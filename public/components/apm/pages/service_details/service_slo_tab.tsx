@@ -289,14 +289,15 @@ export const ServiceSloTab: React.FC<ServiceSloTabProps> = ({
   isLoading,
   error: accessError,
   refetch,
+  timeRange,
 }) => {
   const showSkeleton = useDelayedLoading(isLoading);
   const total = bucket?.total ?? 0;
   const isFirstLoad = isLoading && total === 0 && !accessError;
 
   const onSuggest = useCallback(() => {
-    navigateToSloSuggest([serviceName]);
-  }, [serviceName]);
+    navigateToSloSuggest([serviceName], timeRange);
+  }, [serviceName, timeRange]);
 
   const onCreateManually = useCallback(() => {
     coreRefs?.application?.navigateToApp(observabilityApmSloID, { path: '#/slos/create' });
@@ -395,6 +396,7 @@ export const ServiceSloTab: React.FC<ServiceSloTabProps> = ({
     return (
       <EuiPanel hasBorder paddingSize="m" data-test-subj="serviceSloTab">
         <EuiCallOut
+          announceOnMount
           color="warning"
           iconType="lock"
           title={t.forbiddenTitle}
@@ -414,6 +416,7 @@ export const ServiceSloTab: React.FC<ServiceSloTabProps> = ({
     return (
       <EuiPanel hasBorder paddingSize="m" data-test-subj="serviceSloTab">
         <EuiCallOut
+          announceOnMount
           color="danger"
           iconType="alert"
           title={t.errorTitle}
@@ -502,6 +505,7 @@ export const ServiceSloTab: React.FC<ServiceSloTabProps> = ({
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="alert"
             size="s"

@@ -30,6 +30,7 @@ import { useServiceMapMetrics } from '../../shared/hooks/use_service_map_metrics
 import { useSelectedEdgeMetrics } from '../../shared/hooks/use_selected_edge_metrics';
 import { useGroupMetrics } from '../../shared/hooks/use_group_metrics';
 import { parseTimeRange } from '../../shared/utils/time_utils';
+import { usePersistentTimeRange } from '../../shared/hooks/use_persistent_time_range';
 import { openServiceDetailsInNewTab } from '../../shared/utils/navigation_utils';
 import {
   ServiceMapSidebar,
@@ -126,8 +127,10 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   // Modal state
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
-  // Time range state
-  const [timeRange, setTimeRange] = useState<TimeRange>(
+  // Shared, persisted time range (sessionStorage) so the map keeps the user's
+  // selection instead of resetting to the default. A `from`/`to` deep link (see
+  // the URL-param effect below) still overrides this on mount.
+  const [timeRange, setTimeRange] = usePersistentTimeRange(
     APPLICATION_MAP_CONSTANTS.DEFAULT_TIME_RANGE
   );
 
@@ -135,9 +138,8 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   const [filters, setFilters] = useState<ApplicationMapFilters>(DEFAULT_FILTERS);
 
   // Navigation state for hierarchical view
-  const [navigationState, setNavigationState] = useState<MapNavigationState>(
-    DEFAULT_NAVIGATION_STATE
-  );
+  const [navigationState, setNavigationState] =
+    useState<MapNavigationState>(DEFAULT_NAVIGATION_STATE);
 
   // Selected node state for details panel
   const [selectedNode, setSelectedNode] = useState<SelectedNodeState | null>(null);
@@ -203,7 +205,9 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     if (fromParam && toParam) {
       setTimeRange({ from: fromParam, to: toParam });
     }
-  }, []); // Empty deps - run only on mount
+    // `setTimeRange` is stable (useCallback); listed to satisfy exhaustive-deps
+    // without changing the mount-only intent.
+  }, [setTimeRange]); // Run only on mount
 
   // Show toast when config fetch error occurs
   useEffect(() => {
@@ -282,7 +286,11 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   }, [nodes]);
 
   // Fetch RED metrics for all services
-  const { metricsMap, isLoading: metricsLoading, refetch: refetchMetrics } = useServiceMapMetrics({
+  const {
+    metricsMap,
+    isLoading: metricsLoading,
+    refetch: refetchMetrics,
+  } = useServiceMapMetrics({
     services: servicesList,
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
@@ -334,9 +342,12 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   const isLoading = mapLoading || metricsLoading;
 
   // Handle time range change
-  const handleTimeChange = useCallback((newTimeRange: TimeRange) => {
-    setTimeRange(newTimeRange);
-  }, []);
+  const handleTimeChange = useCallback(
+    (newTimeRange: TimeRange) => {
+      setTimeRange(newTimeRange);
+    },
+    [setTimeRange]
+  );
 
   // Handle refresh
   const handleRefresh = useCallback(() => {
@@ -630,7 +641,12 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
           <HeaderControlledComponentsWrapper components={[settingsButton]} />
           <EuiPageContent>
             <EuiPageContentBody>
-              <EuiCallOut title={i18nTexts.error.title} color="danger" iconType="alert">
+              <EuiCallOut
+                announceOnMount
+                title={i18nTexts.error.title}
+                color="danger"
+                iconType="alert"
+              >
                 <p>{mapError.message}</p>
               </EuiCallOut>
             </EuiPageContentBody>

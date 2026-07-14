@@ -51,6 +51,7 @@ import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/pl
 import { useApmConfig } from '../../config/apm_config_context';
 import { useServices } from '../../shared/hooks/use_services';
 import { parseTimeRange } from '../../shared/utils/time_utils';
+import { DEFAULT_APM_TIME_RANGE } from '../../common/constants';
 import type { SloApiClient } from './slo_api_client';
 import { DiscoveredService, Suggestion, generateSuggestionsForServices } from './suggest_engine';
 import { parseSuggestScopeFromSearch } from './slo_suggest_scope';
@@ -109,9 +110,11 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   // APM config rather than picking here.
   const datasourceId = config?.prometheusDataSource?.name ?? '';
 
-  // Same time range as Services Home's default (15m) — discovery is only about
-  // "does this service emit traces right now?", not historical enumeration.
-  const timeRange = useMemo(() => ({ from: 'now-15m', to: 'now' }), []);
+  // Discovery window comes from the caller via the URL (`from`/`to`) so the
+  // suggestion reflects the range the user was looking at on the services /
+  // service-details page they launched from. Falls back to the 15m default
+  // when the page is opened without an explicit range (e.g. a bare deep link).
+  const timeRange = useMemo(() => scope.timeRange ?? DEFAULT_APM_TIME_RANGE, [scope.timeRange]);
   const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
 
   const {
@@ -252,10 +255,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   // deps include it (uniqueServices, serviceRows, …). The result was a render
   // loop where typing in a draft override re-derived the entire row tree on
   // every keystroke for ~38 drafts.
-  const decoratedSuggestions = useMemo(() => suggestions.map(applyOverrides), [
-    suggestions,
-    applyOverrides,
-  ]);
+  const decoratedSuggestions = useMemo(
+    () => suggestions.map(applyOverrides),
+    [suggestions, applyOverrides]
+  );
   const selectedCount = decoratedSuggestions.filter((s) => selected.has(s.key)).length;
   const totalRules = decoratedSuggestions
     .filter((s) => selected.has(s.key))
@@ -425,6 +428,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   iconType="iInCircle"
                   color="warning"
@@ -457,6 +461,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
             {servicesError && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   color="danger"
                   iconType="alert"
                   title={i18n.translate('observability.apm.slo.suggest.servicesErrorTitle', {
@@ -480,6 +485,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
             {!loading && !datasourceId && (
               <EuiCallOut
+                announceOnMount
                 size="s"
                 iconType="iInCircle"
                 title={i18n.translate('observability.apm.slo.suggest.noDatasource.title', {
@@ -498,6 +504,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
             {!loading && datasourceId && uniqueServices.length === 0 && !servicesError && (
               <EuiCallOut
+                announceOnMount
                 size="s"
                 iconType="iInCircle"
                 title={i18n.translate('observability.apm.slo.suggest.noServices.title', {
@@ -516,6 +523,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
             {!loading && datasourceId && rulerFetchFailed && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   iconType="alert"
                   color="warning"

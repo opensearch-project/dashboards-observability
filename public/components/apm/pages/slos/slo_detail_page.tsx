@@ -39,6 +39,7 @@ import { ChromeStart, NotificationsStart } from '../../../../../../../src/core/p
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { TimeRangePicker } from '../../shared/components/time_filter';
 import { TimeRange } from '../../common/types/service_types';
+import { usePersistentTimeRange } from '../../shared/hooks/use_persistent_time_range';
 import { SloVisualizations } from './slo_visualizations';
 import { SloMetadataPanel } from './slo_metadata_panel';
 import { SloAlertsPanel } from './slo_alerts_panel';
@@ -156,8 +157,8 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
     attainmentDelta === null
       ? euiThemeVars.euiTextSubduedColor
       : attainmentDelta >= 0
-      ? euiThemeVars.euiColorSuccessText
-      : euiThemeVars.euiColorDangerText;
+        ? euiThemeVars.euiColorSuccessText
+        : euiThemeVars.euiColorDangerText;
   const deltaSign = attainmentDelta !== null && attainmentDelta >= 0 ? '+' : '';
 
   return (
@@ -191,7 +192,12 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
             {sliLeafType && (
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
-                  <EuiIcon type={templateIconFor(iconSummaryFromDoc(doc))} size="s" /> {sliLeafType}
+                  <EuiIcon
+                    type={templateIconFor(iconSummaryFromDoc(doc))}
+                    size="s"
+                    aria-hidden={true}
+                  />{' '}
+                  {sliLeafType}
                 </EuiText>
               </EuiFlexItem>
             )}
@@ -282,7 +288,7 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
         buttonContent={
           <EuiText size="s">
             <strong>
-              <EuiIcon type="iInCircle" size="s" />{' '}
+              <EuiIcon type="iInCircle" size="s" aria-hidden={true} />{' '}
               {i18n.translate('observability.apm.slo.detail.summaryAccordion.label', {
                 defaultMessage: 'Summary & SLI details',
               })}
@@ -392,14 +398,14 @@ function buildObjectiveRow(
   const sli = doc.spec.sli.type === 'single' ? doc.spec.sli : null;
   const latencyUnit =
     sli?.definition.backend === 'prometheus' && sli.definition.type === 'latency_threshold'
-      ? sli.definition.latencyThresholdUnit ?? 'seconds'
+      ? (sli.definition.latencyThresholdUnit ?? 'seconds')
       : 'seconds';
   const threshold =
     obj.latencyThreshold !== undefined
       ? `≤ ${obj.latencyThreshold}${latencyUnit === 'milliseconds' ? 'ms' : 's'}`
       : obj.thresholdBound
-      ? `${obj.thresholdBound.operator} ${obj.thresholdBound.value}`
-      : '—';
+        ? `${obj.thresholdBound.operator} ${obj.thresholdBound.value}`
+        : '—';
 
   // SloAlarmConfig is SLO-wide, not per-objective — so every row shows the
   // same boolean. That's the closest signal we have in the persisted spec
@@ -448,7 +454,10 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-1h', to: 'now' });
+  // Shared, persisted time range (sessionStorage) so the SLO detail picker
+  // stays in sync with the rest of APM. Falls back to a 1h window — a more
+  // useful default for burn-rate charts — when nothing is stored yet.
+  const [timeRange, setTimeRange] = usePersistentTimeRange({ from: 'now-1h', to: 'now' });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const advancedRef = useRef<HTMLDivElement | null>(null);
@@ -694,8 +703,8 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     ruleHealthState === 'ruler_unreachable'
       ? ruleHealthState
       : doc.liveStatus.state === 'rules_missing'
-      ? 'rules_missing'
-      : null;
+        ? 'rules_missing'
+        : null;
 
   // Recording-rule names from the persisted provisioning record. Dedup
   // shape: SLOs carry `recordingFingerprints` (objective name → fingerprint).
@@ -895,6 +904,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
             {derivedCalloutState === 'rules_missing' || derivedCalloutState === 'rules_partial' ? (
               <>
                 <EuiCallOut
+                  announceOnMount
                   color="danger"
                   iconType="alert"
                   title={i18n.translate('observability.apm.slo.detail.rulesMissingCallout.title', {
@@ -952,6 +962,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
             ) : derivedCalloutState === 'ruler_unreachable' ? (
               <>
                 <EuiCallOut
+                  announceOnMount
                   color="warning"
                   iconType="alert"
                   title={i18n.translate(
@@ -1032,7 +1043,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                   buttonContent={
                     <EuiText size="s">
                       <strong>
-                        <EuiIcon type="advancedSettingsApp" size="s" />{' '}
+                        <EuiIcon type="advancedSettingsApp" size="s" aria-hidden={true} />{' '}
                         {i18n.translate('observability.apm.slo.detail.advancedAccordion.label', {
                           defaultMessage: 'Advanced details',
                         })}
@@ -1138,7 +1149,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                         buttonContent={
                           <EuiText size="s">
                             <strong>
-                              <EuiIcon type="indexRuntime" size="s" />{' '}
+                              <EuiIcon type="indexRuntime" size="s" aria-hidden={true} />{' '}
                               {i18n.translate(
                                 'observability.apm.slo.detail.recordingRulesAccordion.label',
                                 { defaultMessage: 'Recording rules' }

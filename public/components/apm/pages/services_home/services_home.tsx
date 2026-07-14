@@ -56,6 +56,7 @@ import { TopServicesByFaultRate } from '../../shared/components/fault_widgets/to
 import { TopDependenciesByFaultRate } from '../../shared/components/fault_widgets/top_dependencies_by_fault_rate';
 import { TimeRange, ServiceTableItem } from '../../common/types/service_types';
 import { parseTimeRange } from '../../shared/utils/time_utils';
+import { usePersistentTimeRange } from '../../shared/hooks/use_persistent_time_range';
 import { parseEnvironmentType } from '../../query_services/query_requests/response_processor';
 import {
   navigateToServiceMap,
@@ -188,6 +189,7 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
         error={sloError}
         onRetry={sloRefetch}
         prometheusConnectionId={sloDatasourceId}
+        timeRange={timeRange}
       />
     )}
 
@@ -281,10 +283,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   parentBreadcrumb: _parentBreadcrumb,
   onServiceClick,
 }) => {
-  const [timeRange, setTimeRange] = useState<TimeRange>({
-    from: 'now-15m',
-    to: 'now',
-  });
+  // Shared, persisted time range (sessionStorage) so the picker keeps the
+  // user's selection instead of resetting on every navigation/reload.
+  const [timeRange, setTimeRange] = usePersistentTimeRange();
 
   // Flyout state
   const [flyoutState, setFlyoutState] = useState<FlyoutState | null>(null);
@@ -343,7 +344,13 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
   const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
 
-  const { data: services, isLoading, error, availableGroupByAttributes, refetch } = useServices({
+  const {
+    data: services,
+    isLoading,
+    error,
+    availableGroupByAttributes,
+    refetch,
+  } = useServices({
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     refreshTrigger,
@@ -367,7 +374,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   // circuits on empty serviceNames / datasourceId, so `.list` never runs.
   const sloApiClientStub = useMemo(
     () =>
-      (({
+      ({
         list: () =>
           Promise.resolve({
             results: [],
@@ -377,7 +384,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             nextCursor: null,
             prevCursor: null,
           }),
-      } as unknown) as SloApiClient),
+      }) as unknown as SloApiClient,
     []
   );
 
@@ -422,9 +429,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     [sloHealth.bySvc, sloHealth.isLoading, sloHealthError]
   );
 
-  const handleTimeChange = useCallback((newTimeRange: TimeRange) => {
-    setTimeRange(newTimeRange);
-  }, []);
+  const handleTimeChange = useCallback(
+    (newTimeRange: TimeRange) => {
+      setTimeRange(newTimeRange);
+    },
+    [setTimeRange]
+  );
 
   // Filtered attribute values based on search queries
   const filteredAttributeValues = useMemo(() => {
@@ -564,7 +574,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
   // Fetch RED (Request rate, Error rate, Duration) metrics for ALL services
   // Fetched separately and before filtering to avoid re-fetching on filter changes
-  const { metricsMap, isLoading: metricsLoading, refetch: refetchMetrics } = useServicesRedMetrics({
+  const {
+    metricsMap,
+    isLoading: metricsLoading,
+    refetch: refetchMetrics,
+  } = useServicesRedMetrics({
     services: (services || []).map((s) => ({
       serviceName: s.serviceName,
       environment: s.environment,
@@ -860,7 +874,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             justifyContent="center"
           >
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewSpans}>
+              <EuiToolTip content={i18nTexts.actions.viewSpans} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="apmTrace"
                   aria-label={i18nTexts.actions.viewSpans}
@@ -877,7 +891,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewLogs}>
+              <EuiToolTip content={i18nTexts.actions.viewLogs} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="discoverApp"
                   autoFocus={false}
@@ -895,7 +909,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewServiceMap}>
+              <EuiToolTip content={i18nTexts.actions.viewServiceMap} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="navAiFlow"
                   aria-label={i18nTexts.actions.viewServiceMap}
@@ -916,7 +930,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             <EuiFlexItem grow={false}>{`Latency (${latencyPercentile.toUpperCase()})`}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.tableTooltips.latency}>
-                <EuiIcon type="questionInCircle" size="s" color="subdued" />
+                <EuiIcon type="questionInCircle" size="s" color="subdued" aria-hidden={true} />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -968,7 +982,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             <EuiFlexItem grow={false}>{i18nTexts.table.throughput}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.tableTooltips.throughput}>
-                <EuiIcon type="questionInCircle" size="s" color="subdued" />
+                <EuiIcon type="questionInCircle" size="s" color="subdued" aria-hidden={true} />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -1017,7 +1031,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             <EuiFlexItem grow={false}>{i18nTexts.table.failureRatio}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.tableTooltips.failureRatio}>
-                <EuiIcon type="questionInCircle" size="s" color="subdued" />
+                <EuiIcon type="questionInCircle" size="s" color="subdued" aria-hidden={true} />
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -1084,7 +1098,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                   <EuiFlexItem grow={false}>{SLO_HEALTH_COLUMN_HEADER}</EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiToolTip content={SLO_HEALTH_COLUMN_HEADER_TIP}>
-                      <EuiIcon type="questionInCircle" size="s" color="subdued" />
+                      <EuiIcon
+                        type="questionInCircle"
+                        size="s"
+                        color="subdued"
+                        aria-hidden={true}
+                      />
                     </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -1102,6 +1121,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                     bucket={accessed.bucket}
                     isLoading={accessed.isLoading}
                     error={accessed.error}
+                    timeRange={timeRange}
                   />
                 );
               },
@@ -1126,7 +1146,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         <EuiPageBody>
           <EuiPageContent>
             <EuiPageContentBody>
-              <EuiCallOut title={i18nTexts.error.title} color="danger" iconType="alert">
+              <EuiCallOut
+                announceOnMount
+                title={i18nTexts.error.title}
+                color="danger"
+                iconType="alert"
+              >
                 <p>{error.message}</p>
               </EuiCallOut>
             </EuiPageContentBody>
