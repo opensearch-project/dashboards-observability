@@ -56,6 +56,7 @@ function fakeDraft(key: string, service: string, existingRuleMatch = false) {
       spec: {
         service,
         name: key,
+        owner: { teams: ['t'] },
         objectives: [{ name: 'o', target: 0.99 }],
         sli: {
           type: 'single',
@@ -165,6 +166,40 @@ function renderPage(
 // Scope both mocked services so drafts are generated (unscoped renders the
 // "pick services" empty state instead).
 const SCOPED_ENTRY = '/slos/suggest?source=apm&services=cart,checkout';
+
+/** Seed the config + services hooks the page reads (for tests that render the
+ *  page directly, e.g. to drive rerenders, rather than via `renderPage`). */
+function seedPageMocks() {
+  mockUseApmConfig.mockReturnValue({
+    config: { prometheusDataSource: { name: 'prom-1' } },
+    loading: false,
+  });
+  mockUseServices.mockReturnValue({
+    data: [
+      { serviceName: 'cart', environment: 'prod' },
+      { serviceName: 'checkout', environment: 'prod' },
+    ],
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  });
+  jest.spyOn(console, 'warn').mockImplementation(() => {});
+}
+
+/** The scoped page element, for render + rerender in state-machine tests. */
+function scopedPage() {
+  return (
+    <MemoryRouter initialEntries={[SCOPED_ENTRY]}>
+      <SloSuggestPage
+        apiClient={makeApiClient()}
+        http={makeHttp()}
+        chrome={makeChrome()}
+        notifications={makeNotifications()}
+        parentBreadcrumb={{ text: 'APM', href: '#/' }}
+      />
+    </MemoryRouter>
+  );
+}
 
 describe('SloSuggestPage', () => {
   beforeEach(() => {
@@ -343,6 +378,62 @@ describe('SloSuggestPage', () => {
     // The covered draft is called out in the subline.
     expect(screen.getByTestId('slosSuggestHeaderSubline')).toHaveTextContent(
       '1 draft already covered by existing rules'
+    );
+  });
+
+  it('deselects an untouched draft when coverage resolves late', async () => {
+    seedPageMocks();
+    // First paint: both drafts uncovered (ruler not yet resolved) → both selected.
+    mockGenerateSuggestions.mockReturnValue([
+      fakeDraft('cart-avail', 'cart', false),
+      fakeDraft('cart-lat', 'cart', false),
+    ]);
+    const { rerender } = render(scopedPage());
+    await screen.findByTestId('slosSuggestPage');
+    await waitFor(() =>
+      expect(screen.getByTestId('slosSuggestCreate')).toHaveTextContent('Create 2 SLOs')
+    );
+
+    // Ruler resolves: cart-avail now matches an existing rule. The user never
+    // touched it, so the late coverage signal must deselect it.
+    mockGenerateSuggestions.mockReturnValue([
+      fakeDraft('cart-avail', 'cart', true),
+      fakeDraft('cart-lat', 'cart', false),
+    ]);
+    rerender(scopedPage());
+    await waitFor(() =>
+      expect(screen.getByTestId('slosSuggestCreate')).toHaveTextContent('Create 1 SLO')
+    );
+  });
+
+  it('preserves a manual toggle when the draft set recomputes', async () => {
+    seedPageMocks();
+    mockGenerateSuggestions.mockReturnValue([
+      fakeDraft('cart-avail', 'cart', false),
+      fakeDraft('cart-lat', 'cart', false),
+    ]);
+    const { rerender } = render(scopedPage());
+    await screen.findByTestId('slosSuggestPage');
+    await waitFor(() =>
+      expect(screen.getByTestId('slosSuggestCreate')).toHaveTextContent('Create 2 SLOs')
+    );
+
+    // User expands cart and unchecks the latency draft themselves.
+    fireEvent.click(screen.getByTestId('slosSuggestServiceExpand-cart'));
+    fireEvent.click(await screen.findByTestId('slosSuggestSelect-cart-lat'));
+    await waitFor(() =>
+      expect(screen.getByTestId('slosSuggestCreate')).toHaveTextContent('Create 1 SLO')
+    );
+
+    // A metadata-only recompute (same keys) must NOT re-check the user's draft.
+    mockGenerateSuggestions.mockReturnValue([
+      fakeDraft('cart-avail', 'cart', false),
+      fakeDraft('cart-lat', 'cart', false),
+    ]);
+    rerender(scopedPage());
+    // Still 1 — the manual deselection survived the recompute.
+    await waitFor(() =>
+      expect(screen.getByTestId('slosSuggestCreate')).toHaveTextContent('Create 1 SLO')
     );
   });
 });

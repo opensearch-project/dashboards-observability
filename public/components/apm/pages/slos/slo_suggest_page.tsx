@@ -343,48 +343,43 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     return set;
   }, [healthBySvc]);
 
-  // Tracks whether the user has manually changed the selection. Once they have,
-  // we stop auto-re-seeding so a late-resolving ruler/health fetch can't clobber
-  // their toggles (the discovery probes and SLO-health rollup arrive async and
-  // recompute `suggestions`).
-  const hasInteractedRef = useRef(false);
-  // Signature of the current draft set — re-seeding keys off this rather than
-  // `suggestions` identity so metadata-only recomputes (ruler resolving, which
-  // sets `existingRuleMatch`) don't count as "a new list".
-  const suggestionKeySig = useMemo(
-    () =>
-      suggestions
-        .map((s) => s.key)
-        .sort()
-        .join('\n'),
-    [suggestions]
+  // Whether a draft is "covered" (and so defaults unchecked, to avoid a
+  // dual-write). Unions both signals: a matching Prometheus recording rule
+  // (`existingRuleMatch`, per-draft) OR the service already owning its canonical
+  // availability+latency SLO pair (`allServicesCoverage`, from the health
+  // rollup, which resolves asynchronously).
+  const isDraftCovered = useCallback(
+    (s: Suggestion) => !!s.existingRuleMatch || allServicesCoverage.has(s.input.spec.service),
+    [allServicesCoverage]
   );
-  const lastSeededSigRef = useRef<string | null>(null);
 
-  // Default drafts to "selected" — EXCEPT those already covered, so we never
-  // dual-write. "Covered" unions both signals we have: a matching Prometheus
-  // recording rule (`existingRuleMatch`, per-draft) OR the service already
-  // owning its canonical availability+latency SLO pair (`allServicesCoverage`,
-  // from the health rollup). Re-seed when the draft set changes (scope changed)
-  // or while the user hasn't touched the selection yet — the latter lets a
-  // late-arriving coverage signal still deselect covered drafts. Once the user
-  // interacts, their selection is preserved.
+  // Keys the user has explicitly toggled. Re-seeding preserves the user's choice
+  // for these while still letting the defaults (and a late-arriving coverage
+  // signal) drive every untouched draft — so touching one draft never freezes
+  // coverage-deselection for the others, and changing scope never discards
+  // curation for services that remain.
+  const touchedKeysRef = useRef<Set<string>>(new Set());
+
+  // Default drafts to "selected" EXCEPT covered ones, but keep whatever the user
+  // did to any draft they've touched. Runs whenever the draft set or the
+  // coverage signal changes; prunes touched keys that are no longer present.
   useEffect(() => {
-    const sigChanged = lastSeededSigRef.current !== suggestionKeySig;
-    if (!sigChanged && hasInteractedRef.current) return;
-    if (sigChanged) hasInteractedRef.current = false;
-    lastSeededSigRef.current = suggestionKeySig;
-    setSelected(
-      new Set(
-        suggestions
-          .filter((s) => !s.existingRuleMatch && !allServicesCoverage.has(s.input.spec.service))
-          .map((s) => s.key)
-      )
-    );
-  }, [suggestions, suggestionKeySig, allServicesCoverage]);
+    const presentKeys = new Set(suggestions.map((s) => s.key));
+    for (const k of touchedKeysRef.current) {
+      if (!presentKeys.has(k)) touchedKeysRef.current.delete(k);
+    }
+    setSelected((prev) => {
+      const next = new Set<string>();
+      for (const s of suggestions) {
+        const keep = touchedKeysRef.current.has(s.key) ? prev.has(s.key) : !isDraftCovered(s);
+        if (keep) next.add(s.key);
+      }
+      return next;
+    });
+  }, [suggestions, isDraftCovered]);
 
   const toggle = useCallback((key: string) => {
-    hasInteractedRef.current = true;
+    touchedKeysRef.current.add(key);
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key);
@@ -509,27 +504,31 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
       .filter((row) => row.drafts.length > 0);
   }, [uniqueServices, decoratedSuggestions, selected]);
 
-  /** Re-seed expansion to "all collapsed" whenever the set of services changes. */
+  // Re-seed expansion to "all collapsed" whenever the *set of services* changes.
+  // Keyed on the joined service names (not `serviceRows`, whose identity changes
+  // on every selection toggle) so toggling a draft doesn't churn this effect.
+  const serviceNameSig = useMemo(() => uniqueServices.join('\n'), [uniqueServices]);
   useEffect(() => {
+    const names = serviceNameSig ? serviceNameSig.split('\n') : [];
     setExpandedMap((prev) => {
       const next: Record<string, boolean> = {};
-      for (const row of serviceRows) {
-        next[row.serviceName] = prev[row.serviceName] ?? false;
+      for (const name of names) {
+        next[name] = prev[name] ?? false;
       }
       return next;
     });
-  }, [serviceRows]);
+  }, [serviceNameSig]);
 
   const toggleExpand = useCallback((serviceName: string) => {
     setExpandedMap((prev) => ({ ...prev, [serviceName]: !prev[serviceName] }));
   }, []);
 
   const toggleServiceSelection = useCallback((row: ServiceRowShape) => {
-    hasInteractedRef.current = true;
     const allSelected = row.selectedCount === row.drafts.length;
     setSelected((prev) => {
       const next = new Set(prev);
       for (const d of row.drafts) {
+        touchedKeysRef.current.add(d.key);
         if (allSelected) next.delete(d.key);
         else next.add(d.key);
       }

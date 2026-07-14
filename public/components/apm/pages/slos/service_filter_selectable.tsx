@@ -25,6 +25,9 @@ const t = {
   searchPlaceholder: i18n.translate('observability.apm.slo.serviceFilter.searchPlaceholder', {
     defaultMessage: 'Filter services',
   }),
+  ariaLabel: i18n.translate('observability.apm.slo.serviceFilter.ariaLabel', {
+    defaultMessage: 'Select services to suggest SLOs for',
+  }),
   covered: i18n.translate('observability.apm.slo.serviceFilter.covered', {
     defaultMessage: 'covered',
   }),
@@ -76,8 +79,13 @@ export const ServiceFilterSelectable: React.FC<ServiceFilterSelectableProps> = (
 
   return (
     <EuiSelectable
+      aria-label={t.ariaLabel}
       searchable
-      searchProps={{ compressed: true, placeholder: t.searchPlaceholder }}
+      searchProps={{
+        compressed: true,
+        placeholder: t.searchPlaceholder,
+        'aria-label': t.ariaLabel,
+      }}
       options={options}
       onChange={onChange}
       listProps={{ bordered: false }}
