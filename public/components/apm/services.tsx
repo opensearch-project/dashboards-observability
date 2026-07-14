@@ -27,7 +27,7 @@ import { navigateToServiceDetails } from './shared/utils/navigation_utils';
 import { TimeRangePicker } from './shared/components/time_filter';
 import { LanguageIcon } from './shared/components/language_icon';
 import { LegacyBanner } from './shared/components/legacy_banner';
-import { TimeRange } from './common/types/service_types';
+import { usePersistentTimeRange } from './shared/hooks/use_persistent_time_range';
 import './shared/styles/apm_common.scss';
 
 export interface ApmServicesProps {
@@ -45,10 +45,9 @@ export const Services = (props: ApmServicesProps) => {
 
   // Service details page state - lifted from ServiceDetails for header rendering
   const [isServiceDetailsRoute, setIsServiceDetailsRoute] = useState(false);
-  const [serviceDetailsTimeRange, setServiceDetailsTimeRange] = useState<TimeRange>({
-    from: 'now-15m',
-    to: 'now',
-  });
+  // Shared, persisted time range so navigating between services / service
+  // details doesn't reset the picker back to the default range.
+  const [serviceDetailsTimeRange, setServiceDetailsTimeRange] = usePersistentTimeRange();
   const [serviceDetailsRefreshTrigger, setServiceDetailsRefreshTrigger] = useState(0);
   const [currentServiceLanguage, setCurrentServiceLanguage] = useState<string | undefined>();
 
@@ -111,7 +110,7 @@ export const Services = (props: ApmServicesProps) => {
         onClick={() => setIsSettingsModalVisible(true)}
       />,
     ],
-    [serviceDetailsTimeRange, handleServiceDetailsRefresh]
+    [serviceDetailsTimeRange, setServiceDetailsTimeRange, handleServiceDetailsRefresh]
   );
 
   // Show loading spinner while checking config

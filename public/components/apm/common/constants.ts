@@ -34,6 +34,23 @@ export const EXPLORE_APP_ID = 'explore';
 export const LEGACY_BANNER_DISMISSED_KEY = 'apm.legacyBannerDismissed';
 
 /**
+ * sessionStorage key for the shared APM time range. All APM pages (services,
+ * service details, application map, SLO detail) read and write this key so the
+ * selected time range persists across reloads/navigation and is shared between
+ * pages instead of resetting to the default. Uses sessionStorage to match the
+ * Trace Analytics convention (see trace_analytics/home.tsx).
+ */
+export const APM_TIME_RANGE_STORAGE_KEY = 'apm.timeRange';
+
+/**
+ * Default APM time range used when nothing has been persisted yet.
+ */
+export const DEFAULT_APM_TIME_RANGE = {
+  from: 'now-15m',
+  to: 'now',
+} as const;
+
+/**
  * Constants for APM components
  */
 export const APM_CONSTANTS = {
