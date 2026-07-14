@@ -4,6 +4,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import dateMath from '@elastic/datemath';
 import { TimeRange } from '../../common/types/service_types';
 import { APM_TIME_RANGE_STORAGE_KEY, DEFAULT_APM_TIME_RANGE } from '../../common/constants';
 
@@ -16,8 +17,25 @@ import { APM_TIME_RANGE_STORAGE_KEY, DEFAULT_APM_TIME_RANGE } from '../../common
 const APM_TIME_RANGE_EVENT = 'apm.timeRangeChange';
 
 /**
+ * True when `bound` is datemath `parseTimeRange`/downstream `dateMath.parse`
+ * can actually resolve. Values like `now-`, `now+`, `now.`, `nowZ` are
+ * non-empty strings that still resolve to `undefined`, which would make
+ * `parseTimeRange` throw at render time on the pages that consume this range.
+ */
+const isParseableBound = (bound: string): boolean => {
+  try {
+    return dateMath.parse(bound) !== undefined;
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Narrow an unknown value to a valid TimeRange. Guards against corrupt or
- * legacy sessionStorage payloads so a bad value can never crash the picker.
+ * legacy sessionStorage payloads — and, critically, rejects non-empty but
+ * unparseable datemath bounds so a poison value (e.g. from a crafted/stale
+ * deep link) can neither be persisted nor rehydrated into the shared key,
+ * which would otherwise crash every APM page reading it.
  */
 const isValidTimeRange = (value: unknown): value is TimeRange =>
   typeof value === 'object' &&
@@ -25,7 +43,9 @@ const isValidTimeRange = (value: unknown): value is TimeRange =>
   typeof (value as TimeRange).from === 'string' &&
   typeof (value as TimeRange).to === 'string' &&
   (value as TimeRange).from.length > 0 &&
-  (value as TimeRange).to.length > 0;
+  (value as TimeRange).to.length > 0 &&
+  isParseableBound((value as TimeRange).from) &&
+  isParseableBound((value as TimeRange).to);
 
 /**
  * Read the persisted time range from sessionStorage, falling back to `fallback`
@@ -66,6 +86,13 @@ export const usePersistentTimeRange = (
   );
 
   const setTimeRange = useCallback((newTimeRange: TimeRange) => {
+    // Reject unparseable ranges (e.g. a crafted/stale deep link's `from=now-`
+    // written through by a page's mount effect) so poison never reaches
+    // in-memory state or the shared key, where it would crash consumers that
+    // call `parseTimeRange` unguarded. Keeps the current valid range instead.
+    if (!isValidTimeRange(newTimeRange)) {
+      return;
+    }
     setTimeRangeState(newTimeRange);
     try {
       sessionStorage.setItem(APM_TIME_RANGE_STORAGE_KEY, JSON.stringify(newTimeRange));

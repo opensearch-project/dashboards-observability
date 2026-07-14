@@ -79,6 +79,51 @@ describe('usePersistentTimeRange', () => {
     expect(result.current[0]).toEqual(DEFAULT_APM_TIME_RANGE);
   });
 
+  // A crafted/stale deep link can write a non-empty but unparseable datemath
+  // bound (`now-`, `now+`, `now.`, `nowZ`) through the shared key. These pass a
+  // naive string check but make dateMath.parse return undefined, so downstream
+  // parseTimeRange would throw. The hook must reject them everywhere.
+  it.each(['now-', 'now+', 'now.', 'nowZ'])(
+    'falls back to the default when a stored bound (%s) is unparseable datemath',
+    (badBound) => {
+      sessionStorage.setItem(
+        APM_TIME_RANGE_STORAGE_KEY,
+        JSON.stringify({ from: badBound, to: 'now' })
+      );
+
+      const { result } = renderHook(() => usePersistentTimeRange());
+      expect(result.current[0]).toEqual(DEFAULT_APM_TIME_RANGE);
+    }
+  );
+
+  it('ignores a setTimeRange call with an unparseable bound (keeps prior range, persists nothing)', () => {
+    const { result } = renderHook(() => usePersistentTimeRange());
+
+    act(() => {
+      result.current[1]({ from: 'now-2h', to: 'now' });
+    });
+    expect(result.current[0]).toEqual({ from: 'now-2h', to: 'now' });
+
+    // Poison write is rejected — state and storage keep the last valid range.
+    act(() => {
+      result.current[1]({ from: 'now-', to: 'now' });
+    });
+    expect(result.current[0]).toEqual({ from: 'now-2h', to: 'now' });
+    expect(JSON.parse(sessionStorage.getItem(APM_TIME_RANGE_STORAGE_KEY)!)).toEqual({
+      from: 'now-2h',
+      to: 'now',
+    });
+  });
+
+  it('accepts slash-rounded datemath bounds (now/d)', () => {
+    const { result } = renderHook(() => usePersistentTimeRange());
+
+    act(() => {
+      result.current[1]({ from: 'now/d', to: 'now/d' });
+    });
+    expect(result.current[0]).toEqual({ from: 'now/d', to: 'now/d' });
+  });
+
   it('still updates in-memory state when sessionStorage writes throw', () => {
     const setItemSpy = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new Error('QuotaExceededError');
