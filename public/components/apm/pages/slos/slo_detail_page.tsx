@@ -904,7 +904,6 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
             {derivedCalloutState === 'rules_missing' || derivedCalloutState === 'rules_partial' ? (
               <>
                 <EuiCallOut
-                  announceOnMount
                   color="danger"
                   iconType="alert"
                   title={i18n.translate('observability.apm.slo.detail.rulesMissingCallout.title', {
@@ -962,7 +961,6 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
             ) : derivedCalloutState === 'ruler_unreachable' ? (
               <>
                 <EuiCallOut
-                  announceOnMount
                   color="warning"
                   iconType="alert"
                   title={i18n.translate(

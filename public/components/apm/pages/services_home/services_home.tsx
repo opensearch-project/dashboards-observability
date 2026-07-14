@@ -874,7 +874,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             justifyContent="center"
           >
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewSpans} disableScreenReaderOutput>
+              <EuiToolTip content={i18nTexts.actions.viewSpans}>
                 <EuiButtonIcon
                   iconType="apmTrace"
                   aria-label={i18nTexts.actions.viewSpans}
@@ -891,7 +891,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewLogs} disableScreenReaderOutput>
+              <EuiToolTip content={i18nTexts.actions.viewLogs}>
                 <EuiButtonIcon
                   iconType="discoverApp"
                   autoFocus={false}
@@ -909,7 +909,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewServiceMap} disableScreenReaderOutput>
+              <EuiToolTip content={i18nTexts.actions.viewServiceMap}>
                 <EuiButtonIcon
                   iconType="navAiFlow"
                   aria-label={i18nTexts.actions.viewServiceMap}
@@ -1146,12 +1146,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         <EuiPageBody>
           <EuiPageContent>
             <EuiPageContentBody>
-              <EuiCallOut
-                announceOnMount
-                title={i18nTexts.error.title}
-                color="danger"
-                iconType="alert"
-              >
+              <EuiCallOut title={i18nTexts.error.title} color="danger" iconType="alert">
                 <p>{error.message}</p>
               </EuiCallOut>
             </EuiPageContentBody>

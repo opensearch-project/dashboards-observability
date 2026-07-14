@@ -641,12 +641,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
           <HeaderControlledComponentsWrapper components={[settingsButton]} />
           <EuiPageContent>
             <EuiPageContentBody>
-              <EuiCallOut
-                announceOnMount
-                title={i18nTexts.error.title}
-                color="danger"
-                iconType="alert"
-              >
+              <EuiCallOut title={i18nTexts.error.title} color="danger" iconType="alert">
                 <p>{mapError.message}</p>
               </EuiCallOut>
             </EuiPageContentBody>

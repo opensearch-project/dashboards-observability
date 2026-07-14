@@ -54,6 +54,14 @@ module.exports = [
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-console': 0,
+      // The shared `eui` config targets a newer upstream EUI than the
+      // `@opensearch-project/oui@1.22.1` this repo aliases `@elastic/eui` to.
+      // These two rules autofix in props (`announceOnMount` on EuiCallOut,
+      // `disableScreenReaderOutput` on EuiToolTip) that don't exist in OUI
+      // 1.22.1's type defs, so `--fix` (incl. the lint-staged pre-commit hook)
+      // injects code that fails `yarn typecheck`. Disable until OUI catches up.
+      '@elastic/eui/callout-announce-on-mount': 'off',
+      '@elastic/eui/sr-output-disabled-tooltip': 'off',
       '@osd/eslint/no-restricted-paths': [
         'error',
         {

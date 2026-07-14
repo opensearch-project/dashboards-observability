@@ -42,21 +42,21 @@ import type {
 function makeHttp(): HttpStart {
   // The discovery effect fires probes + ruler fetch; resolve them all to
   // empty so the page renders without loading-spinner getting stuck.
-  return ({
+  return {
     get: jest.fn().mockImplementation((url: string) => {
       if (url.includes('/metadata/label-values/')) return Promise.resolve({ values: [] });
       if (url.includes('/rules')) return Promise.resolve({ data: { groups: [] } });
       return Promise.resolve({});
     }),
-  } as unknown) as HttpStart;
+  } as unknown as HttpStart;
 }
 
 function makeChrome(): ChromeStart {
-  return ({ setBreadcrumbs: jest.fn() } as unknown) as ChromeStart;
+  return { setBreadcrumbs: jest.fn() } as unknown as ChromeStart;
 }
 
 function makeNotifications(): NotificationsStart {
-  return ({
+  return {
     toasts: {
       addSuccess: jest.fn(),
       addDanger: jest.fn(),
@@ -64,19 +64,20 @@ function makeNotifications(): NotificationsStart {
       addInfo: jest.fn(),
       addError: jest.fn(),
     },
-  } as unknown) as NotificationsStart;
+  } as unknown as NotificationsStart;
 }
 
 function makeApiClient(): SloApiClient {
-  return ({
+  return {
     create: jest.fn().mockResolvedValue(undefined),
     preview: jest.fn().mockResolvedValue({ groupName: 'g', interval: 30, rules: [], yaml: '' }),
-  } as unknown) as SloApiClient;
+  } as unknown as SloApiClient;
 }
 
 function renderPage(
   opts: {
     rulerFails?: boolean;
+    initialEntry?: string;
   } = {}
 ) {
   mockUseApmConfig.mockReturnValue({
@@ -93,20 +94,20 @@ function renderPage(
     refetch: jest.fn(),
   });
   const http = opts.rulerFails
-    ? (({
+    ? ({
         get: jest.fn().mockImplementation((url: string) => {
           if (url.includes('/rules')) return Promise.reject(new Error('ruler down'));
           if (url.includes('/metadata/label-values/')) return Promise.resolve({ values: [] });
           return Promise.resolve({});
         }),
-      } as unknown) as HttpStart)
+      } as unknown as HttpStart)
     : makeHttp();
   // Suppress per-probe / ruler failure console.warn / .error so they don't
   // pollute the test report.
   jest.spyOn(console, 'warn').mockImplementation(() => {});
   const apiClient = makeApiClient();
   const result = render(
-    <MemoryRouter initialEntries={['/slos/suggest']}>
+    <MemoryRouter initialEntries={[opts.initialEntry ?? '/slos/suggest']}>
       <SloSuggestPage
         apiClient={apiClient}
         http={http}
@@ -124,6 +125,14 @@ describe('SloSuggestPage', () => {
     mockUseApmConfig.mockReset();
     mockUseServices.mockReset();
     jest.restoreAllMocks();
+  });
+
+  it('renders without crashing when the URL carries an unparseable time range', async () => {
+    // `now/` passes the scope charset check but dateMath.parse() returns
+    // undefined, so parseTimeRange would throw. The page must fall back to the
+    // default range and still render rather than crashing at render time.
+    renderPage({ initialEntry: '/slos/suggest?from=now%2F&to=now' });
+    expect(await screen.findByTestId('slosSuggestPage')).toBeInTheDocument();
   });
 
   it('mounts with mocked services and renders the page chrome', async () => {

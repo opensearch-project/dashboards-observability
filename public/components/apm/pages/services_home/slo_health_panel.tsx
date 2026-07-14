@@ -188,7 +188,6 @@ export const SloHealthPanel: React.FC<SloHealthPanelProps> = ({
       <>
         <EuiPanel hasBorder paddingSize="m" data-test-subj="sloHealthPanel">
           <EuiCallOut
-            announceOnMount
             size="s"
             color="warning"
             iconType="lock"

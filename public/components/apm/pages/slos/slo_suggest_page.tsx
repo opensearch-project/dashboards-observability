@@ -115,7 +115,17 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   // service-details page they launched from. Falls back to the 15m default
   // when the page is opened without an explicit range (e.g. a bare deep link).
   const timeRange = useMemo(() => scope.timeRange ?? DEFAULT_APM_TIME_RANGE, [scope.timeRange]);
-  const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
+  // `parseTimeRange` throws on bounds that pass the URL charset check but aren't
+  // parseable datemath (e.g. a stale/crafted `?from=now/&to=now`). Since this
+  // runs at render time with no error boundary, fall back to the default range
+  // instead of crashing the page.
+  const parsedTimeRange = useMemo(() => {
+    try {
+      return parseTimeRange(timeRange);
+    } catch {
+      return parseTimeRange(DEFAULT_APM_TIME_RANGE);
+    }
+  }, [timeRange]);
 
   const {
     data: allDiscoveredServices,
@@ -428,7 +438,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
               <>
                 <EuiSpacer size="s" />
                 <EuiCallOut
-                  announceOnMount
                   size="s"
                   iconType="iInCircle"
                   color="warning"
@@ -461,7 +470,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
             {servicesError && (
               <>
                 <EuiCallOut
-                  announceOnMount
                   color="danger"
                   iconType="alert"
                   title={i18n.translate('observability.apm.slo.suggest.servicesErrorTitle', {
@@ -485,7 +493,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
             {!loading && !datasourceId && (
               <EuiCallOut
-                announceOnMount
                 size="s"
                 iconType="iInCircle"
                 title={i18n.translate('observability.apm.slo.suggest.noDatasource.title', {
@@ -504,7 +511,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
             {!loading && datasourceId && uniqueServices.length === 0 && !servicesError && (
               <EuiCallOut
-                announceOnMount
                 size="s"
                 iconType="iInCircle"
                 title={i18n.translate('observability.apm.slo.suggest.noServices.title', {
@@ -523,7 +529,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
             {!loading && datasourceId && rulerFetchFailed && (
               <>
                 <EuiCallOut
-                  announceOnMount
                   size="s"
                   iconType="alert"
                   color="warning"
