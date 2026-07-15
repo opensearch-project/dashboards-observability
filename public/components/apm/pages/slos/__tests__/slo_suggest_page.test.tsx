@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 
 // HeaderControlledComponentsWrapper hits the chrome service; stub it.
 jest.mock('../../../../../plugin_helpers/plugin_headerControl', () => ({
@@ -215,6 +215,14 @@ describe('SloSuggestPage', () => {
     jest.restoreAllMocks();
   });
 
+  it('renders without crashing when the URL carries an unparseable time range', async () => {
+    // `now/` passes the scope charset check but dateMath.parse() returns
+    // undefined, so parseTimeRange would throw. The page must fall back to the
+    // default range and still render rather than crashing at render time.
+    renderPage({ initialEntry: '/slos/suggest?from=now%2F&to=now' });
+    expect(await screen.findByTestId('slosSuggestPage')).toBeInTheDocument();
+  });
+
   it('mounts with mocked services and renders the page chrome', async () => {
     renderPage();
     expect(await screen.findByTestId('slosSuggestPage')).toBeInTheDocument();
@@ -335,6 +343,40 @@ describe('SloSuggestPage', () => {
     // Scope cleared → drafts gone → the "pick services" empty state returns.
     expect(await screen.findByTestId('slosSuggestPickServices')).toBeInTheDocument();
     expect(screen.queryByTestId('slosSuggestHeaderStrip')).not.toBeInTheDocument();
+  });
+
+  it('preserves the time range in the URL when the service scope is cleared', async () => {
+    seedPageMocks();
+    let search = '';
+    const LocationProbe = () => {
+      search = useLocation().search;
+      return null;
+    };
+    render(
+      <MemoryRouter initialEntries={['/slos/suggest?source=apm&services=cart&from=now-1h&to=now']}>
+        <SloSuggestPage
+          apiClient={makeApiClient()}
+          http={makeHttp()}
+          chrome={makeChrome()}
+          notifications={makeNotifications()}
+          parentBreadcrumb={{ text: 'APM', href: '#/' }}
+        />
+        <LocationProbe />
+      </MemoryRouter>
+    );
+    await screen.findByTestId('slosSuggestPage');
+    await waitFor(() => expect(screen.getByTestId('slosSuggestHeaderStrip')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('slosSuggestServiceFilter'));
+    fireEvent.click(await screen.findByTestId('slosSuggestServiceFilterClear'));
+
+    // Scope dropped, but the discovery window survives so re-picking keeps it.
+    await waitFor(() => {
+      const params = new URLSearchParams(search);
+      expect(params.get('services')).toBeNull();
+      expect(params.get('from')).toBe('now-1h');
+      expect(params.get('to')).toBe('now');
+    });
   });
 
   it('renders the no-datasource warning when prometheusDataSource is missing', async () => {

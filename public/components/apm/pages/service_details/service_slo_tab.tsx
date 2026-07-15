@@ -289,14 +289,15 @@ export const ServiceSloTab: React.FC<ServiceSloTabProps> = ({
   isLoading,
   error: accessError,
   refetch,
+  timeRange,
 }) => {
   const showSkeleton = useDelayedLoading(isLoading);
   const total = bucket?.total ?? 0;
   const isFirstLoad = isLoading && total === 0 && !accessError;
 
   const onSuggest = useCallback(() => {
-    navigateToSloSuggest([serviceName]);
-  }, [serviceName]);
+    navigateToSloSuggest([serviceName], timeRange);
+  }, [serviceName, timeRange]);
 
   const onCreateManually = useCallback(() => {
     coreRefs?.application?.navigateToApp(observabilityApmSloID, { path: '#/slos/create' });

@@ -9,6 +9,7 @@ import {
   navigateToSpanDetails,
   navigateToExploreLogs,
   navigateToDatasetCorrelations,
+  navigateToSloSuggest,
 } from '../navigation_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 
@@ -367,6 +368,60 @@ describe('navigation_utils', () => {
       navigateToDatasetCorrelations('test-dataset');
 
       expect(window.location.href).toContain('tab:correlatedDatasets');
+    });
+  });
+
+  describe('navigateToSloSuggest', () => {
+    const navigateToAppMock = jest.fn();
+    let dispatchSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      (coreRefs as any).application = { navigateToApp: navigateToAppMock };
+      dispatchSpy = jest.spyOn(window, 'dispatchEvent').mockImplementation(() => true);
+    });
+
+    afterEach(() => {
+      dispatchSpy.mockRestore();
+      delete (coreRefs as any).application;
+    });
+
+    const getPath = () => navigateToAppMock.mock.calls[0][1].path as string;
+
+    it('builds a path with source=apm and the services csv', () => {
+      navigateToSloSuggest(['checkout', 'cart']);
+
+      expect(navigateToAppMock).toHaveBeenCalledTimes(1);
+      const path = getPath();
+      expect(path).toContain('source=apm');
+      expect(path).toContain('services=checkout%2Ccart');
+    });
+
+    it('omits the services param when the list is empty', () => {
+      navigateToSloSuggest([]);
+
+      expect(getPath()).not.toContain('services=');
+    });
+
+    it('includes from/to when a time range is provided', () => {
+      navigateToSloSuggest(['checkout'], { from: 'now-24h', to: 'now' });
+
+      const path = getPath();
+      expect(path).toContain('from=now-24h');
+      expect(path).toContain('to=now');
+    });
+
+    it('omits from/to when no time range is provided', () => {
+      navigateToSloSuggest(['checkout']);
+
+      const path = getPath();
+      expect(path).not.toContain('from=');
+      expect(path).not.toContain('to=');
+    });
+
+    it('dispatches a hashchange event so the HashRouter picks up the path', () => {
+      navigateToSloSuggest(['checkout'], { from: 'now-1h', to: 'now' });
+
+      expect(dispatchSpy).toHaveBeenCalledWith(expect.any(HashChangeEvent));
     });
   });
 });

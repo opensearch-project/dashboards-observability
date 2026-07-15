@@ -32,6 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { navigateToSloListing, navigateToSloSuggest } from '../../shared/utils/navigation_utils';
+import type { TimeRange } from '../../common/types/service_types';
 import type { SloHealthAccessError, SloHealthBucket } from '../slos/slo_health_summary';
 import { ChipRow } from '../slos/slo_health_chip_row';
 import { ServiceFilterSelectable } from '../slos/service_filter_selectable';
@@ -40,7 +41,7 @@ import './slo_health_panel.scss';
 
 export interface SloHealthPanelProps {
   aggregate: SloHealthBucket;
-  /** Keyed by serviceName. Used only to compute `missingPairServices`. */
+  /** Keyed by serviceName. Used to compute which services are already covered. */
   bySvc: Map<string, SloHealthBucket>;
   /** Services currently rendered in the table — drives "View all SLOs". */
   allServices: string[];
@@ -53,6 +54,11 @@ export interface SloHealthPanelProps {
    * in rather than re-derived so the panel stays framework-agnostic.
    */
   prometheusConnectionId?: string;
+  /**
+   * Current time range from the services page, forwarded to the Suggest SLOs
+   * page so discovery reuses the window the user is viewing.
+   */
+  timeRange?: TimeRange;
 }
 
 export interface SloHealthCellProps {
@@ -60,6 +66,8 @@ export interface SloHealthCellProps {
   bucket: SloHealthBucket | undefined;
   isLoading: boolean;
   error: SloHealthAccessError | undefined;
+  /** Current time range, forwarded to Suggest SLOs (see SloHealthPanelProps). */
+  timeRange?: TimeRange;
 }
 
 // ============================================================================
@@ -165,7 +173,8 @@ const SloSuggestPicker: React.FC<{
   allServices: string[];
   coveredSet: Set<string>;
   isLoading: boolean;
-}> = ({ allServices, coveredSet, isLoading }) => {
+  timeRange?: TimeRange;
+}> = ({ allServices, coveredSet, isLoading, timeRange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [picked, setPicked] = useState<Set<string>>(new Set());
 
@@ -187,8 +196,8 @@ const SloSuggestPicker: React.FC<{
   const onConfirm = useCallback(() => {
     if (picked.size === 0) return;
     setIsOpen(false);
-    navigateToSloSuggest([...picked]);
-  }, [picked]);
+    navigateToSloSuggest([...picked], timeRange);
+  }, [picked, timeRange]);
 
   const clearAll = useCallback(() => setPicked(new Set()), []);
 
@@ -272,6 +281,7 @@ export const SloHealthPanel: React.FC<SloHealthPanelProps> = ({
   error,
   onRetry,
   prometheusConnectionId,
+  timeRange,
 }) => {
   const showSkeleton = useDelayedLoading(isLoading);
 
@@ -368,6 +378,7 @@ export const SloHealthPanel: React.FC<SloHealthPanelProps> = ({
                     allServices={allServices}
                     coveredSet={coveredSet}
                     isLoading={isLoading}
+                    timeRange={timeRange}
                   />
                 </EuiFlexItem>
               )}
@@ -504,6 +515,7 @@ const SloHealthCellUI: React.FC<SloHealthCellProps> = ({
   bucket,
   isLoading,
   error,
+  timeRange,
 }) => {
   if (error?.kind === 'forbidden') {
     return (
@@ -550,7 +562,7 @@ const SloHealthCellUI: React.FC<SloHealthCellProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
-            onClick={() => navigateToSloSuggest([serviceName])}
+            onClick={() => navigateToSloSuggest([serviceName], timeRange)}
             data-test-subj={`sloHealthCellSuggest-${serviceName}`}
           >
             <EuiText size="xs">{t.suggestRow}</EuiText>

@@ -52,6 +52,8 @@ import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/pl
 import { useApmConfig } from '../../config/apm_config_context';
 import { useServices } from '../../shared/hooks/use_services';
 import { parseTimeRange } from '../../shared/utils/time_utils';
+import { DEFAULT_APM_TIME_RANGE } from '../../common/constants';
+import type { TimeRange } from '../../common/types/service_types';
 import type { SloApiClient } from './slo_api_client';
 import { DiscoveredService, Suggestion, generateSuggestionsForServices } from './suggest_engine';
 import { parseSuggestScopeFromSearch } from './slo_suggest_scope';
@@ -137,8 +139,9 @@ const SuggestServiceFilter: React.FC<{
   allServices: Array<{ serviceName: string }>;
   coveredSet: Set<string>;
   scopedServices: string[] | undefined;
+  timeRange: TimeRange | undefined;
   history: ReturnType<typeof useHistory>;
-}> = ({ allServices, coveredSet, scopedServices, history }) => {
+}> = ({ allServices, coveredSet, scopedServices, timeRange, history }) => {
   const [isOpen, setIsOpen] = useState(false);
   const scopeSet = useMemo(() => new Set(scopedServices ?? []), [scopedServices]);
 
@@ -150,26 +153,36 @@ const SuggestServiceFilter: React.FC<{
     return Array.from(set);
   }, [allServices]);
 
+  // Build the target URL, always carrying the discovery time range (`from`/`to`)
+  // so changing the service scope never resets the window the user launched with.
+  const buildScopeUrl = useCallback(
+    (sel: string[]) => {
+      const qs = new URLSearchParams({ source: 'apm' });
+      if (sel.length > 0) qs.set('services', sel.join(','));
+      if (timeRange) {
+        qs.set('from', timeRange.from);
+        qs.set('to', timeRange.to);
+      }
+      return `/slos/suggest?${qs.toString()}`;
+    },
+    [timeRange]
+  );
+
   // The suggest page commits selection live to the URL scope — no staged
-  // "confirm" step — so every toggle rewrites the query string.
+  // "confirm" step — so every toggle rewrites the query string. An empty
+  // selection drops the `services` param, which renders the "pick services"
+  // empty state rather than drafting everything.
   const onSelectionChange = useCallback(
     (sel: string[]) => {
-      // Empty selection collapses to the unscoped URL, which renders the
-      // "pick services" empty state rather than drafting everything.
-      if (sel.length === 0) {
-        history.replace('/slos/suggest');
-      } else {
-        const qs = new URLSearchParams({ source: 'apm', services: sel.join(',') });
-        history.replace(`/slos/suggest?${qs.toString()}`);
-      }
+      history.replace(buildScopeUrl(sel));
     },
-    [history]
+    [history, buildScopeUrl]
   );
 
   const clearScope = useCallback(() => {
     setIsOpen(false);
-    history.replace('/slos/suggest');
-  }, [history]);
+    history.replace(buildScopeUrl([]));
+  }, [history, buildScopeUrl]);
 
   const scopedCount = scopedServices?.length ?? 0;
   const buttonLabel =
@@ -270,10 +283,22 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   // APM config rather than picking here.
   const datasourceId = config?.prometheusDataSource?.name ?? '';
 
-  // Same time range as Services Home's default (15m) — discovery is only about
-  // "does this service emit traces right now?", not historical enumeration.
-  const timeRange = useMemo(() => ({ from: 'now-15m', to: 'now' }), []);
-  const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
+  // Discovery window comes from the caller via the URL (`from`/`to`) so the
+  // suggestion reflects the range the user was looking at on the services /
+  // service-details page they launched from. Falls back to the 15m default
+  // when the page is opened without an explicit range (e.g. a bare deep link).
+  const timeRange = useMemo(() => scope.timeRange ?? DEFAULT_APM_TIME_RANGE, [scope.timeRange]);
+  // `parseTimeRange` throws on bounds that pass the URL charset check but aren't
+  // parseable datemath (e.g. a stale/crafted `?from=now/&to=now`). Since this
+  // runs at render time with no error boundary, fall back to the default range
+  // instead of crashing the page.
+  const parsedTimeRange = useMemo(() => {
+    try {
+      return parseTimeRange(timeRange);
+    } catch {
+      return parseTimeRange(DEFAULT_APM_TIME_RANGE);
+    }
+  }, [timeRange]);
 
   const {
     data: allDiscoveredServices,
@@ -809,6 +834,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                   allServices={allDiscoveredServices}
                   coveredSet={allServicesCoverage}
                   scopedServices={scope.services}
+                  timeRange={scope.timeRange}
                   history={history}
                 />
                 <EuiSpacer size="s" />
