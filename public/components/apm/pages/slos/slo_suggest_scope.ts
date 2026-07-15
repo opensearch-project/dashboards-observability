@@ -53,13 +53,6 @@ function parseTimeValue(value: string | null): string | undefined {
 }
 
 /**
- * Parse `?source=&services=&from=&to=` out of a `location.search` string.
- * Unknown `source` values fall back to `'apm'` (the only meaningful source
- * today); `services` missing or empty yields `undefined` rather than `[]` so
- * callers can distinguish "unscoped" from "scoped to nothing". A `timeRange` is
- * returned only when both `from` and `to` are present and valid.
- */
-/**
  * Build the `source=apm&services=<csv>[&from=&to=]` query string for a suggest
  * deep link. Returns the query portion only (no leading `?` and no path), so
  * both the in-app router (`/slos/suggest?…`) and the cross-app navigator
@@ -76,6 +69,13 @@ export function buildSuggestSearch(services: string[], timeRange?: TimeRange): s
   return qs.toString();
 }
 
+/**
+ * Parse `?source=&services=&from=&to=` out of a `location.search` string.
+ * Unknown `source` values fall back to `'apm'` (the only meaningful source
+ * today); `services` missing or empty yields `undefined` rather than `[]` so
+ * callers can distinguish "unscoped" from "scoped to nothing". A `timeRange` is
+ * returned only when both `from` and `to` are present and valid.
+ */
 export function parseSuggestScopeFromSearch(search: string): SuggestScope {
   const params = new URLSearchParams(search.startsWith('?') ? search.slice(1) : search);
   const rawSource = params.get('source');

@@ -166,7 +166,11 @@ export interface ServiceRowShape {
   serviceName: string;
   environment?: string;
   drafts: Suggestion[];
+  /** Creatable drafts currently checked (selected AND not covered). */
   selectedCount: number;
+  /** Drafts that can be selected at all (not covered). Denominator for the
+   *  master checkbox's "all selected" state. */
+  selectableCount: number;
   totalRules: number;
   coveredCount: number;
   kinds: string[];
@@ -183,8 +187,13 @@ export interface ServiceTreeTableProps {
   onOverrideChange: (key: string, patch: OverridePatch) => void;
   /** Optional per-draft status for the in-flight batch create. */
   rowStatusMap?: RowStatusMap;
-  /** Services whose canonical SLO pair is fully covered — rendered as disabled. */
-  coveredServices?: Set<string>;
+  /**
+   * Draft keys that are already covered (from the page's `isDraftCovered` —
+   * recording-rule match OR a same-side SLO already existing for the service).
+   * Covered drafts are non-selectable. Authoritative and side-aware, so the
+   * table never re-derives coverage itself.
+   */
+  coveredKeys?: Set<string>;
 }
 
 export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
@@ -197,15 +206,19 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
   onToggleDraft,
   onOverrideChange,
   rowStatusMap,
-  coveredServices,
+  coveredKeys,
 }) => {
   return (
     <div data-test-subj="slosSuggestTable">
       {serviceRows.map((row) => {
         const isExpanded = expandedMap[row.serviceName] ?? false;
-        const allSelected = row.selectedCount === row.drafts.length && row.drafts.length > 0;
+        // "All selected" is relative to the selectable (non-covered) drafts, so
+        // a partially-covered service can still reach a fully-checked master box.
+        const allSelected = row.selectableCount > 0 && row.selectedCount === row.selectableCount;
         const someSelected = row.selectedCount > 0 && !allSelected;
-        const isCovered = coveredServices?.has(row.serviceName) ?? false;
+        // Disable the master checkbox when the service has no selectable drafts
+        // left — i.e. every draft it owns is already covered.
+        const isCovered = row.selectableCount === 0;
 
         const iconByKind = new Map<string, string>();
         for (const draft of row.drafts) {
@@ -359,6 +372,8 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                         onOverrideChange={(patch) => onOverrideChange(draft.key, patch)}
                         rowStatus={rowStatusMap?.[draft.key]?.status}
                         rowStatusMessage={rowStatusMap?.[draft.key]?.message}
+                        // Authoritative per-draft covered flag from the page.
+                        covered={coveredKeys?.has(draft.key) ?? false}
                       />
                     ))}
                   </div>

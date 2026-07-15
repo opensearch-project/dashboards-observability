@@ -62,7 +62,7 @@ import { ServiceRowShape, ServiceTreeTable } from './suggest_service_tree_table'
 import { SuggestBatchPreview } from './suggest_batch_preview';
 import { useDiscoveryProbes } from './suggest_use_discovery_probes';
 import { useBatchCreate } from './suggest_use_batch_create';
-import { useServiceSloHealth } from './slo_health_summary';
+import { kindSide, useServiceSloHealth } from './slo_health_summary';
 import { ServiceFilterSelectable } from './service_filter_selectable';
 import './slo_suggest_page.scss';
 
@@ -394,22 +394,47 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     apiClient,
   });
 
-  const allServicesCoverage = useMemo<Set<string>>(() => {
-    const set = new Set<string>();
+  // Per-service, per-side coverage from the health rollup. We track the two
+  // sides (availability / latency) separately rather than collapsing to a
+  // single "has the whole pair" flag: creating just the availability SLO for a
+  // service must mark only its availability draft covered, not both — otherwise
+  // the still-missing latency draft would either stay wrongly selectable
+  // (all-or-nothing = not covered) or get wrongly hidden.
+  const coverageBySvc = useMemo(() => {
+    const map = new Map<string, { availability: boolean; latency: boolean }>();
     for (const [svc, bucket] of healthBySvc) {
-      if (!bucket.missingCanonicalPair) set.add(svc);
+      map.set(svc, { availability: bucket.hasAvailability, latency: bucket.hasLatency });
     }
-    return set;
+    return map;
   }, [healthBySvc]);
 
-  // Whether a draft is "covered" (and so defaults unchecked, to avoid a
-  // dual-write). Unions both signals: a matching Prometheus recording rule
-  // (`existingRuleMatch`, per-draft) OR the service already owning its canonical
-  // availability+latency SLO pair (`allServicesCoverage`, from the health
-  // rollup, which resolves asynchronously).
+  // Services that already own the FULL canonical pair — used to disable the
+  // whole service at the filter/master-checkbox level. (Per-draft coverage is
+  // handled by `isDraftCovered` below; this is the "nothing left to add for
+  // this service at all" case.)
+  const fullyCoveredServices = useMemo<Set<string>>(() => {
+    const set = new Set<string>();
+    for (const [svc, cov] of coverageBySvc) {
+      if (cov.availability && cov.latency) set.add(svc);
+    }
+    return set;
+  }, [coverageBySvc]);
+
+  // Whether a draft is "covered" (and so non-selectable, to avoid a dual-write).
+  // Unions two signals: a matching Prometheus recording rule (`existingRuleMatch`,
+  // per-draft) OR the service already owning an SLO on this draft's SIDE of the
+  // canonical pair (`coverageBySvc`, from the health rollup, which resolves
+  // asynchronously). Side-aware so a partial create (e.g. availability only)
+  // covers exactly the draft that now exists.
   const isDraftCovered = useCallback(
-    (s: Suggestion) => !!s.existingRuleMatch || allServicesCoverage.has(s.input.spec.service),
-    [allServicesCoverage]
+    (s: Suggestion) => {
+      if (s.existingRuleMatch) return true;
+      const side = kindSide(s.kindId);
+      const cov = coverageBySvc.get(s.input.spec.service);
+      if (!cov || !side) return false;
+      return side === 'availability' ? cov.availability : cov.latency;
+    },
+    [coverageBySvc]
   );
 
   // Keys the user has explicitly toggled. Re-seeding preserves the user's choice
@@ -498,16 +523,21 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     history,
   });
 
+  // The single "will be created" predicate. A draft is creatable iff it's
+  // selected AND not already covered. Covered drafts can't be selected in the
+  // UI (their checkbox is disabled), but we still filter here as a hard backstop
+  // against a selection-state race — and, critically, EVERY count surface below
+  // derives from this same predicate so the button / modal / preview / toast
+  // can never disagree with what `runCreateSelected` actually provisions.
+  const creatable = useCallback(
+    (s: Suggestion) => selected.has(s.key) && !isDraftCovered(s),
+    [selected, isDraftCovered]
+  );
+
   const runCreateSelected = useCallback(() => {
-    // Backstop against dual-writes: never provision a draft whose service is
-    // already covered, even if it stayed checked through a selection-state race
-    // (e.g. the master checkbox marked it touched before the async coverage
-    // signal resolved, so the seeding effect could no longer auto-deselect it).
-    const picks = suggestions
-      .filter((s) => selected.has(s.key) && !isDraftCovered(s))
-      .map(applyOverrides);
+    const picks = suggestions.filter(creatable).map(applyOverrides);
     return runCreate(picks);
-  }, [applyOverrides, isDraftCovered, runCreate, selected, suggestions]);
+  }, [applyOverrides, creatable, runCreate, suggestions]);
 
   const createSelected = useCallback(() => {
     // Already-open preview means the user has seen the full rule/SLI
@@ -529,9 +559,12 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     () => suggestions.map(applyOverrides),
     [suggestions, applyOverrides]
   );
-  const selectedCount = decoratedSuggestions.filter((s) => selected.has(s.key)).length;
+  // Count only creatable drafts (selected AND not covered), matching exactly
+  // what `runCreateSelected` provisions — so "Create N SLOs", the confirm
+  // modal's rule total, and the preview never contradict the actual create.
+  const selectedCount = decoratedSuggestions.filter(creatable).length;
   const totalRules = decoratedSuggestions
-    .filter((s) => selected.has(s.key))
+    .filter(creatable)
     .reduce((acc, s) => acc + s.estimatedRuleCount, 0);
   // Count with the same `isDraftCovered` union that drives default-unchecking,
   // not just `existingRuleMatch` — otherwise a service covered via the health
@@ -539,6 +572,12 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   // "N drafts already covered" subline never renders, leaving the user with a
   // disabled Create and no explanation.
   const coveredCount = decoratedSuggestions.filter((s) => isDraftCovered(s)).length;
+  // Authoritative per-draft covered set, handed to the tree table so the inline
+  // checkboxes disable exactly the drafts the create-time filter excludes.
+  const coveredKeys = useMemo(
+    () => new Set(decoratedSuggestions.filter((s) => isDraftCovered(s)).map((s) => s.key)),
+    [decoratedSuggestions, isDraftCovered]
+  );
   // The service list comes from APM discovery but an OTel-only service (one
   // that emits direct metrics without span-derived RED) can still surface a
   // draft. Union both sources so every service that owns drafts gets a row.
@@ -565,8 +604,16 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
           serviceName,
           environment: drafts[0]?.detected.environment,
           drafts,
-          selectedCount: drafts.filter((s) => selected.has(s.key)).length,
-          totalRules: drafts.reduce((acc, s) => acc + s.estimatedRuleCount, 0),
+          // Count only creatable drafts as "selected" so the row's N/M and the
+          // master checkbox's all/indeterminate state track what will actually
+          // be created — covered drafts are excluded from both numerator and
+          // denominator (see `selectableCount`).
+          selectedCount: drafts.filter(creatable).length,
+          // Selectable = not covered. Denominator for the master checkbox's
+          // "all selected" state, so a partially-covered service can still reach
+          // a fully-checked master box.
+          selectableCount: drafts.filter((s) => !isDraftCovered(s)).length,
+          totalRules: drafts.filter(creatable).reduce((acc, s) => acc + s.estimatedRuleCount, 0),
           // Union recording-rule + health-rollup coverage, matching the
           // page-level `coveredCount` and the default-unchecking in the seeding
           // effect (see `isDraftCovered`).
@@ -575,7 +622,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
         };
       })
       .filter((row) => row.drafts.length > 0);
-  }, [uniqueServices, decoratedSuggestions, selected, isDraftCovered]);
+  }, [uniqueServices, decoratedSuggestions, creatable, isDraftCovered]);
 
   // Re-seed expansion to "all collapsed" whenever the *set of services* changes.
   // Keyed on the joined service names (not `serviceRows`, whose identity changes
@@ -596,18 +643,26 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     setExpandedMap((prev) => ({ ...prev, [serviceName]: !prev[serviceName] }));
   }, []);
 
-  const toggleServiceSelection = useCallback((row: ServiceRowShape) => {
-    const allSelected = row.selectedCount === row.drafts.length;
-    setSelected((prev) => {
-      const next = new Set(prev);
-      for (const d of row.drafts) {
-        touchedKeysRef.current.add(d.key);
-        if (allSelected) next.delete(d.key);
-        else next.add(d.key);
-      }
-      return next;
-    });
-  }, []);
+  const toggleServiceSelection = useCallback(
+    (row: ServiceRowShape) => {
+      // Only ever toggle selectable (non-covered) drafts — covered drafts stay
+      // deselected so the master checkbox can't provision a duplicate. "All
+      // selected" is relative to the selectable set.
+      const selectableDrafts = row.drafts.filter((d) => !isDraftCovered(d));
+      const allSelected =
+        selectableDrafts.length > 0 && selectableDrafts.every((d) => selected.has(d.key));
+      setSelected((prev) => {
+        const next = new Set(prev);
+        for (const d of selectableDrafts) {
+          touchedKeysRef.current.add(d.key);
+          if (allSelected) next.delete(d.key);
+          else next.add(d.key);
+        }
+        return next;
+      });
+    },
+    [isDraftCovered, selected]
+  );
 
   const loading = configLoading || servicesLoading || discoveryLoading;
 
@@ -929,7 +984,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                     the empty initial state. */}
                 <SuggestServiceFilter
                   allServices={allDiscoveredServices}
-                  coveredSet={allServicesCoverage}
+                  coveredSet={fullyCoveredServices}
                   scopedServices={scope.services}
                   timeRange={timeRange}
                   history={history}
@@ -947,7 +1002,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                     onToggleDraft={toggle}
                     onOverrideChange={setOverride}
                     rowStatusMap={rowStatusMap}
-                    coveredServices={allServicesCoverage}
+                    coveredKeys={coveredKeys}
                   />
                 ) : (
                   <EuiPanel
@@ -993,7 +1048,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
           <EuiFlyoutBody className="slo-suggest-flyout__body">
             <SuggestBatchPreview
               apiClient={apiClient}
-              selectedSuggestions={decoratedSuggestions.filter((s) => selected.has(s.key))}
+              selectedSuggestions={decoratedSuggestions.filter(creatable)}
               prometheusConnectionId={config?.prometheusDataSource?.name}
               prometheusConnectionMeta={config?.prometheusDataSource?.meta}
             />

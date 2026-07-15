@@ -55,10 +55,13 @@ function fakeSuggestion(key: string, kind = 'HTTP availability'): Suggestion {
 }
 
 function row(overrides: Partial<ServiceRowShape> = {}): ServiceRowShape {
+  const drafts = overrides.drafts ?? [fakeSuggestion('a'), fakeSuggestion('b')];
   return {
     serviceName: overrides.serviceName ?? 'cart',
-    drafts: overrides.drafts ?? [fakeSuggestion('a'), fakeSuggestion('b')],
+    drafts,
     selectedCount: overrides.selectedCount ?? 1,
+    // Default every draft to selectable (nothing covered) unless overridden.
+    selectableCount: overrides.selectableCount ?? drafts.length,
     totalRules: overrides.totalRules ?? 26,
     coveredCount: overrides.coveredCount ?? 0,
     kinds: overrides.kinds ?? ['HTTP availability', 'HTTP latency'],
@@ -152,6 +155,41 @@ describe('ServiceTreeTable', () => {
       />
     );
     expect(screen.getByText('3 covered')).toBeInTheDocument();
+  });
+
+  it('disables the master checkbox when the service has no selectable drafts', () => {
+    render(
+      <ServiceTreeTable
+        serviceRows={[row({ selectableCount: 0, selectedCount: 0, coveredCount: 2 })]}
+        expandedMap={{}}
+        onToggleExpand={jest.fn()}
+        onToggleServiceSelection={jest.fn()}
+        selected={new Set()}
+        overrides={{}}
+        onToggleDraft={jest.fn()}
+        onOverrideChange={jest.fn()}
+      />
+    );
+    expect(screen.getByTestId('slosSuggestServiceSelect-cart')).toBeDisabled();
+  });
+
+  it('disables the inline checkbox for drafts named in coveredKeys', () => {
+    render(
+      <ServiceTreeTable
+        serviceRows={[row({ selectableCount: 1 })]}
+        expandedMap={{ cart: true }}
+        onToggleExpand={jest.fn()}
+        onToggleServiceSelection={jest.fn()}
+        selected={new Set()}
+        overrides={{}}
+        onToggleDraft={jest.fn()}
+        onOverrideChange={jest.fn()}
+        coveredKeys={new Set(['a'])}
+      />
+    );
+    // Draft 'a' is covered → its checkbox is disabled; 'b' stays enabled.
+    expect(screen.getByTestId('slosSuggestSelect-a')).toBeDisabled();
+    expect(screen.getByTestId('slosSuggestSelect-b')).not.toBeDisabled();
   });
 
   it('renders the selection count with the correct values', () => {

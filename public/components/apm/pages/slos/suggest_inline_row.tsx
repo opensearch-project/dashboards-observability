@@ -55,6 +55,13 @@ export interface SuggestionInlineRowProps {
   /** Render status — used by the batch-create progress strip. */
   rowStatus?: RowStatus;
   rowStatusMessage?: string;
+  /**
+   * Authoritative "already covered" flag from the page (`isDraftCovered`):
+   * unions the per-draft recording-rule match with the service-level health
+   * rollup. Covered drafts are non-selectable. Defaults to the local
+   * recording-rule signal when the caller doesn't pass it.
+   */
+  covered?: boolean;
 }
 
 export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
@@ -65,6 +72,7 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
   onOverrideChange,
   rowStatus,
   rowStatusMessage,
+  covered,
 }) => {
   const spec = suggestion.input.spec;
   const objective = spec.objectives[0];
@@ -73,11 +81,16 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
     spec.sli.type === 'single' &&
     spec.sli.definition.backend === 'prometheus' &&
     spec.sli.definition.type === 'latency_threshold'
-      ? spec.sli.definition.latencyThresholdUnit ?? 'seconds'
+      ? (spec.sli.definition.latencyThresholdUnit ?? 'seconds')
       : 'seconds';
-  const isCovered = Boolean(suggestion.existingRuleMatch);
+  // Prefer the page's authoritative flag (rule + health union); fall back to
+  // the local recording-rule signal for callers that don't pass it.
+  const isCovered = covered ?? Boolean(suggestion.existingRuleMatch);
   const fadedOut = isCovered && !selected;
-  const disableCheckbox = rowStatus === 'creating' || rowStatus === 'success';
+  // Covered drafts are non-selectable: creating one would dual-write a rule
+  // that already exists. Disabling here (not just filtering at create time)
+  // keeps the checkbox, the counts, and the actual create in agreement.
+  const disableCheckbox = rowStatus === 'creating' || rowStatus === 'success' || isCovered;
 
   const coveredTooltip = suggestion.existingRuleMatch
     ? i18n.translate('observability.apm.slo.suggest.inlineRow.coveredTooltip', {
@@ -94,7 +107,12 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
             : '',
         },
       })
-    : '';
+    : isCovered
+      ? i18n.translate('observability.apm.slo.suggest.inlineRow.coveredHealthTooltip', {
+          defaultMessage:
+            'This service already owns its canonical availability + latency SLO pair. Unchecked to avoid dual-writing.',
+        })
+      : '';
 
   return (
     <EuiPanel
