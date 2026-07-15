@@ -160,6 +160,7 @@ export function ServiceMap({
         includeMetricsCallback();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const removeFilter = (field: string, value: string) => {
@@ -359,6 +360,7 @@ export function ServiceMap({
         setSelectedNodeDetails(details);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   useEffect(() => {
@@ -385,6 +387,7 @@ export function ServiceMap({
         filterByCurrService: showRelatedServices,
       })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceMap, idSelected, focusedService, filterByCurrService]);
 
   return (
