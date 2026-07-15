@@ -134,12 +134,21 @@ export function navigateToServicesList(): void {
 
 /**
  * Navigates to the SLO suggest page scoped to the given services.
- * `#/slos/suggest?source=apm&services=<csv>` inside the apm-slo app — we
- * cross a HashRouter boundary, so go through `application.navigateToApp`.
+ * `#/slos/suggest?source=apm&services=<csv>[&from=<time>&to=<time>]` inside the
+ * apm-slo app — we cross a HashRouter boundary, so go through
+ * `application.navigateToApp`.
+ *
+ * The optional `timeRange` carries the range the user was viewing on the
+ * launching page so discovery reflects the same window; the suggest page falls
+ * back to its default when it's omitted.
  */
-export function navigateToSloSuggest(services: string[]): void {
+export function navigateToSloSuggest(services: string[], timeRange?: TimeRange): void {
   const qs = new URLSearchParams({ source: 'apm' });
   if (services.length > 0) qs.set('services', services.join(','));
+  if (timeRange) {
+    qs.set('from', timeRange.from);
+    qs.set('to', timeRange.to);
+  }
   const path = `#/slos/suggest?${qs.toString()}`;
   coreRefs?.application?.navigateToApp(observabilityApmSloID, { path });
   window.dispatchEvent(new HashChangeEvent('hashchange'));

@@ -31,6 +31,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { navigateToSloListing, navigateToSloSuggest } from '../../shared/utils/navigation_utils';
+import type { TimeRange } from '../../common/types/service_types';
 import type { SloHealthAccessError, SloHealthBucket } from '../slos/slo_health_summary';
 import { ChipRow } from '../slos/slo_health_chip_row';
 import { SloBudgetSparkline } from './slo_budget_sparkline';
@@ -50,6 +51,11 @@ export interface SloHealthPanelProps {
    * in rather than re-derived so the panel stays framework-agnostic.
    */
   prometheusConnectionId?: string;
+  /**
+   * Current time range from the services page, forwarded to the Suggest SLOs
+   * page so discovery reuses the window the user is viewing.
+   */
+  timeRange?: TimeRange;
 }
 
 export interface SloHealthCellProps {
@@ -57,6 +63,8 @@ export interface SloHealthCellProps {
   bucket: SloHealthBucket | undefined;
   isLoading: boolean;
   error: SloHealthAccessError | undefined;
+  /** Current time range, forwarded to Suggest SLOs (see SloHealthPanelProps). */
+  timeRange?: TimeRange;
 }
 
 // ============================================================================
@@ -151,6 +159,7 @@ export const SloHealthPanel: React.FC<SloHealthPanelProps> = ({
   error,
   onRetry,
   prometheusConnectionId,
+  timeRange,
 }) => {
   const showSkeleton = useDelayedLoading(isLoading);
 
@@ -167,8 +176,8 @@ export const SloHealthPanel: React.FC<SloHealthPanelProps> = ({
   }, [allServices, bySvc]);
 
   const onClickSuggest = useCallback(() => {
-    navigateToSloSuggest(missingPairServices);
-  }, [missingPairServices]);
+    navigateToSloSuggest(missingPairServices, timeRange);
+  }, [missingPairServices, timeRange]);
 
   const onClickViewAll = useCallback(() => {
     navigateToSloListing(allServices);
@@ -396,6 +405,7 @@ const SloHealthCellUI: React.FC<SloHealthCellProps> = ({
   bucket,
   isLoading,
   error,
+  timeRange,
 }) => {
   if (error?.kind === 'forbidden') {
     return (
@@ -404,6 +414,7 @@ const SloHealthCellUI: React.FC<SloHealthCellProps> = ({
           type="lock"
           color="subdued"
           data-test-subj={`sloHealthCellForbidden-${serviceName}`}
+          aria-hidden={true}
         />
       </EuiToolTip>
     );
@@ -411,7 +422,12 @@ const SloHealthCellUI: React.FC<SloHealthCellProps> = ({
   if (error) {
     return (
       <EuiToolTip content={t.cellLoadError}>
-        <EuiIcon type="alert" color="danger" data-test-subj={`sloHealthCellError-${serviceName}`} />
+        <EuiIcon
+          type="alert"
+          color="danger"
+          data-test-subj={`sloHealthCellError-${serviceName}`}
+          aria-hidden={true}
+        />
       </EuiToolTip>
     );
   }
@@ -433,7 +449,7 @@ const SloHealthCellUI: React.FC<SloHealthCellProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
-            onClick={() => navigateToSloSuggest([serviceName])}
+            onClick={() => navigateToSloSuggest([serviceName], timeRange)}
             data-test-subj={`sloHealthCellSuggest-${serviceName}`}
           >
             <EuiText size="xs">{t.suggestRow}</EuiText>
@@ -477,6 +493,7 @@ const SloHealthCellUI: React.FC<SloHealthCellProps> = ({
               type="alert"
               color="warning"
               data-test-subj={`sloHealthMissingPairIcon-${serviceName}`}
+              aria-hidden={true}
             />
           </EuiToolTip>
         </EuiFlexItem>
