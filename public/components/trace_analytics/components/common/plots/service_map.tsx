@@ -22,6 +22,7 @@ import {
 import React, { useEffect, useMemo, useState } from 'react';
 // @ts-ignore
 import Graph from 'react-graph-vis';
+import { v4 as uuidv4 } from 'uuid';
 import {
   ServiceNodeDetails,
   TraceAnalyticsMode,
@@ -93,6 +94,11 @@ export function ServiceMap({
   hideSearchBar?: boolean;
 }) {
   const [graphKey, setGraphKey] = useState(0); // adding key to allow for re-renders
+  // react-graph-vis falls back to `uuid`'s CommonJS default export (`uuid.v4()`) to
+  // generate the container id when no `identifier` prop is supplied. uuid v7+ dropped
+  // that default export, so the fallback throws and unmounts the map. Supplying a
+  // stable identifier keeps us off that code path entirely.
+  const [graphIdentifier] = useState(() => uuidv4());
   const [invalid, setInvalid] = useState(false);
   const [network, setNetwork] = useState(null);
   const [ticks, setTicks] = useState<number[]>([]);
@@ -154,6 +160,7 @@ export function ServiceMap({
         includeMetricsCallback();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const removeFilter = (field: string, value: string) => {
@@ -353,6 +360,7 @@ export function ServiceMap({
         setSelectedNodeDetails(details);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
   useEffect(() => {
@@ -379,6 +387,7 @@ export function ServiceMap({
         filterByCurrService: showRelatedServices,
       })
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceMap, idSelected, focusedService, filterByCurrService]);
 
   return (
@@ -525,6 +534,7 @@ export function ServiceMap({
                 {items?.graph && (
                   <Graph
                     key={graphKey}
+                    identifier={graphIdentifier}
                     graph={items.graph}
                     options={options}
                     events={events}
