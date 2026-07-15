@@ -56,7 +56,7 @@ import { DEFAULT_APM_TIME_RANGE } from '../../common/constants';
 import type { TimeRange } from '../../common/types/service_types';
 import type { SloApiClient } from './slo_api_client';
 import { DiscoveredService, Suggestion, generateSuggestionsForServices } from './suggest_engine';
-import { parseSuggestScopeFromSearch } from './slo_suggest_scope';
+import { buildSuggestSearch, parseSuggestScopeFromSearch } from './slo_suggest_scope';
 import { OverridePatch, OverrideValues } from './suggest_inline_row';
 import { ServiceRowShape, ServiceTreeTable } from './suggest_service_tree_table';
 import { SuggestBatchPreview } from './suggest_batch_preview';
@@ -84,7 +84,10 @@ const ResizableFlyout: React.FC<{
   onClose: () => void;
   children: React.ReactNode;
 }> = ({ width, onResize, onClose, children }) => {
-  const handleRef = React.useRef<HTMLDivElement>(null);
+  // Track the active drag's teardown so a mid-drag unmount (e.g. the last draft
+  // gets deselected and the flyout closes while the mouse is still down) can
+  // still detach the document listeners and restore the global cursor.
+  const teardownRef = useRef<(() => void) | null>(null);
 
   const onMouseDown = useCallback(
     (e: React.MouseEvent) => {
@@ -98,12 +101,17 @@ const ResizableFlyout: React.FC<{
         const next = Math.min(maxWidth, Math.max(FLYOUT_MIN_WIDTH, startWidth + delta));
         onResize(next);
       };
-      const onMouseUp = () => {
+      const teardown = () => {
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
+        teardownRef.current = null;
       };
+      function onMouseUp() {
+        teardown();
+      }
+      teardownRef.current = teardown;
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
       document.addEventListener('mousemove', onMouseMove);
@@ -111,6 +119,14 @@ const ResizableFlyout: React.FC<{
     },
     [width, onResize]
   );
+
+  // Safety net: if the component unmounts mid-drag, run the pending teardown so
+  // we never leak a document listener or leave the body cursor/user-select stuck.
+  useEffect(() => {
+    return () => {
+      teardownRef.current?.();
+    };
+  }, []);
 
   return (
     <EuiFlyout
@@ -123,7 +139,6 @@ const ResizableFlyout: React.FC<{
       data-test-subj="slosSuggestPreviewFlyout"
     >
       <div
-        ref={handleRef}
         onMouseDown={onMouseDown}
         className="slo-suggest-flyout__resize-handle"
         data-test-subj="slosSuggestPreviewFlyoutResizeHandle"
@@ -156,15 +171,7 @@ const SuggestServiceFilter: React.FC<{
   // Build the target URL, always carrying the discovery time range (`from`/`to`)
   // so changing the service scope never resets the window the user launched with.
   const buildScopeUrl = useCallback(
-    (sel: string[]) => {
-      const qs = new URLSearchParams({ source: 'apm' });
-      if (sel.length > 0) qs.set('services', sel.join(','));
-      if (timeRange) {
-        qs.set('from', timeRange.from);
-        qs.set('to', timeRange.to);
-      }
-      return `/slos/suggest?${qs.toString()}`;
-    },
+    (sel: string[]) => `/slos/suggest?${buildSuggestSearch(sel, timeRange)}`,
     [timeRange]
   );
 
@@ -257,10 +264,21 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   const [overrides, setOverrides] = useState<Record<string, OverrideValues>>({});
   const [showPreview, setShowPreview] = useState(false);
   const [flyoutWidth, setFlyoutWidth] = useState(() =>
-    Math.round(window.innerWidth * FLYOUT_INITIAL_WIDTH_PCT)
+    // Clamp the seed to the same [min, max] band the drag handler enforces, so a
+    // narrow viewport can't open the flyout below FLYOUT_MIN_WIDTH.
+    Math.round(
+      Math.min(
+        window.innerWidth * FLYOUT_MAX_WIDTH_PCT,
+        Math.max(FLYOUT_MIN_WIDTH, window.innerWidth * FLYOUT_INITIAL_WIDTH_PCT)
+      )
+    )
   );
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [expandedMap, setExpandedMap] = useState<Record<string, boolean>>({});
+  /** Bumping this re-runs the discovery probes + ruler fetch (the "Rediscover"
+   *  button), giving the user a way to recover from a transient ruler outage
+   *  without a full page reload. */
+  const [discoveryEpoch, setDiscoveryEpoch] = useState(0);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -312,6 +330,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     data: allDiscoveredServices,
     isLoading: servicesLoading,
     error: servicesError,
+    refetch: refetchServices,
   } = useServices({
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
@@ -334,13 +353,20 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
   const services = scopedServices;
 
+  // The URL named a scope, discovery returned services, but none of them match
+  // — a stale/bookmarked deep link (e.g. `?services=cart` after the service
+  // stopped emitting). Warn the user rather than silently showing the generic
+  // "pick services" empty state, and offer a one-click way to clear the scope.
+  const scopeFellThrough =
+    scope.services !== undefined && allDiscoveredServices.length > 0 && scopedServices.length === 0;
+
   const {
     metricNames,
     labelValuesByMetric,
     existingRuleGroups,
     rulerFetchFailed,
     loading: discoveryLoading,
-  } = useDiscoveryProbes({ http, datasourceId });
+  } = useDiscoveryProbes({ http, datasourceId, epoch: discoveryEpoch });
 
   const suggestions = useMemo<Suggestion[]>(() => {
     if (!datasourceId || !services || services.length === 0) return [];
@@ -362,7 +388,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     [allDiscoveredServices]
   );
 
-  const { bySvc: healthBySvc } = useServiceSloHealth({
+  const { bySvc: healthBySvc, isLoading: healthLoading } = useServiceSloHealth({
     serviceNames: allServiceNames,
     datasourceId,
     apiClient,
@@ -473,9 +499,15 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   });
 
   const runCreateSelected = useCallback(() => {
-    const picks = suggestions.filter((s) => selected.has(s.key)).map(applyOverrides);
+    // Backstop against dual-writes: never provision a draft whose service is
+    // already covered, even if it stayed checked through a selection-state race
+    // (e.g. the master checkbox marked it touched before the async coverage
+    // signal resolved, so the seeding effect could no longer auto-deselect it).
+    const picks = suggestions
+      .filter((s) => selected.has(s.key) && !isDraftCovered(s))
+      .map(applyOverrides);
     return runCreate(picks);
-  }, [applyOverrides, runCreate, selected, suggestions]);
+  }, [applyOverrides, isDraftCovered, runCreate, selected, suggestions]);
 
   const createSelected = useCallback(() => {
     // Already-open preview means the user has seen the full rule/SLI
@@ -501,7 +533,12 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   const totalRules = decoratedSuggestions
     .filter((s) => selected.has(s.key))
     .reduce((acc, s) => acc + s.estimatedRuleCount, 0);
-  const coveredCount = decoratedSuggestions.filter((s) => s.existingRuleMatch).length;
+  // Count with the same `isDraftCovered` union that drives default-unchecking,
+  // not just `existingRuleMatch` — otherwise a service covered via the health
+  // rollup (no matching recording rule) gets its drafts unchecked while the
+  // "N drafts already covered" subline never renders, leaving the user with a
+  // disabled Create and no explanation.
+  const coveredCount = decoratedSuggestions.filter((s) => isDraftCovered(s)).length;
   // The service list comes from APM discovery but an OTel-only service (one
   // that emits direct metrics without span-derived RED) can still surface a
   // draft. Union both sources so every service that owns drafts gets a row.
@@ -530,12 +567,15 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
           drafts,
           selectedCount: drafts.filter((s) => selected.has(s.key)).length,
           totalRules: drafts.reduce((acc, s) => acc + s.estimatedRuleCount, 0),
-          coveredCount: drafts.filter((s) => s.existingRuleMatch).length,
+          // Union recording-rule + health-rollup coverage, matching the
+          // page-level `coveredCount` and the default-unchecking in the seeding
+          // effect (see `isDraftCovered`).
+          coveredCount: drafts.filter((s) => isDraftCovered(s)).length,
           kinds,
         };
       })
       .filter((row) => row.drafts.length > 0);
-  }, [uniqueServices, decoratedSuggestions, selected]);
+  }, [uniqueServices, decoratedSuggestions, selected, isDraftCovered]);
 
   // Re-seed expansion to "all collapsed" whenever the *set of services* changes.
   // Keyed on the joined service names (not `serviceRows`, whose identity changes
@@ -572,11 +612,33 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   const loading = configLoading || servicesLoading || discoveryLoading;
 
   const headerActions = [
-    <EuiButtonEmpty key="back" size="s" onClick={() => history.goBack()}>
+    // Navigate to the SLO listing rather than `history.goBack()`: the primary
+    // entry to this page is a cross-app deep link (or a fresh/bookmarked URL),
+    // so the router stack length is often 1 and `goBack()` is a no-op (or exits
+    // the app). Pushing the listing route always lands somewhere useful.
+    <EuiButtonEmpty key="back" iconType="arrowLeft" size="s" onClick={() => history.push('/slos')}>
       {i18n.translate('observability.apm.slo.suggest.backButton', {
         defaultMessage: 'Cancel',
       })}
     </EuiButtonEmpty>,
+    // Re-run service discovery + the ruler/probe fetch. Recovers from a
+    // transient ruler outage (the "could not verify existing recording rules"
+    // warning) without forcing a full page reload.
+    <EuiButton
+      key="rediscover"
+      size="s"
+      iconType="refresh"
+      onClick={() => {
+        refetchServices();
+        setDiscoveryEpoch((n) => n + 1);
+      }}
+      isLoading={loading}
+      data-test-subj="slosSuggestDiscover"
+    >
+      {i18n.translate('observability.apm.slo.suggest.rediscoverButton', {
+        defaultMessage: 'Rediscover',
+      })}
+    </EuiButton>,
     <EuiButton
       key="preview"
       size="s"
@@ -597,7 +659,10 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
       color="primary"
       onClick={createSelected}
       isLoading={isCreating}
-      isDisabled={selectedCount === 0 || loading}
+      // Also gate on `healthLoading`: the coverage rollup resolves async and
+      // drives which drafts default unchecked. Creating before it lands risks
+      // dual-writing rules for a service that's already covered.
+      isDisabled={selectedCount === 0 || loading || healthLoading}
       data-test-subj="slosSuggestCreate"
     >
       {i18n.translate('observability.apm.slo.suggest.createSelectedButton', {
@@ -635,12 +700,9 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
               })}
               <EuiCode>slo-generated</EuiCode>
             </EuiText>
-            <EuiSpacer size="m" />
-
             {servicesError && (
               <>
                 <EuiCallOut
-                  announceOnMount
                   color="danger"
                   iconType="alert"
                   title={i18n.translate('observability.apm.slo.suggest.servicesErrorTitle', {
@@ -668,7 +730,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
             {!loading && !datasourceId && (
               <EuiCallOut
-                announceOnMount
                 size="s"
                 iconType="iInCircle"
                 title={i18n.translate('observability.apm.slo.suggest.noDatasource.title', {
@@ -687,7 +748,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
 
             {!loading && datasourceId && allDiscoveredServices.length === 0 && !servicesError && (
               <EuiCallOut
-                announceOnMount
                 size="s"
                 iconType="iInCircle"
                 title={i18n.translate('observability.apm.slo.suggest.noServices.title', {
@@ -706,7 +766,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
             {!loading && datasourceId && rulerFetchFailed && (
               <>
                 <EuiCallOut
-                  announceOnMount
                   size="s"
                   iconType="alert"
                   color="warning"
@@ -721,6 +780,38 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                         'The Prometheus ruler did not respond when this page tried to list its current recording groups. Suggestions and bulk-create still work, but duplicate recording groups may be created if rules already exist for these SLIs.',
                     })}
                   </EuiText>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
+            {!loading && datasourceId && scopeFellThrough && (
+              <>
+                <EuiCallOut
+                  size="s"
+                  iconType="iInCircle"
+                  color="warning"
+                  title={i18n.translate('observability.apm.slo.suggest.scopeFellThrough.title', {
+                    defaultMessage: 'Scoped services not found',
+                  })}
+                  data-test-subj="slosSuggestScopeFellThrough"
+                >
+                  <EuiText size="s">
+                    {i18n.translate('observability.apm.slo.suggest.scopeFellThrough.body', {
+                      defaultMessage:
+                        "These services aren't in the current APM discovery result. Clear the scope to pick from all discovered services.",
+                    })}
+                  </EuiText>
+                  <EuiSpacer size="xs" />
+                  <EuiButtonEmpty
+                    size="xs"
+                    onClick={() => history.push('/slos/suggest')}
+                    data-test-subj="slosSuggestClearScope"
+                  >
+                    {i18n.translate('observability.apm.slo.suggest.clearScope', {
+                      defaultMessage: 'Clear scope',
+                    })}
+                  </EuiButtonEmpty>
                 </EuiCallOut>
                 <EuiSpacer size="m" />
               </>
@@ -797,8 +888,6 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                         })}
                       </EuiText>
                     )}
-                    <EuiSpacer size="m" />
-
                     {progress && (
                       <>
                         <EuiPanel
@@ -858,6 +947,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                     onToggleDraft={toggle}
                     onOverrideChange={setOverride}
                     rowStatusMap={rowStatusMap}
+                    coveredServices={allServicesCoverage}
                   />
                 ) : (
                   <EuiPanel
