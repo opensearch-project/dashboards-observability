@@ -12,6 +12,7 @@ import {
   observabilityApmSloID,
 } from '../../../../../common/constants/apm';
 import { coreRefs } from '../../../../framework/core_refs';
+import { buildSuggestSearch } from '../../pages/slos/slo_suggest_scope';
 
 /**
  * Options for navigating to service details
@@ -143,13 +144,7 @@ export function navigateToServicesList(): void {
  * back to its default when it's omitted.
  */
 export function navigateToSloSuggest(services: string[], timeRange?: TimeRange): void {
-  const qs = new URLSearchParams({ source: 'apm' });
-  if (services.length > 0) qs.set('services', services.join(','));
-  if (timeRange) {
-    qs.set('from', timeRange.from);
-    qs.set('to', timeRange.to);
-  }
-  const path = `#/slos/suggest?${qs.toString()}`;
+  const path = `#/slos/suggest?${buildSuggestSearch(services, timeRange)}`;
   coreRefs?.application?.navigateToApp(observabilityApmSloID, { path });
   window.dispatchEvent(new HashChangeEvent('hashchange'));
 }

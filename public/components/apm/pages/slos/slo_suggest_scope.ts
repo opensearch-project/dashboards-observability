@@ -53,6 +53,23 @@ function parseTimeValue(value: string | null): string | undefined {
 }
 
 /**
+ * Build the `source=apm&services=<csv>[&from=&to=]` query string for a suggest
+ * deep link. Returns the query portion only (no leading `?` and no path), so
+ * both the in-app router (`/slos/suggest?…`) and the cross-app navigator
+ * (`#/slos/suggest?…`) share one definition of the URL contract. Inverse of
+ * `parseSuggestScopeFromSearch`.
+ */
+export function buildSuggestSearch(services: string[], timeRange?: TimeRange): string {
+  const qs = new URLSearchParams({ source: 'apm' });
+  if (services.length > 0) qs.set('services', services.join(','));
+  if (timeRange) {
+    qs.set('from', timeRange.from);
+    qs.set('to', timeRange.to);
+  }
+  return qs.toString();
+}
+
+/**
  * Parse `?source=&services=&from=&to=` out of a `location.search` string.
  * Unknown `source` values fall back to `'apm'` (the only meaningful source
  * today); `services` missing or empty yields `undefined` rather than `[]` so

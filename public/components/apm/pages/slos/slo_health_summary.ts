@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { SloApiClient } from './slo_api_client';
-import { classifySloKind, rollupSloHealth } from '../../../../../common/slo/classifier';
+import { classifySloKind, kindSide, rollupSloHealth } from '../../../../../common/slo/classifier';
 import type { CanonicalKind, SloHealthBucket } from '../../../../../common/slo/classifier';
 import type {
   SloAggregateResponse,
@@ -30,7 +30,7 @@ import type {
 
 // Re-export so existing callers (ChipRow, ServiceSloTab, tests) keep working
 // against the hook's module without reaching into `common/slo/`.
-export { classifySloKind, rollupSloHealth };
+export { classifySloKind, kindSide, rollupSloHealth };
 export type { CanonicalKind, SloHealthBucket };
 
 export interface UseServiceSloHealthResult {

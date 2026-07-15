@@ -1,0 +1,50 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Width of the service-filter popover panel.
+.slo-service-filter__panel {
+  width: 300px;
+}
+
+// Draggable grip on the left edge of the preview flyout. The flyout width
+// itself stays inline (it is driven by the drag state), but the handle's
+// presentation lives here so the themed color + hover state are declarative.
+.slo-suggest-flyout {
+  &__resize-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: col-resize;
+    z-index: 1000;
+  }
+
+  &__resize-grip {
+    width: 4px;
+    height: 40px;
+    border-radius: 2px;
+    background-color: $euiColorMediumShade;
+    transition: background-color $euiAnimSpeedFast ease-in;
+  }
+
+  &__resize-handle:hover &__resize-grip {
+    background-color: $euiColorDarkShade;
+  }
+
+  // Break long PromQL / rule strings in the preview flyout body.
+  &__body {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+}
+
+// Reserve height so the centered loading spinner doesn't collapse the page.
+.slo-suggest-loading {
+  min-height: 200px;
+}

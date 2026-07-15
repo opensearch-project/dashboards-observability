@@ -25,6 +25,7 @@ import {
   EuiLink,
   EuiLoadingContent,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiToolTip,
@@ -34,11 +35,13 @@ import { navigateToSloListing, navigateToSloSuggest } from '../../shared/utils/n
 import type { TimeRange } from '../../common/types/service_types';
 import type { SloHealthAccessError, SloHealthBucket } from '../slos/slo_health_summary';
 import { ChipRow } from '../slos/slo_health_chip_row';
+import { ServiceFilterSelectable } from '../slos/service_filter_selectable';
 import { SloBudgetSparkline } from './slo_budget_sparkline';
+import './slo_health_panel.scss';
 
 export interface SloHealthPanelProps {
   aggregate: SloHealthBucket;
-  /** Keyed by serviceName. Used only to compute `missingPairServices`. */
+  /** Keyed by serviceName. Used to compute which services are already covered. */
   bySvc: Map<string, SloHealthBucket>;
   /** Services currently rendered in the table — drives "View all SLOs". */
   allServices: string[];
@@ -84,6 +87,15 @@ const t = {
       defaultMessage: 'Suggest SLOs for {count, plural, one {# service} other {# services}}',
       values: { count },
     }),
+  suggestPick: i18n.translate('observability.apm.services.sloHealth.suggestPick', {
+    defaultMessage: 'Suggest SLOs',
+  }),
+  suggestPickEmpty: i18n.translate('observability.apm.services.sloHealth.suggestPickEmpty', {
+    defaultMessage: 'No services to suggest SLOs for.',
+  }),
+  suggestPickClear: i18n.translate('observability.apm.services.sloHealth.suggestPickClear', {
+    defaultMessage: 'Clear',
+  }),
   suggestDisabledTip: i18n.translate('observability.apm.services.sloHealth.suggestDisabledTip', {
     defaultMessage: 'All services have an availability and latency SLO.',
   }),
@@ -151,6 +163,116 @@ function useDelayedLoading(isLoading: boolean, delayMs = 150): boolean {
   return delayed;
 }
 
+/**
+ * Dropdown picker for the SLO-suggest CTA. Lists every service in the table,
+ * disabling the ones whose canonical availability+latency pair already exists
+ * ("covered"). Nothing is checked on open — the user opts services in — and
+ * confirming navigates to the Suggest SLOs page scoped to the picks.
+ */
+const SloSuggestPicker: React.FC<{
+  allServices: string[];
+  coveredSet: Set<string>;
+  isLoading: boolean;
+  timeRange?: TimeRange;
+}> = ({ allServices, coveredSet, isLoading, timeRange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+
+  // Prune picks that no longer make sense as the data refreshes: a service that
+  // dropped out of discovery, or one that became covered while the popover was
+  // open, must not linger in `picked` — otherwise the CTA count inflates and
+  // `onConfirm` would navigate with a stale/covered service. Runs on every
+  // props change; only rebuilds the set when something actually falls out.
+  useEffect(() => {
+    setPicked((prev) => {
+      const allServiceSet = new Set(allServices);
+      const next = new Set([...prev].filter((s) => allServiceSet.has(s) && !coveredSet.has(s)));
+      return next.size === prev.size ? prev : next;
+    });
+  }, [allServices, coveredSet]);
+
+  const onSelectionChange = useCallback((sel: string[]) => setPicked(new Set(sel)), []);
+
+  const onConfirm = useCallback(() => {
+    if (picked.size === 0) return;
+    setIsOpen(false);
+    navigateToSloSuggest([...picked], timeRange);
+  }, [picked, timeRange]);
+
+  const clearAll = useCallback(() => setPicked(new Set()), []);
+
+  const allCovered = allServices.length > 0 && allServices.every((s) => coveredSet.has(s));
+
+  return (
+    <EuiPopover
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+      button={
+        <EuiToolTip content={allCovered && !isLoading ? t.suggestDisabledTip : undefined}>
+          <EuiButton
+            // Fill (primary) while closed to draw attention to opening it; once
+            // open, drop to a neutral trigger so the footer's "Suggest SLOs for
+            // N" button is the single primary action in view.
+            fill={!isOpen}
+            iconType="arrowDown"
+            iconSide="right"
+            size="s"
+            isLoading={isLoading}
+            isDisabled={!isLoading && allCovered}
+            onClick={() => setIsOpen((prev) => !prev)}
+            data-test-subj="sloHealthPanelCta"
+          >
+            {picked.size === 0 ? t.suggestPick : t.suggestCta(picked.size)}
+          </EuiButton>
+        </EuiToolTip>
+      }
+    >
+      {allServices.length === 0 ? (
+        <EuiText size="s" color="subdued" className="slo-health-picker__empty">
+          {t.suggestPickEmpty}
+        </EuiText>
+      ) : (
+        <div className="slo-health-picker__panel">
+          <ServiceFilterSelectable
+            serviceNames={allServices}
+            selectedSet={picked}
+            coveredSet={coveredSet}
+            onSelectionChange={onSelectionChange}
+          />
+          <EuiPanel color="transparent" paddingSize="s">
+            <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  onClick={clearAll}
+                  isDisabled={picked.size === 0}
+                  data-test-subj="sloHealthPanelCtaClear"
+                >
+                  {t.suggestPickClear}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <EuiButton
+                  fullWidth
+                  size="s"
+                  fill
+                  onClick={onConfirm}
+                  isDisabled={picked.size === 0}
+                  data-test-subj="sloHealthPanelCtaConfirm"
+                >
+                  {picked.size === 0 ? t.suggestPick : t.suggestCta(picked.size)}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </div>
+      )}
+    </EuiPopover>
+  );
+};
+
 export const SloHealthPanel: React.FC<SloHealthPanelProps> = ({
   aggregate,
   bySvc,
@@ -163,21 +285,18 @@ export const SloHealthPanel: React.FC<SloHealthPanelProps> = ({
 }) => {
   const showSkeleton = useDelayedLoading(isLoading);
 
-  const missingPairServices = useMemo(() => {
-    const out: string[] = [];
-    // Only include services we actually have data for — stale `allServices`
-    // entries that are missing from `bySvc` aren't "known to be missing", so
-    // don't silently seed the CTA CSV with them.
+  // Services whose canonical availability+latency pair already exists. These
+  // are shown but disabled in the picker so the user can't request duplicate
+  // suggestions. A service missing from `bySvc` isn't known to be covered, so
+  // it stays enabled (pickable).
+  const coveredSet = useMemo(() => {
+    const set = new Set<string>();
     for (const name of allServices) {
       const bucket = bySvc.get(name);
-      if (bucket?.missingCanonicalPair) out.push(name);
+      if (bucket && !bucket.missingCanonicalPair) set.add(name);
     }
-    return out;
+    return set;
   }, [allServices, bySvc]);
-
-  const onClickSuggest = useCallback(() => {
-    navigateToSloSuggest(missingPairServices, timeRange);
-  }, [missingPairServices, timeRange]);
 
   const onClickViewAll = useCallback(() => {
     navigateToSloListing(allServices);
@@ -234,7 +353,10 @@ export const SloHealthPanel: React.FC<SloHealthPanelProps> = ({
                   ) : (
                     // Reserve vertical height so the panel doesn't reflow when
                     // the skeleton appears at t=150ms.
-                    <div style={{ height: 20 }} data-test-subj="sloHealthPanelLoadingPlaceholder" />
+                    <div
+                      className="slo-health-panel__loading-placeholder"
+                      data-test-subj="sloHealthPanelLoadingPlaceholder"
+                    />
                   )
                 ) : aggregate.total === 0 ? (
                   <EuiText size="s" color="subdued" data-test-subj="sloHealthPanelEmpty">
@@ -251,25 +373,12 @@ export const SloHealthPanel: React.FC<SloHealthPanelProps> = ({
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               {!error && (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip
-                    content={
-                      missingPairServices.length === 0 && !isLoading
-                        ? t.suggestDisabledTip
-                        : undefined
-                    }
-                  >
-                    <EuiButton
-                      fill
-                      iconType="wand"
-                      size="s"
-                      isLoading={isLoading}
-                      isDisabled={!isLoading && missingPairServices.length === 0}
-                      onClick={onClickSuggest}
-                      data-test-subj="sloHealthPanelCta"
-                    >
-                      {t.suggestCta(missingPairServices.length)}
-                    </EuiButton>
-                  </EuiToolTip>
+                  <SloSuggestPicker
+                    allServices={allServices}
+                    coveredSet={coveredSet}
+                    isLoading={isLoading}
+                    timeRange={timeRange}
+                  />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
@@ -433,7 +542,10 @@ const SloHealthCellUI: React.FC<SloHealthCellProps> = ({
   }
   if (isLoading && !bucket) {
     return (
-      <div style={{ width: 80 }} data-test-subj={`sloHealthCellLoading-${serviceName}`}>
+      <div
+        className="slo-health-cell__loading"
+        data-test-subj={`sloHealthCellLoading-${serviceName}`}
+      >
         <EuiLoadingContent lines={1} />
       </div>
     );

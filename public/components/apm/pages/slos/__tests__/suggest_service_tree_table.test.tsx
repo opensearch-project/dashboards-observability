@@ -4,12 +4,12 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { ServiceRowShape, ServiceTreeTable } from '../suggest_service_tree_table';
 import type { Suggestion } from '../suggest_engine';
 
 function fakeSuggestion(key: string, kind = 'HTTP availability'): Suggestion {
-  return ({
+  return {
     key,
     kindId: 'http-availability',
     kind,
@@ -51,14 +51,17 @@ function fakeSuggestion(key: string, kind = 'HTTP availability'): Suggestion {
         annotations: {},
       },
     },
-  } as unknown) as Suggestion;
+  } as unknown as Suggestion;
 }
 
 function row(overrides: Partial<ServiceRowShape> = {}): ServiceRowShape {
+  const drafts = overrides.drafts ?? [fakeSuggestion('a'), fakeSuggestion('b')];
   return {
     serviceName: overrides.serviceName ?? 'cart',
-    drafts: overrides.drafts ?? [fakeSuggestion('a'), fakeSuggestion('b')],
+    drafts,
     selectedCount: overrides.selectedCount ?? 1,
+    // Default every draft to selectable (nothing covered) unless overridden.
+    selectableCount: overrides.selectableCount ?? drafts.length,
     totalRules: overrides.totalRules ?? 26,
     coveredCount: overrides.coveredCount ?? 0,
     kinds: overrides.kinds ?? ['HTTP availability', 'HTTP latency'],
@@ -151,10 +154,45 @@ describe('ServiceTreeTable', () => {
         onOverrideChange={jest.fn()}
       />
     );
-    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(screen.getByText('3 covered')).toBeInTheDocument();
   });
 
-  it('renders the selection badge with the correct counts', () => {
+  it('disables the master checkbox when the service has no selectable drafts', () => {
+    render(
+      <ServiceTreeTable
+        serviceRows={[row({ selectableCount: 0, selectedCount: 0, coveredCount: 2 })]}
+        expandedMap={{}}
+        onToggleExpand={jest.fn()}
+        onToggleServiceSelection={jest.fn()}
+        selected={new Set()}
+        overrides={{}}
+        onToggleDraft={jest.fn()}
+        onOverrideChange={jest.fn()}
+      />
+    );
+    expect(screen.getByTestId('slosSuggestServiceSelect-cart')).toBeDisabled();
+  });
+
+  it('disables the inline checkbox for drafts named in coveredKeys', () => {
+    render(
+      <ServiceTreeTable
+        serviceRows={[row({ selectableCount: 1 })]}
+        expandedMap={{ cart: true }}
+        onToggleExpand={jest.fn()}
+        onToggleServiceSelection={jest.fn()}
+        selected={new Set()}
+        overrides={{}}
+        onToggleDraft={jest.fn()}
+        onOverrideChange={jest.fn()}
+        coveredKeys={new Set(['a'])}
+      />
+    );
+    // Draft 'a' is covered → its checkbox is disabled; 'b' stays enabled.
+    expect(screen.getByTestId('slosSuggestSelect-a')).toBeDisabled();
+    expect(screen.getByTestId('slosSuggestSelect-b')).not.toBeDisabled();
+  });
+
+  it('renders the selection count with the correct values', () => {
     render(
       <ServiceTreeTable
         serviceRows={[row({ selectedCount: 1 })]}
@@ -167,8 +205,7 @@ describe('ServiceTreeTable', () => {
         onOverrideChange={jest.fn()}
       />
     );
-    const badge = screen.getByTestId('slosSuggestSelectionBadge-cart');
-    expect(badge).toHaveTextContent('1 / 2 selected');
+    expect(screen.getByText('1/2 SLOs selected')).toBeInTheDocument();
   });
 
   it('caps SLI mix badges and renders an overflow badge', () => {
@@ -199,4 +236,82 @@ describe('ServiceTreeTable', () => {
     );
     expect(screen.getByText('+2 more')).toBeInTheDocument();
   });
+
+  it('clears the SLI-mix popover close timer on unmount without a setState warning', () => {
+    jest.useFakeTimers();
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const { unmount } = render(
+        <ServiceTreeTable
+          serviceRows={[row()]}
+          expandedMap={{}}
+          onToggleExpand={jest.fn()}
+          onToggleServiceSelection={jest.fn()}
+          selected={new Set()}
+          overrides={{}}
+          onToggleDraft={jest.fn()}
+          onOverrideChange={jest.fn()}
+        />
+      );
+      // Open a badge popover (hover), then leave to arm the 150ms close timer.
+      const badge = screen.getAllByText('HTTP availability')[0];
+      fireEvent.mouseEnter(badge);
+      fireEvent.mouseLeave(badge);
+      // Unmount with the timer still pending, then let it fire.
+      unmount();
+      act(() => {
+        jest.runAllTimers();
+      });
+      expect(errSpy).not.toHaveBeenCalledWith(
+        expect.stringContaining('not wrapped in act'),
+        expect.anything(),
+        expect.anything()
+      );
+      expect(errSpy).not.toHaveBeenCalledWith(expect.stringContaining('unmounted component'));
+    } finally {
+      errSpy.mockRestore();
+      jest.useRealTimers();
+    }
+  });
+
+  it('opens the SLI-mix popover on hover and holds it open through the grace delay', () => {
+    jest.useFakeTimers();
+    try {
+      render(
+        <ServiceTreeTable
+          serviceRows={[row({ drafts: [fakeSuggestion('a', 'HTTP availability')] })]}
+          expandedMap={{}}
+          onToggleExpand={jest.fn()}
+          onToggleServiceSelection={jest.fn()}
+          selected={new Set()}
+          overrides={{}}
+          onToggleDraft={jest.fn()}
+          onOverrideChange={jest.fn()}
+        />
+      );
+      const badge = screen.getByText('HTTP availability');
+
+      // Not open until hovered.
+      expect(screen.queryByText('Metric:')).not.toBeInTheDocument();
+
+      // Hover opens the popover — its draft detail (the "Metric:" line) appears.
+      act(() => {
+        fireEvent.mouseEnter(badge);
+      });
+      expect(screen.getByText('Metric:')).toBeInTheDocument();
+
+      // Leaving arms the close timer; the grace delay keeps it open just before
+      // the delay elapses so moving the pointer into the panel doesn't dismiss
+      // it. (The close firing + timer cleanup is covered by the unmount test.)
+      act(() => {
+        fireEvent.mouseLeave(badge);
+        jest.advanceTimersByTime(HOVER_CLOSE_DELAY_MS - 1);
+      });
+      expect(screen.getByText('Metric:')).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 });
+
+const HOVER_CLOSE_DELAY_MS = 150;

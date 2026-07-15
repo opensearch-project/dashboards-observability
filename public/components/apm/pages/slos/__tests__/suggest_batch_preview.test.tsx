@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 
 const mockExecuteInstantQuery = jest.fn();
 jest.mock('../../../query_services/promql_search_service', () => ({
@@ -18,8 +18,8 @@ import type { Suggestion } from '../suggest_engine';
 import type { SloApiClient } from '../slo_api_client';
 import type { GeneratedRuleGroup } from '../../../../../../common/slo/slo_types';
 
-function fakeSuggestion(key: string): Suggestion {
-  return ({
+function fakeSuggestion(key: string, service = 'cart'): Suggestion {
+  return {
     key,
     kindId: 'http-availability',
     kind: 'HTTP availability',
@@ -33,7 +33,7 @@ function fakeSuggestion(key: string): Suggestion {
         name: key,
         enabled: true,
         mode: 'active',
-        service: 'cart',
+        service,
         owner: { teams: ['t'] },
         sli: {
           type: 'single',
@@ -61,7 +61,7 @@ function fakeSuggestion(key: string): Suggestion {
         annotations: {},
       },
     },
-  } as unknown) as Suggestion;
+  } as unknown as Suggestion;
 }
 
 const fakeGroup: GeneratedRuleGroup = {
@@ -85,14 +85,14 @@ describe('SuggestBatchPreview', () => {
   });
 
   it('renders an empty-state message when no suggestions are selected', () => {
-    const apiClient = ({ preview: jest.fn() } as unknown) as Pick<SloApiClient, 'preview'>;
+    const apiClient = { preview: jest.fn() } as unknown as Pick<SloApiClient, 'preview'>;
     render(<SuggestBatchPreview apiClient={apiClient} selectedSuggestions={[]} />);
     expect(screen.getByText('Select at least one draft to preview.')).toBeInTheDocument();
   });
 
   it('renders a SuggestPreviewRow per suggestion after preview resolves', async () => {
     const preview = jest.fn().mockResolvedValue(fakeGroup);
-    const apiClient = ({ preview } as unknown) as Pick<SloApiClient, 'preview'>;
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
 
     render(
       <SuggestBatchPreview
@@ -109,7 +109,7 @@ describe('SuggestBatchPreview', () => {
   });
 
   it('exposes the SLI evaluation window selector', async () => {
-    const apiClient = ({ preview: jest.fn().mockResolvedValue(fakeGroup) } as unknown) as Pick<
+    const apiClient = { preview: jest.fn().mockResolvedValue(fakeGroup) } as unknown as Pick<
       SloApiClient,
       'preview'
     >;
@@ -126,7 +126,7 @@ describe('SuggestBatchPreview', () => {
 
   it('shows aggregate rule count after every preview resolves', async () => {
     const preview = jest.fn().mockResolvedValue(fakeGroup);
-    const apiClient = ({ preview } as unknown) as Pick<SloApiClient, 'preview'>;
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
     render(
       <SuggestBatchPreview
         apiClient={apiClient}
@@ -136,5 +136,72 @@ describe('SuggestBatchPreview', () => {
     await waitFor(() => {
       expect(screen.getByText(/2 rules total/)).toBeInTheDocument();
     });
+  });
+
+  it('renders one accordion group per service even when drafts are non-contiguous', async () => {
+    const preview = jest.fn().mockResolvedValue(fakeGroup);
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
+    // Interleave services (cart, checkout, cart) — mirrors the engine emitting
+    // detector-first, so a service's drafts aren't adjacent in the list. The
+    // grouping must still coalesce them into a single per-service accordion.
+    render(
+      <SuggestBatchPreview
+        apiClient={apiClient}
+        selectedSuggestions={[
+          fakeSuggestion('cart-avail', 'cart'),
+          fakeSuggestion('checkout-avail', 'checkout'),
+          fakeSuggestion('cart-http', 'cart'),
+        ]}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('slosSuggestPreviewRow-cart-http')).toBeInTheDocument();
+    });
+    // Exactly one group per distinct service — no duplicate 'cart' group.
+    expect(screen.getAllByTestId('slosSuggestPreviewGroup-cart')).toHaveLength(1);
+    expect(screen.getAllByTestId('slosSuggestPreviewGroup-checkout')).toHaveLength(1);
+    // Both of cart's non-contiguous drafts land in the single cart group.
+    const cartGroup = screen.getByTestId('slosSuggestPreviewGroup-cart');
+    expect(within(cartGroup).getByTestId('slosSuggestPreviewRow-cart-avail')).toBeInTheDocument();
+    expect(within(cartGroup).getByTestId('slosSuggestPreviewRow-cart-http')).toBeInTheDocument();
+  });
+
+  /** Data-frame scalar as the PromQL search service returns it. */
+  function valueFrame(n: number) {
+    return { fields: [{ name: 'Value', values: [n] }] };
+  }
+
+  it('shows the breaching badge when the live SLI is below target', async () => {
+    const preview = jest.fn().mockResolvedValue(fakeGroup);
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
+    // Availability draft (target 0.99): ratio query → 0.5 (below target),
+    // samples query → 100 (>0 so the comparison runs), p99 unused.
+    mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) => {
+      if (query.includes('http_response_status_code')) return Promise.resolve(valueFrame(0.5));
+      if (query.includes('increase(')) return Promise.resolve(valueFrame(100));
+      return Promise.resolve(valueFrame(NaN));
+    });
+
+    render(
+      <SuggestBatchPreview
+        apiClient={apiClient}
+        selectedSuggestions={[fakeSuggestion('a')]}
+        prometheusConnectionId="prom-1"
+      />
+    );
+
+    await waitFor(() => expect(screen.getByText('1 breaching')).toBeInTheDocument());
+  });
+
+  it('shows the failed badge when a preview request rejects', async () => {
+    const preview = jest.fn().mockRejectedValue(new Error('preview boom'));
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
+
+    render(
+      <SuggestBatchPreview apiClient={apiClient} selectedSuggestions={[fakeSuggestion('a')]} />
+    );
+
+    await waitFor(() => expect(screen.getByText('1 failed')).toBeInTheDocument());
   });
 });

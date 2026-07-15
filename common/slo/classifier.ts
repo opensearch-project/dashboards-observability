@@ -52,7 +52,13 @@ export function classifySloKind(slo: SloSummary): CanonicalKind | undefined {
   return undefined;
 }
 
-function kindSide(kind: CanonicalKind | undefined): 'availability' | 'latency' | undefined {
+/**
+ * Map a canonical kind to the side of the availability+latency pair it
+ * satisfies. Exported so the Suggest page can decide per-draft coverage from
+ * the same rule the rollup uses (any `-availability` kind covers the
+ * availability side, any `-latency` kind the latency side).
+ */
+export function kindSide(kind: CanonicalKind | undefined): 'availability' | 'latency' | undefined {
   if (!kind) return undefined;
   if (kind.endsWith('-availability')) return 'availability';
   if (kind.endsWith('-latency')) return 'latency';

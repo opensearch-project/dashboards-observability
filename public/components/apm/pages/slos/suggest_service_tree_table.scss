@@ -1,0 +1,29 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Spacing between the stacked service panels.
+.slo-suggest-tree__service {
+  margin-bottom: $euiSizeM;
+}
+
+// Hover popover listing the drafts behind an "SLI mix" badge.
+.slo-suggest-sli-mix {
+  &__popover {
+    max-width: 320px;
+  }
+
+  // One draft entry inside the popover.
+  &__draft {
+    margin-bottom: $euiSizeXS;
+  }
+
+  &__draft-badges {
+    margin-top: $euiSizeXS / 2;
+  }
+
+  &__draft-metric {
+    margin-top: $euiSizeXS / 2;
+  }
+}

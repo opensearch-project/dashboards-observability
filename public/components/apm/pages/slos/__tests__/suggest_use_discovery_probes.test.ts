@@ -27,7 +27,7 @@ function makeHttp(implementations: {
     }
     return {};
   });
-  return ({ get } as unknown) as HttpStart;
+  return { get } as unknown as HttpStart;
 }
 
 describe('useDiscoveryProbes', () => {
@@ -43,7 +43,7 @@ describe('useDiscoveryProbes', () => {
 
   it('returns empty defaults and never fetches when datasourceId is empty', () => {
     const http = makeHttp({});
-    const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: '', epoch: 0 }));
+    const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: '' }));
     expect(result.current.metricNames).toEqual([]);
     expect(result.current.labelValuesByMetric).toEqual({});
     expect(result.current.existingRuleGroups).toEqual([]);
@@ -62,9 +62,7 @@ describe('useDiscoveryProbes', () => {
       },
       ruler: { groups: [{ name: 'g', file: 'f', interval: 30, rules: [] }] },
     });
-    const { result } = renderHook(() =>
-      useDiscoveryProbes({ http, datasourceId: 'prom-1', epoch: 0 })
-    );
+    const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.metricNames).toContain('http_server_request_duration_seconds_count');
@@ -79,9 +77,7 @@ describe('useDiscoveryProbes', () => {
     const http = makeHttp({
       ruler: new Error('ruler down'),
     });
-    const { result } = renderHook(() =>
-      useDiscoveryProbes({ http, datasourceId: 'prom-1', epoch: 0 })
-    );
+    const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.rulerFetchFailed).toBe(true);
@@ -99,9 +95,7 @@ describe('useDiscoveryProbes', () => {
         http_server_request_duration_seconds_count: { service_name: ['cart'] },
       },
     });
-    const { result } = renderHook(() =>
-      useDiscoveryProbes({ http, datasourceId: 'prom-1', epoch: 0 })
-    );
+    const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
 
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.metricNames).toContain('http_server_request_duration_seconds_count');
@@ -114,39 +108,21 @@ describe('useDiscoveryProbes', () => {
     );
   });
 
-  it('refetches when epoch bumps', async () => {
-    const http = makeHttp({
-      labelValues: { http_server_request_duration_seconds_count: { service_name: ['cart'] } },
-    });
-    const { result, rerender } = renderHook(
-      ({ epoch }) => useDiscoveryProbes({ http, datasourceId: 'prom-1', epoch }),
-      { initialProps: { epoch: 0 } }
-    );
-
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    const firstCount = ((http as unknown) as { get: jest.Mock }).get.mock.calls.length;
-    rerender({ epoch: 1 });
-    await waitFor(() => {
-      expect(((http as unknown) as { get: jest.Mock }).get.mock.calls.length).toBeGreaterThan(
-        firstCount
-      );
-    });
-  });
-
   it('does not setState after unmount', async () => {
     const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const http = makeHttp({
-      labelValues: { http_server_request_duration_seconds_count: { service_name: ['x'] } },
-    });
-    const { unmount } = renderHook(() =>
-      useDiscoveryProbes({ http, datasourceId: 'prom-1', epoch: 0 })
-    );
-    unmount();
-    // Drain microtasks so the in-flight effect's `.then` resolves and would
-    // attempt a setState if cancellation weren't honored.
-    await new Promise((r) => setImmediate(r));
-    // Any state-update-after-unmount would trigger React's act warning here.
-    expect(errSpy).not.toHaveBeenCalledWith(expect.stringContaining('not wrapped in act'));
-    errSpy.mockRestore();
+    try {
+      const http = makeHttp({
+        labelValues: { http_server_request_duration_seconds_count: { service_name: ['x'] } },
+      });
+      const { unmount } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
+      unmount();
+      // Drain microtasks so the in-flight effect's `.then` resolves and would
+      // attempt a setState if cancellation weren't honored.
+      await new Promise((r) => setImmediate(r));
+      // Any state-update-after-unmount would trigger React's act warning here.
+      expect(errSpy).not.toHaveBeenCalledWith(expect.stringContaining('not wrapped in act'));
+    } finally {
+      errSpy.mockRestore();
+    }
   });
 });

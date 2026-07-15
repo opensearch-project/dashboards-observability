@@ -1,0 +1,25 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.slo-health-picker {
+  &__panel {
+    width: 300px;
+  }
+
+  &__empty {
+    width: 300px;
+    padding: $euiSizeM;
+  }
+}
+
+// Reserve height so the header doesn't reflow when the skeleton appears.
+.slo-health-panel__loading-placeholder {
+  height: 20px;
+}
+
+// Fixed width for the per-row loading skeleton so the column doesn't jump.
+.slo-health-cell__loading {
+  width: 80px;
+}

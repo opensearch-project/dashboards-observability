@@ -13,12 +13,15 @@
 
 import React, { useState } from 'react';
 import {
+  EuiAccordion,
   EuiBadge,
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import type { SloApiClient } from './slo_api_client';
@@ -177,14 +180,53 @@ export const SuggestBatchPreview: React.FC<SuggestBatchPreviewProps> = ({
           })}
         </EuiText>
       ) : (
-        previews.map((p) => (
-          <SuggestPreviewRow
-            key={p.key}
-            preview={p}
-            live={liveByKey[p.key] ?? { status: 'loading' }}
-            windowChoice={windowChoice}
-          />
-        ))
+        (() => {
+          // Group previews by service. A service can produce non-contiguous
+          // drafts — the engine emits detector-first (all APM drafts, then all
+          // HTTP drafts, …), so a service with both APM and OTel drafts appears
+          // more than once in `previews`. Key by service (not adjacency) so each
+          // service yields exactly one accordion; adjacency grouping would emit
+          // duplicate groups with duplicate React keys.
+          const grouped: Array<{ service: string; items: typeof previews }> = [];
+          const groupByService = new Map<string, { service: string; items: typeof previews }>();
+          for (const p of previews) {
+            const svc = p.suggestion.input.spec.service ?? '';
+            let group = groupByService.get(svc);
+            if (!group) {
+              group = { service: svc, items: [] };
+              groupByService.set(svc, group);
+              grouped.push(group);
+            }
+            group.items.push(p);
+          }
+          const MAX_INITIALLY_OPEN = 5;
+          return grouped.map((group, idx) => (
+            <div key={group.service} data-test-subj={`slosSuggestPreviewGroup-${group.service}`}>
+              <EuiAccordion
+                id={`slosSuggestPreviewAccordion-${group.service}`}
+                buttonContent={
+                  <EuiTitle size="xxs">
+                    <h5>
+                      {group.service} ({group.items.length})
+                    </h5>
+                  </EuiTitle>
+                }
+                initialIsOpen={idx < MAX_INITIALLY_OPEN}
+                paddingSize="s"
+              >
+                {group.items.map((p) => (
+                  <SuggestPreviewRow
+                    key={p.key}
+                    preview={p}
+                    live={liveByKey[p.key] ?? { status: 'loading' }}
+                    windowChoice={windowChoice}
+                  />
+                ))}
+              </EuiAccordion>
+              {idx < grouped.length - 1 && <EuiHorizontalRule margin="s" />}
+            </div>
+          ));
+        })()
       )}
     </div>
   );
