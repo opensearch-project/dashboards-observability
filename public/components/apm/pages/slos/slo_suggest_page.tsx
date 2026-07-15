@@ -287,18 +287,26 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   // suggestion reflects the range the user was looking at on the services /
   // service-details page they launched from. Falls back to the 15m default
   // when the page is opened without an explicit range (e.g. a bare deep link).
-  const timeRange = useMemo(() => scope.timeRange ?? DEFAULT_APM_TIME_RANGE, [scope.timeRange]);
+  // Key off the `from`/`to` strings, not the `scope.timeRange` object: `scope`
+  // is re-parsed into a fresh object on every `location.search` change (e.g.
+  // toggling a service in the filter), so depending on its identity would remint
+  // the parsed `Date`s each time — churning `useServices`' fetch params and
+  // flashing the loading spinner on every click. The strings only change when
+  // the window actually changes.
+  const from = scope.timeRange?.from ?? DEFAULT_APM_TIME_RANGE.from;
+  const to = scope.timeRange?.to ?? DEFAULT_APM_TIME_RANGE.to;
+  const timeRange = useMemo(() => ({ from, to }), [from, to]);
   // `parseTimeRange` throws on bounds that pass the URL charset check but aren't
   // parseable datemath (e.g. a stale/crafted `?from=now/&to=now`). Since this
   // runs at render time with no error boundary, fall back to the default range
   // instead of crashing the page.
   const parsedTimeRange = useMemo(() => {
     try {
-      return parseTimeRange(timeRange);
+      return parseTimeRange({ from, to });
     } catch {
       return parseTimeRange(DEFAULT_APM_TIME_RANGE);
     }
-  }, [timeRange]);
+  }, [from, to]);
 
   const {
     data: allDiscoveredServices,
@@ -834,7 +842,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                   allServices={allDiscoveredServices}
                   coveredSet={allServicesCoverage}
                   scopedServices={scope.services}
-                  timeRange={scope.timeRange}
+                  timeRange={timeRange}
                   history={history}
                 />
                 <EuiSpacer size="s" />
