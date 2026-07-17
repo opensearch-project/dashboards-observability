@@ -51,7 +51,7 @@ describe('Search bar components', () => {
     fireEvent.change(searchInput, { target: { value: 'queryTest' } });
 
     clock.tick(100);
-    expect(setQuery).toBeCalledWith('queryTest');
+    expect(setQuery).toHaveBeenCalledWith('queryTest');
     clock.restore();
   });
 });

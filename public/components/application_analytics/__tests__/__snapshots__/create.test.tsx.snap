@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Create Page can clear query 1`] = `
 <body>
@@ -499,7 +499,7 @@ exports[`Create Page can clear query 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -925,7 +925,7 @@ exports[`Create Page can clear query 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -2031,7 +2031,7 @@ exports[`Create Page clears one trace selected 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -2492,7 +2492,7 @@ exports[`Create Page clears one trace selected 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -3633,7 +3633,7 @@ exports[`Create Page clears service selected 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -4059,7 +4059,7 @@ exports[`Create Page clears service selected 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -5163,7 +5163,7 @@ exports[`Create Page renders empty 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -5587,7 +5587,7 @@ exports[`Create Page renders empty 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -6693,7 +6693,7 @@ exports[`Create Page renders with name and description 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -7119,7 +7119,7 @@ exports[`Create Page renders with name and description 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -8258,7 +8258,7 @@ exports[`Create Page renders with one service selected 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -8684,7 +8684,7 @@ exports[`Create Page renders with one service selected 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -9790,7 +9790,7 @@ exports[`Create Page renders with one trace selected 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -10251,7 +10251,7 @@ exports[`Create Page renders with one trace selected 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -11359,7 +11359,7 @@ exports[`Create Page renders with query 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>
@@ -11785,7 +11785,7 @@ exports[`Create Page renders with query 1`] = `
                                     value=""
                                   />
                                   <div
-                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                                   />
                                 </div>
                               </div>

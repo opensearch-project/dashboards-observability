@@ -59,6 +59,6 @@ describe('<CustomInputModal /> spec', () => {
       target: { value: 'test-name' },
     });
     utils.getByTestId('custom-input-modal-confirm-button').click();
-    expect(runModal).toBeCalledWith('test-name');
+    expect(runModal).toHaveBeenCalledWith('test-name');
   });
 });

@@ -20,12 +20,12 @@ describe('renders autocomplete', function () {
   const tempQuery = '';
   const handleQueryChange = jest.fn();
   const handleQuerySearch = jest.fn();
-  const dslService = ({
+  const dslService = {
     http: jest.fn(),
     fetch: jest.fn(),
     fetchIndices: jest.fn(),
     fetchFields: jest.fn(),
-  } as unknown) as DSLService;
+  } as unknown as DSLService;
   const getSuggestions = jest.fn();
   const onItemSelect = jest.fn();
   const utils = render(
@@ -49,19 +49,19 @@ describe('renders autocomplete', function () {
     act(() => {
       fireEvent.change(searchBar, { target: { value: 'new query' } });
     });
-    expect(handleQueryChange).toBeCalledWith('new query');
+    expect(handleQueryChange).toHaveBeenCalledWith('new query');
   });
 
   it('handles query search on shift enter', () => {
     act(() => {
       fireEvent.keyDown(searchBar, { keyCode: 13, shiftKey: true });
     });
-    expect(handleQuerySearch).toBeCalled();
+    expect(handleQuerySearch).toHaveBeenCalled();
   });
 });
 
 describe('autocomplete logic', function () {
-  const dslService = ({
+  const dslService = {
     http: jest.fn(),
     fetch: jest
       .fn()
@@ -91,7 +91,7 @@ describe('autocomplete logic', function () {
         },
       },
     }),
-  } as unknown) as DSLService;
+  } as unknown as DSLService;
 
   it('suggests source if empty', async () => {
     const input = '';
@@ -104,7 +104,7 @@ describe('autocomplete logic', function () {
       },
     ] as AutocompleteItem[];
     const suggestion = await parseGetSuggestions('', input, dslService);
-    expect(dslService.fetchIndices).toBeCalled();
+    expect(dslService.fetchIndices).toHaveBeenCalled();
     expect(suggestion).toStrictEqual(expected);
   });
 
@@ -194,7 +194,7 @@ describe('autocomplete logic', function () {
       };
     }) as AutocompleteItem[];
     const suggestion = await parseGetSuggestions('', input, dslService);
-    expect(dslService.fetchFields).toBeCalled();
+    expect(dslService.fetchFields).toHaveBeenCalled();
     expect(suggestion).toStrictEqual(expected);
   });
 
@@ -223,7 +223,7 @@ describe('autocomplete logic', function () {
       },
     ] as AutocompleteItem[];
     const suggestion = await parseGetSuggestions('', input, dslService);
-    expect(dslService.fetch).toBeCalled();
+    expect(dslService.fetch).toHaveBeenCalled();
     expect(suggestion).toStrictEqual(expected);
   });
 
@@ -294,7 +294,7 @@ describe('autocomplete logic', function () {
       },
     ] as AutocompleteItem[];
     const suggestion = await parseGetSuggestions('', input, dslService);
-    expect(dslService.fetch).toBeCalled();
+    expect(dslService.fetch).toHaveBeenCalled();
     expect(suggestion).toStrictEqual(expected);
   });
 
@@ -397,7 +397,7 @@ describe('autocomplete logic', function () {
       },
     ] as AutocompleteItem[];
     const suggestion = await parseGetSuggestions('', input, dslService);
-    expect(dslService.fetch).toBeCalled();
+    expect(dslService.fetch).toHaveBeenCalled();
     expect(suggestion).toStrictEqual(expected);
   });
 

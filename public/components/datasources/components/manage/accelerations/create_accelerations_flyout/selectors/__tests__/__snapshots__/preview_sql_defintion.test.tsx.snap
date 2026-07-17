@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Preview SQL acceleration components renders Preview SQL settings with default covering index options 1`] = `
 <body>

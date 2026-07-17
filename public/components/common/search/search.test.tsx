@@ -72,6 +72,6 @@ describe.skip('Search bar', () => {
 
     const searchBar = utils.getByPlaceholderText('Enter PPL query');
     fireEvent.change(searchBar, { target: { value: 'new query' } });
-    expect(handleQueryChange).toBeCalledWith('new query');
+    expect(handleQueryChange).toHaveBeenCalledWith('new query');
   });
 });

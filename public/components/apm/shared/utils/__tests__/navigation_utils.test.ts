@@ -26,20 +26,18 @@ jest.mock('../../../../../framework/core_refs', () => ({
 
 describe('navigation_utils', () => {
   let windowOpenSpy: jest.SpyInstance;
-  const originalLocation = window.location;
 
   beforeEach(() => {
     jest.clearAllMocks();
     windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
 
-    // Mock window.location.href
-    delete (window as any).location;
-    window.location = { href: '' } as Location;
+    // window.location is mocked globally by jest-location-mock; reset it to the
+    // default test origin before each test so href assertions start clean.
+    window.location.assign('http://localhost:5601/');
   });
 
   afterEach(() => {
     windowOpenSpy.mockRestore();
-    window.location = originalLocation;
   });
 
   describe('navigateToServiceMap', () => {

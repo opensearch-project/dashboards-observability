@@ -15,12 +15,12 @@ import {
   sampleSavedObjectPanel,
   sampleSavedObjectPanelWithVisualization,
 } from '../../../../test/panels_constants';
-// eslint-disable-next-line jest/no-mocks-import
+
 import httpClientMock from '../../../../test/__mocks__/httpClientMock';
 import PPLService from '../../../../public/services/requests/ppl';
 import { HttpResponse } from '../../../../../../src/core/public';
 import DSLService from '../../../../public/services/requests/dsl';
-// eslint-disable-next-line jest/no-mocks-import
+
 import { coreStartMock } from '../../../../test/__mocks__/coreMocks';
 import { applyMiddleware, createStore } from 'redux';
 import { coreRefs } from '../../../framework/core_refs';
@@ -48,10 +48,10 @@ describe('Panels View SO Component', () => {
   http.get = jest.fn(() => {
     if (counter === 0) {
       counter += 1;
-      return Promise.resolve((samplePanel as unknown) as HttpResponse);
-    } else return Promise.resolve((sampleSavedVisualization as unknown) as HttpResponse);
+      return Promise.resolve(samplePanel as unknown as HttpResponse);
+    } else return Promise.resolve(sampleSavedVisualization as unknown as HttpResponse);
   });
-  http.post = jest.fn(() => Promise.resolve((samplePPLResponse as unknown) as HttpResponse));
+  http.post = jest.fn(() => Promise.resolve(samplePPLResponse as unknown as HttpResponse));
   const pplService = new PPLService(http);
   const dslService = new DSLService(http);
   coreRefs.savedObjectsClient.create = jest
@@ -140,7 +140,7 @@ describe('Panels View SO Component', () => {
       fireEvent.click(utils.getByTestId('runModalButton'));
     });
     await waitFor(() => {
-      expect(coreRefs.savedObjectsClient.create).toBeCalledTimes(1);
+      expect(coreRefs.savedObjectsClient.create).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -159,7 +159,7 @@ describe('Panels View SO Component', () => {
       fireEvent.click(utils.getByTestId('popoverModal__deleteButton'));
     });
     await waitFor(() => {
-      expect(coreRefs.http.delete).toBeCalledTimes(1);
+      expect(coreRefs.http.delete).toHaveBeenCalledTimes(1);
     });
   });
 

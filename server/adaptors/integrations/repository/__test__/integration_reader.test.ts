@@ -203,7 +203,7 @@ describe('Integration', () => {
 
       expectOkResult(result);
       expect(result.value).toStrictEqual(Buffer.from('logo data', 'ascii'));
-      expect(readFileMock).toBeCalledWith(path.join('sample', 'static', 'logo.png'));
+      expect(readFileMock).toHaveBeenCalledWith(path.join('sample', 'static', 'logo.png'));
     });
 
     it('should return an error if the static file is not found', async () => {
@@ -234,7 +234,7 @@ describe('Integration', () => {
       const result = await integration.getSampleData();
 
       expect(result.value).toStrictEqual({ sampleData: [{ sample: true }] });
-      expect(readFileMock).toBeCalledWith(path.join('sample', 'data', 'sample.json'), {
+      expect(readFileMock).toHaveBeenCalledWith(path.join('sample', 'data', 'sample.json'), {
         encoding: 'utf-8',
       });
     });

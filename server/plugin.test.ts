@@ -13,11 +13,11 @@ describe('#setup', () => {
     const observabilityPlugin = new ObservabilityPlugin(intializerContextMock);
     observabilityPlugin.setup(coreSetup, {
       investigationDashboards: {},
-      dataSource: ({
+      dataSource: {
         registerCustomApiSchema: jest.fn(),
-      } as unknown) as ObservabilityPluginSetupDependencies,
+      } as unknown as ObservabilityPluginSetupDependencies,
     });
-    expect(coreSetup.savedObjects.registerType).not.toBeCalledWith(
+    expect(coreSetup.savedObjects.registerType).not.toHaveBeenCalledWith(
       expect.objectContaining({
         type: NOTEBOOK_SAVED_OBJECT,
       })
@@ -51,9 +51,9 @@ describe('#setup capability switcher (dynamic feature flags)', () => {
 
     const plugin = new ObservabilityPlugin(initializerContext);
     await plugin.setup(coreSetup, {
-      dataSource: ({
+      dataSource: {
         registerCustomApiSchema: jest.fn(),
-      } as unknown) as ObservabilityPluginSetupDependencies,
+      } as unknown as ObservabilityPluginSetupDependencies,
     });
 
     // The plugin calls `registerSwitcher` once for the dynamic flag path.

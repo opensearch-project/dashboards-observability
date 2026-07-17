@@ -87,6 +87,6 @@ describe('modal_containers spec', () => {
       target: { value: 'delete' },
     });
     fireEvent.click(utils.getAllByTestId('delete-notebook-modal-delete-button')[0]);
-    expect(onConfirm).toBeCalled();
+    expect(onConfirm).toHaveBeenCalled();
   });
 });

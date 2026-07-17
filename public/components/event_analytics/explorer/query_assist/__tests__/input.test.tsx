@@ -73,10 +73,10 @@ describe('<QueryAssistInput /> spec', () => {
       fireEvent.click(component.getByText('Generate and run'));
     });
 
-    expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
+    expect(httpMock.post).toHaveBeenCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
       body: '{"question":"test-input","index":"selected-test-index"}',
     });
-    expect(props.handleQueryChange).toBeCalledWith('source = index');
+    expect(props.handleQueryChange).toHaveBeenCalledWith('source = index');
     expect(props.setCallOut.mock.calls[0][0]).toBeNull();
     expect(props.setCallOut.mock.calls[1][0]).toEqual(
       expect.objectContaining({
@@ -95,7 +95,7 @@ describe('<QueryAssistInput /> spec', () => {
       fireEvent.click(component.getByTestId('query-assist-generate-button'));
     });
 
-    expect(coreRefs.toasts!.addError).toBeCalledWith(
+    expect(coreRefs.toasts!.addError).toHaveBeenCalledWith(
       {
         message: 'Request is throttled. Try again later or contact your administrator',
         statusCode: 429,
@@ -114,11 +114,11 @@ describe('<QueryAssistInput /> spec', () => {
       fireEvent.click(component.getByText('Generate and run'));
     });
 
-    expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
+    expect(httpMock.post).toHaveBeenCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
       body: '{"question":"test-input","index":"selected-test-index"}',
     });
-    expect(httpMock.post).not.toBeCalledWith(QUERY_ASSIST_API.SUMMARIZE, expect.anything());
-    expect(coreRefs.toasts?.addError).toBeCalledWith(
+    expect(httpMock.post).not.toHaveBeenCalledWith(QUERY_ASSIST_API.SUMMARIZE, expect.anything());
+    expect(coreRefs.toasts?.addError).toHaveBeenCalledWith(
       {
         message: 'Request is throttled. Try again later or contact your administrator',
         statusCode: 429,
@@ -140,12 +140,11 @@ describe('<QueryAssistInput /> spec', () => {
       fireEvent.click(component.getByText('Generate and run'));
     });
 
-    expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
+    expect(httpMock.post).toHaveBeenCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
       body: '{"question":"test-input","index":"selected-test-index"}',
     });
-    expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.SUMMARIZE, {
-      body:
-        '{"question":"test-input","index":"selected-test-index","isError":true,"query":"","response":"{\\"statusCode\\":429,\\"message\\":\\"Request is throttled. Try again later or contact your administrator\\"}"}',
+    expect(httpMock.post).toHaveBeenCalledWith(QUERY_ASSIST_API.SUMMARIZE, {
+      body: '{"question":"test-input","index":"selected-test-index","isError":true,"query":"","response":"{\\"statusCode\\":429,\\"message\\":\\"Request is throttled. Try again later or contact your administrator\\"}"}',
     });
   });
 
@@ -161,7 +160,7 @@ describe('<QueryAssistInput /> spec', () => {
       fireEvent.click(component.getByText('Generate and run'));
     });
 
-    expect(httpMock.post).toBeCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
+    expect(httpMock.post).toHaveBeenCalledWith(QUERY_ASSIST_API.GENERATE_PPL, {
       body: '{"question":"test-input","index":"selected-test-index"}',
     });
     expect(props.setCallOut.mock.calls[0][0]).toBeNull();

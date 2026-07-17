@@ -30,19 +30,19 @@ const mockParsedAssets = [
   },
 ];
 
-const mockSavedObjectsClient: SavedObjectsClientContract = ({
+const mockSavedObjectsClient: SavedObjectsClientContract = {
   bulkCreate: jest.fn(),
   create: jest.fn(),
   delete: jest.fn(),
   find: jest.fn(),
   get: jest.fn(),
   update: jest.fn(),
-} as unknown) as SavedObjectsClientContract;
+} as unknown as SavedObjectsClientContract;
 
-const sampleIntegration: IntegrationReader = ({
+const sampleIntegration: IntegrationReader = {
   getAssets: jest.fn().mockResolvedValue(mockParsedAssets),
   getConfig: jest.fn().mockResolvedValue(TEST_INTEGRATION_CONFIG),
-} as unknown) as IntegrationReader;
+} as unknown as IntegrationReader;
 
 describe('IntegrationInstanceBuilder', () => {
   let builder: IntegrationInstanceBuilder;
@@ -227,7 +227,7 @@ describe('IntegrationInstanceBuilder', () => {
         .spyOn(mockUtils, 'deepCheck')
         .mockResolvedValue({ ok: false, error: new Error('Mock error') });
 
-      await expect(builder.build(sampleIntegration, options)).rejects.toThrowError('Mock error');
+      await expect(builder.build(sampleIntegration, options)).rejects.toThrow('Mock error');
     });
 
     it('should reject with an error if getAssets rejects', async () => {
@@ -239,12 +239,12 @@ describe('IntegrationInstanceBuilder', () => {
       const errorMessage = 'Failed to get assets';
       jest
         .spyOn(mockUtils, 'deepCheck')
-        .mockResolvedValue({ ok: true, value: ({} as unknown) as IntegrationConfig });
+        .mockResolvedValue({ ok: true, value: {} as unknown as IntegrationConfig });
       sampleIntegration.getAssets = jest
         .fn()
         .mockResolvedValue({ ok: false, error: new Error(errorMessage) });
 
-      await expect(builder.build(sampleIntegration, options)).rejects.toThrowError(errorMessage);
+      await expect(builder.build(sampleIntegration, options)).rejects.toThrow(errorMessage);
     });
 
     it('should reject with an error if postAssets throws an error', async () => {
@@ -261,14 +261,14 @@ describe('IntegrationInstanceBuilder', () => {
       const errorMessage = 'Failed to post assets';
       jest
         .spyOn(mockUtils, 'deepCheck')
-        .mockResolvedValue({ ok: true, value: ({} as unknown) as IntegrationConfig });
+        .mockResolvedValue({ ok: true, value: {} as unknown as IntegrationConfig });
       sampleIntegration.getAssets = jest.fn().mockResolvedValue({
         ok: true,
         value: [{ type: 'savedObjectBundle', data: remappedAssets }],
       });
       builder.postAssets = jest.fn().mockRejectedValue(new Error(errorMessage));
 
-      await expect(builder.build(sampleIntegration, options)).rejects.toThrowError(errorMessage);
+      await expect(builder.build(sampleIntegration, options)).rejects.toThrow(errorMessage);
     });
   });
 
@@ -361,7 +361,7 @@ describe('IntegrationInstanceBuilder', () => {
       const errorMessage = 'Failed to create assets';
       (mockSavedObjectsClient.bulkCreate as jest.Mock).mockRejectedValue(new Error(errorMessage));
 
-      await expect(builder.postAssets(assets)).rejects.toThrowError(errorMessage);
+      await expect(builder.postAssets(assets)).rejects.toThrow(errorMessage);
     });
   });
 
@@ -399,7 +399,7 @@ describe('IntegrationInstanceBuilder', () => {
       };
 
       const instance = await builder.buildInstance(
-        (integration as unknown) as IntegrationReader,
+        integration as unknown as IntegrationReader,
         refs,
         options
       );
@@ -427,8 +427,8 @@ describe('IntegrationInstanceBuilder', () => {
       };
 
       await expect(
-        builder.buildInstance((integration as unknown) as IntegrationReader, refs, options)
-      ).rejects.toThrowError();
+        builder.buildInstance(integration as unknown as IntegrationReader, refs, options)
+      ).rejects.toThrow();
     });
   });
 });

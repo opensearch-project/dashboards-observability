@@ -182,7 +182,7 @@ export function ServiceView(props: ServiceViewProps) {
   }, [props.serviceName, props.setDataSourceMenuSelectable]);
 
   const redirectToServicePage = (service: string) => {
-    window.location.href = generateServiceUrl(service, props.dataSourceMDSId[0].id, mode);
+    window.location.assign(generateServiceUrl(service, props.dataSourceMDSId[0].id, mode));
   };
 
   const onClickConnectedService = (service: string) => {
@@ -419,11 +419,10 @@ export function ServiceView(props: ServiceViewProps) {
     );
   };
 
-  const overview = useMemo(() => renderOverview(), [
-    fields,
-    isServiceOverviewLoading,
-    props.serviceName,
-  ]);
+  const overview = useMemo(
+    () => renderOverview(),
+    [fields, isServiceOverviewLoading, props.serviceName]
+  );
 
   const title = useMemo(
     () =>

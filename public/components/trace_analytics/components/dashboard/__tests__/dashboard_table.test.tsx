@@ -71,14 +71,14 @@ describe('Dashboard table component', () => {
     const percentileButton2 = screen.getByTestId('dashboard-table-percentile-button-2');
     fireEvent.click(percentileButton1);
     fireEvent.click(percentileButton2);
-    expect(addPercentileFilter).toBeCalledTimes(2);
+    expect(addPercentileFilter).toHaveBeenCalledTimes(2);
 
     const traceGroupButton = screen.getByTestId('dashboard-table-trace-group-name-button');
     fireEvent.click(traceGroupButton);
-    expect(addFilter).toBeCalled();
+    expect(addFilter).toHaveBeenCalled();
 
     const tracesButton = screen.getByTestId('dashboard-table-traces-button');
     fireEvent.click(tracesButton);
-    expect(setRedirect).toBeCalledWith(true);
+    expect(setRedirect).toHaveBeenCalledWith(true);
   });
 });

@@ -84,7 +84,7 @@ export function ServicesTable(props: ServicesTableProps) {
     if (page === 'app') {
       setCurrentSelectedService(serviceName);
     } else {
-      window.location.href = generateServiceUrl(serviceName, dataSourceMDSId[0].id, props.mode);
+      window.location.assign(generateServiceUrl(serviceName, dataSourceMDSId[0].id, props.mode));
     }
   };
 
@@ -312,11 +312,10 @@ export function ServicesTable(props: ServicesTableProps) {
     return baseColumns as Array<EuiTableFieldDataColumnType<any>>;
   }, [items, page]);
 
-  const titleBar = useMemo(() => renderTitleBar(items?.length), [
-    items,
-    selectedItems,
-    isServiceTrendEnabled,
-  ]);
+  const titleBar = useMemo(
+    () => renderTitleBar(items?.length),
+    [items, selectedItems, isServiceTrendEnabled]
+  );
 
   return (
     <>

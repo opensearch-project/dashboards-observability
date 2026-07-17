@@ -245,7 +245,7 @@ export function AppTable(props: AppTableProps) {
                         {
                           label: createButtonText,
                           run: () => {
-                            window.location.href = '#/create';
+                            window.location.assign('#/create');
                           },
                           iconType: 'plus',
                           iconSide: 'left',

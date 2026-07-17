@@ -48,7 +48,7 @@ describe('#setup', () => {
     const observabilityPlugin = new ObservabilityPlugin(initializerContextMock);
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.get = jest.fn().mockReturnValue(true);
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       investigationDashboards: {},
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
@@ -60,10 +60,10 @@ describe('#setup', () => {
       dashboard: {
         registerDashboardProvider: jest.fn(),
       },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
-    expect(coreSetup.application.register).toBeCalled();
-    expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalled();
+    expect(coreSetup.application.register).toHaveBeenCalled();
+    expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalled();
 
     const coreStart = coreMock.createStart();
 
@@ -80,9 +80,9 @@ describe('#setup', () => {
           },
         },
       },
-      ({
+      {
         data: dataPluginMock.createStartContract(),
-      } as unknown) as AppPluginStartDependencies
+      } as unknown as AppPluginStartDependencies
     );
 
     expect(updater$.getValue()()).toEqual({
@@ -115,7 +115,7 @@ describe('#setup notebook hiding with investigation plugin', () => {
     const observabilityPlugin = new ObservabilityPlugin(initializerContextMock);
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.get = jest.fn().mockReturnValue(false);
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
@@ -123,7 +123,7 @@ describe('#setup notebook hiding with investigation plugin', () => {
       dataSource: {},
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const coreStart = coreMock.createStart();
     const dataStartMock = dataPluginMock.createStartContract();
@@ -142,9 +142,9 @@ describe('#setup notebook hiding with investigation plugin', () => {
           },
         },
       },
-      ({
+      {
         data: dataStartMock,
-      } as unknown) as AppPluginStartDependencies
+      } as unknown as AppPluginStartDependencies
     );
 
     expect(updater$.getValue()()).toEqual({});
@@ -161,7 +161,7 @@ describe('#setup with APM enabled', () => {
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.get = jest.fn().mockReturnValue(true); // APM enabled
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
@@ -169,7 +169,7 @@ describe('#setup with APM enabled', () => {
       dataSource: { dataSource: {} }, // MDS enabled
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const registerCalls = (coreSetup.application.register as jest.Mock).mock.calls;
 
@@ -195,7 +195,7 @@ describe('#setup with APM enabled', () => {
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.get = jest.fn().mockReturnValue(false); // APM disabled
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
@@ -203,7 +203,7 @@ describe('#setup with APM enabled', () => {
       dataSource: { dataSource: {} },
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const registerCalls = (coreSetup.application.register as jest.Mock).mock.calls;
     const tracesApp = registerCalls.find((call) => call[0].id === 'observability-traces-nav');
@@ -219,7 +219,7 @@ describe('#setup with APM enabled', () => {
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.get = jest.fn().mockReturnValue(true); // APM enabled
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
@@ -227,7 +227,7 @@ describe('#setup with APM enabled', () => {
       // dataSource: undefined, // MDS status no longer affects registration
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const registerCalls = (coreSetup.application.register as jest.Mock).mock.calls;
     // Both APM and Trace Analytics apps should be registered
@@ -257,14 +257,14 @@ describe('#setup with APM enabled', () => {
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.get = jest.fn().mockReturnValue(true); // APM enabled
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
       uiActions: uiActionsPluginMock.createSetupContract(),
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const coreStart = coreMock.createStart();
     const dataStartMock = dataPluginMock.createStartContract();
@@ -283,9 +283,9 @@ describe('#setup with APM enabled', () => {
           },
         },
       },
-      ({
+      {
         data: dataStartMock,
-      } as unknown) as AppPluginStartDependencies
+      } as unknown as AppPluginStartDependencies
     );
 
     // APM apps should be hidden when discoverTracesEnabled is false
@@ -313,14 +313,14 @@ describe('#setup with APM enabled', () => {
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.get = jest.fn().mockReturnValue(true); // APM enabled
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
       uiActions: uiActionsPluginMock.createSetupContract(),
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const coreStart = coreMock.createStart();
     const dataStartMock = dataPluginMock.createStartContract();
@@ -339,9 +339,9 @@ describe('#setup with APM enabled', () => {
           },
         },
       },
-      ({
+      {
         data: dataStartMock,
-      } as unknown) as AppPluginStartDependencies
+      } as unknown as AppPluginStartDependencies
     );
 
     // Trace Analytics apps should be hidden when discoverTracesEnabled is true
@@ -364,14 +364,14 @@ describe('#setup with Alert Manager feature gate', () => {
 
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
       uiActions: uiActionsPluginMock.createSetupContract(),
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const registerCalls = (coreSetup.application.register as jest.Mock).mock.calls;
     const alertingApp = registerCalls.find((call) => call[0].id === 'observability-alerting');
@@ -394,14 +394,14 @@ describe('#setup with Alert Manager feature gate', () => {
 
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
       uiActions: uiActionsPluginMock.createSetupContract(),
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const registerCalls = (coreSetup.application.register as jest.Mock).mock.calls;
     const alertingApp = registerCalls.find((call) => call[0].id === 'observability-alerting');
@@ -427,14 +427,14 @@ describe('#setup with Alert Manager feature gate', () => {
 
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
       uiActions: uiActionsPluginMock.createSetupContract(),
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const coreStart = coreMock.createStart();
     const dataStartMock = dataPluginMock.createStartContract();
@@ -453,7 +453,7 @@ describe('#setup with Alert Manager feature gate', () => {
           },
         },
       },
-      ({ data: dataStartMock } as unknown) as AppPluginStartDependencies
+      { data: dataStartMock } as unknown as AppPluginStartDependencies
     );
 
     expect(alertingUpdater$.getValue()()).toEqual({
@@ -483,14 +483,14 @@ describe('#setup with Alert Manager feature gate', () => {
 
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
       uiActions: uiActionsPluginMock.createSetupContract(),
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const coreStart = coreMock.createStart();
     const dataStartMock = dataPluginMock.createStartContract();
@@ -509,7 +509,7 @@ describe('#setup with Alert Manager feature gate', () => {
           },
         },
       },
-      ({ data: dataStartMock } as unknown) as AppPluginStartDependencies
+      { data: dataStartMock } as unknown as AppPluginStartDependencies
     );
 
     // The default BehaviorSubject value is `() => ({})`. If `start()` did
@@ -545,14 +545,14 @@ describe('#setup with SLO feature gate', () => {
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.get = jest.fn().mockReturnValue(true); // APM enabled
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
       uiActions: uiActionsPluginMock.createSetupContract(),
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const coreStart = coreMock.createStart();
     const dataStartMock = dataPluginMock.createStartContract();
@@ -574,7 +574,7 @@ describe('#setup with SLO feature gate', () => {
           },
         },
       },
-      ({ data: dataStartMock } as unknown) as AppPluginStartDependencies
+      { data: dataStartMock } as unknown as AppPluginStartDependencies
     );
 
     expect(latestSloUpdate).toMatchObject({
@@ -607,14 +607,14 @@ describe('#setup with SLO feature gate', () => {
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.get = jest.fn().mockReturnValue(true);
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
       uiActions: uiActionsPluginMock.createSetupContract(),
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const coreStart = coreMock.createStart();
     const dataStartMock = dataPluginMock.createStartContract();
@@ -635,7 +635,7 @@ describe('#setup with SLO feature gate', () => {
           },
         },
       },
-      ({ data: dataStartMock } as unknown) as AppPluginStartDependencies
+      { data: dataStartMock } as unknown as AppPluginStartDependencies
     );
 
     expect(latestSloUpdate).toMatchObject({
@@ -668,14 +668,14 @@ describe('#setup with SLO feature gate', () => {
     coreSetup.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     coreSetup.uiSettings.get = jest.fn().mockReturnValue(true);
 
-    await observabilityPlugin.setup(coreSetup, ({
+    await observabilityPlugin.setup(coreSetup, {
       embeddable: embeddablePluginMock.createSetupContract(),
       visualizations: visualizationsPluginMock.createSetupContract(),
       data: dataPluginMock.createSetupContract(),
       uiActions: uiActionsPluginMock.createSetupContract(),
       contentManagement: contentManagementPluginMocks.createSetupContract(),
       dashboard: { registerDashboardProvider: jest.fn() },
-    } as unknown) as SetupDependencies);
+    } as unknown as SetupDependencies);
 
     const coreStart = coreMock.createStart();
     const dataStartMock = dataPluginMock.createStartContract();
@@ -697,7 +697,7 @@ describe('#setup with SLO feature gate', () => {
           },
         },
       },
-      ({ data: dataStartMock } as unknown) as AppPluginStartDependencies
+      { data: dataStartMock } as unknown as AppPluginStartDependencies
     );
 
     // Neither input emitted a hidden status, so the merged updater's

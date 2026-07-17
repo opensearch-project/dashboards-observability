@@ -51,7 +51,7 @@ describe('<Timechart /> spec', () => {
     fireEvent.change(component.getByTestId('eventAnalytics__EventIntervalSelect'), {
       target: { value: 'w' },
     });
-    expect(props.onChangeInterval).toBeCalledWith('w');
+    expect(props.onChangeInterval).toHaveBeenCalledWith('w');
   });
 
   it('should match snapshot', async () => {
