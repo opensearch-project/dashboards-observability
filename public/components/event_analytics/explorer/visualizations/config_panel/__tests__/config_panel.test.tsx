@@ -12,10 +12,12 @@ import {
 } from '../../../../../../../test/event_analytics_constants';
 import { TabContext } from '../../../../hooks';
 import PPLService from '../../../../../../services/requests/ppl';
-// eslint-disable-next-line jest/no-mocks-import
+
 import httpClientMock from '../../../../../../../test/__mocks__/httpClientMock';
 
-jest.mock('!!raw-loader!./default.layout.spec.hjson', () => 'MOCK HJSON STRING');
+// `!!raw-loader!` imports are stubbed globally via the `^!!raw-loader!.*` moduleNameMapper
+// (test/__mocks__/rawLoaderMock.js). An explicit jest.mock() of the mapped specifier fails to
+// resolve under Jest 30, so the mapper alone provides the stub.
 
 describe('Config panel component', () => {
   it('Renders config panel with visualization data', async () => {
