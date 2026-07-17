@@ -91,19 +91,19 @@ describe('Panels Table Component', () => {
   it('create a custom dashboard from empty table view', async () => {
     const utils = renderPanelTable();
 
-    fireEvent.click(utils.getByTestId('customPanels__createNewPanels'));
-    await waitFor(() => {
-      expect(global.window.location.href).toContain('create');
-    });
+    // The create button is an <a href="#/create">. jsdom 26 no longer performs
+    // anchor default navigation on click, so assert the link target directly
+    // instead of the post-click window.location.
+    expect(utils.getByTestId('customPanels__createNewPanels')).toHaveAttribute('href', '#/create');
   });
 
   it('create a custom dashboard from populated table view', async () => {
     const utils = renderPanelTable();
 
-    fireEvent.click(utils.getByTestId('customPanels__createNewPanels'));
-    await waitFor(() => {
-      expect(global.window.location.href).toContain('create');
-    });
+    // The create button is an <a href="#/create">. jsdom 26 no longer performs
+    // anchor default navigation on click, so assert the link target directly
+    // instead of the post-click window.location.
+    expect(utils.getByTestId('customPanels__createNewPanels')).toHaveAttribute('href', '#/create');
   });
 
   it('clone a custom dashboard', async () => {

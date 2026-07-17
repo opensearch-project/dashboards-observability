@@ -112,7 +112,7 @@ describe('<para_input /> spec', () => {
     );
     const textarea = utils.container.querySelectorAll('textarea#editorArea')[0];
     fireEvent.change(textarea, { target: { value: 'test input' } });
-    expect(setIsOutputStale).toBeCalledWith(true);
+    expect(setIsOutputStale).toHaveBeenCalledWith(true);
   });
 
   it('clicks the visualization component', async () => {

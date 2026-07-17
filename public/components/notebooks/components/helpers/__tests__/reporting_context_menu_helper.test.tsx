@@ -20,7 +20,7 @@ describe('reporting_context_menu_helper tests', () => {
       assign: jest.fn(),
     };
     contextMenuViewReports();
-    expect(window.location.assign).toBeCalledWith('reports-dashboards#/');
+    expect(window.location.assign).toHaveBeenCalledWith('reports-dashboards#/');
     window.location = savedLocation;
   });
 
@@ -34,7 +34,7 @@ describe('reporting_context_menu_helper tests', () => {
       assign: jest.fn(),
     };
     contextMenuCreateReportDefinition('https://mock-base.uri/mock-base-path');
-    expect(window.location.assign).toBeCalledWith(
+    expect(window.location.assign).toHaveBeenCalledWith(
       'reports-dashboards#/create?previous=notebook:mock-base-path?timeFrom=0?timeTo=0'
     );
     window.location = savedLocation;
@@ -65,32 +65,41 @@ describe('reporting_context_menu_helper tests', () => {
     const setToast = jest.fn();
     const toggleReportingLoadingModal = jest.fn();
     await generateReport(200, 'test.csv', '__user__', setToast, toggleReportingLoadingModal);
-    expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith('Please continue report generation in the new tab.', 'success');
+    expect(toggleReportingLoadingModal).toHaveBeenCalledWith(true);
+    expect(setToast).toHaveBeenCalledWith(
+      'Please continue report generation in the new tab.',
+      'success'
+    );
   });
 
   it('generates pdf for global tenant', async () => {
     const setToast = jest.fn();
     const toggleReportingLoadingModal = jest.fn();
     await generateReport(200, 'test.pdf', '', setToast, toggleReportingLoadingModal);
-    expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith('Please continue report generation in the new tab.', 'success');
+    expect(toggleReportingLoadingModal).toHaveBeenCalledWith(true);
+    expect(setToast).toHaveBeenCalledWith(
+      'Please continue report generation in the new tab.',
+      'success'
+    );
   });
 
   it('generates png for custom tenant', async () => {
     const setToast = jest.fn();
     const toggleReportingLoadingModal = jest.fn();
     await generateReport(200, 'test.png', 'custom_tenant', setToast, toggleReportingLoadingModal);
-    expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith('Please continue report generation in the new tab.', 'success');
+    expect(toggleReportingLoadingModal).toHaveBeenCalledWith(true);
+    expect(setToast).toHaveBeenCalledWith(
+      'Please continue report generation in the new tab.',
+      'success'
+    );
   });
 
   it('handles 404 error', async () => {
     const setToast = jest.fn();
     const toggleReportingLoadingModal = jest.fn();
     await generateReport(404, 'test.png', 'custom_tenant', setToast, toggleReportingLoadingModal);
-    expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith(
+    expect(toggleReportingLoadingModal).toHaveBeenCalledWith(true);
+    expect(setToast).toHaveBeenCalledWith(
       'Download error',
       'danger',
       'There was an error generating this report.'
@@ -101,8 +110,8 @@ describe('reporting_context_menu_helper tests', () => {
     const setToast = jest.fn();
     const toggleReportingLoadingModal = jest.fn();
     await generateReport(403, 'test.png', 'custom_tenant', setToast, toggleReportingLoadingModal);
-    expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith(
+    expect(toggleReportingLoadingModal).toHaveBeenCalledWith(true);
+    expect(setToast).toHaveBeenCalledWith(
       'Error generating report,',
       'danger',
       'Insufficient permissions. Reach out to your OpenSearch Dashboards administrator.'
@@ -113,8 +122,8 @@ describe('reporting_context_menu_helper tests', () => {
     const setToast = jest.fn();
     const toggleReportingLoadingModal = jest.fn();
     await generateReport(503, 'test.png', 'custom_tenant', setToast, toggleReportingLoadingModal);
-    expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith(
+    expect(toggleReportingLoadingModal).toHaveBeenCalledWith(true);
+    expect(setToast).toHaveBeenCalledWith(
       'Error generating report.',
       'danger',
       'Timed out generating on-demand report from notebook. Try again later.'
@@ -130,7 +139,7 @@ describe('reporting_context_menu_helper tests', () => {
     } catch (error) {
       expect(error.status).toEqual(500);
     }
-    expect(toggleReportingLoadingModal).toBeCalledWith(true);
-    expect(setToast).toBeCalledWith('Tenant error', 'danger', 'Failed to get user tenant.');
+    expect(toggleReportingLoadingModal).toHaveBeenCalledWith(true);
+    expect(setToast).toHaveBeenCalledWith('Tenant error', 'danger', 'Failed to get user tenant.');
   });
 });

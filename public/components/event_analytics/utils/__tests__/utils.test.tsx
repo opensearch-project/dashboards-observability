@@ -138,6 +138,6 @@ describe('Utils event analytics helper functions', () => {
         "source=opensearch_dashboards_sample_data_logs | where timestamp >= '2023-01-01 00:00:00' and timestamp <= '2023-09-28 23:19:10' | where match(request,'filebeat') | sort + timestamp | head 100 from 0",
     };
     // final query is the only thing being tested here
-    expect(fetchEvents).toBeCalledWith(expectedFinalQuery, 'jdbc', expect.anything());
+    expect(fetchEvents).toHaveBeenCalledWith(expectedFinalQuery, 'jdbc', expect.anything());
   });
 });

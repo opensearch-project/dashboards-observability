@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Add Integration Flyout Test Renders add integration flyout with dummy integration name 1`] = `
 <body

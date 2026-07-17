@@ -15,23 +15,9 @@ import {
 import { coreRefs } from '../../../../../framework/core_refs';
 
 describe('ConvertLegacyTraceAnalyticsUrl', () => {
-  let originalLocation: Location;
-
-  beforeEach(() => {
-    originalLocation = window.location;
-
-    Object.defineProperty(window, 'location', {
-      value: {
-        ...originalLocation,
-        assign: jest.fn(),
-      },
-      writable: true,
-    });
-  });
-
-  afterEach(() => {
-    window.location = originalLocation;
-  });
+  // window.location is mocked globally by jest-location-mock, which exposes
+  // window.location.assign as a Jest spy. clearMocks in jest.config resets it
+  // between tests, so no manual mocking/teardown is needed here.
 
   it('should convert legacy URL correctly', () => {
     const location = {
@@ -129,25 +115,9 @@ describe('ConvertLegacyTraceAnalyticsUrl', () => {
 });
 
 describe('ConvertTraceAnalyticsNewNavUrl', () => {
-  let originalLocation;
-
-  beforeEach(() => {
-    // Save the original window.location object
-    originalLocation = window.location;
-
-    // Mock window.location.assign
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-      writable: true,
-    });
-  });
-
-  afterEach(() => {
-    // Restore the original window.location object after each test
-    window.location = originalLocation;
-  });
+  // window.location is mocked globally by jest-location-mock, which exposes
+  // window.location.assign as a Jest spy. clearMocks in jest.config resets it
+  // between tests, so no manual mocking/teardown is needed here.
 
   it('should redirect to the new navigation traces URL if trace ID is present and new nav is enabled', () => {
     const locationMock = {

@@ -88,7 +88,7 @@ describe('Filter helper functions', () => {
 
     const input = container.querySelector('input');
     fireEvent.change(input, { target: { value: '100' } });
-    expect(setValue).toBeCalledWith('100');
+    expect(setValue).toHaveBeenCalledWith('100');
   });
 
   it('renders range field filter', async () => {
@@ -102,9 +102,9 @@ describe('Filter helper functions', () => {
 
     const inputs = container.querySelectorAll('input');
     fireEvent.change(inputs[0], { target: { value: '50' } });
-    expect(setValue).toBeCalledWith({ from: '50', to: '100' });
+    expect(setValue).toHaveBeenCalledWith({ from: '50', to: '100' });
 
     fireEvent.change(inputs[1], { target: { value: '200' } });
-    expect(setValue).toBeCalledWith({ from: '0', to: '200' });
+    expect(setValue).toHaveBeenCalledWith({ from: '0', to: '200' });
   });
 });

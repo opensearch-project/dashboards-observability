@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`Config panel component Renders config panel with visualization data 1`] = `
 <body>
@@ -87,7 +87,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                     value=""
                   />
                   <div
-                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                    style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; letter-spacing: normal; text-transform: none;"
                   />
                 </div>
               </div>
@@ -358,7 +358,9 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                               <div
                                 class="euiSpacer euiSpacer--s"
                               />
-                              <div>
+                              <div
+                                style="width: fit-content;"
+                              >
                                 <fieldset
                                   class="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text"
                                   id="random_html_id"
@@ -438,7 +440,9 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                               <div
                                 class="euiSpacer euiSpacer--s"
                               />
-                              <div>
+                              <div
+                                style="width: fit-content;"
+                              >
                                 <fieldset
                                   class="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text"
                                   id="random_html_id"
@@ -601,7 +605,9 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             <div
                               class="euiSpacer euiSpacer--s"
                             />
-                            <div>
+                            <div
+                              style="width: fit-content;"
+                            >
                               <fieldset
                                 class="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text"
                                 id="random_html_id"
@@ -677,7 +683,9 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             <div
                               class="euiSpacer euiSpacer--s"
                             />
-                            <div>
+                            <div
+                              style="width: fit-content;"
+                            >
                               <fieldset
                                 class="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text"
                                 id="random_html_id"
@@ -842,7 +850,9 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                             <div
                               class="euiSpacer euiSpacer--s"
                             />
-                            <div>
+                            <div
+                              style="width: fit-content;"
+                            >
                               <fieldset
                                 class="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text"
                                 id="random_html_id"
@@ -979,7 +989,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                 >
                                   <button
                                     class="euiRangeTick euiRangeTick--isCustom euiRangeTick--isMin euiRangeTick--hasTickMark"
-                                    style="left: calc(NaN% + 0px); margin-left: -1em;"
+                                    style="left: calc(0px + (% * nan)); margin-left: -1em;"
                                     tabindex="-1"
                                     title="-90°"
                                     type="button"
@@ -988,12 +998,13 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                     <span
                                       aria-hidden="true"
                                       class="euiRangeTick__pseudo"
+                                      style="margin-left: calc(1em + 4px);"
                                     />
                                     -90°
                                   </button>
                                   <button
                                     class="euiRangeTick euiRangeTick--selected euiRangeTick--isCustom"
-                                    style="left: calc(-Infinity% + 8px);"
+                                    style="left: calc(8px + (% * -infinity));"
                                     tabindex="-1"
                                     title="-45°"
                                     type="button"
@@ -1003,7 +1014,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   </button>
                                   <button
                                     class="euiRangeTick euiRangeTick--isCustom"
-                                    style="left: calc(-Infinity% + 8px);"
+                                    style="left: calc(8px + (% * -infinity));"
                                     tabindex="-1"
                                     title="0°"
                                     type="button"
@@ -1013,7 +1024,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   </button>
                                   <button
                                     class="euiRangeTick euiRangeTick--isCustom"
-                                    style="left: calc(-Infinity% + 8px);"
+                                    style="left: calc(8px + (% * -infinity));"
                                     tabindex="-1"
                                     title="45°"
                                     type="button"
@@ -1023,7 +1034,7 @@ exports[`Config panel component Renders config panel with visualization data 1`]
                                   </button>
                                   <button
                                     class="euiRangeTick euiRangeTick--isCustom"
-                                    style="left: calc(-Infinity% + 8px);"
+                                    style="left: calc(8px + (% * -infinity));"
                                     tabindex="-1"
                                     title="90°"
                                     type="button"

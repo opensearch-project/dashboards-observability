@@ -35,7 +35,7 @@ describe('Filter popover component', () => {
     const cancelButton = screen.getByTestId('filter-popover-cancel-button');
     fireEvent.click(cancelButton);
 
-    expect(closePopover).toBeCalled();
+    expect(closePopover).toHaveBeenCalled();
 
     const toggleButtons = screen.getAllByTestId('comboBoxToggleListButton');
     fireEvent.click(toggleButtons[0]);

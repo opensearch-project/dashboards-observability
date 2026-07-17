@@ -365,5 +365,5 @@ export function navigateToDatasetCorrelations(datasetId: string): void {
   const fullUrl = coreRefs.http?.basePath.prepend(`/app/${path}`) || `/app/${path}`;
 
   // Navigate in same tab
-  window.location.href = fullUrl;
+  window.location.assign(fullUrl);
 }

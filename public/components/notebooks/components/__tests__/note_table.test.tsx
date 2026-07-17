@@ -69,7 +69,7 @@ describe('<NoteTable /> spec', () => {
     fireEvent.click(utils.getAllByLabelText('Select this row')[0]);
   });
 
-  it('create notebook modal', async () => {
+  it('create notebook button links to the create route', async () => {
     const notebooks = Array.from({ length: 5 }, (v, k) => ({
       path: `path-${k}`,
       id: `id-${k}`,
@@ -77,10 +77,11 @@ describe('<NoteTable /> spec', () => {
       dateModified: 'date-modified',
     }));
     const utils = renderNoteTable({ notebooks });
-    fireEvent.click(utils.getByText('Create notebook'));
-    await waitFor(() => {
-      expect(global.window.location.href).toContain('/create');
-    });
+    // The "Create notebook" button is an <a href="#/create">. jsdom 26 no longer
+    // performs anchor default navigation on click, so assert the link target
+    // directly instead of the post-click window.location.
+    const createButton = utils.getByText('Create notebook').closest('a');
+    expect(createButton).toHaveAttribute('href', '#/create');
   });
 
   it('filters notebooks based on search input', () => {
@@ -104,13 +105,20 @@ describe('<NoteTable /> spec', () => {
     expect(queryByText('path-2')).toBeNull();
   });
 
-  it('displays empty state message and create notebook button', () => {
+  it('displays empty state message and create notebook button', async () => {
+    // The create-notebook modal is opened by the component's mount effect when
+    // the URL hash ends in "create" (previously reached by clicking the
+    // <a href="#/create"> button). jsdom 26 no longer navigates on anchor
+    // clicks, so set the hash explicitly before rendering to open the modal.
+    window.location.assign('#/create');
     const { getAllByText, getAllByTestId } = renderNoteTable({ notebooks: [] });
 
     expect(getAllByText('No notebooks')).toHaveLength(1);
 
     // Create notebook using the modal
-    fireEvent.click(getAllByText('Create notebook')[0]);
+    await waitFor(() => {
+      expect(getAllByTestId('custom-input-modal-input')[0]).toBeInTheDocument();
+    });
     fireEvent.click(getAllByTestId('custom-input-modal-input')[0]);
     fireEvent.input(getAllByTestId('custom-input-modal-input')[0], {
       target: { value: 'test-notebook' },

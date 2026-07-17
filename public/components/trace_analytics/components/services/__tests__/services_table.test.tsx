@@ -131,10 +131,7 @@ describe('Services table component', () => {
       },
     ];
 
-    // Mock window.location before rendering
-    const originalLocation = window.location;
-    delete window.location;
-    window.location = { ...originalLocation };
+    // window.location.assign is a Jest spy provided by jest-location-mock.
 
     const { getByTestId } = render(
       <ServicesTable
@@ -167,8 +164,6 @@ describe('Services table component', () => {
     fireEvent.click(serviceLink);
 
     const expectedUrl = generateServiceUrl('checkoutservice', mockDataSourceId, mockMode);
-    expect(window.location.href).toBe(expectedUrl);
-
-    window.location = originalLocation;
+    expect(window.location.assign).toHaveBeenCalledWith(expectedUrl);
   });
 });

@@ -107,8 +107,7 @@ describe('Redirect Functions', () => {
     };
     const mockAddFilter = jest.fn();
 
-    delete window.location;
-    window.location = { assign: jest.fn(), href: '' };
+    // window.location.assign is a Jest spy provided by jest-location-mock.
 
     redirectToServiceTraces({
       mode: 'data_prepper',
