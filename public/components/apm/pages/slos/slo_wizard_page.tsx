@@ -64,6 +64,7 @@ import { WIZARD_SECTIONS } from './wizard_sections';
 import type { WizardSectionId } from './wizard_sections';
 import { WizardValidationSummary } from './wizard_validation_summary';
 import { WizardKeyValueGrid } from './wizard_key_value_grid';
+import { alertingTelemetry } from '../../../alerting/alerting_telemetry';
 
 function sectionAnchorId(id: WizardSectionId): string {
   return WIZARD_SECTIONS.find((s) => s.id === id)!.anchorId;
@@ -291,6 +292,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
         }),
       });
       history.push(`/slos/${encodeURIComponent(doc.id)}`);
+      alertingTelemetry.sloCreated({ template: template?.id, dsId: state.datasourceId || '' });
     } catch (e) {
       // Ruler dual-write envelope: surface the raw upstream message inline.
       // `rawBody` is the user-actionable diagnostic (e.g. "invalid PromQL:
