@@ -32,7 +32,6 @@
     "antlr4ts": "^0.5.0-alpha.4",
     "echarts": "^6.0.0",
     "isomorphic-dompurify": "~2.29.0",
-    "js-yaml": "^4.2.0",
     "json5": "^2.2.3",
     "mime": "^3.0.0",
     "performance-now": "^2.1.0",
@@ -45,7 +44,6 @@
   },
   "devDependencies": {
     "@cypress/skip-test": "^2.6.1",
-    "@types/js-yaml": "^4.0.5",
     "@types/mime": "^3.0.1",
     "@types/react-plotly.js": "^2.6.3",
     "@types/sanitize-filename": "^1.6.3",
