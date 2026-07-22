@@ -30,6 +30,7 @@ import {
   EuiToolTip,
   EuiCallOut,
   EuiCodeBlock,
+  EuiLink,
   EuiLoadingContent,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -457,20 +458,24 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   type="column"
                   compressed
                   listItems={[
-                    {
-                      title: i18n.translate(
-                        'observability.alerting.monitorDetailFlyout.evaluationInterval',
-                        { defaultMessage: 'Evaluation Interval' }
-                      ),
-                      description: evaluationInterval,
-                    },
-                    {
-                      title: i18n.translate(
-                        'observability.alerting.monitorDetailFlyout.pendingPeriod',
-                        { defaultMessage: 'Pending Period' }
-                      ),
-                      description: pendingPeriod,
-                    },
+                    ...(monitor.datasourceType !== 'prometheus'
+                      ? [
+                          {
+                            title: i18n.translate(
+                              'observability.alerting.monitorDetailFlyout.evaluationInterval',
+                              { defaultMessage: 'Evaluation Interval' }
+                            ),
+                            description: evaluationInterval,
+                          },
+                          {
+                            title: i18n.translate(
+                              'observability.alerting.monitorDetailFlyout.pendingPeriod',
+                              { defaultMessage: 'Pending Period' }
+                            ),
+                            description: pendingPeriod,
+                          },
+                        ]
+                      : []),
                     ...(detail?.firingPeriod
                       ? [
                           {
@@ -501,8 +506,24 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                               { defaultMessage: 'Threshold' }
                             ),
                             description: `${monitor.threshold.operator} ${monitor.threshold.value}${
-                              monitor.threshold.unit || ''
+                              monitor.datasourceType === 'prometheus'
+                                ? ''
+                                : monitor.threshold.unit || ''
                             }`,
+                          },
+                        ]
+                      : []),
+                    ...(monitor.datasourceType === 'prometheus' && monitor.condition
+                      ? [
+                          {
+                            title: i18n.translate(
+                              'observability.alerting.monitorDetailFlyout.forDuration',
+                              { defaultMessage: 'For Duration' }
+                            ),
+                            description:
+                              monitor.threshold?.forDuration ||
+                              monitor.condition?.match(/for\s+(.+)/)?.[1] ||
+                              '—',
                           },
                         ]
                       : []),
@@ -588,6 +609,32 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     />
                   </EuiAccordion>
 
+                  <EuiSpacer size="m" />
+                </>
+              )}
+
+              {/* Notification Routing — Prometheus only */}
+              {monitor.datasourceType === 'prometheus' && (
+                <>
+                  <EuiAccordion
+                    id={`notification-routing-${monitor.id}`}
+                    buttonContent={<strong>Notification Routing</strong>}
+                    initialIsOpen={true}
+                    paddingSize="m"
+                  >
+                    <EuiCallOut size="s" iconType="bell" color="primary">
+                      <EuiText size="xs">
+                        <p>
+                          Notifications for Prometheus alerts are managed through Alertmanager. The{' '}
+                          <strong>labels</strong> on this rule determine which receiver handles the
+                          alert based on the routing configuration.
+                        </p>
+                        <p>
+                          <EuiLink href="#/routing">Configure notification routing →</EuiLink>
+                        </p>
+                      </EuiText>
+                    </EuiCallOut>
+                  </EuiAccordion>
                   <EuiSpacer size="m" />
                 </>
               )}
