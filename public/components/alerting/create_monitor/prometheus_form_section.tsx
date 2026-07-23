@@ -123,9 +123,11 @@ export const PrometheusFormSection: React.FC<{
   const [showMetricBrowser, setShowMetricBrowser] = useState(false);
   const [showQueryLibrary, setShowQueryLibrary] = useState(false);
 
-  // Rule group state — kept separate from form.name (which is the alert rule name)
-  // Propagated to parent during form submission via a custom field
-  const [ruleGroupName, setRuleGroupName] = useState(form.name || '');
+  // Rule group state — kept separate from form.name (which is the alert rule name).
+  // Initialized from an existing _ruleGroup label so edits round-trip correctly.
+  const [ruleGroupName, setRuleGroupName] = useState(
+    () => form.labels.find((l) => l.key === '_ruleGroup')?.value || ''
+  );
 
   // Use a ref for form.labels to avoid circular dependency:
   // handleRuleGroupChange → onUpdate('labels') → parent re-renders → new form.labels → new callback
@@ -203,7 +205,9 @@ export const PrometheusFormSection: React.FC<{
     const metric = selectedMetric[0].label;
     let query = metric;
     if (selectedLabelName.length > 0 && selectedLabelValue.length > 0) {
-      const labelFilter = `${selectedLabelName[0].label}${labelOperator}"${selectedLabelValue[0].label}"`;
+      // Escape backslashes and quotes so the value is a valid PromQL string literal
+      const escapedValue = selectedLabelValue[0].label.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      const labelFilter = `${selectedLabelName[0].label}${labelOperator}"${escapedValue}"`;
       query = `${metric}{${labelFilter}}`;
     }
     onUpdate('query', query);
@@ -567,7 +571,7 @@ export const PrometheusFormSection: React.FC<{
         >
           <EuiComboBox
             placeholder="Type or select a rule group"
-            options={[{ label: form.name || 'default' }]}
+            options={[]}
             selectedOptions={ruleGroupName ? [{ label: ruleGroupName }] : []}
             onChange={(opts) => handleRuleGroupChange(opts.length > 0 ? opts[0].label : '')}
             onCreateOption={(value) => handleRuleGroupChange(value)}

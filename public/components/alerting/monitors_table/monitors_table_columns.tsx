@@ -159,6 +159,9 @@ export function buildTableColumns({
         render: (name: string, item: UnifiedRuleSummary) => {
           const iconType =
             item.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
+          // Avoid duplicating the group when the dedicated Rule Group column is visible
+          const showGroupBadge =
+            item.datasourceType === 'prometheus' && !!item.group && !visibleColumns.has('group');
           return (
             <div>
               <EuiButtonEmpty
@@ -177,7 +180,7 @@ export function buildTableColumns({
               >
                 <strong>{name}</strong>
               </EuiButtonEmpty>
-              {item.datasourceType === 'prometheus' && item.group && (
+              {showGroupBadge && (
                 <div style={{ marginLeft: 24, marginTop: -2 }}>
                   <EuiBadge color="hollow" style={{ fontSize: 10 }}>
                     {item.group}
