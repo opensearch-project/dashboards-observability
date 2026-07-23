@@ -229,9 +229,9 @@ export const PrometheusFormSection: React.FC<{
   };
 
   // Memoize filtered datasources to avoid re-filtering on every render
-  const promDatasources = useMemo(() => datasources.filter((ds) => ds.type === 'prometheus'), [
-    datasources,
-  ]);
+  const promDatasources = useMemo(() => {
+    return datasources.filter((ds) => ds.type === 'prometheus');
+  }, [datasources]);
 
   const handleMetricBrowserSelect = (metricName: string) => {
     setSelectedMetric([{ label: metricName }]);
@@ -290,9 +290,7 @@ export const PrometheusFormSection: React.FC<{
                       : []),
                   ]}
                   value={datasourceId || ''}
-                  onChange={(e) =>
-                    onUpdate('datasourceId' as keyof PrometheusFormState, e.target.value as any)
-                  }
+                  onChange={(e) => onUpdate('datasourceId', e.target.value)}
                   compressed
                   prepend="Datasource"
                 />

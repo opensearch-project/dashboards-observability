@@ -100,11 +100,12 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
     !!onToggleEnabled &&
     monitor.datasourceType !== 'prometheus' &&
     (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric');
-  const { detail, isLoading: detailLoading, error: detailError } = useMonitorDetail({
+  const detailState = useMonitorDetail({
     dsId: monitor.datasourceId,
     ruleId: monitor.id,
     definitionType: monitor.definitionType || 'monitor',
   });
+  const { detail, isLoading: detailLoading, error: detailError } = detailState;
 
   // Use detail data when available, fall back to summary props.
   // `detail` has the full shape; `monitor` is only a summary, so
@@ -133,6 +134,26 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   const rawMonitor = detail?.raw as OSMonitor | undefined;
   const rawInput: OSMonitorInput | undefined =
     rawMonitor && 'inputs' in rawMonitor ? rawMonitor.inputs?.[0] : undefined;
+
+  // Query definition accordion title, type-aware
+  let queryDefTitle: string;
+  if (monitorKind === 'cluster_metrics') {
+    queryDefTitle = i18n.translate(
+      'observability.alerting.monitorDetailFlyout.queryDef.clusterApi',
+      {
+        defaultMessage: 'Cluster API Configuration',
+      }
+    );
+  } else if (monitorKind === 'doc') {
+    queryDefTitle = i18n.translate('observability.alerting.monitorDetailFlyout.queryDef.docLevel', {
+      defaultMessage: 'Document-Level Queries',
+    });
+  } else {
+    queryDefTitle = i18n.translate(
+      'observability.alerting.monitorDetailFlyout.queryDef.queryDefinition',
+      { defaultMessage: 'Query Definition' }
+    );
+  }
 
   // Alert history columns
   const historyColumns: Array<EuiBasicTableColumn<AlertHistoryEntry>> = [
@@ -289,30 +310,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               {/* Query Definition — type-aware rendering */}
               <EuiAccordion
                 id={`queryDef-${monitor.id}`}
-                buttonContent={
-                  <strong>
-                    {monitorKind === 'cluster_metrics'
-                      ? i18n.translate(
-                          'observability.alerting.monitorDetailFlyout.queryDef.clusterApi',
-                          {
-                            defaultMessage: 'Cluster API Configuration',
-                          }
-                        )
-                      : monitorKind === 'doc'
-                      ? i18n.translate(
-                          'observability.alerting.monitorDetailFlyout.queryDef.docLevel',
-                          {
-                            defaultMessage: 'Document-Level Queries',
-                          }
-                        )
-                      : i18n.translate(
-                          'observability.alerting.monitorDetailFlyout.queryDef.queryDefinition',
-                          {
-                            defaultMessage: 'Query Definition',
-                          }
-                        )}
-                  </strong>
-                }
+                buttonContent={<strong>{queryDefTitle}</strong>}
                 initialIsOpen={true}
                 paddingSize="m"
               >
