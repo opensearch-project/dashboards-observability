@@ -909,6 +909,11 @@ export class SloLifecycleService {
     );
 
     ctx.health.invalidate(ctx.deploy.workspaceId, ctx.deploy.datasource.id, doc.id);
+    // Status cache holds an aggregated `liveStatus.state` (e.g. 'rules_missing')
+    // that the detail page falls back to when the fresh rule-health probe is
+    // 'ok'. Without this, the danger callout re-renders off the stale snapshot
+    // for up to 60s after a successful repair.
+    this.statusService.invalidate(doc.id);
 
     const post = await ctx.health.check({
       workspaceId: ctx.deploy.workspaceId,
@@ -1023,6 +1028,7 @@ export class SloLifecycleService {
     );
 
     ctx.health.invalidate(ctx.deploy.workspaceId, ctx.deploy.datasource.id, doc.id);
+    this.statusService.invalidate(doc.id);
 
     const post = await ctx.health.check({
       workspaceId: ctx.deploy.workspaceId,
