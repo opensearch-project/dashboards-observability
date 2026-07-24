@@ -107,7 +107,6 @@ export function buildTableColumns({
   const allSelectableSelected =
     selectable.length > 0 && selectable.every((item) => selectedIds.has(item.id));
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- EuiInMemoryTable column type is complex
   const cols: Array<Record<string, any>> = [
     {
       field: '_select',
@@ -160,27 +159,35 @@ export function buildTableColumns({
         render: (name: string, item: UnifiedRuleSummary) => {
           const iconType =
             item.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
-          // Use EuiButtonEmpty's `iconType` so the glyph lands in the
-          // button's vertically-centered icon slot. Putting <EuiIcon> inside
-          // the children slot lands inside .euiButtonEmpty__text which is
-          // not center-aligned, so the icon visually sits above the label.
+          // Avoid duplicating the group when the dedicated Rule Group column is visible
+          const showGroupBadge =
+            item.datasourceType === 'prometheus' && !!item.group && !visibleColumns.has('group');
           return (
-            <EuiButtonEmpty
-              size="xs"
-              flush="left"
-              color="primary"
-              iconType={iconType}
-              onClick={() => setSelectedMonitor(item)}
-              aria-label={i18n.translate(
-                'observability.alerting.monitorsTable.columns.viewDetailsAriaLabel',
-                {
-                  defaultMessage: 'View details for {name}',
-                  values: { name },
-                }
+            <div>
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                color="primary"
+                iconType={iconType}
+                onClick={() => setSelectedMonitor(item)}
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorsTable.columns.viewDetailsAriaLabel',
+                  {
+                    defaultMessage: 'View details for {name}',
+                    values: { name },
+                  }
+                )}
+              >
+                <strong>{name}</strong>
+              </EuiButtonEmpty>
+              {showGroupBadge && (
+                <div style={{ marginLeft: 24, marginTop: -2 }}>
+                  <EuiBadge color="hollow" style={{ fontSize: 10 }}>
+                    {item.group}
+                  </EuiBadge>
+                </div>
               )}
-            >
-              <strong>{name}</strong>
-            </EuiButtonEmpty>
+            </div>
           );
         },
       });
@@ -343,7 +350,7 @@ export function buildTableColumns({
       cols.push({
         field: 'group',
         name: i18n.translate('observability.alerting.monitorsTable.columns.group', {
-          defaultMessage: 'Group',
+          defaultMessage: 'Rule Group',
         }),
         width: w('group'),
         render: (g: string) => g || '-',

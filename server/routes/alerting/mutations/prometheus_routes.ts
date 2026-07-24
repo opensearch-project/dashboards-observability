@@ -32,18 +32,19 @@ export type PrometheusClientResolver = (
 const prometheusRuleBodySchema = schema.object({
   name: schema.string({ minLength: 1, maxLength: 256 }),
   query: schema.string({ minLength: 1 }),
-  operator: schema.oneOf(
-    [
+  // Optional legacy comparison appended to the query. Omitted by the current
+  // UI — the PromQL query itself is the complete alert expression.
+  operator: schema.maybe(
+    schema.oneOf([
       schema.literal('>'),
       schema.literal('>='),
       schema.literal('<'),
       schema.literal('<='),
       schema.literal('=='),
       schema.literal('!='),
-    ],
-    { defaultValue: '>' }
+    ])
   ),
-  threshold: schema.number(),
+  threshold: schema.maybe(schema.number()),
   forDuration: schema.string({ defaultValue: '5m' }),
   evaluationInterval: schema.string({ defaultValue: '1m' }),
   labels: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
@@ -89,7 +90,8 @@ export function registerPrometheusRuleRoutes(
     }
   );
 
-  // DELETE /api/alerting/prometheus/{dsId}/rules/{groupName} — delete rule group
+  // DELETE /api/alerting/prometheus/{dsId}/rules/{groupName} — delete rule
+  // group, or a single rule within it when ?ruleName= is provided
   router.delete(
     {
       path: '/api/alerting/prometheus/{dsId}/rules/{groupName}',
@@ -97,6 +99,9 @@ export function registerPrometheusRuleRoutes(
         params: schema.object({
           dsId: alertingIdSchema,
           groupName: schema.string({ minLength: 1 }),
+        }),
+        query: schema.object({
+          ruleName: schema.maybe(schema.string({ minLength: 1 })),
         }),
       },
     },
@@ -108,7 +113,8 @@ export function registerPrometheusRuleRoutes(
           client,
           datasource,
           req.params.groupName,
-          logger
+          logger,
+          req.query.ruleName
         );
         return res.ok({ body: result });
       } catch (e: unknown) {

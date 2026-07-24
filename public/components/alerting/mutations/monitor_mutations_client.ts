@@ -70,9 +70,14 @@ export class MonitorMutationsClient {
     )) as PrometheusRuleResponse;
   }
 
-  async deletePrometheusRule(dsId: string, groupName: string): Promise<{ success: boolean }> {
+  async deletePrometheusRule(
+    dsId: string,
+    groupName: string,
+    ruleName?: string
+  ): Promise<{ success: boolean }> {
     return (await this.requireHttp().delete(
-      `/api/alerting/prometheus/${encodeURIComponent(dsId)}/rules/${encodeURIComponent(groupName)}`
+      `/api/alerting/prometheus/${encodeURIComponent(dsId)}/rules/${encodeURIComponent(groupName)}`,
+      ruleName ? { query: { ruleName } } : undefined
     )) as { success: boolean };
   }
 
