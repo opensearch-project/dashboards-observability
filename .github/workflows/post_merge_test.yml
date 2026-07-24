@@ -1,0 +1,297 @@
+name: Post-Merge Validation
+
+on:
+  push:
+    branches:
+      - main
+      - '[0-9]+.[0-9]+' # release branches like 2.x, 3.0
+      - '[0-9]+.x'
+
+env:
+  PLUGIN_NAME: dashboards-observability
+  OPENSEARCH_DASHBOARDS_VERSION: 'main'
+  CI: 1
+  TERM: xterm
+
+jobs:
+  Get-CI-Image-Tag:
+    uses: opensearch-project/opensearch-build/.github/workflows/get-ci-image-tag.yml@main
+    with:
+      product: opensearch-dashboards
+
+  build-and-test-linux:
+    needs: Get-CI-Image-Tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container:
+      image: ${{ needs.Get-CI-Image-Tag.outputs.ci-image-version-linux }}
+      options: --user root
+    steps:
+      - name: Checkout OpenSearch Dashboards
+        uses: actions/checkout@v4
+        with:
+          repository: opensearch-project/OpenSearch-Dashboards
+          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          path: OpenSearch-Dashboards
+          fetch-depth: 1
+
+      - name: Checkout Dashboards Observability
+        uses: actions/checkout@v4
+        with:
+          path: OpenSearch-Dashboards/plugins/dashboards-observability
+          fetch-depth: 1
+
+      - name: Plugin Bootstrap
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 20
+          max_attempts: 3
+          command: |
+            chown -R 1000:1000 `pwd`
+            cd ./OpenSearch-Dashboards/
+            su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm use && node -v && yarn -v &&
+                                 yarn config set network-timeout 1000000 -g &&
+                                 yarn osd bootstrap --single-version=loose"
+
+      - name: Get plugin version from package.json
+        id: versions
+        run: |
+          chown -R 1000:1000 `pwd`
+          cd ./OpenSearch-Dashboards/
+          PLUGIN_VERSION=$(su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm use > /dev/null 2>&1 && node -p \"require('./plugins/dashboards-observability/opensearch_dashboards.json').version\"")
+          echo "OPENSEARCH_PLUGIN_VERSION=$PLUGIN_VERSION" >> $GITHUB_ENV
+
+      - name: Test all dashboards-observability modules
+        run: |
+          chown -R 1000:1000 `pwd`
+          cd ./OpenSearch-Dashboards/
+          su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm use && node -v && yarn -v &&
+                               cd plugins/dashboards-observability &&
+                               yarn osd bootstrap --single-version=loose && yarn test --coverage --maxWorkers=100%"
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v1
+        with:
+          flags: dashboards-observability
+          directory: ./OpenSearch-Dashboards/plugins/dashboards-observability
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Build Artifact
+        run: |
+          chown -R 1000:1000 `pwd`
+          cd ./OpenSearch-Dashboards/
+          su `id -un 1000` -c "source $NVM_DIR/nvm.sh && nvm use && node -v && yarn -v &&
+                               cd plugins/dashboards-observability &&
+                               yarn build && mv ./build/*.zip ./build/${{ env.PLUGIN_NAME }}-${{ env.OPENSEARCH_PLUGIN_VERSION }}.zip"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboards-observability-linux
+          path: ./OpenSearch-Dashboards/plugins/dashboards-observability/build
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        java: [21]
+        testgroups:
+          [
+            app_analytics_test,
+            event_analytics_test,
+            integrations_test,
+            metrics_analytics_test,
+            notebooks_test,
+            panels_test,
+            trace_analytics_test,
+          ]
+    steps:
+      - name: Set up Java 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '21'
+
+      - name: Checkout OpenSearch Dashboards
+        uses: actions/checkout@v4
+        with:
+          repository: opensearch-project/Opensearch-Dashboards
+          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          path: OpenSearch-Dashboards
+          fetch-depth: 1
+
+      - name: Get OpenSearch and plugin versions from package.json
+        id: versions
+        run: |
+          VERSION=$(node -p "require('./OpenSearch-Dashboards/package.json').version")
+          echo "OPENSEARCH_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "OPENSEARCH_PLUGIN_VERSION=${VERSION}.0-SNAPSHOT" >> $GITHUB_ENV
+
+      - name: Checkout dashboards observability
+        uses: actions/checkout@v4
+        with:
+          path: OpenSearch-Dashboards/plugins/dashboards-observability
+          fetch-depth: 1
+
+      - name: Get latest Job Scheduler snapshot version
+        id: job-scheduler-snapshot
+        run: |
+          METADATA_URL="https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-job-scheduler/${{ env.OPENSEARCH_PLUGIN_VERSION }}/maven-metadata.xml"
+          SNAPSHOT_VERSION=$(curl -s $METADATA_URL | grep '<value>' | head -1 | sed 's/.*<value>\(.*\)<\/value>.*/\1/')
+          echo "version=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download Job Scheduler artifact
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-job-scheduler/${{ env.OPENSEARCH_PLUGIN_VERSION }}/opensearch-job-scheduler-${{ steps.job-scheduler-snapshot.outputs.version }}.zip
+          target: plugin-artifacts/
+          filename: opensearch-job-scheduler.zip
+
+      - name: Get latest Observability snapshot version
+        id: observability-snapshot
+        run: |
+          METADATA_URL="https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-observability/${{ env.OPENSEARCH_PLUGIN_VERSION }}/maven-metadata.xml"
+          SNAPSHOT_VERSION=$(curl -s $METADATA_URL | grep '<value>' | head -1 | sed 's/.*<value>\(.*\)<\/value>.*/\1/')
+          echo "version=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download observability artifact
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-observability/${{ env.OPENSEARCH_PLUGIN_VERSION }}/opensearch-observability-${{ steps.observability-snapshot.outputs.version }}.zip
+          target: plugin-artifacts/
+          filename: observability.zip
+
+      - name: Get latest SQL Plugin snapshot version
+        id: sql-snapshot
+        run: |
+          METADATA_URL="https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-sql-plugin/${{ env.OPENSEARCH_PLUGIN_VERSION }}/maven-metadata.xml"
+          SNAPSHOT_VERSION=$(curl -s $METADATA_URL | grep '<value>' | head -1 | sed 's/.*<value>\(.*\)<\/value>.*/\1/')
+          echo "version=$SNAPSHOT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Download SQL artifact
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://ci.opensearch.org/ci/dbc/snapshots/maven/org/opensearch/plugin/opensearch-sql-plugin/${{ env.OPENSEARCH_PLUGIN_VERSION }}/opensearch-sql-plugin-${{ steps.sql-snapshot.outputs.version }}.zip
+          target: plugin-artifacts/
+          filename: sql.zip
+
+      - name: Download OpenSearch
+        uses: peternied/download-file@v2
+        with:
+          url: https://artifacts.opensearch.org/snapshots/core/opensearch/${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/opensearch-min-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT-linux-x64-latest.tar.gz
+
+      - name: Extract OpenSearch
+        run: |
+          tar -xzf opensearch-*.tar.gz
+          rm -f opensearch-*.tar.gz
+
+      - name: Install OpenSearch plugins
+        run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/opensearch-job-scheduler.zip"
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/observability.zip"
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/sql.zip"
+
+      - name: Configure OpenSearch
+        run: |
+          echo "action.auto_create_index: true" >> ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/config/opensearch.yml
+
+      - name: Run OpenSearch
+        run: /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch -Ecluster.routing.allocation.disk.threshold_enabled=false -Ecluster.routing.allocation.disk.watermark.low=1gb -Ecluster.routing.allocation.disk.watermark.high=500mb -Ecluster.routing.allocation.disk.watermark.flood_stage=100mb -Ecluster.blocks.read_only_allow_delete=false &"
+
+      - name: Get node and yarn versions
+        id: versions_step
+        run: |
+          echo "node_version=$(cat ./OpenSearch-Dashboards/.nvmrc | cut -d'.' -f1)" >> $GITHUB_OUTPUT
+          echo "yarn_version=$(node -p "(require('./OpenSearch-Dashboards/package.json').engines.yarn).match(/[.0-9]+/)[0]")" >> $GITHUB_OUTPUT
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.versions_step.outputs.node_version }}
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install correct yarn version
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
+
+      - name: Get Cypress version
+        id: cypress_version
+        run: |
+          echo "cypress_version=$(cat ./OpenSearch-Dashboards/plugins/dashboards-observability/package.json | jq '.dependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
+
+      - name: Yarn Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            OpenSearch-Dashboards/**/target
+            OpenSearch-Dashboards/**/node_modules
+          key: ${{ runner.OS }}-build-${{ hashFiles('OpenSearch-Dashboards/**/yarn.lock') }}
+
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.OS }}-cypress-${{ steps.cypress_version.outputs.cypress_version }}
+
+      - name: Configure OpenSearch Dashboards
+        run: |
+          rm -rf ./OpenSearch-Dashboards/config/opensearch_dashboards.yml
+          cat << 'EOT' > ./OpenSearch-Dashboards/config/opensearch_dashboards.yml
+          server.host: "0.0.0.0"
+          home.disableWelcomeScreen: true
+          EOT
+
+      - name: Bootstrap OpenSearch Dashboards
+        run: |
+          cd OpenSearch-Dashboards
+          yarn osd bootstrap --single-version=loose
+
+      - name: Install/Verify Cypress
+        run: |
+          cd ./OpenSearch-Dashboards
+          npx cypress install
+          npx cypress verify
+
+      - name: Compile OpenSearch Dashboards
+        run: |
+          cd OpenSearch-Dashboards
+          node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers=10 --verbose
+
+      - name: Run OpenSearch Dashboards server
+        run: |
+          cd OpenSearch-Dashboards
+          nohup yarn start --no-base-path --no-watch --home.disableExperienceModal=true | tee dashboard.log &
+
+      - name: Check If OpenSearch Dashboards Is Ready
+        run: |
+          cd ./OpenSearch-Dashboards
+          if timeout 1200 grep -q "http server running" <(tail -n +1 -f dashboard.log); then
+            echo "OpenSearch Dashboards started successfully."
+          else
+            echo "Timeout reached. OpenSearch Dashboards did not start."
+            tail -100 dashboard.log
+            exit 1
+          fi
+
+      - name: Run Cypress tests for ${{ matrix.testgroups }}
+        run: |
+          cd ./OpenSearch-Dashboards/plugins/dashboards-observability
+          yarn cypress:run --headless --spec '.cypress/integration/${{ matrix.testgroups }}/*'
+
+      - name: Capture failure screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots-${{ matrix.testgroups }}
+          path: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/screenshots
+
+      - name: Capture test video
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-videos-${{ matrix.testgroups }}
+          path: OpenSearch-Dashboards/plugins/dashboards-observability/.cypress/videos
+
