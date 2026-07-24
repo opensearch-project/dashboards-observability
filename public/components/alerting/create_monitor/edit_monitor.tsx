@@ -88,12 +88,13 @@ function buildEditFormFromRule(rule: UnifiedRule, datasources: Datasource[]): Op
   const pplTriggers: PplTriggerForm[] = seed.pplTriggers.map((t, idx) => ({
     ...t,
     id: t.id || `ppl-trigger-${rule.id}-${idx}`,
-    actions: t.actions.map(
-      (a, ai): PplActionForm => ({
+    actions: t.actions.map((a, ai) => {
+      const action: PplActionForm = {
         ...a,
         id: a.id || `ppl-action-${rule.id}-${idx}-${ai}`,
-      })
-    ),
+      };
+      return action;
+    }),
   }));
 
   const datasourceId =
