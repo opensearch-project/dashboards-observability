@@ -187,12 +187,22 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
       const evaluationInterval = normalizeDuration(data.evaluationInterval || '1m');
       const firingPeriod = normalizeDuration(data.firingPeriod || forDuration);
 
+      // Seed labels from the raw rule, plus a _ruleGroup metadata label so
+      // the Rule Group selector round-trips the existing group. The metadata
+      // label is extracted into groupName (and stripped) on submission.
+      const seededLabels = Object.entries(rawLabels)
+        .filter(([key]) => key !== '_ruleGroup')
+        .map(([key, value]) => ({ key, value }));
+      if (data.group) {
+        seededLabels.push({ key: '_ruleGroup', value: data.group });
+      }
+
       const promForm: import('./create_monitor_types').PrometheusFormState = {
         name: data.name,
         datasourceId: data.datasourceId,
         datasourceType: 'prometheus',
-        query:
-          expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+(?:[eE][+-]?\d+)?\s*$/, '').trim() || expr,
+        // The PromQL expression is the complete alert condition — seed verbatim
+        query: expr,
         threshold: {
           operator: (data.threshold?.operator as '>' | '>=' | '<' | '<=' | '==' | '!=') || '>',
           value: data.threshold?.value ?? 0,
@@ -202,7 +212,7 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
         evaluationInterval,
         pendingPeriod: forDuration,
         firingPeriod,
-        labels: Object.entries(rawLabels).map(([key, value]) => ({ key, value })),
+        labels: seededLabels,
         annotations: Object.entries(rawAnnotations).map(([key, value]) => ({ key, value })),
         severity: data.severity,
         enabled: data.enabled,

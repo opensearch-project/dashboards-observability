@@ -6,16 +6,14 @@
 /**
  * Tests for the Prometheus form section (simplified Create Rule flyout).
  *
- * Covers:
- *  - Trigger condition (For duration updates threshold only — no more
- *    pendingPeriod/evaluationInterval per-rule sync, those are rule-group
- *    concerns in managed Prometheus)
- *  - Builder/Code query mode toggle
- *  - Rule group selection propagating via the _ruleGroup metadata label
+ * The form is builder-only: the PromQL query assembled from the metric and
+ * label filters is the complete alert expression. There is no Code mode,
+ * Trigger condition, or per-rule evaluation settings (those are rule-group
+ * concerns in managed Prometheus).
  *
  * Note: label-based queries (getByLabelText) are unreliable here because the
  * test environment stubs htmlIdGenerator, giving every form control the same
- * id. Queries use data-test-subj, text content, or option values instead.
+ * id. Queries use data-test-subj, text content, or placeholders instead.
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -23,12 +21,6 @@ import { PrometheusFormSection } from '../create_monitor/prometheus_form_section
 import type { PrometheusFormState } from '../create_monitor/create_monitor_types';
 
 // Mock dependencies that PrometheusFormSection uses
-jest.mock('../promql_monaco_editor', () => ({
-  PromQLMonacoEditor: () => <div data-test-subj="promql-editor" />,
-}));
-jest.mock('../metric_browser', () => ({
-  MetricBrowser: () => <div data-test-subj="metric-browser" />,
-}));
 jest.mock('../monitor_form_components', () => ({
   LabelEditor: () => <div data-test-subj="label-editor" />,
   AnnotationEditor: () => <div data-test-subj="annotation-editor" />,
@@ -58,57 +50,8 @@ const baseForm: PrometheusFormState = {
 
 const mockDatasources = [{ id: 'ds-1', name: 'ObservabilityStack_Prometheus', type: 'prometheus' }];
 
-/** Find the For Duration <select> by its distinctive duration option values. */
-const findForDurationSelect = (container: HTMLElement): HTMLSelectElement => {
-  const selects = Array.from(container.querySelectorAll('select'));
-  const match = selects.find((s) => Array.from(s.options).some((o) => o.value === '30s'));
-  if (!match) throw new Error('For duration select not found');
-  return match;
-};
-
-describe('PrometheusFormSection — trigger condition', () => {
-  it('changing For duration updates threshold.forDuration only', () => {
-    const onUpdate = jest.fn();
-
-    const { container } = render(
-      <PrometheusFormSection
-        form={baseForm}
-        onUpdate={onUpdate}
-        validationErrors={{}}
-        hasSubmitted={false}
-      />
-    );
-
-    const forDurationSelect = findForDurationSelect(container);
-    expect(forDurationSelect.value).toBe('5m');
-    fireEvent.change(forDurationSelect, { target: { value: '30s' } });
-
-    expect(onUpdate).toHaveBeenCalledWith(
-      'threshold',
-      expect.objectContaining({ forDuration: '30s' })
-    );
-    // Per-rule evaluation settings were removed — no pendingPeriod sync
-    expect(onUpdate).not.toHaveBeenCalledWith('pendingPeriod', expect.anything());
-    expect(onUpdate).not.toHaveBeenCalledWith('evaluationInterval', expect.anything());
-  });
-
-  it('does not render per-rule Evaluation Settings fields', () => {
-    render(
-      <PrometheusFormSection
-        form={baseForm}
-        onUpdate={jest.fn()}
-        validationErrors={{}}
-        hasSubmitted={false}
-      />
-    );
-
-    expect(screen.queryByText('Evaluation interval')).not.toBeInTheDocument();
-    expect(screen.queryByText('Pending period')).not.toBeInTheDocument();
-  });
-});
-
-describe('PrometheusFormSection — query mode toggle', () => {
-  it('renders Builder mode by default with metric and label filter inputs', () => {
+describe('PrometheusFormSection — simplified layout', () => {
+  it('renders the builder with metric and label filter inputs', () => {
     render(
       <PrometheusFormSection
         form={baseForm}
@@ -126,7 +69,7 @@ describe('PrometheusFormSection — query mode toggle', () => {
     expect(screen.getByText('Select a metric to start.')).toBeInTheDocument();
   });
 
-  it('switches to Code mode showing the PromQL editor with query library and metric browser', () => {
+  it('does not render Code mode, Trigger condition, or Evaluation Settings', () => {
     render(
       <PrometheusFormSection
         form={baseForm}
@@ -136,12 +79,14 @@ describe('PrometheusFormSection — query mode toggle', () => {
       />
     );
 
-    // EuiButtonGroup renders radio inputs with data-test-subj per option id
-    fireEvent.click(screen.getByTestId('code'));
-
-    expect(screen.getByTestId('promql-editor')).toBeInTheDocument();
-    expect(screen.getByText(/Query library/)).toBeInTheDocument();
-    expect(screen.getByText(/Metric browser/)).toBeInTheDocument();
+    expect(screen.queryByText('Code')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Query library/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Metric browser/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Trigger condition')).not.toBeInTheDocument();
+    expect(screen.queryByText('Operator')).not.toBeInTheDocument();
+    expect(screen.queryByText('For duration')).not.toBeInTheDocument();
+    expect(screen.queryByText('Evaluation interval')).not.toBeInTheDocument();
+    expect(screen.queryByText('Pending period')).not.toBeInTheDocument();
   });
 
   it('shows the datasource selector when datasources are provided', () => {
@@ -190,12 +135,11 @@ describe('PrometheusFormSection — rule group', () => {
       />
     );
 
-    // Switch to Code mode so the only remaining combo box is the rule group
-    fireEvent.click(screen.getByTestId('code'));
-
+    // Builder has 3 combo boxes (metric, label name, label value);
+    // the rule group combo box is the 4th and last
     const comboInputs = container.querySelectorAll('[data-test-subj="comboBoxSearchInput"]');
-    expect(comboInputs.length).toBe(1);
-    const input = comboInputs[0];
+    expect(comboInputs.length).toBe(4);
+    const input = comboInputs[comboInputs.length - 1];
 
     fireEvent.change(input, { target: { value: 'my-group' } });
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
@@ -204,6 +148,52 @@ describe('PrometheusFormSection — rule group', () => {
       'labels',
       expect.arrayContaining([expect.objectContaining({ key: '_ruleGroup', value: 'my-group' })])
     );
+  });
+
+  it('initializes the rule group from an existing _ruleGroup label (edit mode)', () => {
+    render(
+      <PrometheusFormSection
+        form={{
+          ...baseForm,
+          labels: [{ key: '_ruleGroup', value: 'existing-group', isDynamic: false }],
+        }}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    expect(screen.getByText('existing-group')).toBeInTheDocument();
+  });
+});
+
+describe('PrometheusFormSection — YAML preview', () => {
+  it('uses the query as the complete expression and hides _ruleGroup', () => {
+    const { container } = render(
+      <PrometheusFormSection
+        form={{
+          ...baseForm,
+          labels: [
+            { key: 'severity', value: 'warning', isDynamic: false },
+            { key: '_ruleGroup', value: 'my-group', isDynamic: false },
+          ],
+        }}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    const pre = container.querySelector('pre');
+    expect(pre).not.toBeNull();
+    const yaml = pre!.textContent || '';
+    // The query is the complete expression — no operator/threshold appended
+    expect(yaml).toContain('expr: up == 0\n');
+    // Group name comes from the _ruleGroup label
+    expect(yaml).toContain('name: my-group');
+    // _ruleGroup must not leak into the labels block
+    expect(yaml).not.toContain('_ruleGroup');
+    expect(yaml).toContain('severity: "warning"');
   });
 });
 
