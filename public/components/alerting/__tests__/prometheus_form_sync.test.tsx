@@ -25,7 +25,7 @@ import type { PrometheusFormState } from '../create_monitor/create_monitor_types
 
 // Mock dependencies that PrometheusFormSection uses
 jest.mock('../monitor_form_components', () => ({
-  LabelEditor: () => <div data-test-subj="label-editor" />,
+  LabelEditor: jest.fn(() => <div data-test-subj="label-editor" />),
   AnnotationEditor: () => <div data-test-subj="annotation-editor" />,
 }));
 jest.mock('../query_services/alerting_prom_resources_service', () => ({
@@ -173,6 +173,43 @@ describe('PrometheusFormSection — rule group', () => {
       'labels',
       expect.arrayContaining([expect.objectContaining({ key: '_ruleGroup', value: 'my-group' })])
     );
+  });
+
+  it('hides _ruleGroup from the label editor and preserves it through label edits', () => {
+    const onUpdate = jest.fn();
+    const labelEditorProps: any[] = [];
+    // Capture what LabelEditor receives via the module mock
+    const { LabelEditor } = jest.requireMock('../monitor_form_components');
+    LabelEditor.mockImplementation((props: any) => {
+      labelEditorProps.push(props);
+      return <div data-test-subj="label-editor" />;
+    });
+
+    render(
+      <PrometheusFormSection
+        form={{
+          ...baseForm,
+          labels: [
+            { key: 'severity', value: 'warning', isDynamic: false },
+            { key: '_ruleGroup', value: 'my-group', isDynamic: false },
+          ],
+        }}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    // _ruleGroup must not be visible in the editor
+    const received = labelEditorProps[labelEditorProps.length - 1];
+    expect(received.labels).toEqual([{ key: 'severity', value: 'warning', isDynamic: false }]);
+
+    // Label edits must re-append _ruleGroup so it survives
+    received.onChange([{ key: 'team', value: 'obs', isDynamic: false }]);
+    expect(onUpdate).toHaveBeenCalledWith('labels', [
+      { key: 'team', value: 'obs', isDynamic: false },
+      { key: '_ruleGroup', value: 'my-group', isDynamic: false },
+    ]);
   });
 
   it('initializes the rule group from an existing _ruleGroup label (edit mode)', () => {

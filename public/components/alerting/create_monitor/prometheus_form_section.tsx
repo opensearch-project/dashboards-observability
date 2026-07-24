@@ -143,14 +143,32 @@ export const PrometheusFormSection: React.FC<{
     [onUpdate]
   );
 
-  // Fetch metric names and existing rule groups when datasource changes
+  // The _ruleGroup transport label is owned by the Rule Group selector — hide
+  // it from the Label editor and re-append it on every label edit so user
+  // changes there can't desync or delete it.
+  const visibleLabels = useMemo(() => {
+    return form.labels.filter((l) => l.key !== '_ruleGroup');
+  }, [form.labels]);
+  const handleLabelsChange = useCallback(
+    (labels: PrometheusFormState['labels']) => {
+      const ruleGroup = formLabelsRef.current.find((l) => l.key === '_ruleGroup');
+      onUpdate('labels', ruleGroup ? [...labels, ruleGroup] : labels);
+    },
+    [onUpdate]
+  );
+
+  // Fetch metric names and existing rule groups when datasource changes.
+  // The `stale` flag guards against out-of-order responses: a slower
+  // response from a previous datasource/metric selection must not
+  // overwrite options fetched for the current one.
   useEffect(() => {
     if (!datasourceId) return;
+    let stale = false;
     const service = new AlertingPromResourcesService(datasourceId);
     service
       .listMetricNames()
       .then(({ metrics }) => {
-        setMetricOptions(metrics.map((m) => ({ label: m })));
+        if (!stale) setMetricOptions(metrics.map((m) => ({ label: m })));
       })
       .catch(() => {
         /* non-critical */
@@ -158,11 +176,14 @@ export const PrometheusFormSection: React.FC<{
     service
       .listRuleGroupNames()
       .then(({ groups }) => {
-        setRuleGroupOptions(groups.map((g) => ({ label: g })));
+        if (!stale) setRuleGroupOptions(groups.map((g) => ({ label: g })));
       })
       .catch(() => {
         /* non-critical — user can still type a new group name */
       });
+    return () => {
+      stale = true;
+    };
   }, [datasourceId]);
 
   // Fetch label names when metric changes
@@ -171,15 +192,19 @@ export const PrometheusFormSection: React.FC<{
       setLabelNameOptions([]);
       return;
     }
+    let stale = false;
     const service = new AlertingPromResourcesService(datasourceId);
     service
       .listLabelNames(selectedMetric[0].label)
       .then(({ labels }) => {
-        setLabelNameOptions(labels.map((l) => ({ label: l })));
+        if (!stale) setLabelNameOptions(labels.map((l) => ({ label: l })));
       })
       .catch(() => {
         /* non-critical */
       });
+    return () => {
+      stale = true;
+    };
   }, [datasourceId, selectedMetric]);
 
   // Fetch label values when label name changes
@@ -188,17 +213,21 @@ export const PrometheusFormSection: React.FC<{
       setLabelValueOptions([]);
       return;
     }
+    let stale = false;
     const metric = selectedMetric.length > 0 ? selectedMetric[0].label : undefined;
     const selector = metric ? `{__name__="${metric}"}` : undefined;
     const service = new AlertingPromResourcesService(datasourceId);
     service
       .listLabelValues(selectedLabelName[0].label, selector)
       .then(({ values }) => {
-        setLabelValueOptions(values.map((v) => ({ label: v })));
+        if (!stale) setLabelValueOptions(values.map((v) => ({ label: v })));
       })
       .catch(() => {
         /* non-critical */
       });
+    return () => {
+      stale = true;
+    };
   }, [datasourceId, selectedLabelName, selectedMetric]);
 
   // Sync builder selections to the PromQL query
@@ -510,11 +539,7 @@ export const PrometheusFormSection: React.FC<{
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <LabelEditor
-          labels={form.labels}
-          onChange={(l) => onUpdate('labels', l)}
-          context={context}
-        />
+        <LabelEditor labels={visibleLabels} onChange={handleLabelsChange} context={context} />
       </EuiPanel>
 
       <EuiSpacer size="m" />
