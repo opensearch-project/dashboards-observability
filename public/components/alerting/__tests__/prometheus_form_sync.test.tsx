@@ -84,9 +84,30 @@ describe('PrometheusFormSection — simplified layout', () => {
     expect(screen.queryByText(/Metric browser/)).not.toBeInTheDocument();
     expect(screen.queryByText('Trigger condition')).not.toBeInTheDocument();
     expect(screen.queryByText('Operator')).not.toBeInTheDocument();
-    expect(screen.queryByText('For duration')).not.toBeInTheDocument();
     expect(screen.queryByText('Evaluation interval')).not.toBeInTheDocument();
     expect(screen.queryByText('Pending period')).not.toBeInTheDocument();
+  });
+
+  it('renders the For duration select and wires it to threshold.forDuration', () => {
+    const onUpdate = jest.fn();
+
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    const select = screen.getByTestId('prometheusForDurationSelect') as HTMLSelectElement;
+    expect(select.value).toBe('5m');
+    fireEvent.change(select, { target: { value: '10m' } });
+
+    expect(onUpdate).toHaveBeenCalledWith(
+      'threshold',
+      expect.objectContaining({ forDuration: '10m' })
+    );
   });
 
   it('shows the datasource selector when datasources are provided', () => {

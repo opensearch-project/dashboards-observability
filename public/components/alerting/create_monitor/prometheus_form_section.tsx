@@ -40,7 +40,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
 import { AlertingPromResourcesService } from '../query_services/alerting_prom_resources_service';
-import { PrometheusFormState } from './create_monitor_types';
+import { DURATION_OPTIONS, PrometheusFormState } from './create_monitor_types';
 
 // ============================================================================
 // Component
@@ -345,6 +345,36 @@ export const PrometheusFormSection: React.FC<{
             defaultMessage: 'Select a metric to start.',
           })}
         </EuiText>
+
+        <EuiSpacer size="m" />
+
+        {/* For duration — the rule's `for:` clause. Kept per-rule (unlike the
+            group-level evaluation interval): the condition must hold
+            continuously for this long before the alert transitions from
+            pending to firing. */}
+        <EuiFormRow
+          label={i18n.translate('observability.alerting.prometheusFormSection.forDurationLabel', {
+            defaultMessage: 'For duration',
+          })}
+          helpText={i18n.translate(
+            'observability.alerting.prometheusFormSection.forDurationHelpText',
+            {
+              defaultMessage:
+                'How long the condition must stay true before the alert fires. The alert is "pending" during this window. Choose "Immediately (0s)" to fire on the first evaluation.',
+            }
+          )}
+          display="rowCompressed"
+        >
+          <EuiSelect
+            options={DURATION_OPTIONS}
+            value={form.threshold.forDuration}
+            onChange={(e) =>
+              onUpdate('threshold', { ...form.threshold, forDuration: e.target.value })
+            }
+            compressed
+            data-test-subj="prometheusForDurationSelect"
+          />
+        </EuiFormRow>
       </EuiPanel>
 
       <EuiSpacer size="m" />
