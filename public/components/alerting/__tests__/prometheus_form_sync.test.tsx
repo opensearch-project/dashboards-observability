@@ -30,6 +30,7 @@ jest.mock('../query_services/alerting_prom_resources_service', () => ({
     listMetricNames: jest.fn().mockResolvedValue({ metrics: ['up', 'http_requests_total'] }),
     listLabelNames: jest.fn().mockResolvedValue({ labels: ['job', 'instance'] }),
     listLabelValues: jest.fn().mockResolvedValue({ values: ['node-exporter'] }),
+    listRuleGroupNames: jest.fn().mockResolvedValue({ groups: ['team-a-rules', 'team-b-rules'] }),
   })),
 }));
 

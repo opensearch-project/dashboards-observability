@@ -31,31 +31,7 @@ import {
   PplActionForm,
   PplTriggerForm,
 } from './create_monitor_types';
-
-/** Convert seconds to a human-readable duration string (e.g., 60 → "1m"). */
-function formatSeconds(sec: number): string {
-  if (sec <= 0) return '1m';
-  if (sec % 3600 === 0) return `${sec / 3600}h`;
-  if (sec % 60 === 0) return `${sec / 60}m`;
-  return `${sec}s`;
-}
-
-/**
- * Normalize a duration string like "120s" to the canonical form used in
- * dropdown options ("2m"). Handles "Ns" → minutes/hours conversion.
- */
-function normalizeDuration(dur: string): string {
-  if (!dur) return '5m';
-  // Already in m/h/d format
-  if (/^\d+[mhd]$/.test(dur)) return dur;
-  // Convert "Ns" to minutes if evenly divisible
-  const secMatch = dur.match(/^(\d+)s$/);
-  if (secMatch) {
-    const sec = parseInt(secMatch[1], 10);
-    return formatSeconds(sec);
-  }
-  return dur;
-}
+import { normalizeDuration } from '../utils/duration';
 
 export interface EditMonitorProps {
   dsId: string;

@@ -45,6 +45,7 @@ import { DeleteModal } from '../common/helpers/delete_modal';
 import { useMonitorDetail } from './hooks/use_monitor_detail';
 import { ConditionPreviewGraph } from './monitor_detail/condition_preview_graph';
 import { humanizeCondition } from './monitor_detail/humanize_condition';
+import { normalizeDuration } from './utils/duration';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
 
@@ -422,7 +423,9 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     )}
                   </>
                 )}
-                {monitor.condition && (
+                {/* Prometheus rules: the expr above IS the condition — the
+                    summary `condition` field is a canned template, so hide it */}
+                {monitor.condition && monitor.datasourceType !== 'prometheus' && (
                   <>
                     <EuiSpacer size="s" />
                     <EuiText size="xs" color="subdued">
@@ -496,7 +499,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                           },
                         ]
                       : []),
-                    ...(monitor.threshold
+                    ...(monitor.threshold && monitor.datasourceType !== 'prometheus'
                       ? [
                           {
                             title: i18n.translate(
@@ -504,24 +507,24 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                               { defaultMessage: 'Threshold' }
                             ),
                             description: `${monitor.threshold.operator} ${monitor.threshold.value}${
-                              monitor.datasourceType === 'prometheus'
-                                ? ''
-                                : monitor.threshold.unit || ''
+                              monitor.threshold.unit || ''
                             }`,
                           },
                         ]
                       : []),
-                    ...(monitor.datasourceType === 'prometheus' && monitor.condition
+                    ...(monitor.datasourceType === 'prometheus'
                       ? [
                           {
                             title: i18n.translate(
                               'observability.alerting.monitorDetailFlyout.forDuration',
                               { defaultMessage: 'For Duration' }
                             ),
-                            description:
-                              monitor.threshold?.forDuration ||
-                              monitor.condition?.match(/for\s+(.+)/)?.[1] ||
-                              '—',
+                            // pendingPeriod carries the rule's `for:` value
+                            // ("300s") — normalize for display ("5m")
+                            description: normalizeDuration(
+                              monitor.pendingPeriod || monitor.threshold?.forDuration || '',
+                              '—'
+                            ),
                           },
                         ]
                       : []),

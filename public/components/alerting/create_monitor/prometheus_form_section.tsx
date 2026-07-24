@@ -77,6 +77,7 @@ export const PrometheusFormSection: React.FC<{
   const [ruleGroupName, setRuleGroupName] = useState(
     () => form.labels.find((l) => l.key === '_ruleGroup')?.value || ''
   );
+  const [ruleGroupOptions, setRuleGroupOptions] = useState<Array<{ label: string }>>([]);
 
   // Use a ref for form.labels to avoid circular dependency:
   // handleRuleGroupChange → onUpdate('labels') → parent re-renders → new form.labels → new callback
@@ -99,7 +100,7 @@ export const PrometheusFormSection: React.FC<{
     [onUpdate]
   );
 
-  // Fetch metric names when datasource changes
+  // Fetch metric names and existing rule groups when datasource changes
   useEffect(() => {
     if (!datasourceId) return;
     const service = new AlertingPromResourcesService(datasourceId);
@@ -110,6 +111,14 @@ export const PrometheusFormSection: React.FC<{
       })
       .catch(() => {
         /* non-critical */
+      });
+    service
+      .listRuleGroupNames()
+      .then(({ groups }) => {
+        setRuleGroupOptions(groups.map((g) => ({ label: g })));
+      })
+      .catch(() => {
+        /* non-critical — user can still type a new group name */
       });
   }, [datasourceId]);
 
@@ -412,7 +421,7 @@ export const PrometheusFormSection: React.FC<{
               'observability.alerting.prometheusFormSection.groupNamePlaceholder',
               { defaultMessage: 'Type or select a rule group' }
             )}
-            options={[]}
+            options={ruleGroupOptions}
             selectedOptions={ruleGroupName ? [{ label: ruleGroupName }] : []}
             onChange={(opts) => handleRuleGroupChange(opts.length > 0 ? opts[0].label : '')}
             onCreateOption={(value) => handleRuleGroupChange(value)}
