@@ -17,7 +17,10 @@
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { PrometheusFormSection } from '../create_monitor/prometheus_form_section';
+import {
+  parseBuilderQuery,
+  PrometheusFormSection,
+} from '../create_monitor/prometheus_form_section';
 import type { PrometheusFormState } from '../create_monitor/create_monitor_types';
 
 // Mock dependencies that PrometheusFormSection uses
@@ -216,6 +219,70 @@ describe('PrometheusFormSection — YAML preview', () => {
     // _ruleGroup must not leak into the labels block
     expect(yaml).not.toContain('_ruleGroup');
     expect(yaml).toContain('severity: "warning"');
+  });
+});
+
+describe('parseBuilderQuery — edit-mode builder seeding', () => {
+  it('parses a bare metric', () => {
+    expect(parseBuilderQuery('up')).toEqual({ metric: 'up' });
+  });
+
+  it('parses a metric with a single label matcher', () => {
+    expect(parseBuilderQuery('up{instance="host-1"}')).toEqual({
+      metric: 'up',
+      labelName: 'instance',
+      labelOperator: '=',
+      labelValue: 'host-1',
+    });
+  });
+
+  it('unescapes quotes and backslashes in the label value', () => {
+    expect(parseBuilderQuery('up{path="C:\\\\dir\\"x\\""}')).toEqual({
+      metric: 'up',
+      labelName: 'path',
+      labelOperator: '=',
+      labelValue: 'C:\\dir"x"',
+    });
+  });
+
+  it('returns null for expressions the builder cannot represent', () => {
+    expect(parseBuilderQuery('sum(rate(http_requests_total[5m])) > 0.05')).toBeNull();
+    expect(parseBuilderQuery('up == 0')).toBeNull();
+    expect(parseBuilderQuery('up{a="1",b="2"}')).toBeNull();
+    expect(parseBuilderQuery('')).toBeNull();
+  });
+});
+
+describe('PrometheusFormSection — edit mode seeding', () => {
+  it('seeds builder selections from a builder-shaped query', () => {
+    render(
+      <PrometheusFormSection
+        form={{ ...baseForm, query: 'http_requests_total{job="api"}' }}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    expect(screen.getByText('http_requests_total')).toBeInTheDocument();
+    expect(screen.getByText('job')).toBeInTheDocument();
+    expect(screen.getByText('api')).toBeInTheDocument();
+  });
+
+  it('does not clobber a complex seeded query on mount', () => {
+    const onUpdate = jest.fn();
+    render(
+      <PrometheusFormSection
+        form={{ ...baseForm, query: 'sum(rate(http_requests_total[5m])) > 0.05' }}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    // Builder is unseeded (query not representable), so the builder→query
+    // sync must stay inert — no query updates on mount
+    expect(onUpdate).not.toHaveBeenCalledWith('query', expect.anything());
   });
 });
 

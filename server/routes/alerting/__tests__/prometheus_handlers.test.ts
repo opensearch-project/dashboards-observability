@@ -100,6 +100,22 @@ describe('handleCreatePrometheusRule — shared group merge', () => {
     expect(upserted.rules.map((r) => r.name)).toEqual(['ExistingRule', 'HighErrorRate']);
   });
 
+  it('preserves the existing group evaluation interval when merging', async () => {
+    const ruler = makeRulerClient({
+      groupName: 'team-rules',
+      interval: 300,
+      rules: [{ type: 'alerting', name: 'ExistingRule', expr: 'up == 0', for: '1m' } as any],
+    });
+    await handleCreatePrometheusRule(ruler as any, mockClient, mockDatasource, {
+      ...basePayload,
+      evaluationInterval: '1m', // would be 60s if it overwrote the group
+      groupName: 'team-rules',
+    });
+
+    const upserted = ruler.upsertRuleGroup.mock.calls[0][3] as GeneratedRuleGroup;
+    expect(upserted.interval).toBe(300);
+  });
+
   it('replaces a same-named rule instead of duplicating it (edit upsert)', async () => {
     const ruler = makeRulerClient({
       groupName: 'team-rules',

@@ -43,6 +43,39 @@ import { AlertingPromResourcesService } from '../query_services/alerting_prom_re
 import { DURATION_OPTIONS, PrometheusFormState } from './create_monitor_types';
 
 // ============================================================================
+// Helpers
+// ============================================================================
+
+interface ParsedBuilderQuery {
+  metric: string;
+  labelName?: string;
+  labelOperator?: string;
+  labelValue?: string;
+}
+
+/**
+ * Parse a PromQL expression back into builder selections, when the expression
+ * has the exact shape the builder produces: `metric` or
+ * `metric{label OP "value"}`. Returns null for anything more complex
+ * (aggregations, comparisons, multiple matchers) — those cannot be
+ * represented by the builder, so its fields stay empty and the builder→query
+ * sync stays inert until the user makes a selection.
+ */
+export function parseBuilderQuery(query: string): ParsedBuilderQuery | null {
+  const match = (query || '')
+    .trim()
+    .match(
+      /^([a-zA-Z_:][a-zA-Z0-9_:]*)(?:\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(=~|!~|!=|=)\s*"((?:[^"\\]|\\.)*)"\s*\})?$/
+    );
+  if (!match) return null;
+  const [, metric, labelName, labelOperator, escapedValue] = match;
+  if (!labelName) return { metric };
+  // Reverse the escaping applied by syncBuilderToQuery
+  const labelValue = escapedValue.replace(/\\(["\\])/g, '$1');
+  return { metric, labelName, labelOperator, labelValue };
+}
+
+// ============================================================================
 // Component
 // ============================================================================
 
@@ -63,14 +96,24 @@ export const PrometheusFormSection: React.FC<{
   datasourceId,
   datasources = [],
 }) => {
-  // Builder state
+  // Builder state — seeded from the existing query (edit mode) when the
+  // expression has a builder-representable shape. Complex expressions leave
+  // the builder empty and untouched, so the seeded query is never clobbered
+  // unless the user explicitly picks a new metric.
+  const seededBuilder = useRef(parseBuilderQuery(form.query)).current;
   const [metricOptions, setMetricOptions] = useState<Array<{ label: string }>>([]);
-  const [selectedMetric, setSelectedMetric] = useState<Array<{ label: string }>>([]);
+  const [selectedMetric, setSelectedMetric] = useState<Array<{ label: string }>>(
+    seededBuilder ? [{ label: seededBuilder.metric }] : []
+  );
   const [labelNameOptions, setLabelNameOptions] = useState<Array<{ label: string }>>([]);
-  const [selectedLabelName, setSelectedLabelName] = useState<Array<{ label: string }>>([]);
+  const [selectedLabelName, setSelectedLabelName] = useState<Array<{ label: string }>>(
+    seededBuilder?.labelName ? [{ label: seededBuilder.labelName }] : []
+  );
   const [labelValueOptions, setLabelValueOptions] = useState<Array<{ label: string }>>([]);
-  const [selectedLabelValue, setSelectedLabelValue] = useState<Array<{ label: string }>>([]);
-  const [labelOperator, setLabelOperator] = useState('=');
+  const [selectedLabelValue, setSelectedLabelValue] = useState<Array<{ label: string }>>(
+    seededBuilder?.labelValue ? [{ label: seededBuilder.labelValue }] : []
+  );
+  const [labelOperator, setLabelOperator] = useState(seededBuilder?.labelOperator || '=');
 
   // Rule group state — kept separate from form.name (which is the alert rule name).
   // Initialized from an existing _ruleGroup label so edits round-trip correctly.
@@ -428,6 +471,9 @@ export const PrometheusFormSection: React.FC<{
             singleSelection={{ asPlainText: true }}
             compressed
             isClearable
+            // Double templating on purpose: i18n substitutes the literal
+            // '{searchValue}' back in, yielding the exact template string
+            // EUI interpolates with the user's typed text at render time.
             customOptionText={i18n.translate(
               'observability.alerting.prometheusFormSection.createGroupOptionText',
               {

@@ -106,6 +106,12 @@ export async function handleCreatePrometheusRule(
   if (existing && existing.rules.length > 0) {
     const siblings = existing.rules.filter((r) => r.name !== payload.name);
     group.rules = [...siblings, ...group.rules];
+    // The evaluation interval is a group-level property shared by all rules.
+    // Preserve the existing group's interval — adding one rule should not
+    // silently change when every sibling is evaluated.
+    if (existing.interval) {
+      group.interval = existing.interval;
+    }
   }
 
   await rulerClient.upsertRuleGroup(client, datasource, USER_RULES_NAMESPACE, group);
