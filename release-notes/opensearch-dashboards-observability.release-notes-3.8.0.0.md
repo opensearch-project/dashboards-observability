@@ -10,7 +10,6 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.8.0
 
 * Add anomaly detection resources (detectors, forecasters) to Alert Manager ([#2721](https://github.com/opensearch-project/dashboards-observability/pull/2721))
 * Add alert banner for legacy experience navigation ([#2772](https://github.com/opensearch-project/dashboards-observability/pull/2772))
-* Onboard new backport-pr reusable GitHub workflow ([#2760](https://github.com/opensearch-project/dashboards-observability/pull/2760))
 * Persist APM time range selection across pages and reloads using session storage ([#2784](https://github.com/opensearch-project/dashboards-observability/pull/2784))
 * Refine SLO suggest page with service-first selection, grouped preview, and UX improvements ([#2783](https://github.com/opensearch-project/dashboards-observability/pull/2783))
 
@@ -29,6 +28,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.8.0
 
 * Update opensearch-build workflow references from commit SHA to main branch ([#2731](https://github.com/opensearch-project/dashboards-observability/pull/2731))
 * Update GitHub actions to use official opensearch-project actions ([#2749](https://github.com/opensearch-project/dashboards-observability/pull/2749))
+* Onboard new backport-pr reusable GitHub workflow ([#2760](https://github.com/opensearch-project/dashboards-observability/pull/2760))
 
 ### Maintenance
 
