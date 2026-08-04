@@ -10,7 +10,13 @@ module.exports = function (api) {
   if (api.env('test')) {
     return {
       presets: [
-        require('@babel/preset-env'),
+        // Explicit modern-Node target for jest — without targets, preset-env
+        // compiles to ES5 and rewrites `**` to Math.pow(), which throws
+        // "Cannot convert a BigInt value to a number" on BigInt
+        // exponentiation in transpiled OSD core sources (e.g. @osd/monaco).
+        // Node 14 (not `current`) keeps newer syntax like class static
+        // blocks transpiled for compatibility across toolchain versions.
+        [require('@babel/preset-env'), { targets: { node: '14' } }],
         require('@babel/preset-react'),
         require('@babel/preset-typescript'),
       ],
