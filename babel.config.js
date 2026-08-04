@@ -10,7 +10,12 @@ module.exports = function (api) {
   if (api.env('test')) {
     return {
       presets: [
-        require('@babel/preset-env'),
+        // Exclude the exponentiation-operator transform: it rewrites `**` to
+        // Math.pow(), which throws on BigInt operands (e.g. `2n ** 63n` in
+        // @osd/monaco's ppl lint code). Tests run in Node, which supports `**`
+        // natively, so the transform is unnecessary here. Excluding just this
+        // one plugin leaves all other preset-env transforms intact.
+        [require('@babel/preset-env'), { exclude: ['transform-exponentiation-operator'] }],
         require('@babel/preset-react'),
         require('@babel/preset-typescript'),
       ],
