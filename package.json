@@ -38,12 +38,12 @@
     "performance-now": "^2.1.0",
     "plotly.js-dist": "^2.35.3",
     "react-graph-vis": "^1.0.7",
-    "vis-network": "^9.1.13",
     "react-paginate": "^8.1.3",
     "react-plotly.js": "^2.6.0",
-    "vis-data": "7.1.6",
-    "vis-util": "^5.0.7",
     "redux-persist": "^6.0.0",
+    "vis-data": "^7.1.2",
+    "vis-network": "^9.1.13",
+    "vis-util": "^5.0.7",
     "sanitize-filename": "^1.6.3"
   },
   "devDependencies": {
