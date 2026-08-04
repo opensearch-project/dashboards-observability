@@ -46,6 +46,8 @@ import { useMonitorDetail } from './hooks/use_monitor_detail';
 import { ConditionPreviewGraph } from './monitor_detail/condition_preview_graph';
 import { humanizeCondition } from './monitor_detail/humanize_condition';
 import { normalizeDuration } from './utils/duration';
+import { observabilityAlertingID } from '../../../common/constants/shared';
+import { coreRefs } from '../../framework/core_refs';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
 
@@ -619,19 +621,53 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 <>
                   <EuiAccordion
                     id={`notification-routing-${monitor.id}`}
-                    buttonContent={<strong>Notification Routing</strong>}
+                    buttonContent={
+                      <strong>
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.notificationRoutingHeader"
+                          defaultMessage="Notification Routing"
+                        />
+                      </strong>
+                    }
                     initialIsOpen={true}
                     paddingSize="m"
                   >
                     <EuiCallOut size="s" iconType="bell" color="primary">
                       <EuiText size="xs">
                         <p>
-                          Notifications for Prometheus alerts are managed through Alertmanager. The{' '}
-                          <strong>labels</strong> on this rule determine which receiver handles the
-                          alert based on the routing configuration.
+                          <FormattedMessage
+                            id="observability.alerting.monitorDetailFlyout.notificationRoutingBody"
+                            defaultMessage="Notifications for Prometheus alerts are managed through Alertmanager. The {labels} on this rule determine which receiver handles the alert based on the routing configuration."
+                            values={{
+                              labels: (
+                                <strong>
+                                  <FormattedMessage
+                                    id="observability.alerting.monitorDetailFlyout.notificationRoutingLabels"
+                                    defaultMessage="labels"
+                                  />
+                                </strong>
+                              ),
+                            }}
+                          />
                         </p>
                         <p>
-                          <EuiLink href="#/routing">Configure notification routing →</EuiLink>
+                          {/* navigateToApp resolves the basepath (bare hash
+                              hrefs don't) — matches the toast_helpers deep-link
+                              pattern */}
+                          <EuiLink
+                            onClick={() => {
+                              coreRefs?.application?.navigateToApp(observabilityAlertingID, {
+                                path: '#/routing',
+                              });
+                              window.dispatchEvent(new HashChangeEvent('hashchange'));
+                            }}
+                            data-test-subj="monitorDetailConfigureRoutingLink"
+                          >
+                            <FormattedMessage
+                              id="observability.alerting.monitorDetailFlyout.configureRoutingLink"
+                              defaultMessage="Configure notification routing →"
+                            />
+                          </EuiLink>
                         </p>
                       </EuiText>
                     </EuiCallOut>

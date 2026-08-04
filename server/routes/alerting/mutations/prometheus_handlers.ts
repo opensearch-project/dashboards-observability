@@ -97,6 +97,12 @@ export async function handleCreatePrometheusRule(
   // Cortex's POST is create-or-replace on (namespace, groupName). Merge with
   // the existing group so sibling rules are preserved — the new rule replaces
   // any same-named rule, others are kept.
+  //
+  // NOTE: this read-modify-write is not atomic. The Cortex ruler API offers
+  // no compare-and-swap, so two concurrent writers targeting the same group
+  // can still lose an update (the second upsert wins). This protects against
+  // the common single-writer clobber; true concurrent safety would need
+  // server-side coordination in Cortex itself.
   const existing = await rulerClient.getRuleGroup(
     client,
     datasource,
@@ -132,6 +138,8 @@ export async function handleDeletePrometheusRule(
   // When a ruleName is provided, splice just that rule out of the group so
   // sibling rules in a shared group are preserved. The whole group is only
   // deleted when it would become empty (or no ruleName was given).
+  // Same non-atomicity caveat as the create-merge above: no CAS on the
+  // Cortex ruler, so concurrent writers to one group can race.
   if (ruleName) {
     const existing = await rulerClient.getRuleGroup(
       client,

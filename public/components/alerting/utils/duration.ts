@@ -18,13 +18,14 @@ export function formatSeconds(sec: number): string {
 
 /**
  * Normalize a duration string like "120s" to the canonical form used in
- * dropdown options ("2m"). Values already in m/h/d format pass through;
- * anything unparseable is returned as-is.
+ * dropdown options ("2m"). Values already in m/h/d format pass through.
+ * Bare numeric strings (e.g. a YAML `for: 0` stringified to "0") are
+ * treated as seconds. Anything unparseable is returned as-is.
  */
 export function normalizeDuration(dur: string, fallback = '5m'): string {
   if (!dur) return fallback;
   if (/^\d+[mhd]$/.test(dur)) return dur;
-  const secMatch = dur.match(/^(\d+)s$/);
+  const secMatch = dur.match(/^(\d+)s?$/);
   if (secMatch) return formatSeconds(parseInt(secMatch[1], 10));
   return dur;
 }

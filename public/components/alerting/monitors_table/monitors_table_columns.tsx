@@ -107,7 +107,7 @@ export function buildTableColumns({
   const allSelectableSelected =
     selectable.length > 0 && selectable.every((item) => selectedIds.has(item.id));
 
-  const cols: Array<Record<string, any>> = [
+  const cols: Array<Record<string, unknown>> = [
     {
       field: '_select',
       name: (
