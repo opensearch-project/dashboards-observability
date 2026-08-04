@@ -306,6 +306,26 @@ describe('PrometheusFormSection — edit mode seeding', () => {
     expect(screen.getByText('api')).toBeInTheDocument();
   });
 
+  it('clears a builder-authored query when the metric is cleared, but never a complex one', () => {
+    const onUpdate = jest.fn();
+    const { container } = render(
+      <PrometheusFormSection
+        form={{ ...baseForm, query: 'up{job="api"}' }}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    // Builder was seeded from the builder-shaped query; clear the metric
+    // via the combo box clear button
+    const clearButtons = container.querySelectorAll('[data-test-subj="comboBoxClearButton"]');
+    expect(clearButtons.length).toBeGreaterThan(0);
+    fireEvent.click(clearButtons[0]);
+
+    expect(onUpdate).toHaveBeenCalledWith('query', '');
+  });
+
   it('does not clobber a complex seeded query on mount', () => {
     const onUpdate = jest.fn();
     render(

@@ -99,8 +99,9 @@ export const PrometheusFormSection: React.FC<{
   // Builder state — seeded from the existing query (edit mode) when the
   // expression has a builder-representable shape. Complex expressions leave
   // the builder empty and untouched, so the seeded query is never clobbered
-  // unless the user explicitly picks a new metric.
-  const seededBuilder = useRef(parseBuilderQuery(form.query)).current;
+  // unless the user explicitly picks a new metric. useState's lazy
+  // initializer parses once on mount instead of on every render.
+  const [seededBuilder] = useState(() => parseBuilderQuery(form.query));
   const [metricOptions, setMetricOptions] = useState<Array<{ label: string }>>([]);
   const [selectedMetric, setSelectedMetric] = useState<Array<{ label: string }>>(
     seededBuilder ? [{ label: seededBuilder.metric }] : []
@@ -230,6 +231,11 @@ export const PrometheusFormSection: React.FC<{
     };
   }, [datasourceId, selectedLabelName, selectedMetric]);
 
+  // Tracks whether the current form.query was authored by the builder. Only
+  // then may clearing the metric clear the query — a complex seeded
+  // expression the builder never produced must not be wiped.
+  const builderOwnsQuery = useRef(false);
+
   // Sync builder selections to the PromQL query
   const syncBuilderToQuery = useCallback(() => {
     if (selectedMetric.length === 0) return;
@@ -241,13 +247,18 @@ export const PrometheusFormSection: React.FC<{
       const labelFilter = `${selectedLabelName[0].label}${labelOperator}"${escapedValue}"`;
       query = `${metric}{${labelFilter}}`;
     }
+    builderOwnsQuery.current = true;
     onUpdate('query', query);
   }, [selectedMetric, selectedLabelName, selectedLabelValue, labelOperator, onUpdate]);
 
-  // Sync when builder field selections change
+  // Sync when builder field selections change; clearing the metric clears a
+  // builder-authored query so the two stay consistent
   useEffect(() => {
     if (selectedMetric.length > 0) {
       syncBuilderToQuery();
+    } else if (builderOwnsQuery.current) {
+      builderOwnsQuery.current = false;
+      onUpdate('query', '');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedMetric, selectedLabelName, selectedLabelValue, labelOperator]);
