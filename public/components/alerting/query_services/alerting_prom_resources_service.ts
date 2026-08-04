@@ -56,6 +56,16 @@ export class AlertingPromResourcesService {
     )) as { values: string[] };
   }
 
+  /** List existing rule group names in the datasource's ruler. */
+  async listRuleGroupNames(): Promise<{ groups: string[] }> {
+    const response = (await this.requireHttp().get(
+      `/api/alerting/prometheus/${encodeURIComponent(this.datasourceId)}/rules`
+    )) as { data?: { groups?: Array<{ name: string }> } };
+    const names = (response.data?.groups || []).map((g) => g.name).filter(Boolean);
+    // De-duplicate while preserving order
+    return { groups: Array.from(new Set(names)) };
+  }
+
   /** Get descriptions/units/types keyed by metric name. */
   async getMetricMetadata(): Promise<{ metadata: PrometheusMetricMetadata[] }> {
     return (await this.requireHttp().get(

@@ -38,6 +38,7 @@ import {
 } from '../../../common/types/alerting';
 import { MonitorsTable } from './monitors_table';
 import { CreateMonitor, MonitorFormState } from './create_monitor';
+import type { PrometheusFormState } from './create_monitor/create_monitor_types';
 import { EditMonitor } from './create_monitor/edit_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
@@ -147,12 +148,14 @@ const TAB_LABELS: Record<TabId, string> = {
   }),
 };
 
-/** Build the payload for Prometheus rule create/edit/clone operations. */
+/**
+ * Build the payload for Prometheus rule create/edit/clone operations.
+ * The PromQL query itself defines the alert condition — no separate
+ * operator/threshold is sent.
+ */
 function buildPrometheusRulePayload(opts: {
   name: string;
   query: string;
-  operator: string;
-  threshold: number;
   forDuration: string;
   evaluationInterval: string;
   labels: Record<string, string>;
@@ -163,8 +166,6 @@ function buildPrometheusRulePayload(opts: {
   return {
     name: opts.name,
     query: opts.query,
-    operator: opts.operator,
-    threshold: opts.threshold,
     forDuration: opts.forDuration,
     evaluationInterval: opts.evaluationInterval,
     labels: opts.labels,
@@ -300,12 +301,13 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   } = useTimeRange();
 
   // ---- Alerts data (migrated off inline fetchAlerts onto useAlerts) ----
-  const { data: alertsData, isLoading: alertsLoading, error: alertsError } = useAlerts({
+  const alertsState = useAlerts({
     dsIds: selectedDsIds,
     startTime,
     endTime,
     refreshToken,
   });
+  const { data: alertsData, isLoading: alertsLoading, error: alertsError } = alertsState;
 
   // Optimistic ack overrides — keyed by alertId. The hook owns the alerts
   // array (single source of truth), so we layer the user's pending acks
@@ -609,33 +611,12 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       }
       try {
         if (rule.datasourceType === 'prometheus') {
-          // Prometheus rules are deleted via the Cortex ruler API using
-          // the group name. Since Cortex deletes the entire group, check
-          // if other rules share this group — if so, warn that siblings
-          // will also be removed. Our create flow uses one rule per group,
-          // but externally-authored groups may contain multiple rules.
+          // Prometheus rules are deleted via the Cortex ruler API. Passing
+          // the rule name makes the server splice just this rule out of the
+          // group, preserving sibling rules in shared groups (the group is
+          // only removed once it becomes empty).
           const groupName = rule.group || rule.name;
-          const siblingsInGroup = rules.filter(
-            (r) =>
-              r.id !== id &&
-              r.datasourceId === rule.datasourceId &&
-              r.datasourceType === 'prometheus' &&
-              (r.group || r.name) === groupName
-          );
-          if (siblingsInGroup.length > 0) {
-            // Multi-rule group: warn via toast but proceed (user already
-            // confirmed via the delete modal). A future enhancement can
-            // implement per-rule splice (read group → remove rule → upsert).
-            addToast(
-              i18n.translate('observability.alerting.alarmsPage.toast.groupDeleteWarning', {
-                defaultMessage:
-                  'Deleting rule group "{groupName}" which contains {count} other rule(s)',
-                values: { groupName, count: siblingsInGroup.length },
-              }),
-              'warning'
-            );
-          }
-          await mutations.deletePrometheusRule(rule.datasourceId, groupName);
+          await mutations.deletePrometheusRule(rule.datasourceId, groupName, rule.name);
         } else {
           await mutations.deleteMonitor(id, rule.datasourceId);
         }
@@ -752,7 +733,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         const clonedName = `${baseName}${suffix}`;
 
         // Extract rule details from the unified shape + raw
-        const raw = ((detail.raw ?? {}) as unknown) as Record<string, unknown>;
+        const rawDetail: unknown = detail.raw ?? {};
+        const raw = rawDetail as Record<string, unknown>;
         const expr = String(raw.query || raw.expr || detail.query || '');
         const rawLabels = (raw.labels || detail.labels || {}) as Record<string, string>;
         const rawAnnotations = (raw.annotations || detail.annotations || {}) as Record<
@@ -801,7 +783,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         return;
       }
 
-      const raw = ((detail.raw ?? {}) as unknown) as Record<string, unknown>;
+      const rawDetail: unknown = detail.raw ?? {};
+      const raw = rawDetail as Record<string, unknown>;
       const {
         id: _id,
         last_update_time: _t,
@@ -894,7 +877,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         pplTriggers: os.pplTriggers,
       });
     }
-    return (form as unknown) as Record<string, unknown>;
+    const formBody: unknown = form;
+    return formBody as Record<string, unknown>;
   };
 
   const handleCreateMonitor = async (formState: MonitorFormState) => {
@@ -904,23 +888,25 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     try {
       if (formState.datasourceType === 'prometheus') {
         // Prometheus rules go to the Cortex ruler API
-        const promForm = formState as import('./create_monitor/create_monitor_types').PrometheusFormState;
-        // Use pendingPeriod from Eval Settings if edited; fall back to threshold.forDuration
-        const resolvedForDuration = promForm.pendingPeriod || promForm.threshold.forDuration;
+        const promForm = formState as PrometheusFormState;
+        // _ruleGroup is a form-transport metadata label, not a real Prometheus
+        // label — extract it into groupName and strip it from persisted labels.
+        const ruleGroupLabel = promForm.labels.find((l) => l.key === '_ruleGroup')?.value;
         const payload = buildPrometheusRulePayload({
           name: promForm.name,
           query: promForm.query,
-          operator: promForm.threshold.operator,
-          threshold: promForm.threshold.value,
-          forDuration: resolvedForDuration,
+          forDuration: promForm.threshold.forDuration,
           evaluationInterval: promForm.evaluationInterval,
           labels: Object.fromEntries(
-            promForm.labels.filter((l) => l.key && l.value).map((l) => [l.key, l.value])
+            promForm.labels
+              .filter((l) => l.key && l.value && l.key !== '_ruleGroup')
+              .map((l) => [l.key, l.value])
           ),
           annotations: Object.fromEntries(
             promForm.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
           ),
           enabled: promForm.enabled,
+          groupName: ruleGroupLabel || promForm.name,
         });
         await mutations.createPrometheusRule(payload, dsId);
 
@@ -961,39 +947,43 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     try {
       if (formState.datasourceType === 'prometheus') {
         // Prometheus rules use upsert semantics — same endpoint as create
-        const promForm = formState as import('./create_monitor/create_monitor_types').PrometheusFormState;
+        const promForm = formState as PrometheusFormState;
 
-        // Detect if the rule was renamed. In our design groupName === ruleName
-        // (1 rule per group). Look up the original rule in the current rules list
-        // Use pendingPeriod from Eval Settings if edited; fall back to threshold.forDuration
-        const resolvedForDuration = promForm.pendingPeriod || promForm.threshold.forDuration;
+        // _ruleGroup is a form-transport metadata label — extract it into
+        // groupName and strip it from persisted labels.
+        const ruleGroupLabel = promForm.labels.find((l) => l.key === '_ruleGroup')?.value;
         const payload = buildPrometheusRulePayload({
           name: promForm.name,
           query: promForm.query,
-          operator: promForm.threshold.operator,
-          threshold: promForm.threshold.value,
-          forDuration: resolvedForDuration,
+          forDuration: promForm.threshold.forDuration,
           evaluationInterval: promForm.evaluationInterval,
           labels: Object.fromEntries(
-            promForm.labels.filter((l) => l.key && l.value).map((l) => [l.key, l.value])
+            promForm.labels
+              .filter((l) => l.key && l.value && l.key !== '_ruleGroup')
+              .map((l) => [l.key, l.value])
           ),
           annotations: Object.fromEntries(
             promForm.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
           ),
           enabled: promForm.enabled,
-          groupName: promForm.name,
+          groupName: ruleGroupLabel || promForm.name,
         });
         // Create new rule first, then delete old on success (prevents data loss
         // if create fails — worst case is a harmless duplicate).
         await mutations.createPrometheusRule(payload, dsId);
 
         const originalRule = rules.find((r) => r.id === ruleId);
-        const originalGroupName = originalRule?.group || originalRule?.name || promForm.name;
-        if (originalGroupName && originalGroupName !== promForm.name) {
+        const originalName = originalRule?.name || promForm.name;
+        const originalGroupName = originalRule?.group || originalName;
+        const newGroupName = ruleGroupLabel || promForm.name;
+        // If the rule was renamed or moved to a different group, remove the
+        // old copy. The rule-level delete splices it out of the old group,
+        // preserving any sibling rules that share the group.
+        if (originalGroupName !== newGroupName || originalName !== promForm.name) {
           try {
-            await mutations.deletePrometheusRule(dsId, originalGroupName);
+            await mutations.deletePrometheusRule(dsId, originalGroupName, originalName);
           } catch {
-            // Orphaned old group — harmless, user can delete manually
+            // Orphaned old rule — harmless, user can delete manually
           }
         }
         // Background refetch to reconcile with Cortex once it propagates
