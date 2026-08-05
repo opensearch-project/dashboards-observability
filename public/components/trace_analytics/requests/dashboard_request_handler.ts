@@ -62,8 +62,8 @@ export const handleDashboardRequest = async (
     latencyTrendDSL,
     getLatencyTrendQuery(),
     mode,
-    setShowTimeoutToast,
-    dataSourceMDSId
+    dataSourceMDSId,
+    setShowTimeoutToast
   )
     .then((response) => {
       const map: any = {};

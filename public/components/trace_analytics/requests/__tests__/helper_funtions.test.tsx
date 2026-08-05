@@ -5,6 +5,7 @@
 
 import { handleError } from '../helper_functions';
 import { handleDslRequest } from '../request_handler';
+import { handleDashboardRequest } from '../dashboard_request_handler';
 import { coreRefs } from '../../../../../public/framework/core_refs';
 import { CoreStart } from '../../../../../../../src/core/public';
 
@@ -274,6 +275,50 @@ describe('Trace Analytics Error Handling', () => {
 
       expect(toast.title).toBe('Error 504');
       expect(toast.text).toContain('Request timed out');
+    });
+  });
+
+  describe('external data source: dataSourceMDSId must be threaded on every request', () => {
+    // Invariant: when an external data source (MDS) is selected, EVERY trace-analytics
+    // query must carry its dataSourceMDSId. A request dispatched without it falls back to
+    // the local cluster on the server (the `else` branch of trace_analytics_dsl_router).
+    // On a deployment with no local cluster this throws "No Living connections" -> HTTP 400.
+    const MDS_ID = 'test-mds-id';
+
+    // Minimal aggregation payload so the .then() handlers in handleDashboardRequest
+    // don't throw before all requests are dispatched.
+    const emptyAggResponse = {
+      aggregations: {
+        trace_group: { buckets: [] },
+        trace_group_name: { buckets: [] },
+      },
+    };
+
+    beforeEach(() => {
+      mockHttp.post.mockResolvedValue(emptyAggResponse as any);
+    });
+
+    it('handleDashboardRequest sends dataSourceMDSId on ALL dispatched requests', async () => {
+      await handleDashboardRequest(
+        mockHttp,
+        {}, // DSL
+        {}, // timeFilterDSL
+        {}, // latencyTrendDSL
+        [], // items
+        jest.fn(), // setItems
+        'data_prepper',
+        undefined, // setShowTimeoutToast
+        MDS_ID,
+        jest.fn() // setPercentileMap
+      );
+
+      // Every http.post issued by the dashboard flow must carry the MDS id.
+      expect(mockHttp.post).toHaveBeenCalled();
+      const callsMissingMdsId = mockHttp.post.mock.calls.filter(
+        ([, options]) => options?.query?.dataSourceMDSId !== MDS_ID
+      );
+
+      expect(callsMissingMdsId).toHaveLength(0);
     });
   });
 });
