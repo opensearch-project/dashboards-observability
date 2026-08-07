@@ -114,6 +114,8 @@ export const TYPE_LABELS: Record<string, string> = {
   forecaster: 'Forecaster',
 };
 
+export const BASE_PPL_ALERTING_SUPPORTED_VERSION = '3.5.0';
+
 // ============================================================================
 // Anomaly detection / forecasting lifecycle helpers
 // ============================================================================

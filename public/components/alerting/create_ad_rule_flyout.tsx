@@ -28,14 +28,12 @@ import {
   EuiSelect,
   EuiTextArea,
   EuiDescriptionList,
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormRow,
   EuiHorizontalRule,
   EuiLink,
   EuiLoadingSpinner,
@@ -428,9 +426,9 @@ const buildFeatureFormState = (
 };
 
 const getFeatureForms = (resource: Record<string, unknown>): CreateAdFeatureFormState[] => {
-  const features = asArray(
-    getField(resource, 'feature_attributes', 'featureAttributes')
-  ).map((feature) => buildFeatureFormState(resource, feature));
+  const features = asArray(getField(resource, 'feature_attributes', 'featureAttributes')).map(
+    (feature) => buildFeatureFormState(resource, feature)
+  );
   return features.length > 0 ? features : [createInitialFeature()];
 };
 
@@ -744,7 +742,9 @@ const validateForm = (
   if (!form.datasourceId) {
     errors.datasourceId = i18n.translate(
       'observability.alerting.createAdRuleFlyout.datasourceRequired',
-      { defaultMessage: 'OpenSearch datasource is required.' }
+      {
+        defaultMessage: 'OpenSearch datasource is required.',
+      }
     );
   }
   if (form.indices.length === 0) {
@@ -755,7 +755,9 @@ const validateForm = (
   if (!form.timeField.trim()) {
     errors.timeField = i18n.translate(
       'observability.alerting.createAdRuleFlyout.timeFieldRequired',
-      { defaultMessage: 'Time field is required.' }
+      {
+        defaultMessage: 'Time field is required.',
+      }
     );
   }
   if (
@@ -764,7 +766,9 @@ const validateForm = (
   ) {
     errors.resultIndex = i18n.translate(
       'observability.alerting.createAdRuleFlyout.resultIndexRequired',
-      { defaultMessage: 'Result index name is required.' }
+      {
+        defaultMessage: 'Result index name is required.',
+      }
     );
   }
   if (form.features.length === 0) {
@@ -818,13 +822,17 @@ const validateForm = (
   if (form.categoryFieldEnabled && form.categoryField.length === 0) {
     errors.categoryField = i18n.translate(
       'observability.alerting.createAdRuleFlyout.categoryFieldRequired',
-      { defaultMessage: 'Select at least one categorical field.' }
+      {
+        defaultMessage: 'Select at least one categorical field.',
+      }
     );
   }
   if (form.categoryField.length > 2) {
     errors.categoryField = i18n.translate(
       'observability.alerting.createAdRuleFlyout.categoryFieldMax',
-      { defaultMessage: 'Select no more than two categorical fields.' }
+      {
+        defaultMessage: 'Select no more than two categorical fields.',
+      }
     );
   }
   if (form.filterQuery.trim()) {
@@ -833,7 +841,9 @@ const validateForm = (
     } catch {
       errors.filterQuery = i18n.translate(
         'observability.alerting.createAdRuleFlyout.filterQueryInvalid',
-        { defaultMessage: 'Filter query must be valid JSON.' }
+        {
+          defaultMessage: 'Filter query must be valid JSON.',
+        }
       );
     }
   }
@@ -850,7 +860,9 @@ const validateForm = (
   if (form.frequency !== '' && frequencyValue === undefined) {
     errors.frequency = i18n.translate(
       'observability.alerting.createAdRuleFlyout.frequencyInvalid',
-      { defaultMessage: 'Frequency must be at least 1 minute.' }
+      {
+        defaultMessage: 'Frequency must be at least 1 minute.',
+      }
     );
   }
   if (
@@ -860,13 +872,17 @@ const validateForm = (
   ) {
     errors.frequency = i18n.translate(
       'observability.alerting.createAdRuleFlyout.frequencyMultipleInvalid',
-      { defaultMessage: 'Frequency must be a multiple of interval.' }
+      {
+        defaultMessage: 'Frequency must be a multiple of interval.',
+      }
     );
   }
   if (form.windowDelay !== '' && windowDelayValue === undefined) {
     errors.windowDelay = i18n.translate(
       'observability.alerting.createAdRuleFlyout.windowDelayInvalid',
-      { defaultMessage: 'Window delay must be a non-negative integer.' }
+      {
+        defaultMessage: 'Window delay must be a non-negative integer.',
+      }
     );
   }
   if (form.history !== '' && historyValue === undefined) {
@@ -877,7 +893,9 @@ const validateForm = (
   if (form.shingleSize < 1 || form.shingleSize > 128) {
     errors.shingleSize = i18n.translate(
       'observability.alerting.createAdRuleFlyout.shingleInvalid',
-      { defaultMessage: 'Shingle size must be between 1 and 128.' }
+      {
+        defaultMessage: 'Shingle size must be between 1 and 128.',
+      }
     );
   }
   return errors;
@@ -894,18 +912,18 @@ const errorsForStep = (
       step === 0
         ? ['name', 'datasourceId', 'indices', 'timeField', 'filterQuery', 'resultIndex']
         : step === 1
-        ? [
-            'features',
-            'categoryField',
-            'interval',
-            'frequency',
-            'windowDelay',
-            'history',
-            'shingleSize',
-          ]
-        : step === 2
-        ? []
-        : Object.keys(errors);
+          ? [
+              'features',
+              'categoryField',
+              'interval',
+              'frequency',
+              'windowDelay',
+              'history',
+              'shingleSize',
+            ]
+          : step === 2
+            ? []
+            : Object.keys(errors);
   } else {
     stepFields =
       step === 0
@@ -919,8 +937,8 @@ const errorsForStep = (
             'categoryField',
           ]
         : step === 1
-        ? ['interval', 'windowDelay', 'history', 'horizon', 'shingleSize']
-        : Object.keys(errors);
+          ? ['interval', 'windowDelay', 'history', 'horizon', 'shingleSize']
+          : Object.keys(errors);
   }
 
   return Object.fromEntries(
@@ -1128,7 +1146,9 @@ const AdTimestampSelector: React.FC<{
         onChange={(options) => onChange(options[0]?.label ?? '')}
         placeholder={i18n.translate(
           'observability.alerting.createAdRuleFlyout.timestampFieldPlaceholder',
-          { defaultMessage: 'Find timestamp' }
+          {
+            defaultMessage: 'Find timestamp',
+          }
         )}
         data-test-subj="alertManagerCreateAdRuleTimestamp"
       />
@@ -1184,7 +1204,9 @@ const FeatureFieldSelector: React.FC<{
         }}
         placeholder={i18n.translate(
           'observability.alerting.createAdRuleFlyout.featureFieldPlaceholder',
-          { defaultMessage: 'Select field' }
+          {
+            defaultMessage: 'Select field',
+          }
         )}
         data-test-subj={dataTestSubj ?? 'alertManagerCreateAdRuleFeatureField'}
       />
@@ -1275,11 +1297,15 @@ const CategoryFieldSelector: React.FC<{
               ruleType === 'detector'
                 ? i18n.translate(
                     'observability.alerting.createAdRuleFlyout.enableDetectorCategory',
-                    { defaultMessage: 'Enable categorical fields' }
+                    {
+                      defaultMessage: 'Enable categorical fields',
+                    }
                   )
                 : i18n.translate(
                     'observability.alerting.createAdRuleFlyout.enableForecasterCategory',
-                    { defaultMessage: 'Split time series using categorical fields' }
+                    {
+                      defaultMessage: 'Split time series using categorical fields',
+                    }
                   )
             }
             checked={enabled}
@@ -1317,7 +1343,9 @@ const CategoryFieldSelector: React.FC<{
                     })
                   : i18n.translate(
                       'observability.alerting.createAdRuleFlyout.forecasterCategoryFieldLabel',
-                      { defaultMessage: 'Categorical fields' }
+                      {
+                        defaultMessage: 'Categorical fields',
+                      }
                     )
               }
               helpText={i18n.translate(
@@ -1341,7 +1369,9 @@ const CategoryFieldSelector: React.FC<{
                 }}
                 placeholder={i18n.translate(
                   'observability.alerting.createAdRuleFlyout.categoryFieldPlaceholder',
-                  { defaultMessage: 'Select your categorical fields' }
+                  {
+                    defaultMessage: 'Select your categorical fields',
+                  }
                 )}
                 data-test-subj="alertManagerCreateAdRuleCategoryField"
               />
@@ -1444,8 +1474,8 @@ const SuggestParametersDialog: React.FC<{
         typeof intervalValue === 'number'
           ? intervalValue
           : typeof frequencyValue === 'number'
-          ? frequencyValue
-          : 10;
+            ? frequencyValue
+            : 10;
 
       const historyValue = payload.history;
       const windowDelayValue = payload.windowDelay?.period?.interval;
@@ -1511,11 +1541,15 @@ const SuggestParametersDialog: React.FC<{
               <EuiFormRow
                 label={i18n.translate(
                   'observability.alerting.createAdRuleFlyout.providedIntervalLabel',
-                  { defaultMessage: 'Detection interval' }
+                  {
+                    defaultMessage: 'Detection interval',
+                  }
                 )}
                 helpText={i18n.translate(
                   'observability.alerting.createAdRuleFlyout.providedIntervalHelp',
-                  { defaultMessage: 'A valid interval is from 1 minute to 30 days.' }
+                  {
+                    defaultMessage: 'A valid interval is from 1 minute to 30 days.',
+                  }
                 )}
               >
                 <EuiFieldNumber
@@ -1525,7 +1559,9 @@ const SuggestParametersDialog: React.FC<{
                   onChange={(e) => setProvidedInterval(e.target.value)}
                   append={i18n.translate(
                     'observability.alerting.createAdRuleFlyout.minutesAppend',
-                    { defaultMessage: 'minutes' }
+                    {
+                      defaultMessage: 'minutes',
+                    }
                   )}
                 />
               </EuiFormRow>
@@ -1706,12 +1742,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
           defaultMessage: 'Edit forecasting rule',
         })
     : isDetector
-    ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorTitle', {
-        defaultMessage: 'Create anomaly detection rule',
-      })
-    : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterTitle', {
-        defaultMessage: 'Create forecasting rule',
-      });
+      ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorTitle', {
+          defaultMessage: 'Create anomaly detection rule',
+        })
+      : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterTitle', {
+          defaultMessage: 'Create forecasting rule',
+        });
   const detectorStepTitles = isEdit
     ? [
         isDetectorModelEdit
@@ -1930,7 +1966,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
         coreRefs.toasts?.addDanger({
           title: i18n.translate(
             'observability.alerting.createAdRuleFlyout.detectorStartAfterEditFailed',
-            { defaultMessage: 'Failed to start detector' }
+            {
+              defaultMessage: 'Failed to start detector',
+            }
           ),
           text: buildErrorMessage(error),
         });
@@ -2005,13 +2043,17 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
           response,
           i18n.translate(
             'observability.alerting.createAdRuleFlyout.forecasterStopForEditFailedMessage',
-            { defaultMessage: 'There was a problem stopping the forecast' }
+            {
+              defaultMessage: 'There was a problem stopping the forecast',
+            }
           )
         );
         coreRefs.toasts?.addSuccess(
           i18n.translate(
             'observability.alerting.createAdRuleFlyout.forecasterStoppedForEditToast',
-            { defaultMessage: 'Successfully stopped the forecast' }
+            {
+              defaultMessage: 'Successfully stopped the forecast',
+            }
           )
         );
         setShouldOfferStartDetectorAfterEdit(false);
@@ -2027,11 +2069,15 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
           ruleType === 'detector'
             ? i18n.translate(
                 'observability.alerting.createAdRuleFlyout.detectorStopForEditFailed',
-                { defaultMessage: 'Failed to stop detector' }
+                {
+                  defaultMessage: 'Failed to stop detector',
+                }
               )
             : i18n.translate(
                 'observability.alerting.createAdRuleFlyout.forecasterStopForEditFailed',
-                { defaultMessage: 'Failed to stop forecast' }
+                {
+                  defaultMessage: 'Failed to stop forecast',
+                }
               ),
         text: message,
       });
@@ -2078,11 +2124,15 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
         ruleType === 'detector'
           ? i18n.translate(
               'observability.alerting.createAdRuleFlyout.detectorRunningUpdateBlocked',
-              { defaultMessage: 'Detector cannot be updated while it is running' }
+              {
+                defaultMessage: 'Detector cannot be updated while it is running',
+              }
             )
           : i18n.translate(
               'observability.alerting.createAdRuleFlyout.forecasterActiveUpdateBlocked',
-              { defaultMessage: 'Forecast cannot be updated while it is active' }
+              {
+                defaultMessage: 'Forecast cannot be updated while it is active',
+              }
             )
       );
       return;
@@ -2140,12 +2190,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               defaultMessage: 'Forecasting rule updated successfully',
             })
         : isDetector
-        ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreatedToast', {
-            defaultMessage: 'Anomaly detection rule created successfully',
-          })
-        : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreatedToast', {
-            defaultMessage: 'Forecasting rule created successfully',
-          });
+          ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreatedToast', {
+              defaultMessage: 'Anomaly detection rule created successfully',
+            })
+          : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreatedToast', {
+              defaultMessage: 'Forecasting rule created successfully',
+            });
 
       if (isEdit && isDetector && shouldOfferStartDetectorAfterEdit && editTarget) {
         setStartAfterEditPrompt({
@@ -2175,12 +2225,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                 defaultMessage: 'Failed to update forecasting rule',
               })
           : isDetector
-          ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreateFailed', {
-              defaultMessage: 'Failed to create anomaly detection rule',
-            })
-          : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreateFailed', {
-              defaultMessage: 'Failed to create forecasting rule',
-            }),
+            ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreateFailed', {
+                defaultMessage: 'Failed to create anomaly detection rule',
+              })
+            : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreateFailed', {
+                defaultMessage: 'Failed to create forecasting rule',
+              }),
         text: message,
       });
     } finally {
@@ -2264,7 +2314,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
             onChange={(e) => updateForm('name', e.target.value)}
             placeholder={i18n.translate(
               'observability.alerting.createAdRuleFlyout.detectorNamePlaceholder',
-              { defaultMessage: 'Enter detector name' }
+              {
+                defaultMessage: 'Enter detector name',
+              }
             )}
             data-test-subj="alertManagerCreateAdRuleName"
           />
@@ -2294,7 +2346,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
             onChange={(e) => updateForm('description', e.target.value)}
             placeholder={i18n.translate(
               'observability.alerting.createAdRuleFlyout.descriptionPlaceholder',
-              { defaultMessage: isDetector ? 'Describe the detector' : 'Describe the forecaster' }
+              {
+                defaultMessage: isDetector ? 'Describe the detector' : 'Describe the forecaster',
+              }
             )}
             rows={3}
             data-test-subj="alertManagerCreateAdRuleDescription"
@@ -2431,7 +2485,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                     id="resultIndexCheckbox"
                     label={i18n.translate(
                       'observability.alerting.createAdRuleFlyout.enableResultIndex',
-                      { defaultMessage: 'Enable custom result index' }
+                      {
+                        defaultMessage: 'Enable custom result index',
+                      }
                     )}
                     checked={form.customResultIndexEnabled}
                     disabled={isEdit}
@@ -2462,7 +2518,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                     <EuiFormRow
                       label={i18n.translate(
                         'observability.alerting.createAdRuleFlyout.resultIndexFieldLabel',
-                        { defaultMessage: 'Field' }
+                        {
+                          defaultMessage: 'Field',
+                        }
                       )}
                       helpText={i18n.translate(
                         'observability.alerting.createAdRuleFlyout.resultIndexHelp',
@@ -2477,6 +2535,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                       <EuiFieldText
                         value={form.resultIndex}
                         prepend={CUSTOM_AD_RESULT_INDEX_PREFIX}
+                        isInvalid={!!visibleErrors.resultIndex}
                         placeholder={i18n.translate(
                           'observability.alerting.createAdRuleFlyout.resultIndexPlaceholder',
                           { defaultMessage: 'Enter result index name' }
@@ -2525,7 +2584,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                   <EuiButtonIcon
                     aria-label={i18n.translate(
                       'observability.alerting.createAdRuleFlyout.deleteFeature',
-                      { defaultMessage: 'Delete feature' }
+                      {
+                        defaultMessage: 'Delete feature',
+                      }
                     )}
                     size="s"
                     iconType="trash"
@@ -2555,10 +2616,13 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               >
                 <EuiFieldText
                   value={feature.featureName}
+                  isInvalid={!!featureNameError}
                   onChange={(e) => updateFeature(index, 'featureName', e.target.value)}
                   placeholder={i18n.translate(
                     'observability.alerting.createAdRuleFlyout.featureNamePlaceholder',
-                    { defaultMessage: 'Enter feature name' }
+                    {
+                      defaultMessage: 'Enter feature name',
+                    }
                   )}
                   data-test-subj={`alertManagerCreateAdRuleFeatureName-${index}`}
                 />
@@ -2750,7 +2814,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               id="detectionInterval"
               placeholder={i18n.translate(
                 'observability.alerting.createAdRuleFlyout.intervalPlaceholder',
-                { defaultMessage: 'Interval' }
+                {
+                  defaultMessage: 'Interval',
+                }
               )}
               value={form.interval}
               min={1}
@@ -2789,7 +2855,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               id="frequency"
               placeholder={i18n.translate(
                 'observability.alerting.createAdRuleFlyout.frequencyPlaceholder',
-                { defaultMessage: 'Frequency' }
+                {
+                  defaultMessage: 'Frequency',
+                }
               )}
               value={form.frequency}
               min={1}
@@ -2824,7 +2892,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               id="windowDelay"
               placeholder={i18n.translate(
                 'observability.alerting.createAdRuleFlyout.windowDelayPlaceholder',
-                { defaultMessage: 'Window delay' }
+                {
+                  defaultMessage: 'Window delay',
+                }
               )}
               value={form.windowDelay}
               min={0}
@@ -2859,7 +2929,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               id="history"
               placeholder={i18n.translate(
                 'observability.alerting.createAdRuleFlyout.historyPlaceholder',
-                { defaultMessage: 'History' }
+                {
+                  defaultMessage: 'History',
+                }
               )}
               value={form.history}
               min={40}
@@ -2925,7 +2997,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                   id="shingleSize"
                   placeholder={i18n.translate(
                     'observability.alerting.createAdRuleFlyout.shingleSizePlaceholder',
-                    { defaultMessage: 'Shingle size' }
+                    {
+                      defaultMessage: 'Shingle size',
+                    }
                   )}
                   value={form.shingleSize}
                   min={1}
@@ -3031,7 +3105,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
           })}
           helpText={i18n.translate(
             'observability.alerting.createAdRuleFlyout.forecastIntervalHelp',
-            { defaultMessage: 'The interval must be at least one minute.' }
+            {
+              defaultMessage: 'The interval must be at least one minute.',
+            }
           )}
           isInvalid={!!visibleErrors.interval}
           error={visibleErrors.interval}
@@ -3212,9 +3288,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
         .filter((feature) => feature.featureName.trim())
         .map(
           (feature) =>
-            `${feature.featureName.trim()}: ${
-              feature.aggregationBy
-            }(${feature.aggregationOf.trim()})`
+            `${feature.featureName.trim()}: ${feature.aggregationBy}(${feature.aggregationOf.trim()})`
         )
         .join(', ') || '-';
     const descriptionItems = [
@@ -3283,7 +3357,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               iconType="alert"
               title={i18n.translate(
                 'observability.alerting.createAdRuleFlyout.reviewValidationTitle',
-                { defaultMessage: 'Some required fields need attention.' }
+                {
+                  defaultMessage: 'Some required fields need attention.',
+                }
               )}
             />
             <EuiSpacer size="m" />
@@ -3323,7 +3399,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                   <h2>
                     {i18n.translate(
                       'observability.alerting.createAdRuleFlyout.stopDetectorToEditTitle',
-                      { defaultMessage: 'Stop detector to proceed?' }
+                      {
+                        defaultMessage: 'Stop detector to proceed?',
+                      }
                     )}
                   </h2>
                 </EuiText>
@@ -3362,7 +3440,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               >
                 {i18n.translate(
                   'observability.alerting.createAdRuleFlyout.stopDetectorProceedButton',
-                  { defaultMessage: 'Stop and proceed to edit' }
+                  {
+                    defaultMessage: 'Stop and proceed to edit',
+                  }
                 )}
               </EuiSmallButton>
             </EuiModalFooter>
@@ -3381,7 +3461,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                   <h2>
                     {i18n.translate(
                       'observability.alerting.createAdRuleFlyout.waitForForecastTestTitle',
-                      { defaultMessage: 'Please wait for test initialization' }
+                      {
+                        defaultMessage: 'Please wait for test initialization',
+                      }
                     )}
                   </h2>
                 </EuiText>
@@ -3394,7 +3476,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                 iconType="clock"
                 title={i18n.translate(
                   'observability.alerting.createAdRuleFlyout.forecastTestInProgressTitle',
-                  { defaultMessage: 'Test in progress' }
+                  {
+                    defaultMessage: 'Test in progress',
+                  }
                 )}
               >
                 <p>
@@ -3413,7 +3497,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               <EuiSmallButton fill color="primary" onClick={handleStopForEditModalCancel}>
                 {i18n.translate(
                   'observability.alerting.createAdRuleFlyout.forecastTestUnderstandButton',
-                  { defaultMessage: 'I understand' }
+                  {
+                    defaultMessage: 'I understand',
+                  }
                 )}
               </EuiSmallButton>
             </EuiModalFooter>
@@ -3445,12 +3531,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
           }
         )
       : isAwaitingDataToInit || isAwaitingDataToRestart
-      ? i18n.translate('observability.alerting.createAdRuleFlyout.cancelForecastToEditTitle', {
-          defaultMessage: 'Cancel forecast to edit?',
-        })
-      : i18n.translate('observability.alerting.createAdRuleFlyout.stopForecastToEditTitle', {
-          defaultMessage: 'Stop forecast to edit?',
-        });
+        ? i18n.translate('observability.alerting.createAdRuleFlyout.cancelForecastToEditTitle', {
+            defaultMessage: 'Cancel forecast to edit?',
+          })
+        : i18n.translate('observability.alerting.createAdRuleFlyout.stopForecastToEditTitle', {
+            defaultMessage: 'Stop forecast to edit?',
+          });
     const forecastModalDescription = (() => {
       if (isInitializingForecast) {
         return i18n.translate(
@@ -3506,7 +3592,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                   iconType="alert"
                   title={i18n.translate(
                     'observability.alerting.createAdRuleFlyout.forecastEditWipeWarningTitle',
-                    { defaultMessage: 'Editing forecast will wipe historical visualizations' }
+                    {
+                      defaultMessage: 'Editing forecast will wipe historical visualizations',
+                    }
                   )}
                 >
                   <p>
@@ -3557,7 +3645,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
         iconType="check"
         title={i18n.translate(
           'observability.alerting.createAdRuleFlyout.detectorUpdatedStartPromptTitle',
-          { defaultMessage: 'Anomaly detection rule updated' }
+          {
+            defaultMessage: 'Anomaly detection rule updated',
+          }
         )}
       >
         <p>
@@ -3618,14 +3708,14 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                     }
                   )
               : isDetector
-              ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorSubtitle', {
-                  defaultMessage:
-                    'Create an anomaly detection rule using the same model definition fields from the AD workflow.',
-                })
-              : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterSubtitle', {
-                  defaultMessage:
-                    'Create a forecasting rule using the same data source and model parameter fields from the Forecasting workflow.',
-                })}
+                ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorSubtitle', {
+                    defaultMessage:
+                      'Create an anomaly detection rule using the same model definition fields from the AD workflow.',
+                  })
+                : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterSubtitle', {
+                    defaultMessage:
+                      'Create a forecasting rule using the same data source and model parameter fields from the Forecasting workflow.',
+                  })}
           </EuiText>
         </EuiFlyoutHeader>
 
@@ -3636,7 +3726,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               iconType="alert"
               title={i18n.translate(
                 'observability.alerting.createAdRuleFlyout.noOpenSearchDatasourceTitle',
-                { defaultMessage: 'Select an OpenSearch datasource to create this rule.' }
+                {
+                  defaultMessage: 'Select an OpenSearch datasource to create this rule.',
+                }
               )}
             />
           ) : isEdit && !isEditFormReady && !editDetailError ? (
@@ -3682,7 +3774,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                     {startAfterEditPrompt
                       ? i18n.translate(
                           'observability.alerting.createAdRuleFlyout.startDetectorAfterEditTitle',
-                          { defaultMessage: 'Start detector' }
+                          {
+                            defaultMessage: 'Start detector',
+                          }
                         )
                       : stepTitles[currentStep]}
                   </h1>
@@ -3704,7 +3798,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                 >
                   {i18n.translate(
                     'observability.alerting.createAdRuleFlyout.closeAfterEditButton',
-                    { defaultMessage: 'Close' }
+                    {
+                      defaultMessage: 'Close',
+                    }
                   )}
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -3722,7 +3818,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                 >
                   {i18n.translate(
                     'observability.alerting.createAdRuleFlyout.startDetectorAfterEditButton',
-                    { defaultMessage: 'Start detector' }
+                    {
+                      defaultMessage: 'Start detector',
+                    }
                   )}
                 </EuiButton>
               </EuiFlexItem>

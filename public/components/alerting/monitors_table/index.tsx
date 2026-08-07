@@ -224,7 +224,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   // a supported OS DS is undefined, Metrics without a Prometheus DS is
   // undefined. Gate both so the user can't enter a flyout that will silently
   // re-default the datasource on them.
-  const [logsCreateDisabled, logsDisabledReason] = useMemo(() => {
+  const [logsCreateDisabled] = useMemo(() => {
     if (selectedDatasources.length === 0) return [true, 'no_selection'] as const;
     const osSelected = selectedDatasources.filter((d) => d.type === 'opensearch');
     if (osSelected.length === 0) return [true, 'no_os_datasource'] as const;

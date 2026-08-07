@@ -55,8 +55,7 @@ import {
  */
 export function extractTimestampField(query: Record<string, unknown>): string | undefined {
   const innerQuery = (query as Record<string, unknown>).query as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   const target = innerQuery || query;
   const bool = target?.bool as Record<string, unknown> | undefined;
   if (!bool) return undefined;
@@ -861,7 +860,7 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
   } else {
     // query-level: derive from index patterns. See LOG_INDEX_PREFIXES /
     // APM_INDEX_PREFIXES at module scope for the schema list.
-    const indices = input && 'search' in input ? input.search.indices ?? [] : [];
+    const indices = input && 'search' in input ? (input.search.indices ?? []) : [];
     monitorType = inferMonitorTypeFromIndices(indices);
   }
 
