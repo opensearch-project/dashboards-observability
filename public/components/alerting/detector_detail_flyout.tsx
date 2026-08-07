@@ -214,11 +214,11 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
   onStop,
 }) => {
   const [lifecycleAction, setLifecycleAction] = useState<'start' | 'stop' | null>(null);
-  const { data: detail, isLoading, error } = useRuleDetail(
-    detector.datasourceId,
-    detector.id,
-    'detector'
-  );
+  const {
+    data: detail,
+    isLoading,
+    error,
+  } = useRuleDetail(detector.datasourceId, detector.id, 'detector');
   const rawDetector = (detail?.raw as ADDetector | undefined) || detectorFromSummary(detector);
   const description =
     detail?.description || rawDetector.description || detector.annotations.description || '';
@@ -454,21 +454,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.name',
-                      { defaultMessage: 'Name' }
+                      {
+                        defaultMessage: 'Name',
+                      }
                     ),
                     description: detector.name,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.detectorType',
-                      { defaultMessage: 'Detector type' }
+                      {
+                        defaultMessage: 'Detector type',
+                      }
                     ),
                     description: detectorType,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.dataSourceIndex',
-                      { defaultMessage: 'Data source index' }
+                      {
+                        defaultMessage: 'Data source index',
+                      }
                     ),
                     description: formatList(rawDetector.indices),
                   },
@@ -484,21 +490,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.timestamp',
-                      { defaultMessage: 'Timestamp' }
+                      {
+                        defaultMessage: 'Timestamp',
+                      }
                     ),
                     description: stringValue(rawDetector.time_field),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.lastUpdated',
-                      { defaultMessage: 'Last updated' }
+                      {
+                        defaultMessage: 'Last updated',
+                      }
                     ),
                     description: formatTimestamp(rawDetector.last_update_time),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.customResultIndex',
-                      { defaultMessage: 'Custom result index' }
+                      {
+                        defaultMessage: 'Custom result index',
+                      }
                     ),
                     description: resultIndex,
                   },
@@ -572,21 +584,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.operational.detectorInterval',
-                      { defaultMessage: 'Detector interval' }
+                      {
+                        defaultMessage: 'Detector interval',
+                      }
                     ),
                     description: detectorIntervalDisplay,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.operational.windowDelay',
-                      { defaultMessage: 'Window delay' }
+                      {
+                        defaultMessage: 'Window delay',
+                      }
                     ),
                     description: formatPeriod(rawDetector.window_delay),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.operational.frequency',
-                      { defaultMessage: 'Frequency' }
+                      {
+                        defaultMessage: 'Frequency',
+                      }
                     ),
                     description:
                       frequencyDisplay === EMPTY_VALUE ? detectorIntervalDisplay : frequencyDisplay,
@@ -594,7 +612,9 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.operational.history',
-                      { defaultMessage: 'History' }
+                      {
+                        defaultMessage: 'History',
+                      }
                     ),
                     description: rawDetector.history
                       ? i18n.translate(
@@ -632,21 +652,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.additional.categoryField',
-                      { defaultMessage: 'Category field' }
+                      {
+                        defaultMessage: 'Category field',
+                      }
                     ),
                     description: categoryField,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.additional.shingleSize',
-                      { defaultMessage: 'Shingle size' }
+                      {
+                        defaultMessage: 'Shingle size',
+                      }
                     ),
                     description: String(shingleSize),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.additional.imputationMethod',
-                      { defaultMessage: 'Imputation method' }
+                      {
+                        defaultMessage: 'Imputation method',
+                      }
                     ),
                     description: buildImputationDisplay(rawDetector),
                   },
@@ -676,21 +702,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.job.realTimeJob',
-                      { defaultMessage: 'Real-time job' }
+                      {
+                        defaultMessage: 'Real-time job',
+                      }
                     ),
                     description: realTimeJobDisplay,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.job.enabledTime',
-                      { defaultMessage: 'Enabled time' }
+                      {
+                        defaultMessage: 'Enabled time',
+                      }
                     ),
                     description: formatTimestamp(detectorJob.enabled_time),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.job.disabledTime',
-                      { defaultMessage: 'Disabled time' }
+                      {
+                        defaultMessage: 'Disabled time',
+                      }
                     ),
                     description: formatTimestamp(detectorJob.disabled_time),
                   },

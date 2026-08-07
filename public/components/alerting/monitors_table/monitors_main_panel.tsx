@@ -37,13 +37,14 @@ import { MonitorDetailFlyout } from '../monitor_detail_flyout';
 import { isAdResourceRunning } from '../shared_constants';
 import { isDetectorDefinition, isForecasterDefinition } from './monitors_table_columns';
 import { MonitorsEuiTable } from './monitors_eui_table';
+import type { MonitorsEuiTableProps } from './monitors_eui_table';
 
 export interface MonitorsMainPanelProps {
   // Data
   rules: UnifiedRuleSummary[];
   filtered: UnifiedRuleSummary[];
   loading: boolean;
-  tableColumns: any[];
+  tableColumns: MonitorsEuiTableProps['columns'];
   rowProps: (item: UnifiedRuleSummary) => React.HTMLAttributes<HTMLTableRowElement>;
   tableWrapperRef: React.RefObject<HTMLDivElement | null>;
 

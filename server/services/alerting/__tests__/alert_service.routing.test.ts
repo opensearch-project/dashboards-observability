@@ -134,7 +134,7 @@ describe('MultiBackendAlertService — routing & list', () => {
         value: '',
       },
     ]);
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     const response = await svc.getUnifiedAlerts(resolver);
     expect(response.results).toHaveLength(2);
     expect(response.totalDatasources).toBe(2);
@@ -249,7 +249,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       async () =>
         ({
           transport: { request: transportRequest },
-        } as never),
+        }) as never,
       { dsIds: ['ds-os'] }
     );
 
@@ -365,7 +365,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       async () =>
         ({
           transport: { request: transportRequest },
-        } as never),
+        }) as never,
       { dsIds: ['ds-os'] }
     );
 
@@ -475,7 +475,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       async () =>
         ({
           transport: { request: transportRequest },
-        } as never),
+        }) as never,
       { dsIds: ['ds-os'], startTime: 'now-24h', endTime: 'now' }
     );
 
@@ -487,7 +487,7 @@ describe('MultiBackendAlertService — routing & list', () => {
   it('getUnifiedAlerts isolates errors per datasource', async () => {
     mockOsBackend.getAlerts.mockRejectedValueOnce(new Error('OS down'));
     mockPromBackend.getAlerts.mockResolvedValueOnce([]);
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     const response = await svc.getUnifiedAlerts(resolver);
     // Prom succeeded, OS failed — still returns results
     expect(response.completedDatasources).toBe(1);
@@ -497,7 +497,7 @@ describe('MultiBackendAlertService — routing & list', () => {
   // ---- getUnifiedRules ----
   it('getUnifiedRules filters by dsIds when provided', async () => {
     mockPromBackend.getRuleGroups.mockResolvedValueOnce([]);
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     const response = await svc.getUnifiedRules(resolver, { dsIds: ['ds-prom'] });
     // Only prom datasource should be fetched
     expect(response.totalDatasources).toBe(1);
@@ -544,7 +544,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       async () =>
         ({
           transport: { request: transportRequest },
-        } as never),
+        }) as never,
       { dsIds: ['ds-os'] }
     );
 
@@ -563,7 +563,7 @@ describe('MultiBackendAlertService — routing & list', () => {
     const disabledDs = { ...promDatasource, enabled: false };
     mockDsSvc.list.mockResolvedValueOnce([osDatasource, disabledDs]);
     mockOsBackend.getAlerts.mockResolvedValueOnce({ alerts: [], totalAlerts: 0, truncated: false });
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     const response = await svc.getUnifiedAlerts(resolver);
     expect(response.totalDatasources).toBe(1);
   });
@@ -577,7 +577,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       truncated: false,
     });
     mockPromBackend.getAlerts.mockResolvedValueOnce([]);
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     await svc.getUnifiedAlerts(resolver, {
       startTime: 'now-1h',
       endTime: 'now',
@@ -599,7 +599,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       truncated: false,
     });
     mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     await svc.getUnifiedAlerts(
       resolver,
       {
@@ -624,7 +624,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       truncated: false,
     });
     mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     await svc.getUnifiedAlerts(
       resolver,
       {
@@ -649,7 +649,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       truncated: false,
     });
     mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     await svc.getUnifiedAlerts(
       resolver,
       {
@@ -669,7 +669,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       truncated: false,
     });
     mockPromBackend.getAlerts.mockResolvedValueOnce([]);
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     await svc.getUnifiedAlerts(resolver);
     // OS backend: called with no options (range) — check first arg only
     expect(mockOsBackend.getAlerts).toHaveBeenCalledWith(expect.anything());
@@ -685,7 +685,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       truncated: true,
     });
     mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({ alerts: [] });
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     const response = await svc.getUnifiedAlerts(resolver, {
       startTime: 'now-1h',
       endTime: 'now',
@@ -732,7 +732,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       async () =>
         ({
           transport: { request: transportRequest },
-        } as never),
+        }) as never,
       { dsIds: ['ds-os'], startTime: 'now-1h', endTime: 'now' }
     );
 
@@ -766,7 +766,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       async () =>
         ({
           transport: { request: transportRequest },
-        } as never),
+        }) as never,
       { dsIds: ['ds-os'] }
     );
 
@@ -802,7 +802,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       async () =>
         ({
           transport: { request: transportRequest },
-        } as never),
+        }) as never,
       { dsIds: ['ds-os'] }
     );
 
@@ -820,7 +820,7 @@ describe('MultiBackendAlertService — routing & list', () => {
     // unified request. `Promise.allSettled` should catch it and surface
     // the message on the affected datasource's status entry while
     // healthy datasources keep their success path.
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     // Expect no throw. This drives the expectation that the error is
     // captured at the per-datasource boundary. The exact surfacing
     // mechanism is tested downstream — here we only assert the request
@@ -843,7 +843,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       alerts: [],
       fallback: 'prometheus-alerts-current-only',
     });
-    const resolver = jest.fn(async () => ({} as never));
+    const resolver = jest.fn(async () => ({}) as never);
     const response = await svc.getUnifiedAlerts(resolver, {
       startTime: 'now-1h',
       endTime: 'now',

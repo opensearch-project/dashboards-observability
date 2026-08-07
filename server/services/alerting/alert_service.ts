@@ -200,8 +200,9 @@ function getErrorType(value: unknown): string | undefined {
   };
   if (typeof typedError.type === 'string') return typedError.type;
 
-  const rootCauseType = typedError.root_cause?.find((cause) => typeof cause.type === 'string')
-    ?.type;
+  const rootCauseType = typedError.root_cause?.find(
+    (cause) => typeof cause.type === 'string'
+  )?.type;
   if (rootCauseType) return rootCauseType;
 
   return typeof typedError.reason === 'string' ? typedError.reason : undefined;
@@ -578,9 +579,7 @@ export class MultiBackendAlertService {
 
     if (allRules.length === 0 && warnings.length === datasources.length && datasources.length > 0) {
       throw new Error(
-        `All datasources failed: ${warnings
-          .map((w) => `${w.datasourceName}: ${w.error}`)
-          .join('; ')}`
+        `All datasources failed: ${warnings.map((w) => `${w.datasourceName}: ${w.error}`).join('; ')}`
       );
     }
 
@@ -639,9 +638,7 @@ export class MultiBackendAlertService {
       datasources.length > 0
     ) {
       throw new Error(
-        `All datasources failed: ${warnings
-          .map((w) => `${w.datasourceName}: ${w.error}`)
-          .join('; ')}`
+        `All datasources failed: ${warnings.map((w) => `${w.datasourceName}: ${w.error}`).join('; ')}`
       );
     }
 
@@ -830,22 +827,18 @@ export class MultiBackendAlertService {
   ): Promise<FetchAlertsRawResult> {
     if (ds.type === 'opensearch' && this.osBackend) {
       const partialErrors: string[] = [];
-      const [
-        alertSettled,
-        anomalySettled,
-        detectorSettled,
-        monitorSettled,
-      ] = await Promise.allSettled([
-        range
-          ? this.osBackend.getAlerts(client, {
-              startMs: range.startMs,
-              endMs: range.endMs,
-            })
-          : this.osBackend.getAlerts(client),
-        this.fetchADAnomalies(client, range),
-        this.fetchADDetectors(client),
-        this.osBackend.getMonitors(client),
-      ] as const);
+      const [alertSettled, anomalySettled, detectorSettled, monitorSettled] =
+        await Promise.allSettled([
+          range
+            ? this.osBackend.getAlerts(client, {
+                startMs: range.startMs,
+                endMs: range.endMs,
+              })
+            : this.osBackend.getAlerts(client),
+          this.fetchADAnomalies(client, range),
+          this.fetchADDetectors(client),
+          this.osBackend.getMonitors(client),
+        ] as const);
 
       if (alertSettled.status === 'rejected') {
         throw alertSettled.reason;

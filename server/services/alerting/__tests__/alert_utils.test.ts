@@ -223,7 +223,7 @@ describe('osAlertToUnified', () => {
 
 describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
   function buildMonitor(indices: string[]): OSMonitor {
-    return ({
+    return {
       id: 'mon-1',
       type: 'monitor',
       monitor_type: 'query_level_monitor',
@@ -240,7 +240,7 @@ describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
       ],
       triggers: [],
       last_update_time: 1700000000000,
-    } as unknown) as OSMonitor;
+    } as unknown as OSMonitor;
   }
 
   it.each([['logs-2024.01.15'], ['logs-prod-app'], ['ss4o_logs-myapp'], ['ss4o_logs']])(
