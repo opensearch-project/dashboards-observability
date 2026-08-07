@@ -34,16 +34,17 @@ import { DeleteModal } from '../../common/helpers/delete_modal';
 import { DetectorDetailFlyout } from '../detector_detail_flyout';
 import { ForecasterDetailFlyout } from '../forecaster_detail_flyout';
 import { MonitorDetailFlyout } from '../monitor_detail_flyout';
+import { isAdResourceRunning } from '../shared_constants';
 import { isDetectorDefinition, isForecasterDefinition } from './monitors_table_columns';
 import { MonitorsEuiTable } from './monitors_eui_table';
+import type { MonitorsEuiTableProps } from './monitors_eui_table';
 
 export interface MonitorsMainPanelProps {
   // Data
   rules: UnifiedRuleSummary[];
   filtered: UnifiedRuleSummary[];
   loading: boolean;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- EuiInMemoryTable column type is complex
-  tableColumns: any[];
+  tableColumns: MonitorsEuiTableProps['columns'];
   rowProps: (item: UnifiedRuleSummary) => React.HTMLAttributes<HTMLTableRowElement>;
   tableWrapperRef: React.RefObject<HTMLDivElement | null>;
 
@@ -65,7 +66,7 @@ export interface MonitorsMainPanelProps {
   setSelectedIds: React.Dispatch<React.SetStateAction<Set<string>>>;
 
   // Create
-  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics') => void;
+  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'detector' | 'forecaster') => void;
   /**
    * When true, the "Logs" popover entry is disabled with a hint that an
    * OpenSearch datasource is needed. Triggered when the parent's selection
@@ -78,6 +79,17 @@ export interface MonitorsMainPanelProps {
    * Metrics monitor can't be created without changing the selection.
    */
   metricsCreateDisabled?: boolean;
+  /**
+   * Detector authoring uses the AD plugin flow, which only targets
+   * OpenSearch datasources.
+   */
+  detectorCreateDisabled?: boolean;
+  /**
+   * Forecaster authoring uses the Forecasting plugin flow, which only targets
+   * OpenSearch datasources. Kept separate from detectorCreateDisabled so the
+   * two rule types can diverge if their backend support rules differ.
+   */
+  forecasterCreateDisabled?: boolean;
   /**
    * The parent's datasource filter is empty. Distinguishes the empty-state
    * "No monitors configured yet" copy from "Select a datasource to see
@@ -99,6 +111,11 @@ export interface MonitorsMainPanelProps {
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
   onEdit?: (monitor: UnifiedRuleSummary) => void;
+  onEditDetectorSettings?: (detector: UnifiedRuleSummary) => void;
+  onEditDetectorFeatures?: (detector: UnifiedRuleSummary) => void;
+  onEditForecaster?: (forecaster: UnifiedRuleSummary) => void;
+  onStartResources?: (resources: UnifiedRuleSummary[]) => Promise<void> | void;
+  onStopResources?: (resources: UnifiedRuleSummary[]) => Promise<void> | void;
   /**
    * Forwarded to {@link MonitorDetailFlyout.onToggleEnabled}. Page provides
    * an awaitable handler that PUTs the monitor with `enabled` flipped; the
@@ -129,6 +146,8 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   onCreateMonitor,
   logsCreateDisabled = false,
   metricsCreateDisabled = false,
+  detectorCreateDisabled = false,
+  forecasterCreateDisabled = false,
   noDatasourceSelected = false,
   showCreatePopover,
   setShowCreatePopover,
@@ -140,8 +159,22 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   onDelete,
   onClone,
   onEdit,
+  onEditDetectorSettings,
+  onEditDetectorFeatures,
+  onEditForecaster,
+  onStartResources,
+  onStopResources,
   onToggleEnabled,
 }) => {
+  const selectedRules = filtered.filter((rule) => selectedIds.has(rule.id));
+  const selectedAdResources = selectedRules.filter(
+    (rule) => isDetectorDefinition(rule) || isForecasterDefinition(rule)
+  );
+  const selectedStartableResources = selectedAdResources.filter(
+    (resource) => !isAdResourceRunning(resource)
+  );
+  const selectedStoppableResources = selectedAdResources.filter(isAdResourceRunning);
+
   return (
     <>
       <EuiPanel
@@ -166,10 +199,11 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                       iconType="plusInCircle"
                       size="s"
                       onClick={() => setShowCreatePopover((prev) => !prev)}
+                      data-test-subj="alertManagerCreateResourceButton"
                     >
                       <FormattedMessage
                         id="observability.alerting.monitorsTable.mainPanel.createMonitor"
-                        defaultMessage="Create alert rule"
+                        defaultMessage="Create"
                       />
                     </EuiButton>
                   }
@@ -178,7 +212,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   panelPaddingSize="none"
                   anchorPosition="downRight"
                 >
-                  <EuiListGroup flush style={{ width: 200 }}>
+                  <EuiListGroup flush style={{ width: 220 }}>
                     {logsCreateDisabled ? (
                       <EuiToolTip
                         position="left"
@@ -194,7 +228,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           label={i18n.translate(
                             'observability.alerting.monitorsTable.mainPanel.logsOption',
                             {
-                              defaultMessage: 'Logs',
+                              defaultMessage: 'Logs alert rule',
                             }
                           )}
                           isDisabled
@@ -211,7 +245,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                         label={i18n.translate(
                           'observability.alerting.monitorsTable.mainPanel.logsOption',
                           {
-                            defaultMessage: 'Logs',
+                            defaultMessage: 'Logs alert rule',
                           }
                         )}
                         onClick={() => {
@@ -241,7 +275,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           label={i18n.translate(
                             'observability.alerting.monitorsTable.mainPanel.metricsOption',
                             {
-                              defaultMessage: 'Metrics',
+                              defaultMessage: 'Metrics alert rule',
                             }
                           )}
                           isDisabled
@@ -258,7 +292,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                         label={i18n.translate(
                           'observability.alerting.monitorsTable.mainPanel.metricsOption',
                           {
-                            defaultMessage: 'Metrics',
+                            defaultMessage: 'Metrics alert rule',
                           }
                         )}
                         onClick={() => {
@@ -269,6 +303,100 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
                           {
                             defaultMessage: 'Create metrics rule',
+                          }
+                        )}
+                      />
+                    )}
+                    {detectorCreateDisabled ? (
+                      <EuiToolTip
+                        position="left"
+                        content={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.detectorDisabledTooltip',
+                          {
+                            defaultMessage:
+                              'Anomaly detection rules require an OpenSearch datasource. Select one to enable.',
+                          }
+                        )}
+                      >
+                        <EuiListGroupItem
+                          label={i18n.translate(
+                            'observability.alerting.monitorsTable.mainPanel.detectorOption',
+                            {
+                              defaultMessage: 'Anomaly detection rule',
+                            }
+                          )}
+                          isDisabled
+                          aria-label={i18n.translate(
+                            'observability.alerting.monitorsTable.mainPanel.createDetectorAriaLabel',
+                            {
+                              defaultMessage: 'Create anomaly detection rule',
+                            }
+                          )}
+                        />
+                      </EuiToolTip>
+                    ) : (
+                      <EuiListGroupItem
+                        label={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.detectorOption',
+                          {
+                            defaultMessage: 'Anomaly detection rule',
+                          }
+                        )}
+                        onClick={() => {
+                          setShowCreatePopover(false);
+                          onCreateMonitor('detector');
+                        }}
+                        aria-label={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.createDetectorAriaLabel',
+                          {
+                            defaultMessage: 'Create anomaly detection rule',
+                          }
+                        )}
+                      />
+                    )}
+                    {forecasterCreateDisabled ? (
+                      <EuiToolTip
+                        position="left"
+                        content={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.forecasterDisabledTooltip',
+                          {
+                            defaultMessage:
+                              'Forecasting rules require an OpenSearch datasource. Select one to enable.',
+                          }
+                        )}
+                      >
+                        <EuiListGroupItem
+                          label={i18n.translate(
+                            'observability.alerting.monitorsTable.mainPanel.forecasterOption',
+                            {
+                              defaultMessage: 'Forecasting rule',
+                            }
+                          )}
+                          isDisabled
+                          aria-label={i18n.translate(
+                            'observability.alerting.monitorsTable.mainPanel.createForecasterAriaLabel',
+                            {
+                              defaultMessage: 'Create forecasting rule',
+                            }
+                          )}
+                        />
+                      </EuiToolTip>
+                    ) : (
+                      <EuiListGroupItem
+                        label={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.forecasterOption',
+                          {
+                            defaultMessage: 'Forecasting rule',
+                          }
+                        )}
+                        onClick={() => {
+                          setShowCreatePopover(false);
+                          onCreateMonitor('forecaster');
+                        }}
+                        aria-label={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.createForecasterAriaLabel',
+                          {
+                            defaultMessage: 'Create forecasting rule',
                           }
                         )}
                       />
@@ -385,6 +513,42 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
+                {selectedStartableResources.length > 0 && onStartResources && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      iconType="play"
+                      onClick={() => {
+                        void onStartResources(selectedStartableResources);
+                      }}
+                      data-test-subj="alertManagerStartSelectedResources"
+                    >
+                      <FormattedMessage
+                        id="observability.alerting.monitorsTable.mainPanel.startSelectedButton"
+                        defaultMessage="Start ({count})"
+                        values={{ count: selectedStartableResources.length }}
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+                {selectedStoppableResources.length > 0 && onStopResources && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      size="s"
+                      iconType="cross"
+                      onClick={() => {
+                        void onStopResources(selectedStoppableResources);
+                      }}
+                      data-test-subj="alertManagerStopSelectedResources"
+                    >
+                      <FormattedMessage
+                        id="observability.alerting.monitorsTable.mainPanel.stopSelectedButton"
+                        defaultMessage="Stop ({count})"
+                        values={{ count: selectedStoppableResources.length }}
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
                 {selectedIds.size > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiButton
@@ -485,14 +649,14 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       {showDeleteConfirm && (
         <DeleteModal
           title={i18n.translate('observability.alerting.monitorsTable.mainPanel.deleteModalTitle', {
-            defaultMessage: 'Delete {count} {count, plural, one {rule} other {rules}}?',
+            defaultMessage:
+              'Delete {count} selected {count, plural, one {resource} other {resources}}?',
             values: { count: selectedIds.size },
           })}
           message={i18n.translate(
             'observability.alerting.monitorsTable.mainPanel.deleteModalMessage',
             {
-              defaultMessage:
-                'This will remove the selected {count, plural, one {monitor} other {monitors}} from the current view.',
+              defaultMessage: 'This will remove the selected resources from Alerts Manager.',
               values: { count: selectedIds.size },
             }
           )}
@@ -503,11 +667,21 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
 
       {/* Rule / detector detail flyout */}
       {selectedMonitor && isDetectorDefinition(selectedMonitor) ? (
-        <DetectorDetailFlyout detector={selectedMonitor} onClose={() => setSelectedMonitor(null)} />
+        <DetectorDetailFlyout
+          detector={selectedMonitor}
+          onClose={() => setSelectedMonitor(null)}
+          onEditSettings={onEditDetectorSettings}
+          onEditFeatures={onEditDetectorFeatures}
+          onStart={onStartResources ? (detector) => onStartResources([detector]) : undefined}
+          onStop={onStopResources ? (detector) => onStopResources([detector]) : undefined}
+        />
       ) : selectedMonitor && isForecasterDefinition(selectedMonitor) ? (
         <ForecasterDetailFlyout
           forecaster={selectedMonitor}
           onClose={() => setSelectedMonitor(null)}
+          onEdit={onEditForecaster}
+          onStart={onStartResources ? (forecaster) => onStartResources([forecaster]) : undefined}
+          onStop={onStopResources ? (forecaster) => onStopResources([forecaster]) : undefined}
         />
       ) : selectedMonitor ? (
         <MonitorDetailFlyout

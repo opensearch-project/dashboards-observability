@@ -107,4 +107,27 @@ describe('ForecasterDetailFlyout', () => {
     expect(screen.getByText('24')).toBeInTheDocument();
     expect(useRuleDetailMock).toHaveBeenCalledWith('ds-1', 'forecast-1', 'forecaster');
   });
+
+  it('calls edit handler from forecaster quick action', () => {
+    const onEdit = jest.fn();
+    useRuleDetailMock.mockReturnValue({
+      data: forecasterDetail(),
+      isLoading: false,
+      error: null,
+    });
+
+    render(
+      <I18nProvider>
+        <ForecasterDetailFlyout
+          forecaster={forecasterSummary}
+          onClose={jest.fn()}
+          onEdit={onEdit}
+        />
+      </I18nProvider>
+    );
+
+    screen.getByTestId('alertManagerForecasterDetailEdit').click();
+
+    expect(onEdit).toHaveBeenCalledWith(forecasterSummary);
+  });
 });

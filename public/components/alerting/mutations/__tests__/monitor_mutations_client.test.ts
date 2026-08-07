@@ -72,6 +72,48 @@ describe('MonitorMutationsClient', () => {
     });
   });
 
+  describe('detector lifecycle', () => {
+    it('uses the AD detector lifecycle routes with encoded ids', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: true });
+      mockPost.mockResolvedValue({ ok: true });
+
+      await client.deleteDetector('det/1', 'ds 1');
+      await client.startDetector('det/1', 'ds 1');
+      await client.stopDetector('det/1', 'ds 1');
+
+      expect(mockDelete).toHaveBeenCalledWith('/api/anomaly_detectors/detectors/det%2F1/ds%201');
+      expect(mockPost).toHaveBeenNthCalledWith(
+        1,
+        '/api/anomaly_detectors/detectors/det%2F1/start/ds%201'
+      );
+      expect(mockPost).toHaveBeenNthCalledWith(
+        2,
+        '/api/anomaly_detectors/detectors/det%2F1/stop/false/ds%201'
+      );
+    });
+  });
+
+  describe('forecaster lifecycle', () => {
+    it('uses the forecasting lifecycle routes with encoded ids', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: true });
+      mockPost.mockResolvedValue({ ok: true });
+
+      await client.deleteForecaster('forecast/1', 'ds 1');
+      await client.startForecaster('forecast/1', 'ds 1');
+      await client.stopForecaster('forecast/1', 'ds 1');
+
+      expect(mockDelete).toHaveBeenCalledWith('/api/forecasting/forecasters/forecast%2F1/ds%201');
+      expect(mockPost).toHaveBeenNthCalledWith(
+        1,
+        '/api/forecasting/forecasters/forecast%2F1/start/ds%201'
+      );
+      expect(mockPost).toHaveBeenNthCalledWith(
+        2,
+        '/api/forecasting/forecasters/forecast%2F1/stop/ds%201'
+      );
+    });
+  });
+
   describe('acknowledgeAlert', () => {
     it('rejects when alertId is missing', async () => {
       await expect(client.acknowledgeAlert('', 'ds-1', 'mon-1')).rejects.toThrow(
