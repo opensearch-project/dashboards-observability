@@ -1,0 +1,44 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Compact the horizontal step nav at the top of the setup wizard so it doesn't
+// dominate the modal. The default EuiStepsHorizontal reserves generous vertical
+// padding; APM's wizard has short step labels and benefits from a tighter rail.
+.apmSetupWizardSteps {
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiStepsHorizontal {
+    padding-top: $euiSizeXS;
+    padding-bottom: $euiSizeXS;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiStepHorizontal {
+    padding-top: $euiSizeS;
+    padding-bottom: $euiSizeS;
+
+    // The connecting line's `top` is hard-anchored to the default top padding
+    // ($euiSizeL). Since we reduced padding-top to $euiSizeS, re-anchor the line
+    // to the new circle center so it stays vertically aligned with the numbers.
+    // The step number circle is $euiSizeXL (32px) tall, so its center sits at
+    // padding-top + half the circle.
+    &::before,
+    &::after {
+      top: $euiSizeS + calc($euiSizeXL / 2);
+    }
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiStepHorizontal__title {
+    font-size: $euiFontSizeXS;
+  }
+}
+
+// Fixed minimum height so the modal stays a constant size across all four
+// steps and their loading states — prevents the resize "flicker" when paging.
+// No own overflow: the EuiModalBody is the single scroll container, so a tall
+// step (or small window) scrolls there rather than nesting a second scrollbar.
+.apmSetupWizardStepContent {
+  min-height: 380px;
+}
