@@ -12,6 +12,10 @@ interface DatasetOptionData {
   id: string;
   displayName?: string;
   title: string;
+  /** Backing OpenSearch data source id; undefined for the local cluster. */
+  datasourceId?: string;
+  /** DataView field names, used to detect a dataset's shape (e.g. service map). */
+  fieldNames?: string[];
 }
 
 /**
@@ -67,6 +71,7 @@ export const useDatasets = () => {
           try {
             const dataView = await dataService.dataViews.get(id);
             const displayName = dataView.getDisplayName();
+            const fieldNames = dataView.fields?.getAll?.().map((f) => f.name) ?? [];
 
             const option = {
               label: displayName,
@@ -74,6 +79,8 @@ export const useDatasets = () => {
                 id,
                 displayName,
                 title,
+                datasourceId: dataView.dataSourceRef?.id,
+                fieldNames,
               },
             };
             dataSourceIdByOption.set(option, dataView.dataSourceRef?.id);

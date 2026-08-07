@@ -18,6 +18,7 @@ import { HashRouter, Route, Switch, Redirect } from 'react-router-dom';
 import { ChromeBreadcrumb, NotificationsStart } from '../../../../../src/core/public';
 import { useOpenOnUrlMarker } from '../../../../../src/plugins/opensearch_dashboards_utils/public';
 import { ApmSettingsModal } from './config/apm_settings_modal';
+import { ApmSetupWizardModal } from './setup_wizard/apm_setup_wizard_modal';
 import { ApmEmptyState } from './common/apm_empty_state';
 import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_headerControl';
 import { useApmConfig } from './config/apm_config_context';
@@ -42,6 +43,7 @@ export const Services = (props: ApmServicesProps) => {
   const { config, loading, error, refresh } = useApmConfig();
 
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+  const [isWizardVisible, setIsWizardVisible] = useState(false);
 
   // Service details page state - lifted from ServiceDetails for header rendering
   const [isServiceDetailsRoute, setIsServiceDetailsRoute] = useState(false);
@@ -76,7 +78,14 @@ export const Services = (props: ApmServicesProps) => {
   };
 
   const handleGetStartedClick = () => {
-    setIsSettingsModalVisible(true);
+    setIsWizardVisible(true);
+  };
+
+  const handleWizardClose = (saved?: boolean) => {
+    setIsWizardVisible(false);
+    if (saved) {
+      refresh();
+    }
   };
 
   const handleServiceDetailsRefresh = useCallback(() => {
@@ -147,6 +156,10 @@ export const Services = (props: ApmServicesProps) => {
           />
 
           <ApmEmptyState onGetStartedClick={handleGetStartedClick} />
+
+          {isWizardVisible && (
+            <ApmSetupWizardModal onClose={handleWizardClose} notifications={notifications} />
+          )}
 
           {isSettingsModalVisible && (
             <ApmSettingsModal onClose={handleModalClose} notifications={notifications} />
