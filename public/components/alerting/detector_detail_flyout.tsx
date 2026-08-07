@@ -8,7 +8,7 @@
  * Rules table. Mirrors the monitor detail flyout shell while
  * grouping detector content like the AD detector configuration page.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -35,11 +35,20 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import type { ADDetector, UnifiedRuleSummary } from '../../../common/types/alerting';
 import { useRuleDetail } from './hooks/use_rule_detail';
-import { HEALTH_COLORS, SEVERITY_COLORS, STATUS_COLORS } from './shared_constants';
+import {
+  HEALTH_COLORS,
+  isAdResourceRunning,
+  SEVERITY_COLORS,
+  STATUS_COLORS,
+} from './shared_constants';
 
 export interface DetectorDetailFlyoutProps {
   detector: UnifiedRuleSummary;
   onClose: () => void;
+  onEditSettings?: (detector: UnifiedRuleSummary) => void;
+  onEditFeatures?: (detector: UnifiedRuleSummary) => void;
+  onStart?: (detector: UnifiedRuleSummary) => Promise<void> | void;
+  onStop?: (detector: UnifiedRuleSummary) => Promise<void> | void;
 }
 
 interface FeatureRow {
@@ -199,7 +208,12 @@ const buildImputationDisplay = (detector: ADDetector): string => {
 export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
   detector,
   onClose,
+  onEditSettings,
+  onEditFeatures,
+  onStart,
+  onStop,
 }) => {
+  const [lifecycleAction, setLifecycleAction] = useState<'start' | 'stop' | null>(null);
   const { data: detail, isLoading, error } = useRuleDetail(
     detector.datasourceId,
     detector.id,
@@ -225,6 +239,20 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
   const frequencyDisplay = formatPeriod(rawDetector.frequency);
   const realTimeJobDisplay =
     typeof jobEnabled === 'boolean' ? (jobEnabled ? enabledLabel() : disabledLabel()) : EMPTY_VALUE;
+  const isRunning = isAdResourceRunning(detector);
+
+  const runLifecycleAction = async (
+    action: 'start' | 'stop',
+    handler?: (detectorToUpdate: UnifiedRuleSummary) => Promise<void> | void
+  ) => {
+    if (!handler) return;
+    setLifecycleAction(action);
+    try {
+      await handler(detector);
+    } finally {
+      setLifecycleAction(null);
+    }
+  };
 
   const featureColumns: Array<EuiBasicTableColumn<FeatureRow>> = [
     {
@@ -285,6 +313,86 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {(onEditSettings || onEditFeatures || onStart || onStop) && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              {isRunning
+                ? onStop && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="cross"
+                        isLoading={lifecycleAction === 'stop'}
+                        onClick={() => {
+                          void runLifecycleAction('stop', onStop);
+                        }}
+                        data-test-subj="alertManagerDetectorDetailStop"
+                      >
+                        <FormattedMessage
+                          id="observability.alerting.detectorDetailFlyout.stopDetectorButton"
+                          defaultMessage="Stop detector"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )
+                : onStart && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="play"
+                        isLoading={lifecycleAction === 'start'}
+                        onClick={() => {
+                          void runLifecycleAction('start', onStart);
+                        }}
+                        data-test-subj="alertManagerDetectorDetailStart"
+                      >
+                        <FormattedMessage
+                          id="observability.alerting.detectorDetailFlyout.startDetectorButton"
+                          defaultMessage="Start detector"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
+              {onEditSettings && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="pencil"
+                    onClick={() => {
+                      onClose();
+                      onEditSettings(detector);
+                    }}
+                    data-test-subj="alertManagerDetectorDetailEditSettings"
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.detectorDetailFlyout.editSettingsButton"
+                      defaultMessage="Edit detector settings"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              {onEditFeatures && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="controlsHorizontal"
+                    onClick={() => {
+                      onClose();
+                      onEditFeatures(detector);
+                    }}
+                    data-test-subj="alertManagerDetectorDetailEditFeatures"
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.detectorDetailFlyout.editFeaturesButton"
+                      defaultMessage="Edit model configuration"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </>
+        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

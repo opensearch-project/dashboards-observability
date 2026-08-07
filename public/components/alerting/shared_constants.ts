@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import type { MonitorStatus, UnifiedRuleSummary } from '../../../common/types/alerting';
 
 /**
  * Shared color maps, formatting utilities, and style constants
@@ -58,6 +59,24 @@ export const STATUS_COLORS: Record<string, string> = {
   pending: 'warning',
   muted: 'default',
   disabled: 'subdued',
+  Running: 'success',
+  Stopped: 'subdued',
+  Initializing: 'primary',
+  Finished: 'success',
+  'Feature required': 'warning',
+  'Initialization failure': 'danger',
+  'Unexpected failure': 'danger',
+  Failed: 'danger',
+  'Inactive stopped': 'subdued',
+  'Inactive not started': 'subdued',
+  'Awaiting data to init': 'warning',
+  'Awaiting data to restart': 'warning',
+  'Initializing test': 'primary',
+  'Initializing forecast': 'primary',
+  'Test complete': 'success',
+  'Init forecast failure': 'danger',
+  'Forecast failure': 'danger',
+  'Init test failure': 'danger',
 };
 
 // ============================================================================
@@ -93,6 +112,50 @@ export const TYPE_LABELS: Record<string, string> = {
   anomaly_detector_monitor: 'Anomaly detector monitor',
   detector: 'Detector',
   forecaster: 'Forecaster',
+};
+
+// ============================================================================
+// Anomaly detection / forecasting lifecycle helpers
+// ============================================================================
+
+export const isDetectorRule = (rule: UnifiedRuleSummary): boolean =>
+  rule.definitionType === 'detector' || rule.monitorType === 'detector';
+
+export const isForecasterRule = (rule: UnifiedRuleSummary): boolean =>
+  rule.definitionType === 'forecaster' || rule.monitorType === 'forecaster';
+
+export const isAdResourceRule = (rule: UnifiedRuleSummary): boolean =>
+  isDetectorRule(rule) || isForecasterRule(rule);
+
+const AD_RESOURCE_STOP_ACTION_STATUSES = new Set<MonitorStatus>([
+  'Running',
+  'Initializing',
+  'Awaiting data to init',
+  'Awaiting data to restart',
+  'Initializing test',
+  'Initializing forecast',
+]);
+
+const AD_RESOURCE_START_ACTION_STATUSES = new Set<MonitorStatus>([
+  'Stopped',
+  'Finished',
+  'Inactive stopped',
+  'Inactive not started',
+  'Test complete',
+  'Feature required',
+  'Initialization failure',
+  'Unexpected failure',
+  'Failed',
+  'Init forecast failure',
+  'Forecast failure',
+  'Init test failure',
+]);
+
+export const isAdResourceRunning = (rule: UnifiedRuleSummary): boolean => {
+  if (!isAdResourceRule(rule)) return false;
+  if (AD_RESOURCE_STOP_ACTION_STATUSES.has(rule.status)) return true;
+  if (AD_RESOURCE_START_ACTION_STATUSES.has(rule.status)) return false;
+  return rule.enabled;
 };
 
 // ============================================================================

@@ -19,12 +19,15 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiResizableContainer } from '@elastic/eui';
+import semver from 'semver';
 import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alerting';
+import { coreRefs } from '../../../framework/core_refs';
 import { useFacetCollapse } from '../facet_filter_panel';
+import { BASE_PPL_ALERTING_SUPPORTED_VERSION } from '../shared_constants';
 import {
   buildTableColumns,
   DEFAULT_VISIBLE,
-  isReadOnlyRuleDefinition,
+  isSelectableRuleDefinition,
 } from './monitors_table_columns';
 import {
   buildSuggestions,
@@ -48,12 +51,19 @@ interface MonitorsTableProps {
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
   onEdit?: (monitor: UnifiedRuleSummary) => void;
+  onEditDetectorSettings?: (detector: UnifiedRuleSummary) => void;
+  onEditDetectorFeatures?: (detector: UnifiedRuleSummary) => void;
+  onEditForecaster?: (forecaster: UnifiedRuleSummary) => void;
+  onStartResources?: (resources: UnifiedRuleSummary[]) => Promise<void> | void;
+  onStopResources?: (resources: UnifiedRuleSummary[]) => Promise<void> | void;
   /**
    * Optional Disable / Enable handler. Forwarded to the detail flyout.
    * Wired only for PPL monitors at the page layer.
    */
   onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
-  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
+  onCreateMonitor?: (
+    type: 'logs' | 'prometheus' | 'metrics' | 'slo' | 'detector' | 'forecaster'
+  ) => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
   /** Callback when datasource selection changes */
@@ -70,6 +80,15 @@ interface MonitorsTableProps {
   initialSearchQuery?: string;
 }
 
+interface AlertingSettingsResponse {
+  ok?: boolean;
+  resp?: {
+    transient?: { cluster?: { pluggable?: Record<string, unknown> } };
+    persistent?: { cluster?: { pluggable?: Record<string, unknown> } };
+    defaults?: { cluster?: { pluggable?: Record<string, unknown> } };
+  };
+}
+
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -81,6 +100,11 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   onDelete,
   onClone,
   onEdit,
+  onEditDetectorSettings,
+  onEditDetectorFeatures,
+  onEditForecaster,
+  onStartResources,
+  onStopResources,
   onToggleEnabled,
   onCreateMonitor,
   selectedDsIds,
@@ -139,23 +163,99 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   const dsNameMap = useMemo(() => new Map(datasources.map((d) => [d.id, d.name])), [datasources]);
 
+  // Prefetch AnalyticEngine status for OpenSearch datasources.
+  // An AnalyticEngine domain has cluster.pluggable.dataformat.enabled === true.
+  const [analyticEngineCache, setAnalyticEngineCache] = useState<Map<string, boolean>>(new Map());
+  useEffect(() => {
+    const http = coreRefs.http;
+    if (!http) return;
+    const osDs = datasources.filter(
+      (d) => d.type === 'opensearch' && d.engineType !== 'OpenSearch Serverless' && d.mdsId
+    );
+    if (osDs.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const cache = new Map<string, boolean>();
+      await Promise.all(
+        osDs.map(async (ds) => {
+          try {
+            const resp = await http.get<AlertingSettingsResponse>('../api/alerting/_settings', {
+              query: { dataSourceId: ds.mdsId },
+            });
+            if (resp?.ok && resp.resp) {
+              const val =
+                resp.resp.transient?.cluster?.pluggable?.['dataformat.enabled'] ??
+                resp.resp.persistent?.cluster?.pluggable?.['dataformat.enabled'] ??
+                resp.resp.defaults?.cluster?.pluggable?.['dataformat.enabled'];
+              cache.set(ds.id, val === 'true' || val === true);
+            } else {
+              cache.set(ds.id, false);
+            }
+          } catch {
+            cache.set(ds.id, false);
+          }
+        })
+      );
+      if (!cancelled) setAnalyticEngineCache(cache);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [datasources]);
+
+  const isAnalyticEngineEnabled = useCallback(
+    (datasourceId: string) => analyticEngineCache.get(datasourceId) || false,
+    [analyticEngineCache]
+  );
+
+  const selectedDatasources = useMemo(
+    () =>
+      selectedDsIds
+        .map((id) => datasources.find((d) => d.id === id))
+        .filter((d): d is Datasource => !!d),
+    [datasources, selectedDsIds]
+  );
+
   // Logs / Metrics popover entries are grayed out when the parent's selection
-  // can't satisfy them: Logs needs at least one OpenSearch datasource, Metrics
-  // needs at least one Prometheus. The empty-selection case is "no datasource
-  // selected → no create options viable", so gate both. When a selection
-  // exists, each option is disabled iff EVERY selected datasource is the wrong
-  // type for it — i.e. only-Prometheus disables Logs, only-OpenSearch disables
-  // Metrics (symmetric).
-  const [logsCreateDisabled, metricsCreateDisabled] = useMemo(() => {
-    const selected = selectedDsIds
-      .map((id) => datasources.find((d) => d.id === id))
-      .filter((d): d is Datasource => !!d);
-    if (selected.length === 0) return [true, true];
-    return [
-      selected.every((d) => d.type === 'prometheus'),
-      selected.every((d) => d.type === 'opensearch'),
-    ];
-  }, [datasources, selectedDsIds]);
+  // can't satisfy them: Logs needs at least one OpenSearch datasource with
+  // version >= 3.5.0 (or serverless), Metrics needs at least one Prometheus.
+  // The empty-selection case used to fall through to "both enabled", but the
+  // spec is "no datasource selected → no create options viable" — Logs without
+  // a supported OS DS is undefined, Metrics without a Prometheus DS is
+  // undefined. Gate both so the user can't enter a flyout that will silently
+  // re-default the datasource on them.
+  const [logsCreateDisabled, logsDisabledReason] = useMemo(() => {
+    if (selectedDatasources.length === 0) return [true, 'no_selection'] as const;
+    const osSelected = selectedDatasources.filter((d) => d.type === 'opensearch');
+    if (osSelected.length === 0) return [true, 'no_os_datasource'] as const;
+    // Check if any selected OS datasource supports PPL alerting
+    const hasSupportedDs = osSelected.some((d) => {
+      if (!d.mdsId) return true; // Local cluster — no version metadata available
+      if (d.engineType === 'OpenSearch Serverless') return true;
+      if (isAnalyticEngineEnabled(d.id)) return true;
+      if (!d.version) return false;
+      const coerced = semver.coerce(d.version);
+      return coerced ? semver.gte(coerced, BASE_PPL_ALERTING_SUPPORTED_VERSION) : false;
+    });
+    if (!hasSupportedDs) return [true, 'version_unsupported'] as const;
+    return [false, ''] as const;
+  }, [selectedDatasources, isAnalyticEngineEnabled]);
+
+  const metricsCreateDisabled = useMemo(() => {
+    if (selectedDatasources.length === 0) return true;
+    // Always allow Metrics creation when at least one datasource is selected —
+    // the Prometheus data-connection may exist on the cluster without a
+    // corresponding MDS saved object (discovered via SQL plugin API, not SO).
+    return false;
+  }, [selectedDatasources]);
+
+  const detectorCreateDisabled = useMemo(() => {
+    return !selectedDatasources.some((d) => d.type === 'opensearch');
+  }, [selectedDatasources]);
+
+  const forecasterCreateDisabled = useMemo(() => {
+    return !selectedDatasources.some((d) => d.type === 'opensearch');
+  }, [selectedDatasources]);
 
   // Build selectable datasource entries for the filter facet — alpha by name
   const datasourceEntries = useMemo(
@@ -197,7 +297,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     [rules, searchQuery, filters]
   );
   const selectableIds = useMemo(
-    () => new Set(rules.filter((r) => !isReadOnlyRuleDefinition(r)).map((r) => r.id)),
+    () => new Set(rules.filter(isSelectableRuleDefinition).map((r) => r.id)),
     [rules]
   );
   useEffect(() => {
@@ -238,7 +338,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     setSelectedIds(next);
   };
   const toggleSelectAll = () => {
-    const selectableFiltered = filtered.filter((r) => !isReadOnlyRuleDefinition(r));
+    const selectableFiltered = filtered.filter(isSelectableRuleDefinition);
     const allSelected =
       selectableFiltered.length > 0 && selectableFiltered.every((r) => selectedIds.has(r.id));
     const next = new Set(selectedIds);
@@ -267,6 +367,18 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     setSelectedIds(new Set());
     setShowDeleteConfirm(false);
   };
+
+  const handleLifecycleAction = useCallback(
+    async (
+      resources: UnifiedRuleSummary[],
+      handler?: (resourcesToUpdate: UnifiedRuleSummary[]) => Promise<void> | void
+    ) => {
+      if (!handler || resources.length === 0) return;
+      await handler(resources);
+      setSelectedIds(new Set());
+    },
+    []
+  );
 
   // Build table columns from visible set
   const tableColumns = useMemo(() => {
@@ -445,6 +557,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onCreateMonitor={onCreateMonitor}
                 logsCreateDisabled={logsCreateDisabled}
                 metricsCreateDisabled={metricsCreateDisabled}
+                detectorCreateDisabled={detectorCreateDisabled}
+                forecasterCreateDisabled={forecasterCreateDisabled}
                 noDatasourceSelected={selectedDsIds.length === 0}
                 showCreatePopover={showCreatePopover}
                 setShowCreatePopover={setShowCreatePopover}
@@ -456,6 +570,11 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onDelete={onDelete}
                 onClone={onClone}
                 onEdit={onEdit}
+                onEditDetectorSettings={onEditDetectorSettings}
+                onEditDetectorFeatures={onEditDetectorFeatures}
+                onEditForecaster={onEditForecaster}
+                onStartResources={(resources) => handleLifecycleAction(resources, onStartResources)}
+                onStopResources={(resources) => handleLifecycleAction(resources, onStopResources)}
                 onToggleEnabled={onToggleEnabled}
               />
             </EuiResizablePanel>

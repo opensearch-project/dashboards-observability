@@ -108,4 +108,31 @@ describe('DetectorDetailFlyout', () => {
     expect(screen.getAllByText('10 minutes')).toHaveLength(2);
     expect(useRuleDetailMock).toHaveBeenCalledWith('ds-1', 'det-1', 'detector');
   });
+
+  it('calls edit handlers from detector quick actions', () => {
+    const onEditSettings = jest.fn();
+    const onEditFeatures = jest.fn();
+    useRuleDetailMock.mockReturnValue({
+      data: detectorDetail(),
+      isLoading: false,
+      error: null,
+    });
+
+    render(
+      <I18nProvider>
+        <DetectorDetailFlyout
+          detector={detectorSummary}
+          onClose={jest.fn()}
+          onEditSettings={onEditSettings}
+          onEditFeatures={onEditFeatures}
+        />
+      </I18nProvider>
+    );
+
+    screen.getByTestId('alertManagerDetectorDetailEditSettings').click();
+    screen.getByTestId('alertManagerDetectorDetailEditFeatures').click();
+
+    expect(onEditSettings).toHaveBeenCalledWith(detectorSummary);
+    expect(onEditFeatures).toHaveBeenCalledWith(detectorSummary);
+  });
 });
