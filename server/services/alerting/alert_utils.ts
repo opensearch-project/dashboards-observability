@@ -302,6 +302,99 @@ function formatPeriod(period?: { period?: { interval?: number; unit?: string } }
   return `${interval} ${unit.toLowerCase()}`;
 }
 
+const AD_RUNTIME_STATUS_BY_KEY: Record<string, MonitorStatus> = {
+  DISABLED: 'Stopped',
+  STOPPED: 'Stopped',
+  CREATED: 'Initializing',
+  INIT: 'Initializing',
+  INITIALIZING: 'Initializing',
+  RUNNING: 'Running',
+  FINISHED: 'Finished',
+  FEATURE_REQUIRED: 'Feature required',
+  INIT_FAILURE: 'Initialization failure',
+  INITIALIZATION_FAILURE: 'Initialization failure',
+  UNEXPECTED_FAILURE: 'Unexpected failure',
+  FAILED: 'Failed',
+  INACTIVE_STOPPED: 'Inactive stopped',
+  INACTIVE_NOT_STARTED: 'Inactive not started',
+  AWAITING_DATA_TO_INIT: 'Awaiting data to init',
+  AWAITING_DATA_TO_RESTART: 'Awaiting data to restart',
+  INITIALIZING_TEST: 'Initializing test',
+  INIT_TEST: 'Initializing test',
+  INITIALIZING_FORECAST: 'Initializing forecast',
+  TEST_COMPLETE: 'Test complete',
+  INIT_FORECAST_FAILURE: 'Init forecast failure',
+  FORECAST_FAILURE: 'Forecast failure',
+  INIT_TEST_FAILURE: 'Init test failure',
+};
+
+const RUNTIME_FAILURE_STATUSES = new Set<MonitorStatus>([
+  'Initialization failure',
+  'Unexpected failure',
+  'Failed',
+  'Init forecast failure',
+  'Forecast failure',
+  'Init test failure',
+]);
+
+const RUNTIME_INACTIVE_STATUSES = new Set<MonitorStatus>([
+  'Stopped',
+  'Finished',
+  'Inactive stopped',
+  'Inactive not started',
+]);
+
+const asRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+
+const getField = (value: unknown, ...keys: string[]): unknown => {
+  const record = asRecord(value);
+  for (const key of keys) {
+    if (record[key] !== undefined) return record[key];
+  }
+  return undefined;
+};
+
+const getNestedBoolean = (value: unknown, jobKey: string, field: string): boolean | undefined => {
+  const rootValue = getField(value, field);
+  if (typeof rootValue === 'boolean') return rootValue;
+
+  const jobValue = getField(getField(value, jobKey), field);
+  return typeof jobValue === 'boolean' ? jobValue : undefined;
+};
+
+export function runtimeStateToMonitorStatus(state: unknown): MonitorStatus | undefined {
+  if (typeof state !== 'string') return undefined;
+
+  const trimmed = state.trim();
+  if (!trimmed) return undefined;
+
+  const key = trimmed.replace(/[\s-]+/g, '_').toUpperCase();
+  return AD_RUNTIME_STATUS_BY_KEY[key] || (trimmed as MonitorStatus);
+}
+
+function getRuntimeStatus(resource: unknown): MonitorStatus | undefined {
+  return runtimeStateToMonitorStatus(
+    getField(resource, 'curState', 'cur_state', 'state', 'taskState', 'task_state')
+  );
+}
+
+function getADResourceEnabled(
+  resource: unknown,
+  jobKey: string,
+  fallbackStatus: MonitorStatus
+): boolean {
+  const enabled = getNestedBoolean(resource, jobKey, 'enabled');
+  if (enabled !== undefined) return enabled;
+  return !RUNTIME_INACTIVE_STATUSES.has(fallbackStatus) && fallbackStatus !== 'disabled';
+}
+
+function getADResourceHealthStatus(status: MonitorStatus): 'healthy' | 'failing' | 'no_data' {
+  if (RUNTIME_FAILURE_STATUSES.has(status)) return 'failing';
+  if (RUNTIME_INACTIVE_STATUSES.has(status) || status === 'disabled') return 'no_data';
+  return 'healthy';
+}
+
 function anomalySeverity(grade?: number, score?: number): UnifiedAlertSeverity {
   if ((grade ?? 0) >= 0.9 || (score ?? 0) >= 10) return 'critical';
   if ((grade ?? 0) >= 0.5 || (score ?? 0) >= 5) return 'high';
@@ -827,6 +920,8 @@ export function adDetectorToUnifiedRuleSummary(
   const indices = detector.indices || [];
   const evalInterval = formatPeriod(detector.detection_interval) || 'unknown interval';
   const windowDelay = formatPeriod(detector.window_delay) || 'none';
+  const status = getRuntimeStatus(detector) || 'Running';
+  const enabled = getADResourceEnabled(detector, 'anomaly_detector_job', status);
   const labels: Record<string, string> = {
     source: 'anomaly_detection',
     detector_type: detector.detector_type || 'detector',
@@ -841,7 +936,7 @@ export function adDetectorToUnifiedRuleSummary(
     datasourceType: 'opensearch',
     definitionType: 'detector',
     name: detector.name || detector.id,
-    enabled: true,
+    enabled,
     severity: 'info',
     query: indices.length > 0 ? indices.join(', ') : '(no indices)',
     condition: `${features.length} feature${features.length === 1 ? '' : 's'} analyzed`,
@@ -858,8 +953,8 @@ export function adDetectorToUnifiedRuleSummary(
         : {}),
     },
     monitorType: 'detector',
-    status: 'active',
-    healthStatus: 'healthy',
+    status,
+    healthStatus: getADResourceHealthStatus(status),
     createdBy: detector.user?.name || '',
     createdAt: new Date(detector.last_update_time || Date.now()).toISOString(),
     lastModified: new Date(detector.last_update_time || Date.now()).toISOString(),
@@ -897,7 +992,10 @@ export function adForecasterToUnifiedRuleSummary(
         feature.feature_name || feature.featureName || feature.feature_id || feature.featureId
     )
     .filter((name): name is string => typeof name === 'string' && name.trim().length > 0);
-  const enabled = forecaster.enabled !== false;
+  const fallbackStatus: MonitorStatus =
+    forecaster.enabled === false ? 'Inactive stopped' : 'Running';
+  const status = getRuntimeStatus(forecaster) || fallbackStatus;
+  const enabled = getADResourceEnabled(forecaster, 'forecaster_job', status);
 
   return {
     id: forecaster.id,
@@ -916,8 +1014,8 @@ export function adForecasterToUnifiedRuleSummary(
       ...(featureNames.length > 0 ? { features: featureNames.join(', ') } : {}),
     },
     monitorType: 'forecaster',
-    status: enabled ? 'active' : 'disabled',
-    healthStatus: enabled ? 'healthy' : 'no_data',
+    status,
+    healthStatus: getADResourceHealthStatus(status),
     createdBy: forecaster.user?.name || '',
     createdAt: new Date(lastUpdateTime).toISOString(),
     lastModified: new Date(lastUpdateTime).toISOString(),

@@ -29,11 +29,23 @@ export interface AcknowledgeAlertResponse {
   acknowledged: boolean;
 }
 
+export interface AdResourceActionResponse {
+  ok?: boolean;
+  response?: unknown;
+  message?: string;
+  id?: string;
+  deleted?: boolean;
+}
+
 export class MonitorMutationsClient {
   private requireHttp() {
     const http = coreRefs.http;
     if (!http) throw new Error('HTTP client not available');
     return http;
+  }
+
+  private withOptionalDatasource(basePath: string, dsId?: string): string {
+    return dsId ? `${basePath}/${encodeURIComponent(dsId)}` : basePath;
   }
 
   async createMonitor(data: Record<string, unknown>, dsId: string): Promise<MonitorResponse> {
@@ -79,6 +91,48 @@ export class MonitorMutationsClient {
       `/api/alerting/prometheus/${encodeURIComponent(dsId)}/rules/${encodeURIComponent(groupName)}`,
       ruleName ? { query: { ruleName } } : undefined
     )) as { success: boolean };
+  }
+
+  async deleteDetector(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/anomaly_detectors/detectors/${encodeURIComponent(id)}`;
+    return (await this.requireHttp().delete(
+      this.withOptionalDatasource(basePath, dsId)
+    )) as AdResourceActionResponse;
+  }
+
+  async startDetector(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/anomaly_detectors/detectors/${encodeURIComponent(id)}/start`;
+    return (await this.requireHttp().post(
+      this.withOptionalDatasource(basePath, dsId)
+    )) as AdResourceActionResponse;
+  }
+
+  async stopDetector(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/anomaly_detectors/detectors/${encodeURIComponent(id)}/stop/false`;
+    return (await this.requireHttp().post(
+      this.withOptionalDatasource(basePath, dsId)
+    )) as AdResourceActionResponse;
+  }
+
+  async deleteForecaster(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/forecasting/forecasters/${encodeURIComponent(id)}`;
+    return (await this.requireHttp().delete(
+      this.withOptionalDatasource(basePath, dsId)
+    )) as AdResourceActionResponse;
+  }
+
+  async startForecaster(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/forecasting/forecasters/${encodeURIComponent(id)}/start`;
+    return (await this.requireHttp().post(
+      this.withOptionalDatasource(basePath, dsId)
+    )) as AdResourceActionResponse;
+  }
+
+  async stopForecaster(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/forecasting/forecasters/${encodeURIComponent(id)}/stop`;
+    return (await this.requireHttp().post(
+      this.withOptionalDatasource(basePath, dsId)
+    )) as AdResourceActionResponse;
   }
 
   async acknowledgeAlert(

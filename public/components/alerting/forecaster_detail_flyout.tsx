@@ -8,7 +8,7 @@
  * Rules table. It mirrors the detector flyout shell while keeping forecasting
  * terminology visible in the table-level unified experience.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -35,11 +35,19 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import type { ADForecaster, UnifiedRuleSummary } from '../../../common/types/alerting';
 import { useRuleDetail } from './hooks/use_rule_detail';
-import { HEALTH_COLORS, SEVERITY_COLORS, STATUS_COLORS } from './shared_constants';
+import {
+  HEALTH_COLORS,
+  isAdResourceRunning,
+  SEVERITY_COLORS,
+  STATUS_COLORS,
+} from './shared_constants';
 
 export interface ForecasterDetailFlyoutProps {
   forecaster: UnifiedRuleSummary;
   onClose: () => void;
+  onEdit?: (forecaster: UnifiedRuleSummary) => void;
+  onStart?: (forecaster: UnifiedRuleSummary) => Promise<void> | void;
+  onStop?: (forecaster: UnifiedRuleSummary) => Promise<void> | void;
 }
 
 interface FeatureRow {
@@ -207,7 +215,11 @@ const buildImputationDisplay = (forecaster: ADForecaster): string => {
 export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
   forecaster,
   onClose,
+  onEdit,
+  onStart,
+  onStop,
 }) => {
+  const [lifecycleAction, setLifecycleAction] = useState<'start' | 'stop' | null>(null);
   const { data: detail, isLoading, error } = useRuleDetail(
     forecaster.datasourceId,
     forecaster.id,
@@ -242,6 +254,21 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
       asRecord(rawForecaster.realtime_task).state ||
       asRecord(rawForecaster.run_once_task).state
   );
+  const isRunning = isAdResourceRunning(forecaster);
+
+  const runLifecycleAction = async (
+    action: 'start' | 'stop',
+    handler?: (forecasterToUpdate: UnifiedRuleSummary) => Promise<void> | void
+  ) => {
+    if (!handler) return;
+    setLifecycleAction(action);
+    try {
+      await handler(forecaster);
+    } finally {
+      setLifecycleAction(null);
+    }
+  };
+
   const featureColumns: Array<EuiBasicTableColumn<FeatureRow>> = [
     {
       field: 'name',
@@ -303,6 +330,68 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {(onEdit || onStart || onStop) && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              {isRunning
+                ? onStop && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="cross"
+                        isLoading={lifecycleAction === 'stop'}
+                        onClick={() => {
+                          void runLifecycleAction('stop', onStop);
+                        }}
+                        data-test-subj="alertManagerForecasterDetailStop"
+                      >
+                        <FormattedMessage
+                          id="observability.alerting.forecasterDetailFlyout.stopForecasterButton"
+                          defaultMessage="Stop forecaster"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )
+                : onStart && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="play"
+                        isLoading={lifecycleAction === 'start'}
+                        onClick={() => {
+                          void runLifecycleAction('start', onStart);
+                        }}
+                        data-test-subj="alertManagerForecasterDetailStart"
+                      >
+                        <FormattedMessage
+                          id="observability.alerting.forecasterDetailFlyout.startForecasterButton"
+                          defaultMessage="Start forecaster"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
+              {onEdit && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="pencil"
+                    onClick={() => {
+                      onClose();
+                      onEdit(forecaster);
+                    }}
+                    data-test-subj="alertManagerForecasterDetailEdit"
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.forecasterDetailFlyout.editButton"
+                      defaultMessage="Edit forecaster"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </>
+        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

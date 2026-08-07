@@ -532,6 +532,11 @@ describe('MultiBackendAlertService — routing & list', () => {
           },
         };
       }
+      if (
+        path === '/_plugins/_forecast/forecasters/forecaster-1/_profile/init_progress,state,error'
+      ) {
+        return { body: { state: 'AWAITING_DATA_TO_INIT' } };
+      }
       throw new Error(`Unexpected request: ${path}`);
     });
 
@@ -549,6 +554,7 @@ describe('MultiBackendAlertService — routing & list', () => {
       name: 'CPU forecast',
       definitionType: 'forecaster',
       monitorType: 'forecaster',
+      status: 'Awaiting data to init',
     });
   });
 
