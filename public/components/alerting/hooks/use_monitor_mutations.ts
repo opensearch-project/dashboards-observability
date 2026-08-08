@@ -30,7 +30,11 @@ export interface UseMonitorMutationsResult {
     data: Record<string, unknown>,
     dsId: string
   ) => Promise<PrometheusRuleResponse>;
-  deletePrometheusRule: (dsId: string, groupName: string) => Promise<{ success: boolean }>;
+  deletePrometheusRule: (
+    dsId: string,
+    groupName: string,
+    ruleName?: string
+  ) => Promise<{ success: boolean }>;
   acknowledgeAlert: (
     alertId: string,
     datasourceId?: string,
@@ -46,7 +50,8 @@ export function useMonitorMutations(): UseMonitorMutationsResult {
       updateMonitor: (id, data, dsId) => client.updateMonitor(id, data, dsId),
       deleteMonitor: (id, dsId) => client.deleteMonitor(id, dsId),
       createPrometheusRule: (data, dsId) => client.createPrometheusRule(data, dsId),
-      deletePrometheusRule: (dsId, groupName) => client.deletePrometheusRule(dsId, groupName),
+      deletePrometheusRule: (dsId, groupName, ruleName) =>
+        client.deletePrometheusRule(dsId, groupName, ruleName),
       acknowledgeAlert: (alertId, datasourceId, monitorId) =>
         client.acknowledgeAlert(alertId, datasourceId, monitorId),
     }),

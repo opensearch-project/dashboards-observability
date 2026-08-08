@@ -20,8 +20,12 @@ export const USER_RULES_NAMESPACE = 'observability-alerting';
 export interface PrometheusRulePayload {
   name: string;
   query: string;
-  operator: string;
-  threshold: number;
+  /**
+   * Optional comparison appended to the query. When omitted, the PromQL
+   * query itself is the complete alert expression.
+   */
+  operator?: string;
+  threshold?: number;
   forDuration: string;
   evaluationInterval: string;
   labels: Record<string, string>;
@@ -36,7 +40,12 @@ export interface PrometheusRulePayload {
  * Cortex ruler upsert API.
  */
 export function buildRuleGroup(payload: PrometheusRulePayload): GeneratedRuleGroup {
-  const expr = `${payload.query} ${payload.operator} ${payload.threshold}`;
+  // The query alone is the alert expression unless a legacy operator/threshold
+  // pair is provided (kept for backward compatibility with older clients).
+  const expr =
+    payload.operator !== undefined && payload.threshold !== undefined
+      ? `${payload.query} ${payload.operator} ${payload.threshold}`
+      : payload.query;
   const rule: GeneratedRule = {
     type: 'alerting',
     name: payload.name,
@@ -83,9 +92,37 @@ export async function handleCreatePrometheusRule(
   logger?: Logger
 ): Promise<{ success: boolean; groupName: string; namespace: string }> {
   const group = buildRuleGroup(payload);
+
+  // Rule groups are shared: multiple rules may live in the same group, and
+  // Cortex's POST is create-or-replace on (namespace, groupName). Merge with
+  // the existing group so sibling rules are preserved — the new rule replaces
+  // any same-named rule, others are kept.
+  //
+  // NOTE: this read-modify-write is not atomic. The Cortex ruler API offers
+  // no compare-and-swap, so two concurrent writers targeting the same group
+  // can still lose an update (the second upsert wins). This protects against
+  // the common single-writer clobber; true concurrent safety would need
+  // server-side coordination in Cortex itself.
+  const existing = await rulerClient.getRuleGroup(
+    client,
+    datasource,
+    USER_RULES_NAMESPACE,
+    group.groupName
+  );
+  if (existing && existing.rules.length > 0) {
+    const siblings = existing.rules.filter((r) => r.name !== payload.name);
+    group.rules = [...siblings, ...group.rules];
+    // The evaluation interval is a group-level property shared by all rules.
+    // Preserve the existing group's interval — adding one rule should not
+    // silently change when every sibling is evaluated.
+    if (existing.interval) {
+      group.interval = existing.interval;
+    }
+  }
+
   await rulerClient.upsertRuleGroup(client, datasource, USER_RULES_NAMESPACE, group);
   logger?.info(
-    `alerting: createPrometheusRule success — ds=${datasource.id} group=${group.groupName}`
+    `alerting: createPrometheusRule success — ds=${datasource.id} group=${group.groupName} rules=${group.rules.length}`
   );
   return { success: true, groupName: group.groupName, namespace: USER_RULES_NAMESPACE };
 }
@@ -95,8 +132,35 @@ export async function handleDeletePrometheusRule(
   client: AlertingOSClient,
   datasource: Datasource,
   groupName: string,
-  logger?: Logger
+  logger?: Logger,
+  ruleName?: string
 ): Promise<{ success: boolean }> {
+  // When a ruleName is provided, splice just that rule out of the group so
+  // sibling rules in a shared group are preserved. The whole group is only
+  // deleted when it would become empty (or no ruleName was given).
+  // Same non-atomicity caveat as the create-merge above: no CAS on the
+  // Cortex ruler, so concurrent writers to one group can race.
+  if (ruleName) {
+    const existing = await rulerClient.getRuleGroup(
+      client,
+      datasource,
+      USER_RULES_NAMESPACE,
+      groupName
+    );
+    if (existing) {
+      const remaining = existing.rules.filter((r) => r.name !== ruleName);
+      if (remaining.length > 0) {
+        await rulerClient.upsertRuleGroup(client, datasource, USER_RULES_NAMESPACE, {
+          ...existing,
+          rules: remaining,
+        });
+        logger?.info(
+          `alerting: deletePrometheusRule spliced rule=${ruleName} from group=${groupName} — ds=${datasource.id} remaining=${remaining.length}`
+        );
+        return { success: true };
+      }
+    }
+  }
   await rulerClient.deleteRuleGroup(client, datasource, USER_RULES_NAMESPACE, groupName);
   logger?.info(`alerting: deletePrometheusRule success — ds=${datasource.id} group=${groupName}`);
   return { success: true };

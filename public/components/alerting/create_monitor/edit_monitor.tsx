@@ -31,31 +31,7 @@ import {
   PplActionForm,
   PplTriggerForm,
 } from './create_monitor_types';
-
-/** Convert seconds to a human-readable duration string (e.g., 60 → "1m"). */
-function formatSeconds(sec: number): string {
-  if (sec <= 0) return '1m';
-  if (sec % 3600 === 0) return `${sec / 3600}h`;
-  if (sec % 60 === 0) return `${sec / 60}m`;
-  return `${sec}s`;
-}
-
-/**
- * Normalize a duration string like "120s" to the canonical form used in
- * dropdown options ("2m"). Handles "Ns" → minutes/hours conversion.
- */
-function normalizeDuration(dur: string): string {
-  if (!dur) return '5m';
-  // Already in m/h/d format
-  if (/^\d+[mhd]$/.test(dur)) return dur;
-  // Convert "Ns" to minutes if evenly divisible
-  const secMatch = dur.match(/^(\d+)s$/);
-  if (secMatch) {
-    const sec = parseInt(secMatch[1], 10);
-    return formatSeconds(sec);
-  }
-  return dur;
-}
+import { normalizeDuration } from '../utils/duration';
 
 export interface EditMonitorProps {
   dsId: string;
@@ -112,12 +88,13 @@ function buildEditFormFromRule(rule: UnifiedRule, datasources: Datasource[]): Op
   const pplTriggers: PplTriggerForm[] = seed.pplTriggers.map((t, idx) => ({
     ...t,
     id: t.id || `ppl-trigger-${rule.id}-${idx}`,
-    actions: t.actions.map(
-      (a, ai): PplActionForm => ({
+    actions: t.actions.map((a, ai) => {
+      const action: PplActionForm = {
         ...a,
         id: a.id || `ppl-action-${rule.id}-${idx}-${ai}`,
-      })
-    ),
+      };
+      return action;
+    }),
   }));
 
   const datasourceId =
@@ -187,12 +164,22 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
       const evaluationInterval = normalizeDuration(data.evaluationInterval || '1m');
       const firingPeriod = normalizeDuration(data.firingPeriod || forDuration);
 
+      // Seed labels from the raw rule, plus a _ruleGroup metadata label so
+      // the Rule Group selector round-trips the existing group. The metadata
+      // label is extracted into groupName (and stripped) on submission.
+      const seededLabels = Object.entries(rawLabels)
+        .filter(([key]) => key !== '_ruleGroup')
+        .map(([key, value]) => ({ key, value }));
+      if (data.group) {
+        seededLabels.push({ key: '_ruleGroup', value: data.group });
+      }
+
       const promForm: import('./create_monitor_types').PrometheusFormState = {
         name: data.name,
         datasourceId: data.datasourceId,
         datasourceType: 'prometheus',
-        query:
-          expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+(?:[eE][+-]?\d+)?\s*$/, '').trim() || expr,
+        // The PromQL expression is the complete alert condition — seed verbatim
+        query: expr,
         threshold: {
           operator: (data.threshold?.operator as '>' | '>=' | '<' | '<=' | '==' | '!=') || '>',
           value: data.threshold?.value ?? 0,
@@ -202,7 +189,7 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
         evaluationInterval,
         pendingPeriod: forDuration,
         firingPeriod,
-        labels: Object.entries(rawLabels).map(([key, value]) => ({ key, value })),
+        labels: seededLabels,
         annotations: Object.entries(rawAnnotations).map(([key, value]) => ({ key, value })),
         severity: data.severity,
         enabled: data.enabled,
