@@ -184,22 +184,24 @@ describe('APM Services Page', () => {
       cy.get('.euiModal').should('be.visible');
       cy.get('.euiModalHeader').should('be.visible');
 
-      // Select Traces dataset
+      // Select Traces dataset. Scope the option click to the options list (not a
+      // page-wide cy.contains) so a re-render of the async-loaded dataset list
+      // doesn't detach the matched element mid-click.
       cy.get('.euiFormRow').contains('Traces').parent().parent().find('.euiComboBox').click();
       cy.get('.euiComboBoxOptionsList').should('be.visible');
-      cy.contains(APM_RESOURCES.TRACE_INDEX_PATTERN).click();
+      cy.get('.euiComboBoxOptionsList').contains(APM_RESOURCES.TRACE_INDEX_PATTERN).click();
       cy.get('.euiComboBoxOptionsList').should('not.exist');
 
       // Select Services dataset
       cy.get('.euiFormRow').contains('Services').parent().parent().find('.euiComboBox').click();
       cy.get('.euiComboBoxOptionsList').should('be.visible');
-      cy.contains(APM_RESOURCES.SERVICE_INDEX_PATTERN).click();
+      cy.get('.euiComboBoxOptionsList').contains(APM_RESOURCES.SERVICE_INDEX_PATTERN).click();
       cy.get('.euiComboBoxOptionsList').should('not.exist');
 
       // Select Prometheus data source
       cy.get('.euiFormRow').contains('RED Metrics').parent().parent().find('.euiComboBox').click();
       cy.get('.euiComboBoxOptionsList').should('be.visible');
-      cy.contains(APM_RESOURCES.DATA_CONNECTION_NAME).click();
+      cy.get('.euiComboBoxOptionsList').contains(APM_RESOURCES.DATA_CONNECTION_NAME).click();
       cy.get('.euiComboBoxOptionsList').should('not.exist');
 
       // Click Apply button
