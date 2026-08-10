@@ -6,9 +6,18 @@
 /// <reference types="cypress" />
 
 import { PROMETHEUS_CLUSTER } from '../../utils/constants';
-import { uploadAPMDataToOpenSearch, waitForPrometheusMetrics, verifyPrometheusReady, getAPMTestTimeRange } from '../../utils/apm_data_helpers';
+import {
+  uploadAPMDataToOpenSearch,
+  waitForPrometheusMetrics,
+  verifyPrometheusReady,
+  getAPMTestTimeRange,
+} from '../../utils/apm_data_helpers';
 import { setupAPMTestEnvironment, cleanupObservabilityWorkspace } from '../../utils/helpers';
-import { getRandomizedWorkspaceName, getRandomizedDatasetId, formatDateForPicker } from '../../utils/shared';
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+  formatDateForPicker,
+} from '../../utils/shared';
 
 const workspaceName = getRandomizedWorkspaceName('apm-services');
 const traceDatasetId = getRandomizedDatasetId('trace');
@@ -166,42 +175,29 @@ describe('APM Services Page', () => {
     });
 
     it('should configure APM settings and display services page', () => {
-      // Click "Get started" button to open settings modal
-      cy.contains('button', 'Get started').should('be.visible').click();
+      // Open the APM Settings modal. The empty-state "Get started" button now
+      // launches the setup wizard, so this flow uses the header "APM Settings"
+      // button, which still opens the manual settings modal used below.
+      cy.contains('button', 'APM Settings').should('be.visible').click();
 
       // Wait for modal to appear
       cy.get('.euiModal').should('be.visible');
       cy.get('.euiModalHeader').should('be.visible');
 
       // Select Traces dataset
-      cy.get('.euiFormRow')
-        .contains('Traces')
-        .parent()
-        .parent()
-        .find('.euiComboBox')
-        .click();
+      cy.get('.euiFormRow').contains('Traces').parent().parent().find('.euiComboBox').click();
       cy.get('.euiComboBoxOptionsList').should('be.visible');
       cy.contains(APM_RESOURCES.TRACE_INDEX_PATTERN).click();
       cy.get('.euiComboBoxOptionsList').should('not.exist');
 
       // Select Services dataset
-      cy.get('.euiFormRow')
-        .contains('Services')
-        .parent()
-        .parent()
-        .find('.euiComboBox')
-        .click();
+      cy.get('.euiFormRow').contains('Services').parent().parent().find('.euiComboBox').click();
       cy.get('.euiComboBoxOptionsList').should('be.visible');
       cy.contains(APM_RESOURCES.SERVICE_INDEX_PATTERN).click();
       cy.get('.euiComboBoxOptionsList').should('not.exist');
 
       // Select Prometheus data source
-      cy.get('.euiFormRow')
-        .contains('RED Metrics')
-        .parent()
-        .parent()
-        .find('.euiComboBox')
-        .click();
+      cy.get('.euiFormRow').contains('RED Metrics').parent().parent().find('.euiComboBox').click();
       cy.get('.euiComboBoxOptionsList').should('be.visible');
       cy.contains(APM_RESOURCES.DATA_CONNECTION_NAME).click();
       cy.get('.euiComboBoxOptionsList').should('not.exist');
