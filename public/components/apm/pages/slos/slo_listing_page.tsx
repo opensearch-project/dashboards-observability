@@ -1073,8 +1073,21 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     if (promDatasourcesLoading) return;
     dsScopeResolvedRef.current = true;
 
-    // URL wins: an explicit ?datasourceId= is left exactly as hydrated.
-    if (deserializeFiltersFromSearch(location.search).datasourceId?.length) {
+    // URL wins: an explicit ?datasourceId= is honored as-is, but heal a legacy
+    // link that carries data-connection saved-object ids — map any id to its
+    // connection name (what the facet, badge, and server all key on) so the
+    // scope resolves to real results and the checkbox state stays consistent.
+    // Unknown values pass through unchanged.
+    const urlDatasourceId = deserializeFiltersFromSearch(location.search).datasourceId;
+    if (urlDatasourceId?.length) {
+      const nameById = new Map(promDatasources.map((d) => [d.id, d.name]));
+      const normalized = Array.from(new Set(urlDatasourceId.map((v) => nameById.get(v) ?? v)));
+      const differs =
+        normalized.length !== urlDatasourceId.length ||
+        normalized.some((v, i) => v !== urlDatasourceId[i]);
+      if (differs) {
+        setFiltersAndResetCursor((f) => ({ ...f, datasourceId: normalized }));
+      }
       setScopeReady(true);
       return;
     }

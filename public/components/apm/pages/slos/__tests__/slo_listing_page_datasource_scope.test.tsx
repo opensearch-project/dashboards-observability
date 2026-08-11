@@ -189,6 +189,22 @@ describe('SloListingPage — datasource scope on landing', () => {
     expect(lastMainLoadDatasourceIds(list)).toEqual(['a']);
   });
 
+  it('heals a legacy URL datasource id to the connection name for the query', async () => {
+    mockUsePrometheusDatasources.mockReturnValue({
+      datasources: [ds('id-a', 'a'), ds('id-b', 'b')],
+      loading: false,
+      error: null,
+    });
+    const list = makeListImpl();
+    // Legacy bookmarked link carries the data-connection saved-object id.
+    renderPage(list, '?datasourceId=id-a');
+
+    // The listing heals it to the connection name so the server query resolves.
+    await waitFor(() => expect(lastMainLoadDatasourceIds(list)).toEqual(['a']));
+    // No count probes — this is the URL-wins path, not auto-select.
+    expect(list.mock.calls.every(([f]) => (f as SloListFilters)?.pageSize !== 1)).toBe(true);
+  });
+
   it('restores a remembered per-tab selection without re-ranking', async () => {
     window.sessionStorage.setItem(
       datasourceScopeCacheKey('default'),

@@ -87,6 +87,28 @@ describe('SloListFilterPanel (sidebar)', () => {
     expect(screen.getByTestId('slosFilterDatasourceCheckbox-c4b2c2d0-uuid')).toBeChecked();
   });
 
+  it('reverse-maps a legacy saved-object id selection to a checked box', () => {
+    const datasources = [
+      { id: 'c4b2c2d0-uuid', name: 'ObservabilityStack_Prometheus', type: 'prometheus' as const },
+    ];
+    // A legacy bookmarked URL carries the data-connection saved-object id, not
+    // the connection name. The facet must still render it checked, and toggling
+    // it off must emit the name-keyed (healed) selection — here, empty.
+    const onChange = jest.fn();
+    render(
+      <SloListFilterPanel
+        filters={{ datasourceId: ['c4b2c2d0-uuid'] }}
+        onChange={onChange}
+        items={[makeSummary()]}
+        datasources={datasources}
+      />
+    );
+    const box = screen.getByTestId('slosFilterDatasourceCheckbox-c4b2c2d0-uuid');
+    expect(box).toBeChecked();
+    fireEvent.click(box);
+    expect(onChange).toHaveBeenCalledWith({ datasourceId: [] });
+  });
+
   it('emits an explicit empty array when the last datasource is unchecked (show nothing)', () => {
     const onChange = jest.fn();
     const datasources = [

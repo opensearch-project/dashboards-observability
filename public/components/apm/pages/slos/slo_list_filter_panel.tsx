@@ -252,7 +252,15 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
   onCapReached,
 }) => {
   const [query, setQuery] = useState('');
-  const selectedSet = useMemo(() => new Set(selected ?? []), [selected]);
+  // Selection is keyed on the datasource *name*. Reverse-map any incoming
+  // legacy saved-object id (e.g. from an old bookmarked `?datasourceId=<id>`
+  // link) to its name so the checkbox state stays consistent with the query
+  // and the active-filter badge. Unknown values pass through unchanged.
+  const nameById = useMemo(() => new Map(datasources.map((d) => [d.id, d.name])), [datasources]);
+  const selectedSet = useMemo(
+    () => new Set((selected ?? []).map((v) => nameById.get(v) ?? v)),
+    [selected, nameById]
+  );
   const visible = useMemo(() => {
     if (!query.trim()) return datasources;
     const q = query.toLowerCase();

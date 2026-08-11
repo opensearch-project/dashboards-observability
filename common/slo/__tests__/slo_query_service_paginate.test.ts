@@ -171,8 +171,8 @@ describe('SloService.paginate (cursor)', () => {
 
   /**
    * Store double that reproduces the SavedObject store's pushdown gaps:
-   * `canonicalKind` isn't projected and `state` rides on the unreliable
-   * `cachedState` projection. Its `paginate` drops both facets (as the real SO
+   * `canonicalKind` isn't projected, and `state` is live-computed so it can't
+   * be resolved at the index. Its `paginate` drops both facets (as the real SO
    * query would), so a correct result for those facets can only come from the
    * materialize path (`list`). It also counts `paginate` calls so we can assert
    * the query service bypasses pushdown for those facets entirely.
@@ -219,8 +219,8 @@ describe('SloService.paginate (cursor)', () => {
       await store.save(makeDoc(`slo-${String(i).padStart(3, '0')}`));
     }
 
-    // Whatever the live-computed state is, a state-filtered request must not
-    // lean on the unreliable cachedState pushdown.
+    // A state-filtered request must route through the materialize path rather
+    // than any (nonexistent) index-level state pushdown.
     const r = await svc.paginate({ pageSize: 10, state: ['no_data'] }, null);
     expect(store.paginateCalls).toBe(0);
     expect(Array.isArray(r.results)).toBe(true);

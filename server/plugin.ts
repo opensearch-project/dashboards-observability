@@ -55,8 +55,10 @@ export interface ObservabilityPluginSetupDependencies {
   dataSource: DataSourcePluginSetup;
 }
 
-export class ObservabilityPlugin
-  implements Plugin<ObservabilityPluginSetup, ObservabilityPluginStart> {
+export class ObservabilityPlugin implements Plugin<
+  ObservabilityPluginSetup,
+  ObservabilityPluginStart
+> {
   private readonly logger: Logger;
   private sloService?: SloService;
   /**
@@ -93,7 +95,7 @@ export class ObservabilityPlugin
     // searcher is only invoked from request handlers, which run after
     // both plugins have started.
     bindPromQLSearcherFromStartServices(
-      (core.getStartServices as unknown) as import('opensearch-dashboards/server').StartServicesAccessor<
+      core.getStartServices as unknown as import('opensearch-dashboards/server').StartServicesAccessor<
         {},
         { data: { search: DataPluginStart['search'] } }
       >
@@ -293,12 +295,9 @@ export class ObservabilityPlugin
           worstTarget: { type: 'float' },
           labelKeys: { type: 'keyword' },
           labelValues: { type: 'keyword' },
-          // Last-written live state, eagerly persisted by the status pipeline
-          // when the computed value diverges from this stored projection. Not
-          // a source of truth — `SloLiveStatus.state` is recomputed every
-          // listing call by the aggregator. Exists solely so the SO `filter`
-          // clause can push the `state` facet to the index instead of paying
-          // status fold-in for every matching SLO before slicing.
+          // Reserved keyword — no active reader/writer today. Retained so
+          // removing it doesn't force a saved-objects migration; `state` is
+          // resolved live (see slo_query_service.ts), not via a cached projection.
           cachedState: { type: 'keyword' },
           version: { type: 'integer' },
           createdAt: { type: 'date' },
@@ -590,7 +589,7 @@ export class ObservabilityPlugin
       const soStore = new SavedObjectSloStore(repository);
       this.sloService.setStore(soStore);
       const refStore = new SloRuleRefStore(
-        (repository as unknown) as import('../../../src/core/server').SavedObjectsClientContract
+        repository as unknown as import('../../../src/core/server').SavedObjectsClientContract
       );
       this.sloService.setRuleRefStore(refStore);
       // Per-request store factory. Methods that receive an OSD `request`

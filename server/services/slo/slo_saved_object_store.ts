@@ -15,7 +15,6 @@ import type { SavedObjectsClientContract } from '../../../../../src/core/server'
 import type {
   ISloStore,
   SloDocument,
-  SloHealthState,
   SloPaginateOpts,
   SloPaginateResult,
 } from '../../../common/slo/slo_types';
@@ -91,12 +90,6 @@ function projectAttributes(doc: SloDocument): Record<string, unknown> {
     worstTarget,
     labelKeys,
     labelValues,
-    // `cachedState` is intentionally NOT projected here — it is owned by
-    // the status pipeline's writeback path (`updateCachedState`). Leaving
-    // it absent on full-doc saves means a fresh create starts unfiltered
-    // by state; the very next status read writes the real value. Letting
-    // `save` rewrite cachedState would either require a read-modify-save
-    // round-trip or risk clobbering a more recent writeback.
     // Audit projections from status
     version: doc.status.version,
     createdAt: doc.status.createdAt,
@@ -123,13 +116,10 @@ function buildFilterKuery(opts: SloPaginateOpts): string | undefined {
   };
   const clauses: string[] = [];
   if (f.datasourceId?.length) clauses.push(inClause('datasourceId', f.datasourceId));
-  // NOTE: `state` is intentionally NOT pushed down here. It's a live-computed
-  // facet and `cachedState` is a best-effort projection (only written by the
-  // status-pipeline writeback after an SLO is surfaced on a page), so filtering
-  // on it wrongly drops fresh/never-viewed SLOs and keeps stale ones. The query
-  // service routes any `state`-filtered request through the materialize path
-  // (`SloQueryService.paginate` → `legacyPaginate` → `list`), which applies the
-  // state filter after live-status fold-in. See slo_query_service.ts.
+  // NOTE: `state` is intentionally NOT pushed down — it's live-computed, so the
+  // query service resolves it through the materialize path
+  // (`SloQueryService.paginate` → `legacyPaginate` → `list`) after status
+  // fold-in. See slo_query_service.ts.
   if (f.sliBackend?.length) clauses.push(inClause('sliBackend', f.sliBackend));
   if (f.sliLeafType?.length) clauses.push(inClause('sliLeafType', f.sliLeafType));
   if (f.service?.length) clauses.push(inClause('service', f.service));
@@ -219,25 +209,6 @@ export class SavedObjectSloStore implements ISloStore {
     });
   }
 
-  /**
-   * Lightweight projection write — patches just the cachedState keyword.
-   * Used by the status pipeline to fold a freshly computed state back into
-   * the index so subsequent state-filtered listings can push the facet to
-   * the SO `filter` clause.
-   *
-   * 403/404 silently no-op: the SO was deleted or workspace-scoped away
-   * between the read and the writeback. Either way, nothing to write —
-   * matching the same 403→404 invariant `get` and `delete` apply.
-   */
-  async updateCachedState(id: string, state: SloHealthState): Promise<void> {
-    try {
-      await this.client.update(SO_TYPE, id, { cachedState: state });
-    } catch (err) {
-      if (isSavedObjectNotFound(err)) return;
-      throw err;
-    }
-  }
-
   async paginate(opts: SloPaginateOpts): Promise<SloPaginateResult> {
     const filterClauses = buildFilterKuery(opts);
     const findOpts: {
@@ -274,17 +245,14 @@ export class SavedObjectSloStore implements ISloStore {
     if (filterClauses) findOpts.filter = filterClauses;
     const response = await this.client.find(findOpts);
     const docs: SloDocument[] = [];
-    const cachedStates: Array<SloHealthState | null> = [];
     for (const obj of response.saved_objects as SavedObjectEnvelope[]) {
       try {
         docs.push(fromAttributes(obj));
-        const cached = (obj.attributes as { cachedState?: SloHealthState }).cachedState;
-        cachedStates.push(typeof cached === 'string' ? cached : null);
       } catch {
         // Skip malformed docs rather than failing the whole listing.
       }
     }
-    return { docs, cachedStates, total: response.total };
+    return { docs, total: response.total };
   }
 
   async delete(id: string): Promise<boolean> {
