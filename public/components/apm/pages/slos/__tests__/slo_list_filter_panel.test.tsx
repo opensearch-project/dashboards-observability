@@ -51,6 +51,60 @@ describe('SloListFilterPanel (sidebar)', () => {
     expect(screen.getByTestId('slosFilterAccordionEnabled')).toBeInTheDocument();
   });
 
+  it('selects a datasource by its connection name, not its saved-object id', () => {
+    const onChange = jest.fn();
+    // Mirrors the shape from usePrometheusDatasources: `id` is the
+    // data-connection saved-object UUID, `name` is the connection name that an
+    // SLO persists in spec.datasourceId (and that the server filter resolves).
+    const datasources = [
+      { id: 'c4b2c2d0-uuid', name: 'ObservabilityStack_Prometheus', type: 'prometheus' as const },
+    ];
+    render(
+      <SloListFilterPanel
+        filters={{}}
+        onChange={onChange}
+        items={[makeSummary()]}
+        datasources={datasources}
+      />
+    );
+    fireEvent.click(screen.getByTestId('slosFilterDatasourceCheckbox-c4b2c2d0-uuid'));
+    // The emitted filter carries the NAME, so the server can resolve it.
+    expect(onChange).toHaveBeenCalledWith({ datasourceId: ['ObservabilityStack_Prometheus'] });
+  });
+
+  it('reflects a name-based datasource selection as checked', () => {
+    const datasources = [
+      { id: 'c4b2c2d0-uuid', name: 'ObservabilityStack_Prometheus', type: 'prometheus' as const },
+    ];
+    render(
+      <SloListFilterPanel
+        filters={{ datasourceId: ['ObservabilityStack_Prometheus'] }}
+        onChange={jest.fn()}
+        items={[makeSummary()]}
+        datasources={datasources}
+      />
+    );
+    expect(screen.getByTestId('slosFilterDatasourceCheckbox-c4b2c2d0-uuid')).toBeChecked();
+  });
+
+  it('emits an explicit empty array when the last datasource is unchecked (show nothing)', () => {
+    const onChange = jest.fn();
+    const datasources = [
+      { id: 'c4b2c2d0-uuid', name: 'ObservabilityStack_Prometheus', type: 'prometheus' as const },
+    ];
+    render(
+      <SloListFilterPanel
+        filters={{ datasourceId: ['ObservabilityStack_Prometheus'] }}
+        onChange={onChange}
+        items={[makeSummary()]}
+        datasources={datasources}
+      />
+    );
+    fireEvent.click(screen.getByTestId('slosFilterDatasourceCheckbox-c4b2c2d0-uuid'));
+    // Explicit [] (not undefined): an empty datasource scope means "show nothing".
+    expect(onChange).toHaveBeenCalledWith({ datasourceId: [] });
+  });
+
   it('renders human-readable canonical kind labels from KIND_LABEL', () => {
     render(<SloListFilterPanel filters={{}} onChange={jest.fn()} items={[makeSummary()]} />);
     expect(screen.getByLabelText('APM availability')).toBeInTheDocument();

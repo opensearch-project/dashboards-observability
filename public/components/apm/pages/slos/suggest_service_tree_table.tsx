@@ -56,8 +56,8 @@ const t = {
       defaultMessage: '{count, plural, one {# rule} other {# rules}}',
       values: { count },
     }),
-  covered: i18n.translate('observability.apm.slo.suggest.serviceTreeTable.coveredBadge', {
-    defaultMessage: 'Covered',
+  rulesExist: i18n.translate('observability.apm.slo.suggest.serviceTreeTable.rulesExistBadge', {
+    defaultMessage: 'Rules exist',
   }),
   metricLabel: i18n.translate('observability.apm.slo.suggest.serviceTreeTable.metricLabel', {
     defaultMessage: 'Metric:',
@@ -147,7 +147,9 @@ const SliMixBadgePopover: React.FC<{
                 </EuiFlexItem>
                 {d.existingRuleMatch && (
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color="warning">{t.covered}</EuiBadge>
+                    <EuiBadge color="hollow" iconType="iInCircle">
+                      {t.rulesExist}
+                    </EuiBadge>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

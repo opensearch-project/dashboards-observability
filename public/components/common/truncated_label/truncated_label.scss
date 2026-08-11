@@ -1,0 +1,43 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Shared TruncatedLabel — single-line ellipsis with a custom hover tooltip.
+// The wrap sets up the positioning context for the absolute/fixed tooltip
+// child; both wrap and label carry `min-width: 0; width: 100%` so the ellipsis
+// renders inside a flex/label container that has itself been width-bounded.
+.obsTruncatedLabelWrap {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  position: relative;
+}
+
+.obsTruncatedLabel {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Custom tooltip — appears instantly on hover. Styled to match EUI's dark
+// tooltip, but manually positioned with `position: fixed` so it escapes any
+// surrounding `overflow: hidden` clipping. Top/left are set inline by the
+// component from `getBoundingClientRect()`.
+.obsTruncatedLabelTooltip {
+  @include euiBottomShadowSmall;
+
+  position: fixed;
+  z-index: 9000;
+  background: $euiColorFullShade;
+  color: $euiColorEmptyShade;
+  font-size: $euiFontSizeXS;
+  line-height: 1.4;
+  padding: $euiSizeXS $euiSizeS;
+  border-radius: $euiBorderRadius;
+  white-space: nowrap;
+  pointer-events: none;
+}

@@ -40,6 +40,12 @@ import { SloOverviewPanel } from './slo_overview_panel';
 import { DATASOURCE_SELECTION_CAP, SloListFilterPanel } from './slo_list_filter_panel';
 import { usePrometheusDatasources } from './use_prometheus_datasources';
 import {
+  datasourceScopeCacheKey,
+  readDatasourceScope,
+  scopeFromFilter,
+  writeDatasourceScope,
+} from './slo_datasource_scope_cache';
+import {
   deserializeCursorFromSearch,
   deserializeFiltersFromSearch,
   filtersEqual,
@@ -148,8 +154,8 @@ const SloHealthCell: React.FC<{ row: SloSummary }> = ({ row }) => {
   const budgetColor: 'danger' | 'warning' | 'default' = overBudget
     ? 'danger'
     : remaining < 0.25
-    ? 'warning'
-    : 'default';
+      ? 'warning'
+      : 'default';
   const firing = row.status.firingCount;
   return (
     <div data-test-subj={`slosHealthCell-${row.id}`} style={{ width: 180 }}>
@@ -479,7 +485,12 @@ interface SlosTablePanelProps {
   hasMore: boolean;
   hasPrev: boolean;
   filteredToZero: boolean;
+  /** Zero results specifically because the user unchecked every datasource. */
+  datasourceScopeEmpty: boolean;
+  /** Total Prometheus datasources available (drives the recovery button label). */
+  datasourceCount: number;
   onClearAllFilters: () => void;
+  onShowAllDatasources: () => void;
   onPrev: () => void;
   onNext: () => void;
   onPageSizeChange: (next: number) => void;
@@ -496,13 +507,62 @@ const SlosTablePanelUI: React.FC<SlosTablePanelProps> = ({
   hasMore,
   hasPrev,
   filteredToZero,
+  datasourceScopeEmpty,
+  datasourceCount,
   onClearAllFilters,
+  onShowAllDatasources,
   onPrev,
   onNext,
   onPageSizeChange,
   defaultsLine,
 }) => {
   if (filteredToZero) {
+    // Distinguish "you deselected every datasource" from a generic over-narrow
+    // filter set: the fix for the former is to pick a datasource (or show all),
+    // not to widen unrelated facets.
+    if (datasourceScopeEmpty) {
+      return (
+        <EuiPanel data-test-subj="slosEmptyNoDatasource">
+          <EuiEmptyPrompt
+            iconType="database"
+            title={
+              <h2>
+                {i18n.translate('observability.apm.slo.listing.emptyNoDatasource.title', {
+                  defaultMessage: 'No datasources selected',
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate('observability.apm.slo.listing.emptyNoDatasource.body', {
+                  defaultMessage:
+                    'Select at least one Prometheus datasource in the filters to see its SLOs, or show all datasources.',
+                })}
+              </p>
+            }
+            actions={
+              <EuiButton
+                onClick={onShowAllDatasources}
+                data-test-subj="slosEmptyNoDatasourceShowAll"
+              >
+                {datasourceCount > DATASOURCE_SELECTION_CAP
+                  ? i18n.translate('observability.apm.slo.listing.emptyNoDatasource.showCapped', {
+                      defaultMessage:
+                        'Show {count, plural, one {# datasource} other {# datasources}}',
+                      values: { count: DATASOURCE_SELECTION_CAP },
+                    })
+                  : i18n.translate(
+                      'observability.apm.slo.listing.emptyNoDatasource.showAllButton',
+                      {
+                        defaultMessage: 'Show all datasources',
+                      }
+                    )}
+              </EuiButton>
+            }
+          />
+        </EuiPanel>
+      );
+    }
     return (
       <EuiPanel data-test-subj="slosEmptyFilteredZero">
         <EuiEmptyPrompt
@@ -705,10 +765,31 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     });
   }, [filtersForUrl, cursor, pageSize, location.search, location.pathname, history]);
 
+  // True once the landing datasource-scope has resolved (URL / cache / auto-
+  // select). The first fetch waits on this so we never flash an unscoped list
+  // before the scope applies. See the scope-resolve effect below.
+  const [scopeReady, setScopeReady] = useState(false);
+
+  // Explicit empty datasource scope (user unchecked every datasource): show
+  // nothing. Distinct from "no datasource filter at all" (undefined = show
+  // everything). Shared by `load` (server short-circuit) and the empty-state.
+  const datasourceScopeEmpty =
+    Array.isArray(filters.datasourceId) && filters.datasourceId.length === 0;
+
   const load = useCallback(
     async (isCurrent: () => boolean) => {
       setLoading(true);
       setError(null);
+      // Empty datasource scope → show nothing. Short-circuit without hitting
+      // the server (which treats an empty datasource filter as "no filter").
+      if (datasourceScopeEmpty) {
+        setItems([]);
+        setTotal(0);
+        setNextCursor(null);
+        setPrevCursor(null);
+        setLoading(false);
+        return;
+      }
       try {
         // Listing is Prometheus-scoped by default — the SLI backend facet was
         // dropped from the sidebar in favor of a single-backend default. URL
@@ -744,10 +825,14 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         if (isCurrent()) setLoading(false);
       }
     },
-    [apiClient, filters, cursor, pageSize, notifications]
+    [apiClient, filters, cursor, pageSize, notifications, datasourceScopeEmpty]
   );
 
   useEffect(() => {
+    // Hold the first fetch until the landing datasource scope has resolved, so
+    // the initial render doesn't flash an unscoped list before auto-select /
+    // cache applies. `loading` stays true meanwhile (the spinner shows).
+    if (!scopeReady) return undefined;
     // Stale-fetch guard: rapid filter clicks can fire overlapping `apiClient.list()`
     // requests, and whichever resolves last wins. The flag pins each effect's
     // request to its render cycle so a slower stale response can't clobber the
@@ -757,7 +842,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [load]);
+  }, [load, scopeReady]);
 
   // Manual refresh from the toolbar button + error retry. Guarded by a render
   // counter so a follow-up auto-refresh can't override a manual fetch.
@@ -928,9 +1013,120 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     setFilters(next);
   }, []);
 
-  const clearAllFilters = useCallback(() => setFiltersAndResetCursor({}), [
+  const clearAllFilters = useCallback(
+    () => setFiltersAndResetCursor({}),
+    [setFiltersAndResetCursor]
+  );
+
+  // Rank the available datasources by SLO count (highest first, count > 0),
+  // capped at DATASOURCE_SELECTION_CAP. A lightweight per-datasource `total`
+  // probe (pageSize=1) drives the ranking; a failed probe counts as 0 so one
+  // bad datasource can't block the rest. Shared by the landing auto-select and
+  // the empty-state "Show all" recovery so both pick the same set.
+  const rankTopDatasourceNames = useCallback(async (): Promise<string[]> => {
+    const counts = await Promise.all(
+      promDatasources.map(async (d) => {
+        try {
+          const res = await apiClient.list(
+            { datasourceId: [d.name], sliBackend: ['prometheus'], pageSize: 1 },
+            null
+          );
+          return { name: d.name, total: res.total };
+        } catch {
+          return { name: d.name, total: 0 };
+        }
+      })
+    );
+    return counts
+      .filter((c) => c.total > 0)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, DATASOURCE_SELECTION_CAP)
+      .map((c) => c.name);
+  }, [apiClient, promDatasources]);
+
+  // Recovery from the empty-scope state: actually *check* the datasource boxes
+  // (the top ones by SLO count, matching the landing auto-select) rather than
+  // clearing the filter — the checked state must match what's displayed. Falls
+  // back to the first cap datasources when none report SLOs so the button
+  // always yields a non-empty scope. Preserves any other active facets.
+  const showAllDatasources = useCallback(() => {
+    void (async () => {
+      const ranked = await rankTopDatasourceNames();
+      const names = ranked.length
+        ? ranked
+        : promDatasources.slice(0, DATASOURCE_SELECTION_CAP).map((d) => d.name);
+      setFiltersAndResetCursor((f) => ({ ...f, datasourceId: names }));
+    })();
+  }, [rankTopDatasourceNames, promDatasources, setFiltersAndResetCursor]);
+
+  // Datasource scope on landing (runs once): honor an explicit URL filter
+  // (shared/bookmarked link) first; else restore this tab's remembered
+  // selection; else auto-select the (up to DATASOURCE_SELECTION_CAP)
+  // datasources with the most SLOs. Flips `scopeReady` at every terminal branch
+  // so the first fetch is held until the scope is settled (no unscoped flash).
+  // See slo_datasource_scope_cache.
+  const dsScopeKey = useMemo(() => datasourceScopeCacheKey(), []);
+  const dsScopeResolvedRef = useRef(false);
+  useEffect(() => {
+    if (dsScopeResolvedRef.current) return;
+    // Wait for the datasource catalog before ranking / restoring.
+    if (promDatasourcesLoading) return;
+    dsScopeResolvedRef.current = true;
+
+    // URL wins: an explicit ?datasourceId= is left exactly as hydrated.
+    if (deserializeFiltersFromSearch(location.search).datasourceId?.length) {
+      setScopeReady(true);
+      return;
+    }
+
+    // Remembered scope for this tab/workspace. `all` leaves the filter unset
+    // (show everything); `scope` restores the exact selection — including an
+    // empty one, which means the user deliberately unchecked everything (show
+    // nothing). Either way, don't re-run the auto-select.
+    const cached = readDatasourceScope(dsScopeKey);
+    if (cached) {
+      if (cached.kind === 'scope') {
+        setFiltersAndResetCursor((f) => ({ ...f, datasourceId: cached.ids }));
+      }
+      setScopeReady(true);
+      return;
+    }
+
+    // Nothing to rank if the catalog is empty.
+    if (promDatasources.length === 0) {
+      setScopeReady(true);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      const top = await rankTopDatasourceNames();
+      if (cancelled) return;
+      if (top.length > 0) {
+        setFiltersAndResetCursor((f) => ({ ...f, datasourceId: top }));
+      }
+      setScopeReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    promDatasourcesLoading,
+    promDatasources,
+    dsScopeKey,
+    rankTopDatasourceNames,
+    location.search,
     setFiltersAndResetCursor,
   ]);
+
+  // Persist the datasource selection for this tab after the initial resolve, so
+  // a return visit in the same tab restores it instead of re-auto-selecting.
+  // Gated on the resolve ref so the initial (pre-resolve) empty state isn't
+  // written as a deliberate "show all".
+  useEffect(() => {
+    if (!dsScopeResolvedRef.current) return;
+    writeDatasourceScope(dsScopeKey, scopeFromFilter(filters.datasourceId));
+  }, [filters.datasourceId, dsScopeKey]);
 
   const onPrev = useCallback(() => {
     if (prevCursor) setCursor(prevCursor);
@@ -954,13 +1150,15 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         return next;
       });
     if (filters.datasourceId?.length) {
+      // `filters.datasourceId` now holds datasource *names* (see DatasourceFacet).
+      // Tolerate a legacy id from an old URL by falling back to an id→name map.
       const nameById = new Map(promDatasources.map((d) => [d.id, d.name]));
       badges.push({
         key: 'datasourceId',
         category: i18n.translate('observability.apm.slo.listing.activeFilter.datasource', {
           defaultMessage: 'Datasource',
         }),
-        values: filters.datasourceId.map((id) => nameById.get(id) ?? id),
+        values: filters.datasourceId.map((value) => nameById.get(value) ?? value),
         onRemove: () => clearKey('datasourceId'),
       });
     }
@@ -1111,10 +1309,18 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   );
 
   // --- Render states ---
+  // An explicit empty datasource scope (all boxes unchecked) counts as an
+  // active filter for empty-state purposes (see `datasourceScopeEmpty` above),
+  // so we show the tailored "No datasources selected" prompt rather than the
+  // "create your first SLO" onboarding prompt.
   const isFirstLoad = loading && items.length === 0 && totalUnfiltered === null;
   const noSlosExist =
-    !loading && !hasAnyFilter && items.length === 0 && (totalUnfiltered ?? 0) === 0;
-  const filteredToZero = !loading && hasAnyFilter && items.length === 0;
+    !loading &&
+    !hasAnyFilter &&
+    !datasourceScopeEmpty &&
+    items.length === 0 &&
+    (totalUnfiltered ?? 0) === 0;
+  const filteredToZero = !loading && (hasAnyFilter || datasourceScopeEmpty) && items.length === 0;
 
   return (
     <EuiPage data-test-subj="slosPage">
@@ -1296,7 +1502,10 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                         hasMore={nextCursor !== null}
                         hasPrev={prevCursor !== null}
                         filteredToZero={filteredToZero}
+                        datasourceScopeEmpty={datasourceScopeEmpty}
+                        datasourceCount={promDatasources.length}
                         onClearAllFilters={clearAllFilters}
+                        onShowAllDatasources={showAllDatasources}
                         onPrev={onPrev}
                         onNext={onNext}
                         onPageSizeChange={onPageSizeChange}

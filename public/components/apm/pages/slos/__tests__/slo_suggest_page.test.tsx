@@ -41,6 +41,33 @@ jest.mock('../suggest_engine', () => ({
   generateSuggestionsForServices: (...args: unknown[]) => mockGenerateSuggestions(...args),
 }));
 
+// Coverage now comes solely from the workspace-scoped SLO health rollup.
+// Mock the hook so tests can drive which services already own an SLO, keeping
+// `kindSide` (and the rest of the module) real.
+const mockUseServiceSloHealth = jest.fn();
+jest.mock('../slo_health_summary', () => ({
+  ...jest.requireActual('../slo_health_summary'),
+  useServiceSloHealth: (...args: unknown[]) => mockUseServiceSloHealth(...args),
+}));
+
+/**
+ * Build a `useServiceSloHealth` return value. `covered` maps a service name to
+ * which canonical sides already have an SLO saved object in this workspace.
+ */
+function makeHealth(
+  covered: Record<string, { availability?: boolean; latency?: boolean }> = {},
+  isLoading = false
+) {
+  const bySvc = new Map<string, { hasAvailability: boolean; hasLatency: boolean }>();
+  for (const [svc, sides] of Object.entries(covered)) {
+    bySvc.set(svc, {
+      hasAvailability: Boolean(sides.availability),
+      hasLatency: Boolean(sides.latency),
+    });
+  }
+  return { bySvc, aggregate: undefined, isLoading, error: undefined, refetch: jest.fn() };
+}
+
 /** Minimal covered/uncovered draft fixture shaped like a real Suggestion. */
 function fakeDraft(key: string, service: string, existingRuleMatch = false) {
   return {
@@ -206,12 +233,15 @@ describe('SloSuggestPage', () => {
     // Default: delegate to the real detector pipeline. Tests that need a
     // specific draft set override this per-test.
     mockGenerateSuggestions.mockImplementation(actualEngine.generateSuggestionsForServices);
+    // Default: no service is covered by an existing SLO.
+    mockUseServiceSloHealth.mockReturnValue(makeHealth());
   });
 
   afterEach(() => {
     mockUseApmConfig.mockReset();
     mockUseServices.mockReset();
     mockGenerateSuggestions.mockReset();
+    mockUseServiceSloHealth.mockReset();
     jest.restoreAllMocks();
   });
 
@@ -405,11 +435,12 @@ describe('SloSuggestPage', () => {
     expect(await screen.findByText(/No Prometheus datasource configured/)).toBeInTheDocument();
   });
 
-  it('leaves already-covered drafts unchecked and surfaces the covered subline', async () => {
-    // cart yields two drafts: one already covered by an existing rule, one not.
+  it('leaves drafts covered by an existing SLO unchecked and surfaces the covered subline', async () => {
+    // cart already owns its availability SLO in this workspace; checkout does not.
+    mockUseServiceSloHealth.mockReturnValue(makeHealth({ cart: { availability: true } }));
     mockGenerateSuggestions.mockReturnValue([
-      fakeDraft('cart-avail', 'cart', true),
-      fakeDraft('cart-lat', 'cart', false),
+      fakeDraft('cart-avail', 'cart', false),
+      fakeDraft('checkout-avail', 'checkout', false),
     ]);
     renderPage({ initialEntry: SCOPED_ENTRY });
     await screen.findByTestId('slosSuggestPage');
@@ -419,16 +450,37 @@ describe('SloSuggestPage', () => {
     expect(screen.getByTestId('slosSuggestCreate')).toHaveTextContent('Create 1 SLO');
     // The covered draft is called out in the subline.
     expect(screen.getByTestId('slosSuggestHeaderSubline')).toHaveTextContent(
-      '1 draft already covered by existing rules'
+      '1 draft already covered by an existing SLO in this workspace'
     );
+  });
+
+  it('keeps drafts with a matching recording rule selectable and surfaces the rules-exist hint', async () => {
+    // A recording rule exists on the ruler (e.g. another workspace's namespace)
+    // but no SLO exists here → the draft stays creatable.
+    mockGenerateSuggestions.mockReturnValue([
+      fakeDraft('cart-avail', 'cart', true),
+      fakeDraft('checkout-avail', 'checkout', false),
+    ]);
+    renderPage({ initialEntry: SCOPED_ENTRY });
+    await screen.findByTestId('slosSuggestPage');
+    await waitFor(() => expect(screen.getByTestId('slosSuggestHeaderStrip')).toBeInTheDocument());
+
+    // Both drafts are creatable — the rule match does not block.
+    expect(screen.getByTestId('slosSuggestCreate')).toHaveTextContent('Create 2 SLOs');
+    // The rules-exist hint is surfaced instead of the covered subline.
+    expect(screen.getByTestId('slosSuggestHeaderRulesExistSubline')).toHaveTextContent(
+      'matching recording rules on the ruler'
+    );
+    expect(screen.queryByTestId('slosSuggestHeaderSubline')).not.toBeInTheDocument();
   });
 
   it('deselects an untouched draft when coverage resolves late', async () => {
     seedPageMocks();
-    // First paint: both drafts uncovered (ruler not yet resolved) → both selected.
+    // First paint: no service covered (health not yet resolved) → both selected.
+    mockUseServiceSloHealth.mockReturnValue(makeHealth());
     mockGenerateSuggestions.mockReturnValue([
       fakeDraft('cart-avail', 'cart', false),
-      fakeDraft('cart-lat', 'cart', false),
+      fakeDraft('checkout-avail', 'checkout', false),
     ]);
     const { rerender } = render(scopedPage());
     await screen.findByTestId('slosSuggestPage');
@@ -436,12 +488,9 @@ describe('SloSuggestPage', () => {
       expect(screen.getByTestId('slosSuggestCreate')).toHaveTextContent('Create 2 SLOs')
     );
 
-    // Ruler resolves: cart-avail now matches an existing rule. The user never
-    // touched it, so the late coverage signal must deselect it.
-    mockGenerateSuggestions.mockReturnValue([
-      fakeDraft('cart-avail', 'cart', true),
-      fakeDraft('cart-lat', 'cart', false),
-    ]);
+    // Health resolves: cart now owns its availability SLO. The user never
+    // touched that draft, so the late coverage signal must deselect it.
+    mockUseServiceSloHealth.mockReturnValue(makeHealth({ cart: { availability: true } }));
     rerender(scopedPage());
     await waitFor(() =>
       expect(screen.getByTestId('slosSuggestCreate')).toHaveTextContent('Create 1 SLO')

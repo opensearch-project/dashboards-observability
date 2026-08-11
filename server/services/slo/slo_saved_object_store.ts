@@ -123,7 +123,13 @@ function buildFilterKuery(opts: SloPaginateOpts): string | undefined {
   };
   const clauses: string[] = [];
   if (f.datasourceId?.length) clauses.push(inClause('datasourceId', f.datasourceId));
-  if (f.state?.length) clauses.push(inClause('cachedState', f.state));
+  // NOTE: `state` is intentionally NOT pushed down here. It's a live-computed
+  // facet and `cachedState` is a best-effort projection (only written by the
+  // status-pipeline writeback after an SLO is surfaced on a page), so filtering
+  // on it wrongly drops fresh/never-viewed SLOs and keeps stale ones. The query
+  // service routes any `state`-filtered request through the materialize path
+  // (`SloQueryService.paginate` → `legacyPaginate` → `list`), which applies the
+  // state filter after live-status fold-in. See slo_query_service.ts.
   if (f.sliBackend?.length) clauses.push(inClause('sliBackend', f.sliBackend));
   if (f.sliLeafType?.length) clauses.push(inClause('sliLeafType', f.sliLeafType));
   if (f.service?.length) clauses.push(inClause('service', f.service));

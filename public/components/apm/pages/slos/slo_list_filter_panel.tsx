@@ -29,7 +29,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import type { Datasource } from '../../../../../common/types/alerting';
 import type {
@@ -39,7 +38,9 @@ import type {
   SuggestionKind,
 } from '../../../../../common/slo/slo_types';
 import { SLO_HEALTH_COLOR, SLO_HEALTH_ORDER } from '../../../../../common/slo/state';
+import { TruncatedLabel } from '../../../common/truncated_label';
 import { KIND_LABEL } from './suggest_engine';
+import './slo_list_filter_panel.scss';
 
 /**
  * Max number of Prometheus datasources that can be selected simultaneously.
@@ -260,19 +261,28 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
 
   const atCap = selectedSet.size >= cap;
 
-  const toggle = (id: string) => {
-    if (selectedSet.has(id)) {
+  // Selection is keyed on the datasource *name* (the connection name), not the
+  // saved-object id. That's what an SLO persists in `spec.datasourceId` and
+  // what the server's list/aggregate filters resolve against — sending the
+  // saved-object id here produced "No SLOs match" because the server can't
+  // resolve it to a persisted datasource.
+  const toggle = (name: string) => {
+    if (selectedSet.has(name)) {
       const next = Array.from(selectedSet);
-      const idx = next.indexOf(id);
+      const idx = next.indexOf(name);
       next.splice(idx, 1);
-      onChange(next.length === 0 ? undefined : next);
+      // Emit an explicit empty array (not undefined) when the last datasource
+      // is unchecked: an empty datasource scope means "show nothing", distinct
+      // from having no datasource filter at all. The listing short-circuits on
+      // this and the scope cache remembers it.
+      onChange(next);
       return;
     }
     if (atCap) {
       onCapReached?.();
       return;
     }
-    const next = [...selectedSet, id];
+    const next = [...selectedSet, name];
     onChange(next);
   };
 
@@ -384,25 +394,26 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
             style={{
               maxHeight: 200,
               overflowY: 'auto',
+              // Clip horizontally instead of scrolling: a long connection name
+              // otherwise forces a horizontal scrollbar (setting overflow-y:auto
+              // makes overflow-x compute to auto), which looked like a stray bar
+              // under a single datasource. The label truncates with an ellipsis.
+              overflowX: 'hidden',
               paddingRight: 4,
               marginRight: -4,
             }}
             data-test-subj="slosFilterAccordionDatasourceList"
           >
             {visible.map((ds) => {
-              const isSelected = selectedSet.has(ds.id);
+              const isSelected = selectedSet.has(ds.name);
               const disabled = !isSelected && atCap;
               const checkbox = (
                 <EuiCheckbox
                   id={`slos-ds-${ds.id}`}
-                  label={
-                    <EuiText size="xs" style={{ lineHeight: '16px' }}>
-                      {ds.name}
-                    </EuiText>
-                  }
+                  label={<TruncatedLabel text={ds.name} />}
                   checked={isSelected}
                   disabled={disabled}
-                  onChange={() => toggle(ds.id)}
+                  onChange={() => toggle(ds.name)}
                   compressed
                   data-test-subj={`slosFilterDatasourceCheckbox-${ds.id}`}
                 />
@@ -410,11 +421,12 @@ const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
               return (
                 <div
                   key={ds.id}
-                  style={{
-                    padding: '2px 0',
-                    opacity: disabled ? 0.55 : 1,
-                    borderBottom: `1px solid ${euiThemeVars.euiColorLightestShade}`,
-                  }}
+                  // Plain row spacing, no per-row divider — matches the other
+                  // sidebar facets (State, SLI type, …), which are dividerless
+                  // checkbox groups. `sloDsFacetRow` bounds the width so the
+                  // name truncates with an ellipsis (see the scss).
+                  className="sloDsFacetRow"
+                  style={{ padding: '2px 0', opacity: disabled ? 0.55 : 1 }}
                 >
                   {disabled ? (
                     <EuiToolTip
