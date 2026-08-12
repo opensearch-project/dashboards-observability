@@ -36,6 +36,8 @@ import type { Datasource } from '../../../../common/types/alerting';
 interface DataSourceSOAttributes {
   title?: string;
   endpoint?: string;
+  dataSourceEngineType?: string;
+  dataSourceVersion?: string;
 }
 
 interface DataConnectionSOAttributes {
@@ -69,6 +71,8 @@ export function mapSavedObjectsToDatasources(
     url: so.id,
     enabled: true,
     mdsId: so.id,
+    engineType: so.attributes.dataSourceEngineType,
+    version: so.attributes.dataSourceVersion,
   }));
   const localRows: Datasource[] =
     osDiscovered.length > 0

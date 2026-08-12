@@ -170,6 +170,9 @@ export interface Datasource {
   directQueryName?: string;
   /** OSD Multi-Data-Source saved object ID — when set, use context.dataSource.opensearch.getClient(mdsId) */
   mdsId?: string;
+  /** OpenSearch data-source metadata used to gate datasource-specific creation flows. */
+  engineType?: string;
+  version?: string;
   auth?: {
     type: 'basic' | 'apikey' | 'sigv4';
     credentials?: Record<string, string>;
@@ -229,7 +232,12 @@ export interface DatasourceService {
 
 export type UnifiedAlertSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 export type UnifiedAlertState =
-  'active' | 'pending' | 'acknowledged' | 'silenced' | 'resolved' | 'error';
+  | 'active'
+  | 'pending'
+  | 'acknowledged'
+  | 'silenced'
+  | 'resolved'
+  | 'error';
 export type UnifiedAlertKind = 'alert' | 'anomaly';
 
 /** Lightweight alert representation for list views and tables. */

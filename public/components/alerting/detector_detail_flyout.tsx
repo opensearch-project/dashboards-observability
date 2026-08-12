@@ -214,11 +214,11 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
   onStop,
 }) => {
   const [lifecycleAction, setLifecycleAction] = useState<'start' | 'stop' | null>(null);
-  const {
-    data: detail,
-    isLoading,
-    error,
-  } = useRuleDetail(detector.datasourceId, detector.id, 'detector');
+  const { data: detail, isLoading, error, refetch } = useRuleDetail(
+    detector.datasourceId,
+    detector.id,
+    'detector'
+  );
   const rawDetector = (detail?.raw as ADDetector | undefined) || detectorFromSummary(detector);
   const description =
     detail?.description || rawDetector.description || detector.annotations.description || '';
@@ -249,6 +249,7 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
     setLifecycleAction(action);
     try {
       await handler(detector);
+      refetch();
     } finally {
       setLifecycleAction(null);
     }

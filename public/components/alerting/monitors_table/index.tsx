@@ -24,11 +24,7 @@ import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alertin
 import { coreRefs } from '../../../framework/core_refs';
 import { useFacetCollapse } from '../facet_filter_panel';
 import { BASE_PPL_ALERTING_SUPPORTED_VERSION } from '../shared_constants';
-import {
-  buildTableColumns,
-  DEFAULT_VISIBLE,
-  isSelectableRuleDefinition,
-} from './monitors_table_columns';
+import { buildTableColumns, DEFAULT_VISIBLE } from './monitors_table_columns';
 import {
   buildSuggestions,
   collectLabelKeys,
@@ -134,6 +130,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({ ...DEFAULT_WIDTHS });
   const [selectedMonitor, setSelectedMonitor] = useState<UnifiedRuleSummary | null>(null);
+  const [lifecycleActionPending, setLifecycleActionPending] = useState(false);
   // Keep `selectedMonitor` in sync with the latest version of itself in the
   // rules list. Without this, an optimistic update at the page level (e.g.
   // toggling `enabled` from the detail flyout) wouldn't reflect back into
@@ -224,10 +221,10 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   // a supported OS DS is undefined, Metrics without a Prometheus DS is
   // undefined. Gate both so the user can't enter a flyout that will silently
   // re-default the datasource on them.
-  const [logsCreateDisabled] = useMemo(() => {
-    if (selectedDatasources.length === 0) return [true, 'no_selection'] as const;
+  const logsCreateDisabled = useMemo(() => {
+    if (selectedDatasources.length === 0) return true;
     const osSelected = selectedDatasources.filter((d) => d.type === 'opensearch');
-    if (osSelected.length === 0) return [true, 'no_os_datasource'] as const;
+    if (osSelected.length === 0) return true;
     // Check if any selected OS datasource supports PPL alerting
     const hasSupportedDs = osSelected.some((d) => {
       if (!d.mdsId) return true; // Local cluster — no version metadata available
@@ -237,25 +234,12 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       const coerced = semver.coerce(d.version);
       return coerced ? semver.gte(coerced, BASE_PPL_ALERTING_SUPPORTED_VERSION) : false;
     });
-    if (!hasSupportedDs) return [true, 'version_unsupported'] as const;
-    return [false, ''] as const;
+    return !hasSupportedDs;
   }, [selectedDatasources, isAnalyticEngineEnabled]);
 
-  const metricsCreateDisabled = useMemo(() => {
-    if (selectedDatasources.length === 0) return true;
-    // Always allow Metrics creation when at least one datasource is selected —
-    // the Prometheus data-connection may exist on the cluster without a
-    // corresponding MDS saved object (discovered via SQL plugin API, not SO).
-    return false;
-  }, [selectedDatasources]);
+  const metricsCreateDisabled = !selectedDatasources.some((d) => d.type === 'prometheus');
 
-  const detectorCreateDisabled = useMemo(() => {
-    return !selectedDatasources.some((d) => d.type === 'opensearch');
-  }, [selectedDatasources]);
-
-  const forecasterCreateDisabled = useMemo(() => {
-    return !selectedDatasources.some((d) => d.type === 'opensearch');
-  }, [selectedDatasources]);
+  const adCreateDisabled = !selectedDatasources.some((d) => d.type === 'opensearch');
 
   // Build selectable datasource entries for the filter facet — alpha by name
   const datasourceEntries = useMemo(
@@ -296,10 +280,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     () => rules.filter((r) => matchesSearch(r, searchQuery) && matchesFilters(r, filters)),
     [rules, searchQuery, filters]
   );
-  const selectableIds = useMemo(
-    () => new Set(rules.filter(isSelectableRuleDefinition).map((r) => r.id)),
-    [rules]
-  );
+  const selectableIds = useMemo(() => new Set(rules.map((r) => r.id)), [rules]);
   useEffect(() => {
     setSelectedIds((prev) => {
       const next = new Set(Array.from(prev).filter((id) => selectableIds.has(id)));
@@ -338,7 +319,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     setSelectedIds(next);
   };
   const toggleSelectAll = () => {
-    const selectableFiltered = filtered.filter(isSelectableRuleDefinition);
+    const selectableFiltered = filtered;
     const allSelected =
       selectableFiltered.length > 0 && selectableFiltered.every((r) => selectedIds.has(r.id));
     const next = new Set(selectedIds);
@@ -373,11 +354,16 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       resources: UnifiedRuleSummary[],
       handler?: (resourcesToUpdate: UnifiedRuleSummary[]) => Promise<void> | void
     ) => {
-      if (!handler || resources.length === 0) return;
-      await handler(resources);
-      setSelectedIds(new Set());
+      if (!handler || resources.length === 0 || lifecycleActionPending) return;
+      setLifecycleActionPending(true);
+      try {
+        await handler(resources);
+        setSelectedIds(new Set());
+      } finally {
+        setLifecycleActionPending(false);
+      }
     },
-    []
+    [lifecycleActionPending]
   );
 
   // Build table columns from visible set
@@ -557,8 +543,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onCreateMonitor={onCreateMonitor}
                 logsCreateDisabled={logsCreateDisabled}
                 metricsCreateDisabled={metricsCreateDisabled}
-                detectorCreateDisabled={detectorCreateDisabled}
-                forecasterCreateDisabled={forecasterCreateDisabled}
+                detectorCreateDisabled={adCreateDisabled}
+                forecasterCreateDisabled={adCreateDisabled}
                 noDatasourceSelected={selectedDsIds.length === 0}
                 showCreatePopover={showCreatePopover}
                 setShowCreatePopover={setShowCreatePopover}
@@ -575,6 +561,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onEditForecaster={onEditForecaster}
                 onStartResources={(resources) => handleLifecycleAction(resources, onStartResources)}
                 onStopResources={(resources) => handleLifecycleAction(resources, onStopResources)}
+                lifecycleActionPending={lifecycleActionPending}
                 onToggleEnabled={onToggleEnabled}
               />
             </EuiResizablePanel>

@@ -91,6 +91,22 @@ describe('MonitorMutationsClient', () => {
         '/api/anomaly_detectors/detectors/det%2F1/stop/false/ds%201'
       );
     });
+
+    it('omits Alert Manager local-cluster from detector lifecycle routes', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: true });
+      mockPost.mockResolvedValue({ ok: true });
+
+      await client.deleteDetector('det-1', 'local-cluster');
+      await client.startDetector('det-1', 'local-cluster');
+      await client.stopDetector('det-1', 'local-cluster');
+
+      expect(mockDelete).toHaveBeenCalledWith('/api/anomaly_detectors/detectors/det-1');
+      expect(mockPost).toHaveBeenNthCalledWith(1, '/api/anomaly_detectors/detectors/det-1/start');
+      expect(mockPost).toHaveBeenNthCalledWith(
+        2,
+        '/api/anomaly_detectors/detectors/det-1/stop/false'
+      );
+    });
   });
 
   describe('forecaster lifecycle', () => {
@@ -111,6 +127,19 @@ describe('MonitorMutationsClient', () => {
         2,
         '/api/forecasting/forecasters/forecast%2F1/stop/ds%201'
       );
+    });
+
+    it('omits Alert Manager local-cluster from forecaster lifecycle routes', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: true });
+      mockPost.mockResolvedValue({ ok: true });
+
+      await client.deleteForecaster('forecast-1', 'local-cluster');
+      await client.startForecaster('forecast-1', 'local-cluster');
+      await client.stopForecaster('forecast-1', 'local-cluster');
+
+      expect(mockDelete).toHaveBeenCalledWith('/api/forecasting/forecasters/forecast-1');
+      expect(mockPost).toHaveBeenNthCalledWith(1, '/api/forecasting/forecasters/forecast-1/start');
+      expect(mockPost).toHaveBeenNthCalledWith(2, '/api/forecasting/forecasters/forecast-1/stop');
     });
   });
 

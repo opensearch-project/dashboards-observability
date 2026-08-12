@@ -223,7 +223,7 @@ describe('osAlertToUnified', () => {
 
 describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
   function buildMonitor(indices: string[]): OSMonitor {
-    return {
+    return ({
       id: 'mon-1',
       type: 'monitor',
       monitor_type: 'query_level_monitor',
@@ -240,7 +240,7 @@ describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
       ],
       triggers: [],
       last_update_time: 1700000000000,
-    } as unknown as OSMonitor;
+    } as unknown) as OSMonitor;
   }
 
   it.each([['logs-2024.01.15'], ['logs-prod-app'], ['ss4o_logs-myapp'], ['ss4o_logs']])(
@@ -407,6 +407,37 @@ describe('adDetectorToUnifiedRuleSummary', () => {
     expect(rule.status).toBe('Stopped');
     expect(rule.enabled).toBe(false);
     expect(rule.healthStatus).toBe('no_data');
+  });
+
+  it('does not report a detector as running when runtime and job state are unavailable', () => {
+    const rule = adDetectorToUnifiedRuleSummary(
+      {
+        id: 'detector-1',
+        name: 'Never-started detector',
+        indices: ['flights'],
+      },
+      'ds-os'
+    );
+
+    expect(rule.status).toBe('Inactive not started');
+    expect(rule.enabled).toBe(false);
+    expect(rule.healthStatus).toBe('no_data');
+  });
+
+  it('uses the detector job state when runtime profile state is unavailable', () => {
+    const rule = adDetectorToUnifiedRuleSummary(
+      {
+        id: 'detector-1',
+        name: 'Running detector',
+        indices: ['flights'],
+        anomaly_detector_job: { enabled: true },
+      },
+      'ds-os'
+    );
+
+    expect(rule.status).toBe('Running');
+    expect(rule.enabled).toBe(true);
+    expect(rule.healthStatus).toBe('healthy');
   });
 });
 

@@ -220,11 +220,11 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
   onStop,
 }) => {
   const [lifecycleAction, setLifecycleAction] = useState<'start' | 'stop' | null>(null);
-  const {
-    data: detail,
-    isLoading,
-    error,
-  } = useRuleDetail(forecaster.datasourceId, forecaster.id, 'forecaster');
+  const { data: detail, isLoading, error, refetch } = useRuleDetail(
+    forecaster.datasourceId,
+    forecaster.id,
+    'forecaster'
+  );
   const rawForecaster =
     (detail?.raw as ADForecaster | undefined) || forecasterFromSummary(forecaster);
   const description =
@@ -264,6 +264,7 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
     setLifecycleAction(action);
     try {
       await handler(forecaster);
+      refetch();
     } finally {
       setLifecycleAction(null);
     }

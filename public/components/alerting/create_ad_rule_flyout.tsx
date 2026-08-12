@@ -56,6 +56,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { ADDetector, ADForecaster, Datasource } from '../../../common/types/alerting';
 import { coreRefs } from '../../framework/core_refs';
+import { toAdApiDataSourceId, withAdApiDataSource } from './utils/ad_api_paths';
 import { useIndexMappings } from './hooks/use_index_mappings';
 import { useIndices } from './hooks/use_indices';
 import { useRuleDetail } from './hooks/use_rule_detail';
@@ -139,7 +140,6 @@ interface DetectorSuggestionResponse {
 
 const AD_DETECTOR_API = '/api/anomaly_detectors/detectors';
 const FORECASTER_API = '/api/forecasting/forecasters';
-const LOCAL_OPENSEARCH_DATASOURCE_IDS = new Set(['', 'local', 'local-cluster', 'local_cluster']);
 const OPENSEARCH_SERVERLESS_ENGINE_TYPE = 'OpenSearch Serverless';
 const OPENSEARCH_SERVERLESS_SIGV4_SERVICE = 'aoss';
 const DETECTOR_RUNNING_STATE = 'Running';
@@ -223,16 +223,8 @@ const createInitialForm = (datasourceId: string): CreateAdRuleFormState => ({
   startAfterCreate: true,
 });
 
-const normalizeDataSourceId = (dsId?: string): string =>
-  !dsId || LOCAL_OPENSEARCH_DATASOURCE_IDS.has(dsId) ? '' : dsId;
-
-const withOptionalDatasource = (basePath: string, dsId?: string): string => {
-  const normalized = normalizeDataSourceId(dsId);
-  return normalized ? `${basePath}/${encodeURIComponent(normalized)}` : basePath;
-};
-
-const isServerlessDataSource = async (dsId?: string): Promise<boolean> => {
-  const normalized = normalizeDataSourceId(dsId);
+const isServerlessDataSource = async (dsId: string): Promise<boolean> => {
+  const normalized = toAdApiDataSourceId(dsId);
   if (!normalized || !coreRefs.savedObjectsClient) return false;
 
   try {
@@ -351,35 +343,131 @@ const getInitialDatasourceId = (datasources: Datasource[], selectedDsIds?: strin
   return selected?.id ?? openSearchDatasources[0]?.id ?? '';
 };
 
-const buildFeatureMetadata = (features: CreateAdFeatureFormState[]) =>
-  features.reduce<Record<string, Record<string, string>>>((metadata, feature) => {
-    const featureName = feature.featureName.trim();
-    if (!featureName) return metadata;
-    metadata[featureName] = {
-      featureType: SIMPLE_FEATURE_TYPE,
-      aggregationBy: feature.aggregationBy,
-      aggregationOf: feature.aggregationOf.trim(),
-    };
-    return metadata;
-  }, {});
+const DIRECTION_THRESHOLD_TYPES = new Set(['ACTUAL_IS_BELOW_EXPECTED', 'ACTUAL_IS_OVER_EXPECTED']);
 
-const buildFeatureAttributes = (features: CreateAdFeatureFormState[]) =>
-  features
-    .filter((feature) => feature.featureName.trim())
-    .map((feature) => {
-      const featureName = feature.featureName.trim();
-      return {
-        ...(feature.featureId ? { featureId: feature.featureId } : {}),
-        featureName,
-        featureEnabled: feature.featureEnabled,
-        importance: 1,
-        aggregationQuery: {
-          [toSnakeCase(featureName)]: {
-            [feature.aggregationBy]: { field: feature.aggregationOf.trim() },
-          },
+const toCamelCaseKey = (key: string): string =>
+  key.replace(/_([a-z0-9])/g, (_match, character: string) => character.toUpperCase());
+
+const mapKeysToCamelCase = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(mapKeysToCamelCase);
+  if (!value || typeof value !== 'object') return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, nestedValue]) => [
+      toCamelCaseKey(key),
+      mapKeysToCamelCase(nestedValue),
+    ])
+  );
+};
+
+const normalizeFeatureForUpdate = (value: unknown): Record<string, unknown> => {
+  const feature = asRecord(value);
+  const aggregationQuery = getField(feature, 'aggregation_query', 'aggregationQuery');
+  const normalized = mapKeysToCamelCase(
+    Object.fromEntries(
+      Object.entries(feature).filter(
+        ([key]) => key !== 'aggregation_query' && key !== 'aggregationQuery'
+      )
+    )
+  ) as Record<string, unknown>;
+  return {
+    ...normalized,
+    ...(aggregationQuery !== undefined ? { aggregationQuery } : {}),
+  };
+};
+
+const normalizeExistingResourceForUpdate = (
+  resource?: ADDetector | ADForecaster
+): Record<string, unknown> => {
+  const stripped = stripReadOnlyResourceFields(resource);
+  const filterQuery = getField(stripped, 'filter_query', 'filterQuery');
+  const uiMetadata = getField(stripped, 'ui_metadata', 'uiMetadata');
+  const featureAttributes = getField(stripped, 'feature_attributes', 'featureAttributes');
+  const genericFields = Object.fromEntries(
+    Object.entries(stripped).filter(
+      ([key]) =>
+        ![
+          'filter_query',
+          'filterQuery',
+          'ui_metadata',
+          'uiMetadata',
+          'feature_attributes',
+          'featureAttributes',
+        ].includes(key)
+    )
+  );
+
+  return {
+    ...(mapKeysToCamelCase(genericFields) as Record<string, unknown>),
+    ...(filterQuery !== undefined ? { filterQuery } : {}),
+    ...(uiMetadata !== undefined ? { uiMetadata } : {}),
+    ...(featureAttributes !== undefined
+      ? { featureAttributes: asArray(featureAttributes).map(normalizeFeatureForUpdate) }
+      : {}),
+  };
+};
+
+const getRuleConditions = (rule: unknown): unknown[] => asArray(asRecord(rule).conditions);
+
+const getConditionFeatureName = (condition: unknown): string =>
+  stringValue(getField(asRecord(condition), 'feature_name', 'featureName'));
+
+const getConditionThresholdType = (condition: unknown): string =>
+  stringValue(getField(asRecord(condition), 'threshold_type', 'thresholdType'));
+
+const isDirectionRule = (rule: unknown): boolean => {
+  const conditions = getRuleConditions(rule);
+  return (
+    conditions.length === 1 &&
+    DIRECTION_THRESHOLD_TYPES.has(getConditionThresholdType(conditions[0]))
+  );
+};
+
+const inferFeatureDirection = (
+  resource: Record<string, unknown>,
+  featureName: string
+): CreateAdFeatureFormState['anomalyDirection'] => {
+  const directionCondition = asArray(resource.rules)
+    .filter(isDirectionRule)
+    .flatMap(getRuleConditions)
+    .find((condition) => getConditionFeatureName(condition) === featureName);
+  const thresholdType = getConditionThresholdType(directionCondition);
+  if (thresholdType === 'ACTUAL_IS_BELOW_EXPECTED') return 'above';
+  if (thresholdType === 'ACTUAL_IS_OVER_EXPECTED') return 'below';
+  return 'both';
+};
+
+export const buildDetectorRules = (
+  features: CreateAdFeatureFormState[],
+  resource?: ADDetector | ADForecaster
+): unknown[] => {
+  const retainedFeatureNames = new Set(
+    features.map((feature) => feature.featureName.trim()).filter(Boolean)
+  );
+  const preservedRules = asArray(asRecord(resource).rules)
+    .filter((rule) => !isDirectionRule(rule))
+    .filter((rule) => {
+      const referencedFeatures = getRuleConditions(rule)
+        .map(getConditionFeatureName)
+        .filter(Boolean);
+      return referencedFeatures.every((featureName) => retainedFeatureNames.has(featureName));
+    })
+    .map(mapKeysToCamelCase);
+  const directionRules = features
+    .filter((feature) => feature.featureName.trim() && feature.anomalyDirection !== 'both')
+    .map((feature) => ({
+      action: 'IGNORE_ANOMALY',
+      conditions: [
+        {
+          featureName: feature.featureName.trim(),
+          thresholdType:
+            feature.anomalyDirection === 'above'
+              ? 'ACTUAL_IS_BELOW_EXPECTED'
+              : 'ACTUAL_IS_OVER_EXPECTED',
         },
-      };
-    });
+      ],
+    }));
+  return [...preservedRules, ...directionRules];
+};
 
 const getUiMetadataFeatures = (resource: Record<string, unknown>): Record<string, unknown> =>
   asRecord(asRecord(getField(resource, 'ui_metadata', 'uiMetadata')).features);
@@ -419,17 +507,92 @@ const buildFeatureFormState = (
     featureId: stringValue(getField(feature, 'feature_id', 'featureId')) || undefined,
     featureName,
     featureEnabled: booleanValue(getField(feature, 'feature_enabled', 'featureEnabled'), true),
-    anomalyDirection: 'both',
+    anomalyDirection: inferFeatureDirection(resource, featureName),
     aggregationBy: stringValue(metadata.aggregationBy) || queryAggregation.aggregationBy,
     aggregationOf: stringValue(metadata.aggregationOf) || queryAggregation.aggregationOf,
   };
 };
 
 const getFeatureForms = (resource: Record<string, unknown>): CreateAdFeatureFormState[] => {
-  const features = asArray(getField(resource, 'feature_attributes', 'featureAttributes')).map(
-    (feature) => buildFeatureFormState(resource, feature)
-  );
+  const features = asArray(
+    getField(resource, 'feature_attributes', 'featureAttributes')
+  ).map((feature) => buildFeatureFormState(resource, feature));
   return features.length > 0 ? features : [createInitialFeature()];
+};
+
+const buildFeatureMetadata = (
+  features: CreateAdFeatureFormState[],
+  existingResource?: ADDetector | ADForecaster
+) => {
+  const existingFeatures = getUiMetadataFeatures(asRecord(existingResource));
+  return features.reduce<Record<string, Record<string, unknown>>>((metadata, feature) => {
+    const featureName = feature.featureName.trim();
+    if (!featureName) return metadata;
+    metadata[featureName] = {
+      ...asRecord(existingFeatures[featureName]),
+      featureType: SIMPLE_FEATURE_TYPE,
+      aggregationBy: feature.aggregationBy,
+      aggregationOf: feature.aggregationOf.trim(),
+    };
+    return metadata;
+  }, {});
+};
+
+const buildUiMetadata = (
+  features: CreateAdFeatureFormState[],
+  existingResource?: ADDetector | ADForecaster
+) => {
+  const existingUiMetadata = asRecord(
+    getField(asRecord(existingResource), 'ui_metadata', 'uiMetadata')
+  );
+  return {
+    ...existingUiMetadata,
+    features: buildFeatureMetadata(features, existingResource),
+    filters: asArray(existingUiMetadata.filters),
+  };
+};
+
+const buildFeatureAttributes = (
+  features: CreateAdFeatureFormState[],
+  existingResource?: ADDetector | ADForecaster
+) => {
+  const resource = asRecord(existingResource);
+  const existingFeatures = asArray(getField(resource, 'feature_attributes', 'featureAttributes'));
+
+  return features
+    .filter((feature) => feature.featureName.trim())
+    .map((feature) => {
+      const featureName = feature.featureName.trim();
+      const existingFeature = existingFeatures.find((candidate) => {
+        const record = asRecord(candidate);
+        const id = stringValue(getField(record, 'feature_id', 'featureId'));
+        const name = stringValue(getField(record, 'feature_name', 'featureName'));
+        return (feature.featureId && id === feature.featureId) || name === featureName;
+      });
+      const normalizedExistingFeature = normalizeFeatureForUpdate(existingFeature);
+      const previousForm = existingFeature
+        ? buildFeatureFormState(resource, existingFeature)
+        : undefined;
+      const aggregationUnchanged =
+        previousForm?.aggregationBy === feature.aggregationBy &&
+        previousForm?.aggregationOf === feature.aggregationOf;
+      const aggregationQuery = aggregationUnchanged
+        ? normalizedExistingFeature.aggregationQuery
+        : {
+            [toSnakeCase(featureName)]: {
+              [feature.aggregationBy]: { field: feature.aggregationOf.trim() },
+            },
+          };
+
+      return {
+        ...normalizedExistingFeature,
+        ...(feature.featureId ? { featureId: feature.featureId } : {}),
+        featureName,
+        featureEnabled: feature.featureEnabled,
+        importance: normalizedExistingFeature.importance ?? 1,
+        aggregationQuery,
+      };
+    });
 };
 
 const getCategoryFieldFromResource = (resource: Record<string, unknown>): string[] =>
@@ -586,7 +749,7 @@ const stripReadOnlyResourceFields = (
   );
 };
 
-const formFromAdResource = (
+export const formFromAdResource = (
   ruleType: CreateAdRuleType,
   resource: ADDetector | ADForecaster,
   datasourceId: string
@@ -624,7 +787,7 @@ const formFromAdResource = (
   };
 };
 
-const buildRulePayload = (
+export const buildRulePayload = (
   ruleType: CreateAdRuleType,
   form: CreateAdRuleFormState,
   options: {
@@ -634,17 +797,14 @@ const buildRulePayload = (
 ) => {
   const existingResource = asRecord(options.existingResource);
   const commonPayload = {
-    ...stripReadOnlyResourceFields(options.existingResource),
+    ...normalizeExistingResourceForUpdate(options.existingResource),
     ...getConcurrencyFields(existingResource),
     name: form.name.trim(),
     description: form.description.trim(),
     indices: form.indices,
     filterQuery: parseFilterQuery(form.filterQuery),
-    uiMetadata: {
-      features: buildFeatureMetadata(form.features),
-      filters: [],
-    },
-    featureAttributes: buildFeatureAttributes(form.features),
+    uiMetadata: buildUiMetadata(form.features, options.existingResource),
+    featureAttributes: buildFeatureAttributes(form.features, options.existingResource),
     timeField: form.timeField,
     windowDelay: {
       period: { interval: toPositiveInt(form.windowDelay, 0), unit: MINUTES_UNIT },
@@ -660,6 +820,7 @@ const buildRulePayload = (
     const detectorFrequency = parsePositiveInt(form.frequency) ?? detectorInterval;
     return {
       ...commonPayload,
+      resultIndex: undefined,
       ...(shouldIncludeResultIndex && form.resultIndex.trim()
         ? {
             resultIndex: `${CUSTOM_AD_RESULT_INDEX_PREFIX}${form.resultIndex.trim()}`,
@@ -672,7 +833,7 @@ const buildRulePayload = (
         period: { interval: detectorFrequency, unit: MINUTES_UNIT },
       },
       history: Math.max(1, toPositiveInt(form.history, 40)),
-      rules: [],
+      rules: buildDetectorRules(form.features, options.existingResource),
     };
   }
 
@@ -729,9 +890,9 @@ const featureErrorKey = (
   field: 'featureName' | 'aggregationOf' | 'featureLimit'
 ): string => `features.${index}.${field}`;
 
-const validateForm = (
+export const validateForm = (
   form: CreateAdRuleFormState,
-  options: { customResultIndexRequired?: boolean } = {}
+  options: { customResultIndexRequired?: boolean; ruleType: CreateAdRuleType }
 ): Record<string, string> => {
   const errors: Record<string, string> = {};
   if (!form.name.trim()) {
@@ -851,6 +1012,7 @@ const validateForm = (
   const frequencyValue = parsePositiveInt(form.frequency);
   const windowDelayValue = parseNonNegativeInt(form.windowDelay);
   const historyValue = parsePositiveInt(form.history);
+  const horizonValue = parsePositiveInt(form.horizon);
 
   if (intervalValue === undefined) {
     errors.interval = i18n.translate('observability.alerting.createAdRuleFlyout.intervalInvalid', {
@@ -885,9 +1047,17 @@ const validateForm = (
       }
     );
   }
-  if (form.history !== '' && historyValue === undefined) {
+  if (historyValue === undefined || historyValue < 40 || historyValue > 10000) {
     errors.history = i18n.translate('observability.alerting.createAdRuleFlyout.historyInvalid', {
-      defaultMessage: 'History must be a positive integer.',
+      defaultMessage: 'History must be an integer between 40 and 10,000.',
+    });
+  }
+  if (
+    options.ruleType === 'forecaster' &&
+    (horizonValue === undefined || horizonValue < 1 || horizonValue > 180)
+  ) {
+    errors.horizon = i18n.translate('observability.alerting.createAdRuleFlyout.horizonInvalid', {
+      defaultMessage: 'Horizon must be an integer between 1 and 180.',
     });
   }
   if (form.shingleSize < 1 || form.shingleSize > 128) {
@@ -912,18 +1082,18 @@ const errorsForStep = (
       step === 0
         ? ['name', 'datasourceId', 'indices', 'timeField', 'filterQuery', 'resultIndex']
         : step === 1
-          ? [
-              'features',
-              'categoryField',
-              'interval',
-              'frequency',
-              'windowDelay',
-              'history',
-              'shingleSize',
-            ]
-          : step === 2
-            ? []
-            : Object.keys(errors);
+        ? [
+            'features',
+            'categoryField',
+            'interval',
+            'frequency',
+            'windowDelay',
+            'history',
+            'shingleSize',
+          ]
+        : step === 2
+        ? []
+        : Object.keys(errors);
   } else {
     stepFields =
       step === 0
@@ -937,8 +1107,8 @@ const errorsForStep = (
             'categoryField',
           ]
         : step === 1
-          ? ['interval', 'windowDelay', 'history', 'horizon', 'shingleSize']
-          : Object.keys(errors);
+        ? ['interval', 'windowDelay', 'history', 'horizon', 'shingleSize']
+        : Object.keys(errors);
   }
 
   return Object.fromEntries(
@@ -1437,15 +1607,9 @@ const SuggestParametersDialog: React.FC<{
     try {
       const response = await coreRefs.http?.post<
         ApiResponse<DetectorSuggestionResponse> | DetectorSuggestionResponse
-      >(
-        withOptionalDatasource(
-          `${AD_DETECTOR_API}/_suggest/${suggestionParams}`,
-          form.datasourceId
-        ),
-        {
-          body: JSON.stringify(buildDetectorSuggestionPayload(form, intervalForSuggestion)),
-        }
-      );
+      >(withAdApiDataSource(`${AD_DETECTOR_API}/_suggest/${suggestionParams}`, form.datasourceId), {
+        body: JSON.stringify(buildDetectorSuggestionPayload(form, intervalForSuggestion)),
+      });
       const payload =
         response && 'response' in response
           ? (response.response as DetectorSuggestionResponse | undefined)
@@ -1474,8 +1638,8 @@ const SuggestParametersDialog: React.FC<{
         typeof intervalValue === 'number'
           ? intervalValue
           : typeof frequencyValue === 'number'
-            ? frequencyValue
-            : 10;
+          ? frequencyValue
+          : 10;
 
       const historyValue = payload.history;
       const windowDelayValue = payload.windowDelay?.period?.interval;
@@ -1742,12 +1906,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
           defaultMessage: 'Edit forecasting rule',
         })
     : isDetector
-      ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorTitle', {
-          defaultMessage: 'Create anomaly detection rule',
-        })
-      : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterTitle', {
-          defaultMessage: 'Create forecasting rule',
-        });
+    ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorTitle', {
+        defaultMessage: 'Create anomaly detection rule',
+      })
+    : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterTitle', {
+        defaultMessage: 'Create forecasting rule',
+      });
   const detectorStepTitles = isEdit
     ? [
         isDetectorModelEdit
@@ -1783,7 +1947,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
         }),
       ];
   const finalStep = stepTitles.length - 1;
-  const allErrors = validateForm(form, { customResultIndexRequired });
+  const allErrors = validateForm(form, { customResultIndexRequired, ruleType });
   const currentValidationStep = isSingleDetectorEdit ? editValidationStep : currentStep;
   const submitBlockingErrors = isEdit
     ? errorsForStep(allErrors, currentValidationStep, ruleType)
@@ -1946,7 +2110,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
       setSubmitError(null);
       try {
         const response = await coreRefs.http?.post<ApiResponse>(
-          withOptionalDatasource(
+          withAdApiDataSource(
             `${AD_DETECTOR_API}/${encodeURIComponent(detectorId)}/start`,
             datasourceId
           )
@@ -2007,7 +2171,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
 
         if (isDetectorRealTimeJobRunning(existingResource)) {
           const response = await coreRefs.http?.post<ApiResponse>(
-            withOptionalDatasource(
+            withAdApiDataSource(
               `${AD_DETECTOR_API}/${encodeURIComponent(editTarget.id)}/stop/false`,
               form.datasourceId
             )
@@ -2017,7 +2181,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
 
         if (isDetectorHistoricalJobRunning(existingResource)) {
           const response = await coreRefs.http?.post<ApiResponse>(
-            withOptionalDatasource(
+            withAdApiDataSource(
               `${AD_DETECTOR_API}/${encodeURIComponent(editTarget.id)}/stop/true`,
               form.datasourceId
             )
@@ -2034,7 +2198,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
         setShouldOfferStartDetectorAfterEdit(stoppedRealTimeDetector);
       } else {
         const response = await coreRefs.http?.post<ApiResponse>(
-          withOptionalDatasource(
+          withAdApiDataSource(
             `${FORECASTER_API}/${encodeURIComponent(editTarget.id)}/stop`,
             form.datasourceId
           )
@@ -2101,7 +2265,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
     }
     setHasSubmitted(true);
     const stepErrors = errorsForStep(
-      validateForm(form, { customResultIndexRequired }),
+      validateForm(form, { customResultIndexRequired, ruleType }),
       currentValidationStep,
       ruleType
     );
@@ -2137,7 +2301,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
       );
       return;
     }
-    const validationErrors = validateForm(form, { customResultIndexRequired });
+    const validationErrors = validateForm(form, { customResultIndexRequired, ruleType });
     const blockingErrors = isEdit
       ? errorsForStep(validationErrors, currentValidationStep, ruleType)
       : validationErrors;
@@ -2148,11 +2312,11 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
       const basePath = isDetector ? AD_DETECTOR_API : FORECASTER_API;
       const requestPath =
         isEdit && editTarget
-          ? withOptionalDatasource(
+          ? withAdApiDataSource(
               `${basePath}/${encodeURIComponent(editTarget.id)}`,
               form.datasourceId
             )
-          : withOptionalDatasource(basePath, form.datasourceId);
+          : withAdApiDataSource(basePath, form.datasourceId);
       const requestBody = JSON.stringify(
         buildRulePayload(ruleType, form, {
           customResultIndexRequired,
@@ -2172,13 +2336,23 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
       }
 
       const createdId = extractCreatedId(response);
+      let autoStartError: string | null = null;
       if (!isEdit && isDetector && createdId && form.startAfterCreate) {
-        await coreRefs.http?.post(
-          withOptionalDatasource(
-            `${basePath}/${encodeURIComponent(createdId)}/start`,
-            form.datasourceId
-          )
-        );
+        try {
+          const startResponse = await coreRefs.http?.post<ApiResponse>(
+            withAdApiDataSource(
+              `${basePath}/${encodeURIComponent(createdId)}/start`,
+              form.datasourceId
+            )
+          );
+          if (!startResponse?.ok) {
+            throw new Error(
+              startResponse?.error || startResponse?.message || 'Start request failed'
+            );
+          }
+        } catch (error) {
+          autoStartError = buildErrorMessage(error);
+        }
       }
 
       const successToastTitle = isEdit
@@ -2190,12 +2364,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               defaultMessage: 'Forecasting rule updated successfully',
             })
         : isDetector
-          ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreatedToast', {
-              defaultMessage: 'Anomaly detection rule created successfully',
-            })
-          : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreatedToast', {
-              defaultMessage: 'Forecasting rule created successfully',
-            });
+        ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreatedToast', {
+            defaultMessage: 'Anomaly detection rule created successfully',
+          })
+        : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreatedToast', {
+            defaultMessage: 'Forecasting rule created successfully',
+          });
 
       if (isEdit && isDetector && shouldOfferStartDetectorAfterEdit && editTarget) {
         setStartAfterEditPrompt({
@@ -2211,6 +2385,17 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
         onUpdated?.();
       } else {
         onCreated?.();
+        if (autoStartError) {
+          coreRefs.toasts?.addWarning({
+            title: i18n.translate(
+              'observability.alerting.createAdRuleFlyout.detectorCreatedStartFailed',
+              {
+                defaultMessage: 'Rule created but the detector could not be started',
+              }
+            ),
+            text: autoStartError,
+          });
+        }
       }
     } catch (error) {
       const message = buildErrorMessage(error);
@@ -2225,12 +2410,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                 defaultMessage: 'Failed to update forecasting rule',
               })
           : isDetector
-            ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreateFailed', {
-                defaultMessage: 'Failed to create anomaly detection rule',
-              })
-            : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreateFailed', {
-                defaultMessage: 'Failed to create forecasting rule',
-              }),
+          ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreateFailed', {
+              defaultMessage: 'Failed to create anomaly detection rule',
+            })
+          : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreateFailed', {
+              defaultMessage: 'Failed to create forecasting rule',
+            }),
         text: message,
       });
     } finally {
@@ -2335,21 +2520,40 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               </span>
             </p>
           }
-          hint={i18n.translate('observability.alerting.createAdRuleFlyout.descriptionHint', {
-            defaultMessage: isDetector
-              ? 'Describe the purpose of the detector.'
-              : 'Describe the purpose of the forecaster.',
-          })}
+          hint={
+            isDetector
+              ? i18n.translate(
+                  'observability.alerting.createAdRuleFlyout.detectorDescriptionHint',
+                  {
+                    defaultMessage: 'Describe the purpose of the detector.',
+                  }
+                )
+              : i18n.translate(
+                  'observability.alerting.createAdRuleFlyout.forecasterDescriptionHint',
+                  {
+                    defaultMessage: 'Describe the purpose of the forecaster.',
+                  }
+                )
+          }
         >
           <EuiTextArea
             value={form.description}
             onChange={(e) => updateForm('description', e.target.value)}
-            placeholder={i18n.translate(
-              'observability.alerting.createAdRuleFlyout.descriptionPlaceholder',
-              {
-                defaultMessage: isDetector ? 'Describe the detector' : 'Describe the forecaster',
-              }
-            )}
+            placeholder={
+              isDetector
+                ? i18n.translate(
+                    'observability.alerting.createAdRuleFlyout.detectorDescriptionPlaceholder',
+                    {
+                      defaultMessage: 'Describe the detector',
+                    }
+                  )
+                : i18n.translate(
+                    'observability.alerting.createAdRuleFlyout.forecasterDescriptionPlaceholder',
+                    {
+                      defaultMessage: 'Describe the forecaster',
+                    }
+                  )
+            }
             rows={3}
             data-test-subj="alertManagerCreateAdRuleDescription"
           />
@@ -3119,7 +3323,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                   value={form.interval}
                   min={1}
                   style={{ width: '100%' }}
-                  onChange={(e) => updateForm('interval', Number(e.target.value))}
+                  onChange={(e) => updateForm('interval', parseNumberInputValue(e.target.value))}
                 />
               </div>
             </EuiFlexItem>
@@ -3155,7 +3359,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                   value={form.windowDelay}
                   min={0}
                   style={{ width: '100%' }}
-                  onChange={(e) => updateForm('windowDelay', Number(e.target.value))}
+                  onChange={(e) => updateForm('windowDelay', parseNumberInputValue(e.target.value))}
                 />
               </div>
             </EuiFlexItem>
@@ -3191,7 +3395,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                   min={1}
                   max={180}
                   style={{ width: '100%' }}
-                  onChange={(e) => updateForm('horizon', Number(e.target.value))}
+                  onChange={(e) => updateForm('horizon', parseNumberInputValue(e.target.value))}
                 />
               </div>
             </EuiFlexItem>
@@ -3230,7 +3434,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                   min={40}
                   max={10000}
                   style={{ width: '100%' }}
-                  onChange={(e) => updateForm('history', Number(e.target.value))}
+                  onChange={(e) => updateForm('history', parseNumberInputValue(e.target.value))}
                 />
               </div>
             </EuiFlexItem>
@@ -3288,7 +3492,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
         .filter((feature) => feature.featureName.trim())
         .map(
           (feature) =>
-            `${feature.featureName.trim()}: ${feature.aggregationBy}(${feature.aggregationOf.trim()})`
+            `${feature.featureName.trim()}: ${
+              feature.aggregationBy
+            }(${feature.aggregationOf.trim()})`
         )
         .join(', ') || '-';
     const descriptionItems = [
@@ -3531,12 +3737,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
           }
         )
       : isAwaitingDataToInit || isAwaitingDataToRestart
-        ? i18n.translate('observability.alerting.createAdRuleFlyout.cancelForecastToEditTitle', {
-            defaultMessage: 'Cancel forecast to edit?',
-          })
-        : i18n.translate('observability.alerting.createAdRuleFlyout.stopForecastToEditTitle', {
-            defaultMessage: 'Stop forecast to edit?',
-          });
+      ? i18n.translate('observability.alerting.createAdRuleFlyout.cancelForecastToEditTitle', {
+          defaultMessage: 'Cancel forecast to edit?',
+        })
+      : i18n.translate('observability.alerting.createAdRuleFlyout.stopForecastToEditTitle', {
+          defaultMessage: 'Stop forecast to edit?',
+        });
     const forecastModalDescription = (() => {
       if (isInitializingForecast) {
         return i18n.translate(
@@ -3671,7 +3877,6 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
       if (isDetectorSettingsEdit) return renderDefineStep();
       if (currentStep === 0) return renderDefineStep();
       if (currentStep === 1) return renderDetectorModelStep();
-      if (isEdit) return renderReviewStep();
       if (currentStep === 2) return renderJobsStep();
       return renderReviewStep();
     }
@@ -3708,14 +3913,14 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                     }
                   )
               : isDetector
-                ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorSubtitle', {
-                    defaultMessage:
-                      'Create an anomaly detection rule using the same model definition fields from the AD workflow.',
-                  })
-                : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterSubtitle', {
-                    defaultMessage:
-                      'Create a forecasting rule using the same data source and model parameter fields from the Forecasting workflow.',
-                  })}
+              ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorSubtitle', {
+                  defaultMessage:
+                    'Create an anomaly detection rule using the same model definition fields from the AD workflow.',
+                })
+              : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterSubtitle', {
+                  defaultMessage:
+                    'Create a forecasting rule using the same data source and model parameter fields from the Forecasting workflow.',
+                })}
           </EuiText>
         </EuiFlyoutHeader>
 

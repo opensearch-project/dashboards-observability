@@ -76,8 +76,6 @@ export const isDetectorDefinition = (item: UnifiedRuleSummary): boolean => isDet
 
 export const isForecasterDefinition = (item: UnifiedRuleSummary): boolean => isForecasterRule(item);
 
-export const isSelectableRuleDefinition = (_item: UnifiedRuleSummary): boolean => true;
-
 // ============================================================================
 // Column builder — factory producing the EuiInMemoryTable column array.
 // Cell renderers close over the component state bits passed in (selectedIds,
@@ -107,7 +105,7 @@ export function buildTableColumns({
   setSelectedMonitor,
 }: BuildTableColumnsParams): Array<Record<string, unknown>> {
   const w = (id: string) => `${columnWidths[id] || DEFAULT_WIDTHS[id] || 120}px`;
-  const selectable = filtered.filter(isSelectableRuleDefinition);
+  const selectable = filtered;
   const allSelectableSelected =
     selectable.length > 0 && selectable.every((item) => selectedIds.has(item.id));
 
@@ -130,12 +128,10 @@ export function buildTableColumns({
       ),
       width: '32px',
       render: (_: unknown, item: UnifiedRuleSummary) => {
-        const isSelectable = isSelectableRuleDefinition(item);
         return (
           <input
             type="checkbox"
-            checked={isSelectable && selectedIds.has(item.id)}
-            disabled={!isSelectable}
+            checked={selectedIds.has(item.id)}
             onChange={() => toggleSelect(item.id)}
             aria-label={i18n.translate(
               'observability.alerting.monitorsTable.columns.selectRowAriaLabel',

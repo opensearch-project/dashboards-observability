@@ -12,6 +12,7 @@
  * Replaces the mutation surface of the deleted `alarms_client.ts`.
  */
 import { coreRefs } from '../../../framework/core_refs';
+import { withAdApiDataSource } from '../utils/ad_api_paths';
 
 export interface MonitorResponse {
   id: string;
@@ -42,10 +43,6 @@ export class MonitorMutationsClient {
     const http = coreRefs.http;
     if (!http) throw new Error('HTTP client not available');
     return http;
-  }
-
-  private withOptionalDatasource(basePath: string, dsId?: string): string {
-    return dsId ? `${basePath}/${encodeURIComponent(dsId)}` : basePath;
   }
 
   async createMonitor(data: Record<string, unknown>, dsId: string): Promise<MonitorResponse> {
@@ -93,45 +90,45 @@ export class MonitorMutationsClient {
     )) as { success: boolean };
   }
 
-  async deleteDetector(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+  async deleteDetector(id: string, dsId: string): Promise<AdResourceActionResponse> {
     const basePath = `/api/anomaly_detectors/detectors/${encodeURIComponent(id)}`;
     return (await this.requireHttp().delete(
-      this.withOptionalDatasource(basePath, dsId)
+      withAdApiDataSource(basePath, dsId)
     )) as AdResourceActionResponse;
   }
 
-  async startDetector(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+  async startDetector(id: string, dsId: string): Promise<AdResourceActionResponse> {
     const basePath = `/api/anomaly_detectors/detectors/${encodeURIComponent(id)}/start`;
     return (await this.requireHttp().post(
-      this.withOptionalDatasource(basePath, dsId)
+      withAdApiDataSource(basePath, dsId)
     )) as AdResourceActionResponse;
   }
 
-  async stopDetector(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+  async stopDetector(id: string, dsId: string): Promise<AdResourceActionResponse> {
     const basePath = `/api/anomaly_detectors/detectors/${encodeURIComponent(id)}/stop/false`;
     return (await this.requireHttp().post(
-      this.withOptionalDatasource(basePath, dsId)
+      withAdApiDataSource(basePath, dsId)
     )) as AdResourceActionResponse;
   }
 
-  async deleteForecaster(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+  async deleteForecaster(id: string, dsId: string): Promise<AdResourceActionResponse> {
     const basePath = `/api/forecasting/forecasters/${encodeURIComponent(id)}`;
     return (await this.requireHttp().delete(
-      this.withOptionalDatasource(basePath, dsId)
+      withAdApiDataSource(basePath, dsId)
     )) as AdResourceActionResponse;
   }
 
-  async startForecaster(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+  async startForecaster(id: string, dsId: string): Promise<AdResourceActionResponse> {
     const basePath = `/api/forecasting/forecasters/${encodeURIComponent(id)}/start`;
     return (await this.requireHttp().post(
-      this.withOptionalDatasource(basePath, dsId)
+      withAdApiDataSource(basePath, dsId)
     )) as AdResourceActionResponse;
   }
 
-  async stopForecaster(id: string, dsId?: string): Promise<AdResourceActionResponse> {
+  async stopForecaster(id: string, dsId: string): Promise<AdResourceActionResponse> {
     const basePath = `/api/forecasting/forecasters/${encodeURIComponent(id)}/stop`;
     return (await this.requireHttp().post(
-      this.withOptionalDatasource(basePath, dsId)
+      withAdApiDataSource(basePath, dsId)
     )) as AdResourceActionResponse;
   }
 

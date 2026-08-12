@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 // Stub flyout to avoid pulling in its dependency tree
 jest.mock('../monitor_detail_flyout', () => ({
@@ -52,7 +52,7 @@ const sampleRule = (overrides = {}) => ({
 // display-and-interaction ones the component currently accepts.
 const defaultProps = {
   rules: [sampleRule()],
-  datasources: [{ id: 'ds-1', name: 'prom1', type: 'prometheus' }] as unknown as Datasource[],
+  datasources: ([{ id: 'ds-1', name: 'prom1', type: 'prometheus' }] as unknown) as Datasource[],
   loading: false,
   onDelete: jest.fn(),
   selectedDsIds: ['ds-1'],
@@ -121,7 +121,7 @@ describe('MonitorsTable', () => {
     expect(screen.getByTestId('forecasterFlyout')).toBeInTheDocument();
   });
 
-  it('shows start and stop actions for selected detector and forecaster rows', () => {
+  it('shows start and stop actions for selected detector and forecaster rows', async () => {
     const onStartResources = jest.fn();
     const onStopResources = jest.fn();
     const stoppedDetector = sampleRule({
@@ -156,11 +156,18 @@ describe('MonitorsTable', () => {
 
     fireEvent.click(screen.getByLabelText('Select stopped-detector'));
     fireEvent.click(screen.getByTestId('alertManagerStartSelectedResources'));
-    expect(onStartResources).toHaveBeenCalledWith([expect.objectContaining({ id: 'det-1' })]);
+    await waitFor(() =>
+      expect(onStartResources).toHaveBeenCalledWith([expect.objectContaining({ id: 'det-1' })])
+    );
+    await waitFor(() =>
+      expect(screen.queryByTestId('alertManagerStartSelectedResources')).not.toBeInTheDocument()
+    );
 
     fireEvent.click(screen.getByLabelText('Select running-forecaster'));
     fireEvent.click(screen.getByTestId('alertManagerStopSelectedResources'));
-    expect(onStopResources).toHaveBeenCalledWith([expect.objectContaining({ id: 'forecast-1' })]);
+    await waitFor(() =>
+      expect(onStopResources).toHaveBeenCalledWith([expect.objectContaining({ id: 'forecast-1' })])
+    );
   });
 
   it('surfaces detector and forecaster create actions for OpenSearch datasources', () => {
@@ -168,7 +175,9 @@ describe('MonitorsTable', () => {
     render(
       <MonitorsTable
         {...defaultProps}
-        datasources={[{ id: 'os-1', name: 'local', type: 'opensearch' }] as unknown as Datasource[]}
+        datasources={
+          ([{ id: 'os-1', name: 'local', type: 'opensearch' }] as unknown) as Datasource[]
+        }
         selectedDsIds={['os-1']}
         onCreateMonitor={onCreateMonitor}
       />
@@ -189,7 +198,7 @@ describe('MonitorsTable', () => {
       <MonitorsTable
         {...defaultProps}
         datasources={
-          [
+          ([
             {
               id: 'os-1',
               name: 'old-os',
@@ -197,7 +206,7 @@ describe('MonitorsTable', () => {
               mdsId: 'old-os-mds',
               version: '3.4.0',
             },
-          ] as unknown as Datasource[]
+          ] as unknown) as Datasource[]
         }
         selectedDsIds={['os-1']}
         onCreateMonitor={onCreateMonitor}
@@ -215,6 +224,40 @@ describe('MonitorsTable', () => {
     fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
     fireEvent.click(screen.getByLabelText('Create forecasting rule'));
     expect(onCreateMonitor).toHaveBeenCalledWith('forecaster');
+  });
+
+  it('enables metrics creation only when a selected datasource is Prometheus', () => {
+    const onCreateMonitor = jest.fn();
+    const { unmount } = render(
+      <MonitorsTable
+        {...defaultProps}
+        datasources={
+          ([
+            {
+              id: 'os-1',
+              name: 'OpenSearch',
+              type: 'opensearch',
+              version: '3.8.0',
+            },
+          ] as unknown) as Datasource[]
+        }
+        selectedDsIds={['os-1']}
+        onCreateMonitor={onCreateMonitor}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    expect(screen.getByLabelText('Create metrics rule').closest('.euiListGroupItem')).toHaveClass(
+      'euiListGroupItem-isDisabled'
+    );
+
+    unmount();
+    render(
+      <MonitorsTable {...defaultProps} selectedDsIds={['ds-1']} onCreateMonitor={onCreateMonitor} />
+    );
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    fireEvent.click(screen.getByLabelText('Create metrics rule'));
+    expect(onCreateMonitor).toHaveBeenCalledWith('metrics');
   });
 
   // Regression: deselecting all datasources must wipe both the dependent

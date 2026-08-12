@@ -36,12 +36,12 @@ export interface UseMonitorMutationsResult {
     groupName: string,
     ruleName?: string
   ) => Promise<{ success: boolean }>;
-  deleteDetector: (id: string, dsId?: string) => Promise<AdResourceActionResponse>;
-  startDetector: (id: string, dsId?: string) => Promise<AdResourceActionResponse>;
-  stopDetector: (id: string, dsId?: string) => Promise<AdResourceActionResponse>;
-  deleteForecaster: (id: string, dsId?: string) => Promise<AdResourceActionResponse>;
-  startForecaster: (id: string, dsId?: string) => Promise<AdResourceActionResponse>;
-  stopForecaster: (id: string, dsId?: string) => Promise<AdResourceActionResponse>;
+  deleteDetector: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
+  startDetector: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
+  stopDetector: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
+  deleteForecaster: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
+  startForecaster: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
+  stopForecaster: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
   acknowledgeAlert: (
     alertId: string,
     datasourceId?: string,

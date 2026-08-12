@@ -116,6 +116,7 @@ export interface MonitorsMainPanelProps {
   onEditForecaster?: (forecaster: UnifiedRuleSummary) => void;
   onStartResources?: (resources: UnifiedRuleSummary[]) => Promise<void> | void;
   onStopResources?: (resources: UnifiedRuleSummary[]) => Promise<void> | void;
+  lifecycleActionPending?: boolean;
   /**
    * Forwarded to {@link MonitorDetailFlyout.onToggleEnabled}. Page provides
    * an awaitable handler that PUTs the monitor with `enabled` flipped; the
@@ -164,6 +165,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   onEditForecaster,
   onStartResources,
   onStopResources,
+  lifecycleActionPending = false,
   onToggleEnabled,
 }) => {
   const selectedRules = filtered.filter((rule) => selectedIds.has(rule.id));
@@ -518,6 +520,8 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                     <EuiButton
                       size="s"
                       iconType="play"
+                      isLoading={lifecycleActionPending}
+                      isDisabled={lifecycleActionPending}
                       onClick={() => {
                         void onStartResources(selectedStartableResources);
                       }}
@@ -536,6 +540,8 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                     <EuiButton
                       size="s"
                       iconType="cross"
+                      isLoading={lifecycleActionPending}
+                      isDisabled={lifecycleActionPending}
                       onClick={() => {
                         void onStopResources(selectedStoppableResources);
                       }}
