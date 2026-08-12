@@ -420,15 +420,22 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     return set;
   }, [coverageBySvc]);
 
-  // Whether a draft is "covered" (and so non-selectable, to avoid a dual-write).
-  // Unions two signals: a matching Prometheus recording rule (`existingRuleMatch`,
-  // per-draft) OR the service already owning an SLO on this draft's SIDE of the
-  // canonical pair (`coverageBySvc`, from the health rollup, which resolves
-  // asynchronously). Side-aware so a partial create (e.g. availability only)
-  // covers exactly the draft that now exists.
+  // Whether a draft is "covered" (and so non-selectable). Coverage is driven
+  // solely by whether an SLO *saved object* already exists for this service on
+  // this draft's SIDE of the canonical pair (`coverageBySvc`, from the
+  // workspace-scoped health rollup). Side-aware so a partial create (e.g.
+  // availability only) covers exactly the draft that now exists.
+  //
+  // Deliberately NOT gated on `existingRuleMatch`: a matching Prometheus
+  // recording rule only means rules exist *somewhere* on the shared ruler —
+  // typically in another workspace's namespace (`slo-generated-<workspaceId>`).
+  // Blocking on it stranded users who could see another workspace's rules but
+  // had no SLO of their own to view or manage. Creation is workspace-scoped
+  // (its own namespace) and recording-rule writes are idempotent + refcounted
+  // by fingerprint, so reusing/duplicating rules is safe. `existingRuleMatch`
+  // is surfaced as an informational badge instead (see SuggestionInlineRow).
   const isDraftCovered = useCallback(
     (s: Suggestion) => {
-      if (s.existingRuleMatch) return true;
       const side = kindSide(s.kindId);
       const cov = coverageBySvc.get(s.input.spec.service);
       if (!cov || !side) return false;
@@ -572,6 +579,13 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   // "N drafts already covered" subline never renders, leaving the user with a
   // disabled Create and no explanation.
   const coveredCount = decoratedSuggestions.filter((s) => isDraftCovered(s)).length;
+  // Creatable drafts that already have a matching recording rule on the ruler
+  // (typically another workspace's namespace). These are NOT covered — the user
+  // can still create them here — but we surface a hint so it's clear creation
+  // reuses/duplicates existing rules rather than provisioning from scratch.
+  const rulesExistCount = decoratedSuggestions.filter(
+    (s) => s.existingRuleMatch && !isDraftCovered(s)
+  ).length;
   // Authoritative per-draft covered set, handed to the tree table so the inline
   // checkboxes disable exactly the drafts the create-time filter excludes.
   const coveredKeys = useMemo(
@@ -933,13 +947,26 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={true} />
                     </EuiFlexGroup>
-                    {coveredCount > 0 && <EuiSpacer size="xs" />}
+                    {(coveredCount > 0 || rulesExistCount > 0) && <EuiSpacer size="xs" />}
                     {coveredCount > 0 && (
                       <EuiText size="xs" color="subdued" data-test-subj="slosSuggestHeaderSubline">
                         {i18n.translate('observability.apm.slo.suggest.headerSubline.covered', {
                           defaultMessage:
-                            '{count, plural, one {# draft} other {# drafts}} already covered by existing rules',
+                            '{count, plural, one {# draft} other {# drafts}} already covered by an existing SLO in this workspace',
                           values: { count: coveredCount },
+                        })}
+                      </EuiText>
+                    )}
+                    {rulesExistCount > 0 && (
+                      <EuiText
+                        size="xs"
+                        color="subdued"
+                        data-test-subj="slosSuggestHeaderRulesExistSubline"
+                      >
+                        {i18n.translate('observability.apm.slo.suggest.headerSubline.rulesExist', {
+                          defaultMessage:
+                            '{count, plural, one {# draft has} other {# drafts have}} matching recording rules on the ruler — creating will reuse them for this workspace',
+                          values: { count: rulesExistCount },
                         })}
                       </EuiText>
                     )}

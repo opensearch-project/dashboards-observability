@@ -10,7 +10,7 @@ import type { Suggestion } from '../suggest_engine';
 
 function makeSuggestion(overrides: Partial<Suggestion> = {}): Suggestion {
   const latencyObjective = overrides.input?.spec.objectives?.[0]?.latencyThreshold !== undefined;
-  return ({
+  return {
     key: overrides.key ?? 'http-avail:cart',
     kindId: overrides.kindId ?? 'http-availability',
     kind: overrides.kind ?? 'HTTP availability',
@@ -57,7 +57,7 @@ function makeSuggestion(overrides: Partial<Suggestion> = {}): Suggestion {
         annotations: {},
       },
     },
-  } as unknown) as Suggestion;
+  } as unknown as Suggestion;
 }
 
 describe('SuggestionInlineRow', () => {
@@ -93,7 +93,7 @@ describe('SuggestionInlineRow', () => {
     expect(onToggle).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the covered badge when the suggestion has an existingRuleMatch', () => {
+  it('renders an informational "rules exist" badge (not covered) for an existingRuleMatch', () => {
     render(
       <SuggestionInlineRow
         suggestion={makeSuggestion({
@@ -105,7 +105,30 @@ describe('SuggestionInlineRow', () => {
         onOverrideChange={jest.fn()}
       />
     );
+    // A recording-rule match alone is informational — the draft stays
+    // selectable and shows the "rules exist" hint, not the covered badge.
+    expect(screen.getByTestId('slosSuggestRuleExists-http-avail:cart')).toBeInTheDocument();
+    expect(screen.queryByTestId('slosSuggestCovered-http-avail:cart')).not.toBeInTheDocument();
+    expect(screen.getByTestId('slosSuggestSelect-http-avail:cart')).not.toBeDisabled();
+  });
+
+  it('renders the covered badge and disables selection when covered=true', () => {
+    render(
+      <SuggestionInlineRow
+        suggestion={makeSuggestion({
+          existingRuleMatch: { groupName: 'g', ruleName: 'r' },
+        })}
+        covered
+        selected={false}
+        onToggle={jest.fn()}
+        overrides={{}}
+        onOverrideChange={jest.fn()}
+      />
+    );
     expect(screen.getByTestId('slosSuggestCovered-http-avail:cart')).toBeInTheDocument();
+    // Covered wins over the rule hint, and the checkbox is disabled.
+    expect(screen.queryByTestId('slosSuggestRuleExists-http-avail:cart')).not.toBeInTheDocument();
+    expect(screen.getByTestId('slosSuggestSelect-http-avail:cart')).toBeDisabled();
   });
 
   it('hides the latency override slot for availability objectives', () => {

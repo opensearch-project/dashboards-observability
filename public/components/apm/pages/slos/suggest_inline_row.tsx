@@ -57,9 +57,10 @@ export interface SuggestionInlineRowProps {
   rowStatusMessage?: string;
   /**
    * Authoritative "already covered" flag from the page (`isDraftCovered`):
-   * unions the per-draft recording-rule match with the service-level health
-   * rollup. Covered drafts are non-selectable. Defaults to the local
-   * recording-rule signal when the caller doesn't pass it.
+   * true when an SLO saved object already exists for this service/side in the
+   * current workspace. Covered drafts are non-selectable. Defaults to `false`
+   * (selectable) when the caller doesn't pass it — a recording-rule match
+   * alone does NOT make a draft covered (see `existingRuleMatch` handling).
    */
   covered?: boolean;
 }
@@ -83,19 +84,32 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
     spec.sli.definition.type === 'latency_threshold'
       ? (spec.sli.definition.latencyThresholdUnit ?? 'seconds')
       : 'seconds';
-  // Prefer the page's authoritative flag (rule + health union); fall back to
-  // the local recording-rule signal for callers that don't pass it.
-  const isCovered = covered ?? Boolean(suggestion.existingRuleMatch);
+  // Coverage is the page's authoritative saved-object signal only. A recording
+  // rule match (`existingRuleMatch`) is informational — it never blocks
+  // creation, since creation is workspace-scoped and rule writes are
+  // idempotent/refcounted.
+  const isCovered = covered ?? false;
+  // A recording rule already exists for this (service, kind) somewhere on the
+  // ruler — surfaced as an info badge when the draft is still creatable.
+  const hasExistingRule = Boolean(suggestion.existingRuleMatch);
   const fadedOut = isCovered && !selected;
-  // Covered drafts are non-selectable: creating one would dual-write a rule
-  // that already exists. Disabling here (not just filtering at create time)
-  // keeps the checkbox, the counts, and the actual create in agreement.
+  // Only saved-object coverage disables the checkbox. Disabling here (not just
+  // filtering at create time) keeps the checkbox, the counts, and the actual
+  // create in agreement.
   const disableCheckbox = rowStatus === 'creating' || rowStatus === 'success' || isCovered;
 
-  const coveredTooltip = suggestion.existingRuleMatch
-    ? i18n.translate('observability.apm.slo.suggest.inlineRow.coveredTooltip', {
+  const coveredTooltip = i18n.translate(
+    'observability.apm.slo.suggest.inlineRow.coveredHealthTooltip',
+    {
+      defaultMessage:
+        'An SLO for this service already exists in this workspace. Unchecked to avoid creating a duplicate.',
+    }
+  );
+
+  const existingRuleTooltip = suggestion.existingRuleMatch
+    ? i18n.translate('observability.apm.slo.suggest.inlineRow.existingRuleTooltip', {
         defaultMessage:
-          'Matched: {groupName} / {ruleName}{sloSuffix}. Unchecked to avoid dual-writing.',
+          'Matching recording rule already on the ruler: {groupName} / {ruleName}{sloSuffix}. Creating provisions this workspace’s own SLO and reuses these rules.',
         values: {
           groupName: suggestion.existingRuleMatch.groupName,
           ruleName: suggestion.existingRuleMatch.ruleName,
@@ -107,12 +121,7 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
             : '',
         },
       })
-    : isCovered
-      ? i18n.translate('observability.apm.slo.suggest.inlineRow.coveredHealthTooltip', {
-          defaultMessage:
-            'This service already owns its canonical availability + latency SLO pair. Unchecked to avoid dual-writing.',
-        })
-      : '';
+    : '';
 
   return (
     <EuiPanel
@@ -192,7 +201,22 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
                     data-test-subj={`slosSuggestCovered-${suggestion.key}`}
                   >
                     {i18n.translate('observability.apm.slo.suggest.inlineRow.coveredBadge', {
-                      defaultMessage: 'covered by existing rule',
+                      defaultMessage: 'SLO exists',
+                    })}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {!isCovered && hasExistingRule && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={existingRuleTooltip} position="top">
+                  <EuiBadge
+                    color="hollow"
+                    iconType="iInCircle"
+                    data-test-subj={`slosSuggestRuleExists-${suggestion.key}`}
+                  >
+                    {i18n.translate('observability.apm.slo.suggest.inlineRow.rulesExistBadge', {
+                      defaultMessage: 'rules exist — will reuse',
                     })}
                   </EuiBadge>
                 </EuiToolTip>

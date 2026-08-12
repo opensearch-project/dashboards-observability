@@ -13,7 +13,7 @@
 import { SloService } from '../slo_service';
 import { InMemorySloStore } from '../slo_store';
 import type { Logger } from '../../types/alerting';
-import type { SloDocument, SloSpec } from '../slo_types';
+import type { SloDocument, SloPaginateOpts, SloPaginateResult, SloSpec } from '../slo_types';
 import { encodeCursor } from '../slo_pagination_cursor';
 
 function noopLogger(): Logger {
@@ -78,7 +78,7 @@ function makeDoc(id: string, name: string = id): SloDocument {
 async function seed(svc: SloService, count: number) {
   // Bypass the create wizard validation by writing through the underlying
   // store so the test can populate a known-cardinality fleet.
-  const store = ((svc as unknown) as { core: { store: InMemorySloStore } }).core.store;
+  const store = (svc as unknown as { core: { store: InMemorySloStore } }).core.store;
   for (let i = 0; i < count; i++) {
     await store.save(makeDoc(`slo-${String(i).padStart(3, '0')}`));
   }
@@ -158,7 +158,7 @@ describe('SloService.paginate (cursor)', () => {
 
   it('keyword filter pushes through and is applied', async () => {
     const svc = new SloService(noopLogger(), new InMemorySloStore());
-    const store = ((svc as unknown) as { core: { store: InMemorySloStore } }).core.store;
+    const store = (svc as unknown as { core: { store: InMemorySloStore } }).core.store;
     await store.save(makeDoc('a', 'a'));
     const b = makeDoc('b', 'b');
     b.spec.service = 'other';
@@ -167,5 +167,62 @@ describe('SloService.paginate (cursor)', () => {
     const r = await svc.paginate({ pageSize: 10, service: ['other'] }, null);
     expect(r.results).toHaveLength(1);
     expect(r.results[0].id).toBe('b');
+  });
+
+  /**
+   * Store double that reproduces the SavedObject store's pushdown gaps:
+   * `canonicalKind` isn't projected, and `state` is live-computed so it can't
+   * be resolved at the index. Its `paginate` drops both facets (as the real SO
+   * query would), so a correct result for those facets can only come from the
+   * materialize path (`list`). It also counts `paginate` calls so we can assert
+   * the query service bypasses pushdown for those facets entirely.
+   */
+  class SoLikeStore extends InMemorySloStore {
+    public paginateCalls = 0;
+    async paginate(opts: SloPaginateOpts): Promise<SloPaginateResult> {
+      this.paginateCalls++;
+      const filters = { ...(opts.filters ?? {}) };
+      delete (filters as Record<string, unknown>).canonicalKind;
+      delete (filters as Record<string, unknown>).state;
+      return super.paginate({ ...opts, filters });
+    }
+  }
+
+  it('canonicalKind filter is correct (and bypasses store pushdown) across pages', async () => {
+    const store = new SoLikeStore();
+    const svc = new SloService(noopLogger(), store);
+    // 20 docs total; only 5 carry the http-availability canonical kind, and
+    // they sit *after* the first page-worth of non-matching docs — the exact
+    // shape that made the old post-fetch-per-page filter return an empty page.
+    for (let i = 0; i < 20; i++) {
+      const doc = makeDoc(`slo-${String(i).padStart(3, '0')}`);
+      if (i >= 12 && i < 17) doc.spec.canonicalKind = 'http-availability';
+      await store.save(doc);
+    }
+
+    const r = await svc.paginate({ pageSize: 10, canonicalKind: ['http-availability'] }, null);
+    // Correct total + full first page — not the unfiltered 20 / empty page the
+    // SO pushdown would have produced.
+    expect(r.total).toBe(5);
+    expect(r.results).toHaveLength(5);
+    expect(r.hasMore).toBe(false);
+    expect(r.results.every((s) => s.canonicalKind === 'http-availability')).toBe(true);
+    // Routed through the materialize path — the store's (gap-ridden) paginate
+    // was never consulted.
+    expect(store.paginateCalls).toBe(0);
+  });
+
+  it('state filter bypasses the store pushdown (materialize path)', async () => {
+    const store = new SoLikeStore();
+    const svc = new SloService(noopLogger(), store);
+    for (let i = 0; i < 5; i++) {
+      await store.save(makeDoc(`slo-${String(i).padStart(3, '0')}`));
+    }
+
+    // A state-filtered request must route through the materialize path rather
+    // than any (nonexistent) index-level state pushdown.
+    const r = await svc.paginate({ pageSize: 10, state: ['no_data'] }, null);
+    expect(store.paginateCalls).toBe(0);
+    expect(Array.isArray(r.results)).toBe(true);
   });
 });

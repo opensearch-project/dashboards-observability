@@ -1,0 +1,30 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Datasource facet rows: single-line, ellipsis-truncated connection names —
+// matching the Alert Manager facet panel (`.altFacetCheckboxRow`). EuiCheckbox
+// renders as a flex row (input + label) whose label is `inline-block`, so a
+// long name blows out the row width and gets clipped without an ellipsis.
+// Constraining `min-width: 0` down the chain and making the label a full-width
+// block lets the shared TruncatedLabel render the "…". These EUI overrides are
+// scoped under `.sloDsFacetRow`; the disable comments keep `stylelint --fix`
+// from stripping the (intentional) global-selector overrides.
+.sloDsFacetRow {
+  min-width: 0;
+  overflow: hidden;
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiCheckbox {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiCheckbox__label {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+}
