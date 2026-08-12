@@ -17,10 +17,8 @@
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import {
-  parseBuilderQuery,
-  PrometheusFormSection,
-} from '../create_monitor/prometheus_form_section';
+import { PrometheusFormSection } from '../create_monitor/prometheus_form_section';
+import { parseBuilderQuery } from '../create_monitor/prom_query_builder';
 import type { PrometheusFormState } from '../create_monitor/create_monitor_types';
 
 // Mock dependencies that PrometheusFormSection uses
@@ -156,10 +154,29 @@ describe('PrometheusFormSection — rule group', () => {
       />
     );
 
+    expect(screen.getByText('Rule details')).toBeInTheDocument();
     expect(screen.getByText('Rule group')).toBeInTheDocument();
+    // Namespace is fixed and read-only
+    expect(screen.getByDisplayValue('observability-alerting')).toBeInTheDocument();
     expect(
-      screen.getByText('Select an existing group or type a new name to create one.')
+      screen.getByText(
+        'Rules within a group share an evaluation interval and are evaluated together.'
+      )
     ).toBeInTheDocument();
+  });
+
+  it('renders the shell-provided rule name field inside Rule details', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+        ruleNameField={<input data-test-subj="shellRuleNameField" />}
+      />
+    );
+
+    expect(screen.getByTestId('shellRuleNameField')).toBeInTheDocument();
   });
 
   it('propagates rule group selection via the _ruleGroup metadata label', () => {
@@ -174,11 +191,11 @@ describe('PrometheusFormSection — rule group', () => {
       />
     );
 
-    // Builder has 3 combo boxes (metric, label name, label value);
-    // the rule group combo box is the 4th and last
+    // Rule details renders first, so the rule group combo box is the 1st;
+    // the builder's 3 combo boxes (metric, label name, label value) follow
     const comboInputs = container.querySelectorAll('[data-test-subj="comboBoxSearchInput"]');
     expect(comboInputs.length).toBe(4);
-    const input = comboInputs[comboInputs.length - 1];
+    const input = comboInputs[0];
 
     fireEvent.change(input, { target: { value: 'my-group' } });
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });

@@ -7,26 +7,29 @@
  * Prometheus form section of the Create Monitor flyout — simplified for
  * managed Prometheus (AMP) customers.
  *
- * The query builder alone defines the alert expression:
- *   - Builder: metric dropdown + label name/value filters
- *   - Rule group configuration
- *   - Labels & annotations
- *   - YAML preview
+ * Section layout mirrors the Metrics page "Create alert rule" flyout:
+ *   - Rule details (namespace, rule group, description)
+ *   - Query (point-and-click builder — the PromQL expression is the
+ *     complete alert condition — plus per-rule `for:` duration)
+ *   - Labels
+ *   - Notification routing guidance (Alertmanager)
+ *   - Annotations
+ *   - Rule Preview (YAML)
  *
  * Removed (not applicable to managed Prometheus):
- *   - "Unit" field in threshold
- *   - "Evaluation Settings" section (managed at rule group level in AMP)
- *   - Trigger condition (the PromQL expression itself defines the condition)
+ *   - "Unit" field / Trigger condition (the query defines the condition)
+ *   - "Evaluation Settings" (managed at rule group level in AMP)
  *   - Code mode / freeform PromQL editor
+ *   - Matched notification actions (routing is Alertmanager's job)
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
   EuiBetaBadge,
-  EuiButtonIcon,
   EuiCallOut,
   EuiComboBox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -35,7 +38,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiTextArea,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -43,40 +46,11 @@ import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../../framework/core_refs';
 import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
 import { AlertingPromResourcesService } from '../query_services/alerting_prom_resources_service';
+import { PromQueryBuilder } from './prom_query_builder';
 import { DURATION_OPTIONS, PrometheusFormState } from './create_monitor_types';
 
-// ============================================================================
-// Helpers
-// ============================================================================
-
-interface ParsedBuilderQuery {
-  metric: string;
-  labelName?: string;
-  labelOperator?: string;
-  labelValue?: string;
-}
-
-/**
- * Parse a PromQL expression back into builder selections, when the expression
- * has the exact shape the builder produces: `metric` or
- * `metric{label OP "value"}`. Returns null for anything more complex
- * (aggregations, comparisons, multiple matchers) — those cannot be
- * represented by the builder, so its fields stay empty and the builder→query
- * sync stays inert until the user makes a selection.
- */
-export function parseBuilderQuery(query: string): ParsedBuilderQuery | null {
-  const match = (query || '')
-    .trim()
-    .match(
-      /^([a-zA-Z_:][a-zA-Z0-9_:]*)(?:\{\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*(=~|!~|!=|=)\s*"((?:[^"\\]|\\.)*)"\s*\})?$/
-    );
-  if (!match) return null;
-  const [, metric, labelName, labelOperator, escapedValue] = match;
-  if (!labelName) return { metric };
-  // Reverse the escaping applied by syncBuilderToQuery
-  const labelValue = escapedValue.replace(/\\(["\\])/g, '$1');
-  return { metric, labelName, labelOperator, labelValue };
-}
+/** The namespace all rules created from this form are stored under. */
+const USER_RULES_NAMESPACE = 'observability-alerting';
 
 // ============================================================================
 // Component
@@ -90,6 +64,12 @@ export const PrometheusFormSection: React.FC<{
   context?: { service?: string; team?: string };
   datasourceId?: string;
   datasources?: Array<{ id: string; name: string; type: string }>;
+  /**
+   * The shell-owned Rule name row (validation/dup-check wired there),
+   * rendered inside the Rule details accordion to mirror the Metrics
+   * page flyout layout.
+   */
+  ruleNameField?: React.ReactNode;
 }> = ({
   form,
   onUpdate,
@@ -98,27 +78,8 @@ export const PrometheusFormSection: React.FC<{
   context,
   datasourceId,
   datasources = [],
+  ruleNameField,
 }) => {
-  // Builder state — seeded from the existing query (edit mode) when the
-  // expression has a builder-representable shape. Complex expressions leave
-  // the builder empty and untouched, so the seeded query is never clobbered
-  // unless the user explicitly picks a new metric. useState's lazy
-  // initializer parses once on mount instead of on every render.
-  const [seededBuilder] = useState(() => parseBuilderQuery(form.query));
-  const [metricOptions, setMetricOptions] = useState<Array<{ label: string }>>([]);
-  const [selectedMetric, setSelectedMetric] = useState<Array<{ label: string }>>(
-    seededBuilder ? [{ label: seededBuilder.metric }] : []
-  );
-  const [labelNameOptions, setLabelNameOptions] = useState<Array<{ label: string }>>([]);
-  const [selectedLabelName, setSelectedLabelName] = useState<Array<{ label: string }>>(
-    seededBuilder?.labelName ? [{ label: seededBuilder.labelName }] : []
-  );
-  const [labelValueOptions, setLabelValueOptions] = useState<Array<{ label: string }>>([]);
-  const [selectedLabelValue, setSelectedLabelValue] = useState<Array<{ label: string }>>(
-    seededBuilder?.labelValue ? [{ label: seededBuilder.labelValue }] : []
-  );
-  const [labelOperator, setLabelOperator] = useState(seededBuilder?.labelOperator || '=');
-
   // Rule group state — kept separate from form.name (which is the alert rule name).
   // Initialized from an existing _ruleGroup label so edits round-trip correctly.
   const [ruleGroupName, setRuleGroupName] = useState(
@@ -161,22 +122,25 @@ export const PrometheusFormSection: React.FC<{
     [onUpdate]
   );
 
-  // Fetch metric names and existing rule groups when datasource changes.
-  // The `stale` flag guards against out-of-order responses: a slower
-  // response from a previous datasource/metric selection must not
-  // overwrite options fetched for the current one.
+  // Description is stored as the `description` annotation — the server's rule
+  // builder reads annotations.description, so no new form field is needed.
+  const formAnnotationsRef = useRef(form.annotations);
+  formAnnotationsRef.current = form.annotations;
+  const description = form.annotations.find((a) => a.key === 'description')?.value || '';
+  const handleDescriptionChange = useCallback(
+    (value: string) => {
+      const others = formAnnotationsRef.current.filter((a) => a.key !== 'description');
+      onUpdate('annotations', value ? [...others, { key: 'description', value }] : others);
+    },
+    [onUpdate]
+  );
+
+  // Fetch existing rule groups when datasource changes. The `stale` flag
+  // guards against out-of-order responses overwriting current options.
   useEffect(() => {
     if (!datasourceId) return;
     let stale = false;
     const service = new AlertingPromResourcesService(datasourceId);
-    service
-      .listMetricNames()
-      .then(({ metrics }) => {
-        if (!stale) setMetricOptions(metrics.map((m) => ({ label: m })));
-      })
-      .catch(() => {
-        /* non-critical */
-      });
     service
       .listRuleGroupNames()
       .then(({ groups }) => {
@@ -189,82 +153,6 @@ export const PrometheusFormSection: React.FC<{
       stale = true;
     };
   }, [datasourceId]);
-
-  // Fetch label names when metric changes
-  useEffect(() => {
-    if (!datasourceId || selectedMetric.length === 0) {
-      setLabelNameOptions([]);
-      return;
-    }
-    let stale = false;
-    const service = new AlertingPromResourcesService(datasourceId);
-    service
-      .listLabelNames(selectedMetric[0].label)
-      .then(({ labels }) => {
-        if (!stale) setLabelNameOptions(labels.map((l) => ({ label: l })));
-      })
-      .catch(() => {
-        /* non-critical */
-      });
-    return () => {
-      stale = true;
-    };
-  }, [datasourceId, selectedMetric]);
-
-  // Fetch label values when label name changes
-  useEffect(() => {
-    if (!datasourceId || selectedLabelName.length === 0) {
-      setLabelValueOptions([]);
-      return;
-    }
-    let stale = false;
-    const metric = selectedMetric.length > 0 ? selectedMetric[0].label : undefined;
-    const selector = metric ? `{__name__="${metric}"}` : undefined;
-    const service = new AlertingPromResourcesService(datasourceId);
-    service
-      .listLabelValues(selectedLabelName[0].label, selector)
-      .then(({ values }) => {
-        if (!stale) setLabelValueOptions(values.map((v) => ({ label: v })));
-      })
-      .catch(() => {
-        /* non-critical */
-      });
-    return () => {
-      stale = true;
-    };
-  }, [datasourceId, selectedLabelName, selectedMetric]);
-
-  // Tracks whether the current form.query was authored by the builder. Only
-  // then may clearing the metric clear the query — a complex seeded
-  // expression the builder never produced must not be wiped.
-  const builderOwnsQuery = useRef(false);
-
-  // Sync builder selections to the PromQL query
-  const syncBuilderToQuery = useCallback(() => {
-    if (selectedMetric.length === 0) return;
-    const metric = selectedMetric[0].label;
-    let query = metric;
-    if (selectedLabelName.length > 0 && selectedLabelValue.length > 0) {
-      // Escape backslashes and quotes so the value is a valid PromQL string literal
-      const escapedValue = selectedLabelValue[0].label.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-      const labelFilter = `${selectedLabelName[0].label}${labelOperator}"${escapedValue}"`;
-      query = `${metric}{${labelFilter}}`;
-    }
-    builderOwnsQuery.current = true;
-    onUpdate('query', query);
-  }, [selectedMetric, selectedLabelName, selectedLabelValue, labelOperator, onUpdate]);
-
-  // Sync when builder field selections change; clearing the metric clears a
-  // builder-authored query so the two stay consistent
-  useEffect(() => {
-    if (selectedMetric.length > 0) {
-      syncBuilderToQuery();
-    } else if (builderOwnsQuery.current) {
-      builderOwnsQuery.current = false;
-      onUpdate('query', '');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedMetric, selectedLabelName, selectedLabelValue, labelOperator]);
 
   // Memoize filtered datasources to avoid re-filtering on every render
   const promDatasources = useMemo(() => {
@@ -286,7 +174,7 @@ export const PrometheusFormSection: React.FC<{
     const labels = form.labels.filter((l) => l.key && l.value && l.key !== '_ruleGroup');
     const annotations = form.annotations.filter((a) => a.key && a.value);
     const groupName = ruleGroupName || form.name || '<group-name>';
-    let yaml = `# Rule Group Namespace\nname: ${groupName}\nrules:\n`;
+    let yaml = `# Namespace: ${USER_RULES_NAMESPACE}\nname: ${groupName}\nrules:\n`;
     yaml += `  - alert: ${form.name || '<rule-name>'}\n`;
     yaml += `    expr: ${form.query || '<promql-expression>'}\n`;
     yaml += `    for: ${form.threshold.forDuration}\n`;
@@ -304,51 +192,148 @@ export const PrometheusFormSection: React.FC<{
   return (
     <>
       {/* ================================================================
-          Query Section — Builder (metric + label filters)
+          Rule details — namespace / rule group / description. Mirrors the
+          Metrics page flyout's Rule details section; Rule name and Enabled
+          are owned by the flyout shell directly above.
           ================================================================ */}
       <EuiPanel paddingSize="m" color="subdued">
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          responsive={false}
-          gutterSize="s"
+        <EuiAccordion
+          id="prom-rule-details"
+          buttonContent={
+            <strong>
+              {i18n.translate('observability.alerting.prometheusFormSection.ruleDetailsTitle', {
+                defaultMessage: 'Rule details',
+              })}
+            </strong>
+          }
+          initialIsOpen={true}
+          paddingSize="none"
         >
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label="PromQL"
-                  size="s"
-                  tooltipContent={i18n.translate(
-                    'observability.alerting.prometheusFormSection.promqlTooltip',
-                    { defaultMessage: 'Prometheus Query Language' }
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={i18n.translate('observability.alerting.prometheusFormSection.namespaceLabel', {
+              defaultMessage: 'Namespace',
+            })}
+            helpText={i18n.translate(
+              'observability.alerting.prometheusFormSection.namespaceHelpText',
+              {
+                defaultMessage:
+                  'Logical grouping for rule groups. All rules created here are stored under the "{namespace}" namespace.',
+                values: { namespace: USER_RULES_NAMESPACE },
+              }
+            )}
+            fullWidth
+          >
+            <EuiFieldText value={USER_RULES_NAMESPACE} readOnly fullWidth compressed />
+          </EuiFormRow>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={i18n.translate('observability.alerting.prometheusFormSection.groupNameLabel', {
+              defaultMessage: 'Rule group',
+            })}
+            helpText={i18n.translate(
+              'observability.alerting.prometheusFormSection.groupNameHelpText',
+              {
+                defaultMessage:
+                  'Rules within a group share an evaluation interval and are evaluated together.',
+              }
+            )}
+            fullWidth
+          >
+            <EuiComboBox
+              placeholder={i18n.translate(
+                'observability.alerting.prometheusFormSection.groupNamePlaceholder',
+                { defaultMessage: 'Enter a rule group name (defaults to rule name)' }
+              )}
+              options={ruleGroupOptions}
+              selectedOptions={ruleGroupName ? [{ label: ruleGroupName }] : []}
+              onChange={(opts) => handleRuleGroupChange(opts.length > 0 ? opts[0].label : '')}
+              onCreateOption={(value) => handleRuleGroupChange(value)}
+              singleSelection={{ asPlainText: true }}
+              compressed
+              isClearable
+              fullWidth
+              // Double templating on purpose: i18n substitutes the literal
+              // '{searchValue}' back in, yielding the exact template string
+              // EUI interpolates with the user's typed text at render time.
+              customOptionText={i18n.translate(
+                'observability.alerting.prometheusFormSection.createGroupOptionText',
+                {
+                  defaultMessage: 'Create group: {searchValue}',
+                  values: { searchValue: '{searchValue}' },
+                }
+              )}
+            />
+          </EuiFormRow>
+          {ruleNameField && (
+            <>
+              <EuiSpacer size="s" />
+              {ruleNameField}
+            </>
+          )}
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('observability.alerting.prometheusFormSection.hierarchyExplanation', {
+              defaultMessage:
+                'Prometheus rules are organized as: Namespace → Rule Group → Rule. A namespace contains one or more rule groups, and each group contains one or more rules that share the same evaluation interval.',
+            })}
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={
+              <span>
+                {i18n.translate('observability.alerting.prometheusFormSection.descriptionLabel', {
+                  defaultMessage: 'Description',
+                })}{' '}
+                <EuiText size="xs" color="subdued" style={{ display: 'inline' }}>
+                  {i18n.translate(
+                    'observability.alerting.prometheusFormSection.descriptionOptional',
+                    { defaultMessage: '— optional' }
                   )}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  options={[
-                    ...promDatasources.map((ds) => ({ value: ds.id, text: ds.name })),
-                    ...(datasourceId && !promDatasources.find((ds) => ds.id === datasourceId)
-                      ? [{ value: datasourceId, text: selectedDsName }]
-                      : []),
-                  ]}
-                  value={datasourceId || ''}
-                  onChange={(e) => onUpdate('datasourceId', e.target.value)}
-                  compressed
-                  prepend={i18n.translate(
-                    'observability.alerting.prometheusFormSection.datasourcePrepend',
-                    { defaultMessage: 'Datasource' }
-                  )}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {/* Mirrors the logs flyout's "Build query in logs →" round-trip:
-                author/validate the query against live data in the Metrics
-                app, then return via its Create alert rule action. Same-tab
-                navigation — unsaved form state here is lost. */}
+                </EuiText>
+              </span>
+            }
+            fullWidth
+          >
+            <EuiTextArea
+              placeholder={i18n.translate(
+                'observability.alerting.prometheusFormSection.descriptionPlaceholder',
+                { defaultMessage: 'Describe this rule' }
+              )}
+              value={description}
+              onChange={(e) => handleDescriptionChange(e.target.value)}
+              rows={2}
+              fullWidth
+              compressed
+              data-test-subj="prometheusRuleDescription"
+            />
+          </EuiFormRow>
+        </EuiAccordion>
+      </EuiPanel>
+
+      <EuiSpacer size="m" />
+
+      {/* ================================================================
+          Query — point-and-click builder; the expression is the complete
+          alert condition. Per-rule `for:` duration lives here too.
+          ================================================================ */}
+      <EuiPanel paddingSize="m" color="subdued">
+        <EuiAccordion
+          id="prom-query"
+          buttonContent={
+            <strong>
+              {i18n.translate('observability.alerting.prometheusFormSection.queryTitle', {
+                defaultMessage: 'Query',
+              })}
+            </strong>
+          }
+          initialIsOpen={true}
+          paddingSize="none"
+          extraAction={
+            /* Mirrors the logs flyout's "Build query in logs →" round-trip:
+               author/validate the query against live data in the Metrics
+               app, then return via its Create alert rule action. Same-tab
+               navigation — unsaved form state here is lost. */
             <EuiToolTip
               position="left"
               content={i18n.translate(
@@ -368,198 +353,77 @@ export const PrometheusFormSection: React.FC<{
                 })}
               </EuiLink>
             </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup gutterSize="m" alignItems="flexEnd" responsive={false}>
-          <EuiFlexItem grow={3}>
-            <EuiFormRow
-              label={i18n.translate('observability.alerting.prometheusFormSection.metricLabel', {
-                defaultMessage: 'Metric',
-              })}
-              display="rowCompressed"
-            >
-              <EuiComboBox
-                placeholder={i18n.translate(
-                  'observability.alerting.prometheusFormSection.metricPlaceholder',
-                  { defaultMessage: 'Select metric name' }
+          }
+        >
+          <EuiSpacer size="s" />
+          <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label="PromQL"
+                size="s"
+                tooltipContent={i18n.translate(
+                  'observability.alerting.prometheusFormSection.promqlTooltip',
+                  { defaultMessage: 'Prometheus Query Language' }
                 )}
-                options={metricOptions}
-                selectedOptions={selectedMetric}
-                onChange={(opts) => setSelectedMetric(opts)}
-                singleSelection={{ asPlainText: true }}
-                compressed
-                isClearable
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={3}>
-            <EuiFormRow
-              label={i18n.translate('observability.alerting.prometheusFormSection.labelNameLabel', {
-                defaultMessage: 'Label name',
-              })}
-              display="rowCompressed"
-            >
-              <EuiComboBox
-                placeholder={i18n.translate(
-                  'observability.alerting.prometheusFormSection.labelNamePlaceholder',
-                  { defaultMessage: 'Label name' }
-                )}
-                options={labelNameOptions}
-                selectedOptions={selectedLabelName}
-                onChange={(opts) => setSelectedLabelName(opts)}
-                singleSelection={{ asPlainText: true }}
-                compressed
-                isClearable
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ width: 60 }}>
-            <EuiFormRow label=" " display="rowCompressed">
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiSelect
                 options={[
-                  { value: '=', text: '=' },
-                  { value: '!=', text: '!=' },
-                  { value: '=~', text: '=~' },
-                  { value: '!~', text: '!~' },
+                  ...promDatasources.map((ds) => ({ value: ds.id, text: ds.name })),
+                  ...(datasourceId && !promDatasources.find((ds) => ds.id === datasourceId)
+                    ? [{ value: datasourceId, text: selectedDsName }]
+                    : []),
                 ]}
-                value={labelOperator}
-                onChange={(e) => setLabelOperator(e.target.value)}
+                value={datasourceId || ''}
+                onChange={(e) => onUpdate('datasourceId', e.target.value)}
                 compressed
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={3}>
-            <EuiFormRow
-              label={i18n.translate(
-                'observability.alerting.prometheusFormSection.labelValueLabel',
-                { defaultMessage: 'Label value' }
-              )}
-              display="rowCompressed"
-            >
-              <EuiComboBox
-                placeholder={i18n.translate(
-                  'observability.alerting.prometheusFormSection.labelValuePlaceholder',
-                  { defaultMessage: 'Label value' }
+                prepend={i18n.translate(
+                  'observability.alerting.prometheusFormSection.datasourcePrepend',
+                  { defaultMessage: 'Datasource' }
                 )}
-                options={labelValueOptions}
-                selectedOptions={selectedLabelValue}
-                onChange={(opts) => setSelectedLabelValue(opts)}
-                singleSelection={{ asPlainText: true }}
-                compressed
-                isClearable
               />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              aria-label={i18n.translate(
-                'observability.alerting.prometheusFormSection.clearFilterAriaLabel',
-                { defaultMessage: 'Clear filter' }
-              )}
-              color="subdued"
-              onClick={() => {
-                setSelectedLabelName([]);
-                setSelectedLabelValue([]);
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('observability.alerting.prometheusFormSection.builderHelpText', {
-            defaultMessage: 'Select a metric to start.',
-          })}
-        </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
 
-        {/* For duration — the rule's `for:` clause. Kept per-rule (unlike the
-            group-level evaluation interval): the condition must hold
-            continuously for this long before the alert transitions from
-            pending to firing. */}
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.prometheusFormSection.forDurationLabel', {
-            defaultMessage: 'For duration',
-          })}
-          helpText={i18n.translate(
-            'observability.alerting.prometheusFormSection.forDurationHelpText',
-            {
-              defaultMessage:
-                'How long the condition must stay true before the alert fires. The alert is "pending" during this window. Choose "Immediately (0s)" to fire on the first evaluation.',
-            }
-          )}
-          display="rowCompressed"
-        >
-          <EuiSelect
-            options={DURATION_OPTIONS}
-            value={form.threshold.forDuration}
-            onChange={(e) =>
-              onUpdate('threshold', { ...form.threshold, forDuration: e.target.value })
-            }
-            compressed
-            data-test-subj="prometheusForDurationSelect"
+          <PromQueryBuilder
+            datasourceId={datasourceId}
+            query={form.query}
+            onQueryChange={(q) => onUpdate('query', q)}
           />
-        </EuiFormRow>
-      </EuiPanel>
 
-      <EuiSpacer size="m" />
+          <EuiSpacer size="m" />
 
-      {/* ================================================================
-          Rule Group — where this rule lives in AMP
-          ================================================================ */}
-      <EuiPanel paddingSize="m" color="subdued">
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate('observability.alerting.prometheusFormSection.ruleGroupTitle', {
-              defaultMessage: 'Rule group',
+          {/* For duration — the rule's `for:` clause. Kept per-rule (unlike the
+              group-level evaluation interval): the condition must hold
+              continuously for this long before the alert transitions from
+              pending to firing. */}
+          <EuiFormRow
+            label={i18n.translate('observability.alerting.prometheusFormSection.forDurationLabel', {
+              defaultMessage: 'For duration',
             })}
-          </h3>
-        </EuiTitle>
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('observability.alerting.prometheusFormSection.ruleGroupDescription', {
-            defaultMessage:
-              'Alert rules are organized into groups. Rules in the same group share an evaluation interval and are evaluated together.',
-          })}
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.prometheusFormSection.groupNameLabel', {
-            defaultMessage: 'Group name',
-          })}
-          helpText={i18n.translate(
-            'observability.alerting.prometheusFormSection.groupNameHelpText',
-            { defaultMessage: 'Select an existing group or type a new name to create one.' }
-          )}
-          display="rowCompressed"
-        >
-          <EuiComboBox
-            placeholder={i18n.translate(
-              'observability.alerting.prometheusFormSection.groupNamePlaceholder',
-              { defaultMessage: 'Type or select a rule group' }
-            )}
-            options={ruleGroupOptions}
-            selectedOptions={ruleGroupName ? [{ label: ruleGroupName }] : []}
-            onChange={(opts) => handleRuleGroupChange(opts.length > 0 ? opts[0].label : '')}
-            onCreateOption={(value) => handleRuleGroupChange(value)}
-            singleSelection={{ asPlainText: true }}
-            compressed
-            isClearable
-            // Double templating on purpose: i18n substitutes the literal
-            // '{searchValue}' back in, yielding the exact template string
-            // EUI interpolates with the user's typed text at render time.
-            customOptionText={i18n.translate(
-              'observability.alerting.prometheusFormSection.createGroupOptionText',
+            helpText={i18n.translate(
+              'observability.alerting.prometheusFormSection.forDurationHelpText',
               {
-                defaultMessage: 'Create group: {searchValue}',
-                values: { searchValue: '{searchValue}' },
+                defaultMessage:
+                  'How long the condition must stay true before the alert fires. The alert is "pending" during this window. Choose "Immediately (0s)" to fire on the first evaluation.',
               }
             )}
-          />
-        </EuiFormRow>
+            display="rowCompressed"
+          >
+            <EuiSelect
+              options={DURATION_OPTIONS}
+              value={form.threshold.forDuration}
+              onChange={(e) =>
+                onUpdate('threshold', { ...form.threshold, forDuration: e.target.value })
+              }
+              compressed
+              data-test-subj="prometheusForDurationSelect"
+            />
+          </EuiFormRow>
+        </EuiAccordion>
       </EuiPanel>
 
       <EuiSpacer size="m" />
@@ -568,26 +432,28 @@ export const PrometheusFormSection: React.FC<{
           Labels
           ================================================================ */}
       <EuiPanel paddingSize="m" color="subdued">
-        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate('observability.alerting.prometheusFormSection.labelsTitle', {
-                  defaultMessage: 'Labels',
-                })}
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+        <EuiAccordion
+          id="prom-labels"
+          buttonContent={
+            <strong>
+              {i18n.translate('observability.alerting.prometheusFormSection.labelsTitle', {
+                defaultMessage: 'Labels',
+              })}
+            </strong>
+          }
+          initialIsOpen={true}
+          paddingSize="none"
+          extraAction={
             <EuiText size="xs" color="subdued">
               {i18n.translate('observability.alerting.prometheusFormSection.labelsDescription', {
                 defaultMessage: 'Categorize and route alerts',
               })}
             </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <LabelEditor labels={visibleLabels} onChange={handleLabelsChange} context={context} />
+          }
+        >
+          <EuiSpacer size="s" />
+          <LabelEditor labels={visibleLabels} onChange={handleLabelsChange} context={context} />
+        </EuiAccordion>
       </EuiPanel>
 
       <EuiSpacer size="m" />
@@ -596,31 +462,35 @@ export const PrometheusFormSection: React.FC<{
           Notification Routing — how alerts get routed in Prometheus
           ================================================================ */}
       <EuiPanel paddingSize="m" color="subdued">
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate(
-              'observability.alerting.prometheusFormSection.notificationRoutingTitle',
-              {
-                defaultMessage: 'Notification routing',
-              }
-            )}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiCallOut size="s" iconType="bell" color="primary">
-          <EuiText size="xs">
-            <p>
-              <FormattedMessage
-                id="observability.alerting.prometheusFormSection.notificationRoutingBody"
-                defaultMessage="Notifications for Prometheus alerts are managed through {alertmanager}. The labels you define above (e.g. {severityCode}) determine which receiver handles this alert based on your Alertmanager routing configuration."
-                values={{
-                  alertmanager: <strong>Alertmanager</strong>,
-                  severityCode: <code>severity</code>,
-                }}
-              />
-            </p>
-          </EuiText>
-        </EuiCallOut>
+        <EuiAccordion
+          id="prom-notification-routing"
+          buttonContent={
+            <strong>
+              {i18n.translate(
+                'observability.alerting.prometheusFormSection.notificationRoutingTitle',
+                { defaultMessage: 'Notification routing' }
+              )}
+            </strong>
+          }
+          initialIsOpen={true}
+          paddingSize="none"
+        >
+          <EuiSpacer size="s" />
+          <EuiCallOut size="s" iconType="bell" color="primary">
+            <EuiText size="xs">
+              <p>
+                <FormattedMessage
+                  id="observability.alerting.prometheusFormSection.notificationRoutingBody"
+                  defaultMessage="Notifications for Prometheus alerts are managed through {alertmanager}. The labels you define above (e.g. {severityCode}) determine which receiver handles this alert based on your Alertmanager routing configuration."
+                  values={{
+                    alertmanager: <strong>Alertmanager</strong>,
+                    severityCode: <code>severity</code>,
+                  }}
+                />
+              </p>
+            </EuiText>
+          </EuiCallOut>
+        </EuiAccordion>
       </EuiPanel>
 
       <EuiSpacer size="m" />
@@ -649,7 +519,7 @@ export const PrometheusFormSection: React.FC<{
               </EuiFlexItem>
             </EuiFlexGroup>
           }
-          initialIsOpen={true}
+          initialIsOpen={false}
           paddingSize="none"
         >
           <EuiSpacer size="s" />

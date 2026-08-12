@@ -179,10 +179,10 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       ? 'prometheus'
       : 'opensearch'
     : initialBackendType
-    ? initialBackendType
-    : initialDs?.type === 'opensearch'
-    ? 'opensearch'
-    : 'prometheus';
+      ? initialBackendType
+      : initialDs?.type === 'opensearch'
+        ? 'opensearch'
+        : 'prometheus';
 
   const [creationMode, setCreationMode] = useState<CreationMode>('manual');
   const [backendType, setBackendType] = useState<MonitorBackendType>(initialType);
@@ -312,6 +312,58 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         defaultMessage: 'A rule with this name already exists on the selected datasource.',
       })
     : undefined;
+
+  // Rule name row — built once so the validation/dup-check wiring stays in
+  // the shell. For Prometheus it renders inside the form section's
+  // "Rule details" accordion (mirroring the Metrics page flyout); for Logs
+  // it stays at the top of the flyout.
+  const ruleNameRow = (
+    <EuiFormRow
+      label={i18n.translate('observability.alerting.createMonitor.monitorNameLabel', {
+        defaultMessage: 'Rule name',
+      })}
+      fullWidth
+      isInvalid={
+        duplicateName ||
+        (hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === ''))
+      }
+      error={
+        duplicateNameError ||
+        (hasSubmitted
+          ? validationErrors.name ||
+            (activeForm.name.trim() === ''
+              ? i18n.translate('observability.alerting.createMonitor.nameRequired', {
+                  defaultMessage: 'Name is required',
+                })
+              : undefined)
+          : undefined)
+      }
+    >
+      <EuiFieldText
+        isInvalid={
+          duplicateName ||
+          (hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === ''))
+        }
+        placeholder={
+          backendType === 'prometheus'
+            ? i18n.translate(
+                'observability.alerting.createMonitor.monitorNamePlaceholderPrometheus',
+                { defaultMessage: 'Enter a rule name' }
+              )
+            : i18n.translate(
+                'observability.alerting.createMonitor.monitorNamePlaceholderOpensearch',
+                { defaultMessage: 'e.g. High Error Rate, Disk Usage Alert' }
+              )
+        }
+        value={activeForm.name}
+        onChange={(e) => updateName(e.target.value)}
+        fullWidth
+        aria-label={i18n.translate('observability.alerting.createMonitor.monitorNameAriaLabel', {
+          defaultMessage: 'Rule name',
+        })}
+      />
+    </EuiFormRow>
+  );
   const isValid =
     trimmedName !== '' &&
     activeForm.datasourceId !== '' &&
@@ -417,12 +469,12 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                       defaultMessage: 'Create metrics rule',
                     })
                 : isEdit
-                ? i18n.translate('observability.alerting.createMonitor.editTitleLogs', {
-                    defaultMessage: 'Edit logs rule',
-                  })
-                : i18n.translate('observability.alerting.createMonitor.titleLogs', {
-                    defaultMessage: 'Create logs rule',
-                  })}
+                  ? i18n.translate('observability.alerting.createMonitor.editTitleLogs', {
+                      defaultMessage: 'Edit logs rule',
+                    })
+                  : i18n.translate('observability.alerting.createMonitor.titleLogs', {
+                      defaultMessage: 'Create logs rule',
+                    })}
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
@@ -508,56 +560,14 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             </>
           )}
 
-          {/* Monitor Name. Severity is intentionally not exposed here — each
-              PPL trigger already carries its own severity, and the form-level
-              severity field was redundant (the saved monitor's severity is
-              derived from its triggers, not from this dropdown). */}
-          <EuiFormRow
-            label={i18n.translate('observability.alerting.createMonitor.monitorNameLabel', {
-              defaultMessage: 'Rule name',
-            })}
-            fullWidth
-            isInvalid={
-              duplicateName ||
-              (hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === ''))
-            }
-            error={
-              duplicateNameError ||
-              (hasSubmitted
-                ? validationErrors.name ||
-                  (activeForm.name.trim() === ''
-                    ? i18n.translate('observability.alerting.createMonitor.nameRequired', {
-                        defaultMessage: 'Name is required',
-                      })
-                    : undefined)
-                : undefined)
-            }
-          >
-            <EuiFieldText
-              placeholder={
-                backendType === 'prometheus'
-                  ? i18n.translate(
-                      'observability.alerting.createMonitor.monitorNamePlaceholderPrometheus',
-                      { defaultMessage: 'e.g. HighCpuUsage, PaymentErrorRate' }
-                    )
-                  : i18n.translate(
-                      'observability.alerting.createMonitor.monitorNamePlaceholderOpensearch',
-                      { defaultMessage: 'e.g. High Error Rate, Disk Usage Alert' }
-                    )
-              }
-              value={activeForm.name}
-              onChange={(e) => updateName(e.target.value)}
-              fullWidth
-              aria-label={i18n.translate(
-                'observability.alerting.createMonitor.monitorNameAriaLabel',
-                {
-                  defaultMessage: 'Rule name',
-                }
-              )}
-            />
-          </EuiFormRow>
-
-          <EuiSpacer size="m" />
+          {/* Monitor Name — rendered here for Logs; inside the Prometheus
+              form section's "Rule details" accordion for metrics rules. */}
+          {backendType !== 'prometheus' && (
+            <>
+              {ruleNameRow}
+              <EuiSpacer size="m" />
+            </>
+          )}
 
           {/* Enabled toggle — full row directly under Monitor Name. The
               footer save button reads this state to decide between
@@ -590,6 +600,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               context={context}
               datasourceId={promForm.datasourceId}
               datasources={datasources.filter((d) => d.type === 'prometheus')}
+              ruleNameField={ruleNameRow}
             />
           ) : (
             <OpenSearchFormSection
@@ -637,16 +648,16 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                       defaultMessage: 'Creating in Prometheus...',
                     })
                   : isEdit
-                  ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
-                      defaultMessage: 'Save Changes',
-                    })
-                  : activeForm.enabled
-                  ? i18n.translate('observability.alerting.createMonitor.saveAndEnableButton', {
-                      defaultMessage: 'Save & enable',
-                    })
-                  : i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
-                      defaultMessage: 'Save rule',
-                    })}
+                    ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
+                        defaultMessage: 'Save Changes',
+                      })
+                    : activeForm.enabled
+                      ? i18n.translate('observability.alerting.createMonitor.saveAndEnableButton', {
+                          defaultMessage: 'Save & enable',
+                        })
+                      : i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
+                          defaultMessage: 'Save rule',
+                        })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

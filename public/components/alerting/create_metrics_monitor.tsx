@@ -43,8 +43,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
-import { PromQLEditor } from './promql_editor';
-import { MetricBrowser } from './metric_browser';
+import { PromQueryBuilder } from './create_monitor/prom_query_builder';
 
 // ============================================================================
 // Types
@@ -61,14 +60,11 @@ interface AnnotationEntry {
   value: string;
 }
 
-interface ActionState {
-  id: string;
-  name: string;
-}
-
 export interface MetricsMonitorFormState {
   monitorName: string;
   description: string;
+  namespace: string;
+  groupName: string;
   query: string;
   datasourceId: string;
   // Trigger condition
@@ -82,8 +78,6 @@ export interface MetricsMonitorFormState {
   // Labels & annotations
   labels: LabelEntry[];
   annotations: AnnotationEntry[];
-  // Actions
-  actions: ActionState[];
 }
 
 export interface CreateMetricsMonitorProps {
@@ -279,33 +273,6 @@ const EVAL_INTERVAL_OPTIONS = [
   },
 ];
 
-const MOCK_SAMPLE_QUERIES = [
-  {
-    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleHighCpu', {
-      defaultMessage: 'High CPU usage',
-    }),
-    query: 'rate(node_cpu_seconds_total{mode!="idle"}[5m]) > 0.8',
-  },
-  {
-    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleHighMemory', {
-      defaultMessage: 'High memory usage',
-    }),
-    query: '(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.9',
-  },
-  {
-    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleHighErrorRate', {
-      defaultMessage: 'High error rate',
-    }),
-    query: 'rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05',
-  },
-  {
-    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleDiskFull', {
-      defaultMessage: 'Disk almost full',
-    }),
-    query: '(1 - node_filesystem_avail_bytes / node_filesystem_size_bytes) > 0.85',
-  },
-];
-
 const DEFAULT_PROMQL = 'rate(http_requests_total{status=~"5.."}[5m])';
 
 // Mock preview data — line chart
@@ -379,6 +346,41 @@ const MonitorDetailsSection = React.memo<{
     paddingSize="m"
   >
     <EuiFormRow
+      label={i18n.translate('observability.alerting.createMetricsMonitor.namespaceLabel', {
+        defaultMessage: 'Namespace',
+      })}
+      helpText={i18n.translate('observability.alerting.createMetricsMonitor.namespaceHelp', {
+        defaultMessage:
+          'Logical grouping for rule groups. All rules created here are stored under the "observability-alerting" namespace.',
+      })}
+      fullWidth
+    >
+      <EuiFieldText value="observability-alerting" readOnly fullWidth compressed />
+    </EuiFormRow>
+    <EuiSpacer size="m" />
+    <EuiFormRow
+      label={i18n.translate('observability.alerting.createMetricsMonitor.groupNameLabel', {
+        defaultMessage: 'Rule group',
+      })}
+      helpText={i18n.translate('observability.alerting.createMetricsMonitor.groupNameHelp', {
+        defaultMessage:
+          'Rules within a group share an evaluation interval and are evaluated together.',
+      })}
+      fullWidth
+    >
+      <EuiFieldText
+        placeholder={i18n.translate(
+          'observability.alerting.createMetricsMonitor.groupNamePlaceholder',
+          { defaultMessage: 'Enter a rule group name (defaults to rule name)' }
+        )}
+        value={form.groupName}
+        onChange={(e) => onUpdate({ groupName: e.target.value })}
+        fullWidth
+        compressed
+      />
+    </EuiFormRow>
+    <EuiSpacer size="m" />
+    <EuiFormRow
       label={i18n.translate('observability.alerting.createMetricsMonitor.monitorNameLabel', {
         defaultMessage: 'Rule name',
       })}
@@ -399,6 +401,15 @@ const MonitorDetailsSection = React.memo<{
         )}
       />
     </EuiFormRow>
+    <EuiSpacer size="s" />
+    <EuiText size="xs" color="subdued">
+      {i18n.translate('observability.alerting.createMetricsMonitor.hierarchyExplanation', {
+        defaultMessage:
+          'Prometheus rules are organized as: Namespace → Rule Group → Rule. ' +
+          'A namespace contains one or more rule groups, and each group contains one or more rules ' +
+          'that share the same evaluation interval.',
+      })}
+    </EuiText>
     <EuiSpacer size="m" />
     <EuiFormRow
       label={
@@ -444,8 +455,6 @@ const QuerySection = React.memo<{
   onRunPreview: () => void;
   contextDatasourceName?: string;
 }>(({ form, onUpdate, showPreview, onRunPreview, contextDatasourceName }) => {
-  const [showMetricBrowser, setShowMetricBrowser] = useState(false);
-  const [showQueryLibrary, setShowQueryLibrary] = useState(false);
   const [showDatasourcePicker, setShowDatasourcePicker] = useState(false);
 
   // Use the real datasource from the Explore page context. When no
@@ -466,19 +475,6 @@ const QuerySection = React.memo<{
             defaultMessage: 'No Prometheus datasource attached',
           }),
         };
-
-  const handleMetricSelect = (metricName: string) => {
-    const newQuery = form.query
-      ? form.query + (form.query.endsWith(' ') ? '' : ' ') + metricName
-      : metricName;
-    onUpdate({ query: newQuery });
-    setShowMetricBrowser(false);
-  };
-
-  const handleQueryLibrarySelect = (query: string) => {
-    onUpdate({ query });
-    setShowQueryLibrary(false);
-  };
 
   return (
     <EuiAccordion
@@ -560,127 +556,19 @@ const QuerySection = React.memo<{
               ))}
             </EuiPopover>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="starEmpty"
-                  iconSide="left"
-                  onClick={() => setShowQueryLibrary(!showQueryLibrary)}
-                  aria-label={i18n.translate(
-                    'observability.alerting.createMetricsMonitor.queryLibraryAriaLabel',
-                    { defaultMessage: 'Query library' }
-                  )}
-                >
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      {i18n.translate(
-                        'observability.alerting.createMetricsMonitor.queryLibraryLabel',
-                        { defaultMessage: 'Query library' }
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="arrowDown" size="s" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiButtonEmpty>
-              }
-              isOpen={showQueryLibrary}
-              closePopover={() => setShowQueryLibrary(false)}
-              panelPaddingSize="s"
-            >
-              {MOCK_SAMPLE_QUERIES.map((sq, i) => (
-                <EuiButtonEmpty
-                  key={i}
-                  size="xs"
-                  onClick={() => handleQueryLibrarySelect(sq.query)}
-                  style={{ display: 'block', width: '100%', textAlign: 'left' }}
-                >
-                  {sq.label}
-                </EuiButtonEmpty>
-              ))}
-            </EuiPopover>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => setShowMetricBrowser(!showMetricBrowser)}
-                  aria-label={i18n.translate(
-                    'observability.alerting.createMetricsMonitor.metricBrowserAriaLabel',
-                    { defaultMessage: 'Metric browser' }
-                  )}
-                >
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      {i18n.translate(
-                        'observability.alerting.createMetricsMonitor.metricBrowserLabel',
-                        { defaultMessage: 'Metric browser' }
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="arrowDown" size="s" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiButtonEmpty>
-              }
-              isOpen={showMetricBrowser}
-              closePopover={() => setShowMetricBrowser(false)}
-              panelPaddingSize="s"
-              style={{ width: 600 }}
-            >
-              <div style={{ width: 560, maxHeight: 400, overflow: 'auto' }}>
-                <MetricBrowser
-                  onSelectMetric={handleMetricSelect}
-                  currentQuery={form.query}
-                  datasourceId={form.datasourceId}
-                />
-              </div>
-            </EuiPopover>
-          </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
 
-        {/* PromQL editor */}
-        <div style={{ position: 'relative' }}>
-          <PromQLEditor
-            value={form.query}
-            onChange={(v) => onUpdate({ query: v })}
-            height={56}
-            showLineNumbers
-            hideToolbar
-          />
-          <div
-            style={{ position: 'absolute', top: 4, right: 4, zIndex: 2, display: 'flex', gap: 2 }}
-          >
-            <EuiToolTip
-              content={i18n.translate(
-                'observability.alerting.createMetricsMonitor.copyQueryTooltip',
-                { defaultMessage: 'Copy query' }
-              )}
-            >
-              <EuiButtonIcon
-                iconType="copy"
-                size="s"
-                color="subdued"
-                onClick={() => {
-                  try {
-                    navigator.clipboard.writeText(form.query);
-                  } catch (_) {
-                    /* clipboard unavailable */
-                  }
-                }}
-                aria-label={i18n.translate(
-                  'observability.alerting.createMetricsMonitor.copyQueryAriaLabel',
-                  { defaultMessage: 'Copy query' }
-                )}
-              />
-            </EuiToolTip>
-          </div>
-        </div>
+        {/* Point-and-click builder — same component as the Alert Manager
+            "Create metrics rule" flyout. Seeds from the pre-filled Explore
+            query when it is builder-representable; complex expressions leave
+            the builder inert so the seeded query is preserved. */}
+        <PromQueryBuilder
+          datasourceId={form.datasourceId}
+          query={form.query}
+          onQueryChange={(q) => onUpdate({ query: q })}
+        />
       </EuiPanel>
 
       {/* Preview Results */}
@@ -1174,100 +1062,6 @@ const AnnotationsSection = React.memo<{
     </EuiAccordion>
   );
 });
-
-/** Section 7: Matched Notification Actions */
-const ActionsSection = React.memo<{
-  actions: ActionState[];
-  onDeleteAction: (id: string) => void;
-  onAddAction: () => void;
-}>(({ actions, onDeleteAction, onAddAction }) => (
-  <section
-    aria-label={i18n.translate(
-      'observability.alerting.createMetricsMonitor.matchedActionsAriaLabel',
-      { defaultMessage: 'Matched notification actions' }
-    )}
-  >
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="observability.alerting.createMetricsMonitor.matchedActionsTitle"
-              defaultMessage="Matched notification actions ({count})"
-              values={{ count: actions.length }}
-            />
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="s" />
-    {actions.map((action, idx) => (
-      <React.Fragment key={action.id}>
-        {idx > 0 && <EuiSpacer size="xs" />}
-        <EuiPanel paddingSize="s" hasBorder>
-          <EuiAccordion
-            id={`action-${action.id}`}
-            buttonContent={
-              <span>
-                {idx + 1}. {action.name}
-              </span>
-            }
-            paddingSize="s"
-            extraAction={
-              <EuiButtonEmpty
-                size="xs"
-                color="danger"
-                onClick={() => onDeleteAction(action.id)}
-                aria-label={i18n.translate(
-                  'observability.alerting.createMetricsMonitor.deleteActionAriaLabel',
-                  { defaultMessage: 'Delete action {name}', values: { name: action.name } }
-                )}
-              >
-                {i18n.translate('observability.alerting.createMetricsMonitor.deleteActionButton', {
-                  defaultMessage: 'Delete',
-                })}
-              </EuiButtonEmpty>
-            }
-          >
-            <EuiCallOut
-              size="s"
-              color="primary"
-              iconType="iInCircle"
-              title={i18n.translate(
-                'observability.alerting.createMetricsMonitor.comingSoonCalloutTitle',
-                { defaultMessage: 'Coming soon' }
-              )}
-            >
-              <EuiText size="xs">
-                {i18n.translate(
-                  'observability.alerting.createMetricsMonitor.comingSoonCalloutBody',
-                  {
-                    defaultMessage:
-                      'Full action configuration (notification channel, message template, throttling) will be available in a future update.',
-                  }
-                )}
-              </EuiText>
-            </EuiCallOut>
-          </EuiAccordion>
-        </EuiPanel>
-      </React.Fragment>
-    ))}
-    <EuiSpacer size="s" />
-    <EuiButtonEmpty
-      size="s"
-      iconType="plusInCircle"
-      onClick={onAddAction}
-      aria-label={i18n.translate('observability.alerting.createMetricsMonitor.addActionAriaLabel', {
-        defaultMessage: 'Add another action',
-      })}
-    >
-      {i18n.translate('observability.alerting.createMetricsMonitor.addActionButton', {
-        defaultMessage: 'Add another action',
-      })}
-    </EuiButtonEmpty>
-  </section>
-));
-
 /** Section 8: Rule Preview (YAML) */
 const RulePreviewSection = React.memo<{
   form: MetricsMonitorFormState;
@@ -1368,6 +1162,8 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
   const [form, setForm] = useState<MetricsMonitorFormState>({
     monitorName: '',
     description: '',
+    namespace: 'default',
+    groupName: '',
     query: DEFAULT_PROMQL,
     datasourceId: contextDatasourceId || '',
     operator: '>',
@@ -1378,7 +1174,6 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
     firingPeriod: '0s',
     labels: [{ key: 'severity', value: 'critical', isDynamic: false }],
     annotations: [],
-    actions: [],
   });
   const [showPreview, setShowPreview] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
@@ -1402,34 +1197,15 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
     setForm((prev) => ({ ...prev, ...patch }));
   }, []);
 
-  const handleLabelsUpdate = useCallback((labels: LabelEntry[]) => updateForm({ labels }), [
-    updateForm,
-  ]);
+  const handleLabelsUpdate = useCallback(
+    (labels: LabelEntry[]) => updateForm({ labels }),
+    [updateForm]
+  );
 
   const handleAnnotationsUpdate = useCallback(
     (annotations: AnnotationEntry[]) => updateForm({ annotations }),
     [updateForm]
   );
-
-  const deleteAction = useCallback((id: string) => {
-    setForm((prev) => ({
-      ...prev,
-      actions: prev.actions.filter((a) => a.id !== id),
-    }));
-  }, []);
-
-  const addAction = useCallback(() => {
-    setForm((prev) => ({
-      ...prev,
-      actions: [
-        ...prev.actions,
-        {
-          id: `action-${Date.now()}-${prev.actions.length}`,
-          name: `action_${prev.actions.length + 1}`,
-        },
-      ],
-    }));
-  }, []);
 
   const handleRunPreview = useCallback(() => {
     setShowPreview(true);
@@ -1465,7 +1241,7 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
           form.annotations.filter((a) => a.key.trim()).map((a) => [a.key, a.value])
         ),
         enabled: true,
-        groupName: form.monitorName,
+        groupName: form.groupName || form.monitorName,
       };
       await http.post(`/api/alerting/prometheus/${encodeURIComponent(form.datasourceId)}/rules`, {
         body: JSON.stringify(payload),
@@ -1539,15 +1315,10 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
         <AnnotationsSection annotations={form.annotations} onUpdate={handleAnnotationsUpdate} />
         <EuiHorizontalRule margin="l" />
 
-        {/* Section 7: Matched Notification Actions */}
-        <ActionsSection
-          actions={form.actions}
-          onDeleteAction={deleteAction}
-          onAddAction={addAction}
-        />
-        <EuiHorizontalRule margin="l" />
+        {/* Notification actions are intentionally absent: routing for
+            Prometheus alerts is Alertmanager's job, driven by labels. */}
 
-        {/* Section 8: Rule Preview (YAML) */}
+        {/* Section 7: Rule Preview (YAML) */}
         <RulePreviewSection form={form} />
       </EuiFlyoutBody>
 
