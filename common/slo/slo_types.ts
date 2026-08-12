@@ -117,9 +117,8 @@ export const SLI_BACKEND_TO_DATASOURCE_TYPE: Record<SliBackend, 'prometheus' | '
 };
 
 /** Datasource types that can back a currently-supported SLO. */
-export const SUPPORTED_DATASOURCE_TYPES: ReadonlyArray<
-  'prometheus' | 'opensearch'
-> = SUPPORTED_SLI_BACKENDS.map((b) => SLI_BACKEND_TO_DATASOURCE_TYPE[b]);
+export const SUPPORTED_DATASOURCE_TYPES: ReadonlyArray<'prometheus' | 'opensearch'> =
+  SUPPORTED_SLI_BACKENDS.map((b) => SLI_BACKEND_TO_DATASOURCE_TYPE[b]);
 
 /**
  * Grouping dimensions live inside the SingleSli node. Composite SLOs (P2)
@@ -473,8 +472,6 @@ export interface SloPaginateOpts {
 export interface SloPaginateResult {
   /** Page slice in store-native order. */
   docs: SloDocument[];
-  /** Parallel array of last-known cachedState values; entry is null when unset. */
-  cachedStates: Array<SloHealthState | null>;
   /** Total count across the matching set (cheap on the SO layer). */
   total: number;
 }
@@ -483,22 +480,15 @@ export interface ISloStore {
   get(id: string): Promise<SloDocument | null>;
   list(datasourceIds?: string[]): Promise<SloDocument[]>;
   /**
-   * Index-level paginated read. Pushes facet filters into the SO `filter`
-   * clause so a state-filtered listing doesn't have to materialize every
-   * matching SLO and slice client-side. Optional — implementations that
-   * cannot push facets to the index throw `not implemented`, and the
-   * caller falls back to the in-memory list path.
+   * Index-level paginated read. Pushes the index-friendly facet filters into
+   * the SO `filter` clause so the listing slices at the index level instead of
+   * materializing every matching SLO. Optional — implementations that cannot
+   * push facets to the index omit this, and the caller falls back to the
+   * in-memory list path.
    */
   paginate?(opts: SloPaginateOpts): Promise<SloPaginateResult>;
   /** Upsert — uses `id` as the key. */
   save(doc: SloDocument): Promise<void>;
-  /**
-   * Lightweight write of just the cachedState projection. Skips the full
-   * SO overwrite that `save` performs. Implementations MUST silently
-   * no-op when the SO has been deleted (404) or workspace-scoped away
-   * (403) — the caller treats this as a best-effort writeback.
-   */
-  updateCachedState?(id: string, state: SloHealthState): Promise<void>;
   /** Returns true if deleted, false if not found. */
   delete(id: string): Promise<boolean>;
 }

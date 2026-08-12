@@ -16,7 +16,6 @@ import type { PaginatedResponse } from '../types/alerting';
 import type {
   Dimension,
   SloDocument,
-  SloHealthState,
   SloListFilters,
   SloLiveStatus,
   SloSummary,
@@ -27,7 +26,6 @@ import type { SloServiceCore } from './slo_service_core';
 import type { SloStatusService } from './slo_status_service';
 import { decodeCursor, encodeCursor, hashFilters } from './slo_pagination_cursor';
 import type { PaginationCursorState } from './slo_pagination_cursor';
-import { writeBackChangedStates } from './slo_status_cached_writeback';
 
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 100;
@@ -183,17 +181,22 @@ export class SloQueryService {
   }
 
   /**
-   * Cursor-based pagination. Pushes facet filters (including `state`, via
-   * the persisted `cachedState` projection) into the SO `filter` clause so
-   * a state-filtered listing doesn't need to materialize every matching
-   * SLO before slicing. Status fold-in then runs only over the visible
-   * page. Diffs in computed-vs-cached state trigger a best-effort
-   * writeback so the next request's filter pushdown stays honest.
+   * Cursor-based pagination. Pushes the index-friendly facet filters
+   * (datasource, service, team, tier, enabled, mode, sliBackend, sliLeafType)
+   * into the SO `filter` clause so the store slices at the index level and
+   * status fold-in runs only over the visible page.
    *
-   * Falls back to the legacy `list()` path when the underlying store does
-   * not implement `paginate` (in-memory bootstrap stores in tests can opt
-   * out by leaving the method undefined; the bundled `InMemorySloStore`
-   * implements it).
+   * Two facets can't be pushed down correctly and route through the
+   * materialize-and-slice `list()` path instead:
+   *   - `state` is live-computed (recomputed from the source each read), so it
+   *     can't be resolved by an index-level filter.
+   *   - `canonicalKind` isn't projected on the SO at all, so pushdown could
+   *     only filter the current page slice — corrupting totals and yielding
+   *     empty pages when matches live further in.
+   *
+   * Also falls back to `list()` when the underlying store doesn't implement
+   * `paginate` (in-memory bootstrap stores in tests can opt out by leaving the
+   * method undefined; the bundled `InMemorySloStore` implements it).
    */
   async paginate(
     filters: SloListFilters | undefined,
@@ -242,10 +245,20 @@ export class SloQueryService {
     const sortField = decoded?.sf || '_id';
     const sortOrder = decoded?.so ?? 'asc';
 
-    if (!sloStore.paginate) {
-      // Bootstrap / test path: fall back to the materialize-and-slice
-      // approach. Cursor still drives the page index; filter pushdown
-      // is unavailable in this branch.
+    // Route through the materialize-and-slice path when either:
+    //   - the store can't push down (bootstrap / test doubles), or
+    //   - the request filters on `state` or `canonicalKind`.
+    //
+    // `state` is a live-computed facet (recomputed from the source each read),
+    // so it can't be resolved by an index-level filter. `canonicalKind` isn't
+    // projected on the SO at all, so pushdown pagination could only filter the
+    // current page slice — corrupting totals and yielding empty pages when
+    // matches live on later pages. `list()` computes status and applies both
+    // filters over the full result set, so counts and page contents stay
+    // correct. See slo_saved_object_store.buildFilterKuery.
+    const needsMaterialize =
+      Boolean(filters?.state?.length) || Boolean(filters?.canonicalKind?.length);
+    if (!sloStore.paginate || needsMaterialize) {
       return this.legacyPaginate({
         page: effectivePage,
         pageSize,
@@ -278,38 +291,14 @@ export class SloQueryService {
       },
     });
 
-    // canonicalKind is not projected on the SO yet (see slo_saved_object_store.buildFilterKuery)
-    // — re-apply post-fetch so the contract remains complete.
-    let docs = paginated.docs;
-    let cachedStates = paginated.cachedStates;
-    if (filters?.canonicalKind && filters.canonicalKind.length > 0) {
-      const kept: SloDocument[] = [];
-      const keptStates: Array<SloHealthState | null> = [];
-      for (let i = 0; i < docs.length; i++) {
-        const d = docs[i];
-        if (d.spec.canonicalKind && filters.canonicalKind.includes(d.spec.canonicalKind)) {
-          kept.push(d);
-          keptStates.push(cachedStates[i]);
-        }
-      }
-      docs = kept;
-      cachedStates = keptStates;
-    }
+    // `state` / `canonicalKind` requests never reach this branch — they route
+    // through `legacyPaginate` above — so the SO pushdown result is final.
+    const docs = paginated.docs;
 
     // Fold in live status only over the page slice.
     const ids = docs.map((d) => d.id);
     const statuses = ids.length ? await this.statusService.getStatuses(ids, ctx, request) : [];
     const statusMap = new Map(statuses.map((s) => [s.sloId, s]));
-
-    // Best-effort writeback. Don't await — the writeback is idempotent and
-    // can land any time before the next read; we'd rather return the page
-    // sooner. Caught and logged inside the helper.
-    const writebackInputs = docs.map((d, i) => ({
-      sloId: d.id,
-      newState: (statusMap.get(d.id) ?? this.statusService.noDataStatus(d)).state,
-      oldState: cachedStates[i],
-    }));
-    void writeBackChangedStates(sloStore, writebackInputs, this.core.logger);
 
     const results = docs.map((d) =>
       this.toSummary(d, statusMap.get(d.id) ?? this.statusService.noDataStatus(d))

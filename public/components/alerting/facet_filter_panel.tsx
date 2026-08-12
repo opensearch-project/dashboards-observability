@@ -10,7 +10,7 @@
  * Renders a collapsible section with checkboxes for each option,
  * including count badges and optional color indicators.
  */
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { TruncatedLabel } from '../common/truncated_label';
 
 // ============================================================================
 // Types
@@ -81,67 +82,8 @@ export interface FacetFilterGroupProps extends FacetGroupConfig {
   onToggleCollapse: (id: string) => void;
 }
 
-// ============================================================================
-// TruncatedLabel — ellipsis + tooltip only when content overflows
-// ============================================================================
-//
-// Uses a `ResizeObserver` to track the underlying span's `scrollWidth` vs
-// `clientWidth`. When the parent panel is wide enough to fit the full label,
-// no `title` is rendered. When the label is truncated (via CSS
-// `text-overflow: ellipsis`), we attach a native `title` attribute so
-// hovering shows the full value. Re-evaluates on resize.
-const TruncatedLabel: React.FC<{ text: string }> = ({ text }) => {
-  const ref = useRef<HTMLSpanElement>(null);
-  const [isTruncated, setIsTruncated] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return undefined;
-    const measure = () => setIsTruncated(el.scrollWidth > el.clientWidth);
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [text]);
-
-  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number } | null>(null);
-
-  // Custom instant-hover tooltip. `EuiToolTip` is unreliable when the anchor
-  // is nested inside an EuiCheckbox `<label>` (the label intercepts events
-  // and bubbles them to the paired input), and the browser's native `title`
-  // has a ~500ms non-configurable delay. `position: fixed` escapes the
-  // surrounding `overflow: hidden` clipping on the filter panel rows.
-  const onEnter = () => {
-    if (!isTruncated || !ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    setTooltipPos({ top: rect.top - 28, left: rect.left });
-  };
-  const onLeave = () => setTooltipPos(null);
-
-  return (
-    <span className="altTruncatedLabelWrap" onMouseEnter={onEnter} onMouseLeave={onLeave}>
-      <span
-        ref={ref}
-        className="altTruncatedLabel"
-        style={{
-          fontSize: '12px',
-          lineHeight: '18px',
-        }}
-      >
-        {text}
-      </span>
-      {tooltipPos && (
-        <span
-          className="altTruncatedLabelTooltip"
-          role="tooltip"
-          style={{ top: tooltipPos.top, left: tooltipPos.left }}
-        >
-          {text}
-        </span>
-      )}
-    </span>
-  );
-};
+// `TruncatedLabel` now lives in `../common/truncated_label` (shared with the
+// SLO listing's datasource facet). Imported above.
 
 // ============================================================================
 // FacetFilterGroup — a single collapsible facet section
@@ -345,7 +287,8 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                       data-test-subj={`facetGroup-${id}-icon-${opt}`}
                     />
                   )}
-                  <TruncatedLabel text={displayLabel} />
+                  {/* Explicit 12/18 preserves Alert Manager's existing look. */}
+                  <TruncatedLabel text={displayLabel} fontSize={12} lineHeight={18} />
                 </span>
                 {showCounts && (
                   <EuiText size="xs" color="subdued" className="altFacetCount">

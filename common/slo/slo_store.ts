@@ -9,17 +9,10 @@
  * server/services/slo/slo_saved_object_store.ts for the persistent backend.
  */
 
-import type {
-  ISloStore,
-  SloDocument,
-  SloHealthState,
-  SloPaginateOpts,
-  SloPaginateResult,
-} from './slo_types';
+import type { ISloStore, SloDocument, SloPaginateOpts, SloPaginateResult } from './slo_types';
 
 export class InMemorySloStore implements ISloStore {
   private docs = new Map<string, SloDocument>();
-  private cachedStates = new Map<string, SloHealthState>();
 
   async get(id: string): Promise<SloDocument | null> {
     return this.docs.get(id) ?? null;
@@ -36,21 +29,13 @@ export class InMemorySloStore implements ISloStore {
     this.docs.set(doc.id, doc);
   }
 
-  async updateCachedState(id: string, state: SloHealthState): Promise<void> {
-    if (this.docs.has(id)) {
-      this.cachedStates.set(id, state);
-    }
-  }
-
   async paginate(opts: SloPaginateOpts): Promise<SloPaginateResult> {
     const f = opts.filters ?? {};
+    // NOTE: `state` is applied by the query service's materialize path (it's
+    // live-computed), so it is intentionally not handled here.
     let filtered = Array.from(this.docs.values()).filter((d) => {
       if (f.datasourceId && f.datasourceId.length && !f.datasourceId.includes(d.spec.datasourceId))
         return false;
-      if (f.state && f.state.length) {
-        const cached = this.cachedStates.get(d.id);
-        if (!cached || !f.state.includes(cached)) return false;
-      }
       if (f.service && f.service.length && !f.service.includes(d.spec.service)) return false;
       if (f.team && f.team.length && !d.spec.owner.teams.some((t) => f.team!.includes(t)))
         return false;
@@ -88,15 +73,10 @@ export class InMemorySloStore implements ISloStore {
     const total = filtered.length;
     const start = (opts.page - 1) * opts.perPage;
     const slice = filtered.slice(start, start + opts.perPage);
-    return {
-      docs: slice,
-      cachedStates: slice.map((d) => this.cachedStates.get(d.id) ?? null),
-      total,
-    };
+    return { docs: slice, total };
   }
 
   async delete(id: string): Promise<boolean> {
-    this.cachedStates.delete(id);
     return this.docs.delete(id);
   }
 }
