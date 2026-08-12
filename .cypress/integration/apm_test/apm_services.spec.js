@@ -88,6 +88,32 @@ const setAPMTimeRange = (startDate, endDate) => {
   cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
 };
 
+// Select an option from one of the APM Settings comboboxes.
+//
+// The dataset / data-source lists load asynchronously. When a list resolves, EUI
+// swaps the combo box's `options` prop and re-renders, which closes a popover
+// that was opened too early: you see "Loading options", the option flashes in,
+// then the list immediately closes and the option click never lands. Gate the
+// open on the field's loading spinner being gone so the options are stable
+// before we click, then scope the option click to the options list so a later
+// re-render can't detach the matched element mid-click.
+const selectApmSettingComboBox = (rowLabel, optionText) => {
+  cy.get('.euiFormRow')
+    .contains('label', rowLabel)
+    .parents('.euiFormRow')
+    .first()
+    .find('.euiComboBox')
+    .as('apmComboBox');
+
+  // Wait for the async load to finish (loading spinner gone) before opening.
+  cy.get('@apmComboBox').find('.euiLoadingSpinner', { timeout: 60000 }).should('not.exist');
+
+  cy.get('@apmComboBox').click();
+  cy.get('.euiComboBoxOptionsList').should('be.visible');
+  cy.get('.euiComboBoxOptionsList').contains(optionText).click();
+  cy.get('.euiComboBoxOptionsList').should('not.exist');
+};
+
 describe('APM Services Page', () => {
   const prometheusConfig = PROMETHEUS_CLUSTER;
 
@@ -184,25 +210,14 @@ describe('APM Services Page', () => {
       cy.get('.euiModal').should('be.visible');
       cy.get('.euiModalHeader').should('be.visible');
 
-      // Select Traces dataset. Scope the option click to the options list (not a
-      // page-wide cy.contains) so a re-render of the async-loaded dataset list
-      // doesn't detach the matched element mid-click.
-      cy.get('.euiFormRow').contains('Traces').parent().parent().find('.euiComboBox').click();
-      cy.get('.euiComboBoxOptionsList').should('be.visible');
-      cy.get('.euiComboBoxOptionsList').contains(APM_RESOURCES.TRACE_INDEX_PATTERN).click();
-      cy.get('.euiComboBoxOptionsList').should('not.exist');
+      // Select Traces dataset (waits for the dataset list to finish loading).
+      selectApmSettingComboBox('Traces', APM_RESOURCES.TRACE_INDEX_PATTERN);
 
       // Select Services dataset
-      cy.get('.euiFormRow').contains('Services').parent().parent().find('.euiComboBox').click();
-      cy.get('.euiComboBoxOptionsList').should('be.visible');
-      cy.get('.euiComboBoxOptionsList').contains(APM_RESOURCES.SERVICE_INDEX_PATTERN).click();
-      cy.get('.euiComboBoxOptionsList').should('not.exist');
+      selectApmSettingComboBox('Services', APM_RESOURCES.SERVICE_INDEX_PATTERN);
 
       // Select Prometheus data source
-      cy.get('.euiFormRow').contains('RED Metrics').parent().parent().find('.euiComboBox').click();
-      cy.get('.euiComboBoxOptionsList').should('be.visible');
-      cy.get('.euiComboBoxOptionsList').contains(APM_RESOURCES.DATA_CONNECTION_NAME).click();
-      cy.get('.euiComboBoxOptionsList').should('not.exist');
+      selectApmSettingComboBox('RED Metrics', APM_RESOURCES.DATA_CONNECTION_NAME);
 
       // Click Apply button
       cy.get('.euiModalFooter').find('.euiButton--fill').click();
