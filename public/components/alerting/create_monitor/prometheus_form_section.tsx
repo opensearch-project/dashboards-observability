@@ -30,14 +30,17 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiPanel,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
+import { coreRefs } from '../../../framework/core_refs';
 import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
 import { AlertingPromResourcesService } from '../query_services/alerting_prom_resources_service';
 import { DURATION_OPTIONS, PrometheusFormState } from './create_monitor_types';
@@ -304,33 +307,67 @@ export const PrometheusFormSection: React.FC<{
           Query Section — Builder (metric + label filters)
           ================================================================ */}
       <EuiPanel paddingSize="m" color="subdued">
-        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+          gutterSize="s"
+        >
           <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label="PromQL"
-              size="s"
-              tooltipContent={i18n.translate(
-                'observability.alerting.prometheusFormSection.promqlTooltip',
-                { defaultMessage: 'Prometheus Query Language' }
-              )}
-            />
+            <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label="PromQL"
+                  size="s"
+                  tooltipContent={i18n.translate(
+                    'observability.alerting.prometheusFormSection.promqlTooltip',
+                    { defaultMessage: 'Prometheus Query Language' }
+                  )}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  options={[
+                    ...promDatasources.map((ds) => ({ value: ds.id, text: ds.name })),
+                    ...(datasourceId && !promDatasources.find((ds) => ds.id === datasourceId)
+                      ? [{ value: datasourceId, text: selectedDsName }]
+                      : []),
+                  ]}
+                  value={datasourceId || ''}
+                  onChange={(e) => onUpdate('datasourceId', e.target.value)}
+                  compressed
+                  prepend={i18n.translate(
+                    'observability.alerting.prometheusFormSection.datasourcePrepend',
+                    { defaultMessage: 'Datasource' }
+                  )}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSelect
-              options={[
-                ...promDatasources.map((ds) => ({ value: ds.id, text: ds.name })),
-                ...(datasourceId && !promDatasources.find((ds) => ds.id === datasourceId)
-                  ? [{ value: datasourceId, text: selectedDsName }]
-                  : []),
-              ]}
-              value={datasourceId || ''}
-              onChange={(e) => onUpdate('datasourceId', e.target.value)}
-              compressed
-              prepend={i18n.translate(
-                'observability.alerting.prometheusFormSection.datasourcePrepend',
-                { defaultMessage: 'Datasource' }
+            {/* Mirrors the logs flyout's "Build query in logs →" round-trip:
+                author/validate the query against live data in the Metrics
+                app, then return via its Create alert rule action. Same-tab
+                navigation — unsaved form state here is lost. */}
+            <EuiToolTip
+              position="left"
+              content={i18n.translate(
+                'observability.alerting.prometheusFormSection.openInMetricsTooltip',
+                {
+                  defaultMessage:
+                    'Build and validate your query against live data in metrics, then click Create alert rule to come back here pre-filled. Unsaved changes will be lost.',
+                }
               )}
-            />
+            >
+              <EuiLink
+                onClick={() => coreRefs?.application?.navigateToApp('explore/metrics')}
+                data-test-subj="alertManagerOpenInMetricsLink"
+              >
+                {i18n.translate('observability.alerting.prometheusFormSection.openInMetrics', {
+                  defaultMessage: 'Build query in metrics →',
+                })}
+              </EuiLink>
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
 

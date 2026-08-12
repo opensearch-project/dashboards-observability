@@ -114,6 +114,20 @@ describe('PrometheusFormSection — simplified layout', () => {
     );
   });
 
+  it('renders the "Build query in metrics" link in the query panel header', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    expect(screen.getByTestId('alertManagerOpenInMetricsLink')).toBeInTheDocument();
+    expect(screen.getByText('Build query in metrics →')).toBeInTheDocument();
+  });
+
   it('shows the datasource selector when datasources are provided', () => {
     render(
       <PrometheusFormSection
