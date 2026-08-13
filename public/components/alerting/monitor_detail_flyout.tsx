@@ -661,11 +661,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                               });
                               window.dispatchEvent(new HashChangeEvent('hashchange'));
                             }}
-                            data-test-subj="monitorDetailConfigureRoutingLink"
+                            data-test-subj="monitorDetailViewRoutingLink"
                           >
                             <FormattedMessage
-                              id="observability.alerting.monitorDetailFlyout.configureRoutingLink"
-                              defaultMessage="Configure notification routing →"
+                              id="observability.alerting.monitorDetailFlyout.viewRoutingLink"
+                              defaultMessage="View notification routing →"
                             />
                           </EuiLink>
                         </p>
