@@ -93,7 +93,9 @@ describe('MonitorsTable', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /sample-http-responses-detector/i }));
+    const detectorLink = screen.getByRole('button', { name: /sample-http-responses-detector/i });
+    expect(detectorLink.closest('tr')).toHaveTextContent('Anomaly Detector');
+    fireEvent.click(detectorLink);
 
     expect(screen.getByTestId('detectorFlyout')).toBeInTheDocument();
   });

@@ -110,7 +110,7 @@ export const TYPE_LABELS: Record<string, string> = {
   synthetics: 'Synthetics',
   ppl: 'PPL',
   anomaly_detector_monitor: 'Anomaly detector monitor',
-  detector: 'Detector',
+  detector: 'Anomaly Detector',
   forecaster: 'Forecaster',
 };
 
