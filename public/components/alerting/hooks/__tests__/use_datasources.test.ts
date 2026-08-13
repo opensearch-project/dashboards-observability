@@ -6,7 +6,7 @@
 import { mapSavedObjectsToDatasources } from '../use_datasources';
 
 describe('mapSavedObjectsToDatasources', () => {
-  it('preserves OpenSearch engine and version metadata used by create gating', () => {
+  it('preserves OpenSearch engine metadata used by AD and Forecasting create gating', () => {
     const datasources = mapSavedObjectsToDatasources(
       [
         {
@@ -17,7 +17,6 @@ describe('mapSavedObjectsToDatasources', () => {
             title: 'Serverless',
             endpoint: 'https://example.aoss.amazonaws.com',
             dataSourceEngineType: 'OpenSearch Serverless',
-            dataSourceVersion: '3.8.0',
           },
         },
       ] as never,
@@ -29,7 +28,6 @@ describe('mapSavedObjectsToDatasources', () => {
         id: 'os-1',
         mdsId: 'os-1',
         engineType: 'OpenSearch Serverless',
-        version: '3.8.0',
       })
     );
   });

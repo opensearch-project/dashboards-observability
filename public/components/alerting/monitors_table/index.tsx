@@ -20,13 +20,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiResizableContainer } from '@elastic/eui';
 import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alerting';
-import { isVersionAtLeast } from '../../../../common/utils/shared';
-import { coreRefs } from '../../../framework/core_refs';
 import { useFacetCollapse } from '../facet_filter_panel';
-import {
-  BASE_PPL_ALERTING_SUPPORTED_VERSION,
-  isStandardOpenSearchDatasource,
-} from '../shared_constants';
+import { isStandardOpenSearchDatasource } from '../shared_constants';
 import { buildTableColumns, DEFAULT_VISIBLE } from './monitors_table_columns';
 import {
   buildSuggestions,
@@ -77,15 +72,6 @@ interface MonitorsTableProps {
    * without typing it. Empty / undefined leaves the box blank.
    */
   initialSearchQuery?: string;
-}
-
-interface AlertingSettingsResponse {
-  ok?: boolean;
-  resp?: {
-    transient?: { cluster?: { pluggable?: Record<string, unknown> } };
-    persistent?: { cluster?: { pluggable?: Record<string, unknown> } };
-    defaults?: { cluster?: { pluggable?: Record<string, unknown> } };
-  };
 }
 
 // ============================================================================
@@ -163,51 +149,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   const dsNameMap = useMemo(() => new Map(datasources.map((d) => [d.id, d.name])), [datasources]);
 
-  // Prefetch AnalyticEngine status for OpenSearch datasources.
-  // An AnalyticEngine domain has cluster.pluggable.dataformat.enabled === true.
-  const [analyticEngineCache, setAnalyticEngineCache] = useState<Map<string, boolean>>(new Map());
-  useEffect(() => {
-    const http = coreRefs.http;
-    if (!http) return;
-    const osDs = datasources.filter(
-      (d) => d.type === 'opensearch' && d.engineType !== 'OpenSearch Serverless' && d.mdsId
-    );
-    if (osDs.length === 0) return;
-    let cancelled = false;
-    (async () => {
-      const cache = new Map<string, boolean>();
-      await Promise.all(
-        osDs.map(async (ds) => {
-          try {
-            const resp = await http.get<AlertingSettingsResponse>('../api/alerting/_settings', {
-              query: { dataSourceId: ds.mdsId },
-            });
-            if (resp?.ok && resp.resp) {
-              const val =
-                resp.resp.transient?.cluster?.pluggable?.['dataformat.enabled'] ??
-                resp.resp.persistent?.cluster?.pluggable?.['dataformat.enabled'] ??
-                resp.resp.defaults?.cluster?.pluggable?.['dataformat.enabled'];
-              cache.set(ds.id, val === 'true' || val === true);
-            } else {
-              cache.set(ds.id, false);
-            }
-          } catch {
-            cache.set(ds.id, false);
-          }
-        })
-      );
-      if (!cancelled) setAnalyticEngineCache(cache);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [datasources]);
-
-  const isAnalyticEngineEnabled = useCallback(
-    (datasourceId: string) => analyticEngineCache.get(datasourceId) || false,
-    [analyticEngineCache]
-  );
-
   const selectedDatasources = useMemo(
     () =>
       selectedDsIds
@@ -217,29 +158,22 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   );
 
   // Logs / Metrics popover entries are grayed out when the parent's selection
-  // can't satisfy them: Logs needs at least one OpenSearch datasource with
-  // version >= 3.5.0 (or serverless), Metrics needs at least one Prometheus.
-  // The empty-selection case used to fall through to "both enabled", but the
-  // spec is "no datasource selected → no create options viable" — Logs without
-  // a supported OS DS is undefined, Metrics without a Prometheus DS is
-  // undefined. Gate both so the user can't enter a flyout that will silently
-  // re-default the datasource on them.
-  const logsCreateDisabled = useMemo(() => {
-    if (selectedDatasources.length === 0) return true;
-    const osSelected = selectedDatasources.filter((d) => d.type === 'opensearch');
-    if (osSelected.length === 0) return true;
-    // Check if any selected OS datasource supports PPL alerting
-    const hasSupportedDs = osSelected.some((d) => {
-      if (!d.mdsId) return true; // Local cluster — no version metadata available
-      if (d.engineType === 'OpenSearch Serverless') return true;
-      if (isAnalyticEngineEnabled(d.id)) return true;
-      if (!d.version) return false;
-      return isVersionAtLeast(d.version, BASE_PPL_ALERTING_SUPPORTED_VERSION);
-    });
-    return !hasSupportedDs;
-  }, [selectedDatasources, isAnalyticEngineEnabled]);
-
-  const metricsCreateDisabled = !selectedDatasources.some((d) => d.type === 'prometheus');
+  // can't satisfy them: Logs needs at least one OpenSearch datasource, Metrics
+  // needs at least one Prometheus. The empty-selection case is "no datasource
+  // selected → no create options viable", so gate both. When a selection
+  // exists, each option is disabled iff EVERY selected datasource is the wrong
+  // type for it — i.e. only-Prometheus disables Logs, only-OpenSearch disables
+  // Metrics (symmetric).
+  const [logsCreateDisabled, metricsCreateDisabled] = useMemo(() => {
+    const selected = selectedDsIds
+      .map((id) => datasources.find((d) => d.id === id))
+      .filter((d): d is Datasource => !!d);
+    if (selected.length === 0) return [true, true];
+    return [
+      selected.every((d) => d.type === 'prometheus'),
+      selected.every((d) => d.type === 'opensearch'),
+    ];
+  }, [datasources, selectedDsIds]);
 
   const adCreateDisabled = !selectedDatasources.some(isStandardOpenSearchDatasource);
 

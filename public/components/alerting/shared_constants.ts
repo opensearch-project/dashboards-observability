@@ -114,8 +114,6 @@ export const TYPE_LABELS: Record<string, string> = {
   forecaster: 'Forecaster',
 };
 
-export const BASE_PPL_ALERTING_SUPPORTED_VERSION = '3.5.0';
-
 /**
  * AD and Forecasting creation only support standard OpenSearch data sources.
  * The synthetic local cluster has no engine metadata and remains eligible.

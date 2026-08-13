@@ -172,7 +172,6 @@ export interface Datasource {
   mdsId?: string;
   /** OpenSearch data-source metadata used to gate datasource-specific creation flows. */
   engineType?: string;
-  version?: string;
   auth?: {
     type: 'basic' | 'apikey' | 'sigv4';
     credentials?: Record<string, string>;

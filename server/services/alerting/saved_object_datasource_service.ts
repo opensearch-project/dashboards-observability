@@ -31,8 +31,6 @@ import type {
 interface DataSourceSOAttributes {
   title?: string;
   endpoint?: string;
-  dataSourceEngineType?: string;
-  dataSourceVersion?: string;
 }
 
 interface DataConnectionSOAttributes {
@@ -62,8 +60,6 @@ export class SavedObjectDatasourceService implements DatasourceService {
           url: so.attributes.endpoint || '',
           enabled: true,
           mdsId: so.id,
-          engineType: so.attributes.dataSourceEngineType,
-          version: so.attributes.dataSourceVersion,
         });
         osCount++;
       }

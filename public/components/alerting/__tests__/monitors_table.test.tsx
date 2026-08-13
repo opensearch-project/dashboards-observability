@@ -192,41 +192,6 @@ describe('MonitorsTable', () => {
     expect(onCreateMonitor).toHaveBeenCalledWith('forecaster');
   });
 
-  it('keeps detector and forecaster create actions independent from logs version gating', () => {
-    const onCreateMonitor = jest.fn();
-    render(
-      <MonitorsTable
-        {...defaultProps}
-        datasources={
-          [
-            {
-              id: 'os-1',
-              name: 'old-os',
-              type: 'opensearch',
-              mdsId: 'old-os-mds',
-              engineType: 'OpenSearch',
-              version: '3.4.0',
-            },
-          ] as unknown as Datasource[]
-        }
-        selectedDsIds={['os-1']}
-        onCreateMonitor={onCreateMonitor}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
-    expect(screen.getByLabelText('Create logs rule').closest('.euiListGroupItem')).toHaveClass(
-      'euiListGroupItem-isDisabled'
-    );
-
-    fireEvent.click(screen.getByLabelText('Create anomaly detection rule'));
-    expect(onCreateMonitor).toHaveBeenCalledWith('detector');
-
-    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
-    fireEvent.click(screen.getByLabelText('Create forecasting rule'));
-    expect(onCreateMonitor).toHaveBeenCalledWith('forecaster');
-  });
-
   it('disables detector and forecaster creation for an AOSS datasource', () => {
     const onCreateMonitor = jest.fn();
     render(
@@ -255,40 +220,6 @@ describe('MonitorsTable', () => {
     expect(
       screen.getByLabelText('Create forecasting rule').closest('.euiListGroupItem')
     ).toHaveClass('euiListGroupItem-isDisabled');
-  });
-
-  it('enables metrics creation only when a selected datasource is Prometheus', () => {
-    const onCreateMonitor = jest.fn();
-    const { unmount } = render(
-      <MonitorsTable
-        {...defaultProps}
-        datasources={
-          [
-            {
-              id: 'os-1',
-              name: 'OpenSearch',
-              type: 'opensearch',
-              version: '3.8.0',
-            },
-          ] as unknown as Datasource[]
-        }
-        selectedDsIds={['os-1']}
-        onCreateMonitor={onCreateMonitor}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
-    expect(screen.getByLabelText('Create metrics rule').closest('.euiListGroupItem')).toHaveClass(
-      'euiListGroupItem-isDisabled'
-    );
-
-    unmount();
-    render(
-      <MonitorsTable {...defaultProps} selectedDsIds={['ds-1']} onCreateMonitor={onCreateMonitor} />
-    );
-    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
-    fireEvent.click(screen.getByLabelText('Create metrics rule'));
-    expect(onCreateMonitor).toHaveBeenCalledWith('metrics');
   });
 
   // Regression: deselecting all datasources must wipe both the dependent
