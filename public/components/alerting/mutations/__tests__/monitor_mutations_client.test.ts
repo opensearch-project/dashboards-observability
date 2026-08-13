@@ -107,6 +107,14 @@ describe('MonitorMutationsClient', () => {
         '/api/anomaly_detectors/detectors/det-1/stop/false'
       );
     });
+
+    it('rejects detector action responses that report an application-level failure', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: false, error: 'Detector must be stopped first' });
+
+      await expect(client.deleteDetector('det-1', 'ds-1')).rejects.toThrow(
+        'Detector must be stopped first'
+      );
+    });
   });
 
   describe('forecaster lifecycle', () => {
@@ -140,6 +148,14 @@ describe('MonitorMutationsClient', () => {
       expect(mockDelete).toHaveBeenCalledWith('/api/forecasting/forecasters/forecast-1');
       expect(mockPost).toHaveBeenNthCalledWith(1, '/api/forecasting/forecasters/forecast-1/start');
       expect(mockPost).toHaveBeenNthCalledWith(2, '/api/forecasting/forecasters/forecast-1/stop');
+    });
+
+    it('rejects forecaster action responses that report an application-level failure', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: false, error: 'Forecaster must be stopped first' });
+
+      await expect(client.deleteForecaster('forecast-1', 'ds-1')).rejects.toThrow(
+        'Forecaster must be stopped first'
+      );
     });
   });
 

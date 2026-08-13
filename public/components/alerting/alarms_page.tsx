@@ -61,7 +61,7 @@ import { ALERT_MANAGER_MAX_DATASOURCES_SETTING } from '../../../common/constants
 import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
 import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
 import { showMonitorCreatedToast } from './toast_helpers';
-import { isDetectorRule, isForecasterRule } from './shared_constants';
+import { isAdResourceRunning, isDetectorRule, isForecasterRule } from './shared_constants';
 import './alerting.scss';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
 import {
@@ -704,8 +704,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           const groupName = rule.group || rule.name;
           await mutations.deletePrometheusRule(rule.datasourceId, groupName, rule.name);
         } else if (isDetectorRule(rule)) {
+          if (isAdResourceRunning(rule)) {
+            await mutations.stopDetector(id, rule.datasourceId);
+          }
           await mutations.deleteDetector(id, rule.datasourceId);
         } else if (isForecasterRule(rule)) {
+          if (isAdResourceRunning(rule)) {
+            await mutations.stopForecaster(id, rule.datasourceId);
+          }
           await mutations.deleteForecaster(id, rule.datasourceId);
         } else {
           await mutations.deleteMonitor(id, rule.datasourceId);
