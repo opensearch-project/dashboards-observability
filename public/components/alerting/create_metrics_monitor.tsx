@@ -4,10 +4,16 @@
  */
 
 /**
- * Create Metrics Monitor — flyout form for Prometheus alerting rules.
- * Sections: Monitor Details, Query (PromQL + datasource + metric browser),
- * Trigger Condition, Evaluation Settings, Labels, Annotations,
- * Matched Notification Actions, Rule Preview (YAML), and a sticky footer.
+ * Create Metrics Monitor — the single shared flyout for creating Prometheus
+ * alerting rules, mounted by both the Metrics Explore page ("Create alert
+ * rule" action) and the Alert Manager Rules page.
+ *
+ * Sections: Rule details (namespace / rule group / name / description),
+ * Query (shared PromQL builder + per-rule `for:` duration + Run preview),
+ * Labels, Annotations, Rule Preview (YAML), and a sticky footer. The PromQL
+ * expression is the complete alert condition — there is no separate trigger
+ * condition, and evaluation cadence is a rule-group-level concern in
+ * managed Prometheus.
  */
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import {
@@ -144,7 +150,8 @@ const FOR_DURATION_OPTIONS = [
   },
 ];
 
-const DEFAULT_PROMQL = 'rate(http_requests_total{status=~"5.."}[5m])';
+/** The namespace all rules created from this flyout are stored under. */
+const USER_RULES_NAMESPACE = 'observability-alerting';
 
 // ============================================================================
 // Sub-components
@@ -158,7 +165,7 @@ const MonitorDetailsSection = React.memo<{
   nameError?: string;
 }>(({ form, onUpdate, nameError }) => (
   <EuiAccordion
-    id="prom-monitor-details"
+    id="cmm-rule-details"
     buttonContent={
       <strong>
         {i18n.translate('observability.alerting.createMetricsMonitor.monitorDetailsTitle', {
@@ -179,7 +186,7 @@ const MonitorDetailsSection = React.memo<{
       })}
       fullWidth
     >
-      <EuiFieldText value="observability-alerting" readOnly fullWidth compressed />
+      <EuiFieldText value={USER_RULES_NAMESPACE} readOnly fullWidth compressed />
     </EuiFormRow>
     <EuiSpacer size="m" />
     <EuiFormRow
@@ -318,7 +325,7 @@ const QuerySection = React.memo<{
 
     return (
       <EuiAccordion
-        id="prom-query-section"
+        id="cmm-query"
         buttonContent={
           <strong>
             {i18n.translate('observability.alerting.createMetricsMonitor.queryTitle', {
@@ -477,7 +484,7 @@ const QuerySection = React.memo<{
         {showPreview && (
           <>
             <EuiSpacer size="m" />
-            <QueryPreviewResults query={form.query} />
+            <QueryPreviewResults id="cmm-preview-results" query={form.query} />
           </>
         )}
       </EuiAccordion>
@@ -491,7 +498,7 @@ const LabelsSection = React.memo<{
   onUpdate: (labels: LabelEntry[]) => void;
 }>(({ labels, onUpdate }) => (
   <EuiAccordion
-    id="prom-labels"
+    id="cmm-labels"
     buttonContent={
       <strong>
         {i18n.translate('observability.alerting.createMetricsMonitor.labelsTitle', {
@@ -528,7 +535,7 @@ const AnnotationsSection = React.memo<{
 
   return (
     <EuiAccordion
-      id="prom-annotations"
+      id="cmm-annotations"
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -621,7 +628,15 @@ const RulePreviewSection = React.memo<{
   const yaml = useMemo(() => {
     const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
     const labels = form.labels.filter((l) => l.key && l.value);
-    const annotations = form.annotations.filter((a) => a.key && a.value);
+    // Mirror the save path: the Rule details Description field persists as
+    // the `description` annotation (and wins over a manually-typed one), so
+    // the preview must show exactly what will be saved
+    const annotations = [
+      ...form.annotations.filter(
+        (a) => a.key && a.value && !(form.description.trim() && a.key === 'description')
+      ),
+      ...(form.description.trim() ? [{ key: 'description', value: form.description.trim() }] : []),
+    ];
     let out = `- alert: "${esc(form.monitorName || '<monitor-name>')}"\n`;
     // The PromQL expression is the complete alert condition
     out += `  expr: "${esc(form.query || '<promql-expression>')}"\n`;
@@ -636,16 +651,26 @@ const RulePreviewSection = React.memo<{
     }
     if (annotations.length > 0) {
       out += `  annotations:\n`;
+      // Annotations lack the isDynamic flag — detect template syntax to
+      // single-quote like the server's js-yaml serialization does
       for (const a of annotations) {
-        out += `    "${esc(a.key)}": "${esc(a.value)}"\n`;
+        const value = /\{\{.*\}\}/.test(a.value) ? `'${a.value}'` : `"${esc(a.value)}"`;
+        out += `    "${esc(a.key)}": ${value}\n`;
       }
     }
     return out;
-  }, [form.monitorName, form.query, form.forDuration, form.labels, form.annotations]);
+  }, [
+    form.monitorName,
+    form.query,
+    form.forDuration,
+    form.labels,
+    form.annotations,
+    form.description,
+  ]);
 
   return (
     <EuiAccordion
-      id="prom-rule-preview"
+      id="cmm-rule-preview"
       buttonContent={
         <strong>
           {i18n.translate('observability.alerting.createMetricsMonitor.rulePreviewTitle', {
@@ -714,9 +739,13 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
   const [form, setForm] = useState<MetricsMonitorFormState>({
     monitorName: '',
     description: '',
-    namespace: 'default',
+    namespace: USER_RULES_NAMESPACE,
     groupName: '',
-    query: DEFAULT_PROMQL,
+    // Empty on purpose: the query must come from an explicit builder
+    // selection. A pre-seeded expression would be submittable while the
+    // builder renders empty (it cannot represent complex expressions),
+    // silently creating a rule for a metric the user never chose.
+    query: '',
     datasourceId: defaultDatasourceId,
     forDuration: '5m',
     evalInterval: '1m',
@@ -727,13 +756,12 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
   });
   const [showPreview, setShowPreview] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
-  const initialFormRef = useRef(form);
+  // JSON snapshot so ANY field edit (description, group, duration,
+  // datasource, label/annotation content) arms the discard-confirm modal —
+  // same approach as the CreateMonitor shell
+  const initialFormJson = useRef(JSON.stringify(form));
 
-  const isDirty =
-    form.monitorName !== '' ||
-    form.query !== initialFormRef.current.query ||
-    form.labels.length !== initialFormRef.current.labels.length ||
-    form.annotations.length !== initialFormRef.current.annotations.length;
+  const isDirty = JSON.stringify(form) !== initialFormJson.current;
 
   const handleClose = useCallback(() => {
     if (isDirty) {

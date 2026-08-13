@@ -166,7 +166,12 @@ export const PrometheusFormSection: React.FC<{
     }
     if (annotations.length > 0) {
       yaml += `    annotations:\n`;
-      for (const a of annotations) yaml += `      ${a.key}: "${a.value}"\n`;
+      // Annotations lack the isDynamic flag — detect template syntax to
+      // single-quote like the server's js-yaml serialization does
+      for (const a of annotations) {
+        const value = /\{\{.*\}\}/.test(a.value) ? `'${a.value}'` : `"${a.value}"`;
+        yaml += `      ${a.key}: ${value}\n`;
+      }
     }
     return yaml;
   }, [form, ruleGroupName]);

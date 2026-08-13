@@ -24,6 +24,14 @@ jest.mock('../promql_editor', () => ({
 jest.mock('../metric_browser', () => ({
   MetricBrowser: () => <div data-test-subj="metricBrowserMock" />,
 }));
+// Stub the shared builder with a button that emits a query, so tests can
+// simulate an explicit builder selection (the form seeds query: '' and the
+// Create button stays disabled until the builder produces one)
+jest.mock('../create_monitor/prom_query_builder', () => ({
+  PromQueryBuilder: ({ onQueryChange }: { onQueryChange: (q: string) => void }) => (
+    <button data-test-subj="mockBuilderSetQuery" onClick={() => onQueryChange('up{job="api"}')} />
+  ),
+}));
 
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
@@ -131,9 +139,11 @@ describe('CreateMetricsMonitor', () => {
       />
     );
 
-    // Fill in required fields: monitorName
+    // Fill in required fields: monitorName + an explicit builder selection
+    // (the form seeds query: '' — no invisible default expression)
     const nameInput = document.querySelector('input[aria-label="Rule name"]') as HTMLInputElement;
     fireEvent.change(nameInput, { target: { value: 'my-test-rule' } });
+    fireEvent.click(document.querySelector('[data-test-subj="mockBuilderSetQuery"]')!);
 
     // Click Create button
     const createBtn = document.querySelector(

@@ -46,9 +46,11 @@ const PREVIEW_CHART_OPTION: Record<string, unknown> = {
 export const QueryPreviewResults: React.FC<{
   /** The query being previewed — shown as the series caption. */
   query: string;
-}> = ({ query }) => (
+  /** Unique accordion id — pass a distinct one per mount point. */
+  id?: string;
+}> = ({ query, id = 'prom-preview-results' }) => (
   <EuiAccordion
-    id="prom-preview-results"
+    id={id}
     buttonContent={
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
