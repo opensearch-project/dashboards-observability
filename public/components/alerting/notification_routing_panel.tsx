@@ -20,9 +20,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -30,7 +28,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { classifyRoutingStatus } from '../../../common/error';
 import { Datasource } from '../../../common/types/alerting';
 import { AlertmanagerAdminService } from './query_services/alertmanager_admin_service';
 
@@ -68,13 +65,6 @@ interface AlertmanagerConfig {
   available: boolean;
   error?: string;
   configParseError?: string;
-  cluster?: {
-    status: string;
-    peers: Array<{ name: string; address: string }>;
-    peerCount: number;
-  };
-  uptime?: string;
-  versionInfo?: Record<string, string>;
   config?: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Alertmanager global config has dynamic shape
     global?: Record<string, any>;
@@ -126,17 +116,6 @@ function getMatchers(route: AlertmanagerRoute): string[] {
     for (const [k, v] of Object.entries(route.match_re)) result.push(`${k}=~"${v}"`);
   }
   return result;
-}
-
-function formatUptime(isoStr?: string): string {
-  if (!isoStr) return '—';
-  const start = new Date(isoStr).getTime();
-  const diff = Date.now() - start;
-  const hours = Math.floor(diff / 3600000);
-  const days = Math.floor(hours / 24);
-  if (days > 0) return `${days}d ${hours % 24}h`;
-  if (hours > 0) return `${hours}h`;
-  return `${Math.floor(diff / 60000)}m`;
 }
 
 const INTEGRATION_COLORS: Record<string, string> = {
@@ -348,12 +327,6 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   const routes = flattenRoutes(config.config?.route);
   const receivers = config.config?.receivers || [];
   const inhibitRules = config.config?.inhibitRules || [];
-  const cluster = config.cluster;
-  const version = config.versionInfo?.version || '—';
-  // Map the raw cluster status through the shared error layer. Null when the
-  // backend reports a healthy 'ready'; otherwise a PARTIAL_STATE classification
-  // whose title replaces the previously-literal "unknown".
-  const routingStatus = classifyRoutingStatus(cluster?.status);
 
   // -----------------------------------------------------------------------
   // Route tree table
@@ -571,65 +544,27 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       </EuiCallOut>
       <EuiSpacer size="s" />
 
-      {/* Cluster status bar */}
-      <EuiPanel paddingSize="s" hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiHealth color={cluster?.status === 'ready' ? 'success' : 'warning'}>
-              {/* 'ready' is healthy; any other/empty/unknown status is surfaced
-                  through the shared error layer as a partial-state label
-                  ("Routing status unavailable") instead of the literal word. */}
-              {routingStatus ? routingStatus.title : cluster?.status}
-            </EuiHealth>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              <FormattedMessage
-                id="observability.alerting.notificationRoutingPanel.alertmanagerVersion"
-                defaultMessage="{label} v{version}"
-                values={{ label: <strong>Alertmanager</strong>, version }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="observability.alerting.notificationRoutingPanel.uptime"
-                defaultMessage="Uptime: {uptime}"
-                values={{ uptime: formatUptime(config.uptime) }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="observability.alerting.notificationRoutingPanel.peers"
-                defaultMessage="Peers: {count}"
-                values={{ count: cluster?.peerCount ?? 0 }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow />
-          {datasourceSelector && <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>}
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate(
-                'observability.alerting.notificationRoutingPanel.refreshTooltip',
+      {/* Datasource selector + refresh toolbar */}
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        {datasourceSelector && <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate(
+              'observability.alerting.notificationRoutingPanel.refreshTooltip',
+              { defaultMessage: 'Refresh' }
+            )}
+          >
+            <EuiButtonIcon
+              iconType="refresh"
+              aria-label={i18n.translate(
+                'observability.alerting.notificationRoutingPanel.refreshAriaLabel',
                 { defaultMessage: 'Refresh' }
               )}
-            >
-              <EuiButtonIcon
-                iconType="refresh"
-                aria-label={i18n.translate(
-                  'observability.alerting.notificationRoutingPanel.refreshAriaLabel',
-                  { defaultMessage: 'Refresh' }
-                )}
-                onClick={fetchConfig}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+              onClick={fetchConfig}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="s" />
 
