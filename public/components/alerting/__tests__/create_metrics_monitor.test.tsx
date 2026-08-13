@@ -95,8 +95,6 @@ describe('CreateMetricsMonitor', () => {
     expect(body).toMatchObject({
       name: 'my-test-rule',
       query: expect.any(String),
-      operator: '>',
-      threshold: expect.any(Number),
       forDuration: expect.any(String),
       evaluationInterval: expect.any(String),
       enabled: true,
@@ -104,6 +102,10 @@ describe('CreateMetricsMonitor', () => {
     });
     expect(body).toHaveProperty('labels');
     expect(body).toHaveProperty('annotations');
+    // The PromQL expression is the complete alert condition — no separate
+    // operator/threshold is sent (Trigger condition section was removed)
+    expect(body).not.toHaveProperty('operator');
+    expect(body).not.toHaveProperty('threshold');
 
     // Should call onSave and show success toast
     expect(onSave).toHaveBeenCalled();

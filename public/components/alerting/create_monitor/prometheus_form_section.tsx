@@ -27,6 +27,7 @@ import {
   EuiAccordion,
   EuiBadge,
   EuiBetaBadge,
+  EuiButton,
   EuiCallOut,
   EuiComboBox,
   EuiFieldText,
@@ -46,6 +47,7 @@ import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../../framework/core_refs';
 import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
 import { AlertingPromResourcesService } from '../query_services/alerting_prom_resources_service';
+import { QueryPreviewResults } from '../query_preview_results';
 import { PromQueryBuilder } from './prom_query_builder';
 import { DURATION_OPTIONS, PrometheusFormState } from './create_monitor_types';
 
@@ -86,6 +88,7 @@ export const PrometheusFormSection: React.FC<{
     () => form.labels.find((l) => l.key === '_ruleGroup')?.value || ''
   );
   const [ruleGroupOptions, setRuleGroupOptions] = useState<Array<{ label: string }>>([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Use a ref for form.labels to avoid circular dependency:
   // handleRuleGroupChange → onUpdate('labels') → parent re-renders → new form.labels → new callback
@@ -330,29 +333,48 @@ export const PrometheusFormSection: React.FC<{
           initialIsOpen={true}
           paddingSize="none"
           extraAction={
-            /* Mirrors the logs flyout's "Build query in logs →" round-trip:
-               author/validate the query against live data in the Metrics
-               app, then return via its Create alert rule action. Same-tab
-               navigation — unsaved form state here is lost. */
-            <EuiToolTip
-              position="left"
-              content={i18n.translate(
-                'observability.alerting.prometheusFormSection.openInMetricsTooltip',
-                {
-                  defaultMessage:
-                    'Build and validate your query against live data in metrics, then click Create alert rule to come back here pre-filled. Unsaved changes will be lost.',
-                }
-              )}
-            >
-              <EuiLink
-                onClick={() => coreRefs?.application?.navigateToApp('explore/metrics')}
-                data-test-subj="alertManagerOpenInMetricsLink"
-              >
-                {i18n.translate('observability.alerting.prometheusFormSection.openInMetrics', {
-                  defaultMessage: 'Build query in metrics →',
-                })}
-              </EuiLink>
-            </EuiToolTip>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {/* Mirrors the logs flyout's "Build query in logs →" round-trip:
+                    author/validate the query against live data in the Metrics
+                    app, then return via its Create alert rule action. Same-tab
+                    navigation — unsaved form state here is lost. */}
+                <EuiToolTip
+                  position="left"
+                  content={i18n.translate(
+                    'observability.alerting.prometheusFormSection.openInMetricsTooltip',
+                    {
+                      defaultMessage:
+                        'Build and validate your query against live data in metrics, then click Create alert rule to come back here pre-filled. Unsaved changes will be lost.',
+                    }
+                  )}
+                >
+                  <EuiLink
+                    onClick={() => coreRefs?.application?.navigateToApp('explore/metrics')}
+                    data-test-subj="alertManagerOpenInMetricsLink"
+                  >
+                    {i18n.translate('observability.alerting.prometheusFormSection.openInMetrics', {
+                      defaultMessage: 'Build query in metrics →',
+                    })}
+                  </EuiLink>
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  onClick={() => setShowPreview(true)}
+                  data-test-subj="prometheusRunPreviewButton"
+                  aria-label={i18n.translate(
+                    'observability.alerting.prometheusFormSection.runPreviewAriaLabel',
+                    { defaultMessage: 'Run preview' }
+                  )}
+                >
+                  {i18n.translate('observability.alerting.prometheusFormSection.runPreviewButton', {
+                    defaultMessage: 'Run preview',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
         >
           <EuiSpacer size="s" />
@@ -423,6 +445,13 @@ export const PrometheusFormSection: React.FC<{
               data-test-subj="prometheusForDurationSelect"
             />
           </EuiFormRow>
+
+          {showPreview && (
+            <>
+              <EuiSpacer size="m" />
+              <QueryPreviewResults query={form.query} />
+            </>
+          )}
         </EuiAccordion>
       </EuiPanel>
 

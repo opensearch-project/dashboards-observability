@@ -41,9 +41,8 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { FormattedMessage } from '@osd/i18n/react';
-import { EchartsRender } from './echarts_render';
 import { PromQueryBuilder } from './create_monitor/prom_query_builder';
+import { QueryPreviewResults } from './query_preview_results';
 
 // ============================================================================
 // Types
@@ -67,14 +66,10 @@ export interface MetricsMonitorFormState {
   groupName: string;
   query: string;
   datasourceId: string;
-  // Trigger condition
-  operator: '>' | '>=' | '<' | '<=' | '==' | '!=';
-  thresholdValue: number;
+  /** The rule's `for:` clause — pending window before the alert fires. */
   forDuration: string;
-  // Evaluation settings
+  /** Group-level evaluation cadence sent with the payload (not per-rule UI). */
   evalInterval: string;
-  pendingPeriod: string;
-  firingPeriod: string;
   // Labels & annotations
   labels: LabelEntry[];
   annotations: AnnotationEntry[];
@@ -98,45 +93,6 @@ export interface CreateMetricsMonitorProps {
 // ============================================================================
 // Constants
 // ============================================================================
-
-const OPERATOR_OPTIONS = [
-  {
-    value: '>',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorGt', {
-      defaultMessage: '> (greater than)',
-    }),
-  },
-  {
-    value: '>=',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorGte', {
-      defaultMessage: '>= (greater or equal)',
-    }),
-  },
-  {
-    value: '<',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorLt', {
-      defaultMessage: '< (less than)',
-    }),
-  },
-  {
-    value: '<=',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorLte', {
-      defaultMessage: '<= (less or equal)',
-    }),
-  },
-  {
-    value: '==',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorEq', {
-      defaultMessage: '== (equal)',
-    }),
-  },
-  {
-    value: '!=',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorNeq', {
-      defaultMessage: '!= (not equal)',
-    }),
-  },
-];
 
 const FOR_DURATION_OPTIONS = [
   {
@@ -177,152 +133,7 @@ const FOR_DURATION_OPTIONS = [
   },
 ];
 
-const FIRING_PERIOD_OPTIONS = [
-  {
-    value: '0s',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firingNone', {
-      defaultMessage: 'None (resolve immediately)',
-    }),
-  },
-  {
-    value: '30s',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing30s', {
-      defaultMessage: '30 seconds',
-    }),
-  },
-  {
-    value: '1m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing1m', {
-      defaultMessage: '1 minute',
-    }),
-  },
-  {
-    value: '5m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing5m', {
-      defaultMessage: '5 minutes',
-    }),
-  },
-  {
-    value: '10m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing10m', {
-      defaultMessage: '10 minutes',
-    }),
-  },
-  {
-    value: '15m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing15m', {
-      defaultMessage: '15 minutes',
-    }),
-  },
-  {
-    value: '30m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing30m', {
-      defaultMessage: '30 minutes',
-    }),
-  },
-  {
-    value: '1h',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing1h', {
-      defaultMessage: '1 hour',
-    }),
-  },
-];
-
-const EVAL_INTERVAL_OPTIONS = [
-  {
-    value: '30s',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval30s', {
-      defaultMessage: '30 seconds',
-    }),
-  },
-  {
-    value: '1m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval1m', {
-      defaultMessage: '1 minute',
-    }),
-  },
-  {
-    value: '5m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval5m', {
-      defaultMessage: '5 minutes',
-    }),
-  },
-  {
-    value: '10m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval10m', {
-      defaultMessage: '10 minutes',
-    }),
-  },
-  {
-    value: '15m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval15m', {
-      defaultMessage: '15 minutes',
-    }),
-  },
-  {
-    value: '30m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval30m', {
-      defaultMessage: '30 minutes',
-    }),
-  },
-  {
-    value: '1h',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval1h', {
-      defaultMessage: '1 hour',
-    }),
-  },
-];
-
 const DEFAULT_PROMQL = 'rate(http_requests_total{status=~"5.."}[5m])';
-
-// Mock preview data — line chart
-const PREVIEW_TIMESTAMPS = ['04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '17:00'];
-const PREVIEW_VALUES = [0.02, 0.03, 0.01, 0.06, 0.04, 0.07, 0.05, 0.08];
-
-// ============================================================================
-// Chart helpers
-// ============================================================================
-
-const PREVIEW_CHART_OPTION: Record<string, unknown> = {
-  grid: { left: 48, right: 16, top: 16, bottom: 32 },
-  tooltip: { trigger: 'axis' },
-  xAxis: { type: 'category', data: PREVIEW_TIMESTAMPS },
-  yAxis: { type: 'value' },
-  series: [
-    {
-      type: 'line',
-      data: PREVIEW_VALUES,
-      smooth: true,
-      itemStyle: { color: '#006BB4' },
-      areaStyle: { color: 'rgba(0,107,180,0.1)' },
-    },
-  ],
-};
-
-function buildThresholdChartOption(thresholdValue: number): Record<string, unknown> {
-  return {
-    grid: { left: 48, right: 16, top: 16, bottom: 32 },
-    tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: PREVIEW_TIMESTAMPS },
-    yAxis: { type: 'value' },
-    series: [
-      {
-        type: 'line',
-        data: PREVIEW_VALUES,
-        smooth: true,
-        itemStyle: { color: '#006BB4' },
-        areaStyle: { color: 'rgba(0,107,180,0.1)' },
-        markLine: {
-          silent: true,
-          symbol: 'none',
-          lineStyle: { type: 'dashed', color: '#BD271E', width: 2 },
-          data: [{ yAxis: thresholdValue }],
-          label: { formatter: `Threshold: ${thresholdValue}`, position: 'insideEndTop' },
-        },
-      },
-    ],
-  };
-}
 
 // ============================================================================
 // Sub-components
@@ -569,112 +380,23 @@ const QuerySection = React.memo<{
           query={form.query}
           onQueryChange={(q) => onUpdate({ query: q })}
         />
-      </EuiPanel>
 
-      {/* Preview Results */}
-      {showPreview && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiAccordion
-            id="prom-preview-results"
-            buttonContent={
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <strong>
-                    <FormattedMessage
-                      id="observability.alerting.createMetricsMonitor.resultsTitle"
-                      defaultMessage="Results ({count})"
-                      values={{ count: PREVIEW_VALUES.length }}
-                    />
-                  </strong>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            initialIsOpen
-            paddingSize="s"
-          >
-            <EuiCallOut size="s" color="warning" iconType="iInCircle">
-              <EuiText size="xs">
-                {i18n.translate('observability.alerting.createMetricsMonitor.sampleDataCallout', {
-                  defaultMessage: 'Sample data — run the rule to see real results',
-                })}
-              </EuiText>
-            </EuiCallOut>
-            <EuiSpacer size="s" />
-            <EuiText size="xs" color="subdued">
-              http_requests_total
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EchartsRender spec={PREVIEW_CHART_OPTION} height={200} />
-          </EuiAccordion>
-        </>
-      )}
-    </EuiAccordion>
-  );
-});
+        <EuiSpacer size="m" />
 
-/** Section 3: Trigger Condition */
-const TriggerConditionSection = React.memo<{
-  form: MetricsMonitorFormState;
-  onUpdate: (patch: Partial<MetricsMonitorFormState>) => void;
-}>(({ form, onUpdate }) => (
-  <EuiAccordion
-    id="prom-trigger-condition"
-    buttonContent={
-      <strong>
-        {i18n.translate('observability.alerting.createMetricsMonitor.triggerConditionTitle', {
-          defaultMessage: 'Trigger condition',
-        })}
-      </strong>
-    }
-    initialIsOpen
-    paddingSize="m"
-  >
-    <EuiFlexGroup gutterSize="s" wrap>
-      <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.operatorLabel', {
-            defaultMessage: 'Operator',
-          })}
-          display="rowCompressed"
-        >
-          <EuiSelect
-            options={OPERATOR_OPTIONS}
-            value={form.operator}
-            onChange={(e) =>
-              onUpdate({ operator: e.target.value as MetricsMonitorFormState['operator'] })
-            }
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.thresholdOperatorAriaLabel',
-              { defaultMessage: 'Threshold operator' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 100 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.valueLabel', {
-            defaultMessage: 'Value',
-          })}
-          display="rowCompressed"
-        >
-          <EuiFieldNumber
-            value={form.thresholdValue}
-            onChange={(e) => onUpdate({ thresholdValue: parseFloat(e.target.value) || 0 })}
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.thresholdValueAriaLabel',
-              { defaultMessage: 'Threshold value' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 160 }}>
+        {/* For duration — the rule's `for:` clause. Kept per-rule (unlike
+            the group-level evaluation interval): the condition must hold
+            continuously for this long before the alert fires. */}
         <EuiFormRow
           label={i18n.translate('observability.alerting.createMetricsMonitor.forDurationLabel', {
             defaultMessage: 'For duration',
           })}
+          helpText={i18n.translate(
+            'observability.alerting.createMetricsMonitor.forDurationHelpText',
+            {
+              defaultMessage:
+                'How long the condition must stay true before the alert fires. The alert is "pending" during this window.',
+            }
+          )}
           display="rowCompressed"
         >
           <EuiSelect
@@ -686,147 +408,21 @@ const TriggerConditionSection = React.memo<{
               'observability.alerting.createMetricsMonitor.forDurationAriaLabel',
               { defaultMessage: 'For duration' }
             )}
+            data-test-subj="metricsMonitorForDurationSelect"
           />
         </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiPanel>
 
-    <EuiSpacer size="s" />
-
-    {/* Condition summary callout */}
-    <EuiCallOut size="s" color="primary" iconType="iInCircle">
-      <EuiText size="xs">
-        <FormattedMessage
-          id="observability.alerting.createMetricsMonitor.alertFiresMessage"
-          defaultMessage="Alert fires when: {expression} for {forDuration}"
-          values={{
-            expression: (
-              <code>
-                {form.query || '<query>'} {form.operator} {form.thresholdValue}
-              </code>
-            ),
-            forDuration: form.forDuration,
-          }}
-        />
-      </EuiText>
-    </EuiCallOut>
-
-    <EuiSpacer size="m" />
-
-    {/* Threshold visualization */}
-    <EuiCallOut size="s" color="warning" iconType="iInCircle">
-      <EuiText size="xs">
-        {i18n.translate('observability.alerting.createMetricsMonitor.thresholdSampleDataCallout', {
-          defaultMessage: 'Sample data — run the rule to see real results',
-        })}
-      </EuiText>
-    </EuiCallOut>
-    <EuiSpacer size="xs" />
-    <EuiText size="xs">
-      <strong>
-        {i18n.translate('observability.alerting.createMetricsMonitor.thresholdResultsLabel', {
-          defaultMessage: 'Results',
-        })}
-      </strong>
-    </EuiText>
-    <EuiText size="xs" color="subdued">
-      http_requests_total
-    </EuiText>
-    <EuiSpacer size="xs" />
-    <EchartsRender spec={buildThresholdChartOption(form.thresholdValue)} height={200} />
-  </EuiAccordion>
-));
-
-/** Section 4: Evaluation Settings */
-const EvaluationSettingsSection = React.memo<{
-  form: MetricsMonitorFormState;
-  onUpdate: (patch: Partial<MetricsMonitorFormState>) => void;
-}>(({ form, onUpdate }) => (
-  <EuiAccordion
-    id="prom-evaluation-settings"
-    buttonContent={
-      <strong>
-        {i18n.translate('observability.alerting.createMetricsMonitor.evaluationSettingsTitle', {
-          defaultMessage: 'Evaluation settings',
-        })}
-      </strong>
-    }
-    initialIsOpen={false}
-    paddingSize="m"
-  >
-    <EuiFlexGroup gutterSize="s" wrap>
-      <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.evalIntervalLabel', {
-            defaultMessage: 'Eval interval',
-          })}
-          helpText={i18n.translate(
-            'observability.alerting.createMetricsMonitor.evalIntervalHelpText',
-            { defaultMessage: 'How often evaluated' }
-          )}
-          display="rowCompressed"
-        >
-          <EuiSelect
-            options={EVAL_INTERVAL_OPTIONS}
-            value={form.evalInterval}
-            onChange={(e) => onUpdate({ evalInterval: e.target.value })}
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.evaluationIntervalAriaLabel',
-              { defaultMessage: 'Evaluation interval' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.pendingPeriodLabel', {
-            defaultMessage: 'Pending period',
-          })}
-          helpText={i18n.translate(
-            'observability.alerting.createMetricsMonitor.pendingPeriodHelpText',
-            { defaultMessage: 'Before firing' }
-          )}
-          display="rowCompressed"
-        >
-          <EuiSelect
-            options={EVAL_INTERVAL_OPTIONS}
-            value={form.pendingPeriod}
-            onChange={(e) => onUpdate({ pendingPeriod: e.target.value })}
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.pendingPeriodAriaLabel',
-              { defaultMessage: 'Pending period' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.firingPeriodLabel', {
-            defaultMessage: 'Firing period',
-          })}
-          helpText={i18n.translate(
-            'observability.alerting.createMetricsMonitor.firingPeriodHelpText',
-            { defaultMessage: 'Keep firing after condition clears' }
-          )}
-          display="rowCompressed"
-        >
-          <EuiSelect
-            options={FIRING_PERIOD_OPTIONS}
-            value={form.firingPeriod}
-            onChange={(e) => onUpdate({ firingPeriod: e.target.value })}
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.firingPeriodAriaLabel',
-              { defaultMessage: 'Firing period' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiAccordion>
-));
+      {/* Preview Results */}
+      {showPreview && (
+        <>
+          <EuiSpacer size="m" />
+          <QueryPreviewResults query={form.query} />
+        </>
+      )}
+    </EuiAccordion>
+  );
+});
 
 /** Section 5: Labels */
 const LabelsSection = React.memo<{
@@ -1071,9 +667,8 @@ const RulePreviewSection = React.memo<{
     const labels = form.labels.filter((l) => l.key && l.value);
     const annotations = form.annotations.filter((a) => a.key && a.value);
     let out = `- alert: "${esc(form.monitorName || '<monitor-name>')}"\n`;
-    out += `  expr: "${esc(
-      `${form.query || '<promql-expression>'} ${form.operator} ${form.thresholdValue}`
-    )}"\n`;
+    // The PromQL expression is the complete alert condition
+    out += `  expr: "${esc(form.query || '<promql-expression>')}"\n`;
     out += `  for: ${form.forDuration}\n`;
     if (labels.length > 0) {
       out += `  labels:\n`;
@@ -1088,15 +683,7 @@ const RulePreviewSection = React.memo<{
       }
     }
     return out;
-  }, [
-    form.monitorName,
-    form.query,
-    form.operator,
-    form.thresholdValue,
-    form.forDuration,
-    form.labels,
-    form.annotations,
-  ]);
+  }, [form.monitorName, form.query, form.forDuration, form.labels, form.annotations]);
 
   return (
     <EuiAccordion
@@ -1166,12 +753,8 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
     groupName: '',
     query: DEFAULT_PROMQL,
     datasourceId: contextDatasourceId || '',
-    operator: '>',
-    thresholdValue: 0.05,
     forDuration: '5m',
     evalInterval: '1m',
-    pendingPeriod: '5m',
-    firingPeriod: '0s',
     labels: [{ key: 'severity', value: 'critical', isDynamic: false }],
     annotations: [],
   });
@@ -1227,11 +810,11 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
 
     setIsSaving(true);
     try {
+      // The PromQL expression is the complete alert condition — no
+      // operator/threshold appended server-side.
       const payload = {
         name: form.monitorName,
         query: form.query,
-        operator: form.operator,
-        threshold: form.thresholdValue,
         forDuration: form.forDuration,
         evaluationInterval: form.evalInterval,
         labels: Object.fromEntries(
@@ -1299,15 +882,13 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
         />
         <EuiHorizontalRule margin="l" />
 
-        {/* Section 3: Trigger Condition */}
-        <TriggerConditionSection form={form} onUpdate={updateForm} />
-        <EuiHorizontalRule margin="l" />
+        {/* Trigger condition and per-rule evaluation settings are
+            intentionally absent: the PromQL expression is the complete
+            alert condition, and evaluation cadence is a rule-group-level
+            concern in managed Prometheus. The per-rule `for:` duration
+            lives in the Query section. */}
 
-        {/* Section 4: Evaluation Settings */}
-        <EvaluationSettingsSection form={form} onUpdate={updateForm} />
-        <EuiHorizontalRule margin="l" />
-
-        {/* Section 5: Labels */}
+        {/* Section 3: Labels */}
         <LabelsSection labels={form.labels} onUpdate={handleLabelsUpdate} />
         <EuiHorizontalRule margin="l" />
 

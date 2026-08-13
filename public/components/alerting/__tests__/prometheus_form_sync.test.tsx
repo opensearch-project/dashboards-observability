@@ -26,6 +26,9 @@ jest.mock('../monitor_form_components', () => ({
   LabelEditor: jest.fn(() => <div data-test-subj="label-editor" />),
   AnnotationEditor: () => <div data-test-subj="annotation-editor" />,
 }));
+jest.mock('../echarts_render', () => ({
+  EchartsRender: () => <div data-test-subj="echarts-render" />,
+}));
 jest.mock('../query_services/alerting_prom_resources_service', () => ({
   AlertingPromResourcesService: jest.fn().mockImplementation(() => ({
     listMetricNames: jest.fn().mockResolvedValue({ metrics: ['up', 'http_requests_total'] }),
@@ -110,6 +113,25 @@ describe('PrometheusFormSection — simplified layout', () => {
       'threshold',
       expect.objectContaining({ forDuration: '10m' })
     );
+  });
+
+  it('shows preview results after clicking Run preview', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    // No results until requested
+    expect(screen.queryByTestId('echarts-render')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('prometheusRunPreviewButton'));
+
+    expect(screen.getByTestId('echarts-render')).toBeInTheDocument();
+    expect(screen.getByText('Sample data — run the rule to see real results')).toBeInTheDocument();
   });
 
   it('renders the "Build query in metrics" link in the query panel header', () => {
