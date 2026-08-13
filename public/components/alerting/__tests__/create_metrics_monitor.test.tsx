@@ -96,6 +96,25 @@ describe('CreateMetricsMonitor', () => {
     expect(createBtn.disabled).toBe(true);
   });
 
+  it('shows the "Build query in metrics" link only when requested (Alert Manager)', () => {
+    const { unmount } = render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        showBuildInMetricsLink
+      />
+    );
+    expect(
+      document.querySelector('[data-test-subj="alertManagerOpenInMetricsLink"]')
+    ).not.toBeNull();
+    unmount();
+
+    // Metrics Explore page context: link must be absent (circular hop)
+    render(<CreateMetricsMonitor onCancel={jest.fn()} onSave={jest.fn()} datasourceId="prom-1" />);
+    expect(document.querySelector('[data-test-subj="alertManagerOpenInMetricsLink"]')).toBeNull();
+  });
+
   it('POSTs the correct payload shape on save', async () => {
     const mockPost = jest.fn().mockResolvedValue({});
     const onSave = jest.fn();

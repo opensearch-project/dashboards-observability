@@ -1277,6 +1277,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onSave={handleMetricsRuleSaved}
           datasources={datasources.filter((d) => d.type === 'prometheus')}
           isNameTaken={isNameTakenForCreate}
+          showBuildInMetricsLink
           http={coreRefs.http}
           addToast={(title, color) => addToast(title, color)}
         />
