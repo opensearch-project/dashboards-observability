@@ -76,6 +76,11 @@ export const dataSourceFilterFn = (dataSource: SavedObject<DataSourceAttributes>
   );
 };
 
+export const isVersionAtLeast = (version: string, minimumVersion: string): boolean => {
+  const coerced = semver.coerce(version);
+  return coerced ? semver.gte(coerced, minimumVersion) : false;
+};
+
 // Engine types this plugin declines via its manifest's `unsupportedOSDataSourceEngineTypes`.
 // Driven by the manifest declaration so changes flow from one source of truth.
 const UNSUPPORTED_ENGINE_TYPES: readonly string[] =

@@ -232,12 +232,7 @@ export interface DatasourceService {
 
 export type UnifiedAlertSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 export type UnifiedAlertState =
-  | 'active'
-  | 'pending'
-  | 'acknowledged'
-  | 'silenced'
-  | 'resolved'
-  | 'error';
+  'active' | 'pending' | 'acknowledged' | 'silenced' | 'resolved' | 'error';
 export type UnifiedAlertKind = 'alert' | 'anomaly';
 
 /** Lightweight alert representation for list views and tables. */

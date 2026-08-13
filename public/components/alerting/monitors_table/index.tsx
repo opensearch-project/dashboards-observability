@@ -19,8 +19,8 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiResizableContainer } from '@elastic/eui';
-import semver from 'semver';
 import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alerting';
+import { isVersionAtLeast } from '../../../../common/utils/shared';
 import { coreRefs } from '../../../framework/core_refs';
 import { useFacetCollapse } from '../facet_filter_panel';
 import { BASE_PPL_ALERTING_SUPPORTED_VERSION } from '../shared_constants';
@@ -231,8 +231,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       if (d.engineType === 'OpenSearch Serverless') return true;
       if (isAnalyticEngineEnabled(d.id)) return true;
       if (!d.version) return false;
-      const coerced = semver.coerce(d.version);
-      return coerced ? semver.gte(coerced, BASE_PPL_ALERTING_SUPPORTED_VERSION) : false;
+      return isVersionAtLeast(d.version, BASE_PPL_ALERTING_SUPPORTED_VERSION);
     });
     return !hasSupportedDs;
   }, [selectedDatasources, isAnalyticEngineEnabled]);

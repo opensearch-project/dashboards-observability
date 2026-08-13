@@ -182,10 +182,8 @@ export function useDatasources(): UseDatasourcesResult {
     };
   }, [refreshToken]);
 
-  return useMemo(() => ({ datasources, isLoading, error, refresh }), [
-    datasources,
-    isLoading,
-    error,
-    refresh,
-  ]);
+  return useMemo(
+    () => ({ datasources, isLoading, error, refresh }),
+    [datasources, isLoading, error, refresh]
+  );
 }
