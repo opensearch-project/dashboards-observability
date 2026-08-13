@@ -52,7 +52,7 @@ const sampleRule = (overrides = {}) => ({
 // display-and-interaction ones the component currently accepts.
 const defaultProps = {
   rules: [sampleRule()],
-  datasources: [{ id: 'ds-1', name: 'prom1', type: 'prometheus' }] as unknown as Datasource[],
+  datasources: ([{ id: 'ds-1', name: 'prom1', type: 'prometheus' }] as unknown) as Datasource[],
   loading: false,
   onDelete: jest.fn(),
   selectedDsIds: ['ds-1'],
@@ -175,7 +175,9 @@ describe('MonitorsTable', () => {
     render(
       <MonitorsTable
         {...defaultProps}
-        datasources={[{ id: 'os-1', name: 'local', type: 'opensearch' }] as unknown as Datasource[]}
+        datasources={
+          ([{ id: 'os-1', name: 'local', type: 'opensearch' }] as unknown) as Datasource[]
+        }
         selectedDsIds={['os-1']}
         onCreateMonitor={onCreateMonitor}
       />
@@ -196,15 +198,16 @@ describe('MonitorsTable', () => {
       <MonitorsTable
         {...defaultProps}
         datasources={
-          [
+          ([
             {
               id: 'os-1',
               name: 'old-os',
               type: 'opensearch',
               mdsId: 'old-os-mds',
+              engineType: 'OpenSearch',
               version: '3.4.0',
             },
-          ] as unknown as Datasource[]
+          ] as unknown) as Datasource[]
         }
         selectedDsIds={['os-1']}
         onCreateMonitor={onCreateMonitor}
@@ -224,20 +227,50 @@ describe('MonitorsTable', () => {
     expect(onCreateMonitor).toHaveBeenCalledWith('forecaster');
   });
 
+  it('disables detector and forecaster creation for an AOSS datasource', () => {
+    const onCreateMonitor = jest.fn();
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        datasources={
+          [
+            {
+              id: 'aoss-1',
+              name: 'serverless',
+              type: 'opensearch',
+              mdsId: 'aoss-1',
+              engineType: 'OpenSearch Serverless',
+            },
+          ] as Datasource[]
+        }
+        selectedDsIds={['aoss-1']}
+        onCreateMonitor={onCreateMonitor}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    expect(
+      screen.getByLabelText('Create anomaly detection rule').closest('.euiListGroupItem')
+    ).toHaveClass('euiListGroupItem-isDisabled');
+    expect(
+      screen.getByLabelText('Create forecasting rule').closest('.euiListGroupItem')
+    ).toHaveClass('euiListGroupItem-isDisabled');
+  });
+
   it('enables metrics creation only when a selected datasource is Prometheus', () => {
     const onCreateMonitor = jest.fn();
     const { unmount } = render(
       <MonitorsTable
         {...defaultProps}
         datasources={
-          [
+          ([
             {
               id: 'os-1',
               name: 'OpenSearch',
               type: 'opensearch',
               version: '3.8.0',
             },
-          ] as unknown as Datasource[]
+          ] as unknown) as Datasource[]
         }
         selectedDsIds={['os-1']}
         onCreateMonitor={onCreateMonitor}

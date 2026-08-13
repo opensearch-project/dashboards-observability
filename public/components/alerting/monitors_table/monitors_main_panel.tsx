@@ -316,7 +316,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           'observability.alerting.monitorsTable.mainPanel.detectorDisabledTooltip',
                           {
                             defaultMessage:
-                              'Anomaly detection rules require an OpenSearch datasource. Select one to enable.',
+                              'Anomaly detection rules require a standard OpenSearch datasource. OpenSearch Serverless is not supported.',
                           }
                         )}
                       >
@@ -363,7 +363,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           'observability.alerting.monitorsTable.mainPanel.forecasterDisabledTooltip',
                           {
                             defaultMessage:
-                              'Forecasting rules require an OpenSearch datasource. Select one to enable.',
+                              'Forecasting rules require a standard OpenSearch datasource. OpenSearch Serverless is not supported.',
                           }
                         )}
                       >

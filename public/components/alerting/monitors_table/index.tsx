@@ -23,7 +23,10 @@ import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alertin
 import { isVersionAtLeast } from '../../../../common/utils/shared';
 import { coreRefs } from '../../../framework/core_refs';
 import { useFacetCollapse } from '../facet_filter_panel';
-import { BASE_PPL_ALERTING_SUPPORTED_VERSION } from '../shared_constants';
+import {
+  BASE_PPL_ALERTING_SUPPORTED_VERSION,
+  isStandardOpenSearchDatasource,
+} from '../shared_constants';
 import { buildTableColumns, DEFAULT_VISIBLE } from './monitors_table_columns';
 import {
   buildSuggestions,
@@ -238,7 +241,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   const metricsCreateDisabled = !selectedDatasources.some((d) => d.type === 'prometheus');
 
-  const adCreateDisabled = !selectedDatasources.some((d) => d.type === 'opensearch');
+  const adCreateDisabled = !selectedDatasources.some(isStandardOpenSearchDatasource);
 
   // Build selectable datasource entries for the filter facet — alpha by name
   const datasourceEntries = useMemo(

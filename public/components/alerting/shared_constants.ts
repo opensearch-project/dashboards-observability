@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import type { MonitorStatus, UnifiedRuleSummary } from '../../../common/types/alerting';
+import type { Datasource, MonitorStatus, UnifiedRuleSummary } from '../../../common/types/alerting';
 
 /**
  * Shared color maps, formatting utilities, and style constants
@@ -115,6 +115,14 @@ export const TYPE_LABELS: Record<string, string> = {
 };
 
 export const BASE_PPL_ALERTING_SUPPORTED_VERSION = '3.5.0';
+
+/**
+ * AD and Forecasting creation only support standard OpenSearch data sources.
+ * The synthetic local cluster has no engine metadata and remains eligible.
+ */
+export const isStandardOpenSearchDatasource = (datasource: Datasource): boolean =>
+  datasource.type === 'opensearch' &&
+  (!datasource.engineType || datasource.engineType === 'OpenSearch');
 
 // ============================================================================
 // Anomaly detection / forecasting lifecycle helpers

@@ -7,9 +7,11 @@ import {
   buildDetectorRules,
   buildRulePayload,
   formFromAdResource,
+  getCreateAdRuleDatasources,
   shouldAutoStartCreatedRule,
   validateForm,
 } from '../create_ad_rule_flyout';
+import type { Datasource } from '../../../../common/types/alerting';
 
 const feature = {
   featureId: 'feature-1',
@@ -112,6 +114,57 @@ const existingDetector = {
 };
 
 describe('AD rule payload serialization', () => {
+  it('only offers standard OpenSearch datasources during creation', () => {
+    const datasources: Datasource[] = [
+      {
+        id: 'aos-1',
+        name: 'AOS',
+        type: 'opensearch',
+        url: '',
+        enabled: true,
+        mdsId: 'aos-1',
+        engineType: 'OpenSearch',
+      },
+      {
+        id: 'aoss-1',
+        name: 'AOSS',
+        type: 'opensearch',
+        url: '',
+        enabled: true,
+        mdsId: 'aoss-1',
+        engineType: 'OpenSearch Serverless',
+      },
+      {
+        id: 'prom-1',
+        name: 'Prometheus',
+        type: 'prometheus',
+        url: '',
+        enabled: true,
+      },
+      {
+        id: 'analytic-1',
+        name: 'Analytic Engine',
+        type: 'opensearch',
+        url: '',
+        enabled: true,
+        mdsId: 'analytic-1',
+        engineType: 'AnalyticEngine',
+      },
+      {
+        id: 'local-cluster',
+        name: 'Local Cluster',
+        type: 'opensearch',
+        url: 'local',
+        enabled: true,
+      },
+    ];
+
+    expect(getCreateAdRuleDatasources(datasources).map(({ id }) => id)).toEqual([
+      'aos-1',
+      'local-cluster',
+    ]);
+  });
+
   it('preserves unmodeled settings while emitting only canonical configuration keys', () => {
     const payload = buildRulePayload('detector', detectorForm, {
       existingResource: existingDetector,
