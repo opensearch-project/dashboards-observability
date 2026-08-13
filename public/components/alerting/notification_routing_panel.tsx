@@ -65,9 +65,6 @@ interface AlertmanagerConfig {
   available: boolean;
   error?: string;
   configParseError?: string;
-  cluster?: { status: string; peers: Array<{ name: string; address: string }>; peerCount: number };
-  uptime?: string;
-  versionInfo?: Record<string, string>;
   config?: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Alertmanager global config has dynamic shape
     global?: Record<string, any>;
