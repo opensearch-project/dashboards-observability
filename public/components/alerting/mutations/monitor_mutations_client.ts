@@ -12,6 +12,7 @@
  * Replaces the mutation surface of the deleted `alarms_client.ts`.
  */
 import { coreRefs } from '../../../framework/core_refs';
+import { withAdApiDataSource } from '../utils/ad_api_paths';
 
 export interface MonitorResponse {
   id: string;
@@ -28,6 +29,25 @@ export interface AcknowledgeAlertResponse {
   id: string;
   acknowledged: boolean;
 }
+
+export interface AdResourceActionResponse {
+  ok?: boolean;
+  response?: unknown;
+  error?: string;
+  message?: string;
+  id?: string;
+  deleted?: boolean;
+}
+
+const assertAdResourceActionSucceeded = (
+  response: AdResourceActionResponse | undefined,
+  fallbackMessage: string
+): AdResourceActionResponse => {
+  if (!response || response.ok === false) {
+    throw new Error(response?.error || response?.message || fallbackMessage);
+  }
+  return response;
+};
 
 export class MonitorMutationsClient {
   private requireHttp() {
@@ -79,6 +99,54 @@ export class MonitorMutationsClient {
       `/api/alerting/prometheus/${encodeURIComponent(dsId)}/rules/${encodeURIComponent(groupName)}`,
       ruleName ? { query: { ruleName } } : undefined
     )) as { success: boolean };
+  }
+
+  async deleteDetector(id: string, dsId: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/anomaly_detectors/detectors/${encodeURIComponent(id)}`;
+    const response = (await this.requireHttp().delete(
+      withAdApiDataSource(basePath, dsId)
+    )) as AdResourceActionResponse;
+    return assertAdResourceActionSucceeded(response, 'Failed to delete anomaly detector');
+  }
+
+  async startDetector(id: string, dsId: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/anomaly_detectors/detectors/${encodeURIComponent(id)}/start`;
+    const response = (await this.requireHttp().post(
+      withAdApiDataSource(basePath, dsId)
+    )) as AdResourceActionResponse;
+    return assertAdResourceActionSucceeded(response, 'Failed to start anomaly detector');
+  }
+
+  async stopDetector(id: string, dsId: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/anomaly_detectors/detectors/${encodeURIComponent(id)}/stop/false`;
+    const response = (await this.requireHttp().post(
+      withAdApiDataSource(basePath, dsId)
+    )) as AdResourceActionResponse;
+    return assertAdResourceActionSucceeded(response, 'Failed to stop anomaly detector');
+  }
+
+  async deleteForecaster(id: string, dsId: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/forecasting/forecasters/${encodeURIComponent(id)}`;
+    const response = (await this.requireHttp().delete(
+      withAdApiDataSource(basePath, dsId)
+    )) as AdResourceActionResponse;
+    return assertAdResourceActionSucceeded(response, 'Failed to delete forecaster');
+  }
+
+  async startForecaster(id: string, dsId: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/forecasting/forecasters/${encodeURIComponent(id)}/start`;
+    const response = (await this.requireHttp().post(
+      withAdApiDataSource(basePath, dsId)
+    )) as AdResourceActionResponse;
+    return assertAdResourceActionSucceeded(response, 'Failed to start forecaster');
+  }
+
+  async stopForecaster(id: string, dsId: string): Promise<AdResourceActionResponse> {
+    const basePath = `/api/forecasting/forecasters/${encodeURIComponent(id)}/stop`;
+    const response = (await this.requireHttp().post(
+      withAdApiDataSource(basePath, dsId)
+    )) as AdResourceActionResponse;
+    return assertAdResourceActionSucceeded(response, 'Failed to stop forecaster');
   }
 
   async acknowledgeAlert(

@@ -31,6 +31,11 @@ export interface ADDetector {
   id: string;
   name?: string;
   description?: string;
+  enabled?: boolean;
+  curState?: MonitorStatus;
+  cur_state?: MonitorStatus;
+  taskState?: MonitorStatus;
+  task_state?: MonitorStatus;
   detector_type?: string;
   indices?: string[];
   time_field?: string;
@@ -51,6 +56,11 @@ export interface ADForecaster {
   id: string;
   name?: string;
   description?: string;
+  enabled?: boolean;
+  curState?: MonitorStatus;
+  cur_state?: MonitorStatus;
+  taskState?: MonitorStatus;
+  task_state?: MonitorStatus;
   indices?: string[];
   time_field?: string;
   timeField?: string;
@@ -160,6 +170,8 @@ export interface Datasource {
   directQueryName?: string;
   /** OSD Multi-Data-Source saved object ID — when set, use context.dataSource.opensearch.getClient(mdsId) */
   mdsId?: string;
+  /** OpenSearch data-source metadata used to gate datasource-specific creation flows. */
+  engineType?: string;
   auth?: {
     type: 'basic' | 'apikey' | 'sigv4';
     credentials?: Record<string, string>;
@@ -219,12 +231,7 @@ export interface DatasourceService {
 
 export type UnifiedAlertSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 export type UnifiedAlertState =
-  | 'active'
-  | 'pending'
-  | 'acknowledged'
-  | 'silenced'
-  | 'resolved'
-  | 'error';
+  'active' | 'pending' | 'acknowledged' | 'silenced' | 'resolved' | 'error';
 export type UnifiedAlertKind = 'alert' | 'anomaly';
 
 /** Lightweight alert representation for list views and tables. */
@@ -274,7 +281,29 @@ export type MonitorType =
   | 'anomaly_detector_monitor'
   | 'detector'
   | 'forecaster';
-export type MonitorStatus = 'active' | 'pending' | 'muted' | 'disabled';
+export type MonitorStatus =
+  | 'active'
+  | 'pending'
+  | 'muted'
+  | 'disabled'
+  | 'Running'
+  | 'Stopped'
+  | 'Initializing'
+  | 'Finished'
+  | 'Feature required'
+  | 'Initialization failure'
+  | 'Unexpected failure'
+  | 'Failed'
+  | 'Inactive stopped'
+  | 'Inactive not started'
+  | 'Awaiting data to init'
+  | 'Awaiting data to restart'
+  | 'Initializing test'
+  | 'Initializing forecast'
+  | 'Test complete'
+  | 'Init forecast failure'
+  | 'Forecast failure'
+  | 'Init test failure';
 export type MonitorHealthStatus = 'healthy' | 'failing' | 'no_data';
 export type UnifiedDefinitionType = 'monitor' | 'prometheus_rule' | 'detector' | 'forecaster';
 
