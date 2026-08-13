@@ -71,6 +71,17 @@ export interface CreateMetricsMonitorProps {
   datasourceId?: string;
   /** Datasource display name from the current Explore page context */
   datasourceName?: string;
+  /**
+   * Selectable Prometheus datasources. Provided by the Alert Manager Rules
+   * page (no page context there); when absent, the flyout is pinned to the
+   * context datasource (Metrics Explore page behavior).
+   */
+  datasources?: Array<{ id: string; name: string; type: string }>;
+  /**
+   * Duplicate-name guard, checked against the selected datasource. Provided
+   * by the Alert Manager Rules page which knows the existing rules.
+   */
+  isNameTaken?: (name: string, dsId: string) => boolean;
   /** HTTP client for persisting rules */
   http?: {
     post: (path: string, options: { body: string }) => Promise<unknown>;
@@ -132,7 +143,9 @@ const DEFAULT_PROMQL = 'rate(http_requests_total{status=~"5.."}[5m])';
 const MonitorDetailsSection = React.memo<{
   form: MetricsMonitorFormState;
   onUpdate: (patch: Partial<MetricsMonitorFormState>) => void;
-}>(({ form, onUpdate }) => (
+  /** Duplicate-name error surfaced on the Rule name row. */
+  nameError?: string;
+}>(({ form, onUpdate, nameError }) => (
   <EuiAccordion
     id="prom-monitor-details"
     buttonContent={
@@ -181,12 +194,15 @@ const MonitorDetailsSection = React.memo<{
         defaultMessage: 'Rule name',
       })}
       fullWidth
+      isInvalid={!!nameError}
+      error={nameError}
     >
       <EuiFieldText
         placeholder={i18n.translate(
           'observability.alerting.createMetricsMonitor.monitorNamePlaceholder',
           { defaultMessage: 'Enter a rule name' }
         )}
+        isInvalid={!!nameError}
         value={form.monitorName}
         onChange={(e) => onUpdate({ monitorName: e.target.value })}
         fullWidth
@@ -243,34 +259,40 @@ const MonitorDetailsSection = React.memo<{
   </EuiAccordion>
 ));
 
-/** Section 2: Query — PromQL editor with datasource picker, query library, metric browser */
+/** Section 2: Query — shared PromQL builder with datasource picker */
 const QuerySection = React.memo<{
   form: MetricsMonitorFormState;
   onUpdate: (patch: Partial<MetricsMonitorFormState>) => void;
   showPreview: boolean;
   onRunPreview: () => void;
   contextDatasourceName?: string;
-}>(({ form, onUpdate, showPreview, onRunPreview, contextDatasourceName }) => {
+  /** Selectable datasources (Alert Manager); absent = pinned context ds. */
+  datasources?: Array<{ id: string; name: string; type: string }>;
+}>(({ form, onUpdate, showPreview, onRunPreview, contextDatasourceName, datasources }) => {
   const [showDatasourcePicker, setShowDatasourcePicker] = useState(false);
 
-  // Use the real datasource from the Explore page context. When no
-  // datasource is provided (e.g. standalone usage), show a placeholder.
+  // With an explicit datasource list (Alert Manager) the picker offers all
+  // Prometheus datasources; otherwise it is pinned to the Explore page's
+  // context datasource.
   const datasourceOptions = useMemo(() => {
+    if (datasources && datasources.length > 0) {
+      return datasources
+        .filter((ds) => ds.type === 'prometheus')
+        .map((ds) => ({ id: ds.id, name: ds.name }));
+    }
     if (form.datasourceId) {
       return [{ id: form.datasourceId, name: contextDatasourceName || form.datasourceId }];
     }
     return [];
-  }, [form.datasourceId, contextDatasourceName]);
+  }, [datasources, form.datasourceId, contextDatasourceName]);
 
-  const selectedDs =
-    datasourceOptions.length > 0
-      ? datasourceOptions[0]
-      : {
-          id: '',
-          name: i18n.translate('observability.alerting.createMetricsMonitor.noDatasourceAttached', {
-            defaultMessage: 'No Prometheus datasource attached',
-          }),
-        };
+  const selectedDs = datasourceOptions.find((ds) => ds.id === form.datasourceId) ||
+    datasourceOptions[0] || {
+      id: '',
+      name: i18n.translate('observability.alerting.createMetricsMonitor.noDatasourceAttached', {
+        defaultMessage: 'No Prometheus datasource attached',
+      }),
+    };
 
   return (
     <EuiAccordion
@@ -625,16 +647,22 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
   onSave,
   datasourceId: contextDatasourceId,
   datasourceName: contextDatasourceName,
+  datasources,
+  isNameTaken,
   http,
   addToast,
 }) => {
+  // Without a page-context datasource (Alert Manager), default to the first
+  // Prometheus datasource in the provided list.
+  const defaultDatasourceId =
+    contextDatasourceId || datasources?.find((ds) => ds.type === 'prometheus')?.id || '';
   const [form, setForm] = useState<MetricsMonitorFormState>({
     monitorName: '',
     description: '',
     namespace: 'default',
     groupName: '',
     query: DEFAULT_PROMQL,
-    datasourceId: contextDatasourceId || '',
+    datasourceId: defaultDatasourceId,
     forDuration: '5m',
     evalInterval: '1m',
     // `warning` by default — escalation to `critical` (paging) should be a
@@ -678,8 +706,23 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
     setShowPreview(true);
   }, []);
 
+  const duplicateName = !!(
+    isNameTaken &&
+    form.monitorName.trim() !== '' &&
+    form.datasourceId !== '' &&
+    isNameTaken(form.monitorName.trim(), form.datasourceId)
+  );
+  const nameError = duplicateName
+    ? i18n.translate('observability.alerting.createMetricsMonitor.nameDuplicate', {
+        defaultMessage: 'A rule with this name already exists on the selected datasource.',
+      })
+    : undefined;
+
   const isValid =
-    form.monitorName.trim() !== '' && form.query.trim() !== '' && form.datasourceId !== '';
+    form.monitorName.trim() !== '' &&
+    form.query.trim() !== '' &&
+    form.datasourceId !== '' &&
+    !duplicateName;
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -704,9 +747,16 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
         labels: Object.fromEntries(
           form.labels.filter((l) => l.key.trim()).map((l) => [l.key, l.value])
         ),
-        annotations: Object.fromEntries(
-          form.annotations.filter((a) => a.key.trim()).map((a) => [a.key, a.value])
-        ),
+        annotations: Object.fromEntries([
+          ...form.annotations
+            .filter((a) => a.key.trim())
+            .map((a) => [a.key, a.value] as [string, string]),
+          // The Rule details Description field persists as the standard
+          // `description` annotation (the server's rule builder reads it)
+          ...(form.description.trim()
+            ? [['description', form.description.trim()] as [string, string]]
+            : []),
+        ]),
         enabled: true,
         groupName: form.groupName || form.monitorName,
       };
@@ -753,7 +803,7 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
 
       <EuiFlyoutBody>
         {/* Section 1: Monitor Details */}
-        <MonitorDetailsSection form={form} onUpdate={updateForm} />
+        <MonitorDetailsSection form={form} onUpdate={updateForm} nameError={nameError} />
         <EuiHorizontalRule margin="l" />
 
         {/* Section 2: Query */}
@@ -763,6 +813,7 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
           showPreview={showPreview}
           onRunPreview={handleRunPreview}
           contextDatasourceName={contextDatasourceName}
+          datasources={datasources}
         />
         <EuiHorizontalRule margin="l" />
 

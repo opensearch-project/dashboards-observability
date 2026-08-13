@@ -40,6 +40,7 @@ import { MonitorsTable } from './monitors_table';
 import { CreateMonitor, MonitorFormState } from './create_monitor';
 import type { PrometheusFormState } from './create_monitor/create_monitor_types';
 import { EditMonitor } from './create_monitor/edit_monitor';
+import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
 import { AnomalyDetailFlyout } from './anomaly_detail_flyout';
@@ -941,6 +942,54 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     }
   };
 
+  /**
+   * Post-save handler for the shared CreateMetricsMonitor flyout (the same
+   * component the Metrics Explore page uses). The flyout persists the rule
+   * itself via the http client; this handler only reconciles the page:
+   * optimistic insert, close, and a delayed refetch to bridge Cortex's
+   * eventual consistency (~30-60s propagation).
+   */
+  const handleMetricsRuleSaved = (form: MetricsMonitorFormState) => {
+    // Mirror of the server's promSeverityFromLabels for the optimistic row
+    const sev = form.labels.find((l) => l.key === 'severity')?.value || '';
+    const severity: PrometheusFormState['severity'] =
+      sev === 'critical' || sev === 'high' || sev === 'medium' || sev === 'low'
+        ? sev
+        : sev === 'warning'
+          ? 'medium'
+          : sev === 'page'
+            ? 'critical'
+            : 'info';
+    // Adapt the flyout's form shape to the PrometheusFormState that
+    // formStateToRule understands, for the optimistic table row
+    const promForm: PrometheusFormState = {
+      name: form.monitorName,
+      datasourceId: form.datasourceId,
+      datasourceType: 'prometheus',
+      query: form.query,
+      threshold: { operator: '>', value: 0, unit: '', forDuration: form.forDuration },
+      evaluationInterval: form.evalInterval,
+      pendingPeriod: form.forDuration,
+      firingPeriod: form.forDuration,
+      labels: form.labels,
+      annotations: form.description.trim()
+        ? [
+            ...form.annotations.filter((a) => a.key !== 'description'),
+            { key: 'description', value: form.description.trim() },
+          ]
+        : form.annotations,
+      severity,
+      enabled: true,
+    };
+    const newRule = buildOptimisticRule(promForm);
+    setShowCreateMonitor(false);
+    setCreateBackendType(null);
+    setRules((prev) => [newRule, ...prev]);
+    setRulesTotal((prev) => prev + 1);
+    refetchRules();
+    refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
+  };
+
   const handleEditMonitor = async (formState: MonitorFormState, ruleId: string) => {
     const dsId = resolveDatasourceId(formState);
     if (!dsId) return;
@@ -1214,7 +1263,24 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         />
       </div>
       {renderTable()}
-      {showCreateMonitor && (
+      {/* Metrics rules use the SAME flyout component as the Metrics Explore
+          page ("Create alert rule" action) so the two surfaces can never
+          drift. It persists the rule itself; handleMetricsRuleSaved only
+          reconciles the table. Logs (PPL) rules keep the CreateMonitor
+          shell. */}
+      {showCreateMonitor && createBackendType === 'prometheus' ? (
+        <CreateMetricsMonitor
+          onCancel={() => {
+            setShowCreateMonitor(false);
+            setCreateBackendType(null);
+          }}
+          onSave={handleMetricsRuleSaved}
+          datasources={datasources.filter((d) => d.type === 'prometheus')}
+          isNameTaken={isNameTakenForCreate}
+          http={coreRefs.http}
+          addToast={(title, color) => addToast(title, color)}
+        />
+      ) : showCreateMonitor ? (
         <CreateMonitor
           onSave={handleCreateMonitor}
           onBatchSave={handleBatchCreateMonitors}
@@ -1230,7 +1296,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           submitError={pplSubmitError ? { pplMessage: pplSubmitError } : undefined}
           onClearPplSubmitError={() => setPplSubmitError(null)}
         />
-      )}
+      ) : null}
       {editTarget && (
         <EditMonitor
           dsId={editTarget.dsId}

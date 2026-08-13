@@ -57,6 +57,45 @@ describe('CreateMetricsMonitor', () => {
     expect(createBtn!.disabled).toBe(true);
   });
 
+  it('defaults to the first Prometheus datasource from a provided list (Alert Manager)', () => {
+    render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasources={[
+          { id: 'os-1', name: 'SomeOpenSearch', type: 'opensearch' },
+          { id: 'prom-1', name: 'MyPrometheus', type: 'prometheus' },
+          { id: 'prom-2', name: 'OtherProm', type: 'prometheus' },
+        ]}
+      />
+    );
+    // The first prometheus datasource is preselected and shown in the picker
+    expect(document.body.textContent).toContain('MyPrometheus');
+    expect(document.body.textContent).not.toContain('SomeOpenSearch');
+  });
+
+  it('blocks save and shows an error for duplicate rule names', () => {
+    render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        isNameTaken={(name) => name === 'taken-name'}
+      />
+    );
+    const nameInput = document.querySelector('input[aria-label="Rule name"]') as HTMLInputElement;
+    expect(nameInput).not.toBeNull();
+    fireEvent.change(nameInput, { target: { value: 'taken-name' } });
+
+    expect(document.body.textContent).toContain(
+      'A rule with this name already exists on the selected datasource.'
+    );
+    const createBtn = document.querySelector(
+      'button[class*="euiButton--fill"]'
+    ) as HTMLButtonElement;
+    expect(createBtn.disabled).toBe(true);
+  });
+
   it('POSTs the correct payload shape on save', async () => {
     const mockPost = jest.fn().mockResolvedValue({});
     const onSave = jest.fn();
