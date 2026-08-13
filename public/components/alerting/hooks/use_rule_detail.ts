@@ -12,6 +12,7 @@ export interface UseRuleDetailResult {
   data: UnifiedRule | null;
   isLoading: boolean;
   error: Error | null;
+  refetch: () => void;
 }
 
 export function useRuleDetail(
@@ -23,6 +24,8 @@ export function useRuleDetail(
   const [data, setData] = useState<UnifiedRule | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [refreshToken, setRefreshToken] = useState(0);
+  const refetch = () => setRefreshToken((token) => token + 1);
 
   useEffect(() => {
     if (!dsId || !ruleId) {
@@ -45,7 +48,7 @@ export function useRuleDetail(
     return () => {
       cancelled = true;
     };
-  }, [service, dsId, ruleId, definitionType]);
+  }, [service, dsId, ruleId, definitionType, refreshToken]);
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch };
 }

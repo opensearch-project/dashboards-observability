@@ -33,7 +33,14 @@ import {
   UnifiedAlertSeverity,
   UnifiedRuleSummary,
 } from '../../../../common/types/alerting';
-import { HEALTH_COLORS, SEVERITY_COLORS, STATUS_COLORS, TYPE_LABELS } from '../shared_constants';
+import {
+  HEALTH_COLORS,
+  isDetectorRule,
+  isForecasterRule,
+  SEVERITY_COLORS,
+  STATUS_COLORS,
+  TYPE_LABELS,
+} from '../shared_constants';
 import { DEFAULT_WIDTHS } from './resizable_columns';
 
 // ============================================================================
@@ -65,14 +72,9 @@ export const DEFAULT_VISIBLE: ColumnId[] = [
   'datasource',
 ];
 
-export const isDetectorDefinition = (item: UnifiedRuleSummary): boolean =>
-  item.definitionType === 'detector' || item.monitorType === 'detector';
+export const isDetectorDefinition = (item: UnifiedRuleSummary): boolean => isDetectorRule(item);
 
-export const isForecasterDefinition = (item: UnifiedRuleSummary): boolean =>
-  item.definitionType === 'forecaster' || item.monitorType === 'forecaster';
-
-export const isReadOnlyRuleDefinition = (item: UnifiedRuleSummary): boolean =>
-  isDetectorDefinition(item) || isForecasterDefinition(item);
+export const isForecasterDefinition = (item: UnifiedRuleSummary): boolean => isForecasterRule(item);
 
 // ============================================================================
 // Column builder — factory producing the EuiInMemoryTable column array.
@@ -103,7 +105,7 @@ export function buildTableColumns({
   setSelectedMonitor,
 }: BuildTableColumnsParams): Array<Record<string, unknown>> {
   const w = (id: string) => `${columnWidths[id] || DEFAULT_WIDTHS[id] || 120}px`;
-  const selectable = filtered.filter((item) => !isReadOnlyRuleDefinition(item));
+  const selectable = filtered;
   const allSelectableSelected =
     selectable.length > 0 && selectable.every((item) => selectedIds.has(item.id));
 
@@ -126,12 +128,10 @@ export function buildTableColumns({
       ),
       width: '32px',
       render: (_: unknown, item: UnifiedRuleSummary) => {
-        const isReadOnly = isReadOnlyRuleDefinition(item);
         return (
           <input
             type="checkbox"
-            checked={!isReadOnly && selectedIds.has(item.id)}
-            disabled={isReadOnly}
+            checked={selectedIds.has(item.id)}
             onChange={() => toggleSelect(item.id)}
             aria-label={i18n.translate(
               'observability.alerting.monitorsTable.columns.selectRowAriaLabel',

@@ -8,7 +8,7 @@
  * Rules table. Mirrors the monitor detail flyout shell while
  * grouping detector content like the AD detector configuration page.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -35,11 +35,20 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import type { ADDetector, UnifiedRuleSummary } from '../../../common/types/alerting';
 import { useRuleDetail } from './hooks/use_rule_detail';
-import { HEALTH_COLORS, SEVERITY_COLORS, STATUS_COLORS } from './shared_constants';
+import {
+  HEALTH_COLORS,
+  isAdResourceRunning,
+  SEVERITY_COLORS,
+  STATUS_COLORS,
+} from './shared_constants';
 
 export interface DetectorDetailFlyoutProps {
   detector: UnifiedRuleSummary;
   onClose: () => void;
+  onEditSettings?: (detector: UnifiedRuleSummary) => void;
+  onEditFeatures?: (detector: UnifiedRuleSummary) => void;
+  onStart?: (detector: UnifiedRuleSummary) => Promise<void> | void;
+  onStop?: (detector: UnifiedRuleSummary) => Promise<void> | void;
 }
 
 interface FeatureRow {
@@ -199,12 +208,18 @@ const buildImputationDisplay = (detector: ADDetector): string => {
 export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
   detector,
   onClose,
+  onEditSettings,
+  onEditFeatures,
+  onStart,
+  onStop,
 }) => {
-  const { data: detail, isLoading, error } = useRuleDetail(
-    detector.datasourceId,
-    detector.id,
-    'detector'
-  );
+  const [lifecycleAction, setLifecycleAction] = useState<'start' | 'stop' | null>(null);
+  const {
+    data: detail,
+    isLoading,
+    error,
+    refetch,
+  } = useRuleDetail(detector.datasourceId, detector.id, 'detector');
   const rawDetector = (detail?.raw as ADDetector | undefined) || detectorFromSummary(detector);
   const description =
     detail?.description || rawDetector.description || detector.annotations.description || '';
@@ -225,6 +240,21 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
   const frequencyDisplay = formatPeriod(rawDetector.frequency);
   const realTimeJobDisplay =
     typeof jobEnabled === 'boolean' ? (jobEnabled ? enabledLabel() : disabledLabel()) : EMPTY_VALUE;
+  const isRunning = isAdResourceRunning(detector);
+
+  const runLifecycleAction = async (
+    action: 'start' | 'stop',
+    handler?: (detectorToUpdate: UnifiedRuleSummary) => Promise<void> | void
+  ) => {
+    if (!handler) return;
+    setLifecycleAction(action);
+    try {
+      await handler(detector);
+      refetch();
+    } finally {
+      setLifecycleAction(null);
+    }
+  };
 
   const featureColumns: Array<EuiBasicTableColumn<FeatureRow>> = [
     {
@@ -285,6 +315,86 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {(onEditSettings || onEditFeatures || onStart || onStop) && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              {isRunning
+                ? onStop && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="cross"
+                        isLoading={lifecycleAction === 'stop'}
+                        onClick={() => {
+                          void runLifecycleAction('stop', onStop);
+                        }}
+                        data-test-subj="alertManagerDetectorDetailStop"
+                      >
+                        <FormattedMessage
+                          id="observability.alerting.detectorDetailFlyout.stopDetectorButton"
+                          defaultMessage="Stop detector"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )
+                : onStart && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="play"
+                        isLoading={lifecycleAction === 'start'}
+                        onClick={() => {
+                          void runLifecycleAction('start', onStart);
+                        }}
+                        data-test-subj="alertManagerDetectorDetailStart"
+                      >
+                        <FormattedMessage
+                          id="observability.alerting.detectorDetailFlyout.startDetectorButton"
+                          defaultMessage="Start detector"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
+              {onEditSettings && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="pencil"
+                    onClick={() => {
+                      onClose();
+                      onEditSettings(detector);
+                    }}
+                    data-test-subj="alertManagerDetectorDetailEditSettings"
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.detectorDetailFlyout.editSettingsButton"
+                      defaultMessage="Edit detector settings"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+              {onEditFeatures && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="controlsHorizontal"
+                    onClick={() => {
+                      onClose();
+                      onEditFeatures(detector);
+                    }}
+                    data-test-subj="alertManagerDetectorDetailEditFeatures"
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.detectorDetailFlyout.editFeaturesButton"
+                      defaultMessage="Edit model configuration"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </>
+        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -346,21 +456,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.name',
-                      { defaultMessage: 'Name' }
+                      {
+                        defaultMessage: 'Name',
+                      }
                     ),
                     description: detector.name,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.detectorType',
-                      { defaultMessage: 'Detector type' }
+                      {
+                        defaultMessage: 'Detector type',
+                      }
                     ),
                     description: detectorType,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.dataSourceIndex',
-                      { defaultMessage: 'Data source index' }
+                      {
+                        defaultMessage: 'Data source index',
+                      }
                     ),
                     description: formatList(rawDetector.indices),
                   },
@@ -376,21 +492,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.timestamp',
-                      { defaultMessage: 'Timestamp' }
+                      {
+                        defaultMessage: 'Timestamp',
+                      }
                     ),
                     description: stringValue(rawDetector.time_field),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.lastUpdated',
-                      { defaultMessage: 'Last updated' }
+                      {
+                        defaultMessage: 'Last updated',
+                      }
                     ),
                     description: formatTimestamp(rawDetector.last_update_time),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.settings.customResultIndex',
-                      { defaultMessage: 'Custom result index' }
+                      {
+                        defaultMessage: 'Custom result index',
+                      }
                     ),
                     description: resultIndex,
                   },
@@ -464,21 +586,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.operational.detectorInterval',
-                      { defaultMessage: 'Detector interval' }
+                      {
+                        defaultMessage: 'Detector interval',
+                      }
                     ),
                     description: detectorIntervalDisplay,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.operational.windowDelay',
-                      { defaultMessage: 'Window delay' }
+                      {
+                        defaultMessage: 'Window delay',
+                      }
                     ),
                     description: formatPeriod(rawDetector.window_delay),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.operational.frequency',
-                      { defaultMessage: 'Frequency' }
+                      {
+                        defaultMessage: 'Frequency',
+                      }
                     ),
                     description:
                       frequencyDisplay === EMPTY_VALUE ? detectorIntervalDisplay : frequencyDisplay,
@@ -486,7 +614,9 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.operational.history',
-                      { defaultMessage: 'History' }
+                      {
+                        defaultMessage: 'History',
+                      }
                     ),
                     description: rawDetector.history
                       ? i18n.translate(
@@ -524,21 +654,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.additional.categoryField',
-                      { defaultMessage: 'Category field' }
+                      {
+                        defaultMessage: 'Category field',
+                      }
                     ),
                     description: categoryField,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.additional.shingleSize',
-                      { defaultMessage: 'Shingle size' }
+                      {
+                        defaultMessage: 'Shingle size',
+                      }
                     ),
                     description: String(shingleSize),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.additional.imputationMethod',
-                      { defaultMessage: 'Imputation method' }
+                      {
+                        defaultMessage: 'Imputation method',
+                      }
                     ),
                     description: buildImputationDisplay(rawDetector),
                   },
@@ -568,21 +704,27 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.job.realTimeJob',
-                      { defaultMessage: 'Real-time job' }
+                      {
+                        defaultMessage: 'Real-time job',
+                      }
                     ),
                     description: realTimeJobDisplay,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.job.enabledTime',
-                      { defaultMessage: 'Enabled time' }
+                      {
+                        defaultMessage: 'Enabled time',
+                      }
                     ),
                     description: formatTimestamp(detectorJob.enabled_time),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.detectorDetailFlyout.job.disabledTime',
-                      { defaultMessage: 'Disabled time' }
+                      {
+                        defaultMessage: 'Disabled time',
+                      }
                     ),
                     description: formatTimestamp(detectorJob.disabled_time),
                   },
