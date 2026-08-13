@@ -31,8 +31,6 @@ import {
   EuiFlyoutFooter,
   EuiTitle,
   EuiHorizontalRule,
-  EuiSwitch,
-  EuiToolTip,
   EuiPopover,
   EuiIcon,
   EuiBetaBadge,
@@ -42,21 +40,13 @@ import { i18n } from '@osd/i18n';
 import { PromQueryBuilder } from './create_monitor/prom_query_builder';
 import { RuleGroupSelector } from './create_monitor/rule_group_selector';
 import { QueryPreviewResults } from './query_preview_results';
+// Shared label editor + entry types keep both flyouts' Labels sections in sync
+import { LabelEditor } from './monitor_form_components';
+import type { LabelEntry, AnnotationEntry } from '../../../common/services/alerting/validators';
 
 // ============================================================================
 // Types
 // ============================================================================
-
-interface LabelEntry {
-  key: string;
-  value: string;
-  isDynamic: boolean;
-}
-
-interface AnnotationEntry {
-  key: string;
-  value: string;
-}
 
 export interface MetricsMonitorFormState {
   monitorName: string;
@@ -419,139 +409,33 @@ const QuerySection = React.memo<{
   );
 });
 
-/** Section 5: Labels */
+/** Section 5: Labels — shared LabelEditor keeps parity with the Alert Manager flyout */
 const LabelsSection = React.memo<{
   labels: LabelEntry[];
   onUpdate: (labels: LabelEntry[]) => void;
-}>(({ labels, onUpdate }) => {
-  const addLabel = () => onUpdate([...labels, { key: '', value: '', isDynamic: false }]);
-  const removeLabel = (i: number) => onUpdate(labels.filter((_, idx) => idx !== i));
-  const updateLabel = (i: number, patch: Partial<LabelEntry>) => {
-    const next = [...labels];
-    next[i] = { ...next[i], ...patch };
-    onUpdate(next);
-  };
-
-  return (
-    <EuiAccordion
-      id="prom-labels"
-      buttonContent={
-        <strong>
-          {i18n.translate('observability.alerting.createMetricsMonitor.labelsTitle', {
-            defaultMessage: 'Labels',
-          })}
-        </strong>
-      }
-      initialIsOpen
-      paddingSize="m"
-    >
+}>(({ labels, onUpdate }) => (
+  <EuiAccordion
+    id="prom-labels"
+    buttonContent={
+      <strong>
+        {i18n.translate('observability.alerting.createMetricsMonitor.labelsTitle', {
+          defaultMessage: 'Labels',
+        })}
+      </strong>
+    }
+    initialIsOpen
+    paddingSize="m"
+    extraAction={
       <EuiText size="xs" color="subdued">
         {i18n.translate('observability.alerting.createMetricsMonitor.labelsDescription', {
           defaultMessage: 'Categorize and route alerts',
         })}
       </EuiText>
-      <EuiSpacer size="s" />
-      {labels.map((label, i) => (
-        <EuiFlexGroup
-          key={i}
-          gutterSize="s"
-          alignItems="center"
-          responsive={false}
-          style={{ marginBottom: 4 }}
-        >
-          {/* Equal grow keeps the key and value boxes visually aligned */}
-          <EuiFlexItem grow={1}>
-            <EuiFieldText
-              placeholder={i18n.translate(
-                'observability.alerting.createMetricsMonitor.labelKeyPlaceholder',
-                { defaultMessage: 'e.g. severity, team, service' }
-              )}
-              value={label.key}
-              onChange={(e) => updateLabel(i, { key: e.target.value })}
-              compressed
-              aria-label={i18n.translate(
-                'observability.alerting.createMetricsMonitor.labelKeyAriaLabel',
-                { defaultMessage: 'Label key {index}', values: { index: i + 1 } }
-              )}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <EuiFieldText
-              placeholder={
-                label.isDynamic
-                  ? '{{ $value }}'
-                  : i18n.translate(
-                      'observability.alerting.createMetricsMonitor.labelValuePlaceholder',
-                      { defaultMessage: 'Value' }
-                    )
-              }
-              value={label.value}
-              onChange={(e) => updateLabel(i, { value: e.target.value })}
-              compressed
-              aria-label={i18n.translate(
-                'observability.alerting.createMetricsMonitor.labelValueAriaLabel',
-                { defaultMessage: 'Label value {index}', values: { index: i + 1 } }
-              )}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                label.isDynamic
-                  ? i18n.translate(
-                      'observability.alerting.createMetricsMonitor.labelDynamicTooltip',
-                      { defaultMessage: 'Dynamic (Go template)' }
-                    )
-                  : i18n.translate(
-                      'observability.alerting.createMetricsMonitor.labelStaticTooltip',
-                      { defaultMessage: 'Static value' }
-                    )
-              }
-            >
-              <EuiSwitch
-                label={i18n.translate(
-                  'observability.alerting.createMetricsMonitor.labelDynamicSwitch',
-                  { defaultMessage: 'Dynamic' }
-                )}
-                checked={label.isDynamic}
-                onChange={(e) => updateLabel(i, { isDynamic: e.target.checked })}
-                compressed
-                aria-label={i18n.translate(
-                  'observability.alerting.createMetricsMonitor.labelToggleDynamicAriaLabel',
-                  {
-                    defaultMessage: 'Toggle dynamic for label {index}',
-                    values: { index: i + 1 },
-                  }
-                )}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              size="s"
-              onClick={() => removeLabel(i)}
-              aria-label={i18n.translate(
-                'observability.alerting.createMetricsMonitor.deleteLabelAriaLabel',
-                {
-                  defaultMessage: 'Delete label {label}',
-                  values: { label: label.key || i + 1 },
-                }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
-      <EuiSpacer size="xs" />
-      <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addLabel}>
-        {i18n.translate('observability.alerting.createMetricsMonitor.addLabelButton', {
-          defaultMessage: 'Add label',
-        })}
-      </EuiButtonEmpty>
-    </EuiAccordion>
-  );
-});
+    }
+  >
+    <LabelEditor labels={labels} onChange={onUpdate} />
+  </EuiAccordion>
+));
 
 /** Section 6: Annotations */
 const AnnotationsSection = React.memo<{
@@ -751,7 +635,9 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
     datasourceId: contextDatasourceId || '',
     forDuration: '5m',
     evalInterval: '1m',
-    labels: [{ key: 'severity', value: 'critical', isDynamic: false }],
+    // `warning` by default — escalation to `critical` (paging) should be a
+    // deliberate choice, matching the Alert Manager flyout's default
+    labels: [{ key: 'severity', value: 'warning', isDynamic: false }],
     annotations: [],
   });
   const [showPreview, setShowPreview] = useState(false);
