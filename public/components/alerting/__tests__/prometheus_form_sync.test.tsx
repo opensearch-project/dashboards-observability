@@ -17,16 +17,17 @@
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import {
-  parseBuilderQuery,
-  PrometheusFormSection,
-} from '../create_monitor/prometheus_form_section';
+import { PrometheusFormSection } from '../create_monitor/prometheus_form_section';
+import { parseBuilderQuery } from '../create_monitor/prom_query_builder';
 import type { PrometheusFormState } from '../create_monitor/create_monitor_types';
 
 // Mock dependencies that PrometheusFormSection uses
 jest.mock('../monitor_form_components', () => ({
   LabelEditor: jest.fn(() => <div data-test-subj="label-editor" />),
   AnnotationEditor: () => <div data-test-subj="annotation-editor" />,
+}));
+jest.mock('../echarts_render', () => ({
+  EchartsRender: () => <div data-test-subj="echarts-render" />,
 }));
 jest.mock('../query_services/alerting_prom_resources_service', () => ({
   AlertingPromResourcesService: jest.fn().mockImplementation(() => ({
@@ -114,6 +115,39 @@ describe('PrometheusFormSection — simplified layout', () => {
     );
   });
 
+  it('shows preview results after clicking Run preview', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    // No results until requested
+    expect(screen.queryByTestId('echarts-render')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('prometheusRunPreviewButton'));
+
+    expect(screen.getByTestId('echarts-render')).toBeInTheDocument();
+    expect(screen.getByText('Sample data — run the rule to see real results')).toBeInTheDocument();
+  });
+
+  it('renders the "Build query in metrics" link in the query panel header', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    expect(screen.getByTestId('alertManagerOpenInMetricsLink')).toBeInTheDocument();
+    expect(screen.getByText('Build query in metrics →')).toBeInTheDocument();
+  });
+
   it('shows the datasource selector when datasources are provided', () => {
     render(
       <PrometheusFormSection
@@ -142,10 +176,29 @@ describe('PrometheusFormSection — rule group', () => {
       />
     );
 
+    expect(screen.getByText('Rule details')).toBeInTheDocument();
     expect(screen.getByText('Rule group')).toBeInTheDocument();
+    // Namespace is fixed and read-only
+    expect(screen.getByDisplayValue('observability-alerting')).toBeInTheDocument();
     expect(
-      screen.getByText('Select an existing group or type a new name to create one.')
+      screen.getByText(
+        'Rules within a group share an evaluation interval and are evaluated together.'
+      )
     ).toBeInTheDocument();
+  });
+
+  it('renders the shell-provided rule name field inside Rule details', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+        ruleNameField={<input data-test-subj="shellRuleNameField" />}
+      />
+    );
+
+    expect(screen.getByTestId('shellRuleNameField')).toBeInTheDocument();
   });
 
   it('propagates rule group selection via the _ruleGroup metadata label', () => {
@@ -160,11 +213,11 @@ describe('PrometheusFormSection — rule group', () => {
       />
     );
 
-    // Builder has 3 combo boxes (metric, label name, label value);
-    // the rule group combo box is the 4th and last
+    // Rule details renders first, so the rule group combo box is the 1st;
+    // the builder's 3 combo boxes (metric, label name, label value) follow
     const comboInputs = container.querySelectorAll('[data-test-subj="comboBoxSearchInput"]');
     expect(comboInputs.length).toBe(4);
-    const input = comboInputs[comboInputs.length - 1];
+    const input = comboInputs[0];
 
     fireEvent.change(input, { target: { value: 'my-group' } });
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
@@ -226,6 +279,31 @@ describe('PrometheusFormSection — rule group', () => {
     );
 
     expect(screen.getByText('existing-group')).toBeInTheDocument();
+  });
+});
+
+describe('PrometheusFormSection — dynamic labels', () => {
+  it('single-quotes templated label values in the YAML preview', () => {
+    const { container } = render(
+      <PrometheusFormSection
+        form={{
+          ...baseForm,
+          labels: [
+            {
+              key: 'severity',
+              value: '{{ if gt $value 0.9 }}critical{{ else }}warning{{ end }}',
+              isDynamic: true,
+            },
+          ],
+        }}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    const yaml = container.querySelector('pre')!.textContent || '';
+    expect(yaml).toContain("severity: '{{ if gt $value 0.9 }}critical{{ else }}warning{{ end }}'");
   });
 });
 
@@ -344,7 +422,7 @@ describe('PrometheusFormSection — edit mode seeding', () => {
 });
 
 describe('PrometheusFormSection — notification routing', () => {
-  it('renders Alertmanager routing guidance', () => {
+  it('does not render a Notification routing section (matches the Metrics page flyout)', () => {
     render(
       <PrometheusFormSection
         form={baseForm}
@@ -354,7 +432,8 @@ describe('PrometheusFormSection — notification routing', () => {
       />
     );
 
-    expect(screen.getByText('Notification routing')).toBeInTheDocument();
-    expect(screen.getByText('Alertmanager')).toBeInTheDocument();
+    expect(screen.queryByText('Notification routing')).not.toBeInTheDocument();
+    // The Labels section hint still conveys the routing relationship
+    expect(screen.getByText('Categorize and route alerts')).toBeInTheDocument();
   });
 });
