@@ -8,6 +8,7 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { registerDefaultClassifiers, setTranslator } from '../common/error';
 import {
   App,
   AppCategory,
@@ -156,46 +157,43 @@ interface PublicConfig {
   };
 }
 
-export const [
-  getRenderAccelerationDetailsFlyout,
-  setRenderAccelerationDetailsFlyout,
-] = createGetterSetter<
-  ({
-    acceleration,
-    dataSourceName,
-    handleRefresh,
-    dataSourceMDSId,
-  }: RenderAccelerationDetailsFlyoutParams) => void
->('renderAccelerationDetailsFlyout');
+export const [getRenderAccelerationDetailsFlyout, setRenderAccelerationDetailsFlyout] =
+  createGetterSetter<
+    ({
+      acceleration,
+      dataSourceName,
+      handleRefresh,
+      dataSourceMDSId,
+    }: RenderAccelerationDetailsFlyoutParams) => void
+  >('renderAccelerationDetailsFlyout');
 
-export const [
-  getRenderAssociatedObjectsDetailsFlyout,
-  setRenderAssociatedObjectsDetailsFlyout,
-] = createGetterSetter<
-  ({
-    tableDetail,
-    dataSourceName,
-    handleRefresh,
-    dataSourceMDSId,
-  }: RenderAssociatedObjectsDetailsFlyoutParams) => void
->('renderAssociatedObjectsDetailsFlyout');
+export const [getRenderAssociatedObjectsDetailsFlyout, setRenderAssociatedObjectsDetailsFlyout] =
+  createGetterSetter<
+    ({
+      tableDetail,
+      dataSourceName,
+      handleRefresh,
+      dataSourceMDSId,
+    }: RenderAssociatedObjectsDetailsFlyoutParams) => void
+  >('renderAssociatedObjectsDetailsFlyout');
 
-export const [
-  getRenderCreateAccelerationFlyout,
-  setRenderCreateAccelerationFlyout,
-] = createGetterSetter<
-  ({
-    dataSource,
-    dataSourceMDSId,
-    databaseName,
-    tableName,
-    handleRefresh,
-  }: RenderAccelerationFlyoutParams) => void
->('renderCreateAccelerationFlyout');
+export const [getRenderCreateAccelerationFlyout, setRenderCreateAccelerationFlyout] =
+  createGetterSetter<
+    ({
+      dataSource,
+      dataSourceMDSId,
+      databaseName,
+      tableName,
+      handleRefresh,
+    }: RenderAccelerationFlyoutParams) => void
+  >('renderCreateAccelerationFlyout');
 
-export class ObservabilityPlugin
-  implements
-    Plugin<ObservabilitySetup, ObservabilityStart, SetupDependencies, AppPluginStartDependencies> {
+export class ObservabilityPlugin implements Plugin<
+  ObservabilitySetup,
+  ObservabilityStart,
+  SetupDependencies,
+  AppPluginStartDependencies
+> {
   private config: PublicConfig;
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<PublicConfig>();
@@ -216,6 +214,20 @@ export class ObservabilityPlugin
     setupDeps: SetupDependencies
   ): Promise<ObservabilitySetup> {
     uiSettingsService.init(core.uiSettings, core.notifications);
+
+    // Stand up the shared error-classification layer for the browser: register
+    // the default classifiers and route wording through @osd/i18n. Server
+    // responses carry a structured `errorDetail`; the render adapters localize
+    // it here. Downstream forks add higher-priority classifiers/enrichers on
+    // top (registration only). See common/error/README.md.
+    registerDefaultClassifiers();
+    setTranslator((descriptor) =>
+      i18n.translate(descriptor.id, {
+        defaultMessage: descriptor.defaultMessage,
+        values: descriptor.values,
+      })
+    );
+
     const pplService = new PPLService(core.http);
     const qm = new QueryManager();
     setPPLService(pplService);
@@ -358,35 +370,34 @@ export class ObservabilityPlugin
       // prometheus: openSearchLocalDataSourcePluggable
     };
 
-    const appMountWithStartPage = (startPage: string, defaultRoute?: string) => async (
-      params: AppMountParameters
-    ) => {
-      const { Observability } = await import('./components/index');
-      const [coreStart, depsStart] = await core.getStartServices();
-      const dslService = new DSLService(coreStart.http);
-      const savedObjects = new SavedObjects(coreStart.http);
-      const timestampUtils = new TimestampUtils(dslService, pplService);
-      const { dataSourceManagement } = setupDeps;
+    const appMountWithStartPage =
+      (startPage: string, defaultRoute?: string) => async (params: AppMountParameters) => {
+        const { Observability } = await import('./components/index');
+        const [coreStart, depsStart] = await core.getStartServices();
+        const dslService = new DSLService(coreStart.http);
+        const savedObjects = new SavedObjects(coreStart.http);
+        const timestampUtils = new TimestampUtils(dslService, pplService);
+        const { dataSourceManagement } = setupDeps;
 
-      const mlCommonsRCFService = new MLCommonsRCFService(coreStart.http);
+        const mlCommonsRCFService = new MLCommonsRCFService(coreStart.http);
 
-      return Observability(
-        coreStart,
-        depsStart,
-        params,
-        pplService,
-        dslService,
-        mlCommonsRCFService,
-        savedObjects,
-        timestampUtils,
-        qm,
-        startPage,
-        dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
-        dataSourceManagement,
-        coreStart.savedObjects,
-        defaultRoute
-      );
-    };
+        return Observability(
+          coreStart,
+          depsStart,
+          params,
+          pplService,
+          dslService,
+          mlCommonsRCFService,
+          savedObjects,
+          timestampUtils,
+          qm,
+          startPage,
+          dataSourcePluggables, // just pass down for now due to time constraint, later may better expose this as context
+          dataSourceManagement,
+          coreStart.savedObjects,
+          defaultRoute
+        );
+      };
 
     core.application.register({
       id: observabilityMetricsID,
@@ -483,7 +494,7 @@ export class ObservabilityPlugin
                 ...sloUpdate,
                 navLinkStatus: eitherHidden
                   ? AppNavLinkStatus.hidden
-                  : sloUpdate.navLinkStatus ?? apmUpdate.navLinkStatus,
+                  : (sloUpdate.navLinkStatus ?? apmUpdate.navLinkStatus),
               };
             })
           ),
@@ -615,8 +626,7 @@ export class ObservabilityPlugin
         .getStartServices()
         .then(([coreStart]) => {
           const capabilities = coreStart.application.capabilities as
-            | { observability?: { alertManagerEnabled?: boolean } }
-            | undefined;
+            { observability?: { alertManagerEnabled?: boolean } } | undefined;
           if (!capabilities?.observability?.alertManagerEnabled) {
             return;
           }
@@ -634,8 +644,7 @@ export class ObservabilityPlugin
               // agent config + cluster gate; we just light up alongside
               // theirs so users see this option when PPL alerting is on.
               const liveCapabilities = coreRefs.application?.capabilities as
-                | { alertingDashboards?: { pplV2?: boolean } }
-                | undefined;
+                { alertingDashboards?: { pplV2?: boolean } } | undefined;
               if (!liveCapabilities?.alertingDashboards?.pplV2) return false;
               // This is a Logs (PPL) rule action — disable on Metrics
               // (PromQL) pages so users don't get the wrong flyout.
@@ -648,13 +657,15 @@ export class ObservabilityPlugin
               return !isAOSS;
             },
             component: (props) => {
-              const dataset = (props.dependencies.query as {
-                dataset?: {
-                  dataSource?: { id?: string; title?: string; name?: string };
-                  title?: string;
-                  timeFieldName?: string;
-                };
-              }).dataset;
+              const dataset = (
+                props.dependencies.query as {
+                  dataset?: {
+                    dataSource?: { id?: string; title?: string; name?: string };
+                    title?: string;
+                    timeFieldName?: string;
+                  };
+                }
+              ).dataset;
               const exploreContext = {
                 dataSourceId: dataset?.dataSource?.id,
                 dataSourceName: dataset?.dataSource?.title ?? dataset?.dataSource?.name,
@@ -699,8 +710,7 @@ export class ObservabilityPlugin
         .getStartServices()
         .then(([coreStart]) => {
           const capabilities = coreStart.application.capabilities as
-            | { observability?: { alertManagerEnabled?: boolean } }
-            | undefined;
+            { observability?: { alertManagerEnabled?: boolean } } | undefined;
           if (!capabilities?.observability?.alertManagerEnabled) {
             return;
           }
@@ -724,13 +734,15 @@ export class ObservabilityPlugin
               return !isAOSS;
             },
             component: (props) => {
-              const dataset = (props.dependencies.query as {
-                dataset?: {
-                  id?: string;
-                  title?: string;
-                  dataSource?: { id?: string; title?: string; name?: string };
-                };
-              }).dataset;
+              const dataset = (
+                props.dependencies.query as {
+                  dataset?: {
+                    id?: string;
+                    title?: string;
+                    dataSource?: { id?: string; title?: string; name?: string };
+                  };
+                }
+              ).dataset;
               // On the Metrics page the Prometheus connection is the dataset
               // itself (dataset.id), not a nested dataSource. Fall back to
               // dataset.dataSource.id for compatibility with other layouts.
@@ -747,11 +759,16 @@ export class ObservabilityPlugin
                     datasourceId={dsId}
                     datasourceName={dsName}
                     http={props.services.http}
-                    addToast={(title, color) =>
-                      props.services.notifications.toasts[
-                        color === 'danger' ? 'addDanger' : 'addSuccess'
-                      ](title)
-                    }
+                    addToast={(title, color, text) => {
+                      // Forward the classified error body (`text`) and honor
+                      // 'warning' so the detailed cause — not just the title —
+                      // reaches the toast on create failure.
+                      const toast = text ? { title, text } : { title };
+                      const svc = props.services.notifications.toasts;
+                      if (color === 'danger') svc.addDanger(toast);
+                      else if (color === 'warning') svc.addWarning(toast);
+                      else svc.addSuccess(toast);
+                    }}
                   />
                 </React.Suspense>
               );
@@ -787,8 +804,7 @@ export class ObservabilityPlugin
     // take effect on the next page load. Components
     // (`apm/pages/services_home`, `apm/pages/service_details`) read this ref.
     const observabilityCapabilities = core.application.capabilities.observability as
-      | { alertManagerEnabled?: boolean; sloEnabled?: boolean }
-      | undefined;
+      { alertManagerEnabled?: boolean; sloEnabled?: boolean } | undefined;
     const sloEnabledFromCapability = !!observabilityCapabilities?.sloEnabled;
     const alertManagerEnabledFromCapability = !!observabilityCapabilities?.alertManagerEnabled;
     coreRefs.sloEnabled = sloEnabledFromCapability;

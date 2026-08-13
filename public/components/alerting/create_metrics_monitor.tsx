@@ -44,6 +44,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
 import { PromQLEditor } from './promql_editor';
+import { classifiedToastColor, classifiedToastText, extractClassifiedError } from '../common/error';
 import { MetricBrowser } from './metric_browser';
 
 // ============================================================================
@@ -97,8 +98,12 @@ export interface CreateMetricsMonitorProps {
   http?: {
     post: (path: string, options: { body: string }) => Promise<unknown>;
   };
-  /** Toast notification callback */
-  addToast?: (title: string, color?: 'success' | 'danger') => void;
+  /**
+   * Toast notification callback. `text` carries the classified error body
+   * (message + remediation + safe details); mount adapters must forward it and
+   * honor 'warning' so the detailed cause reaches the toast.
+   */
+  addToast?: (title: string, color?: 'success' | 'warning' | 'danger', text?: string) => void;
 }
 
 // ============================================================================
@@ -350,7 +355,10 @@ function buildThresholdChartOption(thresholdValue: number): Record<string, unkno
           symbol: 'none',
           lineStyle: { type: 'dashed', color: '#BD271E', width: 2 },
           data: [{ yAxis: thresholdValue }],
-          label: { formatter: `Threshold: ${thresholdValue}`, position: 'insideEndTop' },
+          label: {
+            formatter: `Threshold: ${thresholdValue}`,
+            position: 'insideEndTop',
+          },
         },
       },
     ],
@@ -407,7 +415,12 @@ const MonitorDetailsSection = React.memo<{
             defaultMessage: 'Description',
           })}{' '}
           <span
-            style={{ fontSize: 12, color: '#98A2B3', fontStyle: 'italic', fontWeight: 'normal' }}
+            style={{
+              fontSize: 12,
+              color: '#98A2B3',
+              fontStyle: 'italic',
+              fontWeight: 'normal',
+            }}
           >
             {i18n.translate('observability.alerting.createMetricsMonitor.descriptionOptional', {
               defaultMessage: '— optional',
@@ -452,7 +465,12 @@ const QuerySection = React.memo<{
   // datasource is provided (e.g. standalone usage), show a placeholder.
   const datasourceOptions = useMemo(() => {
     if (form.datasourceId) {
-      return [{ id: form.datasourceId, name: contextDatasourceName || form.datasourceId }];
+      return [
+        {
+          id: form.datasourceId,
+          name: contextDatasourceName || form.datasourceId,
+        },
+      ];
     }
     return [];
   }, [form.datasourceId, contextDatasourceName]);
@@ -654,7 +672,14 @@ const QuerySection = React.memo<{
             hideToolbar
           />
           <div
-            style={{ position: 'absolute', top: 4, right: 4, zIndex: 2, display: 'flex', gap: 2 }}
+            style={{
+              position: 'absolute',
+              top: 4,
+              right: 4,
+              zIndex: 2,
+              display: 'flex',
+              gap: 2,
+            }}
           >
             <EuiToolTip
               content={i18n.translate(
@@ -754,7 +779,9 @@ const TriggerConditionSection = React.memo<{
             options={OPERATOR_OPTIONS}
             value={form.operator}
             onChange={(e) =>
-              onUpdate({ operator: e.target.value as MetricsMonitorFormState['operator'] })
+              onUpdate({
+                operator: e.target.value as MetricsMonitorFormState['operator'],
+              })
             }
             compressed
             aria-label={i18n.translate(
@@ -991,7 +1018,10 @@ const LabelsSection = React.memo<{
               compressed
               aria-label={i18n.translate(
                 'observability.alerting.createMetricsMonitor.labelKeyAriaLabel',
-                { defaultMessage: 'Label key {index}', values: { index: i + 1 } }
+                {
+                  defaultMessage: 'Label key {index}',
+                  values: { index: i + 1 },
+                }
               )}
             />
           </EuiFlexItem>
@@ -1010,7 +1040,10 @@ const LabelsSection = React.memo<{
               compressed
               aria-label={i18n.translate(
                 'observability.alerting.createMetricsMonitor.labelValueAriaLabel',
-                { defaultMessage: 'Label value {index}', values: { index: i + 1 } }
+                {
+                  defaultMessage: 'Label value {index}',
+                  values: { index: i + 1 },
+                }
               )}
             />
           </EuiFlexItem>
@@ -1129,7 +1162,10 @@ const AnnotationsSection = React.memo<{
               compressed
               aria-label={i18n.translate(
                 'observability.alerting.createMetricsMonitor.annotationKeyAriaLabel',
-                { defaultMessage: 'Annotation key {index}', values: { index: i + 1 } }
+                {
+                  defaultMessage: 'Annotation key {index}',
+                  values: { index: i + 1 },
+                }
               )}
             />
           </EuiFlexItem>
@@ -1144,7 +1180,10 @@ const AnnotationsSection = React.memo<{
               compressed
               aria-label={i18n.translate(
                 'observability.alerting.createMetricsMonitor.annotationValueAriaLabel',
-                { defaultMessage: 'Annotation value {index}', values: { index: i + 1 } }
+                {
+                  defaultMessage: 'Annotation value {index}',
+                  values: { index: i + 1 },
+                }
               )}
             />
           </EuiFlexItem>
@@ -1220,7 +1259,10 @@ const ActionsSection = React.memo<{
                 onClick={() => onDeleteAction(action.id)}
                 aria-label={i18n.translate(
                   'observability.alerting.createMetricsMonitor.deleteActionAriaLabel',
-                  { defaultMessage: 'Delete action {name}', values: { name: action.name } }
+                  {
+                    defaultMessage: 'Delete action {name}',
+                    values: { name: action.name },
+                  }
                 )}
               >
                 {i18n.translate('observability.alerting.createMetricsMonitor.deleteActionButton', {
@@ -1402,9 +1444,10 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
     setForm((prev) => ({ ...prev, ...patch }));
   }, []);
 
-  const handleLabelsUpdate = useCallback((labels: LabelEntry[]) => updateForm({ labels }), [
-    updateForm,
-  ]);
+  const handleLabelsUpdate = useCallback(
+    (labels: LabelEntry[]) => updateForm({ labels }),
+    [updateForm]
+  );
 
   const handleAnnotationsUpdate = useCallback(
     (annotations: AnnotationEntry[]) => updateForm({ annotations }),
@@ -1479,12 +1522,25 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
       onSave(form);
     } catch (err) {
       console.error('CreateMetricsMonitor: rule creation failed', err);
-      addToast?.(
-        i18n.translate('observability.alerting.createMetricsMonitor.toast.failed', {
-          defaultMessage: 'Failed to create alert rule.',
-        }),
-        'danger'
-      );
+      // Surface the server's classified error (specific cause + remediation +
+      // correlation id) instead of a static "Failed to create alert rule."
+      // toast. Falls back to the generic message when no structured error is
+      // present (older server, network error, etc.).
+      const classified = extractClassifiedError(err);
+      if (classified) {
+        addToast?.(
+          classified.title,
+          classifiedToastColor(classified) === 'warning' ? 'warning' : 'danger',
+          classifiedToastText(classified)
+        );
+      } else {
+        addToast?.(
+          i18n.translate('observability.alerting.createMetricsMonitor.toast.failed', {
+            defaultMessage: 'Failed to create alert rule.',
+          }),
+          'danger'
+        );
+      }
     } finally {
       setIsSaving(false);
     }
