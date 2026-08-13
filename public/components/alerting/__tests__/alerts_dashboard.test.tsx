@@ -238,17 +238,10 @@ describe('AlertsDashboard', () => {
     expect(lastCall.endMs).toBe(NOW);
   });
 
-  it('renders the truncated callout when `truncated` is true', () => {
-    const { getByTestId } = render(
-      <AlertsDashboard {...baseProps} alerts={[sampleAlert]} truncated />
-    );
-    expect(getByTestId('alertsTruncatedCallout')).toBeInTheDocument();
-  });
-
-  it('does not render the truncated callout when `truncated` is false/undefined', () => {
-    const { queryByTestId } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
-    expect(queryByTestId('alertsTruncatedCallout')).not.toBeInTheDocument();
-  });
+  // The former inline "truncated" and "fallback" EuiCallOuts have been
+  // migrated to page-level toasts (see useAlertingPageToasts). They are
+  // no longer part of AlertsDashboard's render output — the corresponding
+  // callout render tests were removed.
 
   it('anchors alertManagerDatePicker on a real DOM element (regression: EuiSuperDatePicker drops data-test-subj)', () => {
     // EuiSuperDatePicker doesn't forward arbitrary DOM attributes to its
@@ -264,26 +257,7 @@ describe('AlertsDashboard', () => {
     expect(anchor!.querySelector('.euiSuperDatePicker')).not.toBeNull();
   });
 
-  it('renders the fallback callout listing each fallback datasource', () => {
-    const { getByTestId, getByText } = render(
-      <AlertsDashboard
-        {...baseProps}
-        alerts={[sampleAlert]}
-        fallbackHints={[
-          { datasourceName: 'prom-prod', fallback: 'prometheus-alerts-current-only' },
-        ]}
-      />
-    );
-    expect(getByTestId('alertsFallbackCallout')).toBeInTheDocument();
-    expect(getByText('prom-prod')).toBeInTheDocument();
-  });
-
-  it('does not render the fallback callout when `fallbackHints` is empty', () => {
-    const { queryByTestId } = render(
-      <AlertsDashboard {...baseProps} alerts={[sampleAlert]} fallbackHints={[]} />
-    );
-    expect(queryByTestId('alertsFallbackCallout')).not.toBeInTheDocument();
-  });
+  // Fallback callout render tests removed — see comment above.
 
   // Regression: deselecting all datasources must wipe both the dependent
   // facet selections AND the search box. The Rules tab does this in

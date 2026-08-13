@@ -21,8 +21,11 @@ jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', ()
   toMountPoint: jest.fn((node: unknown) => node),
 }));
 
+// Capture `setToast` calls so tests can assert the page-level toasts fire
+// on the same conditions the removed banner strip used to render for.
+const mockSetToast = jest.fn();
 jest.mock('../../common/toast', () => ({
-  useToast: () => ({ setToast: jest.fn() }),
+  useToast: () => ({ setToast: mockSetToast }),
 }));
 
 // Mock `useAlerts` — this is the hook AlarmsPage consumes for Alerts-tab data.
@@ -39,7 +42,7 @@ jest.mock('../hooks/use_rules_data', () => ({
 }));
 
 // Capture AlertsDashboard props so we can assert `startTime` / `endTime` /
-// `startMs` / `endMs` / `truncated` / `fallbackHints` are forwarded.
+// `startMs` / `endMs` / `datasourceErrorMap` are forwarded.
 const mockDashboard = jest.fn();
 jest.mock('../alerts_dashboard', () => ({
   AlertsDashboard: (props: unknown) => {
@@ -123,6 +126,7 @@ beforeEach(() => {
   mockUseRulesData.mockReturnValue(emptyRulesHookResult);
   mockDashboard.mockClear();
   mockMonitorsTable.mockClear();
+  mockSetToast.mockClear();
   mockGetRuleDetail.mockReset();
   mockCreateMonitor.mockReset();
   mockDeleteMonitor.mockReset();
@@ -234,7 +238,7 @@ describe('AlarmsPage', () => {
     expect(last.endMs).toBeGreaterThan(last.startMs);
   });
 
-  it('forwards `truncated` from hook data.datasourceStatus to AlertsDashboard', async () => {
+  it('fires a "Search incomplete" toast when a datasource reports a truncated result', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
       data: {
@@ -259,11 +263,14 @@ describe('AlarmsPage', () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
-    const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
-    expect(last.truncated).toBe(true);
+    const truncatedToast = mockSetToast.mock.calls.find(
+      (c) => typeof c[0] === 'string' && c[0].includes('Search incomplete')
+    );
+    expect(truncatedToast).toBeDefined();
+    expect(truncatedToast![1]).toBe('warning');
   });
 
-  it('surfaces partial-success datasource errors as warnings', async () => {
+  it('surfaces partial-success datasource errors as a toast + facet error indicator', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
       data: {
@@ -286,14 +293,38 @@ describe('AlarmsPage', () => {
     });
 
     await act(async () => {
-      render(<AlarmsPage {...defaultProps} />);
+      render(
+        <AlarmsPage
+          {...defaultProps}
+          datasources={[
+            {
+              id: 'ds-1',
+              name: 'Local',
+              type: 'opensearch',
+              connection: 'cluster',
+              enabled: true,
+            } as Datasource,
+          ]}
+        />
+      );
     });
 
-    expect(screen.getByText('Some datasources could not be reached')).toBeInTheDocument();
-    expect(screen.getByText(/Failed to fetch anomaly results/)).toBeInTheDocument();
+    // Page-level toast fires — replaces the banner strip.
+    const singleTitleCall = mockSetToast.mock.calls.find(
+      (c) => typeof c[0] === 'string' && c[0].includes('Could not connect to')
+    );
+    expect(singleTitleCall).toBeDefined();
+    expect(singleTitleCall![1]).toBe('warning');
+
+    // AlertsDashboard receives the per-datasource error map, keyed by DS name.
+    // The indicator message is framed with "Could not connect" (matching the
+    // toast) and still carries the underlying error text.
+    const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
+    expect(last.datasourceErrorMap.Local).toMatch(/^Could not connect\./);
+    expect(last.datasourceErrorMap.Local).toContain('AD unavailable');
   });
 
-  it('forwards `fallbackHints` built from datasourceStatus entries with a fallback marker', async () => {
+  it('fires a "Showing current alerts only" toast when a datasource reports a legacy-fallback', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
       data: {
@@ -326,10 +357,12 @@ describe('AlarmsPage', () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
-    const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
-    expect(last.fallbackHints).toEqual([
-      { datasourceName: 'prom-prod', fallback: 'prometheus-alerts-current-only' },
-    ]);
+    const fallbackToast = mockSetToast.mock.calls.find(
+      (c) => typeof c[0] === 'string' && c[0].includes('Showing current alerts only')
+    );
+    expect(fallbackToast).toBeDefined();
+    expect(fallbackToast![1]).toBe('warning');
+    expect(String(fallbackToast![2])).toContain('prom-prod');
   });
 
   it('passes selectedDsIds, startTime, endTime, refreshToken together to useAlerts', async () => {

@@ -21,6 +21,7 @@ import {
   EuiHealth,
   EuiFieldSearch,
   EuiLink,
+  EuiPopover,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -42,6 +43,14 @@ export interface FacetGroupConfig {
   colorMap?: Record<string, string>;
   /** Optional per-option leading icon (e.g. logoOpenSearch / logoPrometheus). */
   iconMap?: Record<string, string>;
+  /**
+   * Optional per-option error message. When present for an option, an alert
+   * icon renders trailing the label; clicking it opens a popover with the
+   * message. Consumers use this to surface per-datasource connectivity
+   * failures next to the failing datasource in the filter panel (rather
+   * than in a page-level banner).
+   */
+  errorMap?: Record<string, string>;
   /** Enables a case-insensitive search input above the options list. */
   searchable?: boolean;
   /** Hide the `(count)` badge next to each option. Defaults to true. */
@@ -86,6 +95,77 @@ export interface FacetFilterGroupProps extends FacetGroupConfig {
 // SLO listing's datasource facet). Imported above.
 
 // ============================================================================
+// FacetErrorIndicator — click-to-open popover attached to a facet row
+// ============================================================================
+//
+// Per-option error icon. Extracted into a sub-component so each row can own
+// its popover state (a hook inside .map() is not permitted). The button's
+// onClick stops propagation so the surrounding checkbox row doesn't toggle
+// selection when the user just wants to read the error.
+interface FacetErrorIndicatorProps {
+  facetId: string;
+  option: string;
+  displayLabel: string;
+  error: string;
+}
+const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
+  facetId,
+  option,
+  displayLabel,
+  error,
+}) => {
+  const [open, setOpen] = useState(false);
+  const stop = (e: React.SyntheticEvent) => e.stopPropagation();
+  const ariaLabel = i18n.translate('observability.alerting.facetFilterPanel.errorIconAriaLabel', {
+    defaultMessage: '{displayLabel} — connection error, click for details',
+    values: { displayLabel },
+  });
+  return (
+    <EuiPopover
+      isOpen={open}
+      closePopover={() => setOpen(false)}
+      panelPaddingSize="s"
+      anchorPosition="rightCenter"
+      button={
+        <button
+          type="button"
+          aria-label={ariaLabel}
+          onClick={(e) => {
+            stop(e);
+            setOpen((v) => !v);
+          }}
+          onMouseDown={stop}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: 0,
+            border: 'none',
+            background: 'transparent',
+            cursor: 'pointer',
+            marginLeft: 4,
+            flexShrink: 0,
+          }}
+          data-test-subj={`facetGroup-${facetId}-error-${option}`}
+        >
+          <EuiIcon type="alert" color="danger" size="s" />
+        </button>
+      }
+    >
+      <div
+        style={{ maxWidth: 260 }}
+        data-test-subj={`facetGroup-${facetId}-error-${option}-popover`}
+      >
+        <EuiText size="xs">
+          <strong>{displayLabel}</strong>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText size="xs">{error}</EuiText>
+      </div>
+    </EuiPopover>
+  );
+};
+
+// ============================================================================
 // FacetFilterGroup — a single collapsible facet section
 // ============================================================================
 
@@ -99,6 +179,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
   displayMap,
   colorMap,
   iconMap,
+  errorMap,
   searchable,
   showCounts = true,
   showOptionCount = false,
@@ -289,6 +370,14 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                   )}
                   {/* Explicit 12/18 preserves Alert Manager's existing look. */}
                   <TruncatedLabel text={displayLabel} fontSize={12} lineHeight={18} />
+                  {errorMap?.[opt] && (
+                    <FacetErrorIndicator
+                      facetId={id}
+                      option={opt}
+                      displayLabel={displayLabel}
+                      error={errorMap[opt]}
+                    />
+                  )}
                 </span>
                 {showCounts && (
                   <EuiText size="xs" color="subdued" className="altFacetCount">

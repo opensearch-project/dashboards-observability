@@ -69,6 +69,21 @@ describe('FacetFilterGroup', () => {
     expect(queryByTestId('facetGroup-status-clear')).not.toBeInTheDocument();
   });
 
+  it('renders an error indicator next to affected options and reveals the message on click', () => {
+    const { getByTestId, queryByTestId } = render(
+      <FacetFilterGroup {...defaultProps} errorMap={{ active: 'Cluster unreachable (timeout)' }} />
+    );
+    // The alert-icon button is only present for options in errorMap
+    expect(getByTestId('facetGroup-status-error-active')).toBeInTheDocument();
+    expect(queryByTestId('facetGroup-status-error-pending')).not.toBeInTheDocument();
+    // Popover content is not in the DOM until the icon is clicked
+    expect(queryByTestId('facetGroup-status-error-active-popover')).not.toBeInTheDocument();
+    fireEvent.click(getByTestId('facetGroup-status-error-active'));
+    expect(getByTestId('facetGroup-status-error-active-popover')).toHaveTextContent(
+      'Cluster unreachable (timeout)'
+    );
+  });
+
   it('caps rendered options at initialVisible and toggles "+N more" / "Show less"', () => {
     const props: FacetFilterGroupProps = {
       ...defaultProps,

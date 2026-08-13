@@ -54,12 +54,12 @@ import { NotificationRoutingPanel } from './notification_routing_panel';
 import type { MonitorBackendType } from './monitor_form_components';
 import { useAlerts } from './hooks/use_alerts';
 import { useAlertingPluginAvailability } from './hooks/use_alerting_plugin_availability';
+import { useAlertingPageToasts } from './hooks/use_alerting_page_toasts';
 import { useDatasourceSelection } from './hooks/use_datasource_selection';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';
 import { useRulesData } from './hooks/use_rules_data';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { useTimeRange } from './hooks/use_time_range';
-import { AlarmsPageCallouts } from './alarms_page_callouts';
 import { coreRefs } from '../../framework/core_refs';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 import { observabilityID, observabilityTitle } from '../../../common/constants/shared';
@@ -1329,8 +1329,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             pickerEnd={endTime}
             onTimeChange={handleTimeChange}
             onRefresh={handleRefreshTime}
-            truncated={alertsTruncated}
-            fallbackHints={alertsFallbackHints}
+            datasourceErrorMap={datasourceErrorMapByName}
           />
         </>
       );
@@ -1365,6 +1364,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onDatasourceChange={handleDatasourceChange}
           maxDatasources={maxDatasources}
           onDatasourceCapReached={handleDatasourceCapReached}
+          datasourceErrorMap={datasourceErrorMapByName}
           initialSearchQuery={deepLink.q}
         />
       );
@@ -1375,12 +1375,90 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return null;
   };
 
-  // Merge Rules-path `rulesWarnings` with the hook-driven `alertsWarnings`
-  // so the callout block renders a single warning regardless of which tab
-  // is active. Keyed by datasource name to dedupe when both paths report
-  // the same backend (possible if the user flips tabs rapidly while a slow
-  // datasource is still timing out on both flows).
-  const activeWarnings = activeTab === 'alerts' ? alertsWarnings : rulesWarnings;
+  // Merge datasource-connection failures from every source that reports them:
+  //   - `alertsWarnings`: unified alerts-fetch datasourceStatus[].error
+  //   - `rulesWarnings`:  unified rules-fetch datasourceStatus[].error
+  //   - alerting-plugin probe: OS datasources whose `opensearch-alerting`
+  //     backend didn't respond at all — flagged individually here (in addition
+  //     to the aggregate "plugin not detected" toast when EVERY OS DS fails).
+  //
+  // Deduped by datasource id so a slow DS reporting the same error on both
+  // paths doesn't produce a doubled indicator. The FIRST error wins; later
+  // duplicates are dropped. Output shape:
+  //   - `datasourceErrorsById`  for toast messaging (stable id)
+  //   - `datasourceErrorsByName` for the FacetFilterGroup indicator (keyed
+  //     by option label, which is the datasource name)
+  const datasourceIssues = useMemo(() => {
+    const byId = new Map<string, { datasourceId: string; datasourceName: string; error: string }>();
+    const addOnce = (dsName: string, message: string) => {
+      // Look up id by name — both `alertsWarnings` and `rulesWarnings`
+      // carry the display name, not the id. Fall back to name as the key
+      // if the datasource list hasn't hydrated yet.
+      const ds = datasources.find((d) => d.name === dsName);
+      const id = ds?.id ?? dsName;
+      if (!byId.has(id)) byId.set(id, { datasourceId: id, datasourceName: dsName, error: message });
+    };
+    for (const w of alertsWarnings) addOnce(w.datasourceName, w.error);
+    for (const w of rulesWarnings) addOnce(w.datasourceName, w.error);
+    // Alerting-plugin probe: only decorate individual DSes when the probe
+    // is finished (avoids flashing the indicator during the initial mount)
+    // AND we're not already in the "everything failed" state — that latter
+    // condition already fires its own aggregate toast, and adorning every
+    // row on top would just be noise.
+    if (!alertingAvailability.isLoading && !alertingAvailability.unavailable) {
+      // The probe only knows the cluster didn't return a 200 — that covers a
+      // missing plugin, a transient timeout (10s abort), or a network blip.
+      // Don't assert the plugin is definitively uninstalled; state what we
+      // actually observed and offer the most likely cause.
+      const probeFailedText = i18n.translate(
+        'observability.alerting.alarmsPage.datasourceErrors.probeFailed',
+        {
+          defaultMessage:
+            'The cluster did not respond to the alerting probe. The opensearch-alerting plugin may be missing, or the cluster may be temporarily unreachable.',
+        }
+      );
+      for (const id of alertingAvailability.unavailableDsIds) {
+        const ds = datasources.find((d) => d.id === id);
+        if (!ds) continue;
+        if (!byId.has(id)) {
+          byId.set(id, { datasourceId: id, datasourceName: ds.name, error: probeFailedText });
+        }
+      }
+    }
+    return Array.from(byId.values());
+  }, [alertsWarnings, rulesWarnings, alertingAvailability, datasources]);
+
+  const datasourceErrorMapByName = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const issue of datasourceIssues) {
+      // Frame the raw error with the same "Could not connect" language the
+      // toast uses so the indicator popover reads as a complete thought
+      // (the raw error alone — e.g. "getaddrinfo ENOTFOUND opensearch" — is
+      // opaque without it). The datasource name is already shown as the
+      // popover heading, so it is not repeated here.
+      m[issue.datasourceName] = i18n.translate(
+        'observability.alerting.alarmsPage.datasourceErrors.indicatorMessage',
+        {
+          defaultMessage: 'Could not connect. {error}',
+          values: { error: issue.error },
+        }
+      );
+    }
+    return m;
+  }, [datasourceIssues]);
+
+  // Fire toasts on transitions for every condition the callout strip used
+  // to cover, plus the two inline dashboard warnings (truncation + Prom
+  // legacy-fallback). See the hook for the per-condition dedupe strategy.
+  useAlertingPageToasts({
+    alertsErrorMessage,
+    rulesErrorMessage: error,
+    alertingPluginMissing: alertingAvailability.unavailable,
+    alertingProbeLoading: alertingAvailability.isLoading,
+    datasourceIssues,
+    alertsTruncated,
+    fallbackHints: alertsFallbackHints,
+  });
 
   // Link back to the legacy alerting dashboard (the standalone `alerts` app's
   // `#/dashboard` route). Built from `basePath.get()` (which carries any
@@ -1394,14 +1472,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
   return (
     <div data-test-subj="alertManagerPage" className="altPageRoot">
-      <AlarmsPageCallouts
-        alertingPluginMissing={alertingAvailability.unavailable}
-        alertingProbeLoading={alertingAvailability.isLoading}
-        alertsErrorMessage={alertsErrorMessage}
-        activeTab={activeTab}
-        generalError={error}
-        warnings={activeWarnings}
-      />
+      {/* Page-top banner callouts (errors, alerting-plugin missing,           */}
+      {/* per-datasource unreachable, alerts truncation, Prom legacy fallback) */}
+      {/* have been migrated to toasts — see `useAlertingPageToasts`. Per-DS   */}
+      {/* connection errors are ALSO surfaced next to the affected row in the  */}
+      {/* datasource facet via `datasourceErrorMapByName`.                     */}
       {!newExperienceCalloutDismissed && (
         <EuiCallOut
           size="s"
@@ -1413,7 +1488,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           title={
             <FormattedMessage
               id="observability.alerting.alarmsPage.newExperienceCallout"
-              defaultMessage="Welcome to the new alerting experience view your OpenSearch and Prometheus alerts together in one place. Prefer the previous view? {oldExperienceLink}"
+              defaultMessage="Welcome to the new alerting experience. View your OpenSearch and Prometheus alerts together in one place. Prefer the previous view? {oldExperienceLink}."
               values={{
                 oldExperienceLink: (
                   <EuiLink data-test-subj="alertManagerOldExperienceLink" href={oldExperienceHref}>

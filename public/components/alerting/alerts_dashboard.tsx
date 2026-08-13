@@ -26,18 +26,13 @@ import {
   EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiResizableContainer,
-  EuiCallOut,
   EuiHorizontalRule,
   EuiSuperDatePicker,
   EuiSplitPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import {
-  DatasourceFetchFallback,
-  UnifiedAlertSummary,
-  Datasource,
-} from '../../../common/types/alerting';
+import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { filterAlerts } from '../../../common/services/alerting/filter';
 import { AlertTimeline } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
@@ -458,18 +453,14 @@ export interface AlertsDashboardProps {
   /** Fires when the user clicks the picker's refresh button. */
   onRefresh: (range: { start: string; end: string }) => void;
   /**
-   * Set by the parent when any backend reported a hard cap on returned
-   * alerts (e.g. the OpenSearch 1000-alert post-filter cap). Drives a
-   * warning callout near the timeline telling the user to narrow the
-   * range.
+   * Per-datasource error text, keyed by datasource NAME (the label key used
+   * by the datasource facet). Rendered as an error icon next to the
+   * affected row in the filter panel; click opens a popover with details.
+   * Truncation / fallback hints and connection failures are ALSO surfaced
+   * by page-level toasts — this indicator is the persistent home for the
+   * details.
    */
-  truncated?: boolean;
-  /**
-   * Per-datasource hints from the unified fetch, used to surface backend
-   * fallbacks (e.g. Prometheus empty-matrix → legacy /alerts active-only).
-   * Rendered as a callout above the timeline.
-   */
-  fallbackHints?: Array<{ datasourceName: string; fallback: DatasourceFetchFallback }>;
+  datasourceErrorMap?: Record<string, string>;
 }
 
 export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
@@ -491,8 +482,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   pickerEnd,
   onTimeChange,
   onRefresh,
-  truncated,
-  fallbackHints,
+  datasourceErrorMap,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<AlertFilterState>(emptyAlertFilters());
@@ -522,12 +512,14 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   }, [datasources]);
 
   // Unique values for facets
-  const uniqueSeverities = useMemo(() => collectAlertUniqueValues(alerts, (a) => a.severity), [
-    alerts,
-  ]);
-  const uniqueStates = useMemo(() => collectAlertUniqueValues(alerts, getAlertDisplayState), [
-    alerts,
-  ]);
+  const uniqueSeverities = useMemo(
+    () => collectAlertUniqueValues(alerts, (a) => a.severity),
+    [alerts]
+  );
+  const uniqueStates = useMemo(
+    () => collectAlertUniqueValues(alerts, getAlertDisplayState),
+    [alerts]
+  );
   const uniqueAlertKinds = useMemo(() => collectAlertUniqueValues(alerts, getAlertKind), [alerts]);
   const labelKeys = useMemo(() => collectAlertLabelKeys(alerts), [alerts]);
 
@@ -877,10 +869,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     ? selectedDsIds.length === 0
       ? 'no-ds'
       : rulesTotal === 0
-      ? 'no-rules'
-      : alerts.length === 0
-      ? 'no-alerts'
-      : null
+        ? 'no-rules'
+        : alerts.length === 0
+          ? 'no-alerts'
+          : null
     : null;
 
   return (
@@ -934,6 +926,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     defaultMessage: 'Datasource',
                   })}
                   iconMap={datasourceIconMap}
+                  errorMap={datasourceErrorMap}
                   options={datasourceEntries.map((e) => e.label)}
                   selected={selectedDsIds
                     .map((id) => datasourceEntries.find((e) => e.id === id)?.label || '')
@@ -1114,70 +1107,12 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           >
             {
               <>
-                {/* ---- Backend hints / fallbacks ---- */}
-                {/* Surfaced here (above the timeline) because both hints      */}
-                {/* directly explain what the chart and table are showing:     */}
-                {/*   - `truncated` → the backend capped results (OS 1000      */}
-                {/*     post-filter cap) so the chart is missing bars and the  */}
-                {/*     table row count is lower than reality.                 */}
-                {/*   - `fallbackHints` → a Prometheus datasource returned no  */}
-                {/*     historical matrix and fell back to the legacy         */}
-                {/*     `/api/v1/alerts` endpoint, which is active-only and   */}
-                {/*     does not reflect the selected time range.             */}
-                {truncated && (
-                  <>
-                    <EuiCallOut
-                      title={i18n.translate(
-                        'observability.alerting.dashboard.truncatedCallout.title',
-                        {
-                          defaultMessage: 'Search incomplete — too many alerts to scan',
-                        }
-                      )}
-                      color="warning"
-                      iconType="alert"
-                      size="s"
-                      data-test-subj="alertsTruncatedCallout"
-                    >
-                      <p>
-                        <FormattedMessage
-                          id="observability.alerting.dashboard.truncatedCallout.body"
-                          defaultMessage="Narrow the time range or refine your filters and try again."
-                        />
-                      </p>
-                    </EuiCallOut>
-                    <EuiSpacer size="s" />
-                  </>
-                )}
-                {fallbackHints && fallbackHints.length > 0 && (
-                  <>
-                    <EuiCallOut
-                      title={i18n.translate(
-                        'observability.alerting.dashboard.fallbackCallout.title',
-                        {
-                          defaultMessage: 'Showing current alerts only',
-                        }
-                      )}
-                      color="warning"
-                      iconType="alert"
-                      size="s"
-                      data-test-subj="alertsFallbackCallout"
-                    >
-                      {fallbackHints.map((h, i) => (
-                        <p key={i}>
-                          <FormattedMessage
-                            id="observability.alerting.dashboard.fallbackCallout.entry"
-                            defaultMessage="{datasourceName}: historical alert data unavailable; showing currently active alerts instead ({fallback})."
-                            values={{
-                              datasourceName: <strong>{h.datasourceName}</strong>,
-                              fallback: h.fallback,
-                            }}
-                          />
-                        </p>
-                      ))}
-                    </EuiCallOut>
-                    <EuiSpacer size="s" />
-                  </>
-                )}
+                {/* Backend hints (truncation / Prometheus legacy fallback) are   */}
+                {/* now surfaced as page-level toasts (see                        */}
+                {/* useAlertingPageToasts). The banners that used to live here    */}
+                {/* were removed to keep the visualization row anchored to the    */}
+                {/* top of the panel; the toasts are event-driven so the user is  */}
+                {/* still notified when the condition transitions.               */}
 
                 {/* ---- Visualization Row ---- */}
                 <EuiFlexGroup gutterSize="m" responsive={true} className="altVizRow">
