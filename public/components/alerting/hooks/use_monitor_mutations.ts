@@ -13,6 +13,7 @@ import { useMemo } from 'react';
 import { MonitorMutationsClient } from '../mutations/monitor_mutations_client';
 import type {
   AcknowledgeAlertResponse,
+  AdResourceActionResponse,
   MonitorDeleteResponse,
   MonitorResponse,
   PrometheusRuleResponse,
@@ -35,6 +36,12 @@ export interface UseMonitorMutationsResult {
     groupName: string,
     ruleName?: string
   ) => Promise<{ success: boolean }>;
+  deleteDetector: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
+  startDetector: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
+  stopDetector: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
+  deleteForecaster: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
+  startForecaster: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
+  stopForecaster: (id: string, dsId: string) => Promise<AdResourceActionResponse>;
   acknowledgeAlert: (
     alertId: string,
     datasourceId?: string,
@@ -52,6 +59,12 @@ export function useMonitorMutations(): UseMonitorMutationsResult {
       createPrometheusRule: (data, dsId) => client.createPrometheusRule(data, dsId),
       deletePrometheusRule: (dsId, groupName, ruleName) =>
         client.deletePrometheusRule(dsId, groupName, ruleName),
+      deleteDetector: (id, dsId) => client.deleteDetector(id, dsId),
+      startDetector: (id, dsId) => client.startDetector(id, dsId),
+      stopDetector: (id, dsId) => client.stopDetector(id, dsId),
+      deleteForecaster: (id, dsId) => client.deleteForecaster(id, dsId),
+      startForecaster: (id, dsId) => client.startForecaster(id, dsId),
+      stopForecaster: (id, dsId) => client.stopForecaster(id, dsId),
       acknowledgeAlert: (alertId, datasourceId, monitorId) =>
         client.acknowledgeAlert(alertId, datasourceId, monitorId),
     }),

@@ -39,6 +39,7 @@ import {
 import { MonitorsTable } from './monitors_table';
 import { CreateMonitor, MonitorFormState } from './create_monitor';
 import type { PrometheusFormState } from './create_monitor/create_monitor_types';
+import { CreateAdRuleFlyout, CreateAdRuleType } from './create_ad_rule_flyout';
 import { EditMonitor } from './create_monitor/edit_monitor';
 import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
@@ -61,6 +62,7 @@ import { ALERT_MANAGER_MAX_DATASOURCES_SETTING } from '../../../common/constants
 import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
 import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
 import { showMonitorCreatedToast } from './toast_helpers';
+import { isAdResourceRunning, isDetectorRule, isForecasterRule } from './shared_constants';
 import './alerting.scss';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
 import {
@@ -95,6 +97,14 @@ interface AlarmsPageProps {
 }
 
 type TabId = 'alerts' | 'rules' | 'routing';
+interface AdEditTarget {
+  ruleType: CreateAdRuleType;
+  id: string;
+  datasourceId: string;
+  initialStep?: 'define' | 'model';
+}
+
+type AdResourceLifecycleAction = 'start' | 'stop';
 
 /**
  * Parse a hash-route deep link of the form `#/rules?q=<query>&ds=<dsId>`
@@ -448,12 +458,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     },
     [rules, deletedRuleIds]
   );
-  // The popover's "Logs" entry maps to an OpenSearch monitor; "Metrics" toasts
-  // "coming soon" until PR 2 lights up the Prom create flyout. When the user
-  // picks Logs the flyout is forced to the OS variant via this override even
-  // if the parent-page selected datasource happens to be Prometheus.
+  // The popover's "Logs" entry maps to an OpenSearch monitor and "Metrics"
+  // maps to a Prometheus rule. When the user picks Logs the flyout is forced
+  // to the OS variant via this override even if the parent-page selected
+  // datasource happens to be Prometheus.
   const [createBackendType, setCreateBackendType] = useState<MonitorBackendType | null>(null);
+  const [createAdRuleType, setCreateAdRuleType] = useState<CreateAdRuleType | null>(null);
   const [editTarget, setEditTarget] = useState<{ dsId: string; ruleId: string } | null>(null);
+  const [editAdTarget, setEditAdTarget] = useState<AdEditTarget | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<UnifiedAlertSummary | null>(null);
   // Whether the "new alerting experience" intro callout has been dismissed.
   // Persisted in localStorage so it stays hidden across reloads once closed.
@@ -592,6 +604,80 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     }
   };
 
+  const callAdResourceLifecycleMutation = async (
+    rule: UnifiedRuleSummary,
+    action: AdResourceLifecycleAction
+  ) => {
+    if (isDetectorRule(rule)) {
+      if (action === 'stop') return mutations.stopDetector(rule.id, rule.datasourceId);
+      return mutations.startDetector(rule.id, rule.datasourceId);
+    }
+
+    if (isForecasterRule(rule)) {
+      if (action === 'stop') return mutations.stopForecaster(rule.id, rule.datasourceId);
+      return mutations.startForecaster(rule.id, rule.datasourceId);
+    }
+
+    throw new Error('Lifecycle actions are only supported for detectors and forecasters');
+  };
+
+  const getOptimisticLifecycleState = (
+    rule: UnifiedRuleSummary,
+    action: AdResourceLifecycleAction
+  ): Pick<UnifiedRuleSummary, 'enabled' | 'status'> => {
+    if (action === 'stop') return { enabled: false, status: 'Stopped' };
+    return {
+      enabled: true,
+      status: isForecasterRule(rule) ? 'Initializing forecast' : 'Initializing',
+    };
+  };
+
+  const handleAdResourceLifecycle = async (
+    resources: UnifiedRuleSummary[],
+    action: AdResourceLifecycleAction
+  ) => {
+    const succeeded: UnifiedRuleSummary[] = [];
+
+    for (const resource of resources) {
+      if (!isDetectorRule(resource) && !isForecasterRule(resource)) continue;
+      try {
+        await callAdResourceLifecycleMutation(resource, action);
+        succeeded.push(resource);
+      } catch (e: unknown) {
+        addToast(
+          i18n.translate('observability.alerting.alarmsPage.toast.adResourceLifecycleFailed', {
+            defaultMessage: 'Failed to {action} {name}',
+            values: { action, name: resource.name },
+          }),
+          'danger',
+          extractServerErrorMessage(e)
+        );
+      }
+    }
+
+    if (succeeded.length > 0) {
+      setRules((prev) =>
+        prev.map((rule) => {
+          const updated = succeeded.find((resource) => resource.id === rule.id);
+          return updated
+            ? {
+                ...rule,
+                ...getOptimisticLifecycleState(updated, action),
+              }
+            : rule;
+        })
+      );
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.adResourcesLifecycleUpdated', {
+          defaultMessage:
+            '{count} {count, plural, one {resource} other {resources}} {action, select, start {started} stop {stopped} other {updated}}',
+          values: { count: succeeded.length, action },
+        })
+      );
+      refetchRules();
+    }
+  };
+
   const handleDeleteRules = async (ids: string[]) => {
     const failed: string[] = [];
     for (const id of ids) {
@@ -618,6 +704,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           // only removed once it becomes empty).
           const groupName = rule.group || rule.name;
           await mutations.deletePrometheusRule(rule.datasourceId, groupName, rule.name);
+        } else if (isDetectorRule(rule)) {
+          if (isAdResourceRunning(rule)) {
+            await mutations.stopDetector(id, rule.datasourceId);
+          }
+          await mutations.deleteDetector(id, rule.datasourceId);
+        } else if (isForecasterRule(rule)) {
+          if (isAdResourceRunning(rule)) {
+            await mutations.stopForecaster(id, rule.datasourceId);
+          }
+          await mutations.deleteForecaster(id, rule.datasourceId);
         } else {
           await mutations.deleteMonitor(id, rule.datasourceId);
         }
@@ -636,7 +732,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     if (succeeded.length > 0) {
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.monitorsDeleted', {
-          defaultMessage: '{count} alert rule(s) deleted',
+          defaultMessage: '{count} selected resource(s) deleted',
           values: { count: succeeded.length },
         })
       );
@@ -864,6 +960,58 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     }
     return dsId;
   };
+
+  const resolveOpenSearchDatasourceId = useCallback((): string | null => {
+    const selected = selectedDsIds
+      .map((id) => datasources.find((ds) => ds.id === id))
+      .filter((ds): ds is Datasource => !!ds);
+    const openSearchDatasource = selected.find((ds) => ds.type === 'opensearch');
+    if (!openSearchDatasource) {
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.selectOpenSearchDatasource', {
+          defaultMessage: 'Select an OpenSearch datasource before creating AD resources.',
+        }),
+        'warning'
+      );
+      return null;
+    }
+    return openSearchDatasource.id;
+  }, [addToast, datasources, selectedDsIds]);
+
+  const handleCreateADResource = useCallback(
+    (resourceType: 'detector' | 'forecaster') => {
+      if (resolveOpenSearchDatasourceId() === null) return;
+      setCreateAdRuleType(resourceType);
+    },
+    [resolveOpenSearchDatasourceId]
+  );
+
+  const handleEditDetectorSettings = useCallback((detector: UnifiedRuleSummary) => {
+    setEditAdTarget({
+      ruleType: 'detector',
+      id: detector.id,
+      datasourceId: detector.datasourceId,
+      initialStep: 'define',
+    });
+  }, []);
+
+  const handleEditDetectorFeatures = useCallback((detector: UnifiedRuleSummary) => {
+    setEditAdTarget({
+      ruleType: 'detector',
+      id: detector.id,
+      datasourceId: detector.datasourceId,
+      initialStep: 'model',
+    });
+  }, []);
+
+  const handleEditForecaster = useCallback((forecaster: UnifiedRuleSummary) => {
+    setEditAdTarget({
+      ruleType: 'forecaster',
+      id: forecaster.id,
+      datasourceId: forecaster.datasourceId,
+      initialStep: 'define',
+    });
+  }, []);
 
   // OS create flyout only authors PPL monitors; Prom rules pass raw form state
   // through (PR 2 will add the Prom transform).
@@ -1165,6 +1313,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onDelete={handleDeleteRules}
           onClone={handleCloneRule}
           onEdit={(monitor) => setEditTarget({ dsId: monitor.datasourceId, ruleId: monitor.id })}
+          onEditDetectorSettings={handleEditDetectorSettings}
+          onEditDetectorFeatures={handleEditDetectorFeatures}
+          onEditForecaster={handleEditForecaster}
+          onStartResources={(resources) => handleAdResourceLifecycle(resources, 'start')}
+          onStopResources={(resources) => handleAdResourceLifecycle(resources, 'stop')}
           onToggleEnabled={handleToggleMonitorEnabled}
           onCreateMonitor={(type) => {
             if (type === 'logs') {
@@ -1173,6 +1326,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             } else if (type === 'metrics') {
               setCreateBackendType('prometheus');
               setShowCreateMonitor(true);
+            } else if (type === 'detector' || type === 'forecaster') {
+              handleCreateADResource(type);
             }
           }}
           selectedDsIds={selectedDsIds}
@@ -1298,6 +1453,32 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onClearPplSubmitError={() => setPplSubmitError(null)}
         />
       ) : null}
+      {createAdRuleType && (
+        <CreateAdRuleFlyout
+          ruleType={createAdRuleType}
+          datasources={datasources}
+          selectedDsIds={selectedDsIds}
+          onCancel={() => setCreateAdRuleType(null)}
+          onCreated={() => {
+            setCreateAdRuleType(null);
+            refetchRules();
+          }}
+        />
+      )}
+      {editAdTarget && (
+        <CreateAdRuleFlyout
+          mode="edit"
+          ruleType={editAdTarget.ruleType}
+          editTarget={editAdTarget}
+          datasources={datasources}
+          selectedDsIds={selectedDsIds}
+          onCancel={() => setEditAdTarget(null)}
+          onUpdated={() => {
+            setEditAdTarget(null);
+            refetchRules();
+          }}
+        />
+      )}
       {editTarget && (
         <EditMonitor
           dsId={editTarget.dsId}

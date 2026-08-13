@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 // Stub flyout to avoid pulling in its dependency tree
 jest.mock('../monitor_detail_flyout', () => ({
@@ -52,7 +52,7 @@ const sampleRule = (overrides = {}) => ({
 // display-and-interaction ones the component currently accepts.
 const defaultProps = {
   rules: [sampleRule()],
-  datasources: ([{ id: 'ds-1', name: 'prom1', type: 'prometheus' }] as unknown) as Datasource[],
+  datasources: [{ id: 'ds-1', name: 'prom1', type: 'prometheus' }] as unknown as Datasource[],
   loading: false,
   onDelete: jest.fn(),
   selectedDsIds: ['ds-1'],
@@ -93,12 +93,14 @@ describe('MonitorsTable', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /sample-http-responses-detector/i }));
+    const detectorLink = screen.getByRole('button', { name: /sample-http-responses-detector/i });
+    expect(detectorLink.closest('tr')).toHaveTextContent('Anomaly Detector');
+    fireEvent.click(detectorLink);
 
     expect(screen.getByTestId('detectorFlyout')).toBeInTheDocument();
   });
 
-  it('opens the forecaster flyout and keeps forecasters out of bulk monitor selection', () => {
+  it('opens the forecaster flyout and allows forecaster selection', () => {
     render(
       <MonitorsTable
         {...defaultProps}
@@ -115,10 +117,109 @@ describe('MonitorsTable', () => {
       />
     );
 
-    expect(screen.getByLabelText('Select sample-cpu-forecaster')).toBeDisabled();
+    expect(screen.getByLabelText('Select sample-cpu-forecaster')).not.toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: /sample-cpu-forecaster/i }));
 
     expect(screen.getByTestId('forecasterFlyout')).toBeInTheDocument();
+  });
+
+  it('shows start and stop actions for selected detector and forecaster rows', async () => {
+    const onStartResources = jest.fn();
+    const onStopResources = jest.fn();
+    const stoppedDetector = sampleRule({
+      id: 'det-1',
+      name: 'stopped-detector',
+      definitionType: 'detector',
+      monitorType: 'detector',
+      enabled: false,
+      status: 'Stopped' as const,
+      severity: 'info',
+      datasourceType: 'opensearch',
+    });
+    const runningForecaster = sampleRule({
+      id: 'forecast-1',
+      name: 'running-forecaster',
+      definitionType: 'forecaster',
+      monitorType: 'forecaster',
+      enabled: true,
+      status: 'Running' as const,
+      severity: 'info',
+      datasourceType: 'opensearch',
+    });
+
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        rules={[stoppedDetector, runningForecaster]}
+        onStartResources={onStartResources}
+        onStopResources={onStopResources}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText('Select stopped-detector'));
+    fireEvent.click(screen.getByTestId('alertManagerStartSelectedResources'));
+    await waitFor(() =>
+      expect(onStartResources).toHaveBeenCalledWith([expect.objectContaining({ id: 'det-1' })])
+    );
+    await waitFor(() =>
+      expect(screen.queryByTestId('alertManagerStartSelectedResources')).not.toBeInTheDocument()
+    );
+
+    fireEvent.click(screen.getByLabelText('Select running-forecaster'));
+    fireEvent.click(screen.getByTestId('alertManagerStopSelectedResources'));
+    await waitFor(() =>
+      expect(onStopResources).toHaveBeenCalledWith([expect.objectContaining({ id: 'forecast-1' })])
+    );
+  });
+
+  it('surfaces detector and forecaster create actions for OpenSearch datasources', () => {
+    const onCreateMonitor = jest.fn();
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        datasources={[{ id: 'os-1', name: 'local', type: 'opensearch' }] as unknown as Datasource[]}
+        selectedDsIds={['os-1']}
+        onCreateMonitor={onCreateMonitor}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    fireEvent.click(screen.getByText('Anomaly detection rule'));
+    expect(onCreateMonitor).toHaveBeenCalledWith('detector');
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    fireEvent.click(screen.getByText('Forecasting rule'));
+    expect(onCreateMonitor).toHaveBeenCalledWith('forecaster');
+  });
+
+  it('disables detector and forecaster creation for an AOSS datasource', () => {
+    const onCreateMonitor = jest.fn();
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        datasources={
+          [
+            {
+              id: 'aoss-1',
+              name: 'serverless',
+              type: 'opensearch',
+              mdsId: 'aoss-1',
+              engineType: 'OpenSearch Serverless',
+            },
+          ] as Datasource[]
+        }
+        selectedDsIds={['aoss-1']}
+        onCreateMonitor={onCreateMonitor}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    expect(
+      screen.getByLabelText('Create anomaly detection rule').closest('.euiListGroupItem')
+    ).toHaveClass('euiListGroupItem-isDisabled');
+    expect(
+      screen.getByLabelText('Create forecasting rule').closest('.euiListGroupItem')
+    ).toHaveClass('euiListGroupItem-isDisabled');
   });
 
   // Regression: deselecting all datasources must wipe both the dependent

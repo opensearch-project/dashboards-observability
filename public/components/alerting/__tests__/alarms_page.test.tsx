@@ -33,6 +33,11 @@ jest.mock('../hooks/use_alerts', () => ({
   useAlerts: (args: unknown) => mockUseAlerts(args),
 }));
 
+const mockUseRulesData = jest.fn();
+jest.mock('../hooks/use_rules_data', () => ({
+  useRulesData: (args: unknown) => mockUseRulesData(args),
+}));
+
 // Capture AlertsDashboard props so we can assert `startTime` / `endTime` /
 // `startMs` / `endMs` / `truncated` / `fallbackHints` are forwarded.
 const mockDashboard = jest.fn();
@@ -66,10 +71,19 @@ jest.mock('../query_services/alerting_opensearch_service', () => ({
 }));
 
 const mockCreateMonitor = jest.fn();
+const mockDeleteMonitor = jest.fn();
+const mockDeleteDetector = jest.fn();
+const mockStopDetector = jest.fn();
+const mockDeleteForecaster = jest.fn();
+const mockStopForecaster = jest.fn();
 jest.mock('../hooks/use_monitor_mutations', () => ({
   useMonitorMutations: () => ({
     createMonitor: mockCreateMonitor,
-    deleteMonitor: jest.fn(),
+    deleteMonitor: mockDeleteMonitor,
+    deleteDetector: mockDeleteDetector,
+    stopDetector: mockStopDetector,
+    deleteForecaster: mockDeleteForecaster,
+    stopForecaster: mockStopForecaster,
     acknowledgeAlert: jest.fn(),
   }),
 }));
@@ -91,13 +105,35 @@ const emptyHookResult = {
   refetch: jest.fn(),
 };
 
+const emptyRulesHookResult = {
+  rules: [],
+  rulesTotal: 0,
+  isLoading: false,
+  error: null,
+  warnings: [],
+  setRules: jest.fn(),
+  setRulesTotal: jest.fn(),
+  refetch: jest.fn(),
+};
+
 beforeEach(() => {
   mockUseAlerts.mockReset();
   mockUseAlerts.mockReturnValue(emptyHookResult);
+  mockUseRulesData.mockReset();
+  mockUseRulesData.mockReturnValue(emptyRulesHookResult);
   mockDashboard.mockClear();
   mockMonitorsTable.mockClear();
   mockGetRuleDetail.mockReset();
   mockCreateMonitor.mockReset();
+  mockDeleteMonitor.mockReset();
+  mockDeleteDetector.mockReset();
+  mockStopDetector.mockReset();
+  mockDeleteForecaster.mockReset();
+  mockStopForecaster.mockReset();
+  mockDeleteDetector.mockResolvedValue({ ok: true });
+  mockStopDetector.mockResolvedValue({ ok: true });
+  mockDeleteForecaster.mockResolvedValue({ ok: true });
+  mockStopForecaster.mockResolvedValue({ ok: true });
   try {
     window.sessionStorage.clear();
   } catch (_e) {
@@ -401,6 +437,56 @@ describe('AlarmsPage', () => {
       'ds-1'
     );
   });
+
+  it.each([
+    {
+      definitionType: 'detector',
+      stop: mockStopDetector,
+      remove: mockDeleteDetector,
+    },
+    {
+      definitionType: 'forecaster',
+      stop: mockStopForecaster,
+      remove: mockDeleteForecaster,
+    },
+  ])(
+    'stops a running $definitionType before deleting it',
+    async ({ definitionType, stop, remove }) => {
+      const resource = {
+        id: `${definitionType}-1`,
+        name: `Running ${definitionType}`,
+        datasourceId: 'ds-1',
+        datasourceType: 'opensearch',
+        definitionType,
+        monitorType: definitionType,
+        status: 'Running',
+        enabled: true,
+      };
+      mockUseRulesData.mockReturnValue({
+        ...emptyRulesHookResult,
+        rules: [resource],
+        rulesTotal: 1,
+      });
+
+      await act(async () => {
+        render(<AlarmsPage {...defaultProps} />);
+      });
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+      const tableProps = mockMonitorsTable.mock.calls[
+        mockMonitorsTable.mock.calls.length - 1
+      ][0] as {
+        onDelete: (ids: string[]) => Promise<void>;
+      };
+
+      await act(async () => {
+        await tableProps.onDelete([resource.id]);
+      });
+
+      expect(stop).toHaveBeenCalledWith(resource.id, resource.datasourceId);
+      expect(remove).toHaveBeenCalledWith(resource.id, resource.datasourceId);
+      expect(stop.mock.invocationCallOrder[0]).toBeLessThan(remove.mock.invocationCallOrder[0]);
+    }
+  );
 
   // ---- URL-reflects-active-tab ---------------------------------------------
   // `handleTabClick` mirrors the active tab into `window.location.hash` so

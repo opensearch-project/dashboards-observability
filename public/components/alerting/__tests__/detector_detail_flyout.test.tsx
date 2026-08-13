@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import type { UnifiedRule } from '../../../../common/types/alerting';
 import { DetectorDetailFlyout } from '../detector_detail_flyout';
@@ -88,6 +88,7 @@ describe('DetectorDetailFlyout', () => {
       data: detectorDetail(),
       isLoading: false,
       error: null,
+      refetch: jest.fn(),
     });
 
     render(
@@ -107,5 +108,59 @@ describe('DetectorDetailFlyout', () => {
     expect(screen.getByText(/Field: http_4xx/)).toBeInTheDocument();
     expect(screen.getAllByText('10 minutes')).toHaveLength(2);
     expect(useRuleDetailMock).toHaveBeenCalledWith('ds-1', 'det-1', 'detector');
+  });
+
+  it('calls edit handlers from detector quick actions', () => {
+    const onEditSettings = jest.fn();
+    const onEditFeatures = jest.fn();
+    useRuleDetailMock.mockReturnValue({
+      data: detectorDetail(),
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    render(
+      <I18nProvider>
+        <DetectorDetailFlyout
+          detector={detectorSummary}
+          onClose={jest.fn()}
+          onEditSettings={onEditSettings}
+          onEditFeatures={onEditFeatures}
+        />
+      </I18nProvider>
+    );
+
+    screen.getByTestId('alertManagerDetectorDetailEditSettings').click();
+    screen.getByTestId('alertManagerDetectorDetailEditFeatures').click();
+
+    expect(onEditSettings).toHaveBeenCalledWith(detectorSummary);
+    expect(onEditFeatures).toHaveBeenCalledWith(detectorSummary);
+  });
+
+  it('stops a running detector and refreshes its detail', async () => {
+    const onStop = jest.fn().mockResolvedValue(undefined);
+    const refetch = jest.fn();
+    useRuleDetailMock.mockReturnValue({
+      data: detectorDetail(),
+      isLoading: false,
+      error: null,
+      refetch,
+    });
+
+    render(
+      <I18nProvider>
+        <DetectorDetailFlyout
+          detector={{ ...detectorSummary, status: 'Running' }}
+          onClose={jest.fn()}
+          onStop={onStop}
+        />
+      </I18nProvider>
+    );
+
+    screen.getByTestId('alertManagerDetectorDetailStop').click();
+
+    await waitFor(() => expect(onStop).toHaveBeenCalled());
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 });

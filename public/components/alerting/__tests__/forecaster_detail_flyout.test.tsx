@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import type { UnifiedRule } from '../../../../common/types/alerting';
 import { ForecasterDetailFlyout } from '../forecaster_detail_flyout';
@@ -88,6 +88,7 @@ describe('ForecasterDetailFlyout', () => {
       data: forecasterDetail(),
       isLoading: false,
       error: null,
+      refetch: jest.fn(),
     });
 
     render(
@@ -106,5 +107,55 @@ describe('ForecasterDetailFlyout', () => {
     expect(screen.getByText('Horizon')).toBeInTheDocument();
     expect(screen.getByText('24')).toBeInTheDocument();
     expect(useRuleDetailMock).toHaveBeenCalledWith('ds-1', 'forecast-1', 'forecaster');
+  });
+
+  it('calls edit handler from forecaster quick action', () => {
+    const onEdit = jest.fn();
+    useRuleDetailMock.mockReturnValue({
+      data: forecasterDetail(),
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+
+    render(
+      <I18nProvider>
+        <ForecasterDetailFlyout
+          forecaster={forecasterSummary}
+          onClose={jest.fn()}
+          onEdit={onEdit}
+        />
+      </I18nProvider>
+    );
+
+    screen.getByTestId('alertManagerForecasterDetailEdit').click();
+
+    expect(onEdit).toHaveBeenCalledWith(forecasterSummary);
+  });
+
+  it('starts a stopped forecaster and refreshes its detail', async () => {
+    const onStart = jest.fn().mockResolvedValue(undefined);
+    const refetch = jest.fn();
+    useRuleDetailMock.mockReturnValue({
+      data: forecasterDetail(),
+      isLoading: false,
+      error: null,
+      refetch,
+    });
+
+    render(
+      <I18nProvider>
+        <ForecasterDetailFlyout
+          forecaster={{ ...forecasterSummary, enabled: false, status: 'Stopped' }}
+          onClose={jest.fn()}
+          onStart={onStart}
+        />
+      </I18nProvider>
+    );
+
+    screen.getByTestId('alertManagerForecasterDetailStart').click();
+
+    await waitFor(() => expect(onStart).toHaveBeenCalled());
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 });

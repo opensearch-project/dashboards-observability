@@ -36,6 +36,7 @@ import type { Datasource } from '../../../../common/types/alerting';
 interface DataSourceSOAttributes {
   title?: string;
   endpoint?: string;
+  dataSourceEngineType?: string;
 }
 
 interface DataConnectionSOAttributes {
@@ -69,6 +70,7 @@ export function mapSavedObjectsToDatasources(
     url: so.id,
     enabled: true,
     mdsId: so.id,
+    engineType: so.attributes.dataSourceEngineType,
   }));
   const localRows: Datasource[] =
     osDiscovered.length > 0
@@ -178,10 +180,8 @@ export function useDatasources(): UseDatasourcesResult {
     };
   }, [refreshToken]);
 
-  return useMemo(() => ({ datasources, isLoading, error, refresh }), [
-    datasources,
-    isLoading,
-    error,
-    refresh,
-  ]);
+  return useMemo(
+    () => ({ datasources, isLoading, error, refresh }),
+    [datasources, isLoading, error, refresh]
+  );
 }

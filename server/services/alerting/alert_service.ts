@@ -158,12 +158,27 @@ interface ADSearchResponse<TSource> {
   };
 }
 
+interface ADRuntimeProfileResponse {
+  state?: unknown;
+  response?: {
+    state?: unknown;
+  };
+}
+
 interface ADAnomalyFetchResult {
   anomalies: ADAnomalyResult[];
   truncated: boolean;
 }
 
 const ALERT_ANOMALY_LINK_TOLERANCE_MS = 60 * 60 * 1000;
+
+const asRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+
+function getRuntimeProfileState(body: ADRuntimeProfileResponse | undefined): string | undefined {
+  const state = body?.state ?? asRecord(body?.response).state;
+  return typeof state === 'string' && state.trim().length > 0 ? state : undefined;
+}
 
 function getErrorType(value: unknown): string | undefined {
   if (!value || typeof value !== 'object') return undefined;
@@ -185,8 +200,9 @@ function getErrorType(value: unknown): string | undefined {
   };
   if (typeof typedError.type === 'string') return typedError.type;
 
-  const rootCauseType = typedError.root_cause?.find((cause) => typeof cause.type === 'string')
-    ?.type;
+  const rootCauseType = typedError.root_cause?.find(
+    (cause) => typeof cause.type === 'string'
+  )?.type;
   if (rootCauseType) return rootCauseType;
 
   return typeof typedError.reason === 'string' ? typedError.reason : undefined;
@@ -563,9 +579,7 @@ export class MultiBackendAlertService {
 
     if (allRules.length === 0 && warnings.length === datasources.length && datasources.length > 0) {
       throw new Error(
-        `All datasources failed: ${warnings
-          .map((w) => `${w.datasourceName}: ${w.error}`)
-          .join('; ')}`
+        `All datasources failed: ${warnings.map((w) => `${w.datasourceName}: ${w.error}`).join('; ')}`
       );
     }
 
@@ -624,9 +638,7 @@ export class MultiBackendAlertService {
       datasources.length > 0
     ) {
       throw new Error(
-        `All datasources failed: ${warnings
-          .map((w) => `${w.datasourceName}: ${w.error}`)
-          .join('; ')}`
+        `All datasources failed: ${warnings.map((w) => `${w.datasourceName}: ${w.error}`).join('; ')}`
       );
     }
 
@@ -815,22 +827,18 @@ export class MultiBackendAlertService {
   ): Promise<FetchAlertsRawResult> {
     if (ds.type === 'opensearch' && this.osBackend) {
       const partialErrors: string[] = [];
-      const [
-        alertSettled,
-        anomalySettled,
-        detectorSettled,
-        monitorSettled,
-      ] = await Promise.allSettled([
-        range
-          ? this.osBackend.getAlerts(client, {
-              startMs: range.startMs,
-              endMs: range.endMs,
-            })
-          : this.osBackend.getAlerts(client),
-        this.fetchADAnomalies(client, range),
-        this.fetchADDetectors(client),
-        this.osBackend.getMonitors(client),
-      ] as const);
+      const [alertSettled, anomalySettled, detectorSettled, monitorSettled] =
+        await Promise.allSettled([
+          range
+            ? this.osBackend.getAlerts(client, {
+                startMs: range.startMs,
+                endMs: range.endMs,
+              })
+            : this.osBackend.getAlerts(client),
+          this.fetchADAnomalies(client, range),
+          this.fetchADDetectors(client),
+          this.osBackend.getMonitors(client),
+        ] as const);
 
       if (alertSettled.status === 'rejected') {
         throw alertSettled.reason;
@@ -1178,10 +1186,11 @@ export class MultiBackendAlertService {
         sort: [{ last_update_time: { order: 'desc', unmapped_type: 'long' } }],
       },
     });
-    return (response.body.hits?.hits || []).map((hit) => ({
+    const detectors = (response.body.hits?.hits || []).map((hit) => ({
       ...(hit._source || {}),
       id: hit._id,
     }));
+    return this.enrichADDetectorRuntimeStates(client, detectors);
   }
 
   private async fetchADForecasters(client: AlertingOSClient): Promise<ADForecaster[]> {
@@ -1194,10 +1203,53 @@ export class MultiBackendAlertService {
         sort: [{ last_update_time: { order: 'desc', unmapped_type: 'long' } }],
       },
     });
-    return (response.body.hits?.hits || []).map((hit) => ({
+    const forecasters = (response.body.hits?.hits || []).map((hit) => ({
       ...(hit._source || {}),
       id: hit._id,
     }));
+    return this.enrichADForecasterRuntimeStates(client, forecasters);
+  }
+
+  private async enrichADDetectorRuntimeStates(
+    client: AlertingOSClient,
+    detectors: ADDetector[]
+  ): Promise<ADDetector[]> {
+    const results = await runWithConcurrencyLimit(
+      detectors.map((detector) => async () => {
+        const response = await client.transport.request<ADRuntimeProfileResponse>({
+          method: 'GET',
+          path: `/_plugins/_anomaly_detection/detectors/${encodeURIComponent(
+            detector.id
+          )}/_profile/init_progress,state,error`,
+        });
+        const state = getRuntimeProfileState(response.body);
+        return state ? { ...detector, curState: state as ADDetector['curState'] } : detector;
+      })
+    );
+    return results.map((result, index) =>
+      result.status === 'fulfilled' ? result.value : detectors[index]
+    );
+  }
+
+  private async enrichADForecasterRuntimeStates(
+    client: AlertingOSClient,
+    forecasters: ADForecaster[]
+  ): Promise<ADForecaster[]> {
+    const results = await runWithConcurrencyLimit(
+      forecasters.map((forecaster) => async () => {
+        const response = await client.transport.request<ADRuntimeProfileResponse>({
+          method: 'GET',
+          path: `/_plugins/_forecast/forecasters/${encodeURIComponent(
+            forecaster.id
+          )}/_profile/init_progress,state,error`,
+        });
+        const state = getRuntimeProfileState(response.body);
+        return state ? { ...forecaster, curState: state as ADForecaster['curState'] } : forecaster;
+      })
+    );
+    return results.map((result, index) =>
+      result.status === 'fulfilled' ? result.value : forecasters[index]
+    );
   }
 
   private async fetchADAnomalies(

@@ -15,13 +15,15 @@
  *   - `truncatedStart` flag ⇒ `annotations.truncatedStart = 'true'`.
  */
 import {
+  adDetectorToUnifiedRuleSummary,
   adForecasterToUnifiedRuleSummary,
   extractADAnomalyResultIdsFromMonitor,
   osAlertToUnified,
   osMonitorToUnifiedRuleSummary,
   promEpisodeToUnified,
+  runtimeStateToMonitorStatus,
 } from '../alert_utils';
-import type { OSMonitor } from '../../../../common/types/alerting';
+import type { MonitorStatus, OSMonitor } from '../../../../common/types/alerting';
 
 describe('promEpisodeToUnified', () => {
   const START = Date.UTC(2024, 0, 15, 12, 0, 0);
@@ -221,7 +223,7 @@ describe('osAlertToUnified', () => {
 
 describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
   function buildMonitor(indices: string[]): OSMonitor {
-    return ({
+    return {
       id: 'mon-1',
       type: 'monitor',
       monitor_type: 'query_level_monitor',
@@ -238,7 +240,7 @@ describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
       ],
       triggers: [],
       last_update_time: 1700000000000,
-    } as unknown) as OSMonitor;
+    } as unknown as OSMonitor;
   }
 
   it.each([['logs-2024.01.15'], ['logs-prod-app'], ['ss4o_logs-myapp'], ['ss4o_logs']])(
@@ -356,5 +358,94 @@ describe('adForecasterToUnifiedRuleSummary', () => {
     expect(rule.evaluationInterval).toBe('5 minutes');
     expect(rule.pendingPeriod).toBe('1 minutes');
     expect(rule.createdBy).toBe('admin');
+  });
+
+  it('uses the forecaster runtime state as the unified rule status', () => {
+    const rule = adForecasterToUnifiedRuleSummary(
+      {
+        id: 'forecaster-1',
+        name: 'CPU forecast',
+        curState: 'INITIALIZING_FORECAST' as MonitorStatus,
+        indices: ['metrics-*'],
+      },
+      'ds-os'
+    );
+
+    expect(rule.status).toBe('Initializing forecast');
+    expect(rule.healthStatus).toBe('healthy');
+  });
+});
+
+describe('adDetectorToUnifiedRuleSummary', () => {
+  it('uses the detector runtime state as the unified rule status', () => {
+    const rule = adDetectorToUnifiedRuleSummary(
+      {
+        id: 'detector-1',
+        name: 'Flight detector',
+        curState: 'RUNNING' as MonitorStatus,
+        indices: ['flights'],
+      },
+      'ds-os'
+    );
+
+    expect(rule.status).toBe('Running');
+    expect(rule.enabled).toBe(true);
+    expect(rule.healthStatus).toBe('healthy');
+  });
+
+  it('marks stopped detectors as disabled/no data', () => {
+    const rule = adDetectorToUnifiedRuleSummary(
+      {
+        id: 'detector-1',
+        name: 'Flight detector',
+        curState: 'DISABLED' as MonitorStatus,
+        indices: ['flights'],
+      },
+      'ds-os'
+    );
+
+    expect(rule.status).toBe('Stopped');
+    expect(rule.enabled).toBe(false);
+    expect(rule.healthStatus).toBe('no_data');
+  });
+
+  it('does not report a detector as running when runtime and job state are unavailable', () => {
+    const rule = adDetectorToUnifiedRuleSummary(
+      {
+        id: 'detector-1',
+        name: 'Never-started detector',
+        indices: ['flights'],
+      },
+      'ds-os'
+    );
+
+    expect(rule.status).toBe('Inactive not started');
+    expect(rule.enabled).toBe(false);
+    expect(rule.healthStatus).toBe('no_data');
+  });
+
+  it('uses the detector job state when runtime profile state is unavailable', () => {
+    const rule = adDetectorToUnifiedRuleSummary(
+      {
+        id: 'detector-1',
+        name: 'Running detector',
+        indices: ['flights'],
+        anomaly_detector_job: { enabled: true },
+      },
+      'ds-os'
+    );
+
+    expect(rule.status).toBe('Running');
+    expect(rule.enabled).toBe(true);
+    expect(rule.healthStatus).toBe('healthy');
+  });
+});
+
+describe('runtimeStateToMonitorStatus', () => {
+  it('normalizes AD profile state keys to display labels', () => {
+    expect(runtimeStateToMonitorStatus('INIT')).toBe('Initializing');
+    expect(runtimeStateToMonitorStatus('Awaiting data to restart')).toBe(
+      'Awaiting data to restart'
+    );
   });
 });
