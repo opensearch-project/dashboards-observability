@@ -7,6 +7,7 @@ import {
   buildDetectorRules,
   buildRulePayload,
   formFromAdResource,
+  shouldAutoStartCreatedRule,
   validateForm,
 } from '../create_ad_rule_flyout';
 
@@ -28,6 +29,11 @@ const detectorForm = {
   filterQuery: '{"term":{"host_name":"new-host"}}',
   customResultIndexEnabled: false,
   resultIndex: '',
+  resultIndexMinAge: '',
+  resultIndexMinSize: '',
+  resultIndexTtl: '',
+  customResultIndexLifecycleEnabled: false,
+  flattenCustomResultIndex: false,
   categoryFieldEnabled: false,
   categoryField: [],
   features: [feature],
@@ -179,5 +185,65 @@ describe('AD rule payload serialization', () => {
     expect(
       validateForm({ ...detectorForm, history: 40, horizon: 181 }, { ruleType: 'forecaster' })
     ).toHaveProperty('horizon');
+  });
+
+  it('serializes forecasting storage settings using the forecasting result index prefix', () => {
+    const payload = buildRulePayload('forecaster', {
+      ...detectorForm,
+      customResultIndexEnabled: true,
+      resultIndex: 'capacity-forecast',
+      resultIndexMinAge: 7,
+      resultIndexMinSize: 1000,
+      resultIndexTtl: 30,
+      customResultIndexLifecycleEnabled: true,
+      flattenCustomResultIndex: true,
+    });
+
+    expect(payload).toEqual(
+      expect.objectContaining({
+        resultIndex: 'opensearch-forecast-result-capacity-forecast',
+        resultIndexMinAge: 7,
+        resultIndexMinSize: 1000,
+        resultIndexTtl: 30,
+        flattenCustomResultIndex: true,
+      })
+    );
+  });
+
+  it('omits forecasting storage settings when the default result index is selected', () => {
+    const payload = JSON.parse(
+      JSON.stringify(
+        buildRulePayload('forecaster', {
+          ...detectorForm,
+          customResultIndexEnabled: false,
+          resultIndex: '',
+        })
+      )
+    );
+
+    expect(payload).not.toHaveProperty('resultIndex');
+    expect(payload).not.toHaveProperty('resultIndexMinAge');
+    expect(payload).not.toHaveProperty('resultIndexMinSize');
+    expect(payload).not.toHaveProperty('resultIndexTtl');
+    expect(payload).not.toHaveProperty('flattenCustomResultIndex');
+  });
+
+  it('uses indicator terminology when validating a forecaster', () => {
+    const errors = validateForm(
+      {
+        ...detectorForm,
+        features: [{ ...feature, featureName: '', aggregationOf: '' }],
+      },
+      { ruleType: 'forecaster' }
+    );
+
+    expect(errors['features.0.featureName']).toBe('Indicator name is required.');
+    expect(errors['features.0.aggregationOf']).toBe('Indicator field is required.');
+  });
+
+  it('always auto-starts a newly created forecaster', () => {
+    expect(shouldAutoStartCreatedRule('forecaster', false)).toBe(true);
+    expect(shouldAutoStartCreatedRule('detector', false)).toBe(false);
+    expect(shouldAutoStartCreatedRule('detector', true)).toBe(true);
   });
 });
