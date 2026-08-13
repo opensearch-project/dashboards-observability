@@ -22,14 +22,13 @@
  *   - Code mode / freeform PromQL editor
  *   - Matched notification actions (routing is Alertmanager's job)
  */
-import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
   EuiBetaBadge,
   EuiButton,
   EuiCallOut,
-  EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,7 +45,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../../framework/core_refs';
 import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
-import { AlertingPromResourcesService } from '../query_services/alerting_prom_resources_service';
+import { RuleGroupSelector } from './rule_group_selector';
 import { QueryPreviewResults } from '../query_preview_results';
 import { PromQueryBuilder } from './prom_query_builder';
 import { DURATION_OPTIONS, PrometheusFormState } from './create_monitor_types';
@@ -87,7 +86,6 @@ export const PrometheusFormSection: React.FC<{
   const [ruleGroupName, setRuleGroupName] = useState(
     () => form.labels.find((l) => l.key === '_ruleGroup')?.value || ''
   );
-  const [ruleGroupOptions, setRuleGroupOptions] = useState<Array<{ label: string }>>([]);
   const [showPreview, setShowPreview] = useState(false);
 
   // Use a ref for form.labels to avoid circular dependency:
@@ -137,25 +135,6 @@ export const PrometheusFormSection: React.FC<{
     },
     [onUpdate]
   );
-
-  // Fetch existing rule groups when datasource changes. The `stale` flag
-  // guards against out-of-order responses overwriting current options.
-  useEffect(() => {
-    if (!datasourceId) return;
-    let stale = false;
-    const service = new AlertingPromResourcesService(datasourceId);
-    service
-      .listRuleGroupNames()
-      .then(({ groups }) => {
-        if (!stale) setRuleGroupOptions(groups.map((g) => ({ label: g })));
-      })
-      .catch(() => {
-        /* non-critical — user can still type a new group name */
-      });
-    return () => {
-      stale = true;
-    };
-  }, [datasourceId]);
 
   // Memoize filtered datasources to avoid re-filtering on every render
   const promDatasources = useMemo(() => {
@@ -243,29 +222,11 @@ export const PrometheusFormSection: React.FC<{
             )}
             fullWidth
           >
-            <EuiComboBox
-              placeholder={i18n.translate(
-                'observability.alerting.prometheusFormSection.groupNamePlaceholder',
-                { defaultMessage: 'Enter a rule group name (defaults to rule name)' }
-              )}
-              options={ruleGroupOptions}
-              selectedOptions={ruleGroupName ? [{ label: ruleGroupName }] : []}
-              onChange={(opts) => handleRuleGroupChange(opts.length > 0 ? opts[0].label : '')}
-              onCreateOption={(value) => handleRuleGroupChange(value)}
-              singleSelection={{ asPlainText: true }}
-              compressed
-              isClearable
-              fullWidth
-              // Double templating on purpose: i18n substitutes the literal
-              // '{searchValue}' back in, yielding the exact template string
-              // EUI interpolates with the user's typed text at render time.
-              customOptionText={i18n.translate(
-                'observability.alerting.prometheusFormSection.createGroupOptionText',
-                {
-                  defaultMessage: 'Create group: {searchValue}',
-                  values: { searchValue: '{searchValue}' },
-                }
-              )}
+            <RuleGroupSelector
+              datasourceId={datasourceId}
+              value={ruleGroupName}
+              onChange={handleRuleGroupChange}
+              data-test-subj="prometheusRuleGroupSelector"
             />
           </EuiFormRow>
           {ruleNameField && (

@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiFieldText,
-  EuiFieldNumber,
   EuiTextArea,
   EuiSelect,
   EuiButton,
@@ -32,7 +31,6 @@ import {
   EuiFlyoutFooter,
   EuiTitle,
   EuiHorizontalRule,
-  EuiCallOut,
   EuiSwitch,
   EuiToolTip,
   EuiPopover,
@@ -42,6 +40,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { PromQueryBuilder } from './create_monitor/prom_query_builder';
+import { RuleGroupSelector } from './create_monitor/rule_group_selector';
 import { QueryPreviewResults } from './query_preview_results';
 
 // ============================================================================
@@ -179,15 +178,11 @@ const MonitorDetailsSection = React.memo<{
       })}
       fullWidth
     >
-      <EuiFieldText
-        placeholder={i18n.translate(
-          'observability.alerting.createMetricsMonitor.groupNamePlaceholder',
-          { defaultMessage: 'Enter a rule group name (defaults to rule name)' }
-        )}
+      <RuleGroupSelector
+        datasourceId={form.datasourceId}
         value={form.groupName}
-        onChange={(e) => onUpdate({ groupName: e.target.value })}
-        fullWidth
-        compressed
+        onChange={(groupName) => onUpdate({ groupName })}
+        data-test-subj="metricsMonitorRuleGroupSelector"
       />
     </EuiFormRow>
     <EuiSpacer size="m" />
