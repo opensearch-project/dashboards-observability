@@ -1451,6 +1451,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // to cover, plus the two inline dashboard warnings (truncation + Prom
   // legacy-fallback). See the hook for the per-condition dedupe strategy.
   useAlertingPageToasts({
+    activeTab,
     alertsErrorMessage,
     rulesErrorMessage: error,
     alertingPluginMissing: alertingAvailability.unavailable,

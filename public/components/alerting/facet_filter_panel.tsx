@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiButtonIcon,
   EuiText,
   EuiBadge,
   EuiCheckbox,
@@ -27,6 +28,11 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TruncatedLabel } from '../common/truncated_label';
+// Note: `.altFacetErrorBtn` / `.altFacetErrorPopover` (and the pre-existing
+// `altFacet*` classes) live in `alerting.scss`, which the alerting pages that
+// render this component already import. This shared component deliberately
+// does NOT import that stylesheet itself — doing so would pull Alert Manager's
+// global EUI selector overrides into any future non-alerting consumer.
 
 // ============================================================================
 // Types
@@ -99,9 +105,13 @@ export interface FacetFilterGroupProps extends FacetGroupConfig {
 // ============================================================================
 //
 // Per-option error icon. Extracted into a sub-component so each row can own
-// its popover state (a hook inside .map() is not permitted). The button's
-// onClick stops propagation so the surrounding checkbox row doesn't toggle
-// selection when the user just wants to read the error.
+// its popover state (a hook inside .map() is not permitted). The button lives
+// inside the checkbox row's `<label>`, so it stops event propagation on
+// pointer AND keyboard activation (click / mousedown / keydown / keyup) — a
+// nested control does not activate the labeled input per spec, but stopping
+// propagation also prevents React's synthetic bubbling from reaching the row's
+// handlers and toggling the datasource selection when the user only wanted to
+// read the error.
 interface FacetErrorIndicatorProps {
   facetId: string;
   option: string;
@@ -127,32 +137,25 @@ const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
       panelPaddingSize="s"
       anchorPosition="rightCenter"
       button={
-        <button
-          type="button"
+        <EuiButtonIcon
+          iconType="alert"
+          color="danger"
+          size="xs"
+          className="altFacetErrorBtn"
           aria-label={ariaLabel}
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent) => {
             stop(e);
             setOpen((v) => !v);
           }}
           onMouseDown={stop}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: 0,
-            border: 'none',
-            background: 'transparent',
-            cursor: 'pointer',
-            marginLeft: 4,
-            flexShrink: 0,
-          }}
+          onKeyDown={stop}
+          onKeyUp={stop}
           data-test-subj={`facetGroup-${facetId}-error-${option}`}
-        >
-          <EuiIcon type="alert" color="danger" size="s" />
-        </button>
+        />
       }
     >
       <div
-        style={{ maxWidth: 260 }}
+        className="altFacetErrorPopover"
         data-test-subj={`facetGroup-${facetId}-error-${option}-popover`}
       >
         <EuiText size="xs">

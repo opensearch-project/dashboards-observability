@@ -10,6 +10,16 @@
   flex-direction: column;
 }
 
+/* Per-datasource error indicator in the filter facet (FacetErrorIndicator). */
+.altFacetErrorBtn {
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+.altFacetErrorPopover {
+  max-width: 260px;
+}
+
 .altResizableContainer {
   min-height: calc(100vh - 140px);
 }
