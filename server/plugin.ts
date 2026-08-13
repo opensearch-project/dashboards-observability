@@ -26,6 +26,8 @@ import { PPLParsers } from './parsers/ppl_parser';
 import { registerObservabilityUISettings } from './plugin_helper/register_settings';
 import { setupRoutes } from './routes/index';
 import { registerSloRoutes } from './routes/slo';
+import { registerDefaultClassifiers } from '../common/error';
+import { configureErrorExposure } from './routes/alerting/classified_error';
 import {
   getSearchSavedObject,
   getVisualizationSavedObject,
@@ -68,7 +70,11 @@ export class ObservabilityPlugin implements Plugin<
    * `first()` and replays don't refresh on reload.
    */
   private sloRulerClient?: DirectQueryRulerClient;
-  private sloReconcilerOpts?: { enabled: boolean; intervalMs: number; graceMs: number };
+  private sloReconcilerOpts?: {
+    enabled: boolean;
+    intervalMs: number;
+    graceMs: number;
+  };
   private sloReconciler?: SloReconciler;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -317,7 +323,10 @@ export class ObservabilityPlugin implements Plugin<
           };
         },
         getTitle(obj) {
-          const attrs = obj.attributes as { name?: string; spec?: { name?: string } };
+          const attrs = obj.attributes as {
+            name?: string;
+            spec?: { name?: string };
+          };
           return String(attrs.name ?? attrs.spec?.name ?? obj.id);
         },
       },
@@ -339,14 +348,26 @@ export class ObservabilityPlugin implements Plugin<
     const observabilityConfig = await this.initializerContext.config
       .create<{
         alertManager?: { enabled?: boolean };
+        errors?: { exposeSensitiveErrorDetail?: boolean };
         slo?: {
           enabled?: boolean;
           ruleDedup?: { enabled: boolean };
-          reconciler?: { enabled?: boolean; intervalMs?: number; graceMs?: number };
+          reconciler?: {
+            enabled?: boolean;
+            intervalMs?: number;
+            graceMs?: number;
+          };
         };
       }>()
       .pipe(first())
       .toPromise();
+
+    // Stand up the shared error-classification layer: register the default
+    // provider-neutral classifiers and apply the client-exposure policy. A
+    // downstream fork adds higher-priority classifiers / enrichers on top
+    // (registration only, no core edits). See common/error/README.md.
+    registerDefaultClassifiers();
+    configureErrorExposure(observabilityConfig.errors?.exposeSensitiveErrorDetail ?? false);
     // yml-derived defaults for the two UI-visibility flags. When the
     // dynamic-config layer is absent (open-source / GitHub OSD) these
     // values flow straight through to the registered capability defaults
@@ -614,7 +635,10 @@ export class ObservabilityPlugin implements Plugin<
           core.savedObjects,
           core.opensearch,
           this.sloRulerClient,
-          { intervalMs: reconcilerOpts.intervalMs, graceMs: reconcilerOpts.graceMs }
+          {
+            intervalMs: reconcilerOpts.intervalMs,
+            graceMs: reconcilerOpts.graceMs,
+          }
         );
         this.sloReconciler.start();
       }

@@ -37,6 +37,7 @@ import { useDatasources } from './hooks/use_datasources';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';
 import { useRulesData } from './hooks/use_rules_data';
 import { useToast } from '../common/toast';
+import { extractClassifiedError, classifiedToastColor, classifiedToastText } from '../common/error';
 import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
 import { Datasource } from '../../../common/types/alerting';
 import { showMonitorCreatedToast } from './toast_helpers';
@@ -177,7 +178,7 @@ export const ExploreCreateMonitor: React.FC<ExploreCreateMonitorProps> = ({
     }
     // Explore-launched flyout is OS-only; this branch is unreachable in
     // practice (we force `initialBackendType='opensearch'`).
-    return (form as unknown) as Record<string, unknown>;
+    return form as unknown as Record<string, unknown>;
   };
 
   const handleSave = async (formState: MonitorFormState) => {
@@ -202,13 +203,24 @@ export const ExploreCreateMonitor: React.FC<ExploreCreateMonitorProps> = ({
       // them inline under the editor so the user can fix without losing context.
       const match = message.match(/PPL Query validation failed:[^"}]+/i);
       if (match) setPplSubmitError(match[0]);
-      setToast(
-        i18n.translate('observability.alerting.exploreCreateMonitor.toast.createFailed', {
-          defaultMessage: 'Failed to create alert rule',
-        }),
-        'danger',
-        message
-      );
+      // Prefer the server's classified error (specific cause + remediation +
+      // safe details) when present; fall back to the raw message otherwise.
+      const classified = extractClassifiedError(e);
+      if (classified) {
+        setToast(
+          classified.title,
+          classifiedToastColor(classified),
+          classifiedToastText(classified)
+        );
+      } else {
+        setToast(
+          i18n.translate('observability.alerting.exploreCreateMonitor.toast.createFailed', {
+            defaultMessage: 'Failed to create alert rule',
+          }),
+          'danger',
+          message
+        );
+      }
     }
   };
 

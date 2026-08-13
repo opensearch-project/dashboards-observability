@@ -25,7 +25,9 @@ import {
 } from '../../../common/slo/slo_service';
 import type { SloCreateInput, SloListFilters, SloUpdateInput } from '../../../common/slo/slo_types';
 import type { HandlerResult } from '../alerting/route_utils';
-import { toHandlerResult } from '../alerting/route_utils';
+import { classifyToHandlerResult } from '../alerting/classified_error';
+import type { ClassifiedError } from '../../../common/error';
+import { redactForDisplay } from '../../../common/error';
 
 /**
  * Cap on the upstream ruler diagnostic surfaced to the client. Cortex's
@@ -52,7 +54,10 @@ function sanitizeRulerRawBody(body: string): string {
 function toSloError(e: unknown, logger?: Logger): HandlerResult {
   if (e instanceof SloValidationError) {
     if (logger) logger.warn(e.message);
-    return { status: 400, body: { error: 'Validation failed', errors: e.errors } };
+    return {
+      status: 400,
+      body: { error: 'Validation failed', errors: e.errors },
+    };
   }
   if (e instanceof SloNotFoundError) {
     return { status: 404, body: { error: e.message } };
@@ -68,25 +73,38 @@ function toSloError(e: unknown, logger?: Logger): HandlerResult {
     };
   }
   if (e instanceof SloRulerError) {
-    if (logger) {
-      // Log the full upstream body server-side so ops still has the raw
-      // diagnostic; the client gets a sanitized excerpt instead.
-      logger.warn(
-        `Ruler dual-write failed: ${e.code} (HTTP ${e.httpStatus}). Upstream body: ${e.rawBody}`
-      );
-    }
+    // Classify (this logs the full upstream detail with a correlation id) so
+    // we get a structured, provider-neutral errorDetail alongside the legacy
+    // ruler envelope. The classifier also inspects the inner cause: a wrapped
+    // conflict (e.g. an inner 409 "already exists" carried in a 503) is
+    // reclassified to CONFLICT, and we trust its 409 over the misleading outer
+    // status.
+    const classified = classifyToHandlerResult(e, {
+      operation: 'slo.ruler',
+      logger,
+    });
+    const errorDetail = classified.body.errorDetail as ClassifiedError | undefined;
     // Surface upstream status verbatim when available (4xx) so the wizard can
-    // show Cortex's own diagnostic. 0 (transport / network failure with no
+    // show the upstream diagnostic. 0 (transport / network failure with no
     // response) maps to 503 — semantically "upstream unavailable" rather
     // than 502 "bad gateway response".
-    const status = e.httpStatus >= 400 && e.httpStatus < 600 ? e.httpStatus : 503;
+    const legacyStatus = e.httpStatus >= 400 && e.httpStatus < 600 ? e.httpStatus : 503;
+    const status = errorDetail?.category === 'CONFLICT' ? classified.status : legacyStatus;
     return {
       status,
       body: {
+        // Legacy fields the SLO wizard already consumes — kept verbatim.
         error: e.message,
         code: e.code,
         httpStatus: e.httpStatus,
-        rawBody: sanitizeRulerRawBody(e.rawBody),
+        // Redact before truncating so any consumer of this legacy field (not
+        // just the wizard, which also redacts at render) gets scrubbed text.
+        // The full, un-redacted body is still logged server-side by the
+        // classifier under the correlation id.
+        rawBody: sanitizeRulerRawBody(redactForDisplay(e.rawBody)),
+        // Additive structured classification + correlation id.
+        correlationId: classified.body.correlationId,
+        errorDetail,
       },
     };
   }
@@ -105,7 +123,10 @@ function toSloError(e: unknown, logger?: Logger): HandlerResult {
       },
     };
   }
-  return toHandlerResult(e, logger);
+  // Anything else: classify instead of collapsing to a bare generic 500. The
+  // classifier surfaces a redacted, provider-neutral message (and keeps the
+  // raw detail server-side under the correlation id).
+  return classifyToHandlerResult(e, { operation: 'slo', logger });
 }
 
 export async function handleListSLOs(
@@ -317,7 +338,9 @@ export async function handleRepairSLO(
     if (!ctx?.health) {
       return {
         status: 501,
-        body: { error: 'Rule health checker not configured in this environment' },
+        body: {
+          error: 'Rule health checker not configured in this environment',
+        },
       };
     }
     if (!ctx.deploy) {
@@ -329,7 +352,10 @@ export async function handleRepairSLO(
         },
       };
     }
-    const repairCtx: SloRepairContext = { health: ctx.health, deploy: ctx.deploy };
+    const repairCtx: SloRepairContext = {
+      health: ctx.health,
+      deploy: ctx.deploy,
+    };
     const result = await svc.repair(id, repairCtx, request);
     return { status: 200, body: result };
   } catch (e) {
@@ -353,7 +379,9 @@ export async function handleGetRuleHealth(
     if (!ctx?.health) {
       return {
         status: 501,
-        body: { error: 'Rule health checker not configured in this environment' },
+        body: {
+          error: 'Rule health checker not configured in this environment',
+        },
       };
     }
     const doc = await svc.get(id, request);

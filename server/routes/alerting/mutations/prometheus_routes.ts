@@ -16,7 +16,8 @@ import { schema } from '@osd/config-schema';
 import { IRouter, RequestHandlerContext } from '../../../../../../src/core/server';
 import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { RulerClient } from '../../../services/slo/ruler_client';
-import { toErrorBody, toHandlerResult } from '../route_utils';
+import { toErrorBody } from '../route_utils';
+import { classifyToHandlerResult } from '../classified_error';
 import { alertingIdSchema } from '../schema_helpers';
 import {
   handleCreatePrometheusRule,
@@ -47,8 +48,12 @@ const prometheusRuleBodySchema = schema.object({
   threshold: schema.maybe(schema.number()),
   forDuration: schema.string({ defaultValue: '5m' }),
   evaluationInterval: schema.string({ defaultValue: '1m' }),
-  labels: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
-  annotations: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
+  labels: schema.recordOf(schema.string(), schema.string(), {
+    defaultValue: {},
+  }),
+  annotations: schema.recordOf(schema.string(), schema.string(), {
+    defaultValue: {},
+  }),
   enabled: schema.boolean({ defaultValue: true }),
   groupName: schema.maybe(schema.string()),
 });
@@ -81,7 +86,13 @@ export function registerPrometheusRuleRoutes(
         );
         return res.ok({ body: result });
       } catch (e: unknown) {
-        const result = toHandlerResult(e, logger);
+        // Classify: a ruler dual-write failure (unreachable / invalid PromQL /
+        // auth / wrapped conflict) becomes a specific, actionable error instead
+        // of the old generic "An internal error occurred" 500.
+        const result = classifyToHandlerResult(e, {
+          operation: 'rule.create.metric',
+          logger,
+        });
         return res.customError({
           statusCode: result.status,
           body: toErrorBody(result.body),
@@ -118,7 +129,10 @@ export function registerPrometheusRuleRoutes(
         );
         return res.ok({ body: result });
       } catch (e: unknown) {
-        const result = toHandlerResult(e, logger);
+        const result = classifyToHandlerResult(e, {
+          operation: 'rule.delete.metric',
+          logger,
+        });
         return res.customError({
           statusCode: result.status,
           body: toErrorBody(result.body),

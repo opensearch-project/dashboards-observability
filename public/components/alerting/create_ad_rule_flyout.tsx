@@ -3632,6 +3632,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                     error={visibleErrors.resultIndexMinAge}
                   >
                     <EuiFieldNumber
+                      isInvalid={!!visibleErrors.resultIndexMinAge}
                       min={1}
                       value={form.resultIndexMinAge}
                       append="days"
@@ -3651,6 +3652,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                     error={visibleErrors.resultIndexMinSize}
                   >
                     <EuiFieldNumber
+                      isInvalid={!!visibleErrors.resultIndexMinSize}
                       min={1000}
                       value={form.resultIndexMinSize}
                       append="MB"
@@ -3670,6 +3672,7 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                     error={visibleErrors.resultIndexTtl}
                   >
                     <EuiFieldNumber
+                      isInvalid={!!visibleErrors.resultIndexTtl}
                       min={1}
                       value={form.resultIndexTtl}
                       append="days"

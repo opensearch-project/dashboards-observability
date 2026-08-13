@@ -339,7 +339,12 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
         defaultMessage: 'Receiver',
       }),
       render: (val: string, item: FlatRoute) => (
-        <span style={{ paddingLeft: item.depth * 20, fontWeight: item.depth === 0 ? 600 : 400 }}>
+        <span
+          style={{
+            paddingLeft: item.depth * 20,
+            fontWeight: item.depth === 0 ? 600 : 400,
+          }}
+        >
           {item.depth > 0 && <span style={{ color: '#98A2B3', marginRight: 6 }}>{'└'}</span>}
           {val || (
             <EuiText size="xs" color="subdued">

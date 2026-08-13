@@ -112,13 +112,11 @@ function makeDeploy(ruler: SloRulerClient): SloDeployContext {
     enabled: true,
     directQueryName: 'prom-connection',
   };
-  const client = ({ transport: { request: jest.fn() } } as unknown) as AlertingOSClient;
+  const client = { transport: { request: jest.fn() } } as unknown as AlertingOSClient;
   return { ruler, client, datasource, workspaceId: 'ws-unit' };
 }
 
-function makeHealth(
-  reports: RuleHealthReportLite[]
-): SloRuleHealthProbe & {
+function makeHealth(reports: RuleHealthReportLite[]): SloRuleHealthProbe & {
   check: jest.Mock;
   invalidate: jest.Mock;
 } {
@@ -286,6 +284,33 @@ describe('handleRepairSLO', () => {
 
     expect(result.status).toBe(400);
     expect(result.body).toMatchObject({ code: 'RULER_VALIDATION_FAILED' });
+  });
+
+  it('redacts the legacy rawBody server-side so consumers other than the wizard get scrubbed text', async () => {
+    const { store } = makeStore();
+    const ruler = makeRuler();
+    ruler.upsertRuleGroup.mockRejectedValueOnce(
+      new SloRulerError(
+        'RULER_VALIDATION_FAILED',
+        400,
+        'invalid PromQL at https://host.internal:9090/rules'
+      )
+    );
+    const deploy = makeDeploy(ruler);
+    const svc = new SloService(noopLogger(), store);
+    const doc = await svc.create({ spec: validSpec() }, 'alice', makeDeploy(makeRuler()));
+    const groups =
+      doc.status.provisioning.backend === 'prometheus'
+        ? [doc.status.provisioning.alertGroupName ?? '']
+        : [];
+    const health = makeHealth([missingReport(groups)]);
+
+    const result = await handleRepairSLO(svc, doc.id, noopLogger(), { health, deploy });
+
+    const body = result.body as { rawBody: string };
+    expect(body.rawBody).toContain('invalid PromQL');
+    expect(body.rawBody).toContain('<redacted-url>');
+    expect(body.rawBody).not.toContain('host.internal');
   });
 });
 

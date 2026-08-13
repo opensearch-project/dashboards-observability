@@ -31,6 +31,11 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { useToast } from '../common/toast';
 import {
+  ClassifiedErrorToastBody,
+  classifiedToastColor,
+  extractClassifiedError,
+} from '../common/error';
+import {
   Datasource,
   UnifiedAlertSummary,
   UnifiedRule,
@@ -41,6 +46,7 @@ import { CreateMonitor, MonitorFormState } from './create_monitor';
 import type { PrometheusFormState } from './create_monitor/create_monitor_types';
 import { CreateAdRuleFlyout, CreateAdRuleType } from './create_ad_rule_flyout';
 import { EditMonitor } from './create_monitor/edit_monitor';
+import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
 import { AnomalyDetailFlyout } from './anomaly_detail_flyout';
@@ -120,7 +126,11 @@ type AdResourceLifecycleAction = 'start' | 'stop';
  * live on a Prometheus datasource the user just unchecked silently
  * shows zero matches.
  */
-export function parseAlarmsHashRoute(hash: string): { tab?: TabId; q?: string; ds?: string } {
+export function parseAlarmsHashRoute(hash: string): {
+  tab?: TabId;
+  q?: string;
+  ds?: string;
+} {
   if (!hash) return {};
   // Strip leading `#` then `/`. The hash router's URLs are
   // `#/rules?q=…` or `#/routing` etc.
@@ -382,7 +392,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     () =>
       (alertsData?.datasourceStatus || [])
         .filter((s) => s.fallback)
-        .map((s) => ({ datasourceName: s.datasourceName, fallback: s.fallback! })),
+        .map((s) => ({
+          datasourceName: s.datasourceName,
+          fallback: s.fallback!,
+        })),
     [alertsData]
   );
   const alertsErrorMessage =
@@ -582,7 +595,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       // immediately. The override is dropped once the refetch's response
       // either confirms the ack or removes the row.
       const lastUpdated = new Date().toISOString();
-      setAckOverrides((prev) => ({ ...prev, [alertId]: { state: 'acknowledged', lastUpdated } }));
+      setAckOverrides((prev) => ({
+        ...prev,
+        [alertId]: { state: 'acknowledged', lastUpdated },
+      }));
       // Bump the refresh token so the hook refetches and the override can
       // be reconciled / cleared once the backend agrees.
       bumpRefreshToken();
@@ -777,7 +793,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       setRules((prev) =>
         prev.map((r) =>
           r.id === monitor.id
-            ? { ...r, enabled: nextEnabled, status: nextEnabled ? 'active' : 'disabled' }
+            ? {
+                ...r,
+                enabled: nextEnabled,
+                status: nextEnabled ? 'active' : 'disabled',
+              }
             : r
         )
       );
@@ -1079,14 +1099,74 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       const message = extractServerErrorMessage(e);
       const pplError = extractPplValidationError(message);
       if (pplError) setPplSubmitError(pplError);
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
-          defaultMessage: 'Failed to create alert rule',
-        }),
-        'danger',
-        message
-      );
+      // Prefer the server's classified error: show its title plus a "See full
+      // error" expander carrying the exact, fully-unwrapped upstream diagnostic.
+      // Fall back to the raw message.
+      const classified = extractClassifiedError(e);
+      if (classified) {
+        addToast(
+          classified.title,
+          classifiedToastColor(classified),
+          toMountPoint(<ClassifiedErrorToastBody error={classified} />)
+        );
+      } else {
+        addToast(
+          i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
+            defaultMessage: 'Failed to create alert rule',
+          }),
+          'danger',
+          message
+        );
+      }
     }
+  };
+
+  /**
+   * Post-save handler for the shared CreateMetricsMonitor flyout (the same
+   * component the Metrics Explore page uses). The flyout persists the rule
+   * itself via the http client; this handler only reconciles the page:
+   * optimistic insert, close, and a delayed refetch to bridge Cortex's
+   * eventual consistency (~30-60s propagation).
+   */
+  const handleMetricsRuleSaved = (form: MetricsMonitorFormState) => {
+    // Mirror of the server's promSeverityFromLabels for the optimistic row
+    const sev = form.labels.find((l) => l.key === 'severity')?.value || '';
+    const severity: PrometheusFormState['severity'] =
+      sev === 'critical' || sev === 'high' || sev === 'medium' || sev === 'low'
+        ? sev
+        : sev === 'warning'
+          ? 'medium'
+          : sev === 'page'
+            ? 'critical'
+            : 'info';
+    // Adapt the flyout's form shape to the PrometheusFormState that
+    // formStateToRule understands, for the optimistic table row
+    const promForm: PrometheusFormState = {
+      name: form.monitorName,
+      datasourceId: form.datasourceId,
+      datasourceType: 'prometheus',
+      query: form.query,
+      threshold: { operator: '>', value: 0, unit: '', forDuration: form.forDuration },
+      evaluationInterval: form.evalInterval,
+      pendingPeriod: form.forDuration,
+      firingPeriod: form.forDuration,
+      labels: form.labels,
+      annotations: form.description.trim()
+        ? [
+            ...form.annotations.filter((a) => a.key !== 'description'),
+            { key: 'description', value: form.description.trim() },
+          ]
+        : form.annotations,
+      severity,
+      enabled: true,
+    };
+    const newRule = buildOptimisticRule(promForm);
+    setShowCreateMonitor(false);
+    setCreateBackendType(null);
+    setRules((prev) => [newRule, ...prev]);
+    setRulesTotal((prev) => prev + 1);
+    refetchRules();
+    refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
   };
 
   const handleEditMonitor = async (formState: MonitorFormState, ruleId: string) => {
@@ -1365,11 +1445,31 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         <FormattedMessage
           id="observability.alerting.alarmsPage.ariaLive.showingTab"
           defaultMessage="Showing {tabName} tab"
-          values={{ tabName: tabs.find((t) => t.id === activeTab)?.name ?? activeTab }}
+          values={{
+            tabName: tabs.find((t) => t.id === activeTab)?.name ?? activeTab,
+          }}
         />
       </div>
       {renderTable()}
-      {showCreateMonitor && (
+      {/* Metrics rules use the SAME flyout component as the Metrics Explore
+          page ("Create alert rule" action) so the two surfaces can never
+          drift. It persists the rule itself; handleMetricsRuleSaved only
+          reconciles the table. Logs (PPL) rules keep the CreateMonitor
+          shell. */}
+      {showCreateMonitor && createBackendType === 'prometheus' ? (
+        <CreateMetricsMonitor
+          onCancel={() => {
+            setShowCreateMonitor(false);
+            setCreateBackendType(null);
+          }}
+          onSave={handleMetricsRuleSaved}
+          datasources={datasources.filter((d) => d.type === 'prometheus')}
+          isNameTaken={isNameTakenForCreate}
+          showBuildInMetricsLink
+          http={coreRefs.http}
+          addToast={(title, color, text) => addToast(title, color, text)}
+        />
+      ) : showCreateMonitor ? (
         <CreateMonitor
           onSave={handleCreateMonitor}
           onBatchSave={handleBatchCreateMonitors}
@@ -1385,7 +1485,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           submitError={pplSubmitError ? { pplMessage: pplSubmitError } : undefined}
           onClearPplSubmitError={() => setPplSubmitError(null)}
         />
-      )}
+      ) : null}
       {createAdRuleType && (
         <CreateAdRuleFlyout
           ruleType={createAdRuleType}
