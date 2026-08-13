@@ -552,8 +552,10 @@ const RulePreviewSection = React.memo<{
     out += `  for: ${form.forDuration}\n`;
     if (labels.length > 0) {
       out += `  labels:\n`;
+      // Template values are single-quoted, matching the server's js-yaml
+      // serialization (unquoted `{{ ... }}` would be invalid YAML)
       for (const l of labels) {
-        out += `    "${esc(l.key)}": ${l.isDynamic ? l.value : `"${esc(l.value)}"`}\n`;
+        out += `    "${esc(l.key)}": ${l.isDynamic ? `'${l.value}'` : `"${esc(l.value)}"`}\n`;
       }
     }
     if (annotations.length > 0) {

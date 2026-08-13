@@ -282,6 +282,31 @@ describe('PrometheusFormSection — rule group', () => {
   });
 });
 
+describe('PrometheusFormSection — dynamic labels', () => {
+  it('single-quotes templated label values in the YAML preview', () => {
+    const { container } = render(
+      <PrometheusFormSection
+        form={{
+          ...baseForm,
+          labels: [
+            {
+              key: 'severity',
+              value: '{{ if gt $value 0.9 }}critical{{ else }}warning{{ end }}',
+              isDynamic: true,
+            },
+          ],
+        }}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    const yaml = container.querySelector('pre')!.textContent || '';
+    expect(yaml).toContain("severity: '{{ if gt $value 0.9 }}critical{{ else }}warning{{ end }}'");
+  });
+});
+
 describe('PrometheusFormSection — YAML preview', () => {
   it('uses the query as the complete expression and hides _ruleGroup', () => {
     const { container } = render(

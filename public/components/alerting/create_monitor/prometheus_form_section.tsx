@@ -159,7 +159,10 @@ export const PrometheusFormSection: React.FC<{
     yaml += `    for: ${form.threshold.forDuration}\n`;
     if (labels.length > 0) {
       yaml += `    labels:\n`;
-      for (const l of labels) yaml += `      ${l.key}: ${l.isDynamic ? l.value : `"${l.value}"`}\n`;
+      // Template values are single-quoted, matching the server's js-yaml
+      // serialization (unquoted `{{ ... }}` would be invalid YAML)
+      for (const l of labels)
+        yaml += `      ${l.key}: ${l.isDynamic ? `'${l.value}'` : `"${l.value}"`}\n`;
     }
     if (annotations.length > 0) {
       yaml += `    annotations:\n`;
