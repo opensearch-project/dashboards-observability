@@ -531,9 +531,9 @@ const buildFeatureFormState = (
 };
 
 const getFeatureForms = (resource: Record<string, unknown>): CreateAdFeatureFormState[] => {
-  const features = asArray(
-    getField(resource, 'feature_attributes', 'featureAttributes')
-  ).map((feature) => buildFeatureFormState(resource, feature));
+  const features = asArray(getField(resource, 'feature_attributes', 'featureAttributes')).map(
+    (feature) => buildFeatureFormState(resource, feature)
+  );
   return features.length > 0 ? features : [createInitialFeature()];
 };
 
@@ -1175,18 +1175,18 @@ const errorsForStep = (
       step === 0
         ? ['name', 'datasourceId', 'indices', 'timeField', 'filterQuery', 'resultIndex']
         : step === 1
-        ? [
-            'features',
-            'categoryField',
-            'interval',
-            'frequency',
-            'windowDelay',
-            'history',
-            'shingleSize',
-          ]
-        : step === 2
-        ? []
-        : Object.keys(errors);
+          ? [
+              'features',
+              'categoryField',
+              'interval',
+              'frequency',
+              'windowDelay',
+              'history',
+              'shingleSize',
+            ]
+          : step === 2
+            ? []
+            : Object.keys(errors);
   } else {
     stepFields =
       step === 0
@@ -1200,18 +1200,18 @@ const errorsForStep = (
             'categoryField',
           ]
         : step === 1
-        ? [
-            'interval',
-            'windowDelay',
-            'history',
-            'horizon',
-            'shingleSize',
-            'resultIndex',
-            'resultIndexMinAge',
-            'resultIndexMinSize',
-            'resultIndexTtl',
-          ]
-        : Object.keys(errors);
+          ? [
+              'interval',
+              'windowDelay',
+              'history',
+              'horizon',
+              'shingleSize',
+              'resultIndex',
+              'resultIndexMinAge',
+              'resultIndexMinSize',
+              'resultIndexTtl',
+            ]
+          : Object.keys(errors);
   }
 
   return Object.fromEntries(
@@ -1741,8 +1741,8 @@ const SuggestParametersDialog: React.FC<{
         typeof intervalValue === 'number'
           ? intervalValue
           : typeof frequencyValue === 'number'
-          ? frequencyValue
-          : 10;
+            ? frequencyValue
+            : 10;
 
       const historyValue = payload.history;
       const windowDelayValue = payload.windowDelay?.period?.interval;
@@ -2009,12 +2009,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
           defaultMessage: 'Edit forecasting rule',
         })
     : isDetector
-    ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorTitle', {
-        defaultMessage: 'Create anomaly detection rule',
-      })
-    : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterTitle', {
-        defaultMessage: 'Create forecasting rule',
-      });
+      ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorTitle', {
+          defaultMessage: 'Create anomaly detection rule',
+        })
+      : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterTitle', {
+          defaultMessage: 'Create forecasting rule',
+        });
   const detectorStepTitles = isEdit
     ? [
         isDetectorModelEdit
@@ -2468,12 +2468,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
               defaultMessage: 'Forecasting rule updated successfully',
             })
         : isDetector
-        ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreatedToast', {
-            defaultMessage: 'Anomaly detection rule created successfully',
-          })
-        : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreatedToast', {
-            defaultMessage: 'Forecasting rule created successfully',
-          });
+          ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreatedToast', {
+              defaultMessage: 'Anomaly detection rule created successfully',
+            })
+          : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreatedToast', {
+              defaultMessage: 'Forecasting rule created successfully',
+            });
 
       if (isEdit && isDetector && shouldOfferStartDetectorAfterEdit && editTarget) {
         setStartAfterEditPrompt({
@@ -2521,12 +2521,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                 defaultMessage: 'Failed to update forecasting rule',
               })
           : isDetector
-          ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreateFailed', {
-              defaultMessage: 'Failed to create anomaly detection rule',
-            })
-          : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreateFailed', {
-              defaultMessage: 'Failed to create forecasting rule',
-            }),
+            ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorCreateFailed', {
+                defaultMessage: 'Failed to create anomaly detection rule',
+              })
+            : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterCreateFailed', {
+                defaultMessage: 'Failed to create forecasting rule',
+              }),
         text: message,
       });
     } finally {
@@ -4136,12 +4136,12 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
           }
         )
       : isAwaitingDataToInit || isAwaitingDataToRestart
-      ? i18n.translate('observability.alerting.createAdRuleFlyout.cancelForecastToEditTitle', {
-          defaultMessage: 'Cancel forecast to edit?',
-        })
-      : i18n.translate('observability.alerting.createAdRuleFlyout.stopForecastToEditTitle', {
-          defaultMessage: 'Stop forecast to edit?',
-        });
+        ? i18n.translate('observability.alerting.createAdRuleFlyout.cancelForecastToEditTitle', {
+            defaultMessage: 'Cancel forecast to edit?',
+          })
+        : i18n.translate('observability.alerting.createAdRuleFlyout.stopForecastToEditTitle', {
+            defaultMessage: 'Stop forecast to edit?',
+          });
     const forecastModalDescription = (() => {
       if (isInitializingForecast) {
         return i18n.translate(
@@ -4312,14 +4312,14 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
                     }
                   )
               : isDetector
-              ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorSubtitle', {
-                  defaultMessage:
-                    'Create an anomaly detection rule using the same model definition fields from the AD workflow.',
-                })
-              : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterSubtitle', {
-                  defaultMessage:
-                    'Create a forecasting rule using the same data source and model parameter fields from the Forecasting workflow.',
-                })}
+                ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorSubtitle', {
+                    defaultMessage:
+                      'Create an anomaly detection rule using the same model definition fields from the AD workflow.',
+                  })
+                : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterSubtitle', {
+                    defaultMessage:
+                      'Create a forecasting rule using the same data source and model parameter fields from the Forecasting workflow.',
+                  })}
           </EuiText>
         </EuiFlyoutHeader>
 
