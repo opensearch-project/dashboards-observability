@@ -397,7 +397,7 @@ describe('PrometheusFormSection — edit mode seeding', () => {
 });
 
 describe('PrometheusFormSection — notification routing', () => {
-  it('renders Alertmanager routing guidance', () => {
+  it('does not render a Notification routing section (matches the Metrics page flyout)', () => {
     render(
       <PrometheusFormSection
         form={baseForm}
@@ -407,7 +407,8 @@ describe('PrometheusFormSection — notification routing', () => {
       />
     );
 
-    expect(screen.getByText('Notification routing')).toBeInTheDocument();
-    expect(screen.getByText('Alertmanager')).toBeInTheDocument();
+    expect(screen.queryByText('Notification routing')).not.toBeInTheDocument();
+    // The Labels section hint still conveys the routing relationship
+    expect(screen.getByText('Categorize and route alerts')).toBeInTheDocument();
   });
 });

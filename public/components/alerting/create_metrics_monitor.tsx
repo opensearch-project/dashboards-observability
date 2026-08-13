@@ -459,7 +459,8 @@ const LabelsSection = React.memo<{
           responsive={false}
           style={{ marginBottom: 4 }}
         >
-          <EuiFlexItem grow={2}>
+          {/* Equal grow keeps the key and value boxes visually aligned */}
+          <EuiFlexItem grow={1}>
             <EuiFieldText
               placeholder={i18n.translate(
                 'observability.alerting.createMetricsMonitor.labelKeyPlaceholder',
@@ -474,7 +475,7 @@ const LabelsSection = React.memo<{
               )}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={3}>
+          <EuiFlexItem grow={1}>
             <EuiFieldText
               placeholder={
                 label.isDynamic

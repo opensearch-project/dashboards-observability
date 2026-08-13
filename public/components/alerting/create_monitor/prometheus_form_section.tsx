@@ -12,7 +12,6 @@
  *   - Query (point-and-click builder — the PromQL expression is the
  *     complete alert condition — plus per-rule `for:` duration)
  *   - Labels
- *   - Notification routing guidance (Alertmanager)
  *   - Annotations
  *   - Rule Preview (YAML)
  *
@@ -28,7 +27,6 @@ import {
   EuiBadge,
   EuiBetaBadge,
   EuiButton,
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -41,7 +39,6 @@ import {
   EuiTextArea,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../../framework/core_refs';
 import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
@@ -448,42 +445,9 @@ export const PrometheusFormSection: React.FC<{
 
       <EuiSpacer size="m" />
 
-      {/* ================================================================
-          Notification Routing — how alerts get routed in Prometheus
-          ================================================================ */}
-      <EuiPanel paddingSize="m" color="subdued">
-        <EuiAccordion
-          id="prom-notification-routing"
-          buttonContent={
-            <strong>
-              {i18n.translate(
-                'observability.alerting.prometheusFormSection.notificationRoutingTitle',
-                { defaultMessage: 'Notification routing' }
-              )}
-            </strong>
-          }
-          initialIsOpen={true}
-          paddingSize="none"
-        >
-          <EuiSpacer size="s" />
-          <EuiCallOut size="s" iconType="bell" color="primary">
-            <EuiText size="xs">
-              <p>
-                <FormattedMessage
-                  id="observability.alerting.prometheusFormSection.notificationRoutingBody"
-                  defaultMessage="Notifications for Prometheus alerts are managed through {alertmanager}. The labels you define above (e.g. {severityCode}) determine which receiver handles this alert based on your Alertmanager routing configuration."
-                  values={{
-                    alertmanager: <strong>Alertmanager</strong>,
-                    severityCode: <code>severity</code>,
-                  }}
-                />
-              </p>
-            </EuiText>
-          </EuiCallOut>
-        </EuiAccordion>
-      </EuiPanel>
-
-      <EuiSpacer size="m" />
+      {/* Notification routing guidance intentionally absent — matches the
+          Metrics page flyout; the "Categorize and route alerts" hint on the
+          Labels section covers the Alertmanager relationship. */}
 
       {/* ================================================================
           Annotations
