@@ -31,6 +31,11 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { useToast } from '../common/toast';
 import {
+  ClassifiedErrorToastBody,
+  classifiedToastColor,
+  extractClassifiedError,
+} from '../common/error';
+import {
   Datasource,
   UnifiedAlertSummary,
   UnifiedRule,
@@ -121,7 +126,11 @@ type AdResourceLifecycleAction = 'start' | 'stop';
  * live on a Prometheus datasource the user just unchecked silently
  * shows zero matches.
  */
-export function parseAlarmsHashRoute(hash: string): { tab?: TabId; q?: string; ds?: string } {
+export function parseAlarmsHashRoute(hash: string): {
+  tab?: TabId;
+  q?: string;
+  ds?: string;
+} {
   if (!hash) return {};
   // Strip leading `#` then `/`. The hash router's URLs are
   // `#/rules?q=…` or `#/routing` etc.
@@ -383,7 +392,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     () =>
       (alertsData?.datasourceStatus || [])
         .filter((s) => s.fallback)
-        .map((s) => ({ datasourceName: s.datasourceName, fallback: s.fallback! })),
+        .map((s) => ({
+          datasourceName: s.datasourceName,
+          fallback: s.fallback!,
+        })),
     [alertsData]
   );
   const alertsErrorMessage =
@@ -583,7 +595,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       // immediately. The override is dropped once the refetch's response
       // either confirms the ack or removes the row.
       const lastUpdated = new Date().toISOString();
-      setAckOverrides((prev) => ({ ...prev, [alertId]: { state: 'acknowledged', lastUpdated } }));
+      setAckOverrides((prev) => ({
+        ...prev,
+        [alertId]: { state: 'acknowledged', lastUpdated },
+      }));
       // Bump the refresh token so the hook refetches and the override can
       // be reconciled / cleared once the backend agrees.
       bumpRefreshToken();
@@ -778,7 +793,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       setRules((prev) =>
         prev.map((r) =>
           r.id === monitor.id
-            ? { ...r, enabled: nextEnabled, status: nextEnabled ? 'active' : 'disabled' }
+            ? {
+                ...r,
+                enabled: nextEnabled,
+                status: nextEnabled ? 'active' : 'disabled',
+              }
             : r
         )
       );
@@ -1080,13 +1099,25 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       const message = extractServerErrorMessage(e);
       const pplError = extractPplValidationError(message);
       if (pplError) setPplSubmitError(pplError);
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
-          defaultMessage: 'Failed to create alert rule',
-        }),
-        'danger',
-        message
-      );
+      // Prefer the server's classified error: show its title plus a "See full
+      // error" expander carrying the exact, fully-unwrapped upstream diagnostic.
+      // Fall back to the raw message.
+      const classified = extractClassifiedError(e);
+      if (classified) {
+        addToast(
+          classified.title,
+          classifiedToastColor(classified),
+          toMountPoint(<ClassifiedErrorToastBody error={classified} />)
+        );
+      } else {
+        addToast(
+          i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
+            defaultMessage: 'Failed to create alert rule',
+          }),
+          'danger',
+          message
+        );
+      }
     }
   };
 
@@ -1414,7 +1445,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         <FormattedMessage
           id="observability.alerting.alarmsPage.ariaLive.showingTab"
           defaultMessage="Showing {tabName} tab"
-          values={{ tabName: tabs.find((t) => t.id === activeTab)?.name ?? activeTab }}
+          values={{
+            tabName: tabs.find((t) => t.id === activeTab)?.name ?? activeTab,
+          }}
         />
       </div>
       {renderTable()}
@@ -1434,7 +1467,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           isNameTaken={isNameTakenForCreate}
           showBuildInMetricsLink
           http={coreRefs.http}
-          addToast={(title, color) => addToast(title, color)}
+          addToast={(title, color, text) => addToast(title, color, text)}
         />
       ) : showCreateMonitor ? (
         <CreateMonitor

@@ -24,6 +24,14 @@ const observabilityConfig = {
     alertManager: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
+    errors: schema.object({
+      // When true, verbatim upstream error detail (classified as `sensitive`)
+      // is included in API error responses. Defaults off so open-source /
+      // multi-tenant deployments never leak raw upstream text to the browser;
+      // operators and downstream forks opt in per environment. The full detail
+      // is always logged server-side with a correlation id regardless.
+      exposeSensitiveErrorDetail: schema.boolean({ defaultValue: false }),
+    }),
     slo: schema.object({
       // Top-level SLO feature gate. Ships dark — operators opt in via
       // `observability.slo.enabled: true` in `opensearch_dashboards.yml`.

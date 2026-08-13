@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { classifyRoutingStatus } from '../../../common/error';
 import { Datasource } from '../../../common/types/alerting';
 import { AlertmanagerAdminService } from './query_services/alertmanager_admin_service';
 
@@ -67,7 +68,11 @@ interface AlertmanagerConfig {
   available: boolean;
   error?: string;
   configParseError?: string;
-  cluster?: { status: string; peers: Array<{ name: string; address: string }>; peerCount: number };
+  cluster?: {
+    status: string;
+    peers: Array<{ name: string; address: string }>;
+    peerCount: number;
+  };
   uptime?: string;
   versionInfo?: Record<string, string>;
   config?: {
@@ -190,7 +195,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       const res = await adminService.getConfig(selectedDsId);
       // The API client types route/inhibitRules as `unknown` because it's
       // handed back raw from Alertmanager; narrow to our local shape here.
-      setConfig((res as unknown) as AlertmanagerConfig);
+      setConfig(res as unknown as AlertmanagerConfig);
     } catch (e: unknown) {
       setError(
         e instanceof Error
@@ -345,6 +350,10 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   const inhibitRules = config.config?.inhibitRules || [];
   const cluster = config.cluster;
   const version = config.versionInfo?.version || '—';
+  // Map the raw cluster status through the shared error layer. Null when the
+  // backend reports a healthy 'ready'; otherwise a PARTIAL_STATE classification
+  // whose title replaces the previously-literal "unknown".
+  const routingStatus = classifyRoutingStatus(cluster?.status);
 
   // -----------------------------------------------------------------------
   // Route tree table
@@ -357,7 +366,12 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
         defaultMessage: 'Receiver',
       }),
       render: (val: string, item: FlatRoute) => (
-        <span style={{ paddingLeft: item.depth * 20, fontWeight: item.depth === 0 ? 600 : 400 }}>
+        <span
+          style={{
+            paddingLeft: item.depth * 20,
+            fontWeight: item.depth === 0 ? 600 : 400,
+          }}
+        >
           {item.depth > 0 && <span style={{ color: '#98A2B3', marginRight: 6 }}>{'└'}</span>}
           {val || (
             <EuiText size="xs" color="subdued">
@@ -561,12 +575,11 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       <EuiPanel paddingSize="s" hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiHealth color={cluster?.status === 'ready' ? 'success' : 'danger'}>
-              {cluster?.status ||
-                i18n.translate(
-                  'observability.alerting.notificationRoutingPanel.clusterStatusUnknown',
-                  { defaultMessage: 'unknown' }
-                )}
+            <EuiHealth color={cluster?.status === 'ready' ? 'success' : 'warning'}>
+              {/* 'ready' is healthy; any other/empty/unknown status is surfaced
+                  through the shared error layer as a partial-state label
+                  ("Routing status unavailable") instead of the literal word. */}
+              {routingStatus ? routingStatus.title : cluster?.status}
             </EuiHealth>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

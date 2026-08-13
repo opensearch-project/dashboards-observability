@@ -46,6 +46,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../framework/core_refs';
+import { classifiedToastColor, classifiedToastText, extractClassifiedError } from '../common/error';
 import { PromQueryBuilder } from './create_monitor/prom_query_builder';
 import { RuleGroupSelector } from './create_monitor/rule_group_selector';
 import { QueryPreviewResults } from './query_preview_results';
@@ -103,8 +104,12 @@ export interface CreateMetricsMonitorProps {
   http?: {
     post: (path: string, options: { body: string }) => Promise<unknown>;
   };
-  /** Toast notification callback */
-  addToast?: (title: string, color?: 'success' | 'danger') => void;
+  /**
+   * Toast notification callback. `text` carries the classified error body
+   * (message + remediation + safe details); mount adapters must forward it and
+   * honor 'warning' so the detailed cause reaches the toast.
+   */
+  addToast?: (title: string, color?: 'success' | 'warning' | 'danger', text?: string) => void;
 }
 
 // ============================================================================
@@ -855,12 +860,25 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
       onSave(form);
     } catch (err) {
       console.error('CreateMetricsMonitor: rule creation failed', err);
-      addToast?.(
-        i18n.translate('observability.alerting.createMetricsMonitor.toast.failed', {
-          defaultMessage: 'Failed to create alert rule.',
-        }),
-        'danger'
-      );
+      // Surface the server's classified error (specific cause + remediation +
+      // correlation id) instead of a static "Failed to create alert rule."
+      // toast. Falls back to the generic message when no structured error is
+      // present (older server, network error, etc.).
+      const classified = extractClassifiedError(err);
+      if (classified) {
+        addToast?.(
+          classified.title,
+          classifiedToastColor(classified) === 'warning' ? 'warning' : 'danger',
+          classifiedToastText(classified)
+        );
+      } else {
+        addToast?.(
+          i18n.translate('observability.alerting.createMetricsMonitor.toast.failed', {
+            defaultMessage: 'Failed to create alert rule.',
+          }),
+          'danger'
+        );
+      }
     } finally {
       setIsSaving(false);
     }
