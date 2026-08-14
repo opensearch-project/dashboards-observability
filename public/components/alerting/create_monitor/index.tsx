@@ -513,7 +513,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                 <EuiLink
                   data-test-subj="createMonitorClassicExperienceLink"
                   href={`${
-                    coreRefs.http?.basePath.get() ?? ''
+                    coreRefs.http?.basePath?.get() ?? ''
                   }/app/${OLD_ALERTING_APP_ID}#/create-monitor`}
                 >
                   {i18n.translate('observability.alerting.createMonitor.classicExperienceLink', {
