@@ -168,6 +168,54 @@ describe('AlertsDashboard', () => {
     expect(onCreateForecasting).toHaveBeenCalledTimes(1);
   });
 
+  it('disables AD and Forecasting cards when no standard OpenSearch datasource is available', () => {
+    const onCreateAnomalyDetection = jest.fn();
+    const onCreateForecasting = jest.fn();
+    const unavailableDatasources: Datasource[] = [
+      {
+        id: 'aoss-1',
+        name: 'OpenSearch Serverless',
+        type: 'opensearch',
+        url: '',
+        enabled: true,
+        engineType: 'OpenSearch Serverless',
+      },
+      {
+        id: 'prometheus-1',
+        name: 'Prometheus',
+        type: 'prometheus',
+        url: '',
+        enabled: true,
+      },
+    ];
+
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={unavailableDatasources}
+        selectedDsIds={[]}
+        onCreateAnomalyDetection={onCreateAnomalyDetection}
+        onCreateForecasting={onCreateForecasting}
+      />
+    );
+
+    const anomalyCard = screen.getByTestId('alertsEmptyCreateAnomalyDetection');
+    const forecastingCard = screen.getByTestId('alertsEmptyCreateForecasting');
+    expect(anomalyCard).toBeDisabled();
+    expect(forecastingCard).toBeDisabled();
+    expect(
+      screen.getByText('An OpenSearch datasource is required to create an anomaly detection rule.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('An OpenSearch datasource is required to create a forecasting rule.')
+    ).toBeInTheDocument();
+
+    fireEvent.click(anomalyCard);
+    fireEvent.click(forecastingCard);
+    expect(onCreateAnomalyDetection).not.toHaveBeenCalled();
+    expect(onCreateForecasting).not.toHaveBeenCalled();
+  });
+
   it('renders "no rules or detectors" empty state when rulesTotal is 0', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} rulesTotal={0} />);
     expect(

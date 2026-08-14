@@ -353,12 +353,15 @@ const parseFilterQuery = (value: string): Record<string, unknown> => {
 export const getCreateAdRuleDatasources = (datasources: Datasource[]): Datasource[] =>
   datasources.filter(isStandardOpenSearchDatasource);
 
-const getInitialDatasourceId = (datasources: Datasource[], selectedDsIds?: string[]): string => {
+export const getInitialDatasourceId = (
+  datasources: Datasource[],
+  selectedDsIds?: string[]
+): string => {
   const openSearchDatasources = getCreateAdRuleDatasources(datasources);
   const selected = selectedDsIds
     ?.map((id) => openSearchDatasources.find((datasource) => datasource.id === id))
     .find(Boolean);
-  return selected?.id ?? openSearchDatasources[0]?.id ?? '';
+  return selected?.id ?? '';
 };
 
 const DIRECTION_THRESHOLD_TYPES = new Set(['ACTUAL_IS_BELOW_EXPECTED', 'ACTUAL_IS_OVER_EXPECTED']);

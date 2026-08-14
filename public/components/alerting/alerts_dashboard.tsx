@@ -43,7 +43,7 @@ import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting'
 import { filterAlerts } from '../../../common/services/alerting/filter';
 import { AlertTimeline } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
-import { countBy } from './shared_constants';
+import { countBy, isStandardOpenSearchDatasource } from './shared_constants';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
 import './alerting.scss';
 
@@ -151,6 +151,7 @@ const emptyAlertFilters = (): AlertFilterState => ({
 
 interface UnifiedSignalsEmptyStateProps {
   mode: 'no-ds' | 'no-rules';
+  datasources: Datasource[];
   defaultDatasources: string[];
   onDatasourceChange: (ids: string[]) => void;
   onGoToRules: () => void;
@@ -162,6 +163,7 @@ interface UnifiedSignalsEmptyStateProps {
 
 const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
   mode,
+  datasources,
   defaultDatasources,
   onDatasourceChange,
   onGoToRules,
@@ -171,6 +173,7 @@ const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
   onCreateForecasting,
 }) => {
   const [showAlertingRuleTypeModal, setShowAlertingRuleTypeModal] = useState(false);
+  const hasCompatibleOpenSearchDatasource = datasources.some(isStandardOpenSearchDatasource);
   const capabilities = [
     {
       id: 'alerting',
@@ -187,6 +190,7 @@ const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
       ),
       onClick: () => setShowAlertingRuleTypeModal(true),
       dataTestSubj: 'alertsEmptyCreateAlertingRule',
+      isDisabled: false,
     },
     {
       id: 'anomalyDetection',
@@ -195,15 +199,24 @@ const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
         'observability.alerting.alertsDashboard.unifiedEmptyState.anomalyDetectionTitle',
         { defaultMessage: 'Anomaly detection' }
       ),
-      description: i18n.translate(
-        'observability.alerting.alertsDashboard.unifiedEmptyState.anomalyDetectionDescription',
-        {
-          defaultMessage:
-            'Detect unusual behavior automatically and inspect anomalies alongside alerts.',
-        }
-      ),
+      description: hasCompatibleOpenSearchDatasource
+        ? i18n.translate(
+            'observability.alerting.alertsDashboard.unifiedEmptyState.anomalyDetectionDescription',
+            {
+              defaultMessage:
+                'Detect unusual behavior automatically and inspect anomalies alongside alerts.',
+            }
+          )
+        : i18n.translate(
+            'observability.alerting.alertsDashboard.unifiedEmptyState.anomalyDetectionUnavailable',
+            {
+              defaultMessage:
+                'An OpenSearch datasource is required to create an anomaly detection rule.',
+            }
+          ),
       onClick: onCreateAnomalyDetection,
       dataTestSubj: 'alertsEmptyCreateAnomalyDetection',
+      isDisabled: !hasCompatibleOpenSearchDatasource,
     },
     {
       id: 'forecasting',
@@ -212,15 +225,23 @@ const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
         'observability.alerting.alertsDashboard.unifiedEmptyState.forecastingTitle',
         { defaultMessage: 'Forecasting' }
       ),
-      description: i18n.translate(
-        'observability.alerting.alertsDashboard.unifiedEmptyState.forecastingDescription',
-        {
-          defaultMessage:
-            'Create forecasters to predict future values and anticipate emerging trends.',
-        }
-      ),
+      description: hasCompatibleOpenSearchDatasource
+        ? i18n.translate(
+            'observability.alerting.alertsDashboard.unifiedEmptyState.forecastingDescription',
+            {
+              defaultMessage:
+                'Create forecasters to predict future values and anticipate emerging trends.',
+            }
+          )
+        : i18n.translate(
+            'observability.alerting.alertsDashboard.unifiedEmptyState.forecastingUnavailable',
+            {
+              defaultMessage: 'An OpenSearch datasource is required to create a forecasting rule.',
+            }
+          ),
       onClick: onCreateForecasting,
       dataTestSubj: 'alertsEmptyCreateForecasting',
+      isDisabled: !hasCompatibleOpenSearchDatasource,
     },
   ];
 
@@ -285,10 +306,17 @@ const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
             <EuiCard
               className="altUnifiedSignalsCard"
               layout="horizontal"
-              icon={<EuiIcon type={capability.iconType} color="primary" size="l" />}
+              icon={
+                <EuiIcon
+                  type={capability.iconType}
+                  color={capability.isDisabled ? 'subdued' : 'primary'}
+                  size="l"
+                />
+              }
               title={capability.title}
               description={capability.description}
               onClick={capability.onClick}
+              isDisabled={capability.isDisabled}
               data-test-subj={capability.dataTestSubj}
             />
           </EuiFlexItem>
@@ -1432,6 +1460,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                       {emptyMode === 'no-ds' || emptyMode === 'no-rules' ? (
                         <UnifiedSignalsEmptyState
                           mode={emptyMode}
+                          datasources={datasources}
                           defaultDatasources={defaultDatasources}
                           onDatasourceChange={onDatasourceChange}
                           onGoToRules={onGoToRules}
