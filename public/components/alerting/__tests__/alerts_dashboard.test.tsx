@@ -81,6 +81,14 @@ const sampleDs: Datasource = {
   enabled: true,
 };
 
+const samplePrometheusDs: Datasource = {
+  id: 'prometheus-1',
+  name: 'Prometheus',
+  type: 'prometheus',
+  url: '',
+  enabled: true,
+};
+
 const HOUR_MS = 60 * 60 * 1000;
 const NOW = Date.now();
 
@@ -143,6 +151,7 @@ describe('AlertsDashboard', () => {
     const { getByText } = render(
       <AlertsDashboard
         {...baseProps}
+        datasources={[sampleDs, samplePrometheusDs]}
         selectedDsIds={[]}
         onCreateLogsRule={onCreateLogsRule}
         onCreateMetricsRule={onCreateMetricsRule}
@@ -166,6 +175,28 @@ describe('AlertsDashboard', () => {
 
     fireEvent.click(getByText('Forecasting'));
     expect(onCreateForecasting).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables Metrics creation when no Prometheus datasource is available', () => {
+    const onCreateMetricsRule = jest.fn();
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        selectedDsIds={[]}
+        onCreateMetricsRule={onCreateMetricsRule}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Alerting'));
+
+    const metricsCard = screen.getByTestId('alertsEmptyCreateMetricsRule');
+    expect(metricsCard).toBeDisabled();
+    expect(
+      screen.getByText('A Prometheus datasource is required to create a metrics alert rule.')
+    ).toBeInTheDocument();
+
+    fireEvent.click(metricsCard);
+    expect(onCreateMetricsRule).not.toHaveBeenCalled();
   });
 
   it('disables AD and Forecasting cards when no standard OpenSearch datasource is available', () => {

@@ -174,6 +174,7 @@ const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
 }) => {
   const [showAlertingRuleTypeModal, setShowAlertingRuleTypeModal] = useState(false);
   const hasCompatibleOpenSearchDatasource = datasources.some(isStandardOpenSearchDatasource);
+  const hasPrometheusDatasource = datasources.some((datasource) => datasource.type === 'prometheus');
   const capabilities = [
     {
       id: 'alerting',
@@ -373,21 +374,38 @@ const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
               <EuiFlexItem>
                 <EuiCard
                   layout="horizontal"
-                  icon={<EuiIcon type="visMetric" color="primary" size="l" />}
+                  icon={
+                    <EuiIcon
+                      type="visMetric"
+                      color={hasPrometheusDatasource ? 'primary' : 'subdued'}
+                      size="l"
+                    />
+                  }
                   title={i18n.translate(
                     'observability.alerting.alertsDashboard.ruleTypeModal.metricsTitle',
                     { defaultMessage: 'Metrics alert rule' }
                   )}
-                  description={i18n.translate(
-                    'observability.alerting.alertsDashboard.ruleTypeModal.metricsDescription',
-                    {
-                      defaultMessage: 'Evaluate Prometheus metrics with a PromQL query.',
-                    }
-                  )}
+                  description={
+                    hasPrometheusDatasource
+                      ? i18n.translate(
+                          'observability.alerting.alertsDashboard.ruleTypeModal.metricsDescription',
+                          {
+                            defaultMessage: 'Evaluate Prometheus metrics with a PromQL query.',
+                          }
+                        )
+                      : i18n.translate(
+                          'observability.alerting.alertsDashboard.ruleTypeModal.metricsUnavailable',
+                          {
+                            defaultMessage:
+                              'A Prometheus datasource is required to create a metrics alert rule.',
+                          }
+                        )
+                  }
                   onClick={() => {
                     setShowAlertingRuleTypeModal(false);
                     onCreateMetricsRule();
                   }}
+                  isDisabled={!hasPrometheusDatasource}
                   data-test-subj="alertsEmptyCreateMetricsRule"
                 />
               </EuiFlexItem>
