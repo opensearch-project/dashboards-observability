@@ -174,7 +174,9 @@ const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
 }) => {
   const [showAlertingRuleTypeModal, setShowAlertingRuleTypeModal] = useState(false);
   const hasCompatibleOpenSearchDatasource = datasources.some(isStandardOpenSearchDatasource);
-  const hasPrometheusDatasource = datasources.some((datasource) => datasource.type === 'prometheus');
+  const hasPrometheusDatasource = datasources.some(
+    (datasource) => datasource.type === 'prometheus'
+  );
   const capabilities = [
     {
       id: 'alerting',
