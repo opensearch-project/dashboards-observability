@@ -30,7 +30,7 @@ jest.mock('../../../shared/hooks/use_services', () => ({
 const mockUseServices = useServices as jest.Mock;
 const setDiscoveredServices = (names: string[]) =>
   mockUseServices.mockReturnValue({
-    data: names.map((name) => ({ name })),
+    data: names.map((name) => ({ serviceName: name })),
     isLoading: false,
     error: null,
     availableGroupByAttributes: {},
@@ -139,7 +139,11 @@ describe('SloListingPage — filter integration', () => {
     await act(async () => {
       fireEvent.click(suggestCta);
     });
+    // The CTA must hand the discovered service names to the Suggest page as its
+    // scope — otherwise it lands unscoped and drafts nothing, contradicting the
+    // "we discovered services and can draft SLOs" onboarding copy.
     expect(navigateToSloSuggest).toHaveBeenCalledTimes(1);
+    expect(navigateToSloSuggest).toHaveBeenCalledWith(['payments-api', 'checkout']);
   });
 
   it('guides the user to set up services when none are discovered', async () => {

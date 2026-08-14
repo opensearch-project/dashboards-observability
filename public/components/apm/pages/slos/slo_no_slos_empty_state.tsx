@@ -51,6 +51,15 @@ export const SloNoSlosEmptyState: React.FC = () => {
   // there early is harmless and avoids a spinner-then-swap flicker.
   const hasServices = servicesLoading || serviceCount > 0;
 
+  // Names of the services discovery found, passed to the Suggest page as its
+  // URL scope so it lands pre-scoped and auto-drafts objectives for each one —
+  // matching the empty-state promise. Without this, an unscoped Suggest deep
+  // link drafts nothing and drops the user on the "pick services" prompt.
+  const discoveredServiceNames = useMemo(
+    () => (services ?? []).map((s) => s.serviceName).filter(Boolean),
+    [services]
+  );
+
   if (hasServices) {
     return (
       <EuiPanel style={{ marginTop: '8px' }} data-test-subj="slosEmptyNoSlos">
@@ -82,7 +91,7 @@ export const SloNoSlosEmptyState: React.FC = () => {
               key="suggest"
               fill
               iconType="inspect"
-              onClick={() => navigateToSloSuggest([])}
+              onClick={() => navigateToSloSuggest(discoveredServiceNames)}
               data-test-subj="slosEmptySuggest"
             >
               {i18n.translate('observability.apm.slo.listing.emptyState.suggest', {
