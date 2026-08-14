@@ -212,14 +212,14 @@ describe('osAlertToUnified', () => {
 });
 
 // ============================================================================
-// osMonitorToUnifiedRuleSummary — monitorType derivation from index prefixes
+// osMonitorToUnifiedRuleSummary — monitorType derivation
 // ============================================================================
 //
-// Regression coverage for the L5 cleanup that hoisted the previously-inline
-// prefix list into named `LOG_INDEX_PREFIXES` / `APM_INDEX_PREFIXES`
-// constants. Encodes the schema list so adding a new well-known schema
-// (e.g. SS4O metrics) is a one-line constant change with a single test
-// case to follow.
+// The Rules-tab "Type" is derived from the detected monitor kind: composite,
+// cluster-metrics, and anomaly-detector monitors keep their own types; every
+// other OpenSearch monitor — per-query, per-bucket, per-document — is surfaced
+// under a single "Log" type (the old apm/log/metric index-name heuristic was
+// removed because it guessed a data domain rather than the monitor mechanism).
 
 describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
   function buildMonitor(indices: string[]): OSMonitor {
@@ -250,23 +250,17 @@ describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
     }
   );
 
-  it.each([
-    ['otel-v1-apm-span'],
-    ['otel-v1-apm-service-map'],
-    ['ss4o_traces-myapp'],
-    ['ss4o_traces'],
-  ])('classifies %s as an apm monitor', (idx) => {
-    expect(osMonitorToUnifiedRuleSummary(buildMonitor([idx]), 'ds').monitorType).toBe('apm');
-  });
+  // Per-query monitors are surfaced as "log" regardless of the index they
+  // target — the index-name domain heuristic (apm/metric) was removed.
+  it.each([['otel-v1-apm-span'], ['ss4o_traces-myapp'], ['my-custom-index'], ['foo-*']])(
+    'classifies a query monitor over %s as a log monitor',
+    (idx) => {
+      expect(osMonitorToUnifiedRuleSummary(buildMonitor([idx]), 'ds').monitorType).toBe('log');
+    }
+  );
 
-  it('falls back to "metric" for indices that match no schema prefix', () => {
-    const r = osMonitorToUnifiedRuleSummary(buildMonitor(['my-custom-index', 'foo-*']), 'ds');
-    expect(r.monitorType).toBe('metric');
-  });
-
-  it('falls back to "metric" when no input indices are present', () => {
-    const r = osMonitorToUnifiedRuleSummary(buildMonitor([]), 'ds');
-    expect(r.monitorType).toBe('metric');
+  it('classifies a query monitor with no indices as a log monitor', () => {
+    expect(osMonitorToUnifiedRuleSummary(buildMonitor([]), 'ds').monitorType).toBe('log');
   });
 
   it.each([['.opendistro-anomaly-results*'], ['opensearch-ad-plugin-result-test-history-*']])(
@@ -315,9 +309,74 @@ describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
     expect(extractADAnomalyResultIdsFromMonitor(monitor)).toEqual(['anomaly-1', 'anomaly-2']);
   });
 
-  it('treats the first matching prefix as authoritative — log wins over apm when both are present', () => {
-    const r = osMonitorToUnifiedRuleSummary(buildMonitor(['logs-app', 'otel-v1-apm-span']), 'ds');
-    expect(r.monitorType).toBe('log');
+  it('classifies bucket-level monitors as a log monitor', () => {
+    const m = {
+      ...buildMonitor(['logs-x']),
+      monitor_type: 'bucket_level_monitor',
+    } as unknown as OSMonitor;
+    expect(osMonitorToUnifiedRuleSummary(m, 'ds').monitorType).toBe('log');
+  });
+
+  it('classifies doc-level monitors as a log monitor', () => {
+    const m = {
+      ...buildMonitor([]),
+      monitor_type: 'doc_level_monitor',
+      inputs: [{ doc_level_input: { description: '', indices: ['logs-x'], queries: [] } }],
+    } as unknown as OSMonitor;
+    expect(osMonitorToUnifiedRuleSummary(m, 'ds').monitorType).toBe('log');
+  });
+
+  it('keeps cluster-metrics monitors classified as cluster_metrics', () => {
+    const m = {
+      ...buildMonitor([]),
+      inputs: [
+        {
+          uri: {
+            api_type: 'CLUSTER_HEALTH',
+            path: '/_cluster/health',
+            path_params: '',
+            url: '',
+            clusters: [],
+          },
+        },
+      ],
+    } as unknown as OSMonitor;
+    expect(osMonitorToUnifiedRuleSummary(m, 'ds').monitorType).toBe('cluster_metrics');
+  });
+
+  it('classifies composite (workflow) monitors as "composite" and surfaces member monitor ids', () => {
+    // Workflows are returned by the monitors search with no monitor_type (so
+    // mapMonitor coerces to query_level_monitor); the composite_input is the
+    // authoritative signal.
+    const composite = {
+      id: 'wf-1',
+      type: 'monitor',
+      monitor_type: 'query_level_monitor',
+      name: 'composite-wf',
+      enabled: true,
+      schedule: { period: { interval: 1, unit: 'MINUTES' } },
+      inputs: [
+        {
+          composite_input: {
+            sequence: {
+              delegates: [
+                { order: 2, monitor_id: 'mon-b' },
+                { order: 1, monitor_id: 'mon-a' },
+              ],
+            },
+          },
+        },
+      ],
+      triggers: [],
+      last_update_time: 1700000000000,
+    } as unknown as OSMonitor;
+
+    const r = osMonitorToUnifiedRuleSummary(composite, 'ds');
+    expect(r.monitorType).toBe('composite');
+    expect(r.labels?.monitor_kind).toBe('composite');
+    // Ordered by `order`, so mon-a (order 1) precedes mon-b (order 2).
+    expect(r.labels?.composite_delegates).toBe('mon-a,mon-b');
+    expect(r.query).toBe('mon-a, mon-b');
   });
 });
 
