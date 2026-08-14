@@ -67,6 +67,12 @@ interface MonitorsTableProps {
   /** Callback fired when user tries to exceed `maxDatasources`. */
   onDatasourceCapReached: () => void;
   /**
+   * Per-datasource error text, keyed by datasource NAME (the label key used
+   * by the datasource facet). Rendered as an error icon next to the
+   * affected row in the filter panel; click opens a popover with details.
+   */
+  datasourceErrorMap?: Record<string, string>;
+  /**
    * Optional pre-fill for the search box. Used by deep links from the SLO
    * detail page so users can jump straight to a specific recording rule
    * without typing it. Empty / undefined leaves the box blank.
@@ -96,6 +102,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   onDatasourceChange,
   maxDatasources,
   onDatasourceCapReached,
+  datasourceErrorMap,
   initialSearchQuery,
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
@@ -418,6 +425,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onDatasourceChange={onDatasourceChange}
                 maxDatasources={maxDatasources}
                 onDatasourceCapReached={onDatasourceCapReached}
+                datasourceErrorMap={datasourceErrorMap}
                 filters={filters}
                 activeFilterCount={activeFilterCount}
                 clearAllFilters={clearAllFilters}

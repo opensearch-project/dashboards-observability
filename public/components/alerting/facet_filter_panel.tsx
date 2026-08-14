@@ -15,17 +15,24 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiButtonIcon,
   EuiText,
   EuiBadge,
   EuiCheckbox,
   EuiHealth,
   EuiFieldSearch,
   EuiLink,
+  EuiPopover,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TruncatedLabel } from '../common/truncated_label';
+// Note: `.altFacetErrorBtn` / `.altFacetErrorPopover` (and the pre-existing
+// `altFacet*` classes) live in `alerting.scss`, which the alerting pages that
+// render this component already import. This shared component deliberately
+// does NOT import that stylesheet itself — doing so would pull Alert Manager's
+// global EUI selector overrides into any future non-alerting consumer.
 
 // ============================================================================
 // Types
@@ -42,6 +49,14 @@ export interface FacetGroupConfig {
   colorMap?: Record<string, string>;
   /** Optional per-option leading icon (e.g. logoOpenSearch / logoPrometheus). */
   iconMap?: Record<string, string>;
+  /**
+   * Optional per-option error message. When present for an option, an alert
+   * icon renders trailing the label; clicking it opens a popover with the
+   * message. Consumers use this to surface per-datasource connectivity
+   * failures next to the failing datasource in the filter panel (rather
+   * than in a page-level banner).
+   */
+  errorMap?: Record<string, string>;
   /** Enables a case-insensitive search input above the options list. */
   searchable?: boolean;
   /** Hide the `(count)` badge next to each option. Defaults to true. */
@@ -86,6 +101,74 @@ export interface FacetFilterGroupProps extends FacetGroupConfig {
 // SLO listing's datasource facet). Imported above.
 
 // ============================================================================
+// FacetErrorIndicator — click-to-open popover attached to a facet row
+// ============================================================================
+//
+// Per-option error icon. Extracted into a sub-component so each row can own
+// its popover state (a hook inside .map() is not permitted). The button lives
+// inside the checkbox row's `<label>`, so it stops event propagation on
+// pointer AND keyboard activation (click / mousedown / keydown / keyup) — a
+// nested control does not activate the labeled input per spec, but stopping
+// propagation also prevents React's synthetic bubbling from reaching the row's
+// handlers and toggling the datasource selection when the user only wanted to
+// read the error.
+interface FacetErrorIndicatorProps {
+  facetId: string;
+  option: string;
+  displayLabel: string;
+  error: string;
+}
+const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
+  facetId,
+  option,
+  displayLabel,
+  error,
+}) => {
+  const [open, setOpen] = useState(false);
+  const stop = (e: React.SyntheticEvent) => e.stopPropagation();
+  const ariaLabel = i18n.translate('observability.alerting.facetFilterPanel.errorIconAriaLabel', {
+    defaultMessage: '{displayLabel} — connection error, click for details',
+    values: { displayLabel },
+  });
+  return (
+    <EuiPopover
+      isOpen={open}
+      closePopover={() => setOpen(false)}
+      panelPaddingSize="s"
+      anchorPosition="rightCenter"
+      button={
+        <EuiButtonIcon
+          iconType="alert"
+          color="danger"
+          size="xs"
+          className="altFacetErrorBtn"
+          aria-label={ariaLabel}
+          onClick={(e: React.MouseEvent) => {
+            stop(e);
+            setOpen((v) => !v);
+          }}
+          onMouseDown={stop}
+          onKeyDown={stop}
+          onKeyUp={stop}
+          data-test-subj={`facetGroup-${facetId}-error-${option}`}
+        />
+      }
+    >
+      <div
+        className="altFacetErrorPopover"
+        data-test-subj={`facetGroup-${facetId}-error-${option}-popover`}
+      >
+        <EuiText size="xs">
+          <strong>{displayLabel}</strong>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiText size="xs">{error}</EuiText>
+      </div>
+    </EuiPopover>
+  );
+};
+
+// ============================================================================
 // FacetFilterGroup — a single collapsible facet section
 // ============================================================================
 
@@ -99,6 +182,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
   displayMap,
   colorMap,
   iconMap,
+  errorMap,
   searchable,
   showCounts = true,
   showOptionCount = false,
@@ -289,6 +373,14 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                   )}
                   {/* Explicit 12/18 preserves Alert Manager's existing look. */}
                   <TruncatedLabel text={displayLabel} fontSize={12} lineHeight={18} />
+                  {errorMap?.[opt] && (
+                    <FacetErrorIndicator
+                      facetId={id}
+                      option={opt}
+                      displayLabel={displayLabel}
+                      error={errorMap[opt]}
+                    />
+                  )}
                 </span>
                 {showCounts && (
                   <EuiText size="xs" color="subdued" className="altFacetCount">

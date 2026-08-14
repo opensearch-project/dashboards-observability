@@ -10,9 +10,14 @@
   flex-direction: column;
 }
 
-// Spacing below page-level callouts (alarms_page_callouts.tsx).
-.altCalloutSpaced {
-  margin-bottom: 12px;
+/* Per-datasource error indicator in the filter facet (FacetErrorIndicator). */
+.altFacetErrorBtn {
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+.altFacetErrorPopover {
+  max-width: 260px;
 }
 
 .altResizableContainer {

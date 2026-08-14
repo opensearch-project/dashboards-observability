@@ -52,6 +52,8 @@ export interface MonitorsFiltersPanelProps {
   onDatasourceChange: (ids: string[]) => void;
   maxDatasources: number;
   onDatasourceCapReached: () => void;
+  /** Per-datasource error text keyed by datasource NAME; see AlertsDashboard. */
+  datasourceErrorMap?: Record<string, string>;
 
   filters: FilterState;
   activeFilterCount: number;
@@ -95,6 +97,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
   onDatasourceChange,
   maxDatasources,
   onDatasourceCapReached,
+  datasourceErrorMap,
   filters,
   activeFilterCount,
   clearAllFilters,
@@ -207,6 +210,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
             defaultMessage: 'Datasource',
           })}
           iconMap={datasourceIconMap}
+          errorMap={datasourceErrorMap}
           options={datasourceEntries.map((e) => e.label)}
           selected={selectedDsIds
             .map((id) => datasourceEntries.find((e) => e.id === id)?.label || '')
