@@ -97,6 +97,10 @@ const baseProps = {
   rulesTotal: 1,
   defaultDatasources: [],
   onGoToRules: jest.fn(),
+  onCreateLogsRule: jest.fn(),
+  onCreateMetricsRule: jest.fn(),
+  onCreateAnomalyDetection: jest.fn(),
+  onCreateForecasting: jest.fn(),
   startMs: NOW - HOUR_MS,
   endMs: NOW,
   pickerStart: 'now-24h',
@@ -113,16 +117,72 @@ describe('AlertsDashboard', () => {
   it('renders "no alerts in range" empty state when rules exist but no alerts', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} />);
     expect(getByText('No alerts in the selected time range')).toBeInTheDocument();
+    expect(
+      getByText('No alerts or anomalies were detected in the selected time range.')
+    ).toBeInTheDocument();
   });
 
   it('renders "no datasource" empty state when selection is empty', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} selectedDsIds={[]} />);
-    expect(getByText('No datasource selected')).toBeInTheDocument();
+    expect(
+      getByText('Define rules, detect anomalies, and forecast from one place')
+    ).toBeInTheDocument();
+    expect(getByText('Alerting')).toBeInTheDocument();
+    expect(getByText('Anomaly detection')).toBeInTheDocument();
+    expect(getByText('Forecasting')).toBeInTheDocument();
+    expect(
+      getByText('Select a datasource to view alerts and detected anomalies.')
+    ).toBeInTheDocument();
+  });
+
+  it('offers logs and metrics creation from the Alerting capability card', () => {
+    const onCreateLogsRule = jest.fn();
+    const onCreateMetricsRule = jest.fn();
+    const onCreateAnomalyDetection = jest.fn();
+    const onCreateForecasting = jest.fn();
+    const { getByText } = render(
+      <AlertsDashboard
+        {...baseProps}
+        selectedDsIds={[]}
+        onCreateLogsRule={onCreateLogsRule}
+        onCreateMetricsRule={onCreateMetricsRule}
+        onCreateAnomalyDetection={onCreateAnomalyDetection}
+        onCreateForecasting={onCreateForecasting}
+      />
+    );
+
+    fireEvent.click(getByText('Alerting'));
+    expect(screen.getByTestId('alertsEmptyAlertingRuleTypeModal')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('alertsEmptyCreateLogsRule'));
+    expect(onCreateLogsRule).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(getByText('Alerting'));
+    fireEvent.click(screen.getByTestId('alertsEmptyCreateMetricsRule'));
+    expect(onCreateMetricsRule).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(getByText('Anomaly detection'));
+    expect(onCreateAnomalyDetection).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(getByText('Forecasting'));
+    expect(onCreateForecasting).toHaveBeenCalledTimes(1);
   });
 
   it('renders "no rules or detectors" empty state when rulesTotal is 0', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} rulesTotal={0} />);
-    expect(getByText('No rules or detectors have been created')).toBeInTheDocument();
+    expect(
+      getByText('Define rules, detect anomalies, and forecast from one place')
+    ).toBeInTheDocument();
+    expect(
+      getByText(
+        'Create an alerting, anomaly detection, or forecasting rule for the selected datasource.'
+      )
+    ).toBeInTheDocument();
+    expect(
+      getByText(
+        'Create a rule to get started. Triggered alerts and detected anomalies will appear here.'
+      )
+    ).toBeInTheDocument();
+    expect(getByText('Go to Rules')).toBeInTheDocument();
   });
 
   it('renders alert table when alerts provided', () => {
