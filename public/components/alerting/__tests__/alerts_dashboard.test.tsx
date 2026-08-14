@@ -153,6 +153,7 @@ describe('AlertsDashboard', () => {
 
     fireEvent.click(getByText('Alerting'));
     expect(screen.getByTestId('alertsEmptyAlertingRuleTypeModal')).toBeInTheDocument();
+    expect(document.querySelectorAll('.euiOverlayMask, .ouiOverlayMask')).toHaveLength(1);
     fireEvent.click(screen.getByTestId('alertsEmptyCreateLogsRule'));
     expect(onCreateLogsRule).toHaveBeenCalledTimes(1);
 

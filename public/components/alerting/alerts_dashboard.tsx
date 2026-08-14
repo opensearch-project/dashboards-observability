@@ -32,7 +32,6 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiOverlayMask,
   EuiResizableContainer,
   EuiHorizontalRule,
   EuiSuperDatePicker,
@@ -297,86 +296,84 @@ const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
       </EuiFlexGroup>
 
       {showAlertingRuleTypeModal && (
-        <EuiOverlayMask>
-          <EuiModal
-            onClose={() => setShowAlertingRuleTypeModal(false)}
-            aria-labelledby="alertingRuleTypeModalTitle"
-            maxWidth={640}
-            data-test-subj="alertsEmptyAlertingRuleTypeModal"
-          >
-            <EuiModalHeader>
-              <EuiModalHeaderTitle id="alertingRuleTypeModalTitle">
+        <EuiModal
+          onClose={() => setShowAlertingRuleTypeModal(false)}
+          aria-labelledby="alertingRuleTypeModalTitle"
+          maxWidth={640}
+          data-test-subj="alertsEmptyAlertingRuleTypeModal"
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle id="alertingRuleTypeModalTitle">
+              <FormattedMessage
+                id="observability.alerting.alertsDashboard.ruleTypeModal.title"
+                defaultMessage="Create an alerting rule"
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText color="subdued" size="s">
+              <p>
                 <FormattedMessage
-                  id="observability.alerting.alertsDashboard.ruleTypeModal.title"
-                  defaultMessage="Create an alerting rule"
+                  id="observability.alerting.alertsDashboard.ruleTypeModal.description"
+                  defaultMessage="Choose the signal source you want this rule to evaluate."
                 />
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              <EuiText color="subdued" size="s">
-                <p>
-                  <FormattedMessage
-                    id="observability.alerting.alertsDashboard.ruleTypeModal.description"
-                    defaultMessage="Choose the signal source you want this rule to evaluate."
-                  />
-                </p>
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup gutterSize="m" responsive={true}>
-                <EuiFlexItem>
-                  <EuiCard
-                    layout="horizontal"
-                    icon={<EuiIcon type="logsApp" color="primary" size="l" />}
-                    title={i18n.translate(
-                      'observability.alerting.alertsDashboard.ruleTypeModal.logsTitle',
-                      { defaultMessage: 'Logs alert rule' }
-                    )}
-                    description={i18n.translate(
-                      'observability.alerting.alertsDashboard.ruleTypeModal.logsDescription',
-                      {
-                        defaultMessage: 'Evaluate OpenSearch logs with a PPL query.',
-                      }
-                    )}
-                    onClick={() => {
-                      setShowAlertingRuleTypeModal(false);
-                      onCreateLogsRule();
-                    }}
-                    data-test-subj="alertsEmptyCreateLogsRule"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiCard
-                    layout="horizontal"
-                    icon={<EuiIcon type="visMetric" color="primary" size="l" />}
-                    title={i18n.translate(
-                      'observability.alerting.alertsDashboard.ruleTypeModal.metricsTitle',
-                      { defaultMessage: 'Metrics alert rule' }
-                    )}
-                    description={i18n.translate(
-                      'observability.alerting.alertsDashboard.ruleTypeModal.metricsDescription',
-                      {
-                        defaultMessage: 'Evaluate Prometheus metrics with a PromQL query.',
-                      }
-                    )}
-                    onClick={() => {
-                      setShowAlertingRuleTypeModal(false);
-                      onCreateMetricsRule();
-                    }}
-                    data-test-subj="alertsEmptyCreateMetricsRule"
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiModalBody>
-            <EuiModalFooter>
-              <EuiButtonEmpty onClick={() => setShowAlertingRuleTypeModal(false)}>
-                <FormattedMessage
-                  id="observability.alerting.alertsDashboard.ruleTypeModal.cancelButton"
-                  defaultMessage="Cancel"
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="m" responsive={true}>
+              <EuiFlexItem>
+                <EuiCard
+                  layout="horizontal"
+                  icon={<EuiIcon type="logsApp" color="primary" size="l" />}
+                  title={i18n.translate(
+                    'observability.alerting.alertsDashboard.ruleTypeModal.logsTitle',
+                    { defaultMessage: 'Logs alert rule' }
+                  )}
+                  description={i18n.translate(
+                    'observability.alerting.alertsDashboard.ruleTypeModal.logsDescription',
+                    {
+                      defaultMessage: 'Evaluate OpenSearch logs with a PPL query.',
+                    }
+                  )}
+                  onClick={() => {
+                    setShowAlertingRuleTypeModal(false);
+                    onCreateLogsRule();
+                  }}
+                  data-test-subj="alertsEmptyCreateLogsRule"
                 />
-              </EuiButtonEmpty>
-            </EuiModalFooter>
-          </EuiModal>
-        </EuiOverlayMask>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiCard
+                  layout="horizontal"
+                  icon={<EuiIcon type="visMetric" color="primary" size="l" />}
+                  title={i18n.translate(
+                    'observability.alerting.alertsDashboard.ruleTypeModal.metricsTitle',
+                    { defaultMessage: 'Metrics alert rule' }
+                  )}
+                  description={i18n.translate(
+                    'observability.alerting.alertsDashboard.ruleTypeModal.metricsDescription',
+                    {
+                      defaultMessage: 'Evaluate Prometheus metrics with a PromQL query.',
+                    }
+                  )}
+                  onClick={() => {
+                    setShowAlertingRuleTypeModal(false);
+                    onCreateMetricsRule();
+                  }}
+                  data-test-subj="alertsEmptyCreateMetricsRule"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={() => setShowAlertingRuleTypeModal(false)}>
+              <FormattedMessage
+                id="observability.alerting.alertsDashboard.ruleTypeModal.cancelButton"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiModalFooter>
+        </EuiModal>
       )}
     </div>
   );
