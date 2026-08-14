@@ -185,8 +185,15 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
       : monitor.datasourceId;
     // navigateToApp resolves the basepath/workspace prefix (bare hash hrefs
     // don't) — matches the routing deep-link pattern used elsewhere here.
+    // Encode the interpolated values so a reserved char (&, #, =, space) in any
+    // of them can't be parsed as URL structure. In practice all three are
+    // URL-safe (system `_id`, backend enum, saved-object id), so this is
+    // defensive hardening rather than a behavior change.
+    const id = encodeURIComponent(monitor.id);
+    const monitorTypeParam = encodeURIComponent(classicMonitorType);
+    const dsParam = encodeURIComponent(dataSourceIdParam);
     coreRefs?.application?.navigateToApp(CLASSIC_MONITORS_APP_ID, {
-      path: `#/monitors/${monitor.id}?action=edit-monitor&monitorType=${classicMonitorType}&dataSourceId=${dataSourceIdParam}`,
+      path: `#/monitors/${id}?action=edit-monitor&monitorType=${monitorTypeParam}&dataSourceId=${dsParam}`,
     });
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   };

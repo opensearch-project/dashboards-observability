@@ -31,7 +31,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
-  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiSpacer,
@@ -40,6 +39,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
 import { coreRefs } from '../../../framework/core_refs';
 import { Datasource } from '../../../../common/types/alerting';
 import {
@@ -510,26 +510,24 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             <>
               <EuiSpacer size="xs" />
               <EuiText size="xs" color="subdued">
-                <EuiLink
-                  data-test-subj="createMonitorClassicExperienceLink"
-                  href={`${
-                    coreRefs.http?.basePath?.get() ?? ''
-                  }/app/${OLD_ALERTING_APP_ID}#/create-monitor`}
-                >
-                  {i18n.translate('observability.alerting.createMonitor.classicExperienceLink', {
-                    defaultMessage: 'Need another rule (monitor) type? Open the classic experience',
-                  })}
-                </EuiLink>{' '}
-                <EuiIconTip
-                  type="iInCircle"
-                  position="right"
-                  content={i18n.translate(
-                    'observability.alerting.createMonitor.classicExperienceTooltip',
-                    {
-                      defaultMessage:
-                        'This flow creates per-query logs rules only. For per-bucket, per-cluster metrics, per-document, or composite rule (monitor) types, use the classic alerting experience.',
-                    }
-                  )}
+                <FormattedMessage
+                  id="observability.alerting.createMonitor.classicExperiencePrompt"
+                  defaultMessage="Want to create another rule type (e.g. per query, per bucket), {link}."
+                  values={{
+                    link: (
+                      <EuiLink
+                        data-test-subj="createMonitorClassicExperienceLink"
+                        href={`${
+                          coreRefs.http?.basePath?.get() ?? ''
+                        }/app/${OLD_ALERTING_APP_ID}#/create-monitor`}
+                      >
+                        {i18n.translate(
+                          'observability.alerting.createMonitor.classicExperienceLink',
+                          { defaultMessage: 'open the classic experience' }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
                 />
               </EuiText>
             </>
