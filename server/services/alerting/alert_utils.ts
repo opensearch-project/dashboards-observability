@@ -749,7 +749,12 @@ export function hashRuleIdentity(labels: Record<string, string>): string {
  */
 export function detectMonitorKind(
   m: OSMonitor
-): 'query' | 'bucket' | 'doc' | 'cluster_metrics' | 'ppl' {
+): 'query' | 'bucket' | 'doc' | 'cluster_metrics' | 'ppl' | 'composite' {
+  // Composite (workflow) monitors carry a `composite_input` and no
+  // `monitor_type` on the wire, so mapMonitor coerces them to
+  // `query_level_monitor`. Detect them structurally, before the query default,
+  // so they are labeled + rendered as composites rather than metric monitors.
+  if (m.inputs[0] && 'composite_input' in m.inputs[0]) return 'composite';
   if (m.monitor_type === 'ppl_monitor') return 'ppl';
   if (m.monitor_type === 'bucket_level_monitor') return 'bucket';
   if (m.monitor_type === 'doc_level_monitor') return 'doc';
@@ -789,6 +794,17 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     labels.doc_queries = String(input.doc_level_input.queries?.length ?? 0);
   } else if (input && 'ppl_input' in input) {
     labels.query_language = input.ppl_input.query_language;
+  } else if (input && 'composite_input' in input) {
+    const delegates = input.composite_input.sequence?.delegates ?? [];
+    if (delegates.length > 0) {
+      // Ordered member monitor ids — the detail fetch can't resolve a workflow
+      // via the monitors endpoint, so surface the sequence from the summary.
+      labels.composite_delegates = delegates
+        .slice()
+        .sort((a, b) => a.order - b.order)
+        .map((d) => d.monitor_id)
+        .join(',');
+    }
   }
   labels.monitor_type = m.monitor_type;
   labels.monitor_kind = kind;
@@ -841,13 +857,24 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     query = JSON.stringify(input.search.query ?? {});
   } else if (input && 'ppl_input' in input) {
     query = input.ppl_input.query;
+  } else if (input && 'composite_input' in input) {
+    const delegates = input.composite_input.sequence?.delegates ?? [];
+    query = delegates.length
+      ? delegates
+          .slice()
+          .sort((a, b) => a.order - b.order)
+          .map((d) => d.monitor_id)
+          .join(', ')
+      : '(no member monitors)';
   } else {
     query = '{}';
   }
 
   // Derive monitor type from kind and index patterns
   let monitorType: MonitorType;
-  if (kind === 'ppl') {
+  if (kind === 'composite') {
+    monitorType = 'composite';
+  } else if (kind === 'ppl') {
     monitorType = 'ppl';
   } else if (kind === 'cluster_metrics') {
     monitorType = 'cluster_metrics';

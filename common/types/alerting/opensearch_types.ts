@@ -82,13 +82,25 @@ export type OSMonitorInput =
         queries: Array<{ id: string; name: string; query: string; tags: string[] }>;
       };
     }
+  | {
+      // Composite (workflow) monitors sequence other monitors. Their documents
+      // are returned by the monitors search alongside regular monitors, so the
+      // UI must recognize this input shape to label + render them correctly
+      // rather than mis-detecting them as query-level monitors.
+      composite_input: {
+        sequence: {
+          delegates: Array<{
+            order: number;
+            monitor_id: string;
+            chained_monitor_findings?: { monitor_id?: string } | null;
+          }>;
+        };
+      };
+    }
   | OSPPLInput;
 
 export type OSMonitorType =
-  | 'query_level_monitor'
-  | 'bucket_level_monitor'
-  | 'doc_level_monitor'
-  | 'ppl_monitor';
+  'query_level_monitor' | 'bucket_level_monitor' | 'doc_level_monitor' | 'ppl_monitor';
 
 export interface OSMonitor {
   id: string;

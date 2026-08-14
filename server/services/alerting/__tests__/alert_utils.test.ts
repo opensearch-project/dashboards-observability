@@ -319,6 +319,41 @@ describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
     const r = osMonitorToUnifiedRuleSummary(buildMonitor(['logs-app', 'otel-v1-apm-span']), 'ds');
     expect(r.monitorType).toBe('log');
   });
+
+  it('classifies composite (workflow) monitors as "composite" and surfaces member monitor ids', () => {
+    // Workflows are returned by the monitors search with no monitor_type (so
+    // mapMonitor coerces to query_level_monitor); the composite_input is the
+    // authoritative signal.
+    const composite = {
+      id: 'wf-1',
+      type: 'monitor',
+      monitor_type: 'query_level_monitor',
+      name: 'composite-wf',
+      enabled: true,
+      schedule: { period: { interval: 1, unit: 'MINUTES' } },
+      inputs: [
+        {
+          composite_input: {
+            sequence: {
+              delegates: [
+                { order: 2, monitor_id: 'mon-b' },
+                { order: 1, monitor_id: 'mon-a' },
+              ],
+            },
+          },
+        },
+      ],
+      triggers: [],
+      last_update_time: 1700000000000,
+    } as unknown as OSMonitor;
+
+    const r = osMonitorToUnifiedRuleSummary(composite, 'ds');
+    expect(r.monitorType).toBe('composite');
+    expect(r.labels?.monitor_kind).toBe('composite');
+    // Ordered by `order`, so mon-a (order 1) precedes mon-b (order 2).
+    expect(r.labels?.composite_delegates).toBe('mon-a,mon-b');
+    expect(r.query).toBe('mon-a, mon-b');
+  });
 });
 
 describe('adForecasterToUnifiedRuleSummary', () => {

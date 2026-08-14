@@ -29,6 +29,7 @@ import {
   EuiAccordion,
   EuiToolTip,
   EuiCallOut,
+  EuiCode,
   EuiCodeBlock,
   EuiLink,
   EuiLoadingContent,
@@ -134,6 +135,20 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
 
   // Detect monitor kind from raw data for type-specific rendering
   const monitorKind = monitor.labels?.monitor_kind as string | undefined;
+  const isComposite = monitorKind === 'composite';
+  // Ordered member-monitor ids for composite (workflow) monitors, carried on
+  // the summary because the workflow detail can't be fetched via the monitors
+  // endpoint.
+  const compositeDelegates = (monitor.labels?.composite_delegates ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  // Composite (workflow) monitors can't be safely cloned/deleted through the
+  // monitor APIs used here, so those actions are gated with this explanation.
+  const compositeActionTooltip = i18n.translate(
+    'observability.alerting.monitorDetailFlyout.compositeActionTooltip',
+    { defaultMessage: 'Composite monitors are managed in the classic Alerting app.' }
+  );
   const rawMonitor = detail?.raw as OSMonitor | undefined;
   const rawInput: OSMonitorInput | undefined =
     rawMonitor && 'inputs' in rawMonitor ? rawMonitor.inputs?.[0] : undefined;
@@ -151,6 +166,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
     queryDefTitle = i18n.translate('observability.alerting.monitorDetailFlyout.queryDef.docLevel', {
       defaultMessage: 'Document-Level Queries',
     });
+  } else if (monitorKind === 'composite') {
+    queryDefTitle = i18n.translate(
+      'observability.alerting.monitorDetailFlyout.queryDef.composite',
+      { defaultMessage: 'Associated monitors' }
+    );
   } else {
     queryDefTitle = i18n.translate(
       'observability.alerting.monitorDetailFlyout.queryDef.queryDefinition',
@@ -252,25 +272,47 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" iconType="copy" onClick={() => onClone(monitor)}>
-                <FormattedMessage
-                  id="observability.alerting.monitorDetailFlyout.cloneButton"
-                  defaultMessage="Clone"
-                />
-              </EuiButtonEmpty>
+              {isComposite ? (
+                <EuiToolTip content={compositeActionTooltip}>
+                  <EuiButtonEmpty size="s" iconType="copy" isDisabled>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.cloneButton"
+                      defaultMessage="Clone"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              ) : (
+                <EuiButtonEmpty size="s" iconType="copy" onClick={() => onClone(monitor)}>
+                  <FormattedMessage
+                    id="observability.alerting.monitorDetailFlyout.cloneButton"
+                    defaultMessage="Clone"
+                  />
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType="trash"
-                color="danger"
-                onClick={() => setShowDeleteConfirm(true)}
-              >
-                <FormattedMessage
-                  id="observability.alerting.monitorDetailFlyout.deleteButton"
-                  defaultMessage="Delete"
-                />
-              </EuiButtonEmpty>
+              {isComposite ? (
+                <EuiToolTip content={compositeActionTooltip}>
+                  <EuiButtonEmpty size="s" iconType="trash" color="danger" isDisabled>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.deleteButton"
+                      defaultMessage="Delete"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              ) : (
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  <FormattedMessage
+                    id="observability.alerting.monitorDetailFlyout.deleteButton"
+                    defaultMessage="Delete"
+                  />
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -407,6 +449,32 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                         )}
                       </EuiPanel>
                     ))}
+                  </>
+                ) : isComposite ? (
+                  <>
+                    <EuiText size="s">
+                      <FormattedMessage
+                        id="observability.alerting.monitorDetailFlyout.composite.description"
+                        defaultMessage="This composite monitor triggers based on the alerts of its member monitors, evaluated in order:"
+                      />
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    {compositeDelegates.length > 0 ? (
+                      <ol style={{ paddingLeft: 20, margin: 0 }}>
+                        {compositeDelegates.map((mid, idx) => (
+                          <li key={mid || idx} style={{ marginBottom: 4 }}>
+                            <EuiCode>{mid}</EuiCode>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <EuiText size="s" color="subdued">
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.composite.noMembers"
+                          defaultMessage="No member monitors are configured."
+                        />
+                      </EuiText>
+                    )}
                   </>
                 ) : (
                   <>
