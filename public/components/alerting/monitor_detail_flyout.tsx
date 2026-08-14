@@ -83,6 +83,28 @@ export interface MonitorDetailFlyoutProps {
   onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
 }
 
+/**
+ * Collect the `terms.field` values from a bucket-level monitor's aggregation
+ * tree — both `composite.sources[].<name>.terms.field` and plain `terms` aggs —
+ * so the flyout can show the group-by dimensions. Best-effort + defensive: any
+ * unexpected shape simply yields fewer fields, never a throw.
+ */
+function extractGroupByFields(aggregations: unknown): string[] {
+  const fields: string[] = [];
+  const walk = (node: unknown) => {
+    if (!node || typeof node !== 'object') return;
+    const obj = node as Record<string, unknown>;
+    const terms = obj.terms as { field?: unknown } | undefined;
+    if (terms && typeof terms.field === 'string') fields.push(terms.field);
+    Object.values(obj).forEach((v) => {
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === 'object') walk(v);
+    });
+  };
+  walk(aggregations);
+  return Array.from(new Set(fields));
+}
+
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -152,6 +174,19 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   const rawMonitor = detail?.raw as OSMonitor | undefined;
   const rawInput: OSMonitorInput | undefined =
     rawMonitor && 'inputs' in rawMonitor ? rawMonitor.inputs?.[0] : undefined;
+  const isBucket = monitorKind === 'bucket';
+  // Group-by fields for a bucket-level monitor — pulled from the aggregation's
+  // `terms.field`s (composite sources or plain terms aggs) so the flyout can
+  // show what the buckets are grouped on rather than only the raw query JSON.
+  const bucketGroupByFields =
+    isBucket && rawInput && 'search' in rawInput
+      ? extractGroupByFields((rawInput.search.query as Record<string, unknown>)?.aggregations)
+      : [];
+  // When the detail fetch fails for a structured kind (cluster-metrics / doc /
+  // bucket), the summary `query` is an abbreviated non-JSON string; show a
+  // plain "unavailable" note instead of rendering it as malformed JSON.
+  const detailUnavailableForStructuredKind =
+    !!detailError && (monitorKind === 'cluster_metrics' || monitorKind === 'doc' || isBucket);
 
   // Query definition accordion title, type-aware
   let queryDefTitle: string;
@@ -339,7 +374,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     <p>
                       <FormattedMessage
                         id="observability.alerting.monitorDetailFlyout.detailLoadError.body"
-                        defaultMessage="Showing summary information only. Try reopening the flyout to retry."
+                        defaultMessage="Showing summary information only — the full configuration is unavailable for this rule."
                       />
                     </p>
                   </EuiCallOut>
@@ -476,22 +511,84 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                       </EuiText>
                     )}
                   </>
-                ) : (
+                ) : isBucket && rawInput && 'search' in rawInput ? (
                   <>
-                    <EuiCodeBlock language={queryLang} fontSize="s" paddingSize="m" isCopyable>
-                      {queryDisplay}
-                    </EuiCodeBlock>
-                    {monitorKind === 'bucket' && (
-                      <EuiText size="xs" color="subdued">
-                        <em>
-                          <FormattedMessage
-                            id="observability.alerting.monitorDetailFlyout.bucketLevelDescription"
-                            defaultMessage="Bucket-level rule — triggers evaluate per aggregation bucket"
-                          />
-                        </em>
+                    <EuiText size="s">
+                      <strong>
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.targetIndices"
+                          defaultMessage="Target indices:"
+                        />
+                      </strong>{' '}
+                      {rawInput.search.indices?.join(', ') || '—'}
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiText size="s">
+                      <strong>
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.bucket.groupBy"
+                          defaultMessage="Group by"
+                        />
+                      </strong>
+                    </EuiText>
+                    {bucketGroupByFields.length > 0 ? (
+                      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                        {bucketGroupByFields.map((f) => (
+                          <EuiFlexItem grow={false} key={f}>
+                            <EuiBadge color="hollow">{f}</EuiBadge>
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
+                    ) : (
+                      <EuiText size="s" color="subdued">
+                        —
                       </EuiText>
                     )}
+                    {monitor.condition && (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiText size="s">
+                          <strong>
+                            <FormattedMessage
+                              id="observability.alerting.monitorDetailFlyout.bucket.condition"
+                              defaultMessage="Per-bucket condition"
+                            />
+                          </strong>
+                        </EuiText>
+                        <EuiCodeBlock fontSize="s" paddingSize="s" isCopyable>
+                          {monitor.condition}
+                        </EuiCodeBlock>
+                      </>
+                    )}
+                    <EuiSpacer size="s" />
+                    <EuiAccordion
+                      id={`bucketQuery-${monitor.id}`}
+                      buttonContent={
+                        <EuiText size="xs">
+                          <FormattedMessage
+                            id="observability.alerting.monitorDetailFlyout.bucket.showQuery"
+                            defaultMessage="Show aggregation query"
+                          />
+                        </EuiText>
+                      }
+                      paddingSize="s"
+                    >
+                      <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
+                        {queryDisplay}
+                      </EuiCodeBlock>
+                    </EuiAccordion>
                   </>
+                ) : detailUnavailableForStructuredKind ? (
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.detailUnavailable"
+                      defaultMessage="Detailed configuration is unavailable for this rule."
+                    />
+                  </EuiText>
+                ) : (
+                  <EuiCodeBlock language={queryLang} fontSize="s" paddingSize="m" isCopyable>
+                    {queryDisplay}
+                  </EuiCodeBlock>
                 )}
                 {/* Prometheus rules: the expr above IS the condition — the
                     summary `condition` field is a canned template, so hide it */}

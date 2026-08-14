@@ -583,46 +583,14 @@ function hashLabels(labels: Record<string, string>): string {
  */
 const RULE_IDENTITY_STRIP_LABELS = new Set(['__name__', 'alertstate']);
 
-/**
- * Index-name prefixes used to derive a `MonitorType` for query-level OS
- * monitors that don't carry an explicit `kind` hint. These mirror the
- * well-known OSD schemas:
- *
- *   - `logs-*`, `ss4o_logs*` — Simple Schema for Observability (SS4O) logs
- *     and the legacy `logs-*` convention used by the Logs app.
- *   - `otel-v1-apm-*`, `ss4o_traces*` — OTel-derived APM/trace indices
- *     (legacy `otel-v1-apm-*` data prepper output and SS4O traces).
- *
- * Anything that doesn't match either family falls through to `'metric'` —
- * the catch-all bucket for Prometheus / cluster-metrics-style monitors.
- *
- * Hoisted to module scope (rather than inlined in the derivation site) so
- * the schema list is greppable, testable, and obvious. Adding a new schema
- * means adding one row; previously the convention was buried in a
- * 60-line function.
- *
- * Callers that have access to a request-scoped `uiSettings` client should
- * prefer the user-configurable `observability:traceAnalyticsSpanIndices` /
- * `observability:traceAnalyticsCorrelatedLogsIndices` settings when
- * classifying. `osMonitorToUnifiedRuleSummary` runs in code paths that
- * don't yet plumb the request, so it falls back to the static defaults
- * below.
- */
-const LOG_INDEX_PREFIXES = ['logs-', 'ss4o_logs'] as const;
-const APM_INDEX_PREFIXES = ['otel-v1-apm', 'ss4o_traces'] as const;
+// Anomaly-detector result index patterns — used to flag query monitors that
+// alert on AD results so they surface as "Anomaly detector monitor" rather
+// than a generic monitor.
 const AD_RESULT_INDEX_PATTERNS = [
   '.opendistro-anomaly-results',
   '.opensearch-ad-plugin-result',
   'opensearch-ad-plugin-result',
 ] as const;
-
-function inferMonitorTypeFromIndices(indices: string[]): MonitorType {
-  const startsWithAny = (prefixes: readonly string[]): boolean =>
-    indices.some((idx) => prefixes.some((p) => idx.startsWith(p)));
-  if (startsWithAny(LOG_INDEX_PREFIXES)) return 'log';
-  if (startsWithAny(APM_INDEX_PREFIXES)) return 'apm';
-  return 'metric';
-}
 
 export function isAnomalyDetectorMonitor(input: OSMonitor['inputs'][number] | undefined): boolean {
   if (!input || !('search' in input)) return false;
@@ -870,7 +838,13 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     query = '{}';
   }
 
-  // Derive monitor type from kind and index patterns
+  // Derive the displayed monitor type from the detected kind. Composite and
+  // cluster-metrics keep their own types; anomaly-detector-backed monitors are
+  // flagged separately. Everything else — per-query, per-bucket, and
+  // per-document monitors — is surfaced under a single "Log" type. (The type
+  // column previously split query monitors into apm/log/metric by index-name
+  // heuristics, which guessed a data domain rather than the monitor mechanism
+  // and confused users; the flyout still renders the kind-specific detail.)
   let monitorType: MonitorType;
   if (kind === 'composite') {
     monitorType = 'composite';
@@ -878,17 +852,10 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
     monitorType = 'ppl';
   } else if (kind === 'cluster_metrics') {
     monitorType = 'cluster_metrics';
-  } else if (kind === 'doc') {
-    monitorType = 'log';
-  } else if (kind === 'bucket') {
-    monitorType = 'infrastructure';
   } else if (isAnomalyDetectorMonitor(input)) {
     monitorType = 'anomaly_detector_monitor';
   } else {
-    // query-level: derive from index patterns. See LOG_INDEX_PREFIXES /
-    // APM_INDEX_PREFIXES at module scope for the schema list.
-    const indices = input && 'search' in input ? (input.search.indices ?? []) : [];
-    monitorType = inferMonitorTypeFromIndices(indices);
+    monitorType = 'log';
   }
 
   const destNames = triggerActions.map((a) => a.name);
