@@ -357,7 +357,10 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiLoadingContent lines={10} />
           ) : (
             <>
-              {detailError && (
+              {/* Composite (workflow) detail always 404s on the monitors
+                  endpoint — that's expected, not an error — so skip the banner
+                  and just render the summary-derived details cleanly. */}
+              {detailError && !isComposite && (
                 <>
                   <EuiCallOut
                     size="s"
@@ -635,13 +638,20 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                             ),
                             description: evaluationInterval,
                           },
-                          {
-                            title: i18n.translate(
-                              'observability.alerting.monitorDetailFlyout.pendingPeriod',
-                              { defaultMessage: 'Pending Period' }
-                            ),
-                            description: pendingPeriod,
-                          },
+                          // Pending period isn't a meaningful concept for a
+                          // composite (it fires off member alerts, not a
+                          // sustained threshold), so omit it there.
+                          ...(!isComposite
+                            ? [
+                                {
+                                  title: i18n.translate(
+                                    'observability.alerting.monitorDetailFlyout.pendingPeriod',
+                                    { defaultMessage: 'Pending Period' }
+                                  ),
+                                  description: pendingPeriod,
+                                },
+                              ]
+                            : []),
                         ]
                       : []),
                     ...(detail?.firingPeriod
@@ -666,7 +676,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                           },
                         ]
                       : []),
-                    ...(monitor.threshold && monitor.datasourceType !== 'prometheus'
+                    ...(monitor.threshold && monitor.datasourceType !== 'prometheus' && !isComposite
                       ? [
                           {
                             title: i18n.translate(
@@ -720,6 +730,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     'monitor_type',
                     'monitor_kind',
                     'datasource_id',
+                    'composite_delegates',
                     '_workspace',
                   ];
                   const visibleLabels = Object.entries(monitor.labels).filter(
@@ -755,8 +766,9 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   monitors carry a `ppl_input` that isn't covered, so the
                   data array would always be empty and the accordion would
                   permanently render the "No recent evaluation data" copy.
-                  Skip rendering until a PPL preview pipeline ships. */}
-              {monitor.monitorType !== 'ppl' && (
+                  Skip rendering until a PPL preview pipeline ships. Also skip
+                  for composites — a workflow has no single series to plot. */}
+              {monitor.monitorType !== 'ppl' && !isComposite && (
                 <>
                   <EuiAccordion
                     id={`preview-${monitor.id}`}
