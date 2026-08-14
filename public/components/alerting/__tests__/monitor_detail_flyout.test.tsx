@@ -32,8 +32,19 @@ jest.mock('../query_services/alerting_opensearch_service', () => ({
   })),
 }));
 
+// Stub the shared core refs so the Edit-redirect path can assert on
+// `navigateToApp` without a real Core start contract.
+jest.mock('../../../framework/core_refs', () => ({
+  coreRefs: {
+    application: { navigateToApp: jest.fn() },
+  },
+}));
+
 import { MonitorDetailFlyout } from '../monitor_detail_flyout';
+import { coreRefs } from '../../../framework/core_refs';
 import type { UnifiedRuleSummary } from '../../../../common/types/alerting';
+
+const navigateToApp = coreRefs.application!.navigateToApp as jest.Mock;
 
 const mockMonitor: UnifiedRuleSummary = {
   id: 'mon-1',
@@ -118,5 +129,100 @@ describe('MonitorDetailFlyout', () => {
       await Promise.resolve();
     });
     expect(queryByText('Condition Preview')).toBeNull();
+  });
+
+  describe('Edit redirect to the classic experience', () => {
+    // Non-PPL / non-metric OpenSearch monitor types can't be edited in this
+    // flyout yet, so Edit deep-links to the classic alerting app instead of
+    // being disabled.
+    const logMonitor: UnifiedRuleSummary = {
+      ...mockMonitor,
+      monitorType: 'log',
+      datasourceId: 'ds-1',
+      labels: { monitor_type: 'query_level_monitor' },
+    };
+
+    beforeEach(() => {
+      navigateToApp.mockClear();
+    });
+
+    it('confirms, then deep-links to the classic edit route with id, type, and MDS dataSourceId', () => {
+      const { getByTestId, getByText } = render(
+        <MonitorDetailFlyout
+          monitor={logMonitor}
+          onClose={jest.fn()}
+          onDelete={jest.fn()}
+          onClone={jest.fn()}
+        />
+      );
+
+      // The redirect variant of Edit is clickable (not disabled) and opens a
+      // heads-up confirmation before navigating.
+      fireEvent.click(getByTestId('alertManagerMonitorDetailEditRedirect'));
+      expect(navigateToApp).not.toHaveBeenCalled();
+
+      fireEvent.click(getByText('Continue to classic experience'));
+      expect(navigateToApp).toHaveBeenCalledWith('monitors', {
+        path: '#/monitors/mon-1?action=edit-monitor&monitorType=query_level_monitor&dataSourceId=ds-1',
+      });
+    });
+
+    it('does not navigate when the confirmation is cancelled', () => {
+      const { getByTestId, getByText } = render(
+        <MonitorDetailFlyout
+          monitor={logMonitor}
+          onClose={jest.fn()}
+          onDelete={jest.fn()}
+          onClone={jest.fn()}
+        />
+      );
+      fireEvent.click(getByTestId('alertManagerMonitorDetailEditRedirect'));
+      fireEvent.click(getByText('Cancel'));
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('maps cluster-metrics monitors to the cluster_metrics_monitor type', () => {
+      const clusterMonitor: UnifiedRuleSummary = {
+        ...logMonitor,
+        monitorType: 'cluster_metrics',
+        // Cluster-metrics monitors are stored as query_level_monitor; only
+        // monitor_kind distinguishes them.
+        labels: { monitor_kind: 'cluster_metrics', monitor_type: 'query_level_monitor' },
+      };
+      const { getByTestId, getByText } = render(
+        <MonitorDetailFlyout
+          monitor={clusterMonitor}
+          onClose={jest.fn()}
+          onDelete={jest.fn()}
+          onClone={jest.fn()}
+        />
+      );
+      fireEvent.click(getByTestId('alertManagerMonitorDetailEditRedirect'));
+      fireEvent.click(getByText('Continue to classic experience'));
+      expect(navigateToApp).toHaveBeenCalledWith('monitors', {
+        path: '#/monitors/mon-1?action=edit-monitor&monitorType=cluster_metrics_monitor&dataSourceId=ds-1',
+      });
+    });
+
+    it('sends an empty dataSourceId for local-cluster monitors', () => {
+      const localMonitor: UnifiedRuleSummary = {
+        ...logMonitor,
+        datasourceId: 'local-cluster',
+        labels: { monitor_type: 'doc_level_monitor' },
+      };
+      const { getByTestId, getByText } = render(
+        <MonitorDetailFlyout
+          monitor={localMonitor}
+          onClose={jest.fn()}
+          onDelete={jest.fn()}
+          onClone={jest.fn()}
+        />
+      );
+      fireEvent.click(getByTestId('alertManagerMonitorDetailEditRedirect'));
+      fireEvent.click(getByText('Continue to classic experience'));
+      expect(navigateToApp).toHaveBeenCalledWith('monitors', {
+        path: '#/monitors/mon-1?action=edit-monitor&monitorType=doc_level_monitor&dataSourceId=',
+      });
+    });
   });
 });

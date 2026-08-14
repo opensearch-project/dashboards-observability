@@ -31,7 +31,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
-  EuiOverlayMask,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
@@ -39,6 +39,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { coreRefs } from '../../../framework/core_refs';
 import { Datasource } from '../../../../common/types/alerting';
 import {
   MonitorFormState as ValidatorFormState,
@@ -61,6 +63,14 @@ import { OpenSearchFormSection } from './opensearch_form_section';
 // Re-export the shared form-state type so existing consumers that import
 // `MonitorFormState` from `'./create_monitor'` keep working unchanged.
 export type { MonitorFormState } from './create_monitor_types';
+
+// Legacy standalone alerting app. The new flyout only supports per-query
+// monitors, so we surface an escape hatch to the classic monitor-creation
+// flow for the monitor types we don't yet cover (per bucket, per cluster
+// metrics, per document, composite). Same app id as the Alert Manager
+// page's "classic experience" callout; here we deep-link to its
+// create-monitor route instead of the dashboard.
+const OLD_ALERTING_APP_ID = 'alerts';
 
 // ============================================================================
 // Main Component — Flyout
@@ -487,6 +497,41 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                   defaultMessage: 'PPL-based alerting rule',
                 })}
           </EuiText>
+          {/* Escape hatch to the classic monitor-creation flow. This flyout
+              only builds per-query logs monitors; users who need per-bucket,
+              per-cluster-metrics, per-document, or composite monitors go to
+              the legacy `alerts` app. Rendered only when creating a logs rule
+              (not in edit mode, not for the Prometheus/metrics variant) — it's
+              a decision about which creation flow to use, made up front. A
+              full `href` (not `navigateToApp`) is deliberate so right-click /
+              open-in-new-tab work across apps, mirroring the Alert Manager
+              page's classic-experience link. */}
+          {backendType !== 'prometheus' && !isEdit && (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="observability.alerting.createMonitor.classicExperiencePrompt"
+                  defaultMessage="Want to create another rule type (e.g. per query, per bucket), {link}."
+                  values={{
+                    link: (
+                      <EuiLink
+                        data-test-subj="createMonitorClassicExperienceLink"
+                        href={`${
+                          coreRefs.http?.basePath?.get() ?? ''
+                        }/app/${OLD_ALERTING_APP_ID}#/create-monitor`}
+                      >
+                        {i18n.translate(
+                          'observability.alerting.createMonitor.classicExperienceLink',
+                          { defaultMessage: 'open the classic experience' }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </>
+          )}
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
@@ -664,36 +709,36 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         </EuiFlyoutFooter>
       </EuiFlyout>
       {showDiscardConfirm && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate('observability.alerting.createMonitor.discardConfirmTitle', {
-              defaultMessage: 'Discard unsaved changes?',
+        // EuiConfirmModal renders its own EuiOverlayMask, so no wrapping mask
+        // (wrapping double-dims the backdrop).
+        <EuiConfirmModal
+          title={i18n.translate('observability.alerting.createMonitor.discardConfirmTitle', {
+            defaultMessage: 'Discard unsaved changes?',
+          })}
+          onCancel={() => setShowDiscardConfirm(false)}
+          onConfirm={() => {
+            setShowDiscardConfirm(false);
+            onCancel();
+          }}
+          cancelButtonText={i18n.translate(
+            'observability.alerting.createMonitor.discardConfirmCancel',
+            { defaultMessage: 'Keep editing' }
+          )}
+          confirmButtonText={i18n.translate(
+            'observability.alerting.createMonitor.discardConfirmConfirm',
+            { defaultMessage: 'Discard changes' }
+          )}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+          data-test-subj="alertManagerDiscardChangesConfirm"
+        >
+          <p>
+            {i18n.translate('observability.alerting.createMonitor.discardConfirmBody', {
+              defaultMessage:
+                "You've made changes to this rule that haven't been saved. Discarding will lose them.",
             })}
-            onCancel={() => setShowDiscardConfirm(false)}
-            onConfirm={() => {
-              setShowDiscardConfirm(false);
-              onCancel();
-            }}
-            cancelButtonText={i18n.translate(
-              'observability.alerting.createMonitor.discardConfirmCancel',
-              { defaultMessage: 'Keep editing' }
-            )}
-            confirmButtonText={i18n.translate(
-              'observability.alerting.createMonitor.discardConfirmConfirm',
-              { defaultMessage: 'Discard changes' }
-            )}
-            buttonColor="danger"
-            defaultFocusedButton="cancel"
-            data-test-subj="alertManagerDiscardChangesConfirm"
-          >
-            <p>
-              {i18n.translate('observability.alerting.createMonitor.discardConfirmBody', {
-                defaultMessage:
-                  "You've made changes to this rule that haven't been saved. Discarding will lose them.",
-              })}
-            </p>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+          </p>
+        </EuiConfirmModal>
       )}
     </>
   );
