@@ -35,8 +35,9 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { ChromeStart, HttpStart, NotificationsStart } from '../../../../../../../src/core/public';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
-import { navigateToServicesList } from '../../shared/utils/navigation_utils';
 import { SloOverviewPanel } from './slo_overview_panel';
+import { SloNoSlosEmptyState } from './slo_no_slos_empty_state';
+import { SloSuggestHeaderButton } from './slo_suggest_header_button';
 import { DATASOURCE_SELECTION_CAP, SloListFilterPanel } from './slo_list_filter_panel';
 import { usePrometheusDatasources } from './use_prometheus_datasources';
 import {
@@ -923,49 +924,91 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         name: i18n.translate('observability.apm.slo.listing.column.name', {
           defaultMessage: 'Name',
         }),
+        // Give Name a real share of the table so it isn't the squeeze victim of
+        // auto-layout, and truncate to a single line (full name on hover +
+        // detail link) so long names don't word-break into 3-4 line rows on
+        // narrower screens.
+        width: '30%',
+        truncateText: true,
         render: (row: SloSummary) => (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon
-                type={templateIconFor(row)}
-                size="m"
-                color="subdued"
-                data-test-subj={`slosNameIcon-${row.id}`}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink
-                href={`#/slos/${encodeURIComponent(row.id)}`}
-                data-test-subj={`slosLink-${row.id}`}
-              >
-                <EuiText size="s">
-                  <strong>{row.name}</strong>
-                </EuiText>
-              </EuiLink>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          // Plain flex + explicit ellipsis styles (rather than EUI flex + the
+          // eui-textTruncate class alone): in a fixed-layout table the tooltip
+          // anchor otherwise grows to its nowrap min-content width and overflows
+          // into the next column. `overflow:hidden` + `minWidth:0` on the text
+          // wrapper forces it to shrink to the cell and clip with an ellipsis.
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <EuiIcon
+              type={templateIconFor(row)}
+              size="m"
+              color="subdued"
+              style={{ flexShrink: 0 }}
+              data-test-subj={`slosNameIcon-${row.id}`}
+            />
+            <div style={{ flex: '1 1 auto', minWidth: 0, overflow: 'hidden' }}>
+              <EuiToolTip content={row.name} anchorClassName="eui-textTruncate" display="block">
+                <EuiLink
+                  href={`#/slos/${encodeURIComponent(row.id)}`}
+                  data-test-subj={`slosLink-${row.id}`}
+                >
+                  <span
+                    style={{
+                      display: 'block',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      fontWeight: 700,
+                      fontSize: '0.875rem',
+                    }}
+                  >
+                    {row.name}
+                  </span>
+                </EuiLink>
+              </EuiToolTip>
+            </div>
+          </div>
         ),
       },
       {
         name: i18n.translate('observability.apm.slo.listing.column.service', {
           defaultMessage: 'Service',
         }),
-        render: (row: SloSummary) => <EuiText size="s">{row.service}</EuiText>,
+        // Deterministic widths + single-line truncation on the secondary text
+        // columns so the extra room Name gives up doesn't just move the wrapping
+        // problem onto Service/Owner/Objectives.
+        width: '15%',
+        truncateText: true,
+        render: (row: SloSummary) => (
+          <EuiToolTip content={row.service} anchorClassName="eui-textTruncate" display="block">
+            <EuiText size="s" className="eui-textTruncate">
+              {row.service}
+            </EuiText>
+          </EuiToolTip>
+        ),
       },
       {
         name: i18n.translate('observability.apm.slo.listing.column.owner', {
           defaultMessage: 'Owner',
         }),
-        render: (row: SloSummary) => (
-          <EuiText size="s">{row.owner.teams.join(', ') || '—'}</EuiText>
-        ),
+        width: '13%',
+        truncateText: true,
+        render: (row: SloSummary) => {
+          const owner = row.owner.teams.join(', ') || '—';
+          return (
+            <EuiToolTip content={owner} anchorClassName="eui-textTruncate" display="block">
+              <EuiText size="s" className="eui-textTruncate">
+                {owner}
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
         name: i18n.translate('observability.apm.slo.listing.column.objectives', {
           defaultMessage: 'Objectives',
         }),
+        width: '120px',
         render: (row: SloSummary) => (
-          <EuiText size="s">
+          <EuiText size="s" style={{ whiteSpace: 'nowrap' }}>
             {row.objectiveCount} • {formatTargetPct(row.worstTarget)}
           </EuiText>
         ),
@@ -1338,7 +1381,18 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
   return (
     <EuiPage data-test-subj="slosPage">
       <EuiPageBody component="main">
-        <HeaderControlledComponentsWrapper components={[refreshButton, createButton]} />
+        <HeaderControlledComponentsWrapper
+          components={
+            // Surface Suggest SLOs in the toolbar (left of Create) once the
+            // workspace already has SLOs — it's the easier path than the manual
+            // create wizard. Hidden only in the zero-SLO onboarding state (where
+            // the empty state already leads with Suggest) and during first load /
+            // error, so it still shows when the user arrives with a filter active.
+            !isFirstLoad && !error && !noSlosExist
+              ? [refreshButton, <SloSuggestHeaderButton key="suggest" />, createButton]
+              : [refreshButton, createButton]
+          }
+        />
         <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
           <EuiPageContentBody>
             {isFirstLoad ? (
@@ -1370,47 +1424,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                 />
               </EuiPanel>
             ) : noSlosExist ? (
-              <EuiPanel style={{ marginTop: '8px' }} data-test-subj="slosEmptyNoSlos">
-                <EuiEmptyPrompt
-                  iconType="visualizeApp"
-                  title={
-                    <h2>
-                      {i18n.translate('observability.apm.slo.listing.emptyState.title', {
-                        defaultMessage: 'No SLOs yet',
-                      })}
-                    </h2>
-                  }
-                  body={
-                    <p>
-                      {i18n.translate('observability.apm.slo.listing.emptyState.body', {
-                        defaultMessage:
-                          'Track reliability objectives for your APM services. Visit the Services view to see which services are missing SLOs and create them directly from there.',
-                      })}
-                    </p>
-                  }
-                  actions={[
-                    <EuiButton
-                      key="services"
-                      fill
-                      onClick={navigateToServicesList}
-                      data-test-subj="slosEmptyGoToServices"
-                    >
-                      {i18n.translate('observability.apm.slo.listing.emptyState.goToServices', {
-                        defaultMessage: 'Go to Services',
-                      })}
-                    </EuiButton>,
-                    <EuiButtonEmpty
-                      key="create"
-                      href="#/slos/create"
-                      data-test-subj="slosCreateEmpty"
-                    >
-                      {i18n.translate('observability.apm.slo.listing.emptyState.createManually', {
-                        defaultMessage: 'Create manually',
-                      })}
-                    </EuiButtonEmpty>,
-                  ]}
-                />
-              </EuiPanel>
+              <SloNoSlosEmptyState />
             ) : (
               <EuiResizableContainer style={{ marginTop: '8px' }}>
                 {(EuiResizablePanel, EuiResizableButton) => (

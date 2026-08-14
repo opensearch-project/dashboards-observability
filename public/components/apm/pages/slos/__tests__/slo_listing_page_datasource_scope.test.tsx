@@ -20,6 +20,19 @@ import { datasourceScopeCacheKey } from '../slo_datasource_scope_cache';
 
 jest.mock('../../../shared/utils/navigation_utils', () => ({
   navigateToServicesList: jest.fn(),
+  navigateToSloSuggest: jest.fn(),
+}));
+// The toolbar Suggest button + onboarding empty state call useServices; this
+// suite doesn't exercise them, so stub an empty result so they render without a
+// live PPL backend (an unmocked useServices returns undefined and throws).
+jest.mock('../../../shared/hooks/use_services', () => ({
+  useServices: jest.fn(() => ({
+    data: [],
+    isLoading: false,
+    error: null,
+    availableGroupByAttributes: {},
+    refetch: jest.fn(),
+  })),
 }));
 jest.mock('../../../../../plugin_helpers/plugin_headerControl', () => ({
   HeaderControlledComponentsWrapper: ({ components }: { components: React.ReactNode[] }) => (
