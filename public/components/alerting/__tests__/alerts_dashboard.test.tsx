@@ -190,7 +190,7 @@ describe('AlertsDashboard', () => {
     fireEvent.click(screen.getByText('Alerting'));
 
     const metricsCard = screen.getByTestId('alertsEmptyCreateMetricsRule');
-    expect(metricsCard).toBeDisabled();
+    expect(metricsCard).toHaveClass('euiCard-isDisabled');
     expect(
       screen.getByText('A Prometheus datasource is required to create a metrics alert rule.')
     ).toBeInTheDocument();
@@ -232,8 +232,8 @@ describe('AlertsDashboard', () => {
 
     const anomalyCard = screen.getByTestId('alertsEmptyCreateAnomalyDetection');
     const forecastingCard = screen.getByTestId('alertsEmptyCreateForecasting');
-    expect(anomalyCard).toBeDisabled();
-    expect(forecastingCard).toBeDisabled();
+    expect(anomalyCard).toHaveClass('euiCard-isDisabled');
+    expect(forecastingCard).toHaveClass('euiCard-isDisabled');
     expect(
       screen.getByText('An OpenSearch datasource is required to create an anomaly detection rule.')
     ).toBeInTheDocument();
