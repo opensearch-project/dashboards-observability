@@ -167,6 +167,24 @@
   overflow: hidden;
 }
 
+.altUnifiedSignalsEmptyState {
+  padding: 4px 20px 16px;
+}
+
+.altUnifiedSignalsPrompt {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.altUnifiedSignalsCards {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.altUnifiedSignalsCard {
+  height: 100%;
+}
+
 /*
  * Scope: checkbox rows inside a facet filter group. EuiCheckbox's internal
  * <label> is `display: inline-block`, which shrink-wraps to the intrinsic

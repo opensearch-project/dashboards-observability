@@ -8,6 +8,7 @@ import {
   buildRulePayload,
   formFromAdResource,
   getCreateAdRuleDatasources,
+  getInitialDatasourceId,
   shouldAutoStartCreatedRule,
   validateForm,
 } from '../create_ad_rule_flyout';
@@ -163,6 +164,9 @@ describe('AD rule payload serialization', () => {
       'aos-1',
       'local-cluster',
     ]);
+    expect(getInitialDatasourceId(datasources)).toBe('');
+    expect(getInitialDatasourceId(datasources, ['aoss-1'])).toBe('');
+    expect(getInitialDatasourceId(datasources, ['aos-1'])).toBe('aos-1');
   });
 
   it('preserves unmodeled settings while emitting only canonical configuration keys', () => {

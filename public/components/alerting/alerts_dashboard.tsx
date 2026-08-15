@@ -11,6 +11,7 @@ import React, { useState, useMemo } from 'react';
 import {
   EuiBasicTableColumn,
   EuiButton,
+  EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -25,6 +26,12 @@ import {
   EuiFieldSearch,
   EuiEmptyPrompt,
   EuiButtonEmpty,
+  EuiIcon,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiResizableContainer,
   EuiHorizontalRule,
   EuiSuperDatePicker,
@@ -36,7 +43,7 @@ import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting'
 import { filterAlerts } from '../../../common/services/alerting/filter';
 import { AlertTimeline } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
-import { countBy } from './shared_constants';
+import { countBy, isStandardOpenSearchDatasource } from './shared_constants';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
 import './alerting.scss';
 
@@ -141,6 +148,284 @@ const emptyAlertFilters = (): AlertFilterState => ({
   state: [],
   labels: {},
 });
+
+interface UnifiedSignalsEmptyStateProps {
+  mode: 'no-ds' | 'no-rules';
+  datasources: Datasource[];
+  defaultDatasources: string[];
+  onDatasourceChange: (ids: string[]) => void;
+  onGoToRules: () => void;
+  onCreateLogsRule: () => void;
+  onCreateMetricsRule: () => void;
+  onCreateAnomalyDetection: () => void;
+  onCreateForecasting: () => void;
+}
+
+const UnifiedSignalsEmptyState: React.FC<UnifiedSignalsEmptyStateProps> = ({
+  mode,
+  datasources,
+  defaultDatasources,
+  onDatasourceChange,
+  onGoToRules,
+  onCreateLogsRule,
+  onCreateMetricsRule,
+  onCreateAnomalyDetection,
+  onCreateForecasting,
+}) => {
+  const [showAlertingRuleTypeModal, setShowAlertingRuleTypeModal] = useState(false);
+  const hasCompatibleOpenSearchDatasource = datasources.some(isStandardOpenSearchDatasource);
+  const hasPrometheusDatasource = datasources.some(
+    (datasource) => datasource.type === 'prometheus'
+  );
+  const capabilities = [
+    {
+      id: 'alerting',
+      iconType: 'bell' as const,
+      title: i18n.translate(
+        'observability.alerting.alertsDashboard.unifiedEmptyState.alertingTitle',
+        { defaultMessage: 'Alerting' }
+      ),
+      description: i18n.translate(
+        'observability.alerting.alertsDashboard.unifiedEmptyState.alertingDescription',
+        {
+          defaultMessage: 'Create log and metric rules, then investigate triggered alerts.',
+        }
+      ),
+      onClick: () => setShowAlertingRuleTypeModal(true),
+      dataTestSubj: 'alertsEmptyCreateAlertingRule',
+      isDisabled: false,
+    },
+    {
+      id: 'anomalyDetection',
+      iconType: 'inspect' as const,
+      title: i18n.translate(
+        'observability.alerting.alertsDashboard.unifiedEmptyState.anomalyDetectionTitle',
+        { defaultMessage: 'Anomaly detection' }
+      ),
+      description: hasCompatibleOpenSearchDatasource
+        ? i18n.translate(
+            'observability.alerting.alertsDashboard.unifiedEmptyState.anomalyDetectionDescription',
+            {
+              defaultMessage:
+                'Detect unusual behavior automatically and inspect anomalies alongside alerts.',
+            }
+          )
+        : i18n.translate(
+            'observability.alerting.alertsDashboard.unifiedEmptyState.anomalyDetectionUnavailable',
+            {
+              defaultMessage:
+                'An OpenSearch datasource is required to create an anomaly detection rule.',
+            }
+          ),
+      onClick: onCreateAnomalyDetection,
+      dataTestSubj: 'alertsEmptyCreateAnomalyDetection',
+      isDisabled: !hasCompatibleOpenSearchDatasource,
+    },
+    {
+      id: 'forecasting',
+      iconType: 'visLine' as const,
+      title: i18n.translate(
+        'observability.alerting.alertsDashboard.unifiedEmptyState.forecastingTitle',
+        { defaultMessage: 'Forecasting' }
+      ),
+      description: hasCompatibleOpenSearchDatasource
+        ? i18n.translate(
+            'observability.alerting.alertsDashboard.unifiedEmptyState.forecastingDescription',
+            {
+              defaultMessage:
+                'Create forecasters to predict future values and anticipate emerging trends.',
+            }
+          )
+        : i18n.translate(
+            'observability.alerting.alertsDashboard.unifiedEmptyState.forecastingUnavailable',
+            {
+              defaultMessage: 'An OpenSearch datasource is required to create a forecasting rule.',
+            }
+          ),
+      onClick: onCreateForecasting,
+      dataTestSubj: 'alertsEmptyCreateForecasting',
+      isDisabled: !hasCompatibleOpenSearchDatasource,
+    },
+  ];
+
+  return (
+    <div className="altUnifiedSignalsEmptyState" data-test-subj="alertsUnifiedSignalsEmptyState">
+      <EuiEmptyPrompt
+        className="altUnifiedSignalsPrompt"
+        iconType={mode === 'no-ds' ? 'database' : 'bell'}
+        title={
+          <h3>
+            <FormattedMessage
+              id="observability.alerting.alertsDashboard.unifiedEmptyState.title"
+              defaultMessage="Define rules, detect anomalies, and forecast from one place"
+            />
+          </h3>
+        }
+        body={
+          mode === 'no-ds' ? (
+            <p>
+              <FormattedMessage
+                id="observability.alerting.alertsDashboard.unifiedEmptyState.noDatasourceBody"
+                defaultMessage="Select a datasource from the filter panel to view alerts and anomalies, then manage all of your rules in one experience."
+              />
+            </p>
+          ) : (
+            <p>
+              <FormattedMessage
+                id="observability.alerting.alertsDashboard.unifiedEmptyState.noRulesBody"
+                defaultMessage="Create an alerting, anomaly detection, or forecasting rule for the selected datasource."
+              />
+            </p>
+          )
+        }
+        actions={
+          mode === 'no-ds' ? (
+            defaultDatasources.length > 0 ? (
+              <EuiButtonEmpty
+                size="s"
+                onClick={() => onDatasourceChange(defaultDatasources)}
+                data-test-subj="alertsEmptyResetDefaults"
+              >
+                <FormattedMessage
+                  id="observability.alerting.alertsDashboard.resetToDefaultDatasources"
+                  defaultMessage="Reset to default datasources"
+                />
+              </EuiButtonEmpty>
+            ) : undefined
+          ) : (
+            <EuiButton size="s" fill onClick={onGoToRules} data-test-subj="alertsEmptyGoToRules">
+              <FormattedMessage
+                id="observability.alerting.alertsDashboard.goToRules"
+                defaultMessage="Go to Rules"
+              />
+            </EuiButton>
+          )
+        }
+      />
+
+      <EuiFlexGroup className="altUnifiedSignalsCards" gutterSize="m" responsive={true}>
+        {capabilities.map((capability) => (
+          <EuiFlexItem key={capability.id}>
+            <EuiCard
+              className="altUnifiedSignalsCard"
+              layout="horizontal"
+              icon={
+                <EuiIcon
+                  type={capability.iconType}
+                  color={capability.isDisabled ? 'subdued' : 'primary'}
+                  size="l"
+                />
+              }
+              title={capability.title}
+              description={capability.description}
+              onClick={capability.onClick}
+              isDisabled={capability.isDisabled}
+              data-test-subj={capability.dataTestSubj}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+
+      {showAlertingRuleTypeModal && (
+        <EuiModal
+          onClose={() => setShowAlertingRuleTypeModal(false)}
+          aria-labelledby="alertingRuleTypeModalTitle"
+          maxWidth={640}
+          data-test-subj="alertsEmptyAlertingRuleTypeModal"
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle id="alertingRuleTypeModalTitle">
+              <FormattedMessage
+                id="observability.alerting.alertsDashboard.ruleTypeModal.title"
+                defaultMessage="Create an alerting rule"
+              />
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText color="subdued" size="s">
+              <p>
+                <FormattedMessage
+                  id="observability.alerting.alertsDashboard.ruleTypeModal.description"
+                  defaultMessage="Choose the signal source you want this rule to evaluate."
+                />
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="m" responsive={true}>
+              <EuiFlexItem>
+                <EuiCard
+                  layout="horizontal"
+                  icon={<EuiIcon type="logsApp" color="primary" size="l" />}
+                  title={i18n.translate(
+                    'observability.alerting.alertsDashboard.ruleTypeModal.logsTitle',
+                    { defaultMessage: 'Logs alert rule' }
+                  )}
+                  description={i18n.translate(
+                    'observability.alerting.alertsDashboard.ruleTypeModal.logsDescription',
+                    {
+                      defaultMessage: 'Evaluate OpenSearch logs with a PPL query.',
+                    }
+                  )}
+                  onClick={() => {
+                    setShowAlertingRuleTypeModal(false);
+                    onCreateLogsRule();
+                  }}
+                  data-test-subj="alertsEmptyCreateLogsRule"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiCard
+                  layout="horizontal"
+                  icon={
+                    <EuiIcon
+                      type="visMetric"
+                      color={hasPrometheusDatasource ? 'primary' : 'subdued'}
+                      size="l"
+                    />
+                  }
+                  title={i18n.translate(
+                    'observability.alerting.alertsDashboard.ruleTypeModal.metricsTitle',
+                    { defaultMessage: 'Metrics alert rule' }
+                  )}
+                  description={
+                    hasPrometheusDatasource
+                      ? i18n.translate(
+                          'observability.alerting.alertsDashboard.ruleTypeModal.metricsDescription',
+                          {
+                            defaultMessage: 'Evaluate Prometheus metrics with a PromQL query.',
+                          }
+                        )
+                      : i18n.translate(
+                          'observability.alerting.alertsDashboard.ruleTypeModal.metricsUnavailable',
+                          {
+                            defaultMessage:
+                              'A Prometheus datasource is required to create a metrics alert rule.',
+                          }
+                        )
+                  }
+                  onClick={() => {
+                    setShowAlertingRuleTypeModal(false);
+                    onCreateMetricsRule();
+                  }}
+                  isDisabled={!hasPrometheusDatasource}
+                  data-test-subj="alertsEmptyCreateMetricsRule"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButtonEmpty onClick={() => setShowAlertingRuleTypeModal(false)}>
+              <FormattedMessage
+                id="observability.alerting.alertsDashboard.ruleTypeModal.cancelButton"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+    </div>
+  );
+};
 
 function getAlertKind(alert: UnifiedAlertSummary): string {
   return alert.alertKind || 'alert';
@@ -393,7 +678,9 @@ function renderGroupedAnomalyOccurrences(
                           <FormattedMessage
                             id="observability.alerting.alertsDashboard.groupedAnomalyStartedAgo"
                             defaultMessage="{duration} ago"
-                            values={{ duration: formatDuration(occurrence.startTime) }}
+                            values={{
+                              duration: formatDuration(occurrence.startTime),
+                            }}
                           />
                         </span>
                       </EuiToolTip>
@@ -440,6 +727,14 @@ export interface AlertsDashboardProps {
   defaultDatasources: string[];
   /** Switch to the Rules tab (used by the "No rules" empty state CTA). */
   onGoToRules: () => void;
+  /** Open the logs alert rule creation flyout. */
+  onCreateLogsRule: () => void;
+  /** Open the metrics alert rule creation flyout. */
+  onCreateMetricsRule: () => void;
+  /** Open the anomaly detection rule creation flyout. */
+  onCreateAnomalyDetection: () => void;
+  /** Open the forecasting rule creation flyout. */
+  onCreateForecasting: () => void;
   /** Picker start resolved to epoch ms (resolved once by the parent). */
   startMs: number;
   /** Picker end resolved to epoch ms (resolved once by the parent). */
@@ -476,6 +771,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   rulesTotal,
   defaultDatasources,
   onGoToRules,
+  onCreateLogsRule,
+  onCreateMetricsRule,
+  onCreateAnomalyDetection,
+  onCreateForecasting,
   startMs,
   endMs,
   pickerStart,
@@ -604,7 +903,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   };
 
   const updateLabelFilter = (key: string, values: string[]) => {
-    setFilters((prev) => ({ ...prev, labels: { ...prev.labels, [key]: values } }));
+    setFilters((prev) => ({
+      ...prev,
+      labels: { ...prev.labels, [key]: values },
+    }));
   };
 
   const renderFacetGroup = (
@@ -875,6 +1177,24 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           : null
     : null;
 
+  const emptyTableMessage =
+    searchQuery || activeFilterCount > 0
+      ? i18n.translate('observability.alerting.alertsDashboard.noAlertsMatchFilters', {
+          defaultMessage: 'No alerts or detected anomalies match your filters.',
+        })
+      : emptyMode === 'no-ds'
+        ? i18n.translate('observability.alerting.alertsDashboard.noDatasourceTableMessage', {
+            defaultMessage: 'Select a datasource to view alerts and detected anomalies.',
+          })
+        : emptyMode === 'no-rules'
+          ? i18n.translate('observability.alerting.alertsDashboard.noRulesTableMessage', {
+              defaultMessage:
+                'Create a rule to get started. Triggered alerts and detected anomalies will appear here.',
+            })
+          : i18n.translate('observability.alerting.alertsDashboard.noAlertsTableMessage', {
+              defaultMessage: 'No alerts or anomalies were detected in the selected time range.',
+            });
+
   return (
     <EuiResizableContainer className="altResizableContainer">
       {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
@@ -908,7 +1228,11 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     iconType="menuLeft"
-                    onClick={() => togglePanel?.('alerts-filters-panel', { direction: 'left' })}
+                    onClick={() =>
+                      togglePanel?.('alerts-filters-panel', {
+                        direction: 'left',
+                      })
+                    }
                     aria-label={i18n.translate(
                       'observability.alerting.alertsDashboard.collapseFiltersAriaLabel',
                       {
@@ -1153,72 +1477,17 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                         </EuiFlexItem>
                       </EuiFlexGroup>
                       <EuiSpacer size="s" />
-                      {emptyMode === 'no-ds' ? (
-                        <EuiEmptyPrompt
-                          iconType="database"
-                          title={
-                            <h4>
-                              <FormattedMessage
-                                id="observability.alerting.alertsDashboard.noDatasourceTitle"
-                                defaultMessage="No datasource selected"
-                              />
-                            </h4>
-                          }
-                          body={
-                            <p>
-                              <FormattedMessage
-                                id="observability.alerting.alertsDashboard.noDatasourceBody"
-                                defaultMessage="Select a datasource from the filter panel on the left to view alerts."
-                              />
-                            </p>
-                          }
-                          actions={
-                            defaultDatasources.length > 0 ? (
-                              <EuiButtonEmpty
-                                size="s"
-                                onClick={() => onDatasourceChange(defaultDatasources)}
-                                data-test-subj="alertsEmptyResetDefaults"
-                              >
-                                <FormattedMessage
-                                  id="observability.alerting.alertsDashboard.resetToDefaultDatasources"
-                                  defaultMessage="Reset to default datasources"
-                                />
-                              </EuiButtonEmpty>
-                            ) : undefined
-                          }
-                        />
-                      ) : emptyMode === 'no-rules' ? (
-                        <EuiEmptyPrompt
-                          iconType="bell"
-                          title={
-                            <h4>
-                              <FormattedMessage
-                                id="observability.alerting.alertsDashboard.noRulesTitle"
-                                defaultMessage="No rules or detectors have been created"
-                              />
-                            </h4>
-                          }
-                          body={
-                            <p>
-                              <FormattedMessage
-                                id="observability.alerting.alertsDashboard.noRulesBody"
-                                defaultMessage="The selected datasource has no monitors or anomaly detectors configured. Create one to start receiving alerts."
-                              />
-                            </p>
-                          }
-                          actions={
-                            <EuiButton
-                              size="s"
-                              fill
-                              onClick={onGoToRules}
-                              data-test-subj="alertsEmptyGoToRules"
-                            >
-                              <FormattedMessage
-                                id="observability.alerting.alertsDashboard.goToRules"
-                                defaultMessage="Go to Rules"
-                              />
-                            </EuiButton>
-                          }
+                      {emptyMode === 'no-ds' || emptyMode === 'no-rules' ? (
+                        <UnifiedSignalsEmptyState
+                          mode={emptyMode}
+                          datasources={datasources}
+                          defaultDatasources={defaultDatasources}
+                          onDatasourceChange={onDatasourceChange}
+                          onGoToRules={onGoToRules}
+                          onCreateLogsRule={onCreateLogsRule}
+                          onCreateMetricsRule={onCreateMetricsRule}
+                          onCreateAnomalyDetection={onCreateAnomalyDetection}
+                          onCreateForecasting={onCreateForecasting}
                         />
                       ) : emptyMode === 'no-alerts' ? (
                         <EuiEmptyPrompt
@@ -1315,18 +1584,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     columns={columns}
                     loading={loading}
                     itemIdToExpandedRowMap={groupedOccurrenceRows}
-                    message={
-                      searchQuery || activeFilterCount > 0
-                        ? i18n.translate(
-                            'observability.alerting.alertsDashboard.noAlertsMatchFilters',
-                            {
-                              defaultMessage: 'No alerts match your filters',
-                            }
-                          )
-                        : i18n.translate('observability.alerting.alertsDashboard.noAlerts', {
-                            defaultMessage: 'No alerts',
-                          })
-                    }
+                    message={emptyTableMessage}
                   />
                 </EuiPanel>
               </>
