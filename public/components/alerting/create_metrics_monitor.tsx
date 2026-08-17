@@ -4,10 +4,16 @@
  */
 
 /**
- * Create Metrics Monitor — flyout form for Prometheus alerting rules.
- * Sections: Monitor Details, Query (PromQL + datasource + metric browser),
- * Trigger Condition, Evaluation Settings, Labels, Annotations,
- * Matched Notification Actions, Rule Preview (YAML), and a sticky footer.
+ * Create Metrics Monitor — the single shared flyout for creating Prometheus
+ * alerting rules, mounted by both the Metrics Explore page ("Create alert
+ * rule" action) and the Alert Manager Rules page.
+ *
+ * Sections: Rule details (namespace / rule group / name / description),
+ * Query (shared PromQL builder + per-rule `for:` duration + Run preview),
+ * Labels, Annotations, Rule Preview (YAML), and a sticky footer. The PromQL
+ * expression is the complete alert condition — there is no separate trigger
+ * condition, and evaluation cadence is a rule-group-level concern in
+ * managed Prometheus.
  */
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import {
@@ -17,7 +23,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiFieldText,
-  EuiFieldNumber,
   EuiTextArea,
   EuiSelect,
   EuiButton,
@@ -32,8 +37,7 @@ import {
   EuiFlyoutFooter,
   EuiTitle,
   EuiHorizontalRule,
-  EuiCallOut,
-  EuiSwitch,
+  EuiLink,
   EuiToolTip,
   EuiPopover,
   EuiIcon,
@@ -41,49 +45,33 @@ import {
   EuiConfirmModal,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { FormattedMessage } from '@osd/i18n/react';
-import { EchartsRender } from './echarts_render';
-import { PromQLEditor } from './promql_editor';
-import { MetricBrowser } from './metric_browser';
+import { coreRefs } from '../../framework/core_refs';
+import { classifiedToastColor, classifiedToastText, extractClassifiedError } from '../common/error';
+import { PromQueryBuilder } from './create_monitor/prom_query_builder';
+import { RuleGroupSelector } from './create_monitor/rule_group_selector';
+import { QueryPreviewResults } from './query_preview_results';
+// Shared label editor + entry types keep both flyouts' Labels sections in sync
+import { LabelEditor } from './monitor_form_components';
+import type { LabelEntry, AnnotationEntry } from '../../../common/services/alerting/validators';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-interface LabelEntry {
-  key: string;
-  value: string;
-  isDynamic: boolean;
-}
-
-interface AnnotationEntry {
-  key: string;
-  value: string;
-}
-
-interface ActionState {
-  id: string;
-  name: string;
-}
-
 export interface MetricsMonitorFormState {
   monitorName: string;
   description: string;
+  namespace: string;
+  groupName: string;
   query: string;
   datasourceId: string;
-  // Trigger condition
-  operator: '>' | '>=' | '<' | '<=' | '==' | '!=';
-  thresholdValue: number;
+  /** The rule's `for:` clause — pending window before the alert fires. */
   forDuration: string;
-  // Evaluation settings
+  /** Group-level evaluation cadence sent with the payload (not per-rule UI). */
   evalInterval: string;
-  pendingPeriod: string;
-  firingPeriod: string;
   // Labels & annotations
   labels: LabelEntry[];
   annotations: AnnotationEntry[];
-  // Actions
-  actions: ActionState[];
 }
 
 export interface CreateMetricsMonitorProps {
@@ -93,56 +81,40 @@ export interface CreateMetricsMonitorProps {
   datasourceId?: string;
   /** Datasource display name from the current Explore page context */
   datasourceName?: string;
+  /**
+   * Selectable Prometheus datasources. Provided by the Alert Manager Rules
+   * page (no page context there); when absent, the flyout is pinned to the
+   * context datasource (Metrics Explore page behavior).
+   */
+  datasources?: Array<{ id: string; name: string; type: string }>;
+  /**
+   * Duplicate-name guard, checked against the selected datasource. Provided
+   * by the Alert Manager Rules page which knows the existing rules.
+   */
+  isNameTaken?: (name: string, dsId: string) => boolean;
+  /**
+   * Show the "Build query in metrics →" round-trip link in the Query
+   * section header. Set by the Alert Manager Rules page; must stay off on
+   * the Metrics Explore page, where the link would be a circular hop back
+   * to the page the user came from (same rationale as the logs flyout's
+   * hideBuildInLogsLink, inverted).
+   */
+  showBuildInMetricsLink?: boolean;
   /** HTTP client for persisting rules */
   http?: {
     post: (path: string, options: { body: string }) => Promise<unknown>;
   };
-  /** Toast notification callback */
-  addToast?: (title: string, color?: 'success' | 'danger') => void;
+  /**
+   * Toast notification callback. `text` carries the classified error body
+   * (message + remediation + safe details); mount adapters must forward it and
+   * honor 'warning' so the detailed cause reaches the toast.
+   */
+  addToast?: (title: string, color?: 'success' | 'warning' | 'danger', text?: string) => void;
 }
 
 // ============================================================================
 // Constants
 // ============================================================================
-
-const OPERATOR_OPTIONS = [
-  {
-    value: '>',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorGt', {
-      defaultMessage: '> (greater than)',
-    }),
-  },
-  {
-    value: '>=',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorGte', {
-      defaultMessage: '>= (greater or equal)',
-    }),
-  },
-  {
-    value: '<',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorLt', {
-      defaultMessage: '< (less than)',
-    }),
-  },
-  {
-    value: '<=',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorLte', {
-      defaultMessage: '<= (less or equal)',
-    }),
-  },
-  {
-    value: '==',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorEq', {
-      defaultMessage: '== (equal)',
-    }),
-  },
-  {
-    value: '!=',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.operatorNeq', {
-      defaultMessage: '!= (not equal)',
-    }),
-  },
-];
 
 const FOR_DURATION_OPTIONS = [
   {
@@ -183,179 +155,8 @@ const FOR_DURATION_OPTIONS = [
   },
 ];
 
-const FIRING_PERIOD_OPTIONS = [
-  {
-    value: '0s',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firingNone', {
-      defaultMessage: 'None (resolve immediately)',
-    }),
-  },
-  {
-    value: '30s',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing30s', {
-      defaultMessage: '30 seconds',
-    }),
-  },
-  {
-    value: '1m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing1m', {
-      defaultMessage: '1 minute',
-    }),
-  },
-  {
-    value: '5m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing5m', {
-      defaultMessage: '5 minutes',
-    }),
-  },
-  {
-    value: '10m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing10m', {
-      defaultMessage: '10 minutes',
-    }),
-  },
-  {
-    value: '15m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing15m', {
-      defaultMessage: '15 minutes',
-    }),
-  },
-  {
-    value: '30m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing30m', {
-      defaultMessage: '30 minutes',
-    }),
-  },
-  {
-    value: '1h',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.firing1h', {
-      defaultMessage: '1 hour',
-    }),
-  },
-];
-
-const EVAL_INTERVAL_OPTIONS = [
-  {
-    value: '30s',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval30s', {
-      defaultMessage: '30 seconds',
-    }),
-  },
-  {
-    value: '1m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval1m', {
-      defaultMessage: '1 minute',
-    }),
-  },
-  {
-    value: '5m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval5m', {
-      defaultMessage: '5 minutes',
-    }),
-  },
-  {
-    value: '10m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval10m', {
-      defaultMessage: '10 minutes',
-    }),
-  },
-  {
-    value: '15m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval15m', {
-      defaultMessage: '15 minutes',
-    }),
-  },
-  {
-    value: '30m',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval30m', {
-      defaultMessage: '30 minutes',
-    }),
-  },
-  {
-    value: '1h',
-    text: i18n.translate('observability.alerting.createMetricsMonitor.eval1h', {
-      defaultMessage: '1 hour',
-    }),
-  },
-];
-
-const MOCK_SAMPLE_QUERIES = [
-  {
-    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleHighCpu', {
-      defaultMessage: 'High CPU usage',
-    }),
-    query: 'rate(node_cpu_seconds_total{mode!="idle"}[5m]) > 0.8',
-  },
-  {
-    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleHighMemory', {
-      defaultMessage: 'High memory usage',
-    }),
-    query: '(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 0.9',
-  },
-  {
-    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleHighErrorRate', {
-      defaultMessage: 'High error rate',
-    }),
-    query: 'rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05',
-  },
-  {
-    label: i18n.translate('observability.alerting.createMetricsMonitor.sampleDiskFull', {
-      defaultMessage: 'Disk almost full',
-    }),
-    query: '(1 - node_filesystem_avail_bytes / node_filesystem_size_bytes) > 0.85',
-  },
-];
-
-const DEFAULT_PROMQL = 'rate(http_requests_total{status=~"5.."}[5m])';
-
-// Mock preview data — line chart
-const PREVIEW_TIMESTAMPS = ['04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '17:00'];
-const PREVIEW_VALUES = [0.02, 0.03, 0.01, 0.06, 0.04, 0.07, 0.05, 0.08];
-
-// ============================================================================
-// Chart helpers
-// ============================================================================
-
-const PREVIEW_CHART_OPTION: Record<string, unknown> = {
-  grid: { left: 48, right: 16, top: 16, bottom: 32 },
-  tooltip: { trigger: 'axis' },
-  xAxis: { type: 'category', data: PREVIEW_TIMESTAMPS },
-  yAxis: { type: 'value' },
-  series: [
-    {
-      type: 'line',
-      data: PREVIEW_VALUES,
-      smooth: true,
-      itemStyle: { color: '#006BB4' },
-      areaStyle: { color: 'rgba(0,107,180,0.1)' },
-    },
-  ],
-};
-
-function buildThresholdChartOption(thresholdValue: number): Record<string, unknown> {
-  return {
-    grid: { left: 48, right: 16, top: 16, bottom: 32 },
-    tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: PREVIEW_TIMESTAMPS },
-    yAxis: { type: 'value' },
-    series: [
-      {
-        type: 'line',
-        data: PREVIEW_VALUES,
-        smooth: true,
-        itemStyle: { color: '#006BB4' },
-        areaStyle: { color: 'rgba(0,107,180,0.1)' },
-        markLine: {
-          silent: true,
-          symbol: 'none',
-          lineStyle: { type: 'dashed', color: '#BD271E', width: 2 },
-          data: [{ yAxis: thresholdValue }],
-          label: { formatter: `Threshold: ${thresholdValue}`, position: 'insideEndTop' },
-        },
-      },
-    ],
-  };
-}
+/** The namespace all rules created from this flyout are stored under. */
+const USER_RULES_NAMESPACE = 'observability-alerting';
 
 // ============================================================================
 // Sub-components
@@ -365,9 +166,11 @@ function buildThresholdChartOption(thresholdValue: number): Record<string, unkno
 const MonitorDetailsSection = React.memo<{
   form: MetricsMonitorFormState;
   onUpdate: (patch: Partial<MetricsMonitorFormState>) => void;
-}>(({ form, onUpdate }) => (
+  /** Duplicate-name error surfaced on the Rule name row. */
+  nameError?: string;
+}>(({ form, onUpdate, nameError }) => (
   <EuiAccordion
-    id="prom-monitor-details"
+    id="cmm-rule-details"
     buttonContent={
       <strong>
         {i18n.translate('observability.alerting.createMetricsMonitor.monitorDetailsTitle', {
@@ -379,16 +182,50 @@ const MonitorDetailsSection = React.memo<{
     paddingSize="m"
   >
     <EuiFormRow
+      label={i18n.translate('observability.alerting.createMetricsMonitor.namespaceLabel', {
+        defaultMessage: 'Namespace',
+      })}
+      helpText={i18n.translate('observability.alerting.createMetricsMonitor.namespaceHelp', {
+        defaultMessage:
+          'Logical grouping for rule groups. All rules created here are stored under the "observability-alerting" namespace.',
+      })}
+      fullWidth
+    >
+      <EuiFieldText value={USER_RULES_NAMESPACE} readOnly fullWidth compressed />
+    </EuiFormRow>
+    <EuiSpacer size="m" />
+    <EuiFormRow
+      label={i18n.translate('observability.alerting.createMetricsMonitor.groupNameLabel', {
+        defaultMessage: 'Rule group',
+      })}
+      helpText={i18n.translate('observability.alerting.createMetricsMonitor.groupNameHelp', {
+        defaultMessage:
+          'Rules within a group share an evaluation interval and are evaluated together.',
+      })}
+      fullWidth
+    >
+      <RuleGroupSelector
+        datasourceId={form.datasourceId}
+        value={form.groupName}
+        onChange={(groupName) => onUpdate({ groupName })}
+        data-test-subj="metricsMonitorRuleGroupSelector"
+      />
+    </EuiFormRow>
+    <EuiSpacer size="m" />
+    <EuiFormRow
       label={i18n.translate('observability.alerting.createMetricsMonitor.monitorNameLabel', {
         defaultMessage: 'Rule name',
       })}
       fullWidth
+      isInvalid={!!nameError}
+      error={nameError}
     >
       <EuiFieldText
         placeholder={i18n.translate(
           'observability.alerting.createMetricsMonitor.monitorNamePlaceholder',
           { defaultMessage: 'Enter a rule name' }
         )}
+        isInvalid={!!nameError}
         value={form.monitorName}
         onChange={(e) => onUpdate({ monitorName: e.target.value })}
         fullWidth
@@ -399,6 +236,15 @@ const MonitorDetailsSection = React.memo<{
         )}
       />
     </EuiFormRow>
+    <EuiSpacer size="s" />
+    <EuiText size="xs" color="subdued">
+      {i18n.translate('observability.alerting.createMetricsMonitor.hierarchyExplanation', {
+        defaultMessage:
+          'Prometheus rules are organized as: Namespace → Rule Group → Rule. ' +
+          'A namespace contains one or more rule groups, and each group contains one or more rules ' +
+          'that share the same evaluation interval.',
+      })}
+    </EuiText>
     <EuiSpacer size="m" />
     <EuiFormRow
       label={
@@ -436,642 +282,248 @@ const MonitorDetailsSection = React.memo<{
   </EuiAccordion>
 ));
 
-/** Section 2: Query — PromQL editor with datasource picker, query library, metric browser */
+/** Section 2: Query — shared PromQL builder with datasource picker */
 const QuerySection = React.memo<{
   form: MetricsMonitorFormState;
   onUpdate: (patch: Partial<MetricsMonitorFormState>) => void;
   showPreview: boolean;
   onRunPreview: () => void;
   contextDatasourceName?: string;
-}>(({ form, onUpdate, showPreview, onRunPreview, contextDatasourceName }) => {
-  const [showMetricBrowser, setShowMetricBrowser] = useState(false);
-  const [showQueryLibrary, setShowQueryLibrary] = useState(false);
-  const [showDatasourcePicker, setShowDatasourcePicker] = useState(false);
+  /** Selectable datasources (Alert Manager); absent = pinned context ds. */
+  datasources?: Array<{ id: string; name: string; type: string }>;
+  /** Render the "Build query in metrics →" link (Alert Manager only). */
+  showBuildInMetricsLink?: boolean;
+}>(
+  ({
+    form,
+    onUpdate,
+    showPreview,
+    onRunPreview,
+    contextDatasourceName,
+    datasources,
+    showBuildInMetricsLink,
+  }) => {
+    const [showDatasourcePicker, setShowDatasourcePicker] = useState(false);
 
-  // Use the real datasource from the Explore page context. When no
-  // datasource is provided (e.g. standalone usage), show a placeholder.
-  const datasourceOptions = useMemo(() => {
-    if (form.datasourceId) {
-      return [{ id: form.datasourceId, name: contextDatasourceName || form.datasourceId }];
-    }
-    return [];
-  }, [form.datasourceId, contextDatasourceName]);
-
-  const selectedDs =
-    datasourceOptions.length > 0
-      ? datasourceOptions[0]
-      : {
-          id: '',
-          name: i18n.translate('observability.alerting.createMetricsMonitor.noDatasourceAttached', {
-            defaultMessage: 'No Prometheus datasource attached',
-          }),
-        };
-
-  const handleMetricSelect = (metricName: string) => {
-    const newQuery = form.query
-      ? form.query + (form.query.endsWith(' ') ? '' : ' ') + metricName
-      : metricName;
-    onUpdate({ query: newQuery });
-    setShowMetricBrowser(false);
-  };
-
-  const handleQueryLibrarySelect = (query: string) => {
-    onUpdate({ query });
-    setShowQueryLibrary(false);
-  };
-
-  return (
-    <EuiAccordion
-      id="prom-query-section"
-      buttonContent={
-        <strong>
-          {i18n.translate('observability.alerting.createMetricsMonitor.queryTitle', {
-            defaultMessage: 'Query',
-          })}
-        </strong>
+    // With an explicit datasource list (Alert Manager) the picker offers all
+    // Prometheus datasources; otherwise it is pinned to the Explore page's
+    // context datasource.
+    const datasourceOptions = useMemo(() => {
+      if (datasources && datasources.length > 0) {
+        return datasources
+          .filter((ds) => ds.type === 'prometheus')
+          .map((ds) => ({ id: ds.id, name: ds.name }));
       }
-      initialIsOpen
-      paddingSize="m"
-      extraAction={
-        <EuiButton
-          size="s"
-          onClick={onRunPreview}
-          aria-label={i18n.translate(
-            'observability.alerting.createMetricsMonitor.runPreviewAriaLabel',
-            { defaultMessage: 'Run preview' }
-          )}
-        >
-          {i18n.translate('observability.alerting.createMetricsMonitor.runPreviewButton', {
-            defaultMessage: 'Run preview',
-          })}
-        </EuiButton>
+      if (form.datasourceId) {
+        return [{ id: form.datasourceId, name: contextDatasourceName || form.datasourceId }];
       }
-    >
-      {/* Toolbar: language badge, datasource, query library, metric browser */}
-      <EuiPanel paddingSize="s" hasBorder style={{ borderRadius: 4 }}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label="PromQL"
-              tooltipContent={i18n.translate(
-                'observability.alerting.createMetricsMonitor.promqlTooltip',
-                { defaultMessage: 'Prometheus Query Language' }
-              )}
-              size="s"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="database"
-                  iconSide="left"
-                  onClick={() => setShowDatasourcePicker(!showDatasourcePicker)}
-                  aria-label={i18n.translate(
-                    'observability.alerting.createMetricsMonitor.pickDatasourceAriaLabel',
-                    { defaultMessage: 'Pick data source' }
-                  )}
-                >
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>{selectedDs.name}</EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="arrowDown" size="s" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiButtonEmpty>
-              }
-              isOpen={showDatasourcePicker}
-              closePopover={() => setShowDatasourcePicker(false)}
-              panelPaddingSize="s"
-            >
-              {datasourceOptions.map((ds) => (
-                <EuiButtonEmpty
-                  key={ds.id}
-                  size="xs"
-                  onClick={() => {
-                    onUpdate({ datasourceId: ds.id });
-                    setShowDatasourcePicker(false);
-                  }}
-                  style={{ display: 'block', width: '100%', textAlign: 'left' }}
-                >
-                  {ds.name}
-                </EuiButtonEmpty>
-              ))}
-            </EuiPopover>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="starEmpty"
-                  iconSide="left"
-                  onClick={() => setShowQueryLibrary(!showQueryLibrary)}
-                  aria-label={i18n.translate(
-                    'observability.alerting.createMetricsMonitor.queryLibraryAriaLabel',
-                    { defaultMessage: 'Query library' }
-                  )}
-                >
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      {i18n.translate(
-                        'observability.alerting.createMetricsMonitor.queryLibraryLabel',
-                        { defaultMessage: 'Query library' }
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="arrowDown" size="s" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiButtonEmpty>
-              }
-              isOpen={showQueryLibrary}
-              closePopover={() => setShowQueryLibrary(false)}
-              panelPaddingSize="s"
-            >
-              {MOCK_SAMPLE_QUERIES.map((sq, i) => (
-                <EuiButtonEmpty
-                  key={i}
-                  size="xs"
-                  onClick={() => handleQueryLibrarySelect(sq.query)}
-                  style={{ display: 'block', width: '100%', textAlign: 'left' }}
-                >
-                  {sq.label}
-                </EuiButtonEmpty>
-              ))}
-            </EuiPopover>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonEmpty
-                  size="xs"
-                  onClick={() => setShowMetricBrowser(!showMetricBrowser)}
-                  aria-label={i18n.translate(
-                    'observability.alerting.createMetricsMonitor.metricBrowserAriaLabel',
-                    { defaultMessage: 'Metric browser' }
-                  )}
-                >
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      {i18n.translate(
-                        'observability.alerting.createMetricsMonitor.metricBrowserLabel',
-                        { defaultMessage: 'Metric browser' }
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="arrowDown" size="s" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiButtonEmpty>
-              }
-              isOpen={showMetricBrowser}
-              closePopover={() => setShowMetricBrowser(false)}
-              panelPaddingSize="s"
-              style={{ width: 600 }}
-            >
-              <div style={{ width: 560, maxHeight: 400, overflow: 'auto' }}>
-                <MetricBrowser
-                  onSelectMetric={handleMetricSelect}
-                  currentQuery={form.query}
-                  datasourceId={form.datasourceId}
-                />
-              </div>
-            </EuiPopover>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      return [];
+    }, [datasources, form.datasourceId, contextDatasourceName]);
 
-        <EuiSpacer size="s" />
+    const selectedDs = datasourceOptions.find((ds) => ds.id === form.datasourceId) ||
+      datasourceOptions[0] || {
+        id: '',
+        name: i18n.translate('observability.alerting.createMetricsMonitor.noDatasourceAttached', {
+          defaultMessage: 'No Prometheus datasource attached',
+        }),
+      };
 
-        {/* PromQL editor */}
-        <div style={{ position: 'relative' }}>
-          <PromQLEditor
-            value={form.query}
-            onChange={(v) => onUpdate({ query: v })}
-            height={56}
-            showLineNumbers
-            hideToolbar
-          />
-          <div
-            style={{ position: 'absolute', top: 4, right: 4, zIndex: 2, display: 'flex', gap: 2 }}
-          >
-            <EuiToolTip
-              content={i18n.translate(
-                'observability.alerting.createMetricsMonitor.copyQueryTooltip',
-                { defaultMessage: 'Copy query' }
-              )}
-            >
-              <EuiButtonIcon
-                iconType="copy"
+    return (
+      <EuiAccordion
+        id="cmm-query"
+        buttonContent={
+          <strong>
+            {i18n.translate('observability.alerting.createMetricsMonitor.queryTitle', {
+              defaultMessage: 'Query',
+            })}
+          </strong>
+        }
+        initialIsOpen
+        paddingSize="m"
+        extraAction={
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {showBuildInMetricsLink && (
+              <EuiFlexItem grow={false}>
+                {/* Mirrors the logs flyout's "Build query in logs →" round-trip:
+                  author/validate the query against live data in the Metrics
+                  app, then return via its Create alert rule action. Same-tab
+                  navigation — unsaved form state here is lost. */}
+                <EuiToolTip
+                  position="left"
+                  content={i18n.translate(
+                    'observability.alerting.createMetricsMonitor.openInMetricsTooltip',
+                    {
+                      defaultMessage:
+                        'Build and validate your query against live data in metrics, then click Create alert rule to come back here pre-filled. Unsaved changes will be lost.',
+                    }
+                  )}
+                >
+                  <EuiLink
+                    onClick={() => coreRefs?.application?.navigateToApp('explore/metrics')}
+                    data-test-subj="alertManagerOpenInMetricsLink"
+                  >
+                    {i18n.translate('observability.alerting.createMetricsMonitor.openInMetrics', {
+                      defaultMessage: 'Build query in metrics →',
+                    })}
+                  </EuiLink>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButton
                 size="s"
-                color="subdued"
-                onClick={() => {
-                  try {
-                    navigator.clipboard.writeText(form.query);
-                  } catch (_) {
-                    /* clipboard unavailable */
-                  }
-                }}
+                onClick={onRunPreview}
                 aria-label={i18n.translate(
-                  'observability.alerting.createMetricsMonitor.copyQueryAriaLabel',
-                  { defaultMessage: 'Copy query' }
+                  'observability.alerting.createMetricsMonitor.runPreviewAriaLabel',
+                  { defaultMessage: 'Run preview' }
                 )}
-              />
-            </EuiToolTip>
-          </div>
-        </div>
-      </EuiPanel>
-
-      {/* Preview Results */}
-      {showPreview && (
-        <>
-          <EuiSpacer size="m" />
-          <EuiAccordion
-            id="prom-preview-results"
-            buttonContent={
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <strong>
-                    <FormattedMessage
-                      id="observability.alerting.createMetricsMonitor.resultsTitle"
-                      defaultMessage="Results ({count})"
-                      values={{ count: PREVIEW_VALUES.length }}
-                    />
-                  </strong>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            initialIsOpen
-            paddingSize="s"
-          >
-            <EuiCallOut size="s" color="warning" iconType="iInCircle">
-              <EuiText size="xs">
-                {i18n.translate('observability.alerting.createMetricsMonitor.sampleDataCallout', {
-                  defaultMessage: 'Sample data — run the rule to see real results',
+              >
+                {i18n.translate('observability.alerting.createMetricsMonitor.runPreviewButton', {
+                  defaultMessage: 'Run preview',
                 })}
-              </EuiText>
-            </EuiCallOut>
-            <EuiSpacer size="s" />
-            <EuiText size="xs" color="subdued">
-              http_requests_total
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EchartsRender spec={PREVIEW_CHART_OPTION} height={200} />
-          </EuiAccordion>
-        </>
-      )}
-    </EuiAccordion>
-  );
-});
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        {/* Toolbar: language badge, datasource, query library, metric browser */}
+        <EuiPanel paddingSize="s" hasBorder style={{ borderRadius: 4 }}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label="PromQL"
+                tooltipContent={i18n.translate(
+                  'observability.alerting.createMetricsMonitor.promqlTooltip',
+                  { defaultMessage: 'Prometheus Query Language' }
+                )}
+                size="s"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="database"
+                    iconSide="left"
+                    onClick={() => setShowDatasourcePicker(!showDatasourcePicker)}
+                    aria-label={i18n.translate(
+                      'observability.alerting.createMetricsMonitor.pickDatasourceAriaLabel',
+                      { defaultMessage: 'Pick data source' }
+                    )}
+                  >
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>{selectedDs.name}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="arrowDown" size="s" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiButtonEmpty>
+                }
+                isOpen={showDatasourcePicker}
+                closePopover={() => setShowDatasourcePicker(false)}
+                panelPaddingSize="s"
+              >
+                {datasourceOptions.map((ds) => (
+                  <EuiButtonEmpty
+                    key={ds.id}
+                    size="xs"
+                    onClick={() => {
+                      onUpdate({ datasourceId: ds.id });
+                      setShowDatasourcePicker(false);
+                    }}
+                    style={{ display: 'block', width: '100%', textAlign: 'left' }}
+                  >
+                    {ds.name}
+                  </EuiButtonEmpty>
+                ))}
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-/** Section 3: Trigger Condition */
-const TriggerConditionSection = React.memo<{
-  form: MetricsMonitorFormState;
-  onUpdate: (patch: Partial<MetricsMonitorFormState>) => void;
-}>(({ form, onUpdate }) => (
+          <EuiSpacer size="m" />
+
+          {/* Point-and-click builder — same component as the Alert Manager
+            "Create metrics rule" flyout. Seeds from the pre-filled Explore
+            query when it is builder-representable; complex expressions leave
+            the builder inert so the seeded query is preserved. */}
+          <PromQueryBuilder
+            datasourceId={form.datasourceId}
+            query={form.query}
+            onQueryChange={(q) => onUpdate({ query: q })}
+          />
+
+          <EuiSpacer size="m" />
+
+          {/* For duration — the rule's `for:` clause. Kept per-rule (unlike
+            the group-level evaluation interval): the condition must hold
+            continuously for this long before the alert fires. */}
+          <EuiFormRow
+            label={i18n.translate('observability.alerting.createMetricsMonitor.forDurationLabel', {
+              defaultMessage: 'For duration',
+            })}
+            helpText={i18n.translate(
+              'observability.alerting.createMetricsMonitor.forDurationHelpText',
+              {
+                defaultMessage:
+                  'How long the condition must stay true before the alert fires. The alert is "pending" during this window.',
+              }
+            )}
+            display="rowCompressed"
+          >
+            <EuiSelect
+              options={FOR_DURATION_OPTIONS}
+              value={form.forDuration}
+              onChange={(e) => onUpdate({ forDuration: e.target.value })}
+              compressed
+              aria-label={i18n.translate(
+                'observability.alerting.createMetricsMonitor.forDurationAriaLabel',
+                { defaultMessage: 'For duration' }
+              )}
+              data-test-subj="metricsMonitorForDurationSelect"
+            />
+          </EuiFormRow>
+        </EuiPanel>
+
+        {/* Preview Results */}
+        {showPreview && (
+          <>
+            <EuiSpacer size="m" />
+            <QueryPreviewResults id="cmm-preview-results" query={form.query} />
+          </>
+        )}
+      </EuiAccordion>
+    );
+  }
+);
+
+/** Section 5: Labels — shared LabelEditor keeps parity with the Alert Manager flyout */
+const LabelsSection = React.memo<{
+  labels: LabelEntry[];
+  onUpdate: (labels: LabelEntry[]) => void;
+}>(({ labels, onUpdate }) => (
   <EuiAccordion
-    id="prom-trigger-condition"
+    id="cmm-labels"
     buttonContent={
       <strong>
-        {i18n.translate('observability.alerting.createMetricsMonitor.triggerConditionTitle', {
-          defaultMessage: 'Trigger condition',
+        {i18n.translate('observability.alerting.createMetricsMonitor.labelsTitle', {
+          defaultMessage: 'Labels',
         })}
       </strong>
     }
     initialIsOpen
     paddingSize="m"
-  >
-    <EuiFlexGroup gutterSize="s" wrap>
-      <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.operatorLabel', {
-            defaultMessage: 'Operator',
-          })}
-          display="rowCompressed"
-        >
-          <EuiSelect
-            options={OPERATOR_OPTIONS}
-            value={form.operator}
-            onChange={(e) =>
-              onUpdate({ operator: e.target.value as MetricsMonitorFormState['operator'] })
-            }
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.thresholdOperatorAriaLabel',
-              { defaultMessage: 'Threshold operator' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 100 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.valueLabel', {
-            defaultMessage: 'Value',
-          })}
-          display="rowCompressed"
-        >
-          <EuiFieldNumber
-            value={form.thresholdValue}
-            onChange={(e) => onUpdate({ thresholdValue: parseFloat(e.target.value) || 0 })}
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.thresholdValueAriaLabel',
-              { defaultMessage: 'Threshold value' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.forDurationLabel', {
-            defaultMessage: 'For duration',
-          })}
-          display="rowCompressed"
-        >
-          <EuiSelect
-            options={FOR_DURATION_OPTIONS}
-            value={form.forDuration}
-            onChange={(e) => onUpdate({ forDuration: e.target.value })}
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.forDurationAriaLabel',
-              { defaultMessage: 'For duration' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-
-    <EuiSpacer size="s" />
-
-    {/* Condition summary callout */}
-    <EuiCallOut size="s" color="primary" iconType="iInCircle">
-      <EuiText size="xs">
-        <FormattedMessage
-          id="observability.alerting.createMetricsMonitor.alertFiresMessage"
-          defaultMessage="Alert fires when: {expression} for {forDuration}"
-          values={{
-            expression: (
-              <code>
-                {form.query || '<query>'} {form.operator} {form.thresholdValue}
-              </code>
-            ),
-            forDuration: form.forDuration,
-          }}
-        />
-      </EuiText>
-    </EuiCallOut>
-
-    <EuiSpacer size="m" />
-
-    {/* Threshold visualization */}
-    <EuiCallOut size="s" color="warning" iconType="iInCircle">
-      <EuiText size="xs">
-        {i18n.translate('observability.alerting.createMetricsMonitor.thresholdSampleDataCallout', {
-          defaultMessage: 'Sample data — run the rule to see real results',
-        })}
-      </EuiText>
-    </EuiCallOut>
-    <EuiSpacer size="xs" />
-    <EuiText size="xs">
-      <strong>
-        {i18n.translate('observability.alerting.createMetricsMonitor.thresholdResultsLabel', {
-          defaultMessage: 'Results',
-        })}
-      </strong>
-    </EuiText>
-    <EuiText size="xs" color="subdued">
-      http_requests_total
-    </EuiText>
-    <EuiSpacer size="xs" />
-    <EchartsRender spec={buildThresholdChartOption(form.thresholdValue)} height={200} />
-  </EuiAccordion>
-));
-
-/** Section 4: Evaluation Settings */
-const EvaluationSettingsSection = React.memo<{
-  form: MetricsMonitorFormState;
-  onUpdate: (patch: Partial<MetricsMonitorFormState>) => void;
-}>(({ form, onUpdate }) => (
-  <EuiAccordion
-    id="prom-evaluation-settings"
-    buttonContent={
-      <strong>
-        {i18n.translate('observability.alerting.createMetricsMonitor.evaluationSettingsTitle', {
-          defaultMessage: 'Evaluation settings',
-        })}
-      </strong>
-    }
-    initialIsOpen={false}
-    paddingSize="m"
-  >
-    <EuiFlexGroup gutterSize="s" wrap>
-      <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.evalIntervalLabel', {
-            defaultMessage: 'Eval interval',
-          })}
-          helpText={i18n.translate(
-            'observability.alerting.createMetricsMonitor.evalIntervalHelpText',
-            { defaultMessage: 'How often evaluated' }
-          )}
-          display="rowCompressed"
-        >
-          <EuiSelect
-            options={EVAL_INTERVAL_OPTIONS}
-            value={form.evalInterval}
-            onChange={(e) => onUpdate({ evalInterval: e.target.value })}
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.evaluationIntervalAriaLabel',
-              { defaultMessage: 'Evaluation interval' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.pendingPeriodLabel', {
-            defaultMessage: 'Pending period',
-          })}
-          helpText={i18n.translate(
-            'observability.alerting.createMetricsMonitor.pendingPeriodHelpText',
-            { defaultMessage: 'Before firing' }
-          )}
-          display="rowCompressed"
-        >
-          <EuiSelect
-            options={EVAL_INTERVAL_OPTIONS}
-            value={form.pendingPeriod}
-            onChange={(e) => onUpdate({ pendingPeriod: e.target.value })}
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.pendingPeriodAriaLabel',
-              { defaultMessage: 'Pending period' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem style={{ minWidth: 160 }}>
-        <EuiFormRow
-          label={i18n.translate('observability.alerting.createMetricsMonitor.firingPeriodLabel', {
-            defaultMessage: 'Firing period',
-          })}
-          helpText={i18n.translate(
-            'observability.alerting.createMetricsMonitor.firingPeriodHelpText',
-            { defaultMessage: 'Keep firing after condition clears' }
-          )}
-          display="rowCompressed"
-        >
-          <EuiSelect
-            options={FIRING_PERIOD_OPTIONS}
-            value={form.firingPeriod}
-            onChange={(e) => onUpdate({ firingPeriod: e.target.value })}
-            compressed
-            aria-label={i18n.translate(
-              'observability.alerting.createMetricsMonitor.firingPeriodAriaLabel',
-              { defaultMessage: 'Firing period' }
-            )}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </EuiAccordion>
-));
-
-/** Section 5: Labels */
-const LabelsSection = React.memo<{
-  labels: LabelEntry[];
-  onUpdate: (labels: LabelEntry[]) => void;
-}>(({ labels, onUpdate }) => {
-  const addLabel = () => onUpdate([...labels, { key: '', value: '', isDynamic: false }]);
-  const removeLabel = (i: number) => onUpdate(labels.filter((_, idx) => idx !== i));
-  const updateLabel = (i: number, patch: Partial<LabelEntry>) => {
-    const next = [...labels];
-    next[i] = { ...next[i], ...patch };
-    onUpdate(next);
-  };
-
-  return (
-    <EuiAccordion
-      id="prom-labels"
-      buttonContent={
-        <strong>
-          {i18n.translate('observability.alerting.createMetricsMonitor.labelsTitle', {
-            defaultMessage: 'Labels',
-          })}
-        </strong>
-      }
-      initialIsOpen
-      paddingSize="m"
-    >
+    extraAction={
       <EuiText size="xs" color="subdued">
         {i18n.translate('observability.alerting.createMetricsMonitor.labelsDescription', {
           defaultMessage: 'Categorize and route alerts',
         })}
       </EuiText>
-      <EuiSpacer size="s" />
-      {labels.map((label, i) => (
-        <EuiFlexGroup
-          key={i}
-          gutterSize="s"
-          alignItems="center"
-          responsive={false}
-          style={{ marginBottom: 4 }}
-        >
-          <EuiFlexItem grow={2}>
-            <EuiFieldText
-              placeholder={i18n.translate(
-                'observability.alerting.createMetricsMonitor.labelKeyPlaceholder',
-                { defaultMessage: 'e.g. severity, team, service' }
-              )}
-              value={label.key}
-              onChange={(e) => updateLabel(i, { key: e.target.value })}
-              compressed
-              aria-label={i18n.translate(
-                'observability.alerting.createMetricsMonitor.labelKeyAriaLabel',
-                { defaultMessage: 'Label key {index}', values: { index: i + 1 } }
-              )}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={3}>
-            <EuiFieldText
-              placeholder={
-                label.isDynamic
-                  ? '{{ $value }}'
-                  : i18n.translate(
-                      'observability.alerting.createMetricsMonitor.labelValuePlaceholder',
-                      { defaultMessage: 'Value' }
-                    )
-              }
-              value={label.value}
-              onChange={(e) => updateLabel(i, { value: e.target.value })}
-              compressed
-              aria-label={i18n.translate(
-                'observability.alerting.createMetricsMonitor.labelValueAriaLabel',
-                { defaultMessage: 'Label value {index}', values: { index: i + 1 } }
-              )}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                label.isDynamic
-                  ? i18n.translate(
-                      'observability.alerting.createMetricsMonitor.labelDynamicTooltip',
-                      { defaultMessage: 'Dynamic (Go template)' }
-                    )
-                  : i18n.translate(
-                      'observability.alerting.createMetricsMonitor.labelStaticTooltip',
-                      { defaultMessage: 'Static value' }
-                    )
-              }
-            >
-              <EuiSwitch
-                label={i18n.translate(
-                  'observability.alerting.createMetricsMonitor.labelDynamicSwitch',
-                  { defaultMessage: 'Dynamic' }
-                )}
-                checked={label.isDynamic}
-                onChange={(e) => updateLabel(i, { isDynamic: e.target.checked })}
-                compressed
-                aria-label={i18n.translate(
-                  'observability.alerting.createMetricsMonitor.labelToggleDynamicAriaLabel',
-                  {
-                    defaultMessage: 'Toggle dynamic for label {index}',
-                    values: { index: i + 1 },
-                  }
-                )}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              size="s"
-              onClick={() => removeLabel(i)}
-              aria-label={i18n.translate(
-                'observability.alerting.createMetricsMonitor.deleteLabelAriaLabel',
-                {
-                  defaultMessage: 'Delete label {label}',
-                  values: { label: label.key || i + 1 },
-                }
-              )}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ))}
-      <EuiSpacer size="xs" />
-      <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addLabel}>
-        {i18n.translate('observability.alerting.createMetricsMonitor.addLabelButton', {
-          defaultMessage: 'Add label',
-        })}
-      </EuiButtonEmpty>
-    </EuiAccordion>
-  );
-});
+    }
+  >
+    <LabelEditor labels={labels} onChange={onUpdate} />
+  </EuiAccordion>
+));
 
 /** Section 6: Annotations */
 const AnnotationsSection = React.memo<{
@@ -1088,7 +540,7 @@ const AnnotationsSection = React.memo<{
 
   return (
     <EuiAccordion
-      id="prom-annotations"
+      id="cmm-annotations"
       buttonContent={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -1174,100 +626,6 @@ const AnnotationsSection = React.memo<{
     </EuiAccordion>
   );
 });
-
-/** Section 7: Matched Notification Actions */
-const ActionsSection = React.memo<{
-  actions: ActionState[];
-  onDeleteAction: (id: string) => void;
-  onAddAction: () => void;
-}>(({ actions, onDeleteAction, onAddAction }) => (
-  <section
-    aria-label={i18n.translate(
-      'observability.alerting.createMetricsMonitor.matchedActionsAriaLabel',
-      { defaultMessage: 'Matched notification actions' }
-    )}
-  >
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h3>
-            <FormattedMessage
-              id="observability.alerting.createMetricsMonitor.matchedActionsTitle"
-              defaultMessage="Matched notification actions ({count})"
-              values={{ count: actions.length }}
-            />
-          </h3>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="s" />
-    {actions.map((action, idx) => (
-      <React.Fragment key={action.id}>
-        {idx > 0 && <EuiSpacer size="xs" />}
-        <EuiPanel paddingSize="s" hasBorder>
-          <EuiAccordion
-            id={`action-${action.id}`}
-            buttonContent={
-              <span>
-                {idx + 1}. {action.name}
-              </span>
-            }
-            paddingSize="s"
-            extraAction={
-              <EuiButtonEmpty
-                size="xs"
-                color="danger"
-                onClick={() => onDeleteAction(action.id)}
-                aria-label={i18n.translate(
-                  'observability.alerting.createMetricsMonitor.deleteActionAriaLabel',
-                  { defaultMessage: 'Delete action {name}', values: { name: action.name } }
-                )}
-              >
-                {i18n.translate('observability.alerting.createMetricsMonitor.deleteActionButton', {
-                  defaultMessage: 'Delete',
-                })}
-              </EuiButtonEmpty>
-            }
-          >
-            <EuiCallOut
-              size="s"
-              color="primary"
-              iconType="iInCircle"
-              title={i18n.translate(
-                'observability.alerting.createMetricsMonitor.comingSoonCalloutTitle',
-                { defaultMessage: 'Coming soon' }
-              )}
-            >
-              <EuiText size="xs">
-                {i18n.translate(
-                  'observability.alerting.createMetricsMonitor.comingSoonCalloutBody',
-                  {
-                    defaultMessage:
-                      'Full action configuration (notification channel, message template, throttling) will be available in a future update.',
-                  }
-                )}
-              </EuiText>
-            </EuiCallOut>
-          </EuiAccordion>
-        </EuiPanel>
-      </React.Fragment>
-    ))}
-    <EuiSpacer size="s" />
-    <EuiButtonEmpty
-      size="s"
-      iconType="plusInCircle"
-      onClick={onAddAction}
-      aria-label={i18n.translate('observability.alerting.createMetricsMonitor.addActionAriaLabel', {
-        defaultMessage: 'Add another action',
-      })}
-    >
-      {i18n.translate('observability.alerting.createMetricsMonitor.addActionButton', {
-        defaultMessage: 'Add another action',
-      })}
-    </EuiButtonEmpty>
-  </section>
-));
-
 /** Section 8: Rule Preview (YAML) */
 const RulePreviewSection = React.memo<{
   form: MetricsMonitorFormState;
@@ -1275,38 +633,49 @@ const RulePreviewSection = React.memo<{
   const yaml = useMemo(() => {
     const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
     const labels = form.labels.filter((l) => l.key && l.value);
-    const annotations = form.annotations.filter((a) => a.key && a.value);
+    // Mirror the save path: the Rule details Description field persists as
+    // the `description` annotation (and wins over a manually-typed one), so
+    // the preview must show exactly what will be saved
+    const annotations = [
+      ...form.annotations.filter(
+        (a) => a.key && a.value && !(form.description.trim() && a.key === 'description')
+      ),
+      ...(form.description.trim() ? [{ key: 'description', value: form.description.trim() }] : []),
+    ];
     let out = `- alert: "${esc(form.monitorName || '<monitor-name>')}"\n`;
-    out += `  expr: "${esc(
-      `${form.query || '<promql-expression>'} ${form.operator} ${form.thresholdValue}`
-    )}"\n`;
+    // The PromQL expression is the complete alert condition
+    out += `  expr: "${esc(form.query || '<promql-expression>')}"\n`;
     out += `  for: ${form.forDuration}\n`;
     if (labels.length > 0) {
       out += `  labels:\n`;
+      // Template values are single-quoted, matching the server's js-yaml
+      // serialization (unquoted `{{ ... }}` would be invalid YAML)
       for (const l of labels) {
-        out += `    "${esc(l.key)}": ${l.isDynamic ? l.value : `"${esc(l.value)}"`}\n`;
+        out += `    "${esc(l.key)}": ${l.isDynamic ? `'${l.value}'` : `"${esc(l.value)}"`}\n`;
       }
     }
     if (annotations.length > 0) {
       out += `  annotations:\n`;
+      // Annotations lack the isDynamic flag — detect template syntax to
+      // single-quote like the server's js-yaml serialization does
       for (const a of annotations) {
-        out += `    "${esc(a.key)}": "${esc(a.value)}"\n`;
+        const value = /\{\{.*\}\}/.test(a.value) ? `'${a.value}'` : `"${esc(a.value)}"`;
+        out += `    "${esc(a.key)}": ${value}\n`;
       }
     }
     return out;
   }, [
     form.monitorName,
     form.query,
-    form.operator,
-    form.thresholdValue,
     form.forDuration,
     form.labels,
     form.annotations,
+    form.description,
   ]);
 
   return (
     <EuiAccordion
-      id="prom-rule-preview"
+      id="cmm-rule-preview"
       buttonContent={
         <strong>
           {i18n.translate('observability.alerting.createMetricsMonitor.rulePreviewTitle', {
@@ -1362,33 +731,42 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
   onSave,
   datasourceId: contextDatasourceId,
   datasourceName: contextDatasourceName,
+  datasources,
+  isNameTaken,
+  showBuildInMetricsLink,
   http,
   addToast,
 }) => {
+  // Without a page-context datasource (Alert Manager), default to the first
+  // Prometheus datasource in the provided list.
+  const defaultDatasourceId =
+    contextDatasourceId || datasources?.find((ds) => ds.type === 'prometheus')?.id || '';
   const [form, setForm] = useState<MetricsMonitorFormState>({
     monitorName: '',
     description: '',
-    query: DEFAULT_PROMQL,
-    datasourceId: contextDatasourceId || '',
-    operator: '>',
-    thresholdValue: 0.05,
+    namespace: USER_RULES_NAMESPACE,
+    groupName: '',
+    // Empty on purpose: the query must come from an explicit builder
+    // selection. A pre-seeded expression would be submittable while the
+    // builder renders empty (it cannot represent complex expressions),
+    // silently creating a rule for a metric the user never chose.
+    query: '',
+    datasourceId: defaultDatasourceId,
     forDuration: '5m',
     evalInterval: '1m',
-    pendingPeriod: '5m',
-    firingPeriod: '0s',
-    labels: [{ key: 'severity', value: 'critical', isDynamic: false }],
+    // `warning` by default — escalation to `critical` (paging) should be a
+    // deliberate choice, matching the Alert Manager flyout's default
+    labels: [{ key: 'severity', value: 'warning', isDynamic: false }],
     annotations: [],
-    actions: [],
   });
   const [showPreview, setShowPreview] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
-  const initialFormRef = useRef(form);
+  // JSON snapshot so ANY field edit (description, group, duration,
+  // datasource, label/annotation content) arms the discard-confirm modal —
+  // same approach as the CreateMonitor shell
+  const initialFormJson = useRef(JSON.stringify(form));
 
-  const isDirty =
-    form.monitorName !== '' ||
-    form.query !== initialFormRef.current.query ||
-    form.labels.length !== initialFormRef.current.labels.length ||
-    form.annotations.length !== initialFormRef.current.annotations.length;
+  const isDirty = JSON.stringify(form) !== initialFormJson.current;
 
   const handleClose = useCallback(() => {
     if (isDirty) {
@@ -1402,41 +780,37 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
     setForm((prev) => ({ ...prev, ...patch }));
   }, []);
 
-  const handleLabelsUpdate = useCallback((labels: LabelEntry[]) => updateForm({ labels }), [
-    updateForm,
-  ]);
+  const handleLabelsUpdate = useCallback(
+    (labels: LabelEntry[]) => updateForm({ labels }),
+    [updateForm]
+  );
 
   const handleAnnotationsUpdate = useCallback(
     (annotations: AnnotationEntry[]) => updateForm({ annotations }),
     [updateForm]
   );
 
-  const deleteAction = useCallback((id: string) => {
-    setForm((prev) => ({
-      ...prev,
-      actions: prev.actions.filter((a) => a.id !== id),
-    }));
-  }, []);
-
-  const addAction = useCallback(() => {
-    setForm((prev) => ({
-      ...prev,
-      actions: [
-        ...prev.actions,
-        {
-          id: `action-${Date.now()}-${prev.actions.length}`,
-          name: `action_${prev.actions.length + 1}`,
-        },
-      ],
-    }));
-  }, []);
-
   const handleRunPreview = useCallback(() => {
     setShowPreview(true);
   }, []);
 
+  const duplicateName = !!(
+    isNameTaken &&
+    form.monitorName.trim() !== '' &&
+    form.datasourceId !== '' &&
+    isNameTaken(form.monitorName.trim(), form.datasourceId)
+  );
+  const nameError = duplicateName
+    ? i18n.translate('observability.alerting.createMetricsMonitor.nameDuplicate', {
+        defaultMessage: 'A rule with this name already exists on the selected datasource.',
+      })
+    : undefined;
+
   const isValid =
-    form.monitorName.trim() !== '' && form.query.trim() !== '' && form.datasourceId !== '';
+    form.monitorName.trim() !== '' &&
+    form.query.trim() !== '' &&
+    form.datasourceId !== '' &&
+    !duplicateName;
 
   const [isSaving, setIsSaving] = useState(false);
 
@@ -1451,21 +825,28 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
 
     setIsSaving(true);
     try {
+      // The PromQL expression is the complete alert condition — no
+      // operator/threshold appended server-side.
       const payload = {
         name: form.monitorName,
         query: form.query,
-        operator: form.operator,
-        threshold: form.thresholdValue,
         forDuration: form.forDuration,
         evaluationInterval: form.evalInterval,
         labels: Object.fromEntries(
           form.labels.filter((l) => l.key.trim()).map((l) => [l.key, l.value])
         ),
-        annotations: Object.fromEntries(
-          form.annotations.filter((a) => a.key.trim()).map((a) => [a.key, a.value])
-        ),
+        annotations: Object.fromEntries([
+          ...form.annotations
+            .filter((a) => a.key.trim())
+            .map((a) => [a.key, a.value] as [string, string]),
+          // The Rule details Description field persists as the standard
+          // `description` annotation (the server's rule builder reads it)
+          ...(form.description.trim()
+            ? [['description', form.description.trim()] as [string, string]]
+            : []),
+        ]),
         enabled: true,
-        groupName: form.monitorName,
+        groupName: form.groupName || form.monitorName,
       };
       await http.post(`/api/alerting/prometheus/${encodeURIComponent(form.datasourceId)}/rules`, {
         body: JSON.stringify(payload),
@@ -1479,12 +860,25 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
       onSave(form);
     } catch (err) {
       console.error('CreateMetricsMonitor: rule creation failed', err);
-      addToast?.(
-        i18n.translate('observability.alerting.createMetricsMonitor.toast.failed', {
-          defaultMessage: 'Failed to create alert rule.',
-        }),
-        'danger'
-      );
+      // Surface the server's classified error (specific cause + remediation +
+      // correlation id) instead of a static "Failed to create alert rule."
+      // toast. Falls back to the generic message when no structured error is
+      // present (older server, network error, etc.).
+      const classified = extractClassifiedError(err);
+      if (classified) {
+        addToast?.(
+          classified.title,
+          classifiedToastColor(classified) === 'warning' ? 'warning' : 'danger',
+          classifiedToastText(classified)
+        );
+      } else {
+        addToast?.(
+          i18n.translate('observability.alerting.createMetricsMonitor.toast.failed', {
+            defaultMessage: 'Failed to create alert rule.',
+          }),
+          'danger'
+        );
+      }
     } finally {
       setIsSaving(false);
     }
@@ -1510,7 +904,7 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
 
       <EuiFlyoutBody>
         {/* Section 1: Monitor Details */}
-        <MonitorDetailsSection form={form} onUpdate={updateForm} />
+        <MonitorDetailsSection form={form} onUpdate={updateForm} nameError={nameError} />
         <EuiHorizontalRule margin="l" />
 
         {/* Section 2: Query */}
@@ -1520,18 +914,18 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
           showPreview={showPreview}
           onRunPreview={handleRunPreview}
           contextDatasourceName={contextDatasourceName}
+          datasources={datasources}
+          showBuildInMetricsLink={showBuildInMetricsLink}
         />
         <EuiHorizontalRule margin="l" />
 
-        {/* Section 3: Trigger Condition */}
-        <TriggerConditionSection form={form} onUpdate={updateForm} />
-        <EuiHorizontalRule margin="l" />
+        {/* Trigger condition and per-rule evaluation settings are
+            intentionally absent: the PromQL expression is the complete
+            alert condition, and evaluation cadence is a rule-group-level
+            concern in managed Prometheus. The per-rule `for:` duration
+            lives in the Query section. */}
 
-        {/* Section 4: Evaluation Settings */}
-        <EvaluationSettingsSection form={form} onUpdate={updateForm} />
-        <EuiHorizontalRule margin="l" />
-
-        {/* Section 5: Labels */}
+        {/* Section 3: Labels */}
         <LabelsSection labels={form.labels} onUpdate={handleLabelsUpdate} />
         <EuiHorizontalRule margin="l" />
 
@@ -1539,15 +933,10 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
         <AnnotationsSection annotations={form.annotations} onUpdate={handleAnnotationsUpdate} />
         <EuiHorizontalRule margin="l" />
 
-        {/* Section 7: Matched Notification Actions */}
-        <ActionsSection
-          actions={form.actions}
-          onDeleteAction={deleteAction}
-          onAddAction={addAction}
-        />
-        <EuiHorizontalRule margin="l" />
+        {/* Notification actions are intentionally absent: routing for
+            Prometheus alerts is Alertmanager's job, driven by labels. */}
 
-        {/* Section 8: Rule Preview (YAML) */}
+        {/* Section 7: Rule Preview (YAML) */}
         <RulePreviewSection form={form} />
       </EuiFlyoutBody>
 

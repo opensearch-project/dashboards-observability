@@ -31,7 +31,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
-  EuiOverlayMask,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiSwitch,
@@ -39,6 +39,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { FormattedMessage } from '@osd/i18n/react';
+import { coreRefs } from '../../../framework/core_refs';
 import { Datasource } from '../../../../common/types/alerting';
 import {
   MonitorFormState as ValidatorFormState,
@@ -61,6 +63,14 @@ import { OpenSearchFormSection } from './opensearch_form_section';
 // Re-export the shared form-state type so existing consumers that import
 // `MonitorFormState` from `'./create_monitor'` keep working unchanged.
 export type { MonitorFormState } from './create_monitor_types';
+
+// Legacy standalone alerting app. The new flyout only supports per-query
+// monitors, so we surface an escape hatch to the classic monitor-creation
+// flow for the monitor types we don't yet cover (per bucket, per cluster
+// metrics, per document, composite). Same app id as the Alert Manager
+// page's "classic experience" callout; here we deep-link to its
+// create-monitor route instead of the dashboard.
+const OLD_ALERTING_APP_ID = 'alerts';
 
 // ============================================================================
 // Main Component — Flyout
@@ -179,10 +189,10 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       ? 'prometheus'
       : 'opensearch'
     : initialBackendType
-    ? initialBackendType
-    : initialDs?.type === 'opensearch'
-    ? 'opensearch'
-    : 'prometheus';
+      ? initialBackendType
+      : initialDs?.type === 'opensearch'
+        ? 'opensearch'
+        : 'prometheus';
 
   const [creationMode, setCreationMode] = useState<CreationMode>('manual');
   const [backendType, setBackendType] = useState<MonitorBackendType>(initialType);
@@ -312,6 +322,58 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         defaultMessage: 'A rule with this name already exists on the selected datasource.',
       })
     : undefined;
+
+  // Rule name row — built once so the validation/dup-check wiring stays in
+  // the shell. For Prometheus it renders inside the form section's
+  // "Rule details" accordion (mirroring the Metrics page flyout); for Logs
+  // it stays at the top of the flyout.
+  const ruleNameRow = (
+    <EuiFormRow
+      label={i18n.translate('observability.alerting.createMonitor.monitorNameLabel', {
+        defaultMessage: 'Rule name',
+      })}
+      fullWidth
+      isInvalid={
+        duplicateName ||
+        (hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === ''))
+      }
+      error={
+        duplicateNameError ||
+        (hasSubmitted
+          ? validationErrors.name ||
+            (activeForm.name.trim() === ''
+              ? i18n.translate('observability.alerting.createMonitor.nameRequired', {
+                  defaultMessage: 'Name is required',
+                })
+              : undefined)
+          : undefined)
+      }
+    >
+      <EuiFieldText
+        isInvalid={
+          duplicateName ||
+          (hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === ''))
+        }
+        placeholder={
+          backendType === 'prometheus'
+            ? i18n.translate(
+                'observability.alerting.createMonitor.monitorNamePlaceholderPrometheus',
+                { defaultMessage: 'Enter a rule name' }
+              )
+            : i18n.translate(
+                'observability.alerting.createMonitor.monitorNamePlaceholderOpensearch',
+                { defaultMessage: 'e.g. High Error Rate, Disk Usage Alert' }
+              )
+        }
+        value={activeForm.name}
+        onChange={(e) => updateName(e.target.value)}
+        fullWidth
+        aria-label={i18n.translate('observability.alerting.createMonitor.monitorNameAriaLabel', {
+          defaultMessage: 'Rule name',
+        })}
+      />
+    </EuiFormRow>
+  );
   const isValid =
     trimmedName !== '' &&
     activeForm.datasourceId !== '' &&
@@ -417,12 +479,12 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                       defaultMessage: 'Create metrics rule',
                     })
                 : isEdit
-                ? i18n.translate('observability.alerting.createMonitor.editTitleLogs', {
-                    defaultMessage: 'Edit logs rule',
-                  })
-                : i18n.translate('observability.alerting.createMonitor.titleLogs', {
-                    defaultMessage: 'Create logs rule',
-                  })}
+                  ? i18n.translate('observability.alerting.createMonitor.editTitleLogs', {
+                      defaultMessage: 'Edit logs rule',
+                    })
+                  : i18n.translate('observability.alerting.createMonitor.titleLogs', {
+                      defaultMessage: 'Create logs rule',
+                    })}
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
@@ -435,6 +497,41 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                   defaultMessage: 'PPL-based alerting rule',
                 })}
           </EuiText>
+          {/* Escape hatch to the classic monitor-creation flow. This flyout
+              only builds per-query logs monitors; users who need per-bucket,
+              per-cluster-metrics, per-document, or composite monitors go to
+              the legacy `alerts` app. Rendered only when creating a logs rule
+              (not in edit mode, not for the Prometheus/metrics variant) — it's
+              a decision about which creation flow to use, made up front. A
+              full `href` (not `navigateToApp`) is deliberate so right-click /
+              open-in-new-tab work across apps, mirroring the Alert Manager
+              page's classic-experience link. */}
+          {backendType !== 'prometheus' && !isEdit && (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiText size="xs" color="subdued">
+                <FormattedMessage
+                  id="observability.alerting.createMonitor.classicExperiencePrompt"
+                  defaultMessage="Want to create another rule type (e.g. per query, per bucket), {link}."
+                  values={{
+                    link: (
+                      <EuiLink
+                        data-test-subj="createMonitorClassicExperienceLink"
+                        href={`${
+                          coreRefs.http?.basePath?.get() ?? ''
+                        }/app/${OLD_ALERTING_APP_ID}#/create-monitor`}
+                      >
+                        {i18n.translate(
+                          'observability.alerting.createMonitor.classicExperienceLink',
+                          { defaultMessage: 'open the classic experience' }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+            </>
+          )}
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
@@ -508,56 +605,14 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             </>
           )}
 
-          {/* Monitor Name. Severity is intentionally not exposed here — each
-              PPL trigger already carries its own severity, and the form-level
-              severity field was redundant (the saved monitor's severity is
-              derived from its triggers, not from this dropdown). */}
-          <EuiFormRow
-            label={i18n.translate('observability.alerting.createMonitor.monitorNameLabel', {
-              defaultMessage: 'Rule name',
-            })}
-            fullWidth
-            isInvalid={
-              duplicateName ||
-              (hasSubmitted && (!!validationErrors.name || activeForm.name.trim() === ''))
-            }
-            error={
-              duplicateNameError ||
-              (hasSubmitted
-                ? validationErrors.name ||
-                  (activeForm.name.trim() === ''
-                    ? i18n.translate('observability.alerting.createMonitor.nameRequired', {
-                        defaultMessage: 'Name is required',
-                      })
-                    : undefined)
-                : undefined)
-            }
-          >
-            <EuiFieldText
-              placeholder={
-                backendType === 'prometheus'
-                  ? i18n.translate(
-                      'observability.alerting.createMonitor.monitorNamePlaceholderPrometheus',
-                      { defaultMessage: 'e.g. HighCpuUsage, PaymentErrorRate' }
-                    )
-                  : i18n.translate(
-                      'observability.alerting.createMonitor.monitorNamePlaceholderOpensearch',
-                      { defaultMessage: 'e.g. High Error Rate, Disk Usage Alert' }
-                    )
-              }
-              value={activeForm.name}
-              onChange={(e) => updateName(e.target.value)}
-              fullWidth
-              aria-label={i18n.translate(
-                'observability.alerting.createMonitor.monitorNameAriaLabel',
-                {
-                  defaultMessage: 'Rule name',
-                }
-              )}
-            />
-          </EuiFormRow>
-
-          <EuiSpacer size="m" />
+          {/* Monitor Name — rendered here for Logs; inside the Prometheus
+              form section's "Rule details" accordion for metrics rules. */}
+          {backendType !== 'prometheus' && (
+            <>
+              {ruleNameRow}
+              <EuiSpacer size="m" />
+            </>
+          )}
 
           {/* Enabled toggle — full row directly under Monitor Name. The
               footer save button reads this state to decide between
@@ -590,6 +645,7 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
               context={context}
               datasourceId={promForm.datasourceId}
               datasources={datasources.filter((d) => d.type === 'prometheus')}
+              ruleNameField={ruleNameRow}
             />
           ) : (
             <OpenSearchFormSection
@@ -637,52 +693,52 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
                       defaultMessage: 'Creating in Prometheus...',
                     })
                   : isEdit
-                  ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
-                      defaultMessage: 'Save Changes',
-                    })
-                  : activeForm.enabled
-                  ? i18n.translate('observability.alerting.createMonitor.saveAndEnableButton', {
-                      defaultMessage: 'Save & enable',
-                    })
-                  : i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
-                      defaultMessage: 'Save rule',
-                    })}
+                    ? i18n.translate('observability.alerting.createMonitor.saveChangesButton', {
+                        defaultMessage: 'Save Changes',
+                      })
+                    : activeForm.enabled
+                      ? i18n.translate('observability.alerting.createMonitor.saveAndEnableButton', {
+                          defaultMessage: 'Save & enable',
+                        })
+                      : i18n.translate('observability.alerting.createMonitor.saveMonitorButton', {
+                          defaultMessage: 'Save rule',
+                        })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>
       {showDiscardConfirm && (
-        <EuiOverlayMask>
-          <EuiConfirmModal
-            title={i18n.translate('observability.alerting.createMonitor.discardConfirmTitle', {
-              defaultMessage: 'Discard unsaved changes?',
+        // EuiConfirmModal renders its own EuiOverlayMask, so no wrapping mask
+        // (wrapping double-dims the backdrop).
+        <EuiConfirmModal
+          title={i18n.translate('observability.alerting.createMonitor.discardConfirmTitle', {
+            defaultMessage: 'Discard unsaved changes?',
+          })}
+          onCancel={() => setShowDiscardConfirm(false)}
+          onConfirm={() => {
+            setShowDiscardConfirm(false);
+            onCancel();
+          }}
+          cancelButtonText={i18n.translate(
+            'observability.alerting.createMonitor.discardConfirmCancel',
+            { defaultMessage: 'Keep editing' }
+          )}
+          confirmButtonText={i18n.translate(
+            'observability.alerting.createMonitor.discardConfirmConfirm',
+            { defaultMessage: 'Discard changes' }
+          )}
+          buttonColor="danger"
+          defaultFocusedButton="cancel"
+          data-test-subj="alertManagerDiscardChangesConfirm"
+        >
+          <p>
+            {i18n.translate('observability.alerting.createMonitor.discardConfirmBody', {
+              defaultMessage:
+                "You've made changes to this rule that haven't been saved. Discarding will lose them.",
             })}
-            onCancel={() => setShowDiscardConfirm(false)}
-            onConfirm={() => {
-              setShowDiscardConfirm(false);
-              onCancel();
-            }}
-            cancelButtonText={i18n.translate(
-              'observability.alerting.createMonitor.discardConfirmCancel',
-              { defaultMessage: 'Keep editing' }
-            )}
-            confirmButtonText={i18n.translate(
-              'observability.alerting.createMonitor.discardConfirmConfirm',
-              { defaultMessage: 'Discard changes' }
-            )}
-            buttonColor="danger"
-            defaultFocusedButton="cancel"
-            data-test-subj="alertManagerDiscardChangesConfirm"
-          >
-            <p>
-              {i18n.translate('observability.alerting.createMonitor.discardConfirmBody', {
-                defaultMessage:
-                  "You've made changes to this rule that haven't been saved. Discarding will lose them.",
-              })}
-            </p>
-          </EuiConfirmModal>
-        </EuiOverlayMask>
+          </p>
+        </EuiConfirmModal>
       )}
     </>
   );

@@ -29,7 +29,9 @@ import {
   EuiAccordion,
   EuiToolTip,
   EuiCallOut,
+  EuiCode,
   EuiCodeBlock,
+  EuiConfirmModal,
   EuiLink,
   EuiLoadingContent,
 } from '@elastic/eui';
@@ -57,6 +59,13 @@ import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './s
 // flyout. The Alerts tab is the right place to drill into the full history.
 const MAX_ALERT_HISTORY_ROWS = 50;
 
+// Classic alerting app that hosts the full monitor editor. Its `monitors`
+// browser app mounts the `/monitors` hash route, so a deep link of the form
+// `#/monitors/{id}?action=edit-monitor&monitorType={type}` opens the classic
+// edit form directly. Used as the escape hatch for OpenSearch monitor types
+// this flyout can't yet edit in place.
+const CLASSIC_MONITORS_APP_ID = 'monitors';
+
 // ============================================================================
 // Props
 // ============================================================================
@@ -82,6 +91,28 @@ export interface MonitorDetailFlyoutProps {
   onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
 }
 
+/**
+ * Collect the `terms.field` values from a bucket-level monitor's aggregation
+ * tree — both `composite.sources[].<name>.terms.field` and plain `terms` aggs —
+ * so the flyout can show the group-by dimensions. Best-effort + defensive: any
+ * unexpected shape simply yields fewer fields, never a throw.
+ */
+function extractGroupByFields(aggregations: unknown): string[] {
+  const fields: string[] = [];
+  const walk = (node: unknown) => {
+    if (!node || typeof node !== 'object') return;
+    const obj = node as Record<string, unknown>;
+    const terms = obj.terms as { field?: unknown } | undefined;
+    if (terms && typeof terms.field === 'string') fields.push(terms.field);
+    Object.values(obj).forEach((v) => {
+      if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === 'object') walk(v);
+    });
+  };
+  walk(aggregations);
+  return Array.from(new Set(fields));
+}
+
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -95,6 +126,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   onToggleEnabled,
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEditRedirectConfirm, setShowEditRedirectConfirm] = useState(false);
   const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
   // Mirror the Edit-button gate (PPL only). Non-PPL types stay read-only;
   // the existing tooltip surfaces explains the limitation.
@@ -134,9 +166,87 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
 
   // Detect monitor kind from raw data for type-specific rendering
   const monitorKind = monitor.labels?.monitor_kind as string | undefined;
+  const isComposite = monitorKind === 'composite';
+  // Ordered member-monitor ids for composite (workflow) monitors, carried on
+  // the summary because the workflow detail can't be fetched via the monitors
+  // endpoint.
+  const compositeDelegates = (monitor.labels?.composite_delegates ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  // Composite (workflow) monitors can't be safely cloned/deleted through the
+  // monitor APIs used here, so those actions are gated with this explanation.
+  const compositeActionTooltip = i18n.translate(
+    'observability.alerting.monitorDetailFlyout.compositeActionTooltip',
+    { defaultMessage: 'Composite monitors are managed in the classic Alerting app.' }
+  );
   const rawMonitor = detail?.raw as OSMonitor | undefined;
   const rawInput: OSMonitorInput | undefined =
     rawMonitor && 'inputs' in rawMonitor ? rawMonitor.inputs?.[0] : undefined;
+  const isBucket = monitorKind === 'bucket';
+  // Group-by fields for a bucket-level monitor — pulled from the aggregation's
+  // `terms.field`s (composite sources or plain terms aggs) so the flyout can
+  // show what the buckets are grouped on rather than only the raw query JSON.
+  const bucketGroupByFields =
+    isBucket && rawInput && 'search' in rawInput
+      ? extractGroupByFields((rawInput.search.query as Record<string, unknown>)?.aggregations)
+      : [];
+  // When the detail fetch fails for a structured kind (cluster-metrics / doc /
+  // bucket), the summary `query` is an abbreviated non-JSON string; show a
+  // plain "unavailable" note instead of rendering it as malformed JSON.
+  const detailUnavailableForStructuredKind =
+    !!detailError && (monitorKind === 'cluster_metrics' || monitorKind === 'doc' || isBucket);
+
+  // Edit affordance routing. PPL and Prometheus ('metric') rules edit in
+  // place via `onEdit`. Every other OpenSearch monitor type (bucket / doc /
+  // cluster-metrics / query-level log & apm) isn't yet editable in this
+  // flyout, so rather than disable Edit we send the user to the classic
+  // alerting app after a heads-up confirmation.
+  const canEditInPlace =
+    !!onEdit && (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric');
+  // Only OpenSearch monitors have a real `_id` + monitor_type the classic
+  // editor understands; detectors/forecasters/Prometheus rules do not.
+  const isOpenSearchMonitor =
+    (monitor.definitionType ?? 'monitor') === 'monitor' && monitor.datasourceType === 'opensearch';
+  const canRedirectToClassicEdit = !canEditInPlace && isOpenSearchMonitor;
+  // The classic `monitorType` param is advisory (the classic app re-derives
+  // the form from the fetched monitor body), but we send the best value we
+  // have. Cluster-metrics monitors are stored as `query_level_monitor` and
+  // are only distinguishable via `monitor_kind`, so special-case them.
+  const classicMonitorType =
+    monitorKind === 'cluster_metrics'
+      ? 'cluster_metrics_monitor'
+      : ((monitor.labels?.monitor_type as string | undefined) ??
+        rawMonitor?.monitor_type ??
+        'query_level_monitor');
+
+  const goToClassicEdit = () => {
+    // The classic app resolves its data source from the URL's `dataSourceId`
+    // param when multi-data-source is enabled. If the param is ABSENT it never
+    // sets the data source (cold deep-link → "DataSource was not set" +
+    // DataSourceView crash), so we always include it. For MDS OpenSearch
+    // monitors the registry `datasourceId` IS the data-source saved-object id
+    // (id === mdsId), so it maps straight through; the local-cluster sentinel
+    // maps to an empty value, which the classic app treats as the local
+    // cluster. When MDS is disabled the classic app ignores the param.
+    const localSentinels = ['local-cluster', 'local', ''];
+    const dataSourceIdParam = localSentinels.includes(monitor.datasourceId)
+      ? ''
+      : monitor.datasourceId;
+    // navigateToApp resolves the basepath/workspace prefix (bare hash hrefs
+    // don't) — matches the routing deep-link pattern used elsewhere here.
+    // Encode the interpolated values so a reserved char (&, #, =, space) in any
+    // of them can't be parsed as URL structure. In practice all three are
+    // URL-safe (system `_id`, backend enum, saved-object id), so this is
+    // defensive hardening rather than a behavior change.
+    const id = encodeURIComponent(monitor.id);
+    const monitorTypeParam = encodeURIComponent(classicMonitorType);
+    const dsParam = encodeURIComponent(dataSourceIdParam);
+    coreRefs?.application?.navigateToApp(CLASSIC_MONITORS_APP_ID, {
+      path: `#/monitors/${id}?action=edit-monitor&monitorType=${monitorTypeParam}&dataSourceId=${dsParam}`,
+    });
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  };
 
   // Query definition accordion title, type-aware
   let queryDefTitle: string;
@@ -151,6 +261,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
     queryDefTitle = i18n.translate('observability.alerting.monitorDetailFlyout.queryDef.docLevel', {
       defaultMessage: 'Document-Level Queries',
     });
+  } else if (monitorKind === 'composite') {
+    queryDefTitle = i18n.translate(
+      'observability.alerting.monitorDetailFlyout.queryDef.composite',
+      { defaultMessage: 'Associated monitors' }
+    );
   } else {
     queryDefTitle = i18n.translate(
       'observability.alerting.monitorDetailFlyout.queryDef.queryDefinition',
@@ -221,11 +336,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
           {/* Quick actions */}
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              {onEdit && (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric') ? (
+              {canEditInPlace ? (
                 <EuiButtonEmpty
                   size="s"
                   iconType="pencil"
-                  onClick={() => onEdit(monitor)}
+                  onClick={() => onEdit?.(monitor)}
                   data-test-subj="alertManagerMonitorDetailEdit"
                 >
                   <FormattedMessage
@@ -233,6 +348,28 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     defaultMessage="Edit"
                   />
                 </EuiButtonEmpty>
+              ) : canRedirectToClassicEdit ? (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'observability.alerting.monitorDetailFlyout.editRedirectTooltip',
+                    {
+                      defaultMessage:
+                        'This rule type is edited in the classic experience. You’ll be redirected there.',
+                    }
+                  )}
+                >
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="pencil"
+                    onClick={() => setShowEditRedirectConfirm(true)}
+                    data-test-subj="alertManagerMonitorDetailEditRedirect"
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.editButton"
+                      defaultMessage="Edit"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               ) : (
                 <EuiToolTip
                   content={i18n.translate(
@@ -252,25 +389,47 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" iconType="copy" onClick={() => onClone(monitor)}>
-                <FormattedMessage
-                  id="observability.alerting.monitorDetailFlyout.cloneButton"
-                  defaultMessage="Clone"
-                />
-              </EuiButtonEmpty>
+              {isComposite ? (
+                <EuiToolTip content={compositeActionTooltip}>
+                  <EuiButtonEmpty size="s" iconType="copy" isDisabled>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.cloneButton"
+                      defaultMessage="Clone"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              ) : (
+                <EuiButtonEmpty size="s" iconType="copy" onClick={() => onClone(monitor)}>
+                  <FormattedMessage
+                    id="observability.alerting.monitorDetailFlyout.cloneButton"
+                    defaultMessage="Clone"
+                  />
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                iconType="trash"
-                color="danger"
-                onClick={() => setShowDeleteConfirm(true)}
-              >
-                <FormattedMessage
-                  id="observability.alerting.monitorDetailFlyout.deleteButton"
-                  defaultMessage="Delete"
-                />
-              </EuiButtonEmpty>
+              {isComposite ? (
+                <EuiToolTip content={compositeActionTooltip}>
+                  <EuiButtonEmpty size="s" iconType="trash" color="danger" isDisabled>
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.deleteButton"
+                      defaultMessage="Delete"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              ) : (
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="trash"
+                  color="danger"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  <FormattedMessage
+                    id="observability.alerting.monitorDetailFlyout.deleteButton"
+                    defaultMessage="Delete"
+                  />
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -280,7 +439,10 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiLoadingContent lines={10} />
           ) : (
             <>
-              {detailError && (
+              {/* Composite (workflow) detail always 404s on the monitors
+                  endpoint — that's expected, not an error — so skip the banner
+                  and just render the summary-derived details cleanly. */}
+              {detailError && !isComposite && (
                 <>
                   <EuiCallOut
                     size="s"
@@ -297,7 +459,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     <p>
                       <FormattedMessage
                         id="observability.alerting.monitorDetailFlyout.detailLoadError.body"
-                        defaultMessage="Showing summary information only. Try reopening the flyout to retry."
+                        defaultMessage="Showing summary information only — the full configuration is unavailable for this rule."
                       />
                     </p>
                   </EuiCallOut>
@@ -408,22 +570,110 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                       </EuiPanel>
                     ))}
                   </>
-                ) : (
+                ) : isComposite ? (
                   <>
-                    <EuiCodeBlock language={queryLang} fontSize="s" paddingSize="m" isCopyable>
-                      {queryDisplay}
-                    </EuiCodeBlock>
-                    {monitorKind === 'bucket' && (
-                      <EuiText size="xs" color="subdued">
-                        <em>
-                          <FormattedMessage
-                            id="observability.alerting.monitorDetailFlyout.bucketLevelDescription"
-                            defaultMessage="Bucket-level rule — triggers evaluate per aggregation bucket"
-                          />
-                        </em>
+                    <EuiText size="s">
+                      <FormattedMessage
+                        id="observability.alerting.monitorDetailFlyout.composite.description"
+                        defaultMessage="This composite monitor triggers based on the alerts of its member monitors, evaluated in order:"
+                      />
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    {compositeDelegates.length > 0 ? (
+                      <ol style={{ paddingLeft: 20, margin: 0 }}>
+                        {compositeDelegates.map((mid, idx) => (
+                          <li key={mid || idx} style={{ marginBottom: 4 }}>
+                            <EuiCode>{mid}</EuiCode>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <EuiText size="s" color="subdued">
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.composite.noMembers"
+                          defaultMessage="No member monitors are configured."
+                        />
                       </EuiText>
                     )}
                   </>
+                ) : isBucket && rawInput && 'search' in rawInput ? (
+                  <>
+                    <EuiText size="s">
+                      <strong>
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.targetIndices"
+                          defaultMessage="Target indices:"
+                        />
+                      </strong>{' '}
+                      {rawInput.search.indices?.join(', ') || '—'}
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiText size="s">
+                      <strong>
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.bucket.groupBy"
+                          defaultMessage="Group by"
+                        />
+                      </strong>
+                    </EuiText>
+                    {bucketGroupByFields.length > 0 ? (
+                      <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                        {bucketGroupByFields.map((f) => (
+                          <EuiFlexItem grow={false} key={f}>
+                            <EuiBadge color="hollow">{f}</EuiBadge>
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
+                    ) : (
+                      <EuiText size="s" color="subdued">
+                        —
+                      </EuiText>
+                    )}
+                    {monitor.condition && (
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiText size="s">
+                          <strong>
+                            <FormattedMessage
+                              id="observability.alerting.monitorDetailFlyout.bucket.condition"
+                              defaultMessage="Per-bucket condition"
+                            />
+                          </strong>
+                        </EuiText>
+                        <EuiCodeBlock fontSize="s" paddingSize="s" isCopyable>
+                          {monitor.condition}
+                        </EuiCodeBlock>
+                      </>
+                    )}
+                    <EuiSpacer size="s" />
+                    <EuiAccordion
+                      id={`bucketQuery-${monitor.id}`}
+                      buttonContent={
+                        <EuiText size="xs">
+                          <FormattedMessage
+                            id="observability.alerting.monitorDetailFlyout.bucket.showQuery"
+                            defaultMessage="Show aggregation query"
+                          />
+                        </EuiText>
+                      }
+                      paddingSize="s"
+                    >
+                      <EuiCodeBlock language="json" fontSize="s" paddingSize="m" isCopyable>
+                        {queryDisplay}
+                      </EuiCodeBlock>
+                    </EuiAccordion>
+                  </>
+                ) : detailUnavailableForStructuredKind ? (
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="observability.alerting.monitorDetailFlyout.detailUnavailable"
+                      defaultMessage="Detailed configuration is unavailable for this rule."
+                    />
+                  </EuiText>
+                ) : (
+                  <EuiCodeBlock language={queryLang} fontSize="s" paddingSize="m" isCopyable>
+                    {queryDisplay}
+                  </EuiCodeBlock>
                 )}
                 {/* Prometheus rules: the expr above IS the condition — the
                     summary `condition` field is a canned template, so hide it */}
@@ -470,13 +720,20 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                             ),
                             description: evaluationInterval,
                           },
-                          {
-                            title: i18n.translate(
-                              'observability.alerting.monitorDetailFlyout.pendingPeriod',
-                              { defaultMessage: 'Pending Period' }
-                            ),
-                            description: pendingPeriod,
-                          },
+                          // Pending period isn't a meaningful concept for a
+                          // composite (it fires off member alerts, not a
+                          // sustained threshold), so omit it there.
+                          ...(!isComposite
+                            ? [
+                                {
+                                  title: i18n.translate(
+                                    'observability.alerting.monitorDetailFlyout.pendingPeriod',
+                                    { defaultMessage: 'Pending Period' }
+                                  ),
+                                  description: pendingPeriod,
+                                },
+                              ]
+                            : []),
                         ]
                       : []),
                     ...(detail?.firingPeriod
@@ -501,7 +758,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                           },
                         ]
                       : []),
-                    ...(monitor.threshold && monitor.datasourceType !== 'prometheus'
+                    ...(monitor.threshold && monitor.datasourceType !== 'prometheus' && !isComposite
                       ? [
                           {
                             title: i18n.translate(
@@ -555,6 +812,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     'monitor_type',
                     'monitor_kind',
                     'datasource_id',
+                    'composite_delegates',
                     '_workspace',
                   ];
                   const visibleLabels = Object.entries(monitor.labels).filter(
@@ -590,8 +848,9 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   monitors carry a `ppl_input` that isn't covered, so the
                   data array would always be empty and the accordion would
                   permanently render the "No recent evaluation data" copy.
-                  Skip rendering until a PPL preview pipeline ships. */}
-              {monitor.monitorType !== 'ppl' && (
+                  Skip rendering until a PPL preview pipeline ships. Also skip
+                  for composites — a workflow has no single series to plot. */}
+              {monitor.monitorType !== 'ppl' && !isComposite && (
                 <>
                   <EuiAccordion
                     id={`preview-${monitor.id}`}
@@ -661,11 +920,11 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                               });
                               window.dispatchEvent(new HashChangeEvent('hashchange'));
                             }}
-                            data-test-subj="monitorDetailConfigureRoutingLink"
+                            data-test-subj="monitorDetailViewRoutingLink"
                           >
                             <FormattedMessage
-                              id="observability.alerting.monitorDetailFlyout.configureRoutingLink"
-                              defaultMessage="Configure notification routing →"
+                              id="observability.alerting.monitorDetailFlyout.viewRoutingLink"
+                              defaultMessage="View notification routing →"
                             />
                           </EuiLink>
                         </p>
@@ -873,6 +1132,48 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             onClose();
           }}
         />
+      )}
+
+      {/* Redirect-to-classic-editor confirmation. Non-PPL/non-metric
+          OpenSearch monitor types aren't editable in this flyout yet, so we
+          warn the user before navigating them to the classic alerting app. */}
+      {showEditRedirectConfirm && (
+        // EuiConfirmModal renders its own EuiOverlayMask, so no wrapping mask
+        // (wrapping double-dims the backdrop).
+        <EuiConfirmModal
+          title={i18n.translate(
+            'observability.alerting.monitorDetailFlyout.editRedirectModalTitle',
+            {
+              defaultMessage: 'Edit in the classic experience?',
+            }
+          )}
+          onCancel={() => setShowEditRedirectConfirm(false)}
+          onConfirm={() => {
+            setShowEditRedirectConfirm(false);
+            goToClassicEdit();
+          }}
+          cancelButtonText={i18n.translate(
+            'observability.alerting.monitorDetailFlyout.editRedirectModalCancel',
+            { defaultMessage: 'Cancel' }
+          )}
+          confirmButtonText={i18n.translate(
+            'observability.alerting.monitorDetailFlyout.editRedirectModalConfirm',
+            { defaultMessage: 'Continue to classic experience' }
+          )}
+          buttonColor="primary"
+          defaultFocusedButton="confirm"
+          data-test-subj="alertManagerMonitorDetailEditRedirectModal"
+        >
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="observability.alerting.monitorDetailFlyout.editRedirectModalBody"
+                defaultMessage="This rule type can’t be edited in the new experience yet. You’ll be taken to the classic alerting app to edit {name}."
+                values={{ name: <strong>{monitor.name}</strong> }}
+              />
+            </p>
+          </EuiText>
+        </EuiConfirmModal>
       )}
     </>
   );

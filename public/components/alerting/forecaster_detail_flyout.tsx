@@ -8,7 +8,7 @@
  * Rules table. It mirrors the detector flyout shell while keeping forecasting
  * terminology visible in the table-level unified experience.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -35,11 +35,19 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import type { ADForecaster, UnifiedRuleSummary } from '../../../common/types/alerting';
 import { useRuleDetail } from './hooks/use_rule_detail';
-import { HEALTH_COLORS, SEVERITY_COLORS, STATUS_COLORS } from './shared_constants';
+import {
+  HEALTH_COLORS,
+  isAdResourceRunning,
+  SEVERITY_COLORS,
+  STATUS_COLORS,
+} from './shared_constants';
 
 export interface ForecasterDetailFlyoutProps {
   forecaster: UnifiedRuleSummary;
   onClose: () => void;
+  onEdit?: (forecaster: UnifiedRuleSummary) => void;
+  onStart?: (forecaster: UnifiedRuleSummary) => Promise<void> | void;
+  onStop?: (forecaster: UnifiedRuleSummary) => Promise<void> | void;
 }
 
 interface FeatureRow {
@@ -207,12 +215,17 @@ const buildImputationDisplay = (forecaster: ADForecaster): string => {
 export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
   forecaster,
   onClose,
+  onEdit,
+  onStart,
+  onStop,
 }) => {
-  const { data: detail, isLoading, error } = useRuleDetail(
-    forecaster.datasourceId,
-    forecaster.id,
-    'forecaster'
-  );
+  const [lifecycleAction, setLifecycleAction] = useState<'start' | 'stop' | null>(null);
+  const {
+    data: detail,
+    isLoading,
+    error,
+    refetch,
+  } = useRuleDetail(forecaster.datasourceId, forecaster.id, 'forecaster');
   const rawForecaster =
     (detail?.raw as ADForecaster | undefined) || forecasterFromSummary(forecaster);
   const description =
@@ -242,6 +255,22 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
       asRecord(rawForecaster.realtime_task).state ||
       asRecord(rawForecaster.run_once_task).state
   );
+  const isRunning = isAdResourceRunning(forecaster);
+
+  const runLifecycleAction = async (
+    action: 'start' | 'stop',
+    handler?: (forecasterToUpdate: UnifiedRuleSummary) => Promise<void> | void
+  ) => {
+    if (!handler) return;
+    setLifecycleAction(action);
+    try {
+      await handler(forecaster);
+      refetch();
+    } finally {
+      setLifecycleAction(null);
+    }
+  };
+
   const featureColumns: Array<EuiBasicTableColumn<FeatureRow>> = [
     {
       field: 'name',
@@ -303,6 +332,68 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {(onEdit || onStart || onStop) && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              {isRunning
+                ? onStop && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="cross"
+                        isLoading={lifecycleAction === 'stop'}
+                        onClick={() => {
+                          void runLifecycleAction('stop', onStop);
+                        }}
+                        data-test-subj="alertManagerForecasterDetailStop"
+                      >
+                        <FormattedMessage
+                          id="observability.alerting.forecasterDetailFlyout.stopForecasterButton"
+                          defaultMessage="Stop forecaster"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )
+                : onStart && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType="play"
+                        isLoading={lifecycleAction === 'start'}
+                        onClick={() => {
+                          void runLifecycleAction('start', onStart);
+                        }}
+                        data-test-subj="alertManagerForecasterDetailStart"
+                      >
+                        <FormattedMessage
+                          id="observability.alerting.forecasterDetailFlyout.startForecasterButton"
+                          defaultMessage="Start forecaster"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  )}
+              {onEdit && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="pencil"
+                    onClick={() => {
+                      onClose();
+                      onEdit(forecaster);
+                    }}
+                    data-test-subj="alertManagerForecasterDetailEdit"
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.forecasterDetailFlyout.editButton"
+                      defaultMessage="Edit forecaster"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </>
+        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -364,42 +455,54 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.settings.name',
-                      { defaultMessage: 'Name' }
+                      {
+                        defaultMessage: 'Name',
+                      }
                     ),
                     description: forecaster.name,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.settings.forecasterType',
-                      { defaultMessage: 'Forecaster type' }
+                      {
+                        defaultMessage: 'Forecaster type',
+                      }
                     ),
                     description: forecasterType,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.settings.dataSourceIndex',
-                      { defaultMessage: 'Data source index' }
+                      {
+                        defaultMessage: 'Data source index',
+                      }
                     ),
                     description: formatList(rawForecaster.indices),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.settings.id',
-                      { defaultMessage: 'ID' }
+                      {
+                        defaultMessage: 'ID',
+                      }
                     ),
                     description: forecaster.id,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.settings.timestamp',
-                      { defaultMessage: 'Timestamp' }
+                      {
+                        defaultMessage: 'Timestamp',
+                      }
                     ),
                     description: stringValue(rawForecaster.time_field || rawForecaster.timeField),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.settings.lastUpdated',
-                      { defaultMessage: 'Last updated' }
+                      {
+                        defaultMessage: 'Last updated',
+                      }
                     ),
                     description: formatTimestamp(
                       rawForecaster.last_update_time || rawForecaster.lastUpdateTime
@@ -408,7 +511,9 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.settings.customResultIndex',
-                      { defaultMessage: 'Custom result index' }
+                      {
+                        defaultMessage: 'Custom result index',
+                      }
                     ),
                     description: resultIndex,
                   },
@@ -489,14 +594,18 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.operational.windowDelay',
-                      { defaultMessage: 'Window delay' }
+                      {
+                        defaultMessage: 'Window delay',
+                      }
                     ),
                     description: windowDelayDisplay,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.operational.horizon',
-                      { defaultMessage: 'Horizon' }
+                      {
+                        defaultMessage: 'Horizon',
+                      }
                     ),
                     description: rawForecaster.horizon
                       ? String(rawForecaster.horizon)
@@ -505,7 +614,9 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.operational.history',
-                      { defaultMessage: 'History' }
+                      {
+                        defaultMessage: 'History',
+                      }
                     ),
                     description: rawForecaster.history
                       ? i18n.translate(
@@ -543,21 +654,27 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.additional.categoryField',
-                      { defaultMessage: 'Category field' }
+                      {
+                        defaultMessage: 'Category field',
+                      }
                     ),
                     description: formatList(categoryField),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.additional.shingleSize',
-                      { defaultMessage: 'Shingle size' }
+                      {
+                        defaultMessage: 'Shingle size',
+                      }
                     ),
                     description: String(shingleSize),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.additional.imputationMethod',
-                      { defaultMessage: 'Imputation method' }
+                      {
+                        defaultMessage: 'Imputation method',
+                      }
                     ),
                     description: buildImputationDisplay(rawForecaster),
                   },
@@ -587,7 +704,9 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.job.realTimeJob',
-                      { defaultMessage: 'Real-time job' }
+                      {
+                        defaultMessage: 'Real-time job',
+                      }
                     ),
                     description:
                       typeof jobEnabled === 'boolean'
@@ -599,21 +718,27 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.job.currentState',
-                      { defaultMessage: 'Current state' }
+                      {
+                        defaultMessage: 'Current state',
+                      }
                     ),
                     description: currentState,
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.job.enabledTime',
-                      { defaultMessage: 'Enabled time' }
+                      {
+                        defaultMessage: 'Enabled time',
+                      }
                     ),
                     description: formatTimestamp(forecasterJob.enabled_time),
                   },
                   {
                     title: i18n.translate(
                       'observability.alerting.forecasterDetailFlyout.job.disabledTime',
-                      { defaultMessage: 'Disabled time' }
+                      {
+                        defaultMessage: 'Disabled time',
+                      }
                     ),
                     description: formatTimestamp(forecasterJob.disabled_time),
                   },

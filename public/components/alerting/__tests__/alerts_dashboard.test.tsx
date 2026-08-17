@@ -81,6 +81,14 @@ const sampleDs: Datasource = {
   enabled: true,
 };
 
+const samplePrometheusDs: Datasource = {
+  id: 'prometheus-1',
+  name: 'Prometheus',
+  type: 'prometheus',
+  url: '',
+  enabled: true,
+};
+
 const HOUR_MS = 60 * 60 * 1000;
 const NOW = Date.now();
 
@@ -97,6 +105,10 @@ const baseProps = {
   rulesTotal: 1,
   defaultDatasources: [],
   onGoToRules: jest.fn(),
+  onCreateLogsRule: jest.fn(),
+  onCreateMetricsRule: jest.fn(),
+  onCreateAnomalyDetection: jest.fn(),
+  onCreateForecasting: jest.fn(),
   startMs: NOW - HOUR_MS,
   endMs: NOW,
   pickerStart: 'now-24h',
@@ -113,16 +125,144 @@ describe('AlertsDashboard', () => {
   it('renders "no alerts in range" empty state when rules exist but no alerts', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} />);
     expect(getByText('No alerts in the selected time range')).toBeInTheDocument();
+    expect(
+      getByText('No alerts or anomalies were detected in the selected time range.')
+    ).toBeInTheDocument();
   });
 
   it('renders "no datasource" empty state when selection is empty', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} selectedDsIds={[]} />);
-    expect(getByText('No datasource selected')).toBeInTheDocument();
+    expect(
+      getByText('Define rules, detect anomalies, and forecast from one place')
+    ).toBeInTheDocument();
+    expect(getByText('Alerting')).toBeInTheDocument();
+    expect(getByText('Anomaly detection')).toBeInTheDocument();
+    expect(getByText('Forecasting')).toBeInTheDocument();
+    expect(
+      getByText('Select a datasource to view alerts and detected anomalies.')
+    ).toBeInTheDocument();
+  });
+
+  it('offers logs and metrics creation from the Alerting capability card', () => {
+    const onCreateLogsRule = jest.fn();
+    const onCreateMetricsRule = jest.fn();
+    const onCreateAnomalyDetection = jest.fn();
+    const onCreateForecasting = jest.fn();
+    const { getByText } = render(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={[sampleDs, samplePrometheusDs]}
+        selectedDsIds={[]}
+        onCreateLogsRule={onCreateLogsRule}
+        onCreateMetricsRule={onCreateMetricsRule}
+        onCreateAnomalyDetection={onCreateAnomalyDetection}
+        onCreateForecasting={onCreateForecasting}
+      />
+    );
+
+    fireEvent.click(getByText('Alerting'));
+    expect(screen.getByTestId('alertsEmptyAlertingRuleTypeModal')).toBeInTheDocument();
+    expect(document.querySelectorAll('.euiOverlayMask, .ouiOverlayMask')).toHaveLength(1);
+    fireEvent.click(screen.getByTestId('alertsEmptyCreateLogsRule'));
+    expect(onCreateLogsRule).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(getByText('Alerting'));
+    fireEvent.click(screen.getByTestId('alertsEmptyCreateMetricsRule'));
+    expect(onCreateMetricsRule).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(getByText('Anomaly detection'));
+    expect(onCreateAnomalyDetection).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(getByText('Forecasting'));
+    expect(onCreateForecasting).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables Metrics creation when no Prometheus datasource is available', () => {
+    const onCreateMetricsRule = jest.fn();
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        selectedDsIds={[]}
+        onCreateMetricsRule={onCreateMetricsRule}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Alerting'));
+
+    const metricsCard = screen.getByTestId('alertsEmptyCreateMetricsRule');
+    expect(metricsCard).toHaveClass('euiCard-isDisabled');
+    expect(
+      screen.getByText('A Prometheus datasource is required to create a metrics alert rule.')
+    ).toBeInTheDocument();
+
+    fireEvent.click(metricsCard);
+    expect(onCreateMetricsRule).not.toHaveBeenCalled();
+  });
+
+  it('disables AD and Forecasting cards when no standard OpenSearch datasource is available', () => {
+    const onCreateAnomalyDetection = jest.fn();
+    const onCreateForecasting = jest.fn();
+    const unavailableDatasources: Datasource[] = [
+      {
+        id: 'aoss-1',
+        name: 'OpenSearch Serverless',
+        type: 'opensearch',
+        url: '',
+        enabled: true,
+        engineType: 'OpenSearch Serverless',
+      },
+      {
+        id: 'prometheus-1',
+        name: 'Prometheus',
+        type: 'prometheus',
+        url: '',
+        enabled: true,
+      },
+    ];
+
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={unavailableDatasources}
+        selectedDsIds={[]}
+        onCreateAnomalyDetection={onCreateAnomalyDetection}
+        onCreateForecasting={onCreateForecasting}
+      />
+    );
+
+    const anomalyCard = screen.getByTestId('alertsEmptyCreateAnomalyDetection');
+    const forecastingCard = screen.getByTestId('alertsEmptyCreateForecasting');
+    expect(anomalyCard).toHaveClass('euiCard-isDisabled');
+    expect(forecastingCard).toHaveClass('euiCard-isDisabled');
+    expect(
+      screen.getByText('An OpenSearch datasource is required to create an anomaly detection rule.')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('An OpenSearch datasource is required to create a forecasting rule.')
+    ).toBeInTheDocument();
+
+    fireEvent.click(anomalyCard);
+    fireEvent.click(forecastingCard);
+    expect(onCreateAnomalyDetection).not.toHaveBeenCalled();
+    expect(onCreateForecasting).not.toHaveBeenCalled();
   });
 
   it('renders "no rules or detectors" empty state when rulesTotal is 0', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} rulesTotal={0} />);
-    expect(getByText('No rules or detectors have been created')).toBeInTheDocument();
+    expect(
+      getByText('Define rules, detect anomalies, and forecast from one place')
+    ).toBeInTheDocument();
+    expect(
+      getByText(
+        'Create an alerting, anomaly detection, or forecasting rule for the selected datasource.'
+      )
+    ).toBeInTheDocument();
+    expect(
+      getByText(
+        'Create a rule to get started. Triggered alerts and detected anomalies will appear here.'
+      )
+    ).toBeInTheDocument();
+    expect(getByText('Go to Rules')).toBeInTheDocument();
   });
 
   it('renders alert table when alerts provided', () => {
@@ -238,17 +378,10 @@ describe('AlertsDashboard', () => {
     expect(lastCall.endMs).toBe(NOW);
   });
 
-  it('renders the truncated callout when `truncated` is true', () => {
-    const { getByTestId } = render(
-      <AlertsDashboard {...baseProps} alerts={[sampleAlert]} truncated />
-    );
-    expect(getByTestId('alertsTruncatedCallout')).toBeInTheDocument();
-  });
-
-  it('does not render the truncated callout when `truncated` is false/undefined', () => {
-    const { queryByTestId } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
-    expect(queryByTestId('alertsTruncatedCallout')).not.toBeInTheDocument();
-  });
+  // The former inline "truncated" and "fallback" EuiCallOuts have been
+  // migrated to page-level toasts (see useAlertingPageToasts). They are
+  // no longer part of AlertsDashboard's render output — the corresponding
+  // callout render tests were removed.
 
   it('anchors alertManagerDatePicker on a real DOM element (regression: EuiSuperDatePicker drops data-test-subj)', () => {
     // EuiSuperDatePicker doesn't forward arbitrary DOM attributes to its
@@ -264,26 +397,7 @@ describe('AlertsDashboard', () => {
     expect(anchor!.querySelector('.euiSuperDatePicker')).not.toBeNull();
   });
 
-  it('renders the fallback callout listing each fallback datasource', () => {
-    const { getByTestId, getByText } = render(
-      <AlertsDashboard
-        {...baseProps}
-        alerts={[sampleAlert]}
-        fallbackHints={[
-          { datasourceName: 'prom-prod', fallback: 'prometheus-alerts-current-only' },
-        ]}
-      />
-    );
-    expect(getByTestId('alertsFallbackCallout')).toBeInTheDocument();
-    expect(getByText('prom-prod')).toBeInTheDocument();
-  });
-
-  it('does not render the fallback callout when `fallbackHints` is empty', () => {
-    const { queryByTestId } = render(
-      <AlertsDashboard {...baseProps} alerts={[sampleAlert]} fallbackHints={[]} />
-    );
-    expect(queryByTestId('alertsFallbackCallout')).not.toBeInTheDocument();
-  });
+  // Fallback callout render tests removed — see comment above.
 
   // Regression: deselecting all datasources must wipe both the dependent
   // facet selections AND the search box. The Rules tab does this in

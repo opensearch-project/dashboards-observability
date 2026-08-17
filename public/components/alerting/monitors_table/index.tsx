@@ -21,11 +21,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EuiResizableContainer } from '@elastic/eui';
 import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alerting';
 import { useFacetCollapse } from '../facet_filter_panel';
-import {
-  buildTableColumns,
-  DEFAULT_VISIBLE,
-  isReadOnlyRuleDefinition,
-} from './monitors_table_columns';
+import { isStandardOpenSearchDatasource } from '../shared_constants';
+import { buildTableColumns, DEFAULT_VISIBLE } from './monitors_table_columns';
 import {
   buildSuggestions,
   collectLabelKeys,
@@ -48,12 +45,19 @@ interface MonitorsTableProps {
   onDelete: (ids: string[]) => void;
   onClone?: (monitor: UnifiedRuleSummary) => void;
   onEdit?: (monitor: UnifiedRuleSummary) => void;
+  onEditDetectorSettings?: (detector: UnifiedRuleSummary) => void;
+  onEditDetectorFeatures?: (detector: UnifiedRuleSummary) => void;
+  onEditForecaster?: (forecaster: UnifiedRuleSummary) => void;
+  onStartResources?: (resources: UnifiedRuleSummary[]) => Promise<void> | void;
+  onStopResources?: (resources: UnifiedRuleSummary[]) => Promise<void> | void;
   /**
    * Optional Disable / Enable handler. Forwarded to the detail flyout.
    * Wired only for PPL monitors at the page layer.
    */
   onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
-  onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'slo') => void;
+  onCreateMonitor?: (
+    type: 'logs' | 'prometheus' | 'metrics' | 'slo' | 'detector' | 'forecaster'
+  ) => void;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
   /** Callback when datasource selection changes */
@@ -62,6 +66,12 @@ interface MonitorsTableProps {
   maxDatasources: number;
   /** Callback fired when user tries to exceed `maxDatasources`. */
   onDatasourceCapReached: () => void;
+  /**
+   * Per-datasource error text, keyed by datasource NAME (the label key used
+   * by the datasource facet). Rendered as an error icon next to the
+   * affected row in the filter panel; click opens a popover with details.
+   */
+  datasourceErrorMap?: Record<string, string>;
   /**
    * Optional pre-fill for the search box. Used by deep links from the SLO
    * detail page so users can jump straight to a specific recording rule
@@ -81,12 +91,18 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   onDelete,
   onClone,
   onEdit,
+  onEditDetectorSettings,
+  onEditDetectorFeatures,
+  onEditForecaster,
+  onStartResources,
+  onStopResources,
   onToggleEnabled,
   onCreateMonitor,
   selectedDsIds,
   onDatasourceChange,
   maxDatasources,
   onDatasourceCapReached,
+  datasourceErrorMap,
   initialSearchQuery,
 }) => {
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
@@ -110,6 +126,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({ ...DEFAULT_WIDTHS });
   const [selectedMonitor, setSelectedMonitor] = useState<UnifiedRuleSummary | null>(null);
+  const [lifecycleActionPending, setLifecycleActionPending] = useState(false);
   // Keep `selectedMonitor` in sync with the latest version of itself in the
   // rules list. Without this, an optimistic update at the page level (e.g.
   // toggling `enabled` from the detail flyout) wouldn't reflect back into
@@ -139,6 +156,14 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   const dsNameMap = useMemo(() => new Map(datasources.map((d) => [d.id, d.name])), [datasources]);
 
+  const selectedDatasources = useMemo(
+    () =>
+      selectedDsIds
+        .map((id) => datasources.find((d) => d.id === id))
+        .filter((d): d is Datasource => !!d),
+    [datasources, selectedDsIds]
+  );
+
   // Logs / Metrics popover entries are grayed out when the parent's selection
   // can't satisfy them: Logs needs at least one OpenSearch datasource, Metrics
   // needs at least one Prometheus. The empty-selection case is "no datasource
@@ -156,6 +181,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       selected.every((d) => d.type === 'opensearch'),
     ];
   }, [datasources, selectedDsIds]);
+
+  const adCreateDisabled = !selectedDatasources.some(isStandardOpenSearchDatasource);
 
   // Build selectable datasource entries for the filter facet — alpha by name
   const datasourceEntries = useMemo(
@@ -196,10 +223,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     () => rules.filter((r) => matchesSearch(r, searchQuery) && matchesFilters(r, filters)),
     [rules, searchQuery, filters]
   );
-  const selectableIds = useMemo(
-    () => new Set(rules.filter((r) => !isReadOnlyRuleDefinition(r)).map((r) => r.id)),
-    [rules]
-  );
+  const selectableIds = useMemo(() => new Set(rules.map((r) => r.id)), [rules]);
   useEffect(() => {
     setSelectedIds((prev) => {
       const next = new Set(Array.from(prev).filter((id) => selectableIds.has(id)));
@@ -238,7 +262,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     setSelectedIds(next);
   };
   const toggleSelectAll = () => {
-    const selectableFiltered = filtered.filter((r) => !isReadOnlyRuleDefinition(r));
+    const selectableFiltered = filtered;
     const allSelected =
       selectableFiltered.length > 0 && selectableFiltered.every((r) => selectedIds.has(r.id));
     const next = new Set(selectedIds);
@@ -267,6 +291,23 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     setSelectedIds(new Set());
     setShowDeleteConfirm(false);
   };
+
+  const handleLifecycleAction = useCallback(
+    async (
+      resources: UnifiedRuleSummary[],
+      handler?: (resourcesToUpdate: UnifiedRuleSummary[]) => Promise<void> | void
+    ) => {
+      if (!handler || resources.length === 0 || lifecycleActionPending) return;
+      setLifecycleActionPending(true);
+      try {
+        await handler(resources);
+        setSelectedIds(new Set());
+      } finally {
+        setLifecycleActionPending(false);
+      }
+    },
+    [lifecycleActionPending]
+  );
 
   // Build table columns from visible set
   const tableColumns = useMemo(() => {
@@ -384,6 +425,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onDatasourceChange={onDatasourceChange}
                 maxDatasources={maxDatasources}
                 onDatasourceCapReached={onDatasourceCapReached}
+                datasourceErrorMap={datasourceErrorMap}
                 filters={filters}
                 activeFilterCount={activeFilterCount}
                 clearAllFilters={clearAllFilters}
@@ -445,6 +487,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onCreateMonitor={onCreateMonitor}
                 logsCreateDisabled={logsCreateDisabled}
                 metricsCreateDisabled={metricsCreateDisabled}
+                detectorCreateDisabled={adCreateDisabled}
+                forecasterCreateDisabled={adCreateDisabled}
                 noDatasourceSelected={selectedDsIds.length === 0}
                 showCreatePopover={showCreatePopover}
                 setShowCreatePopover={setShowCreatePopover}
@@ -456,6 +500,12 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onDelete={onDelete}
                 onClone={onClone}
                 onEdit={onEdit}
+                onEditDetectorSettings={onEditDetectorSettings}
+                onEditDetectorFeatures={onEditDetectorFeatures}
+                onEditForecaster={onEditForecaster}
+                onStartResources={(resources) => handleLifecycleAction(resources, onStartResources)}
+                onStopResources={(resources) => handleLifecycleAction(resources, onStopResources)}
+                lifecycleActionPending={lifecycleActionPending}
                 onToggleEnabled={onToggleEnabled}
               />
             </EuiResizablePanel>

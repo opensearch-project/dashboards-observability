@@ -19,6 +19,19 @@ import type { SloSummary } from '../../../../../../common/slo/slo_types';
 
 jest.mock('../../../shared/utils/navigation_utils', () => ({
   navigateToServicesList: jest.fn(),
+  navigateToSloSuggest: jest.fn(),
+}));
+// The toolbar Suggest button + onboarding empty state call useServices; this
+// suite doesn't exercise them, so stub an empty result so they render without a
+// live PPL backend (an unmocked useServices returns undefined and throws).
+jest.mock('../../../shared/hooks/use_services', () => ({
+  useServices: jest.fn(() => ({
+    data: [],
+    isLoading: false,
+    error: null,
+    availableGroupByAttributes: {},
+    refetch: jest.fn(),
+  })),
 }));
 jest.mock('../../../../../plugin_helpers/plugin_headerControl', () => ({
   HeaderControlledComponentsWrapper: ({ components }: { components: React.ReactNode[] }) => (
@@ -58,16 +71,16 @@ function summary(id: string): SloSummary {
 }
 
 function renderPage(list: SloApiClient['list'], initialSearch = '') {
-  const apiClient = ({ list } as unknown) as SloApiClient;
-  const chrome = ({ setBreadcrumbs: jest.fn() } as unknown) as Parameters<
+  const apiClient = { list } as unknown as SloApiClient;
+  const chrome = { setBreadcrumbs: jest.fn() } as unknown as Parameters<
     typeof SloListingPage
   >[0]['chrome'];
-  const notifications = ({
+  const notifications = {
     toasts: { addDanger: jest.fn(), addWarning: jest.fn(), addSuccess: jest.fn() },
-  } as unknown) as Parameters<typeof SloListingPage>[0]['notifications'];
-  const http = ({
+  } as unknown as Parameters<typeof SloListingPage>[0]['notifications'];
+  const http = {
     get: jest.fn().mockResolvedValue({ datasources: [] }),
-  } as unknown) as Parameters<typeof SloListingPage>[0]['http'];
+  } as unknown as Parameters<typeof SloListingPage>[0]['http'];
   return render(
     <MemoryRouter initialEntries={[`/slos${initialSearch}`]}>
       <Route path="/slos">

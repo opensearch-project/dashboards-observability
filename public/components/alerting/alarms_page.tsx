@@ -25,11 +25,16 @@
  *   - `AlertManagerEndTime`   — date-math string for picker end.
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { EuiCallOut, EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { useToast } from '../common/toast';
+import {
+  ClassifiedErrorToastBody,
+  classifiedToastColor,
+  extractClassifiedError,
+} from '../common/error';
 import {
   Datasource,
   UnifiedAlertSummary,
@@ -39,7 +44,9 @@ import {
 import { MonitorsTable } from './monitors_table';
 import { CreateMonitor, MonitorFormState } from './create_monitor';
 import type { PrometheusFormState } from './create_monitor/create_monitor_types';
+import { CreateAdRuleFlyout, CreateAdRuleType } from './create_ad_rule_flyout';
 import { EditMonitor } from './create_monitor/edit_monitor';
+import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
 import { AnomalyDetailFlyout } from './anomaly_detail_flyout';
@@ -47,12 +54,12 @@ import { NotificationRoutingPanel } from './notification_routing_panel';
 import type { MonitorBackendType } from './monitor_form_components';
 import { useAlerts } from './hooks/use_alerts';
 import { useAlertingPluginAvailability } from './hooks/use_alerting_plugin_availability';
+import { useAlertingPageToasts } from './hooks/use_alerting_page_toasts';
 import { useDatasourceSelection } from './hooks/use_datasource_selection';
 import { useMonitorMutations } from './hooks/use_monitor_mutations';
 import { useRulesData } from './hooks/use_rules_data';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { useTimeRange } from './hooks/use_time_range';
-import { AlarmsPageCallouts } from './alarms_page_callouts';
 import { coreRefs } from '../../framework/core_refs';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 import { observabilityID, observabilityTitle } from '../../../common/constants/shared';
@@ -60,6 +67,7 @@ import { ALERT_MANAGER_MAX_DATASOURCES_SETTING } from '../../../common/constants
 import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
 import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
 import { showMonitorCreatedToast } from './toast_helpers';
+import { isAdResourceRunning, isDetectorRule, isForecasterRule } from './shared_constants';
 import './alerting.scss';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
 import {
@@ -68,16 +76,6 @@ import {
   formStateToRule,
   resolveDatasourceTokens,
 } from './alarms_page_helpers';
-
-/**
- * App id of the legacy (pre-unified) alerting experience, served by the
- * standalone `alerts` plugin. The "old experience" link in the new-experience
- * callout deep-links to its `#/dashboard` route.
- */
-const OLD_ALERTING_APP_ID = 'alerts';
-
-/** localStorage key persisting dismissal of the new-experience intro callout. */
-const NEW_EXPERIENCE_CALLOUT_DISMISSED_KEY = 'observability.alerting.newExperienceCalloutDismissed';
 
 // ============================================================================
 // Main Page Component
@@ -94,6 +92,14 @@ interface AlarmsPageProps {
 }
 
 type TabId = 'alerts' | 'rules' | 'routing';
+interface AdEditTarget {
+  ruleType: CreateAdRuleType;
+  id: string;
+  datasourceId: string;
+  initialStep?: 'define' | 'model';
+}
+
+type AdResourceLifecycleAction = 'start' | 'stop';
 
 /**
  * Parse a hash-route deep link of the form `#/rules?q=<query>&ds=<dsId>`
@@ -110,7 +116,11 @@ type TabId = 'alerts' | 'rules' | 'routing';
  * live on a Prometheus datasource the user just unchecked silently
  * shows zero matches.
  */
-export function parseAlarmsHashRoute(hash: string): { tab?: TabId; q?: string; ds?: string } {
+export function parseAlarmsHashRoute(hash: string): {
+  tab?: TabId;
+  q?: string;
+  ds?: string;
+} {
   if (!hash) return {};
   // Strip leading `#` then `/`. The hash router's URLs are
   // `#/rules?q=…` or `#/routing` etc.
@@ -372,7 +382,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     () =>
       (alertsData?.datasourceStatus || [])
         .filter((s) => s.fallback)
-        .map((s) => ({ datasourceName: s.datasourceName, fallback: s.fallback! })),
+        .map((s) => ({
+          datasourceName: s.datasourceName,
+          fallback: s.fallback!,
+        })),
     [alertsData]
   );
   const alertsErrorMessage =
@@ -447,22 +460,18 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     },
     [rules, deletedRuleIds]
   );
-  // The popover's "Logs" entry maps to an OpenSearch monitor; "Metrics" toasts
-  // "coming soon" until PR 2 lights up the Prom create flyout. When the user
-  // picks Logs the flyout is forced to the OS variant via this override even
-  // if the parent-page selected datasource happens to be Prometheus.
+  // The popover's "Logs" entry maps to an OpenSearch monitor and "Metrics"
+  // maps to a Prometheus rule. When the user picks Logs the flyout is forced
+  // to the OS variant via this override even if the parent-page selected
+  // datasource happens to be Prometheus.
   const [createBackendType, setCreateBackendType] = useState<MonitorBackendType | null>(null);
-  const [editTarget, setEditTarget] = useState<{ dsId: string; ruleId: string } | null>(null);
+  const [createAdRuleType, setCreateAdRuleType] = useState<CreateAdRuleType | null>(null);
+  const [editTarget, setEditTarget] = useState<{
+    dsId: string;
+    ruleId: string;
+  } | null>(null);
+  const [editAdTarget, setEditAdTarget] = useState<AdEditTarget | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<UnifiedAlertSummary | null>(null);
-  // Whether the "new alerting experience" intro callout has been dismissed.
-  // Persisted in localStorage so it stays hidden across reloads once closed.
-  const [newExperienceCalloutDismissed, setNewExperienceCalloutDismissed] = useState<boolean>(
-    () => window.localStorage.getItem(NEW_EXPERIENCE_CALLOUT_DISMISSED_KEY) === 'true'
-  );
-  const dismissNewExperienceCallout = useCallback(() => {
-    window.localStorage.setItem(NEW_EXPERIENCE_CALLOUT_DISMISSED_KEY, 'true');
-    setNewExperienceCalloutDismissed(true);
-  }, []);
   const { setToast: addToast } = useToast();
 
   const handleNavigateToDetectorResults = useCallback((href: string) => {
@@ -570,7 +579,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       // immediately. The override is dropped once the refetch's response
       // either confirms the ack or removes the row.
       const lastUpdated = new Date().toISOString();
-      setAckOverrides((prev) => ({ ...prev, [alertId]: { state: 'acknowledged', lastUpdated } }));
+      setAckOverrides((prev) => ({
+        ...prev,
+        [alertId]: { state: 'acknowledged', lastUpdated },
+      }));
       // Bump the refresh token so the hook refetches and the override can
       // be reconciled / cleared once the backend agrees.
       bumpRefreshToken();
@@ -588,6 +600,80 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         'danger',
         extractServerErrorMessage(e)
       );
+    }
+  };
+
+  const callAdResourceLifecycleMutation = async (
+    rule: UnifiedRuleSummary,
+    action: AdResourceLifecycleAction
+  ) => {
+    if (isDetectorRule(rule)) {
+      if (action === 'stop') return mutations.stopDetector(rule.id, rule.datasourceId);
+      return mutations.startDetector(rule.id, rule.datasourceId);
+    }
+
+    if (isForecasterRule(rule)) {
+      if (action === 'stop') return mutations.stopForecaster(rule.id, rule.datasourceId);
+      return mutations.startForecaster(rule.id, rule.datasourceId);
+    }
+
+    throw new Error('Lifecycle actions are only supported for detectors and forecasters');
+  };
+
+  const getOptimisticLifecycleState = (
+    rule: UnifiedRuleSummary,
+    action: AdResourceLifecycleAction
+  ): Pick<UnifiedRuleSummary, 'enabled' | 'status'> => {
+    if (action === 'stop') return { enabled: false, status: 'Stopped' };
+    return {
+      enabled: true,
+      status: isForecasterRule(rule) ? 'Initializing forecast' : 'Initializing',
+    };
+  };
+
+  const handleAdResourceLifecycle = async (
+    resources: UnifiedRuleSummary[],
+    action: AdResourceLifecycleAction
+  ) => {
+    const succeeded: UnifiedRuleSummary[] = [];
+
+    for (const resource of resources) {
+      if (!isDetectorRule(resource) && !isForecasterRule(resource)) continue;
+      try {
+        await callAdResourceLifecycleMutation(resource, action);
+        succeeded.push(resource);
+      } catch (e: unknown) {
+        addToast(
+          i18n.translate('observability.alerting.alarmsPage.toast.adResourceLifecycleFailed', {
+            defaultMessage: 'Failed to {action} {name}',
+            values: { action, name: resource.name },
+          }),
+          'danger',
+          extractServerErrorMessage(e)
+        );
+      }
+    }
+
+    if (succeeded.length > 0) {
+      setRules((prev) =>
+        prev.map((rule) => {
+          const updated = succeeded.find((resource) => resource.id === rule.id);
+          return updated
+            ? {
+                ...rule,
+                ...getOptimisticLifecycleState(updated, action),
+              }
+            : rule;
+        })
+      );
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.adResourcesLifecycleUpdated', {
+          defaultMessage:
+            '{count} {count, plural, one {resource} other {resources}} {action, select, start {started} stop {stopped} other {updated}}',
+          values: { count: succeeded.length, action },
+        })
+      );
+      refetchRules();
     }
   };
 
@@ -617,6 +703,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           // only removed once it becomes empty).
           const groupName = rule.group || rule.name;
           await mutations.deletePrometheusRule(rule.datasourceId, groupName, rule.name);
+        } else if (isDetectorRule(rule)) {
+          if (isAdResourceRunning(rule)) {
+            await mutations.stopDetector(id, rule.datasourceId);
+          }
+          await mutations.deleteDetector(id, rule.datasourceId);
+        } else if (isForecasterRule(rule)) {
+          if (isAdResourceRunning(rule)) {
+            await mutations.stopForecaster(id, rule.datasourceId);
+          }
+          await mutations.deleteForecaster(id, rule.datasourceId);
         } else {
           await mutations.deleteMonitor(id, rule.datasourceId);
         }
@@ -635,7 +731,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     if (succeeded.length > 0) {
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.monitorsDeleted', {
-          defaultMessage: '{count} alert rule(s) deleted',
+          defaultMessage: '{count} selected resource(s) deleted',
           values: { count: succeeded.length },
         })
       );
@@ -681,7 +777,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       setRules((prev) =>
         prev.map((r) =>
           r.id === monitor.id
-            ? { ...r, enabled: nextEnabled, status: nextEnabled ? 'active' : 'disabled' }
+            ? {
+                ...r,
+                enabled: nextEnabled,
+                status: nextEnabled ? 'active' : 'disabled',
+              }
             : r
         )
       );
@@ -864,6 +964,58 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return dsId;
   };
 
+  const resolveOpenSearchDatasourceId = useCallback((): string | null => {
+    const selected = selectedDsIds
+      .map((id) => datasources.find((ds) => ds.id === id))
+      .filter((ds): ds is Datasource => !!ds);
+    const openSearchDatasource = selected.find((ds) => ds.type === 'opensearch');
+    if (!openSearchDatasource) {
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.selectOpenSearchDatasource', {
+          defaultMessage: 'Select an OpenSearch datasource before creating AD resources.',
+        }),
+        'warning'
+      );
+      return null;
+    }
+    return openSearchDatasource.id;
+  }, [addToast, datasources, selectedDsIds]);
+
+  const handleCreateADResource = useCallback(
+    (resourceType: 'detector' | 'forecaster') => {
+      if (resolveOpenSearchDatasourceId() === null) return;
+      setCreateAdRuleType(resourceType);
+    },
+    [resolveOpenSearchDatasourceId]
+  );
+
+  const handleEditDetectorSettings = useCallback((detector: UnifiedRuleSummary) => {
+    setEditAdTarget({
+      ruleType: 'detector',
+      id: detector.id,
+      datasourceId: detector.datasourceId,
+      initialStep: 'define',
+    });
+  }, []);
+
+  const handleEditDetectorFeatures = useCallback((detector: UnifiedRuleSummary) => {
+    setEditAdTarget({
+      ruleType: 'detector',
+      id: detector.id,
+      datasourceId: detector.datasourceId,
+      initialStep: 'model',
+    });
+  }, []);
+
+  const handleEditForecaster = useCallback((forecaster: UnifiedRuleSummary) => {
+    setEditAdTarget({
+      ruleType: 'forecaster',
+      id: forecaster.id,
+      datasourceId: forecaster.datasourceId,
+      initialStep: 'define',
+    });
+  }, []);
+
   // OS create flyout only authors PPL monitors; Prom rules pass raw form state
   // through (PR 2 will add the Prom transform).
   const buildPayload = (form: MonitorFormState): Record<string, unknown> => {
@@ -931,14 +1083,79 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       const message = extractServerErrorMessage(e);
       const pplError = extractPplValidationError(message);
       if (pplError) setPplSubmitError(pplError);
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
-          defaultMessage: 'Failed to create alert rule',
-        }),
-        'danger',
-        message
-      );
+      // Prefer the server's classified error: show its title plus a "See full
+      // error" expander carrying the exact, fully-unwrapped upstream diagnostic.
+      // Fall back to the raw message.
+      const classified = extractClassifiedError(e);
+      if (classified) {
+        addToast(
+          classified.title,
+          classifiedToastColor(classified),
+          toMountPoint(<ClassifiedErrorToastBody error={classified} />)
+        );
+      } else {
+        addToast(
+          i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
+            defaultMessage: 'Failed to create alert rule',
+          }),
+          'danger',
+          message
+        );
+      }
     }
+  };
+
+  /**
+   * Post-save handler for the shared CreateMetricsMonitor flyout (the same
+   * component the Metrics Explore page uses). The flyout persists the rule
+   * itself via the http client; this handler only reconciles the page:
+   * optimistic insert, close, and a delayed refetch to bridge Cortex's
+   * eventual consistency (~30-60s propagation).
+   */
+  const handleMetricsRuleSaved = (form: MetricsMonitorFormState) => {
+    // Mirror of the server's promSeverityFromLabels for the optimistic row
+    const sev = form.labels.find((l) => l.key === 'severity')?.value || '';
+    const severity: PrometheusFormState['severity'] =
+      sev === 'critical' || sev === 'high' || sev === 'medium' || sev === 'low'
+        ? sev
+        : sev === 'warning'
+          ? 'medium'
+          : sev === 'page'
+            ? 'critical'
+            : 'info';
+    // Adapt the flyout's form shape to the PrometheusFormState that
+    // formStateToRule understands, for the optimistic table row
+    const promForm: PrometheusFormState = {
+      name: form.monitorName,
+      datasourceId: form.datasourceId,
+      datasourceType: 'prometheus',
+      query: form.query,
+      threshold: {
+        operator: '>',
+        value: 0,
+        unit: '',
+        forDuration: form.forDuration,
+      },
+      evaluationInterval: form.evalInterval,
+      pendingPeriod: form.forDuration,
+      firingPeriod: form.forDuration,
+      labels: form.labels,
+      annotations: form.description.trim()
+        ? [
+            ...form.annotations.filter((a) => a.key !== 'description'),
+            { key: 'description', value: form.description.trim() },
+          ]
+        : form.annotations,
+      severity,
+      enabled: true,
+    };
+    const newRule = buildOptimisticRule(promForm);
+    setShowCreateMonitor(false);
+    setCreateBackendType(null);
+    setRules((prev) => [newRule, ...prev]);
+    setRulesTotal((prev) => prev + 1);
+    refetchRules();
+    refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
   };
 
   const handleEditMonitor = async (formState: MonitorFormState, ruleId: string) => {
@@ -1095,14 +1312,23 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
               maxDatasources
             )}
             onGoToRules={() => handleTabClick('rules')}
+            onCreateLogsRule={() => {
+              setCreateBackendType('opensearch');
+              setShowCreateMonitor(true);
+            }}
+            onCreateMetricsRule={() => {
+              setCreateBackendType('prometheus');
+              setShowCreateMonitor(true);
+            }}
+            onCreateAnomalyDetection={() => setCreateAdRuleType('detector')}
+            onCreateForecasting={() => setCreateAdRuleType('forecaster')}
             startMs={startMs}
             endMs={endMs}
             pickerStart={startTime}
             pickerEnd={endTime}
             onTimeChange={handleTimeChange}
             onRefresh={handleRefreshTime}
-            truncated={alertsTruncated}
-            fallbackHints={alertsFallbackHints}
+            datasourceErrorMap={datasourceErrorMapByName}
           />
         </>
       );
@@ -1116,6 +1342,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onDelete={handleDeleteRules}
           onClone={handleCloneRule}
           onEdit={(monitor) => setEditTarget({ dsId: monitor.datasourceId, ruleId: monitor.id })}
+          onEditDetectorSettings={handleEditDetectorSettings}
+          onEditDetectorFeatures={handleEditDetectorFeatures}
+          onEditForecaster={handleEditForecaster}
+          onStartResources={(resources) => handleAdResourceLifecycle(resources, 'start')}
+          onStopResources={(resources) => handleAdResourceLifecycle(resources, 'stop')}
           onToggleEnabled={handleToggleMonitorEnabled}
           onCreateMonitor={(type) => {
             if (type === 'logs') {
@@ -1124,12 +1355,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             } else if (type === 'metrics') {
               setCreateBackendType('prometheus');
               setShowCreateMonitor(true);
+            } else if (type === 'detector' || type === 'forecaster') {
+              handleCreateADResource(type);
             }
           }}
           selectedDsIds={selectedDsIds}
           onDatasourceChange={handleDatasourceChange}
           maxDatasources={maxDatasources}
           onDatasourceCapReached={handleDatasourceCapReached}
+          datasourceErrorMap={datasourceErrorMapByName}
           initialSearchQuery={deepLink.q}
         />
       );
@@ -1140,59 +1374,108 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return null;
   };
 
-  // Merge Rules-path `rulesWarnings` with the hook-driven `alertsWarnings`
-  // so the callout block renders a single warning regardless of which tab
-  // is active. Keyed by datasource name to dedupe when both paths report
-  // the same backend (possible if the user flips tabs rapidly while a slow
-  // datasource is still timing out on both flows).
-  const activeWarnings = activeTab === 'alerts' ? alertsWarnings : rulesWarnings;
+  // Merge datasource-connection failures from every source that reports them:
+  //   - `alertsWarnings`: unified alerts-fetch datasourceStatus[].error
+  //   - `rulesWarnings`:  unified rules-fetch datasourceStatus[].error
+  //   - alerting-plugin probe: OS datasources whose `opensearch-alerting`
+  //     backend didn't respond at all — flagged individually here (in addition
+  //     to the aggregate "plugin not detected" toast when EVERY OS DS fails).
+  //
+  // Deduped by datasource id so a slow DS reporting the same error on both
+  // paths doesn't produce a doubled indicator. The FIRST error wins; later
+  // duplicates are dropped. Output shape:
+  //   - `datasourceErrorsById`  for toast messaging (stable id)
+  //   - `datasourceErrorsByName` for the FacetFilterGroup indicator (keyed
+  //     by option label, which is the datasource name)
+  const datasourceIssues = useMemo(() => {
+    const byId = new Map<string, { datasourceId: string; datasourceName: string; error: string }>();
+    const addOnce = (dsName: string, message: string) => {
+      // Look up id by name — both `alertsWarnings` and `rulesWarnings`
+      // carry the display name, not the id. Fall back to name as the key
+      // if the datasource list hasn't hydrated yet.
+      const ds = datasources.find((d) => d.name === dsName);
+      const id = ds?.id ?? dsName;
+      if (!byId.has(id))
+        byId.set(id, {
+          datasourceId: id,
+          datasourceName: dsName,
+          error: message,
+        });
+    };
+    for (const w of alertsWarnings) addOnce(w.datasourceName, w.error);
+    for (const w of rulesWarnings) addOnce(w.datasourceName, w.error);
+    // Alerting-plugin probe: only decorate individual DSes when the probe
+    // is finished (avoids flashing the indicator during the initial mount)
+    // AND we're not already in the "everything failed" state — that latter
+    // condition already fires its own aggregate toast, and adorning every
+    // row on top would just be noise.
+    if (!alertingAvailability.isLoading && !alertingAvailability.unavailable) {
+      // The probe only knows the cluster didn't return a 200 — that covers a
+      // missing plugin, a transient timeout (10s abort), or a network blip.
+      // Don't assert the plugin is definitively uninstalled; state what we
+      // actually observed and offer the most likely cause.
+      const probeFailedText = i18n.translate(
+        'observability.alerting.alarmsPage.datasourceErrors.probeFailed',
+        {
+          defaultMessage:
+            'The cluster did not respond to the alerting probe. The opensearch-alerting plugin may be missing, or the cluster may be temporarily unreachable.',
+        }
+      );
+      for (const id of alertingAvailability.unavailableDsIds) {
+        const ds = datasources.find((d) => d.id === id);
+        if (!ds) continue;
+        if (!byId.has(id)) {
+          byId.set(id, {
+            datasourceId: id,
+            datasourceName: ds.name,
+            error: probeFailedText,
+          });
+        }
+      }
+    }
+    return Array.from(byId.values());
+  }, [alertsWarnings, rulesWarnings, alertingAvailability, datasources]);
 
-  // Link back to the legacy alerting dashboard (the standalone `alerts` app's
-  // `#/dashboard` route). Built from `basePath.get()` (which carries any
-  // workspace prefix) + the app path — same URL-building recipe as the
-  // Advanced Settings link above. Rendered as a plain anchor since this crosses
-  // into a different app, so browser navigation (open-in-new-tab / right-click)
-  // is preferable to an `onClick` SPA hop.
-  const oldExperienceHref = `${
-    coreRefs.http?.basePath.get() ?? ''
-  }/app/${OLD_ALERTING_APP_ID}#/dashboard`;
+  const datasourceErrorMapByName = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const issue of datasourceIssues) {
+      // Frame the raw error with the same "Could not connect" language the
+      // toast uses so the indicator popover reads as a complete thought
+      // (the raw error alone — e.g. "getaddrinfo ENOTFOUND opensearch" — is
+      // opaque without it). The datasource name is already shown as the
+      // popover heading, so it is not repeated here.
+      m[issue.datasourceName] = i18n.translate(
+        'observability.alerting.alarmsPage.datasourceErrors.indicatorMessage',
+        {
+          defaultMessage: 'Could not connect. {error}',
+          values: { error: issue.error },
+        }
+      );
+    }
+    return m;
+  }, [datasourceIssues]);
+
+  // Fire toasts on transitions for every condition the callout strip used
+  // to cover, plus the two inline dashboard warnings (truncation + Prom
+  // legacy-fallback). See the hook for the per-condition dedupe strategy.
+  useAlertingPageToasts({
+    activeTab,
+    alertsErrorMessage,
+    rulesErrorMessage: error,
+    alertingPluginMissing: alertingAvailability.unavailable,
+    alertingProbeLoading: alertingAvailability.isLoading,
+    datasourceIssues,
+    alertsTruncated,
+    fallbackHints: alertsFallbackHints,
+  });
 
   return (
     <div data-test-subj="alertManagerPage" className="altPageRoot">
-      <AlarmsPageCallouts
-        alertingPluginMissing={alertingAvailability.unavailable}
-        alertingProbeLoading={alertingAvailability.isLoading}
-        alertsErrorMessage={alertsErrorMessage}
-        activeTab={activeTab}
-        generalError={error}
-        warnings={activeWarnings}
-      />
-      {!newExperienceCalloutDismissed && (
-        <EuiCallOut
-          size="s"
-          iconType="cheer"
-          color="primary"
-          data-test-subj="alertManagerNewExperienceCallout"
-          onDismiss={dismissNewExperienceCallout}
-          dismissible
-          title={
-            <FormattedMessage
-              id="observability.alerting.alarmsPage.newExperienceCallout"
-              defaultMessage="Welcome to the new alerting experience view your OpenSearch and Prometheus alerts together in one place. Prefer the previous view? {oldExperienceLink}"
-              values={{
-                oldExperienceLink: (
-                  <EuiLink data-test-subj="alertManagerOldExperienceLink" href={oldExperienceHref}>
-                    <FormattedMessage
-                      id="observability.alerting.alarmsPage.newExperienceCallout.oldExperienceLink"
-                      defaultMessage="Switch to the classic experience"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          }
-        />
-      )}
+      {/* Page-top banner callouts (errors, alerting-plugin missing,           */}
+      {/* per-datasource unreachable, alerts truncation, Prom legacy fallback) */}
+      {/* have been migrated to toasts — see `useAlertingPageToasts`. Per-DS   */}
+      {/* connection errors are ALSO surfaced next to the affected row in the  */}
+      {/* datasource facet via `datasourceErrorMapByName`.                     */}
       <EuiTabs data-test-subj="alertManagerTabs">
         {tabs.map((t) => (
           <EuiTab
@@ -1210,11 +1493,31 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         <FormattedMessage
           id="observability.alerting.alarmsPage.ariaLive.showingTab"
           defaultMessage="Showing {tabName} tab"
-          values={{ tabName: tabs.find((t) => t.id === activeTab)?.name ?? activeTab }}
+          values={{
+            tabName: tabs.find((t) => t.id === activeTab)?.name ?? activeTab,
+          }}
         />
       </div>
       {renderTable()}
-      {showCreateMonitor && (
+      {/* Metrics rules use the SAME flyout component as the Metrics Explore
+          page ("Create alert rule" action) so the two surfaces can never
+          drift. It persists the rule itself; handleMetricsRuleSaved only
+          reconciles the table. Logs (PPL) rules keep the CreateMonitor
+          shell. */}
+      {showCreateMonitor && createBackendType === 'prometheus' ? (
+        <CreateMetricsMonitor
+          onCancel={() => {
+            setShowCreateMonitor(false);
+            setCreateBackendType(null);
+          }}
+          onSave={handleMetricsRuleSaved}
+          datasources={datasources.filter((d) => d.type === 'prometheus')}
+          isNameTaken={isNameTakenForCreate}
+          showBuildInMetricsLink
+          http={coreRefs.http}
+          addToast={(title, color, text) => addToast(title, color, text)}
+        />
+      ) : showCreateMonitor ? (
         <CreateMonitor
           onSave={handleCreateMonitor}
           onBatchSave={handleBatchCreateMonitors}
@@ -1229,6 +1532,32 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           isNameTaken={isNameTakenForCreate}
           submitError={pplSubmitError ? { pplMessage: pplSubmitError } : undefined}
           onClearPplSubmitError={() => setPplSubmitError(null)}
+        />
+      ) : null}
+      {createAdRuleType && (
+        <CreateAdRuleFlyout
+          ruleType={createAdRuleType}
+          datasources={datasources}
+          selectedDsIds={selectedDsIds}
+          onCancel={() => setCreateAdRuleType(null)}
+          onCreated={() => {
+            setCreateAdRuleType(null);
+            refetchRules();
+          }}
+        />
+      )}
+      {editAdTarget && (
+        <CreateAdRuleFlyout
+          mode="edit"
+          ruleType={editAdTarget.ruleType}
+          editTarget={editAdTarget}
+          datasources={datasources}
+          selectedDsIds={selectedDsIds}
+          onCancel={() => setEditAdTarget(null)}
+          onUpdated={() => {
+            setEditAdTarget(null);
+            refetchRules();
+          }}
         />
       )}
       {editTarget && (

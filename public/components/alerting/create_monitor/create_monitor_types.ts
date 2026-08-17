@@ -117,7 +117,10 @@ export const DEFAULT_PROM_FORM: PrometheusFormState = {
   evaluationInterval: '1m',
   pendingPeriod: '5m',
   firingPeriod: '10m',
-  labels: [{ key: 'severity', value: 'warning', isDynamic: true }],
+  // Severity as a static label — the Prometheus convention Alertmanager
+  // routing matches on (critical/warning/info). `warning` by default so a
+  // new rule never pages anyone unless deliberately escalated.
+  labels: [{ key: 'severity', value: 'warning', isDynamic: false }],
   annotations: [
     { key: 'summary', value: '' },
     { key: 'description', value: '' },

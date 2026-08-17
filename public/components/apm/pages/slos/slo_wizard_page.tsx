@@ -41,6 +41,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { ChromeStart, NotificationsStart } from '../../../../../../../src/core/public';
 import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/plugin_headerControl';
 import { extractRulerErrorEnvelope } from './slo_api_client';
+import { redactForDisplay } from '../../../../../common/error';
 import type { SloApiClient, SloRulerErrorEnvelope } from './slo_api_client';
 import { GeneratedRulesPreview } from './generated_rules_preview';
 import { DatasourceSelect } from './datasource_select';
@@ -188,9 +189,10 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     ]);
   }, [chrome]);
 
-  const template = useMemo(() => SLO_TEMPLATES.find((t) => t.id === state.templateId) ?? null, [
-    state.templateId,
-  ]);
+  const template = useMemo(
+    () => SLO_TEMPLATES.find((t) => t.id === state.templateId) ?? null,
+    [state.templateId]
+  );
 
   // Reset scroll to the top whenever a template is (re)selected, so picking a
   // card lower on the picker grid lands the user at the start of the creation
@@ -232,7 +234,10 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   // (matches the shortest recording window). The probe's lookback is a
   // horizontal-axis concern applied server-side by queryRange(); these
   // PromQL strings are what the ruler would otherwise evaluate.
-  const probeQueries = useMemo<{ good: string | null; total: string | null }>(() => {
+  const probeQueries = useMemo<{
+    good: string | null;
+    total: string | null;
+  }>(() => {
     if (!liveInput) return { good: null, total: null };
     const firstObjective = liveInput.spec.objectives[0];
     if (!firstObjective) return { good: null, total: null };
@@ -497,7 +502,9 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                               <EuiText size="xs" color="subdued" component="span">
                                 {i18n.translate(
                                   'observability.apm.slo.wizard.sli.dimensionsAccordionHint',
-                                  { defaultMessage: '— scoped to the selected service by default' }
+                                  {
+                                    defaultMessage: '— scoped to the selected service by default',
+                                  }
                                 )}
                               </EuiText>
                             </EuiText>
@@ -575,7 +582,13 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                           data-test-subj="slosWizardRulerError"
                         >
                           <EuiText size="s">
-                            <p data-test-subj="slosWizardRulerErrorBody">{rulerError.rawBody}</p>
+                            {/* Redact before display — the upstream body can
+                                embed hostnames / URLs / ids. The un-redacted
+                                body remains available server-side by
+                                correlation id. */}
+                            <p data-test-subj="slosWizardRulerErrorBody">
+                              {redactForDisplay(rulerError.rawBody)}
+                            </p>
                             <p>
                               <small>
                                 {i18n.translate(
@@ -692,6 +705,7 @@ const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
       error={errors['spec.name']}
     >
       <EuiFieldText
+        isInvalid={!!errors['spec.name']}
         value={state.name}
         onChange={(e) => dispatch({ kind: 'setField', field: 'name', value: e.target.value })}
         data-test-subj="slosWizardName"
@@ -706,7 +720,11 @@ const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
         rows={2}
         value={state.description}
         onChange={(e) =>
-          dispatch({ kind: 'setField', field: 'description', value: e.target.value })
+          dispatch({
+            kind: 'setField',
+            field: 'description',
+            value: e.target.value,
+          })
         }
         data-test-subj="slosWizardDescription"
       />
@@ -773,7 +791,11 @@ const OwnerPanel: React.FC<
         <EuiFieldText
           value={state.ownerPrimaryUser}
           onChange={(e) =>
-            dispatch({ kind: 'setField', field: 'ownerPrimaryUser', value: e.target.value })
+            dispatch({
+              kind: 'setField',
+              field: 'ownerPrimaryUser',
+              value: e.target.value,
+            })
           }
           data-test-subj="slosWizardOwnerPrimaryUser"
         />
@@ -797,7 +819,9 @@ const OwnerPanel: React.FC<
 // into the type-specific SLI editors (CustomPromqlEditor / StructuredSliEditor);
 // this panel now owns only the dimension rows, which apply to every SLI type.
 const SliPanel: React.FC<
-  PanelProps & { template: import('../../../../../common/slo/slo_templates').SloTemplate }
+  PanelProps & {
+    template: import('../../../../../common/slo/slo_templates').SloTemplate;
+  }
 > = ({ state, errors, dispatch, template }) => (
   <>
     <EuiText size="xs" color="subdued">

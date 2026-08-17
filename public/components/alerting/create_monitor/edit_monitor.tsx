@@ -169,7 +169,9 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
       // label is extracted into groupName (and stripped) on submission.
       const seededLabels = Object.entries(rawLabels)
         .filter(([key]) => key !== '_ruleGroup')
-        .map(([key, value]) => ({ key, value }));
+        // Infer the dynamic flag from template syntax so the editor's bolt
+        // toggle round-trips (the flag is UI-only and never persisted)
+        .map(([key, value]) => ({ key, value, isDynamic: /\{\{.*\}\}/.test(value) }));
       if (data.group) {
         seededLabels.push({ key: '_ruleGroup', value: data.group });
       }

@@ -72,6 +72,93 @@ describe('MonitorMutationsClient', () => {
     });
   });
 
+  describe('detector lifecycle', () => {
+    it('uses the AD detector lifecycle routes with encoded ids', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: true });
+      mockPost.mockResolvedValue({ ok: true });
+
+      await client.deleteDetector('det/1', 'ds 1');
+      await client.startDetector('det/1', 'ds 1');
+      await client.stopDetector('det/1', 'ds 1');
+
+      expect(mockDelete).toHaveBeenCalledWith('/api/anomaly_detectors/detectors/det%2F1/ds%201');
+      expect(mockPost).toHaveBeenNthCalledWith(
+        1,
+        '/api/anomaly_detectors/detectors/det%2F1/start/ds%201'
+      );
+      expect(mockPost).toHaveBeenNthCalledWith(
+        2,
+        '/api/anomaly_detectors/detectors/det%2F1/stop/false/ds%201'
+      );
+    });
+
+    it('omits Alert Manager local-cluster from detector lifecycle routes', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: true });
+      mockPost.mockResolvedValue({ ok: true });
+
+      await client.deleteDetector('det-1', 'local-cluster');
+      await client.startDetector('det-1', 'local-cluster');
+      await client.stopDetector('det-1', 'local-cluster');
+
+      expect(mockDelete).toHaveBeenCalledWith('/api/anomaly_detectors/detectors/det-1');
+      expect(mockPost).toHaveBeenNthCalledWith(1, '/api/anomaly_detectors/detectors/det-1/start');
+      expect(mockPost).toHaveBeenNthCalledWith(
+        2,
+        '/api/anomaly_detectors/detectors/det-1/stop/false'
+      );
+    });
+
+    it('rejects detector action responses that report an application-level failure', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: false, error: 'Detector must be stopped first' });
+
+      await expect(client.deleteDetector('det-1', 'ds-1')).rejects.toThrow(
+        'Detector must be stopped first'
+      );
+    });
+  });
+
+  describe('forecaster lifecycle', () => {
+    it('uses the forecasting lifecycle routes with encoded ids', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: true });
+      mockPost.mockResolvedValue({ ok: true });
+
+      await client.deleteForecaster('forecast/1', 'ds 1');
+      await client.startForecaster('forecast/1', 'ds 1');
+      await client.stopForecaster('forecast/1', 'ds 1');
+
+      expect(mockDelete).toHaveBeenCalledWith('/api/forecasting/forecasters/forecast%2F1/ds%201');
+      expect(mockPost).toHaveBeenNthCalledWith(
+        1,
+        '/api/forecasting/forecasters/forecast%2F1/start/ds%201'
+      );
+      expect(mockPost).toHaveBeenNthCalledWith(
+        2,
+        '/api/forecasting/forecasters/forecast%2F1/stop/ds%201'
+      );
+    });
+
+    it('omits Alert Manager local-cluster from forecaster lifecycle routes', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: true });
+      mockPost.mockResolvedValue({ ok: true });
+
+      await client.deleteForecaster('forecast-1', 'local-cluster');
+      await client.startForecaster('forecast-1', 'local-cluster');
+      await client.stopForecaster('forecast-1', 'local-cluster');
+
+      expect(mockDelete).toHaveBeenCalledWith('/api/forecasting/forecasters/forecast-1');
+      expect(mockPost).toHaveBeenNthCalledWith(1, '/api/forecasting/forecasters/forecast-1/start');
+      expect(mockPost).toHaveBeenNthCalledWith(2, '/api/forecasting/forecasters/forecast-1/stop');
+    });
+
+    it('rejects forecaster action responses that report an application-level failure', async () => {
+      mockDelete.mockResolvedValueOnce({ ok: false, error: 'Forecaster must be stopped first' });
+
+      await expect(client.deleteForecaster('forecast-1', 'ds-1')).rejects.toThrow(
+        'Forecaster must be stopped first'
+      );
+    });
+  });
+
   describe('acknowledgeAlert', () => {
     it('rejects when alertId is missing', async () => {
       await expect(client.acknowledgeAlert('', 'ds-1', 'mon-1')).rejects.toThrow(

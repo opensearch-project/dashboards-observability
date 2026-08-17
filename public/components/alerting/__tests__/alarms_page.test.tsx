@@ -21,8 +21,11 @@ jest.mock('../../../../../../src/plugins/opensearch_dashboards_react/public', ()
   toMountPoint: jest.fn((node: unknown) => node),
 }));
 
+// Capture `setToast` calls so tests can assert the page-level toasts fire
+// on the same conditions the removed banner strip used to render for.
+const mockSetToast = jest.fn();
 jest.mock('../../common/toast', () => ({
-  useToast: () => ({ setToast: jest.fn() }),
+  useToast: () => ({ setToast: mockSetToast }),
 }));
 
 // Mock `useAlerts` — this is the hook AlarmsPage consumes for Alerts-tab data.
@@ -33,8 +36,13 @@ jest.mock('../hooks/use_alerts', () => ({
   useAlerts: (args: unknown) => mockUseAlerts(args),
 }));
 
+const mockUseRulesData = jest.fn();
+jest.mock('../hooks/use_rules_data', () => ({
+  useRulesData: (args: unknown) => mockUseRulesData(args),
+}));
+
 // Capture AlertsDashboard props so we can assert `startTime` / `endTime` /
-// `startMs` / `endMs` / `truncated` / `fallbackHints` are forwarded.
+// `startMs` / `endMs` / `datasourceErrorMap` are forwarded.
 const mockDashboard = jest.fn();
 jest.mock('../alerts_dashboard', () => ({
   AlertsDashboard: (props: unknown) => {
@@ -66,10 +74,19 @@ jest.mock('../query_services/alerting_opensearch_service', () => ({
 }));
 
 const mockCreateMonitor = jest.fn();
+const mockDeleteMonitor = jest.fn();
+const mockDeleteDetector = jest.fn();
+const mockStopDetector = jest.fn();
+const mockDeleteForecaster = jest.fn();
+const mockStopForecaster = jest.fn();
 jest.mock('../hooks/use_monitor_mutations', () => ({
   useMonitorMutations: () => ({
     createMonitor: mockCreateMonitor,
-    deleteMonitor: jest.fn(),
+    deleteMonitor: mockDeleteMonitor,
+    deleteDetector: mockDeleteDetector,
+    stopDetector: mockStopDetector,
+    deleteForecaster: mockDeleteForecaster,
+    stopForecaster: mockStopForecaster,
     acknowledgeAlert: jest.fn(),
   }),
 }));
@@ -91,13 +108,36 @@ const emptyHookResult = {
   refetch: jest.fn(),
 };
 
+const emptyRulesHookResult = {
+  rules: [],
+  rulesTotal: 0,
+  isLoading: false,
+  error: null,
+  warnings: [],
+  setRules: jest.fn(),
+  setRulesTotal: jest.fn(),
+  refetch: jest.fn(),
+};
+
 beforeEach(() => {
   mockUseAlerts.mockReset();
   mockUseAlerts.mockReturnValue(emptyHookResult);
+  mockUseRulesData.mockReset();
+  mockUseRulesData.mockReturnValue(emptyRulesHookResult);
   mockDashboard.mockClear();
   mockMonitorsTable.mockClear();
+  mockSetToast.mockClear();
   mockGetRuleDetail.mockReset();
   mockCreateMonitor.mockReset();
+  mockDeleteMonitor.mockReset();
+  mockDeleteDetector.mockReset();
+  mockStopDetector.mockReset();
+  mockDeleteForecaster.mockReset();
+  mockStopForecaster.mockReset();
+  mockDeleteDetector.mockResolvedValue({ ok: true });
+  mockStopDetector.mockResolvedValue({ ok: true });
+  mockDeleteForecaster.mockResolvedValue({ ok: true });
+  mockStopForecaster.mockResolvedValue({ ok: true });
   try {
     window.sessionStorage.clear();
   } catch (_e) {
@@ -198,7 +238,7 @@ describe('AlarmsPage', () => {
     expect(last.endMs).toBeGreaterThan(last.startMs);
   });
 
-  it('forwards `truncated` from hook data.datasourceStatus to AlertsDashboard', async () => {
+  it('fires a "Search incomplete" toast when a datasource reports a truncated result', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
       data: {
@@ -223,11 +263,14 @@ describe('AlarmsPage', () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
-    const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
-    expect(last.truncated).toBe(true);
+    const truncatedToast = mockSetToast.mock.calls.find(
+      (c) => typeof c[0] === 'string' && c[0].includes('Search incomplete')
+    );
+    expect(truncatedToast).toBeDefined();
+    expect(truncatedToast![1]).toBe('warning');
   });
 
-  it('surfaces partial-success datasource errors as warnings', async () => {
+  it('surfaces partial-success datasource errors as a toast + facet error indicator', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
       data: {
@@ -250,14 +293,38 @@ describe('AlarmsPage', () => {
     });
 
     await act(async () => {
-      render(<AlarmsPage {...defaultProps} />);
+      render(
+        <AlarmsPage
+          {...defaultProps}
+          datasources={[
+            {
+              id: 'ds-1',
+              name: 'Local',
+              type: 'opensearch',
+              connection: 'cluster',
+              enabled: true,
+            } as Datasource,
+          ]}
+        />
+      );
     });
 
-    expect(screen.getByText('Some datasources could not be reached')).toBeInTheDocument();
-    expect(screen.getByText(/Failed to fetch anomaly results/)).toBeInTheDocument();
+    // Page-level toast fires — replaces the banner strip.
+    const singleTitleCall = mockSetToast.mock.calls.find(
+      (c) => typeof c[0] === 'string' && c[0].includes('Could not connect to')
+    );
+    expect(singleTitleCall).toBeDefined();
+    expect(singleTitleCall![1]).toBe('warning');
+
+    // AlertsDashboard receives the per-datasource error map, keyed by DS name.
+    // The indicator message is framed with "Could not connect" (matching the
+    // toast) and still carries the underlying error text.
+    const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
+    expect(last.datasourceErrorMap.Local).toMatch(/^Could not connect\./);
+    expect(last.datasourceErrorMap.Local).toContain('AD unavailable');
   });
 
-  it('forwards `fallbackHints` built from datasourceStatus entries with a fallback marker', async () => {
+  it('fires a "Showing current alerts only" toast when a datasource reports a legacy-fallback', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
       data: {
@@ -290,10 +357,12 @@ describe('AlarmsPage', () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
-    const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
-    expect(last.fallbackHints).toEqual([
-      { datasourceName: 'prom-prod', fallback: 'prometheus-alerts-current-only' },
-    ]);
+    const fallbackToast = mockSetToast.mock.calls.find(
+      (c) => typeof c[0] === 'string' && c[0].includes('Showing current alerts only')
+    );
+    expect(fallbackToast).toBeDefined();
+    expect(fallbackToast![1]).toBe('warning');
+    expect(String(fallbackToast![2])).toContain('prom-prod');
   });
 
   it('passes selectedDsIds, startTime, endTime, refreshToken together to useAlerts', async () => {
@@ -401,6 +470,56 @@ describe('AlarmsPage', () => {
       'ds-1'
     );
   });
+
+  it.each([
+    {
+      definitionType: 'detector',
+      stop: mockStopDetector,
+      remove: mockDeleteDetector,
+    },
+    {
+      definitionType: 'forecaster',
+      stop: mockStopForecaster,
+      remove: mockDeleteForecaster,
+    },
+  ])(
+    'stops a running $definitionType before deleting it',
+    async ({ definitionType, stop, remove }) => {
+      const resource = {
+        id: `${definitionType}-1`,
+        name: `Running ${definitionType}`,
+        datasourceId: 'ds-1',
+        datasourceType: 'opensearch',
+        definitionType,
+        monitorType: definitionType,
+        status: 'Running',
+        enabled: true,
+      };
+      mockUseRulesData.mockReturnValue({
+        ...emptyRulesHookResult,
+        rules: [resource],
+        rulesTotal: 1,
+      });
+
+      await act(async () => {
+        render(<AlarmsPage {...defaultProps} />);
+      });
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+      const tableProps = mockMonitorsTable.mock.calls[
+        mockMonitorsTable.mock.calls.length - 1
+      ][0] as {
+        onDelete: (ids: string[]) => Promise<void>;
+      };
+
+      await act(async () => {
+        await tableProps.onDelete([resource.id]);
+      });
+
+      expect(stop).toHaveBeenCalledWith(resource.id, resource.datasourceId);
+      expect(remove).toHaveBeenCalledWith(resource.id, resource.datasourceId);
+      expect(stop.mock.invocationCallOrder[0]).toBeLessThan(remove.mock.invocationCallOrder[0]);
+    }
+  );
 
   // ---- URL-reflects-active-tab ---------------------------------------------
   // `handleTabClick` mirrors the active tab into `window.location.hash` so

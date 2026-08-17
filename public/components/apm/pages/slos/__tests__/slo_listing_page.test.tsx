@@ -9,11 +9,33 @@ import { MemoryRouter, Route } from 'react-router-dom';
 import { SloListingPage } from '../slo_listing_page';
 import type { SloApiClient } from '../slo_api_client';
 import type { SloListFilters, SloSummary } from '../../../../../../common/slo/slo_types';
-import { navigateToServicesList } from '../../../shared/utils/navigation_utils';
+import {
+  navigateToServicesList,
+  navigateToSloSuggest,
+} from '../../../shared/utils/navigation_utils';
+import { useServices } from '../../../shared/hooks/use_services';
 
 jest.mock('../../../shared/utils/navigation_utils', () => ({
   navigateToServicesList: jest.fn(),
+  navigateToSloSuggest: jest.fn(),
 }));
+
+// The onboarding empty state discovers APM services to decide whether to pitch
+// "Suggest SLOs" (services exist) or "Set up services" (none yet). Mock the hook
+// so each test drives the branch it wants without a live PPL backend.
+jest.mock('../../../shared/hooks/use_services', () => ({
+  useServices: jest.fn(),
+}));
+
+const mockUseServices = useServices as jest.Mock;
+const setDiscoveredServices = (names: string[]) =>
+  mockUseServices.mockReturnValue({
+    data: names.map((name) => ({ serviceName: name })),
+    isLoading: false,
+    error: null,
+    availableGroupByAttributes: {},
+    refetch: jest.fn(),
+  });
 
 // Overview panel + header wrapper reach into chrome/portals that aren't
 // wired in this jsdom setup. Inline them so the rest of the page mounts.
@@ -57,19 +79,19 @@ function makeSummary(overrides: Partial<SloSummary> = {}): SloSummary {
 }
 
 function renderPage(listImpl: SloApiClient['list'], initialSearch = '') {
-  const apiClient = ({ list: listImpl } as unknown) as SloApiClient;
-  const chrome = ({ setBreadcrumbs: jest.fn() } as unknown) as Parameters<
+  const apiClient = { list: listImpl } as unknown as SloApiClient;
+  const chrome = { setBreadcrumbs: jest.fn() } as unknown as Parameters<
     typeof SloListingPage
   >[0]['chrome'];
-  const notifications = ({
+  const notifications = {
     toasts: { addDanger: jest.fn(), addWarning: jest.fn(), addSuccess: jest.fn() },
-  } as unknown) as Parameters<typeof SloListingPage>[0]['notifications'];
+  } as unknown as Parameters<typeof SloListingPage>[0]['notifications'];
   // The listing page fires one GET to /api/alerting/datasources on mount.
   // Resolve it to an empty list so the facet renders the "no datasources
   // registered" text and the rest of the page doesn't wait on a real fetch.
-  const http = ({
+  const http = {
     get: jest.fn().mockResolvedValue({ datasources: [] }),
-  } as unknown) as Parameters<typeof SloListingPage>[0]['http'];
+  } as unknown as Parameters<typeof SloListingPage>[0]['http'];
   return render(
     <MemoryRouter initialEntries={[`/slos${initialSearch}`]}>
       <Route path="/slos">
@@ -88,9 +110,14 @@ function renderPage(listImpl: SloApiClient['list'], initialSearch = '') {
 describe('SloListingPage — filter integration', () => {
   beforeEach(() => {
     (navigateToServicesList as jest.Mock).mockReset();
+    (navigateToSloSuggest as jest.Mock).mockReset();
+    // Default the onboarding empty state to the "services discovered" branch so
+    // it leads with Suggest SLOs. Tests that need the "no services" branch
+    // override this with setDiscoveredServices([]).
+    setDiscoveredServices(['payments-api', 'checkout']);
   });
 
-  it('shows the "no SLOs yet" empty state when list returns zero unfiltered', async () => {
+  it('leads with the "Suggest SLOs" onboarding when services are discovered', async () => {
     const list = jest.fn().mockResolvedValue({
       results: [],
       total: 0,
@@ -104,15 +131,25 @@ describe('SloListingPage — filter integration', () => {
     });
     expect(await screen.findByTestId('slosEmptyNoSlos')).toBeInTheDocument();
     expect(screen.queryByTestId('slosEmptyFilteredZero')).not.toBeInTheDocument();
-    // Empty state pitches Services as the primary discovery path (M4: the
-    // listing page no longer hosts a Suggest SLOs button).
-    expect(screen.queryByTestId('slosSuggestEmpty')).not.toBeInTheDocument();
-    const servicesCta = screen.getByTestId('slosEmptyGoToServices');
-    expect(servicesCta).toHaveTextContent('Go to Services');
+    // Services exist → fastest path to a first SLO is the Suggest batch flow,
+    // so it leads as the primary CTA with "Create manually" as the fallback.
+    const suggestCta = screen.getByTestId('slosEmptySuggest');
+    expect(suggestCta).toHaveTextContent('Suggest SLOs');
     expect(screen.getByTestId('slosCreateEmpty')).toHaveTextContent('Create manually');
+    await act(async () => {
+      fireEvent.click(suggestCta);
+    });
+    // The CTA must hand the discovered service names to the Suggest page as its
+    // scope — otherwise it lands unscoped and drafts nothing, contradicting the
+    // "we discovered services and can draft SLOs" onboarding copy.
+    expect(navigateToSloSuggest).toHaveBeenCalledTimes(1);
+    expect(navigateToSloSuggest).toHaveBeenCalledWith(['payments-api', 'checkout']);
   });
 
-  it('cross-navigates to Services Home when the empty-state CTA is clicked', async () => {
+  it('guides the user to set up services when none are discovered', async () => {
+    // No services → Suggest SLOs has nothing to draft against, so the empty
+    // state steers the user to set up services first.
+    setDiscoveredServices([]);
     const list = jest.fn().mockResolvedValue({
       results: [],
       total: 0,
@@ -124,13 +161,16 @@ describe('SloListingPage — filter integration', () => {
     await act(async () => {
       renderPage(list);
     });
+    const servicesCta = await screen.findByTestId('slosEmptyGoToServices');
+    expect(servicesCta).toHaveTextContent('Set up services');
+    expect(screen.getByTestId('slosCreateEmpty')).toHaveTextContent('Create manually');
     await act(async () => {
-      fireEvent.click(await screen.findByTestId('slosEmptyGoToServices'));
+      fireEvent.click(servicesCta);
     });
     expect(navigateToServicesList).toHaveBeenCalledTimes(1);
   });
 
-  it('does not render a header-toolbar Suggest SLOs button (M4)', async () => {
+  it('surfaces an enabled Suggest SLOs toolbar button when SLOs and services exist', async () => {
     const list = jest.fn().mockResolvedValue({
       results: [makeSummary()],
       total: 1,
@@ -143,7 +183,35 @@ describe('SloListingPage — filter integration', () => {
       renderPage(list);
     });
     await screen.findByTestId('slosTable');
-    expect(screen.queryByTestId('slosSuggest')).not.toBeInTheDocument();
+    const suggest = screen.getByTestId('slosSuggest');
+    expect(suggest).toHaveTextContent('Suggest SLOs');
+    expect(suggest).not.toBeDisabled();
+    await act(async () => {
+      fireEvent.click(suggest);
+    });
+    expect(navigateToSloSuggest).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the Suggest SLOs toolbar button when no services are discovered', async () => {
+    // SLOs can exist without APM services (e.g. custom PromQL SLOs); with no
+    // services, Suggest has nothing to draft against, so the button is disabled.
+    setDiscoveredServices([]);
+    const list = jest.fn().mockResolvedValue({
+      results: [makeSummary()],
+      total: 1,
+      pageSize: 20,
+      hasMore: false,
+      nextCursor: null,
+      prevCursor: null,
+    });
+    await act(async () => {
+      renderPage(list);
+    });
+    await screen.findByTestId('slosTable');
+    const suggest = screen.getByTestId('slosSuggest');
+    expect(suggest).toBeDisabled();
+    fireEvent.click(suggest);
+    expect(navigateToSloSuggest).not.toHaveBeenCalled();
   });
 
   it('shows the "no matches" empty state with Clear-filters CTA when filtered to zero', async () => {
