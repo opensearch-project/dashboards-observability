@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -23,26 +23,25 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { NotificationsStart } from '../../../../../../../src/core/public';
-import { coreRefs } from '../../../../framework/core_refs';
-import { useDatasets, useCorrelatedLogs } from '../../shared/hooks/use_apm_config';
+import { useCorrelatedLogs } from '../../shared/hooks/use_apm_config';
 import { navigateToDatasetCorrelations } from '../../shared/utils/navigation_utils';
 import { RequirementCallout } from '../components/requirement_callout';
 import { DataSourcePicker } from '../components/data_source_picker';
-import { createApmTraceDatasets, refreshAndPersistFields } from '../utils/apm_auto_create';
-import { fieldNamesSatisfy } from '../utils/apm_auto_detect';
-import { APM_TRACES_INDEX_PATTERN, APM_TRACES_REQUIRED_FIELDS } from '../constants';
-import { APM_TRACES_DOCS_URL, APM_CORRELATIONS_DOCS_URL } from '../../common/constants';
-import { ApmDetectionResult, StepState } from '../types';
-
-interface DetectionHook {
-  detections: ApmDetectionResult[];
-  loading: boolean;
-  error?: Error;
-  refresh: () => void;
-}
+import { createApmTraceDatasets } from '../utils/apm_auto_create';
+import {
+  APM_TRACES_INDEX_PATTERN,
+  APM_TRACES_REQUIRED_FIELDS,
+  APM_TRACES_DOCS_URL,
+  APM_CORRELATIONS_DOCS_URL,
+} from '../../common/constants';
+import { ApmDatasetsHook } from '../../shared/hooks/use_apm_config';
+import { ApmDetectionHook } from '../hooks/use_apm_detection';
+import { useDatasetStep } from '../hooks/use_dataset_step';
+import { StepState } from '../types';
 
 export interface TracesStepProps {
-  detection: DetectionHook;
+  detection: ApmDetectionHook;
+  datasets: ApmDatasetsHook;
   notifications: NotificationsStart;
   state: StepState;
   onStateChange: (state: StepState) => void;
@@ -54,11 +53,13 @@ export interface TracesStepProps {
 /**
  * Page 2 — Traces. Lets the user pick any data source, then for that source
  * either reuses an existing traces dataset or offers a one-click auto-create
- * (traces + correlated logs). Existence and detection are scoped to the
- * selected data source, so switching sources re-evaluates independently.
+ * (traces + correlated logs). Existence and detection are scoped to the selected
+ * data source, so switching sources re-evaluates independently. Create/reuse/
+ * reconcile logic lives in {@link useDatasetStep}.
  */
 export const TracesStep = ({
   detection,
+  datasets,
   notifications,
   state,
   onStateChange,
@@ -66,247 +67,77 @@ export const TracesStep = ({
   selectedDataSourceId,
   onSelectedDataSourceIdChange,
 }: TracesStepProps) => {
-  const { tracesDatasets, loading: datasetsLoading, refresh: refreshDatasets } = useDatasets();
-  const [isCreating, setIsCreating] = useState(false);
-  // Id of a dataset we just auto-created. The datasets list refreshes async, so
-  // we hold the selection on this id until the list catches up — otherwise the
-  // reconcile effect would briefly see it "missing" and clobber the selection
-  // back to an invalid dataset.
-  const justCreatedIdRef = useRef<string | undefined>(undefined);
-
-  // Detection result for the currently selected data source.
-  const selectedDetection = useMemo(
-    () => detection.detections.find((d) => (d.dataSourceId || '') === (selectedDataSourceId || '')),
-    [detection.detections, selectedDataSourceId]
-  );
-
-  const [isRefreshingFields, setIsRefreshingFields] = useState(false);
-
-  const datasetHasRequiredFields = (fieldNames?: string[]) =>
-    fieldNamesSatisfy(fieldNames ?? [], APM_TRACES_REQUIRED_FIELDS);
-
-  // All signalType:traces datasets on the selected source — including ones that
-  // don't (yet) have the required fields, so the user can select and refresh them.
-  const allScopedDatasets = useMemo(
-    () =>
-      tracesDatasets.filter((d) => (d.value?.datasourceId || '') === (selectedDataSourceId || '')),
-    [tracesDatasets, selectedDataSourceId]
-  );
-
-  // Of those, the ones that actually meet the field requirements (a DataView can
-  // be tagged signalType:traces before its index has the fields).
-  const scopedDatasets = useMemo(
-    () => allScopedDatasets.filter((d) => datasetHasRequiredFields(d.value?.fieldNames)),
-    [allScopedDatasets]
-  );
-
-  // Reconcile step status whenever inputs (or the selected source) settle.
-  useEffect(() => {
-    if (detection.loading || datasetsLoading || isCreating || isRefreshingFields) {
-      return;
-    }
-
-    // Hold the "created" state for a just-created dataset until the datasets
-    // list catches up (or if it's already present as a valid dataset). Without
-    // this, the async list refresh lets the effect briefly clobber the fresh
-    // selection back to an invalid one.
-    if (state.status === 'created') {
-      const inList = scopedDatasets.some((d) => d.value?.id === state.existingId);
-      if (inList) {
-        justCreatedIdRef.current = undefined; // list caught up; stop holding
-        return;
-      }
-      if (justCreatedIdRef.current && justCreatedIdRef.current === state.existingId) {
-        return; // still waiting for the list refresh — keep the created selection
-      }
-    }
-
-    // If the user has selected an invalid dataset on this source, keep it
-    // selected (so they can refresh its fields) unless it has since become valid.
-    if (state.status === 'invalid') {
-      const stillPresent = allScopedDatasets.find((d) => d.value?.id === state.existingId);
-      const nowValid = scopedDatasets.find((d) => d.value?.id === state.existingId);
-      if (nowValid) {
-        onStateChange({ status: 'exists', existingId: nowValid.value!.id, detail: nowValid.label });
-      } else if (stillPresent) {
-        return; // still invalid, still on this source — leave selection as-is
-      }
-      // else: selection no longer on this source — fall through to re-pick
-    }
-
-    // Reuse a valid traces dataset on this source if one exists.
-    if (scopedDatasets.length > 0) {
-      const stillValid = scopedDatasets.find((d) => d.value?.id === state.existingId);
-      const chosen = stillValid ?? scopedDatasets[0];
-      const existingId = chosen.value?.id;
-      if (existingId) {
-        onTracesDatasetIdChange(existingId);
-        onStateChange({ status: 'exists', existingId, detail: chosen.label });
-      }
-      return;
-    }
-
-    // No valid dataset, but there are trace-tagged datasets missing fields:
-    // pre-select the first so the user can try refreshing it. Next stays gated.
-    if (allScopedDatasets.length > 0) {
-      const chosen = allScopedDatasets[0];
-      onTracesDatasetIdChange('');
-      onStateChange({ status: 'invalid', existingId: chosen.value?.id, detail: chosen.label });
-      return;
-    }
-
-    // No dataset on this source yet — offer auto-create if the raw data is
-    // present, otherwise report it missing. Clear any stale captured id.
-    onTracesDatasetIdChange('');
-    onStateChange({ status: 'missing' });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    detection.loading,
-    datasetsLoading,
+  const {
+    selectedDetection,
+    datasetOptions,
+    selectedOptions,
+    hasValidOption,
+    isBusy,
+    hasExistingHere,
+    isInvalidSelection,
     isCreating,
     isRefreshingFields,
-    allScopedDatasets,
-    scopedDatasets,
+    handleSelectExisting,
+    handleRefreshFields,
+    handleAutoCreate,
+  } = useDatasetStep({
+    detection,
+    datasets,
     selectedDataSourceId,
-  ]);
-
-  const handleAutoCreate = async () => {
-    if (!selectedDetection) return;
-    const data = coreRefs.data;
-    const savedObjectsClient = coreRefs.savedObjectsClient;
-    if (!data || !savedObjectsClient) return;
-
-    setIsCreating(true);
-    onStateChange({ status: 'creating' });
-    try {
-      const result = await createApmTraceDatasets(
-        savedObjectsClient,
-        data.dataViews,
-        selectedDetection
-      );
-
-      if (result.traceDatasetId) {
-        // Label matches the displayName the create util assigns, so the reuse
-        // dropdown shows a friendly chip even before the datasets list refresh.
-        const createdLabel = `Trace Dataset${
-          selectedDetection.dataSourceTitle ? ` - ${selectedDetection.dataSourceTitle}` : ''
-        }`;
-        // Hold this selection until the datasets list refresh includes it.
-        justCreatedIdRef.current = result.traceDatasetId;
-        onTracesDatasetIdChange(result.traceDatasetId);
-        onStateChange({
-          status: 'created',
-          existingId: result.traceDatasetId,
-          detail: createdLabel,
-        });
-        // Pull the newly created dataset into the datasets list so the reuse
-        // dropdown can display it (selected) once it resolves.
-        refreshDatasets();
-        notifications.toasts.addSuccess({
-          title: i18n.translate('observability.apm.setupWizard.traces.createdTitle', {
-            defaultMessage: 'Traces dataset created',
+    notifications,
+    state,
+    onStateChange,
+    onDatasetIdChange: onTracesDatasetIdChange,
+    requiredFields: APM_TRACES_REQUIRED_FIELDS,
+    scope: 'traces',
+    createdLabelPrefix: 'Trace Dataset',
+    createDataset: async (savedObjectsClient, dataViews, detected) => {
+      const result = await createApmTraceDatasets(savedObjectsClient, dataViews, detected);
+      return {
+        datasetId: result.traceDatasetId,
+        correlationId: result.correlationId,
+        correlatedLogsFailed: result.correlatedLogsFailed,
+      };
+    },
+    createFailedMessage: i18n.translate('observability.apm.setupWizard.traces.createFailed', {
+      defaultMessage: 'Could not create the traces dataset.',
+    }),
+    missingFieldsLabel: i18n.translate('observability.apm.setupWizard.traces.missingFieldsLabel', {
+      defaultMessage: 'missing required fields',
+    }),
+    refreshFieldsErrorTitle: i18n.translate(
+      'observability.apm.setupWizard.traces.refreshFieldsErrorTitle',
+      { defaultMessage: 'Could not refresh dataset fields' }
+    ),
+    onCreated: (outcome) => {
+      notifications.toasts.addSuccess({
+        title: i18n.translate('observability.apm.setupWizard.traces.createdTitle', {
+          defaultMessage: 'Traces dataset created',
+        }),
+        text: outcome.correlationId
+          ? i18n.translate('observability.apm.setupWizard.traces.createdWithLogsText', {
+              defaultMessage: 'Created the traces dataset and correlated logs.',
+            })
+          : i18n.translate('observability.apm.setupWizard.traces.createdText', {
+              defaultMessage: 'Created the traces dataset.',
+            }),
+      });
+      // Correlated logs were detected but their setup failed — trace creation
+      // still succeeded, so warn non-blockingly rather than reporting a clean
+      // success the user can't tell was partial.
+      if (outcome.correlatedLogsFailed) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('observability.apm.setupWizard.traces.correlatedLogsFailedTitle', {
+            defaultMessage: 'Correlated logs were not set up',
           }),
-          text: result.correlationId
-            ? i18n.translate('observability.apm.setupWizard.traces.createdWithLogsText', {
-                defaultMessage: 'Created the traces dataset and correlated logs.',
-              })
-            : i18n.translate('observability.apm.setupWizard.traces.createdText', {
-                defaultMessage: 'Created the traces dataset.',
-              }),
-        });
-      } else {
-        onStateChange({
-          status: 'error',
-          error: i18n.translate('observability.apm.setupWizard.traces.createFailed', {
-            defaultMessage: 'Could not create the traces dataset.',
+          text: i18n.translate('observability.apm.setupWizard.traces.correlatedLogsFailedText', {
+            defaultMessage:
+              'The traces dataset was created, but the correlated log dataset or its correlation could not be created. You can set up correlated logs later from the datasets page.',
           }),
         });
       }
-    } catch (error) {
-      onStateChange({
-        status: 'error',
-        error: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
-  // Selecting a dataset on this source. Valid datasets → 'exists' (captures the
-  // id, unlocks Next); invalid ones → 'invalid' (selectable, but Next stays
-  // gated and a "Refresh fields" affordance appears).
-  const handleSelectExisting = (id: string) => {
-    const chosen = allScopedDatasets.find((d) => d.value?.id === id);
-    if (chosen && datasetHasRequiredFields(chosen.value?.fieldNames)) {
-      onTracesDatasetIdChange(id);
-      onStateChange({ status: 'exists', existingId: id, detail: chosen.label });
-    } else {
-      onTracesDatasetIdChange('');
-      onStateChange({ status: 'invalid', existingId: id, detail: chosen?.label ?? state.detail });
-    }
-  };
-
-  // Re-pull the selected DataView's field list from the cluster and persist it,
-  // in case the index gained the required fields after the DataView was created.
-  const handleRefreshFields = async () => {
-    const data = coreRefs.data;
-    if (!data || !state.existingId) return;
-    setIsRefreshingFields(true);
-    try {
-      // Shared with create/reuse; throwOnError so we can surface a toast.
-      await refreshAndPersistFields(data.dataViews, state.existingId, true);
-      // Re-read datasets; the reconcile effect promotes the selection to
-      // 'exists' if the refresh brought in the required fields.
-      refreshDatasets();
-    } catch (error) {
-      notifications.toasts.addWarning({
-        title: i18n.translate('observability.apm.setupWizard.traces.refreshFieldsErrorTitle', {
-          defaultMessage: 'Could not refresh dataset fields',
-        }),
-        text: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      setIsRefreshingFields(false);
-    }
-  };
-
-  // Dropdown options. List every trace-tagged dataset on the source — valid ones
-  // and ones missing required fields — so the user can select an invalid one and
-  // refresh its fields. Invalid options are labeled so the state is clear.
-  // Always ensure the current selection is present (e.g. right after auto-create,
-  // before the datasets list refresh lands).
-  const missingLabel = i18n.translate('observability.apm.setupWizard.traces.missingFieldsLabel', {
-    defaultMessage: 'missing required fields',
+    },
   });
-  const datasetOptions = useMemo(() => {
-    // Valid datasets first, then the ones missing required fields.
-    const ordered = [...allScopedDatasets].sort((a, b) => {
-      const aValid = datasetHasRequiredFields(a.value?.fieldNames) ? 0 : 1;
-      const bValid = datasetHasRequiredFields(b.value?.fieldNames) ? 0 : 1;
-      return aValid - bValid;
-    });
-    const options = ordered.map((d) => ({
-      label: datasetHasRequiredFields(d.value?.fieldNames)
-        ? d.label
-        : `${d.label} — ${missingLabel}`,
-      value: d.value?.id,
-    }));
-    if (state.existingId && !options.some((o) => o.value === state.existingId)) {
-      options.push({ label: state.detail || state.existingId, value: state.existingId });
-    }
-    return options;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allScopedDatasets, state.existingId, state.detail]);
-
-  // Whether any valid traces dataset exists on this source. When one does, the
-  // invalid branch offers "select the valid one" instead of auto-create.
-  const hasValidOption = scopedDatasets.length > 0;
-
-  const selectedOptions = datasetOptions.filter((o) => o.value === state.existingId);
-
-  const isBusy = detection.loading || datasetsLoading || state.status === 'checking';
-  const hasExistingHere = state.status === 'exists' || state.status === 'created';
-  const isInvalidSelection = state.status === 'invalid';
 
   // Correlated logs for the selected (valid) trace dataset — read-only, mirrors
   // the APM settings modal. The wizard auto-creates these during trace
@@ -680,6 +511,27 @@ export const TracesStep = ({
             </>
           )}
         </>
+      ) : detection.error ? (
+        <EuiCallOut
+          title={i18n.translate('observability.apm.setupWizard.traces.detectionErrorTitle', {
+            defaultMessage: 'Could not check for trace data',
+          })}
+          color="danger"
+          iconType="alert"
+          size="s"
+          data-test-subj="apmSetupWizardTracesDetectionError"
+        >
+          <p>{detection.error.message}</p>
+          <EuiButton
+            size="s"
+            onClick={detection.refresh}
+            data-test-subj="apmSetupWizardTracesDetectionErrorRetry"
+          >
+            {i18n.translate('observability.apm.setupWizard.traces.retryButton', {
+              defaultMessage: 'Retry',
+            })}
+          </EuiButton>
+        </EuiCallOut>
       ) : (
         <EuiCallOut
           title={i18n.translate('observability.apm.setupWizard.traces.noDataTitle', {

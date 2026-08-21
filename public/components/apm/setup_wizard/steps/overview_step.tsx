@@ -10,7 +10,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { coreRefs } from '../../../../framework/core_refs';
 import { RequirementCallout } from '../components/requirement_callout';
 import { ApmArchitectureSvgLight, ApmArchitectureSvgDark } from '../../config/apm-architecture-svg';
-import { APM_TRACES_INDEX_PATTERN, APM_SERVICE_MAP_INDEX_PATTERN } from '../constants';
+import { APM_TRACES_INDEX_PATTERN, APM_SERVICE_MAP_INDEX_PATTERN } from '../../common/constants';
 import { APM_DOCS_URL, APM_PIPELINE_DOCS_URL } from '../../common/constants';
 
 /**

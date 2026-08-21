@@ -60,3 +60,6 @@ export const useApmDetection = () => {
 
   return { detections, loading, error, refresh };
 };
+
+/** Public shape of the detection hook, shared by the wizard steps. */
+export type ApmDetectionHook = ReturnType<typeof useApmDetection>;

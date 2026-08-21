@@ -12,7 +12,7 @@ import {
   APM_LOGS_INDEX_PATTERN,
   APM_SERVICE_MAP_INDEX_PATTERN,
   APM_TRACES_INDEX_PATTERN,
-} from '../constants';
+} from '../../common/constants';
 import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 
@@ -64,8 +64,6 @@ function makeIndexPatterns(
   } as unknown as IndexPatternsContract;
 }
 
-const savedObjectsStub = {} as SavedObjectsClientContract;
-
 describe('fieldNamesSatisfy', () => {
   it('matches when every required field is present exactly', () => {
     expect(
@@ -108,7 +106,7 @@ describe('detectApmData', () => {
       [APM_SERVICE_MAP_INDEX_PATTERN]: serviceMapFields,
     });
 
-    const result = await detectApmData(savedObjectsStub, indexPatterns);
+    const result = await detectApmData(indexPatterns);
 
     expect(result.tracesDetected).toBe(true);
     expect(result.tracePattern).toBe(APM_TRACES_INDEX_PATTERN);
@@ -130,7 +128,7 @@ describe('detectApmData', () => {
       ],
     });
 
-    const result = await detectApmData(savedObjectsStub, indexPatterns);
+    const result = await detectApmData(indexPatterns);
 
     expect(result.tracesDetected).toBe(false);
     expect(result.tracePattern).toBeNull();
@@ -147,7 +145,7 @@ describe('detectApmData', () => {
       ],
     });
 
-    const result = await detectApmData(savedObjectsStub, indexPatterns);
+    const result = await detectApmData(indexPatterns);
 
     expect(result.tracesDetected).toBe(false);
   });
@@ -159,7 +157,7 @@ describe('detectApmData', () => {
       [APM_SERVICE_MAP_INDEX_PATTERN]: serviceMapFields,
     });
 
-    const result = await detectApmData(savedObjectsStub, indexPatterns);
+    const result = await detectApmData(indexPatterns);
 
     expect(result.tracesDetected).toBe(false);
     expect(result.logsDetected).toBe(false);
@@ -169,7 +167,7 @@ describe('detectApmData', () => {
   it('returns all-false when nothing matches', async () => {
     const indexPatterns = makeIndexPatterns({});
 
-    const result = await detectApmData(savedObjectsStub, indexPatterns);
+    const result = await detectApmData(indexPatterns);
 
     expect(result.tracesDetected).toBe(false);
     expect(result.logsDetected).toBe(false);

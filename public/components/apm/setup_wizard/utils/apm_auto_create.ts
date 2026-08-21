@@ -4,10 +4,8 @@
  */
 
 /*
- * Adapted from src/plugins/explore/public/utils/create_auto_datasets.ts and
- * generalized for APM. Reuses the same create-or-reuse DataView helper for
- * traces, correlated logs, and the v2 service map, and creates the
- * trace-to-logs correlation saved object.
+ * Create-or-reuse DataView helpers for the APM traces dataset, correlated logs,
+ * and the v2 service map, plus the trace-to-logs correlation saved object.
  */
 
 import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
@@ -17,14 +15,38 @@ import {
   DuplicateDataViewError,
   IndexPatternSpec,
 } from '../../../../../../../src/plugins/data/public';
-import { APM_LOGS_SCHEMA_MAPPINGS, APM_SERVICE_MAP_TIME_FIELD } from '../constants';
+import { APM_LOGS_SCHEMA_MAPPINGS, APM_SERVICE_MAP_TIME_FIELD } from '../../common/constants';
 import { ApmDetectionResult } from '../types';
 
 export interface CreateApmDatasetsResult {
   traceDatasetId: string | null;
   logDatasetId: string | null;
-  serviceMapDatasetId: string | null;
   correlationId: string | null;
+  /**
+   * True when correlated logs were detected but the log dataset or the
+   * trace-to-logs correlation failed to create. Trace creation can still
+   * succeed, so callers warn that logs did not wire up rather than reporting an
+   * unqualified success.
+   */
+  correlatedLogsFailed: boolean;
+}
+
+/**
+ * Build the per-create data-source context. IndexPatternSpec types
+ * `dataSourceRef` as a SavedObjectReference (which requires `version`), but the
+ * runtime only reads id/type/name — hence the single cast here.
+ */
+function buildDataSourceContext(detection: ApmDetectionResult, dataSourceId?: string) {
+  const effectiveDataSourceId = detection.dataSourceId || dataSourceId;
+  const dataSourceSuffix = detection.dataSourceTitle ? ` - ${detection.dataSourceTitle}` : '';
+  const dataSourceRef = effectiveDataSourceId
+    ? ({
+        id: effectiveDataSourceId,
+        type: 'data-source',
+        name: 'dataSource',
+      } as IndexPatternSpec['dataSourceRef'])
+    : undefined;
+  return { effectiveDataSourceId, dataSourceSuffix, dataSourceRef };
 }
 
 // Pre-fetch the field list ourselves before saving the index pattern, so the
@@ -137,7 +159,6 @@ export async function createOrReuseDataView(
 /**
  * Create the APM trace dataset (and, when detected, the correlated log dataset
  * plus the trace-to-logs correlation) for a single detected data source.
- * Mirrors the explore plugin's one-step trace onboarding.
  */
 export async function createApmTraceDatasets(
   savedObjectsClient: SavedObjectsClientContract,
@@ -148,15 +169,14 @@ export async function createApmTraceDatasets(
   const result: CreateApmDatasetsResult = {
     traceDatasetId: null,
     logDatasetId: null,
-    serviceMapDatasetId: null,
     correlationId: null,
+    correlatedLogsFailed: false,
   };
 
-  const effectiveDataSourceId = detection.dataSourceId || dataSourceId;
-  const dataSourceSuffix = detection.dataSourceTitle ? ` - ${detection.dataSourceTitle}` : '';
-  const dataSourceRef = effectiveDataSourceId
-    ? { id: effectiveDataSourceId, type: 'data-source', name: 'dataSource' }
-    : undefined;
+  const { effectiveDataSourceId, dataSourceSuffix, dataSourceRef } = buildDataSourceContext(
+    detection,
+    dataSourceId
+  );
 
   if (detection.tracesDetected && detection.tracePattern && detection.traceTimeField) {
     try {
@@ -168,8 +188,6 @@ export async function createApmTraceDatasets(
           displayName: `Trace Dataset${dataSourceSuffix}`,
           timeFieldName: detection.traceTimeField,
           signalType: 'traces',
-          // @ts-expect-error TS2322 IndexPatternSpec types dataSourceRef as SavedObjectReference
-          // which incorrectly requires `version`; runtime only uses id/type/name.
           dataSourceRef,
         },
         effectiveDataSourceId
@@ -179,24 +197,31 @@ export async function createApmTraceDatasets(
     }
   }
 
-  if (detection.logsDetected && detection.logPattern && detection.logTimeField) {
+  // Correlated logs were detected, so their setup is expected. A failure here
+  // is non-fatal to trace creation but must be surfaced (correlatedLogsFailed).
+  const logsExpected = Boolean(
+    detection.logsDetected && detection.logPattern && detection.logTimeField
+  );
+  if (logsExpected) {
     try {
       result.logDatasetId = await createOrReuseDataView(
         savedObjectsClient,
         dataViews,
         {
-          title: detection.logPattern,
+          title: detection.logPattern!,
           displayName: `Log Dataset${dataSourceSuffix}`,
-          timeFieldName: detection.logTimeField,
+          timeFieldName: detection.logTimeField!,
           signalType: 'logs',
           schemaMappings: { ...APM_LOGS_SCHEMA_MAPPINGS },
-          // @ts-expect-error TS2322 see note above on trace dataset.
           dataSourceRef,
         },
         effectiveDataSourceId
       );
     } catch (createError) {
       console.warn('Failed to create log dataset:', createError);
+    }
+    if (!result.logDatasetId) {
+      result.correlatedLogsFailed = true;
     }
   }
 
@@ -208,6 +233,9 @@ export async function createApmTraceDatasets(
           title: `trace-to-logs_${detection.tracePattern}`,
           correlationType: `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}${detection.tracePattern}`,
           version: '1.0.0',
+          // `references[N].id` are placeholders resolved against the
+          // `references` array below at read time — the real ids live there, so
+          // don't replace these with literal ids.
           entities: [
             { tracesDataset: { id: 'references[0].id' } },
             { logsDataset: { id: 'references[1].id' } },
@@ -223,6 +251,7 @@ export async function createApmTraceDatasets(
       result.correlationId = correlationResponse.id;
     } catch (error) {
       console.warn('Failed to create correlation:', error);
+      result.correlatedLogsFailed = true;
     }
   }
 
@@ -244,11 +273,10 @@ export async function createApmServiceMapDataset(
     return null;
   }
 
-  const effectiveDataSourceId = detection.dataSourceId || dataSourceId;
-  const dataSourceSuffix = detection.dataSourceTitle ? ` - ${detection.dataSourceTitle}` : '';
-  const dataSourceRef = effectiveDataSourceId
-    ? { id: effectiveDataSourceId, type: 'data-source', name: 'dataSource' }
-    : undefined;
+  const { effectiveDataSourceId, dataSourceSuffix, dataSourceRef } = buildDataSourceContext(
+    detection,
+    dataSourceId
+  );
 
   try {
     return await createOrReuseDataView(
@@ -258,7 +286,6 @@ export async function createApmServiceMapDataset(
         title: detection.serviceMapPattern,
         displayName: `Service Map Dataset${dataSourceSuffix}`,
         timeFieldName: detection.serviceMapTimeField || APM_SERVICE_MAP_TIME_FIELD,
-        // @ts-expect-error TS2322 see note on trace dataset dataSourceRef typing.
         dataSourceRef,
       },
       effectiveDataSourceId

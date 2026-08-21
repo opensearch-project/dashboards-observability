@@ -20,7 +20,7 @@ import {
   usePrometheusMetricCheck,
   PrometheusCandidate,
 } from '../hooks/use_prometheus_metric_check';
-import { APM_RED_REQUIRED_METRICS } from '../constants';
+import { APM_RED_REQUIRED_METRICS } from '../../common/constants';
 import { APM_RED_METRICS_DOCS_URL } from '../../common/constants';
 import { StepState } from '../types';
 
@@ -40,7 +40,11 @@ export const MetricsStep = ({
   onStateChange,
   onPrometheusDataSourceIdChange,
 }: MetricsStepProps) => {
-  const { data: prometheusDataSources, loading: prometheusLoading } = usePrometheusDataSources();
+  const {
+    data: prometheusDataSources,
+    loading: prometheusLoading,
+    error: prometheusError,
+  } = usePrometheusDataSources();
 
   const candidates: PrometheusCandidate[] = useMemo(
     () =>
@@ -72,6 +76,27 @@ export const MetricsStep = ({
     if (matching.length === 1 && state.existingId !== matching[0].id) {
       onPrometheusDataSourceIdChange(matching[0].id);
       onStateChange({ status: 'exists', existingId: matching[0].id, detail: matching[0].name });
+      return;
+    }
+
+    // Multiple matches: the user must choose. Keep a still-valid prior
+    // selection; otherwise reflect a pending selection explicitly so the step
+    // doesn't sit in its initial 'checking' state (the picker is shown and
+    // Finish stays gated until one is selected).
+    if (matching.length > 1) {
+      const stillSelected = matching.find((m) => m.id === state.existingId);
+      if (stillSelected) {
+        if (state.status !== 'exists') {
+          onStateChange({
+            status: 'exists',
+            existingId: stillSelected.id,
+            detail: stillSelected.name,
+          });
+        }
+      } else if (state.status !== 'missing') {
+        onPrometheusDataSourceIdChange('');
+        onStateChange({ status: 'missing' });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isBusy, matching]);
@@ -117,7 +142,19 @@ export const MetricsStep = ({
 
       <EuiSpacer size="m" />
 
-      {isBusy ? (
+      {prometheusError ? (
+        <EuiCallOut
+          title={i18n.translate('observability.apm.setupWizard.metrics.listErrorTitle', {
+            defaultMessage: 'Could not load Prometheus data sources',
+          })}
+          color="danger"
+          iconType="alert"
+          size="s"
+          data-test-subj="apmSetupWizardMetricsError"
+        >
+          <p>{prometheusError.message}</p>
+        </EuiCallOut>
+      ) : isBusy ? (
         <EuiText size="s" color="subdued">
           <EuiLoadingSpinner size="m" />{' '}
           {i18n.translate('observability.apm.setupWizard.metrics.checking', {
@@ -184,10 +221,15 @@ export const MetricsStep = ({
               {results.map((r) => (
                 <p key={r.id}>
                   <EuiCode>{r.name}</EuiCode>{' '}
-                  {i18n.translate('observability.apm.setupWizard.metrics.missingList', {
-                    defaultMessage: 'missing: {missing}',
-                    values: { missing: r.missing.join(', ') || '—' },
-                  })}
+                  {r.error
+                    ? i18n.translate('observability.apm.setupWizard.metrics.probeError', {
+                        defaultMessage: 'probe failed: {error}',
+                        values: { error: r.error },
+                      })
+                    : i18n.translate('observability.apm.setupWizard.metrics.missingList', {
+                        defaultMessage: 'missing: {missing}',
+                        values: { missing: r.missing.join(', ') || '—' },
+                      })}
                 </p>
               ))}
             </EuiText>

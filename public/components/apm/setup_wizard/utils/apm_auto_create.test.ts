@@ -14,7 +14,7 @@ import {
   APM_SERVICE_MAP_INDEX_PATTERN,
   APM_TRACES_INDEX_PATTERN,
   APM_LOGS_INDEX_PATTERN,
-} from '../constants';
+} from '../../common/constants';
 import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
 import { DataViewsContract } from '../../../../../../../src/plugins/data/public';
 
@@ -106,6 +106,7 @@ describe('createApmTraceDatasets', () => {
     expect(result.traceDatasetId).toBe('trace-id');
     expect(result.logDatasetId).toBe('log-id');
     expect(result.correlationId).toBe('correlation-id');
+    expect(result.correlatedLogsFailed).toBe(false);
     expect(savedObjects.create).toHaveBeenCalledWith(
       'correlations',
       expect.objectContaining({
@@ -149,7 +150,49 @@ describe('createApmTraceDatasets', () => {
 
     expect(result.logDatasetId).toBeNull();
     expect(result.correlationId).toBeNull();
+    expect(result.correlatedLogsFailed).toBe(false);
     expect(savedObjects.create).not.toHaveBeenCalled();
+  });
+
+  it('flags correlatedLogsFailed when the correlated log dataset fails to create', async () => {
+    const dataViews = makeDataViews({
+      create: jest
+        .fn()
+        .mockResolvedValueOnce({ id: 'trace-id' })
+        .mockRejectedValueOnce(new Error('log boom')),
+    });
+    const savedObjects = makeSavedObjects();
+
+    const result = await createApmTraceDatasets(savedObjects, dataViews, fullDetection);
+
+    // Trace creation still succeeds; the correlated-logs failure is surfaced,
+    // not swallowed, and the correlation is not attempted.
+    expect(result.traceDatasetId).toBe('trace-id');
+    expect(result.logDatasetId).toBeNull();
+    expect(result.correlationId).toBeNull();
+    expect(result.correlatedLogsFailed).toBe(true);
+    expect(savedObjects.create).not.toHaveBeenCalled();
+  });
+
+  it('flags correlatedLogsFailed when the correlation fails to create', async () => {
+    const dataViews = makeDataViews({
+      create: jest
+        .fn()
+        .mockResolvedValueOnce({ id: 'trace-id' })
+        .mockResolvedValueOnce({ id: 'log-id' }),
+    });
+    const savedObjects = makeSavedObjects({
+      create: jest.fn(async () => {
+        throw new Error('correlation boom');
+      }),
+    });
+
+    const result = await createApmTraceDatasets(savedObjects, dataViews, fullDetection);
+
+    expect(result.traceDatasetId).toBe('trace-id');
+    expect(result.logDatasetId).toBe('log-id');
+    expect(result.correlationId).toBeNull();
+    expect(result.correlatedLogsFailed).toBe(true);
   });
 });
 

@@ -5,7 +5,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { usePrometheusMetricCheck } from './use_prometheus_metric_check';
-import { APM_RED_REQUIRED_METRICS } from '../constants';
+import { APM_RED_REQUIRED_METRICS } from '../../common/constants';
 import { coreRefs } from '../../../../framework/core_refs';
 import type { HttpStart } from '../../../../../../../src/core/public';
 

@@ -5,7 +5,8 @@
 
 import { useEffect, useState } from 'react';
 import { coreRefs } from '../../../../framework/core_refs';
-import { APM_RED_REQUIRED_METRICS } from '../constants';
+import { APM_RED_REQUIRED_METRICS } from '../../common/constants';
+import { mapInChunks, PROBE_CONCURRENCY } from '../utils/apm_auto_detect';
 
 /** A Prometheus data source candidate to check for RED metrics. */
 export interface PrometheusCandidate {
@@ -69,36 +70,36 @@ export const usePrometheusMetricCheck = (candidates: PrometheusCandidate[]) => {
     setLoading(true);
 
     (async () => {
-      const checked = await Promise.all(
-        candidates.map(async (candidate) => {
-          try {
-            const presence = await Promise.all(
-              APM_RED_REQUIRED_METRICS.map(async (metric) => ({
-                metric,
-                exists: await metricExists(candidate.name, metric),
-              }))
-            );
-            const found = presence.filter((p) => p.exists).map((p) => p.metric);
-            const missing = presence.filter((p) => !p.exists).map((p) => p.metric);
-            return {
-              id: candidate.id,
-              name: candidate.name,
-              found,
-              missing,
-              matches: missing.length === 0,
-            } as MetricCheckResult;
-          } catch (error) {
-            return {
-              id: candidate.id,
-              name: candidate.name,
-              found: [],
-              missing: [...APM_RED_REQUIRED_METRICS],
-              matches: false,
-              error: error instanceof Error ? error.message : String(error),
-            } as MetricCheckResult;
-          }
-        })
-      );
+      // Each candidate fires one request per required metric, so probe in
+      // fixed-size concurrent chunks rather than all candidates × metrics at once.
+      const checked = await mapInChunks(candidates, PROBE_CONCURRENCY, async (candidate) => {
+        try {
+          const presence = await Promise.all(
+            APM_RED_REQUIRED_METRICS.map(async (metric) => ({
+              metric,
+              exists: await metricExists(candidate.name, metric),
+            }))
+          );
+          const found = presence.filter((p) => p.exists).map((p) => p.metric);
+          const missing = presence.filter((p) => !p.exists).map((p) => p.metric);
+          return {
+            id: candidate.id,
+            name: candidate.name,
+            found,
+            missing,
+            matches: missing.length === 0,
+          } as MetricCheckResult;
+        } catch (error) {
+          return {
+            id: candidate.id,
+            name: candidate.name,
+            found: [],
+            missing: [...APM_RED_REQUIRED_METRICS],
+            matches: false,
+            error: error instanceof Error ? error.message : String(error),
+          } as MetricCheckResult;
+        }
+      });
 
       if (!cancelled) {
         setResults(checked);

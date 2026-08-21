@@ -22,6 +22,7 @@ import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
 import { coreRefs } from '../../../framework/core_refs';
 import { OSDSavedApmConfigClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/apm_config';
 import { useApmConfig } from '../config/apm_config_context';
+import { useDatasets } from '../shared/hooks/use_apm_config';
 import { useApmDetection } from './hooks/use_apm_detection';
 import { OverviewStep } from './steps/overview_step';
 import { TracesStep } from './steps/traces_step';
@@ -63,6 +64,9 @@ const initialStepState: StepState = { status: 'checking' };
 export const ApmSetupWizardModal = ({ onClose, notifications }: ApmSetupWizardModalProps) => {
   const { config: existingConfig } = useApmConfig();
   const detection = useApmDetection();
+  // Loaded once here and shared with both the traces and services steps, so the
+  // dataset list isn't re-fetched each time the user navigates between them.
+  const datasets = useDatasets();
 
   const [currentStep, setCurrentStep] = useState<WizardStep>('overview');
   const [isSaving, setIsSaving] = useState(false);
@@ -250,6 +254,7 @@ export const ApmSetupWizardModal = ({ onClose, notifications }: ApmSetupWizardMo
         return (
           <TracesStep
             detection={detection}
+            datasets={datasets}
             notifications={notifications}
             state={tracesState}
             onStateChange={setTracesState}
@@ -262,6 +267,7 @@ export const ApmSetupWizardModal = ({ onClose, notifications }: ApmSetupWizardMo
         return (
           <ServicesStep
             detection={detection}
+            datasets={datasets}
             notifications={notifications}
             state={servicesState}
             onStateChange={setServicesState}

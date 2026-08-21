@@ -4,10 +4,10 @@
  */
 
 /*
- * Adapted from src/plugins/explore/public/utils/auto_detect_trace_data.ts and
- * generalized for APM: in addition to traces and correlated logs, this also
- * probes the v2 service map (otel-v2-apm-service-map*). Every detection both
- * matches the naming convention AND validates that the required fields exist.
+ * Detects APM data per data source: traces (otel-v1-apm-span*), correlated logs
+ * (logs-otel-v1*), and the v2 service map (otel-v2-apm-service-map*). Every
+ * detection requires both the naming convention AND that the required fields
+ * exist.
  */
 
 import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
@@ -27,7 +27,7 @@ import {
   APM_TRACES_INDEX_PATTERN,
   APM_TRACES_REQUIRED_FIELDS,
   APM_TRACES_TIME_FIELD_CANDIDATES,
-} from '../constants';
+} from '../../common/constants';
 import { ApmDetectionResult } from '../types';
 
 /** Minimal shape of a field returned by getFieldsForWildcard that we rely on. */
@@ -75,7 +75,6 @@ const hasAllFields = (fields: WildcardField[], required: readonly string[]): boo
  * service map (otel-v2-apm-service-map*), validating required fields for each.
  */
 export async function detectApmData(
-  savedObjectsClient: SavedObjectsClientContract,
   indexPatternsService: IndexPatternsContract,
   dataSourceId?: string
 ): Promise<ApmDetectionResult> {
@@ -144,10 +143,10 @@ export async function detectApmData(
 /** Max data sources probed for the picker; keeps the preview bounded. */
 export const MAX_PROBED_DATA_SOURCES = 50;
 /** How many data sources to probe concurrently (each probe = 3 field_caps). */
-const PROBE_CONCURRENCY = 6;
+export const PROBE_CONCURRENCY = 6;
 
 /** Run an async mapper over items in fixed-size concurrent chunks. */
-async function mapInChunks<T, R>(
+export async function mapInChunks<T, R>(
   items: T[],
   size: number,
   mapper: (item: T) => Promise<R>
@@ -196,7 +195,7 @@ export async function detectApmDataAcrossDataSources(
 
   return mapInChunks(candidates, PROBE_CONCURRENCY, async (candidate) => {
     try {
-      const detection = await detectApmData(savedObjectsClient, indexPatternsService, candidate.id);
+      const detection = await detectApmData(indexPatternsService, candidate.id);
       return { ...detection, dataSourceId: candidate.id, dataSourceTitle: candidate.title };
     } catch {
       return { ...emptyResult(candidate.id), dataSourceTitle: candidate.title };
