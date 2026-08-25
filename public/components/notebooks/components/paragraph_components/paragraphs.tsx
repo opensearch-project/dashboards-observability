@@ -52,6 +52,29 @@ import { ObservabilitySavedVisualization } from '../../../../services/saved_obje
 import { ParaInput } from './para_input';
 import { ParaOutput } from './para_output';
 
+// Id of core's dashboard "Maximize panel" action (ExpandPanelAction). Its in-place
+// expand is broken when a visualization is embedded in a notebook: the panel overflows
+// the window and is hidden behind the chrome header, so it cannot be closed. We disable
+// the action rather than offer a broken control. See
+// https://github.com/opensearch-project/dashboards-observability/issues/2529
+const EXPAND_PANEL_ACTION_ID = 'togglePanel';
+
+// Disables the "Maximize panel" action on every panel of a dashboard input,
+// covering visualizations saved before this behavior existed.
+const disableExpandPanelAction = (input: DashboardContainerInput): DashboardContainerInput => {
+  const panels = Object.entries(input.panels ?? {}).reduce(
+    (acc, [key, panel]) => {
+      const disabledActions = Array.from(
+        new Set([...(panel.explicitInput?.disabledActions ?? []), EXPAND_PANEL_ACTION_ID])
+      );
+      acc[key] = { ...panel, explicitInput: { ...panel.explicitInput, disabledActions } };
+      return acc;
+    },
+    {} as DashboardContainerInput['panels']
+  );
+  return { ...input, panels };
+};
+
 /*
  * "Paragraphs" component is used to render cells of the notebook open and "add para div" between paragraphs
  *
@@ -240,9 +263,13 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
 
   useEffect(() => {
     if (para.isVizualisation) {
-      if (para.visSavedObjId !== '') setVisInput(JSON.parse(para.vizObjectInput));
+      if (para.visSavedObjId !== '')
+        setVisInput(disableExpandPanelAction(JSON.parse(para.vizObjectInput)));
       fetchVisualizations();
     }
+    // Intentionally only re-runs on data source change; re-running on every `para`
+    // update would re-fetch visualizations and reset visInput unnecessarily.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSourceMDSId]);
 
   const createDashboardVizObject = (objectId: string) => {
@@ -263,6 +290,9 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
           explicitInput: {
             id: '1',
             savedObjectId: objectId,
+            // Disable core's "Maximize panel"; it is broken when embedded in a
+            // notebook (see EXPAND_PANEL_ACTION_ID).
+            disabledActions: [EXPAND_PANEL_ACTION_ID],
           },
         },
       },
