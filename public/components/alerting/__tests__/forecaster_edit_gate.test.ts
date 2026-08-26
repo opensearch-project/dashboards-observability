@@ -5,7 +5,11 @@
 
 import { getEditLifecycleBlocker, humanizeAdUpdateError } from '../create_ad_rule_flyout';
 import { isAdResourceRunning } from '../shared_constants';
-import type { ADForecaster, MonitorStatus, UnifiedRuleSummary } from '../../../../common/types/alerting';
+import type {
+  ADForecaster,
+  MonitorStatus,
+  UnifiedRuleSummary,
+} from '../../../../common/types/alerting';
 
 /**
  * BUG-AD1: the forecaster edit gate (getEditLifecycleBlocker) decided "is it running"
@@ -75,21 +79,27 @@ describe('forecaster edit gate vs shared running-state predicate (BUG-AD1)', () 
     // Regression guard for the exact state the shared predicate treats as running but
     // the old hand-maintained list omitted.
     expect(isAdResourceRunning(summaryForStatus('Initializing'))).toBe(true);
-    expect(getEditLifecycleBlocker('forecaster', rawForecasterForStatus('Initializing'), false)).not.toBeNull();
+    expect(
+      getEditLifecycleBlocker('forecaster', rawForecasterForStatus('Initializing'), false)
+    ).not.toBeNull();
   });
 
   it('routes an initializing test to the dedicated "forecaster-test" blocker', () => {
-    expect(getEditLifecycleBlocker('forecaster', rawForecasterForStatus('Initializing test'), false)).toBe(
-      'forecaster-test'
-    );
+    expect(
+      getEditLifecycleBlocker('forecaster', rawForecasterForStatus('Initializing test'), false)
+    ).toBe('forecaster-test');
   });
 
   it('does not block once the forecaster has been stopped for edit', () => {
-    expect(getEditLifecycleBlocker('forecaster', rawForecasterForStatus('Running'), true)).toBeNull();
+    expect(
+      getEditLifecycleBlocker('forecaster', rawForecasterForStatus('Running'), true)
+    ).toBeNull();
   });
 
   it('gates an enabled forecaster even when its status is not a running state', () => {
-    expect(getEditLifecycleBlocker('forecaster', rawForecasterForStatus('Stopped', true), false)).not.toBeNull();
+    expect(
+      getEditLifecycleBlocker('forecaster', rawForecasterForStatus('Stopped', true), false)
+    ).not.toBeNull();
   });
 });
 
