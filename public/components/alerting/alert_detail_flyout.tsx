@@ -196,13 +196,36 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     return undefined;
   }, [alert.datasourceId, alert.datasourceType, allLabels]);
 
-  const monitorDisplayName = (allLabels as Record<string, string>)?.monitor_name;
-  const sourceLinkLabel = (allLabels as Record<string, string>)?.slo_id
+  const sloId = (allLabels as Record<string, string>)?.slo_id;
+  const sourceLinkLabel = sloId
     ? i18n.translate('observability.alerting.alertDetailFlyout.openSlo', {
         defaultMessage: 'Open SLO',
       })
     : i18n.translate('observability.alerting.alertDetailFlyout.openMonitor', {
         defaultMessage: 'Open rule',
+      });
+
+  // The description-list row names the *source*, so it must never fall back to
+  // the action label (`sourceLinkLabel`) — that both duplicates the header
+  // button verbatim and mislabels an SLO as if "Open SLO" were its name.
+  // Preference order per backend: the monitor's own name (OpenSearch), the SLO
+  // name then its id (SLO burn-rate alerts, both carry `slo_name`/`slo_id` per
+  // `slo_promql_generator`), then the Prometheus `alertname`, then the raw
+  // `monitor_id`. `sourceLink` only exists when one of `slo_id` / `monitor_id` /
+  // `alertname` is present, so this chain always resolves to a string.
+  const labelRecord = allLabels as Record<string, string>;
+  const sourceDisplayName =
+    labelRecord?.monitor_name ??
+    labelRecord?.slo_name ??
+    sloId ??
+    labelRecord?.alertname ??
+    labelRecord?.monitor_id;
+  const sourceRowTitle = sloId
+    ? i18n.translate('observability.alerting.alertDetailFlyout.sourceSlo', {
+        defaultMessage: 'Source SLO',
+      })
+    : i18n.translate('observability.alerting.alertDetailFlyout.sourceRule', {
+        defaultMessage: 'Source rule',
       });
 
   const navigateToSource = () => {
@@ -383,15 +406,13 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
               ...(sourceLink
                 ? [
                     {
-                      title: i18n.translate('observability.alerting.alertDetailFlyout.sourceRule', {
-                        defaultMessage: 'Source rule',
-                      }),
+                      title: sourceRowTitle,
                       description: (
                         <EuiLink
                           onClick={navigateToSource}
                           data-test-subj="alertDetailSourceRuleLink"
                         >
-                          {monitorDisplayName ?? sourceLinkLabel}
+                          {sourceDisplayName}
                         </EuiLink>
                       ),
                     },

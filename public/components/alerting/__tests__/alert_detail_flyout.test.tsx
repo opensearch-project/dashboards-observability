@@ -426,9 +426,9 @@ describe('AlertDetailFlyout', () => {
       const sloAlert: UnifiedAlertSummary = {
         ...baseAlert,
         datasourceType: 'prometheus',
-        labels: { slo_id: 'slo/api ok', alertname: 'BurnRate' },
+        labels: { slo_id: 'slo/api ok', slo_name: 'API availability', alertname: 'BurnRate' },
       };
-      const { getByText } = render(
+      const { getByText, getByTestId } = render(
         <AlertDetailFlyout
           alert={sloAlert}
           datasources={datasources}
@@ -436,8 +436,11 @@ describe('AlertDetailFlyout', () => {
           onAcknowledge={jest.fn()}
         />
       );
-      // The action is labelled "Open SLO" whenever `slo_id` is present.
-      fireEvent.click(getByText('Open SLO'));
+      // The action is labelled "Open SLO" whenever `slo_id` is present, and the
+      // source row names the SLO instead of repeating the action label.
+      expect(getByText('Source SLO')).toBeInTheDocument();
+      expect(getByTestId('alertDetailSourceRuleLink')).toHaveTextContent('API availability');
+      fireEvent.click(getByTestId('alertDetailOpenSource'));
       expect(onClose).toHaveBeenCalledTimes(1);
       // Cross-app navigation to the SLO detail route, with the id encoded.
       expect(navigateToApp).toHaveBeenCalledWith(observabilityApmSloID, {
@@ -449,9 +452,9 @@ describe('AlertDetailFlyout', () => {
       const monitorAlert: UnifiedAlertSummary = {
         ...baseAlert,
         datasourceType: 'opensearch',
-        labels: { monitor_id: 'mon-7' },
+        labels: { monitor_id: 'mon-7', monitor_name: 'High latency' },
       };
-      const { getByText } = render(
+      const { getByText, getByTestId } = render(
         <AlertDetailFlyout
           alert={monitorAlert}
           datasources={datasources}
@@ -459,10 +462,31 @@ describe('AlertDetailFlyout', () => {
           onAcknowledge={jest.fn()}
         />
       );
-      fireEvent.click(getByText('Open rule'));
+      expect(getByText('Source rule')).toBeInTheDocument();
+      expect(getByTestId('alertDetailSourceRuleLink')).toHaveTextContent('High latency');
+      fireEvent.click(getByTestId('alertDetailOpenSource'));
       // Rule deep-links stay inside the alerting app (hash-only), so
       // navigateToApp must not fire.
       expect(navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the source id, never the action label, when no name label exists', () => {
+      const namelessAlert: UnifiedAlertSummary = {
+        ...baseAlert,
+        datasourceType: 'opensearch',
+        labels: { monitor_id: 'mon-7' },
+      };
+      const { getByTestId } = render(
+        <AlertDetailFlyout
+          alert={namelessAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const sourceRow = getByTestId('alertDetailSourceRuleLink');
+      expect(sourceRow).toHaveTextContent('mon-7');
+      expect(sourceRow).not.toHaveTextContent('Open rule');
     });
   });
 
