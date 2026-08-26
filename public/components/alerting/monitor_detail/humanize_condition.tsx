@@ -41,9 +41,12 @@ const makeAccordionId = htmlIdGenerator('humanizeCondition');
 export const CustomScriptCondition: React.FC<{ source: string }> = ({ source }) => {
   // Stable across re-renders so the disclosure keeps its open/closed state.
   const [accordionId] = useState(makeAccordionId);
-  const label = i18n.translate('observability.alerting.monitorDetailFlyout.condition.customScript', {
-    defaultMessage: 'Custom script',
-  });
+  const label = i18n.translate(
+    'observability.alerting.monitorDetailFlyout.condition.customScript',
+    {
+      defaultMessage: 'Custom script',
+    }
+  );
   return (
     <>
       <span data-test-subj="monitorConditionCustomScript">{label}</span>{' '}

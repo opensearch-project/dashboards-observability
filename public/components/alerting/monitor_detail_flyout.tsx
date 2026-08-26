@@ -111,9 +111,7 @@ export function resolveDatasourceName(
   datasources: Datasource[] | undefined,
   datasourceId: string | undefined
 ): string {
-  return (
-    datasources?.find((d) => d.id === datasourceId)?.name || datasourceId || EMPTY_VALUE
-  );
+  return datasources?.find((d) => d.id === datasourceId)?.name || datasourceId || EMPTY_VALUE;
 }
 
 /**
