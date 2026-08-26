@@ -20,6 +20,7 @@
 import React, { useMemo } from 'react';
 import moment from 'moment-timezone';
 import { EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
 import { UnifiedAlertSummary } from '../../../common/types/alerting';
@@ -125,13 +126,20 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
       info: number;
     }> = [];
 
-    // Clamp each alert's effective start to the window start so alerts that
-    // began before the window but are still-firing / resolved inside it get
-    // credited to the first bucket. Matches the OS backend's interval-overlap
-    // filter (opensearch_backend.ts) — otherwise the summary cards show "1
-    // alert" while the timeline shows zero bars for the same data. Also a
-    // perf win: parse each startTime once instead of per-bucket.
-    const alertBucketStart = alerts.map((a) => Math.max(startMs, new Date(a.startTime).getTime()));
+    // Parse each alert's start time once (perf: avoid re-parsing per bucket).
+    const alertStartMs = alerts.map((a) => new Date(a.startTime).getTime());
+
+    // This histogram counts alert *starts* per time bucket. The OS backend's
+    // interval-overlap filter (opensearch_backend.ts) also returns alerts that
+    // began BEFORE the picked window but are still firing / recently resolved
+    // inside it. Those alerts are real, but they did not *start* in any visible
+    // bucket — the previous `Math.max(startMs, ...)` clamp forced them into
+    // bucket 0, painting a false spike at the left edge of the timeline. We
+    // instead leave the true start time unclamped (so the bucket filter below
+    // naturally excludes anything before `startMs`) and surface the excluded
+    // count in the chart title, so the data is honest rather than silently
+    // dropped and users can still reconcile it against the summary cards.
+    const excludedBeforeWindow = alertStartMs.filter((t) => t < startMs).length;
 
     const tz = resolveDisplayTz();
 
@@ -140,7 +148,7 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
       const bucketEnd = bucketStart + bucketDuration;
       const label = formatBucketLabel(bucketStart, rangeMs, tz);
       const inBucket = alerts.filter(
-        (_, idx) => alertBucketStart[idx] >= bucketStart && alertBucketStart[idx] < bucketEnd
+        (_, idx) => alertStartMs[idx] >= bucketStart && alertStartMs[idx] < bucketEnd
       );
       buckets.push({
         label,
@@ -162,6 +170,25 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
     ];
 
     return {
+      // Surface alerts that started before the window (see excludedBeforeWindow
+      // above) as a small subtitle instead of silently dropping them from the
+      // bars. Omitted entirely when nothing was excluded.
+      title:
+        excludedBeforeWindow > 0
+          ? {
+              left: 'center' as const,
+              top: 0,
+              text: i18n.translate(
+                'observability.alerting.alertsCharts.excludedBeforeWindow',
+                {
+                  defaultMessage:
+                    '{count, plural, one {# alert started} other {# alerts started}} before this window',
+                  values: { count: excludedBeforeWindow },
+                }
+              ),
+              textStyle: { fontSize: 10, fontWeight: 'normal' as const, color: '#98A2B3' },
+            }
+          : undefined,
       tooltip: {
         trigger: 'axis' as const,
         axisPointer: { type: 'shadow' as const },
@@ -172,7 +199,8 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
         confine: false,
       },
       legend: { bottom: 0, left: 'center', textStyle: { fontSize: 10 } },
-      grid: { top: 10, right: 15, bottom: 36, left: 40 },
+      // Reserve extra headroom for the excluded-count subtitle when present.
+      grid: { top: excludedBeforeWindow > 0 ? 24 : 10, right: 15, bottom: 36, left: 44 },
       xAxis: {
         type: 'category' as const,
         data: timeLabels,
@@ -182,6 +210,12 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
       },
       yAxis: {
         type: 'value' as const,
+        name: i18n.translate('observability.alerting.alertsCharts.yAxisTitle', {
+          defaultMessage: 'Alerts',
+        }),
+        nameLocation: 'middle' as const,
+        nameGap: 30,
+        nameTextStyle: { fontSize: 10, color: '#98A2B3' },
         axisLabel: { fontSize: 9, color: '#98A2B3' },
         splitLine: { lineStyle: { color: '#EDF0F5' } },
         minInterval: 1,
