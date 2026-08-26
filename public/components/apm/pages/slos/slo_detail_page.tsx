@@ -31,6 +31,7 @@ import {
   EuiSpacer,
   EuiStat,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
@@ -43,10 +44,11 @@ import { usePersistentTimeRange } from '../../shared/hooks/use_persistent_time_r
 import { SloVisualizations } from './slo_visualizations';
 import { SloMetadataPanel } from './slo_metadata_panel';
 import { SloAlertsPanel } from './slo_alerts_panel';
-import type { RuleHealthResponse, SloApiClient } from './slo_api_client';
+import type { RuleHealthResponse, SloApiClient, SloRuleHealthState } from './slo_api_client';
 import type {
   Objective,
   SloDocument,
+  SloHealthState,
   SloLiveStatus,
   SloSummary,
 } from '../../../../../common/slo/slo_types';
@@ -107,6 +109,39 @@ function iconSummaryFromDoc(doc: SloDocument): SloSummary {
   };
 }
 
+/**
+ * Rule-health re-poll bounds (F-CRUD2). A freshly-created SLO's rule groups
+ * take a little while to propagate through the Cortex/AMP ruler, during which
+ * the health probe legitimately reports them as missing. Rather than alarm
+ * immediately, we re-probe up to {@link RULE_HEALTH_MAX_RETRIES} times, one
+ * every {@link RULE_HEALTH_RETRY_INTERVAL_MS}, and only escalate to the
+ * destructive "rules missing" callout once those retries are exhausted. The
+ * bound also guarantees the polling can't leak or run forever.
+ */
+export const RULE_HEALTH_MAX_RETRIES = 5;
+export const RULE_HEALTH_RETRY_INTERVAL_MS = 5000;
+
+/**
+ * Fold the fresh rule-health probe and the persisted live-status flag into a
+ * single callout mode. The probe wins whenever it reports a concrete state;
+ * we fall back to the live-status flag so the callout still surfaces before
+ * the first probe returns. Exported so the grace-window logic can be
+ * unit-tested in isolation.
+ */
+export function deriveSloCalloutState(
+  ruleHealthState: SloRuleHealthState | undefined,
+  liveState: SloHealthState
+): 'rules_missing' | 'rules_partial' | 'ruler_unreachable' | null {
+  if (
+    ruleHealthState === 'rules_missing' ||
+    ruleHealthState === 'rules_partial' ||
+    ruleHealthState === 'ruler_unreachable'
+  ) {
+    return ruleHealthState;
+  }
+  return liveState === 'rules_missing' ? 'rules_missing' : null;
+}
+
 interface DetailHeaderProps {
   doc: FullDoc;
   primaryObjective: Objective;
@@ -163,7 +198,12 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
 
   return (
     <EuiPanel data-test-subj="slosDetailHeader">
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      {/* `wrap` + responsive lets the health dot / title / hero stat stack at
+          narrow widths instead of the title being squeezed to one glyph per
+          line (CLAR14 / BUG-S1). The title item below carries `minWidth: 0`
+          so it can shrink below its intrinsic content width and wrap on word
+          boundaries rather than per character. */}
+      <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
         <EuiFlexItem grow={false}>
           <EuiHealth
             color={healthColor}
@@ -176,9 +216,12 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
             <span style={{ fontWeight: 600 }}>{healthLabel}</span>
           </EuiHealth>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0 }}>
           <EuiText size="m">
-            <h2 style={{ marginBottom: 4 }} data-test-subj="slosDetailTitle">
+            <h2
+              style={{ marginBottom: 4, overflowWrap: 'break-word', wordBreak: 'break-word' }}
+              data-test-subj="slosDetailTitle"
+            >
               {doc.spec.name}
             </h2>
           </EuiText>
@@ -272,7 +315,25 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
                   {' · '}
                   <span style={{ ...TABULAR_NUMS_STYLE, color: deltaColor, fontWeight: 600 }}>
                     {deltaSign}
-                    {attainmentDelta.toFixed(SLO_PRECISION.attainment)} pp
+                    {attainmentDelta.toFixed(SLO_PRECISION.attainment)}{' '}
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'observability.apm.slo.detail.percentagePointsTooltip',
+                        { defaultMessage: 'percentage points' }
+                      )}
+                    >
+                      <abbr
+                        title={i18n.translate(
+                          'observability.apm.slo.detail.percentagePointsTooltip',
+                          { defaultMessage: 'percentage points' }
+                        )}
+                        data-test-subj="slosDetailAttainmentDeltaUnit"
+                      >
+                        {i18n.translate('observability.apm.slo.detail.percentagePointsAbbr', {
+                          defaultMessage: 'pp',
+                        })}
+                      </abbr>
+                    </EuiToolTip>
                   </span>
                 </>
               )}
@@ -463,6 +524,11 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
   const advancedRef = useRef<HTMLDivElement | null>(null);
   const [ruleHealth, setRuleHealth] = useState<RuleHealthResponse | null>(null);
   const [ruleHealthLoading, setRuleHealthLoading] = useState(false);
+  // Count of re-probes we've fired while rule health reads as missing/partial
+  // (F-CRUD2). Bounded by RULE_HEALTH_MAX_RETRIES; drives both the polling
+  // effect and the grace-window decision (soft "propagating" callout vs. the
+  // destructive "missing" one).
+  const [ruleHealthRetries, setRuleHealthRetries] = useState(0);
 
   const onRefresh = useCallback(() => {
     setRefreshTrigger((v) => v + 1);
@@ -536,6 +602,37 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       cancelled = true;
     };
   }, [loadRuleHealth]);
+
+  // Reset the retry budget whenever we navigate to a different SLO so the
+  // grace window starts fresh (breadcrumb SLO → SLO navigation reuses the
+  // component instance).
+  useEffect(() => {
+    setRuleHealthRetries(0);
+  }, [id]);
+
+  // While rule health reads as missing/partial, re-probe on a bounded
+  // interval (F-CRUD2). A freshly-created SLO's rule groups take time to
+  // propagate through the Cortex/AMP ruler, so a "missing" reading is
+  // routinely transient right after create. Each probe that still comes back
+  // missing schedules the next one until RULE_HEALTH_MAX_RETRIES is hit; once
+  // health recovers we reset the budget so a later regression re-polls. The
+  // timer is cleared on unmount and whenever the inputs change, so it can't
+  // leak or poll forever.
+  useEffect(() => {
+    if (!doc) return undefined;
+    const calloutState = deriveSloCalloutState(ruleHealth?.state, doc.liveStatus.state);
+    const missing = calloutState === 'rules_missing' || calloutState === 'rules_partial';
+    if (!missing) {
+      if (ruleHealthRetries !== 0) setRuleHealthRetries(0);
+      return undefined;
+    }
+    if (ruleHealthRetries >= RULE_HEALTH_MAX_RETRIES) return undefined;
+    const timer = setTimeout(() => {
+      setRuleHealthRetries((n) => n + 1);
+      loadRuleHealth();
+    }, RULE_HEALTH_RETRY_INTERVAL_MS);
+    return () => clearTimeout(timer);
+  }, [doc, ruleHealth, ruleHealthRetries, loadRuleHealth]);
 
   const onRepair = useCallback(async () => {
     try {
@@ -685,7 +782,53 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     );
   }
 
-  if (!doc) return null;
+  // We only reach here with no doc once loading has finished and no fetch
+  // error was raised (both handled above) — i.e. the id genuinely resolved to
+  // nothing. Surface an explicit "not found" state (CLAR16) rather than a
+  // blank page, distinct from the fetch-error branch above. The loading guard
+  // upstream ensures a still-resolving request never flashes this prompt.
+  if (!doc) {
+    return (
+      <EuiPage>
+        <EuiPageBody>
+          <EuiPanel>
+            <EuiEmptyPrompt
+              iconType="search"
+              data-test-subj="slosDetailNotFound"
+              title={
+                <h2>
+                  {i18n.translate('observability.apm.slo.detail.notFound.title', {
+                    defaultMessage: 'SLO not found',
+                  })}
+                </h2>
+              }
+              body={
+                <p>
+                  {i18n.translate('observability.apm.slo.detail.notFound.body', {
+                    defaultMessage:
+                      "We couldn't find an SLO with the id \"{id}\". It may have been deleted, or the link may be out of date.",
+                    values: { id },
+                  })}
+                </p>
+              }
+              actions={
+                <EuiButton
+                  fill
+                  iconType="arrowLeft"
+                  onClick={() => history.push('/slos')}
+                  data-test-subj="slosDetailNotFoundBack"
+                >
+                  {i18n.translate('observability.apm.slo.detail.notFound.backToList', {
+                    defaultMessage: 'Back to SLOs',
+                  })}
+                </EuiButton>
+              }
+            />
+          </EuiPanel>
+        </EuiPageBody>
+      </EuiPage>
+    );
+  }
 
   const sli = doc.spec.sli.type === 'single' ? doc.spec.sli : null;
   const primaryObjective = doc.spec.objectives[0];
@@ -696,15 +839,18 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
   // rule-health probe is preferred when available; fall back to the
   // persisted live-status flag so the callout still shows when the probe
   // hasn't returned yet.
-  const ruleHealthState = ruleHealth?.state;
-  const derivedCalloutState: 'rules_missing' | 'rules_partial' | 'ruler_unreachable' | null =
-    ruleHealthState === 'rules_missing' ||
-    ruleHealthState === 'rules_partial' ||
-    ruleHealthState === 'ruler_unreachable'
-      ? ruleHealthState
-      : doc.liveStatus.state === 'rules_missing'
-        ? 'rules_missing'
-        : null;
+  const derivedCalloutState = deriveSloCalloutState(ruleHealth?.state, doc.liveStatus.state);
+  const rulesMissing =
+    derivedCalloutState === 'rules_missing' || derivedCalloutState === 'rules_partial';
+  // Grace window (F-CRUD2): until the bounded re-probes are exhausted, a
+  // "missing" reading is treated as still-propagating and shown with a soft,
+  // non-destructive callout. Only after the retries run out do we escalate to
+  // the alarming "rules missing" callout with its Restore/Delete CTAs — so a
+  // freshly-created SLO whose rules are simply mid-propagation never flashes a
+  // scary false alarm.
+  const ruleHealthRetriesExhausted = ruleHealthRetries >= RULE_HEALTH_MAX_RETRIES;
+  const showRulesPropagating = rulesMissing && !ruleHealthRetriesExhausted;
+  const showRulesMissingAlarm = rulesMissing && ruleHealthRetriesExhausted;
 
   // Recording-rule names from the persisted provisioning record. Dedup
   // shape: SLOs carry `recordingFingerprints` (objective name → fingerprint).
@@ -830,38 +976,37 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       compressed
     />,
     <EuiButtonEmpty
-      key="viewRules"
+      key="viewAlerts"
       size="s"
       iconType="popout"
-      data-test-subj="slosDetailViewRules"
+      data-test-subj="slosDetailViewAlerts"
       onClick={() => {
-        // Deep-link to Alert Manager's Rules tab filtered to this SLO's
-        // alert rules. The alarms page parses `?q=…` from the hash and
-        // seeds MonitorsTable's searchQuery (alarms_page.tsx ::
-        // parseAlarmsHashRoute). matchesSearch supports `label:value`
-        // syntax, and every alert rule we emit carries `slo_id=<id>`,
-        // so the table narrows to exactly this SLO's alert rules.
-        // Recording rules don't surface in Alert Manager (they're
-        // filtered to `type === 'alerting'` in alert_service.ts) — the
-        // recording-rule list on this page is informational only.
+        // Deep-link to Alert Manager's *Alerts* tab (the firing alerts view)
+        // rather than the Rules definition list (OBS1). Operators arriving
+        // from an SLO page overwhelmingly want to see what is firing right
+        // now, not the rule definitions. The alarms page's
+        // `parseAlarmsHashRoute` maps the `#/alerts` segment to the Alerts
+        // tab and applies the `ds=<datasourceId>` param to the datasource
+        // selection regardless of which tab is active — so the Alerts view
+        // lands with this SLO's Prometheus datasource already selected.
         //
-        // Also pass `ds=<spec.datasourceId>` so the alarms page can
-        // include the SLO's Prometheus datasource in `selectedDsIds`.
-        // Without this, the search filter narrows to zero rows whenever
-        // the user's last-used datasource selection didn't include the
-        // SLO's Prometheus DS — see BUG-12 in the bug report.
+        // `q=slo_id:<id>` is carried through for the day the Alerts tab
+        // honours the deep-link query the way the Rules tab already does
+        // (today only MonitorsTable seeds its search from `deepLink.q`); it
+        // is harmless until then. The recording-rule list on this page stays
+        // informational — recording rules never surface in Alert Manager.
         const params = new URLSearchParams({
           q: `slo_id:${doc.id}`,
           ds: doc.spec.datasourceId,
         });
         coreRefs?.application?.navigateToApp(observabilityAlertingID, {
-          path: `#/rules?${params.toString()}`,
+          path: `#/alerts?${params.toString()}`,
         });
         window.dispatchEvent(new HashChangeEvent('hashchange'));
       }}
     >
-      {i18n.translate('observability.apm.slo.detail.viewAlertRulesButton', {
-        defaultMessage: 'View alert rules',
+      {i18n.translate('observability.apm.slo.detail.viewAlertsButton', {
+        defaultMessage: 'View alerts',
       })}
     </EuiButtonEmpty>,
     <EuiButton key="toggle" size="s" onClick={onToggleEnabled} data-test-subj="slosDetailToggle">
@@ -901,7 +1046,49 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
 
             <EuiSpacer size="m" />
 
-            {derivedCalloutState === 'rules_missing' || derivedCalloutState === 'rules_partial' ? (
+            {showRulesPropagating ? (
+              <>
+                <EuiCallOut
+                  color="primary"
+                  iconType="clock"
+                  title={i18n.translate(
+                    'observability.apm.slo.detail.rulesPropagatingCallout.title',
+                    { defaultMessage: 'Setting up rule groups' }
+                  )}
+                  data-test-subj="slosDetailRulePropagatingCallout"
+                >
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="m" />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <p>
+                        {i18n.translate(
+                          'observability.apm.slo.detail.rulesPropagatingCallout.body',
+                          {
+                            defaultMessage:
+                              "This SLO's rule groups are still propagating to the ruler. This is normal for a few moments after creating or editing an SLO — alerts and status will start updating once propagation finishes.",
+                          }
+                        )}
+                      </p>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="refresh"
+                    onClick={() => loadRuleHealth()}
+                    isLoading={ruleHealthLoading}
+                    data-test-subj="slosDetailRulePropagatingCheckNow"
+                  >
+                    {i18n.translate('observability.apm.slo.detail.rulesPropagatingCallout.checkNow', {
+                      defaultMessage: 'Check now',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            ) : showRulesMissingAlarm ? (
               <>
                 <EuiCallOut
                   color="danger"
