@@ -56,7 +56,13 @@ export const CustomScriptCondition: React.FC<{ source: string }> = ({ source }) 
         )}
       >
         <div data-test-subj="monitorConditionCustomScriptSource">
-          <EuiCodeBlock language="painless" fontSize="s" paddingSize="s" isCopyable>
+          {/*
+            `painless` is not a registered refractor language, and EuiCodeBlock
+            throws "Unknown language" at render for anything unregistered. Use
+            `java`, which Painless is a subset of, so the block highlights
+            instead of crashing the flyout.
+          */}
+          <EuiCodeBlock language="java" fontSize="s" paddingSize="s" isCopyable>
             {source}
           </EuiCodeBlock>
         </div>

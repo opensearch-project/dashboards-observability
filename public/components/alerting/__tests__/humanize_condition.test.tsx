@@ -4,12 +4,18 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, within } from '@testing-library/react';
 import { humanizeCondition } from '../monitor_detail/humanize_condition';
 
 // humanizeCondition returns either a translated string or a React element
 // (the "Custom script" fallback). Wrap in a host element so both render.
-const renderCondition = (condition: string) => render(<div>{humanizeCondition(condition)}</div>);
+// Queries are scoped to this render's own container: several tests render more
+// than once, and RTL's render-result queries are bound to `document.body`, so
+// unscoped ones would match every previous render too.
+const renderCondition = (condition: string) => {
+  const { container } = render(<div>{humanizeCondition(condition)}</div>);
+  return within(container);
+};
 
 describe('humanizeCondition', () => {
   it('translates `return true` to "Always trigger" (case-insensitive)', () => {
