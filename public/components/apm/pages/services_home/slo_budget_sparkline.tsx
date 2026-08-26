@@ -94,7 +94,7 @@ const t = {
     }),
 };
 
-function buildOption(data: Array<[number, number]>): EChartsOption {
+export function buildOption(data: Array<[number, number]>): EChartsOption {
   return {
     grid: { left: 0, right: 0, top: 2, bottom: 2, containLabel: false },
     tooltip: {
@@ -125,7 +125,9 @@ function buildOption(data: Array<[number, number]>): EChartsOption {
       {
         type: 'line',
         data,
-        smooth: true,
+        // Discrete/step data: smoothing rounds off the short-lived burn spikes
+        // that are the whole point of this trend line, so keep it linear.
+        smooth: false,
         symbol: 'none',
         lineStyle: { color: euiThemeVars.euiColorPrimary, width: 1.5 },
         areaStyle: { color: euiThemeVars.euiColorPrimary, opacity: 0.12 },

@@ -151,6 +151,37 @@ describe('buildBurnRateOption', () => {
     expect(secondMark.label.formatter).toContain('ticket');
   });
 
+  it('tooltip labels the timezone and shows each tier delta versus its threshold (m3)', () => {
+    const opt = buildBurnRateOption({
+      tz: 'UTC',
+      tiers: [
+        {
+          label: 'Page · Quick',
+          severity: 'page',
+          multiplier: 14,
+          color: '#A00',
+          data: [[0, 20]],
+        },
+        {
+          label: 'Ticket · Slow',
+          severity: 'ticket',
+          multiplier: 6,
+          color: '#0A0',
+          data: [[0, 2]],
+        },
+      ],
+    });
+    const tooltip = opt.tooltip as { formatter: (p: unknown) => string };
+    const html = tooltip.formatter([
+      { axisValue: 0, value: [0, 20, 20], seriesName: 'Page · Quick', color: '#A00' },
+      { axisValue: 0, value: [0, 2, 2], seriesName: 'Ticket · Slow', color: '#0A0' },
+    ]);
+    expect(html).toContain('UTC');
+    // 20x is 6x over the 14x threshold; 2x is 4x under the 6x threshold.
+    expect(html).toContain('6x over');
+    expect(html).toContain('4x under');
+  });
+
   it('uses a log10 yAxis snapped to the next decade above the highest threshold or sample', () => {
     const opt = buildBurnRateOption({
       tiers: [
