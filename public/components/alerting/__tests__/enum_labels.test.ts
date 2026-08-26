@@ -7,10 +7,15 @@ import {
   EMPTY_VALUE,
   SEVERITY_LABELS,
   STATE_LABELS,
+  getMonitorStateLabel,
   getSeverityLabel,
   getStateLabel,
 } from '../enum_labels';
-import type { UnifiedAlertSeverity, UnifiedAlertState } from '../../../../common/types/alerting';
+import type {
+  MonitorHealthStatus,
+  UnifiedAlertSeverity,
+  UnifiedAlertState,
+} from '../../../../common/types/alerting';
 
 const ALL_SEVERITIES: UnifiedAlertSeverity[] = ['critical', 'high', 'medium', 'low', 'info'];
 const ALL_STATES: UnifiedAlertState[] = [
@@ -60,5 +65,39 @@ describe('enum_labels', () => {
   it('maps known values through the label tables', () => {
     expect(getSeverityLabel('critical')).toBe(SEVERITY_LABELS.critical);
     expect(getStateLabel('acknowledged')).toBe(STATE_LABELS.acknowledged);
+  });
+
+  describe('getMonitorStateLabel', () => {
+    it('title-cases the lowercase rule-status tokens', () => {
+      expect(getMonitorStateLabel('active')).toBe('Active');
+      expect(getMonitorStateLabel('pending')).toBe('Pending');
+      expect(getMonitorStateLabel('muted')).toBe('Muted');
+      expect(getMonitorStateLabel('disabled')).toBe('Disabled');
+    });
+
+    it('covers every health status with a non-raw label', () => {
+      const ALL_HEALTH: MonitorHealthStatus[] = ['healthy', 'failing', 'no_data'];
+      ALL_HEALTH.forEach((health) => {
+        const label = getMonitorStateLabel(health);
+        expect(label).toBeTruthy();
+        expect(label).not.toBe(health);
+      });
+      // `no_data` in particular must not leak the underscore into the UI.
+      expect(getMonitorStateLabel('no_data')).toBe('No data');
+    });
+
+    it('passes through the AD/forecaster statuses, which already read as prose', () => {
+      // These arrive from the anomaly-detection plugin already display-ready;
+      // re-casing them would corrupt wording like "Awaiting data to init".
+      expect(getMonitorStateLabel('Running')).toBe('Running');
+      expect(getMonitorStateLabel('Awaiting data to init')).toBe('Awaiting data to init');
+      expect(getMonitorStateLabel('Initialization failure')).toBe('Initialization failure');
+    });
+
+    it('returns the empty placeholder for missing values', () => {
+      expect(getMonitorStateLabel(undefined)).toBe(EMPTY_VALUE);
+      expect(getMonitorStateLabel(null)).toBe(EMPTY_VALUE);
+      expect(getMonitorStateLabel('')).toBe(EMPTY_VALUE);
+    });
   });
 });

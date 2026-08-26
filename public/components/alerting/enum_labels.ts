@@ -84,3 +84,44 @@ export function getStateLabel(state?: string | null): string {
   if (!state) return EMPTY_VALUE;
   return STATE_LABELS[state as UnifiedAlertState] ?? humanizeUnknown(state);
 }
+
+/**
+ * Rule/monitor status and health values, which are a different vocabulary from
+ * alert state. Only the OpenSearch-alerting side sends lowercase tokens; the
+ * AD/forecaster side already sends display-ready sentences ("Running",
+ * "Awaiting data to init"), which fall through {@link humanizeUnknown}
+ * unchanged. Only the tokens that actually need translating are mapped.
+ */
+const MONITOR_STATE_LABELS: Record<string, string> = {
+  active: i18n.translate('observability.alerting.monitorStateLabel.active', {
+    defaultMessage: 'Active',
+  }),
+  pending: i18n.translate('observability.alerting.monitorStateLabel.pending', {
+    defaultMessage: 'Pending',
+  }),
+  muted: i18n.translate('observability.alerting.monitorStateLabel.muted', {
+    defaultMessage: 'Muted',
+  }),
+  disabled: i18n.translate('observability.alerting.monitorStateLabel.disabled', {
+    defaultMessage: 'Disabled',
+  }),
+  healthy: i18n.translate('observability.alerting.monitorStateLabel.healthy', {
+    defaultMessage: 'Healthy',
+  }),
+  failing: i18n.translate('observability.alerting.monitorStateLabel.failing', {
+    defaultMessage: 'Failing',
+  }),
+  no_data: i18n.translate('observability.alerting.monitorStateLabel.noData', {
+    defaultMessage: 'No data',
+  }),
+};
+
+/**
+ * Display label for a rule/monitor `status` or `healthStatus`. Returns
+ * {@link EMPTY_VALUE} when absent. Unmapped values are humanized rather than
+ * dropped, so a status the UI doesn't know yet still reads as prose.
+ */
+export function getMonitorStateLabel(value?: string | null): string {
+  if (!value) return EMPTY_VALUE;
+  return MONITOR_STATE_LABELS[value] ?? humanizeUnknown(value);
+}
