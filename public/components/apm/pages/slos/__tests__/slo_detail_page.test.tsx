@@ -151,9 +151,10 @@ interface MockClient {
   getRuleHealth: jest.Mock;
 }
 
-function renderPage(
-  clientOverrides: Partial<MockClient> = {}
-): { client: MockClient; notifications: { toasts: { [k: string]: jest.Mock } } } {
+function renderPage(clientOverrides: Partial<MockClient> = {}): {
+  client: MockClient;
+  notifications: { toasts: { [k: string]: jest.Mock } };
+} {
   const client: MockClient = {
     get: jest.fn(),
     delete: jest.fn(),
@@ -178,10 +179,10 @@ function renderPage(
     <MemoryRouter initialEntries={['/slos/slo-1']}>
       <Route path="/slos/:id">
         <SloDetailPage
-          apiClient={(client as unknown) as SloApiClient}
-          chrome={(chrome as unknown) as Parameters<typeof SloDetailPage>[0]['chrome']}
+          apiClient={client as unknown as SloApiClient}
+          chrome={chrome as unknown as Parameters<typeof SloDetailPage>[0]['chrome']}
           notifications={
-            (notifications as unknown) as Parameters<typeof SloDetailPage>[0]['notifications']
+            notifications as unknown as Parameters<typeof SloDetailPage>[0]['notifications']
           }
           parentBreadcrumb={{ text: 'APM', href: '#/' }}
         />
@@ -199,7 +200,6 @@ function renderPage(
 
 const settle = async () => {
   for (let i = 0; i < 5; i++) {
-    // eslint-disable-next-line no-await-in-loop
     await act(async () => {
       await jest.advanceTimersByTimeAsync(0);
     });
@@ -214,7 +214,6 @@ const advanceOneRetry = async () => {
 
 const exhaustRetries = async () => {
   for (let i = 0; i < RULE_HEALTH_MAX_RETRIES; i++) {
-    // eslint-disable-next-line no-await-in-loop
     await advanceOneRetry();
   }
   await settle();
@@ -302,7 +301,9 @@ describe('SloDetailPage — rule-health grace window + re-poll (F-CRUD2)', () =>
       get: jest.fn().mockResolvedValue(makeDoc({ liveStatusState: 'rules_missing' })),
       getRuleHealth: jest
         .fn()
-        .mockResolvedValue(makeHealth({ state: 'rules_missing', missingGroups: ['grp-a', 'grp-b'] })),
+        .mockResolvedValue(
+          makeHealth({ state: 'rules_missing', missingGroups: ['grp-a', 'grp-b'] })
+        ),
     });
 
     await settle();
@@ -477,7 +478,10 @@ describe('SloDetailPage — rule-health callout (escalated) actions', () => {
       .mockResolvedValue(
         makeHealth({ state: 'ruler_unreachable', rulerErrorCode: 'RULER_UNREACHABLE' })
       );
-    renderPage({ get: jest.fn().mockResolvedValue(makeDoc({ liveStatusState: 'ok' })), getRuleHealth });
+    renderPage({
+      get: jest.fn().mockResolvedValue(makeDoc({ liveStatusState: 'ok' })),
+      getRuleHealth,
+    });
 
     await settle();
 

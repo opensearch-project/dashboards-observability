@@ -829,7 +829,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                 <p>
                   {i18n.translate('observability.apm.slo.detail.notFound.body', {
                     defaultMessage:
-                      "We couldn't find an SLO with the id \"{id}\". It may have been deleted, or the link may be out of date.",
+                      'We couldn\'t find an SLO with the id "{id}". It may have been deleted, or the link may be out of date.',
                     values: { id },
                   })}
                 </p>
@@ -1104,9 +1104,12 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                     isLoading={ruleHealthLoading}
                     data-test-subj="slosDetailRulePropagatingCheckNow"
                   >
-                    {i18n.translate('observability.apm.slo.detail.rulesPropagatingCallout.checkNow', {
-                      defaultMessage: 'Check now',
-                    })}
+                    {i18n.translate(
+                      'observability.apm.slo.detail.rulesPropagatingCallout.checkNow',
+                      {
+                        defaultMessage: 'Check now',
+                      }
+                    )}
                   </EuiButtonEmpty>
                 </EuiCallOut>
                 <EuiSpacer size="m" />
