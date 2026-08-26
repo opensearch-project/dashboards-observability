@@ -244,6 +244,35 @@ describe('MonitorsTable', () => {
     expect(onCreateMonitor).toHaveBeenCalledWith('metrics');
   });
 
+  // Logs symmetric counterpart of the metrics test above, and the case that
+  // actually distinguishes the fix from the pre-fix behaviour: an OpenSearch
+  // datasource EXISTS but is not in the facet selection (only a Prometheus DS
+  // is selected). The old selection-keyed logic disabled Logs create here
+  // (every selected DS was Prometheus); the fix keeps it enabled because the
+  // capability follows the available datasources, not the browse filter.
+  it('keeps logs creation enabled when an OpenSearch datasource exists but is not selected', () => {
+    const onCreateMonitor = jest.fn();
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        datasources={
+          [
+            { id: 'os-1', name: 'cluster1', type: 'opensearch' },
+            { id: 'prom-1', name: 'prom1', type: 'prometheus' },
+          ] as unknown as Datasource[]
+        }
+        selectedDsIds={['prom-1']}
+        onCreateMonitor={onCreateMonitor}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    fireEvent.click(screen.getByText('Logs alert rule'));
+    expect(onCreateMonitor).toHaveBeenCalledWith('logs');
+  });
+
+  // Disable direction still holds: with no OpenSearch datasource available at
+  // all, Logs create is greyed out (the wizard would have no valid target).
   it('disables logs creation when no OpenSearch datasource exists', () => {
     const onCreateMonitor = jest.fn();
     render(
