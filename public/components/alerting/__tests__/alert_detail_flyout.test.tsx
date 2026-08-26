@@ -439,6 +439,7 @@ describe('AlertDetailFlyout', () => {
       // The action is labelled "Open SLO" whenever `slo_id` is present, and the
       // source row names the SLO instead of repeating the action label.
       expect(getByText('Source SLO')).toBeInTheDocument();
+      expect(getByTestId('alertDetailOpenSource')).toHaveTextContent('Open SLO');
       expect(getByTestId('alertDetailSourceRuleLink')).toHaveTextContent('API availability');
       fireEvent.click(getByTestId('alertDetailOpenSource'));
       expect(onClose).toHaveBeenCalledTimes(1);
@@ -463,6 +464,7 @@ describe('AlertDetailFlyout', () => {
         />
       );
       expect(getByText('Source rule')).toBeInTheDocument();
+      expect(getByTestId('alertDetailOpenSource')).toHaveTextContent('Open rule');
       expect(getByTestId('alertDetailSourceRuleLink')).toHaveTextContent('High latency');
       fireEvent.click(getByTestId('alertDetailOpenSource'));
       // Rule deep-links stay inside the alerting app (hash-only), so
