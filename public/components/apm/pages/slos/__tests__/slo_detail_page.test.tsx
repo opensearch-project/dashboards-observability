@@ -304,6 +304,15 @@ describe('SloDetailPage — View alerts pivot (OBS1)', () => {
   });
 });
 
+describe('SloDetailPage — Edit affordance (BUG-S3)', () => {
+  it('renders an Edit action linking to the SLO edit route', async () => {
+    renderPage({ get: jest.fn().mockResolvedValue(makeDoc()) });
+
+    const editButton = await screen.findByTestId('slosDetailEdit');
+    expect(editButton).toHaveAttribute('href', '#/slos/slo-1/edit');
+  });
+});
+
 describe('SloDetailPage — rule-health grace window + re-poll (F-CRUD2)', () => {
   beforeEach(() => {
     jest.useFakeTimers();

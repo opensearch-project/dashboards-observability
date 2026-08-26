@@ -1091,6 +1091,18 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
         defaultMessage: 'View alerts',
       })}
     </EuiButtonEmpty>,
+    <EuiButton
+      key="edit"
+      size="s"
+      fill
+      iconType="pencil"
+      href={`#/slos/${encodeURIComponent(doc.id)}/edit`}
+      data-test-subj="slosDetailEdit"
+    >
+      {i18n.translate('observability.apm.slo.detail.editButton', {
+        defaultMessage: 'Edit',
+      })}
+    </EuiButton>,
     <EuiButton key="toggle" size="s" onClick={onToggleEnabled} data-test-subj="slosDetailToggle">
       {doc.spec.enabled
         ? i18n.translate('observability.apm.slo.detail.disableButton', {

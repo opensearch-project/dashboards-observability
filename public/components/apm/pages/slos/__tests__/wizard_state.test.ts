@@ -4,7 +4,9 @@
  */
 
 import { SLO_TEMPLATES } from '../../../../../../common/slo/slo_templates';
-import { initialState, reducer, applyTemplate } from '../wizard_state';
+import type { SloDocument } from '../../../../../../common/slo/slo_types';
+import { hydrateFromDoc, initialState, reducer, applyTemplate } from '../wizard_state';
+import { buildCreateInput } from '../wizard_builders';
 
 describe('wizard_state reducer', () => {
   it('starts with a single objective and the 28d window default', () => {
@@ -193,8 +195,112 @@ describe('wizard_state reducer', () => {
     const oneoff =
       schedule.type === 'oneoff'
         ? schedule
-        : ((undefined as never) as typeof schedule & { type: 'oneoff' });
+        : (undefined as never as typeof schedule & { type: 'oneoff' });
     expect(oneoff.start).toMatch(/T/);
     expect(oneoff.end).toMatch(/T/);
+  });
+});
+
+describe('hydrateFromDoc (edit-mode prefill)', () => {
+  function makeDoc(): SloDocument {
+    return {
+      id: 'slo-1',
+      spec: {
+        datasourceId: 'prom_conn',
+        name: 'api-availability',
+        description: 'checkout availability',
+        enabled: true,
+        mode: 'shadow',
+        service: 'checkout',
+        owner: { teams: ['sre'], primaryUser: 'alice' },
+        tier: 'tier-1',
+        sli: {
+          type: 'single',
+          definition: {
+            backend: 'prometheus',
+            type: 'availability',
+            calcMethod: 'events',
+            metric: 'http_requests_total',
+            goodEventsFilter: 'status!~"5.."',
+          },
+          dimensions: [{ name: 'service', value: 'checkout' }],
+        },
+        objectives: [{ name: 'obj-1', target: 0.999 }],
+        budgetWarningThresholds: [{ threshold: 0.5, severity: 'warning' }],
+        window: { type: 'rolling', duration: '14d' },
+        alerting: {
+          strategy: 'mwmbr',
+          burnRates: [
+            {
+              shortWindow: '5m',
+              longWindow: '1h',
+              burnRateMultiplier: 14,
+              severity: 'page',
+              createAlarm: true,
+              forDuration: '2m',
+            },
+          ],
+        },
+        alarms: {
+          sliHealth: { enabled: false },
+          attainmentBreach: { enabled: false },
+          budgetWarning: { enabled: true },
+          noData: { enabled: false, forDuration: '10m' },
+          resolved: { enabled: false },
+        },
+        exclusionWindows: [],
+        labels: { compliance: 'pci' },
+        annotations: { runbook: 'https://wiki/slo' },
+      },
+      status: {
+        version: 4,
+        createdAt: '2026-01-01T00:00:00Z',
+        createdBy: 'tester',
+        updatedAt: '2026-01-02T00:00:00Z',
+        updatedBy: 'tester',
+        provisioning: { backend: 'prometheus', rulerNamespace: 'ns' },
+      },
+    };
+  }
+
+  it('maps a persisted spec back into the form state and carries the version', () => {
+    const hydrated = hydrateFromDoc(makeDoc());
+    expect(hydrated).not.toBeNull();
+    const { state, version } = hydrated!;
+    expect(version).toBe(4);
+    expect(state.datasourceId).toBe('prom_conn');
+    expect(state.name).toBe('api-availability');
+    expect(state.service).toBe('checkout');
+    expect(state.ownerTeam).toBe('sre');
+    expect(state.ownerPrimaryUser).toBe('alice');
+    expect(state.windowDuration).toBe('14d');
+    expect(state.shadow).toBe(true);
+    // Decimal target → percent string, no float artifacts.
+    expect(state.objectives[0].target).toBe('99.9');
+    expect(state.metric).toBe('http_requests_total');
+    expect(state.labels).toEqual([{ key: 'compliance', value: 'pci' }]);
+    expect(state.annotations).toEqual([{ key: 'runbook', value: 'https://wiki/slo' }]);
+  });
+
+  it('round-trips: buildCreateInput(hydrated) reproduces the persisted spec', () => {
+    const doc = makeDoc();
+    const hydrated = hydrateFromDoc(doc)!;
+    const rebuilt = buildCreateInput(hydrated.state, hydrated.template);
+    expect(rebuilt.spec.name).toBe(doc.spec.name);
+    expect(rebuilt.spec.service).toBe(doc.spec.service);
+    expect(rebuilt.spec.mode).toBe('shadow');
+    expect(rebuilt.spec.objectives[0].target).toBeCloseTo(0.999, 6);
+    expect(rebuilt.spec.sli.definition.type).toBe('availability');
+    expect(rebuilt.spec.window).toEqual({ type: 'rolling', duration: '14d' });
+  });
+
+  it('returns null for composite SLIs (cannot be edited in the wizard)', () => {
+    const doc = makeDoc();
+    (doc.spec.sli as unknown) = {
+      type: 'composite',
+      operator: 'all',
+      members: [{ sloId: 'a' }],
+    };
+    expect(hydrateFromDoc(doc)).toBeNull();
   });
 });
