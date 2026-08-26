@@ -102,6 +102,26 @@ describe('MonitorDetailFlyout', () => {
     expect(getByText('Test Monitor')).toBeInTheDocument();
   });
 
+  it('title-cases the status, severity, and health chips instead of showing raw enums', () => {
+    const { getByText, queryByText } = render(
+      <MonitorDetailFlyout
+        monitor={mockMonitor}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+      />
+    );
+    // The alerts table reads "Active"/"Medium"; this flyout used to show the
+    // raw backend tokens, so the same rule read two different ways depending
+    // on which surface you opened it from.
+    expect(getByText('Active')).toBeInTheDocument();
+    expect(getByText('Medium')).toBeInTheDocument();
+    expect(getByText('Healthy')).toBeInTheDocument();
+    expect(queryByText('active')).toBeNull();
+    expect(queryByText('medium')).toBeNull();
+    expect(queryByText('healthy')).toBeNull();
+  });
+
   it('calls onClose when close button is clicked', () => {
     const onClose = jest.fn();
     const { getByLabelText } = render(

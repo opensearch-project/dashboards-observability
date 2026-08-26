@@ -52,7 +52,7 @@ import { normalizeDuration } from './utils/duration';
 import { observabilityAlertingID } from '../../../common/constants/shared';
 import { coreRefs } from '../../framework/core_refs';
 import { formatTimestamp } from './time_format';
-import { EMPTY_VALUE } from './enum_labels';
+import { EMPTY_VALUE, getMonitorStateLabel, getSeverityLabel, getStateLabel } from './enum_labels';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
 
@@ -335,7 +335,9 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
       name: i18n.translate('observability.alerting.monitorDetailFlyout.history.state', {
         defaultMessage: 'State',
       }),
-      render: (s: string) => <EuiHealth color={STATE_COLORS[s] || 'subdued'}>{s}</EuiHealth>,
+      render: (s: string) => (
+        <EuiHealth color={STATE_COLORS[s] || 'subdued'}>{getStateLabel(s)}</EuiHealth>
+      ),
     },
     {
       field: 'value',
@@ -366,14 +368,18 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={STATUS_COLORS[monitor.status]}>{monitor.status}</EuiBadge>
+                  <EuiBadge color={STATUS_COLORS[monitor.status]}>
+                    {getMonitorStateLabel(monitor.status)}
+                  </EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={SEVERITY_COLORS[monitor.severity]}>{monitor.severity}</EuiBadge>
+                  <EuiBadge color={SEVERITY_COLORS[monitor.severity]}>
+                    {getSeverityLabel(monitor.severity)}
+                  </EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiHealth color={HEALTH_COLORS[monitor.healthStatus]}>
-                    {monitor.healthStatus}
+                    {getMonitorStateLabel(monitor.healthStatus)}
                   </EuiHealth>
                 </EuiFlexItem>
               </EuiFlexGroup>
