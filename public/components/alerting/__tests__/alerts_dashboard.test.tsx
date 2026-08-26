@@ -424,4 +424,82 @@ describe('AlertsDashboard', () => {
     expect(onDatasourceChange).toHaveBeenCalledWith([]);
     expect(searchInput.value).toBe('');
   });
+
+  // B1 / A11Y1 + CLAR2: severity must be conveyed by a labeled indicator
+  // (translated text), not a bare color dot. Reverting to the dot removes the
+  // human-readable "Critical" text and this fails.
+  it('renders severity as a labeled badge, not a bare color dot', () => {
+    render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    const badge = screen.getByTestId('alertSeverityBadge');
+    expect(badge).toHaveTextContent('Critical');
+    // The raw lowercase wire enum must not leak into the table cell.
+    expect(badge).not.toHaveTextContent('critical');
+  });
+
+  // CLAR2: the State column routes the raw enum through getStateLabel, so it
+  // reads "Active" rather than the lowercase wire value `active`.
+  it('renders the alert state as a human label in the table', () => {
+    render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    // The facet still lists the raw `active` option; the table cell shows "Active".
+    const table = within(screen.getByRole('table'));
+    expect(table.getByText('Active')).toBeInTheDocument();
+  });
+
+  // CLAR4: a single empty placeholder (EMPTY_VALUE = '—') everywhere. The old
+  // Started-cell glyph was '---'; reintroducing it fails this test.
+  it('uses a single unified empty placeholder and never the legacy --- glyph', () => {
+    const emptyAlert: UnifiedAlertSummary = {
+      ...sampleAlert,
+      id: 'empty-1',
+      name: 'EmptyFields',
+      message: undefined,
+      startTime: '',
+      lastUpdated: '',
+    };
+    render(<AlertsDashboard {...baseProps} alerts={[emptyAlert]} />);
+    const table = within(screen.getByRole('table'));
+    // Message, Started, and Duration cells all collapse to the em dash.
+    expect(table.getAllByText('—').length).toBeGreaterThan(0);
+    // The legacy triple-hyphen glyph must be gone.
+    expect(table.queryByText('---')).toBeNull();
+  });
+
+  // A11Y4: the grouped-anomaly expand toggle exposes its state via
+  // aria-expanded, and flips it on toggle.
+  it('sets aria-expanded on the anomaly occurrences toggle in both states', () => {
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[
+          buildAnomaly({ id: 'ad-a', startTime: '2026-06-04T21:03:00.000Z' }),
+          buildAnomaly({ id: 'ad-b', startTime: '2026-06-04T22:03:00.000Z' }),
+        ]}
+      />
+    );
+    const toggle = screen.getByLabelText('Show or hide grouped anomaly occurrences');
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(toggle);
+    expect(
+      screen.getByLabelText('Show or hide grouped anomaly occurrences')
+    ).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  // OBS1: a deep link (`#/alerts?q=...`) seeds the search box on first render,
+  // and the user can still type over it afterwards.
+  it('seeds the search box from initialSearchQuery without blocking later input', () => {
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[sampleAlert]}
+        initialSearchQuery="HighCPU"
+      />
+    );
+    const searchInput = screen.getByLabelText('Search alerts') as HTMLInputElement;
+    expect(searchInput.value).toBe('HighCPU');
+    // Seeded query actually filters the table down to the match.
+    expect(screen.getByText('HighCPU')).toBeInTheDocument();
+    // Subsequent typing is honored — the seed does not re-apply and overwrite it.
+    fireEvent.change(searchInput, { target: { value: 'something-else' } });
+    expect(searchInput.value).toBe('something-else');
+  });
 });
