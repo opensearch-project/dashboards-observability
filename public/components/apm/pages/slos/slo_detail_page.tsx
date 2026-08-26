@@ -610,6 +610,25 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     setRuleHealthRetries(0);
   }, [id]);
 
+  // Stale-write guard for the auto-poll below. Its re-probe resolves
+  // asynchronously; if we've navigated to a different SLO or unmounted before
+  // it lands, the result belongs to a stale id and must be dropped rather than
+  // clobbering the current SLO's rule-health state. A retry-count increment is
+  // NOT stale (`id` is unchanged then), so the guard keys on id + mount only —
+  // never on the retry counter. The mount effect re-arms `mounted` on remount
+  // so a StrictMode double-mount doesn't wedge it permanently false.
+  const pollLiveIdRef = useRef(id);
+  const pollMountedRef = useRef(true);
+  useEffect(() => {
+    pollLiveIdRef.current = id;
+  }, [id]);
+  useEffect(() => {
+    pollMountedRef.current = true;
+    return () => {
+      pollMountedRef.current = false;
+    };
+  }, []);
+
   // While rule health reads as missing/partial, re-probe on a bounded
   // interval (F-CRUD2). A freshly-created SLO's rule groups take time to
   // propagate through the Cortex/AMP ruler, so a "missing" reading is
@@ -627,12 +646,16 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       return undefined;
     }
     if (ruleHealthRetries >= RULE_HEALTH_MAX_RETRIES) return undefined;
+    const scheduledId = id;
     const timer = setTimeout(() => {
       setRuleHealthRetries((n) => n + 1);
-      loadRuleHealth();
+      // Gate the async re-probe so a response that arrives after navigating
+      // away (or unmounting) is discarded instead of writing another SLO's
+      // rule health onto this view. See pollLiveIdRef/pollMountedRef above.
+      loadRuleHealth(() => pollMountedRef.current && pollLiveIdRef.current === scheduledId);
     }, RULE_HEALTH_RETRY_INTERVAL_MS);
     return () => clearTimeout(timer);
-  }, [doc, ruleHealth, ruleHealthRetries, loadRuleHealth]);
+  }, [doc, ruleHealth, ruleHealthRetries, loadRuleHealth, id]);
 
   const onRepair = useCallback(async () => {
     try {
