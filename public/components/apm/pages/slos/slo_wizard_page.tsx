@@ -181,6 +181,11 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   const [editLoading, setEditLoading] = useState<boolean>(isEditMode);
   const [editLoadError, setEditLoadError] = useState<string | null>(null);
   const [editUnsupported, setEditUnsupported] = useState<boolean>(false);
+  // The wizard has no "enabled" control (enable/disable lives on the detail
+  // page), and `buildCreateInput` hardcodes `enabled: true`. Preserve the
+  // loaded SLO's enabled flag so saving an edit to a *disabled* SLO doesn't
+  // silently re-enable it (the server merges the PUT spec over the stored one).
+  const [editEnabled, setEditEnabled] = useState<boolean>(true);
 
   // Sync template state with URL param — CREATE mode only. In edit mode there
   // is no `:templateId` param and the template is synthesized from the loaded
@@ -215,6 +220,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
         dispatch({ kind: 'hydrate', state: hydrated.state });
         setEditTemplate(hydrated.template);
         setEditVersion(hydrated.version);
+        setEditEnabled(doc.spec.enabled);
         setEditLoading(false);
       } catch (e) {
         if (cancelled) return;
@@ -352,7 +358,12 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
           setSubmitting(false);
           return;
         }
-        const doc = await apiClient.update(editSloId, { spec: input.spec, version: editVersion });
+        const doc = await apiClient.update(editSloId, {
+          // Preserve the SLO's enabled state — `buildCreateInput` always emits
+          // `enabled: true`, which would re-enable a disabled SLO on save.
+          spec: { ...input.spec, enabled: editEnabled },
+          version: editVersion,
+        });
         // Advance the version so a second save in the same session doesn't 409.
         setEditVersion(doc.status.version);
         notifications.toasts.addSuccess({
@@ -401,7 +412,17 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     } finally {
       setSubmitting(false);
     }
-  }, [apiClient, history, notifications, state, template, isEditMode, editSloId, editVersion]);
+  }, [
+    apiClient,
+    history,
+    notifications,
+    state,
+    template,
+    isEditMode,
+    editSloId,
+    editVersion,
+    editEnabled,
+  ]);
 
   // Edit-mode gate states — the template selector is never shown for edits.
   if (isEditMode) {

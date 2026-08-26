@@ -290,13 +290,17 @@ describe('hydrateFromDoc (edit-mode prefill)', () => {
     expect(rebuilt.spec.service).toBe(doc.spec.service);
     expect(rebuilt.spec.mode).toBe('shadow');
     expect(rebuilt.spec.objectives[0].target).toBeCloseTo(0.999, 6);
-    expect(rebuilt.spec.sli.definition.type).toBe('availability');
+    const rebuiltSli = rebuilt.spec.sli;
+    expect(rebuiltSli.type).toBe('single');
+    if (rebuiltSli.type === 'single') {
+      expect(rebuiltSli.definition.type).toBe('availability');
+    }
     expect(rebuilt.spec.window).toEqual({ type: 'rolling', duration: '14d' });
   });
 
   it('returns null for composite SLIs (cannot be edited in the wizard)', () => {
     const doc = makeDoc();
-    (doc.spec.sli as unknown) = {
+    doc.spec.sli = {
       type: 'composite',
       operator: 'all',
       members: [{ sloId: 'a' }],
