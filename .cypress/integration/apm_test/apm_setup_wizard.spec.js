@@ -215,14 +215,12 @@ describe('APM Setup Wizard', () => {
       invalidSubj: 'apmSetupWizardServicesInvalid',
     });
 
-    // RED metrics step — the Prometheus source exposing the required metrics is
-    // auto-selected when it is the only match; otherwise pick it explicitly.
+    // RED metrics step. The test environment has exactly one Prometheus source
+    // exposing the required metrics, so the step auto-selects it and enables
+    // Finish without any interaction — just wait for the probe to resolve. (We
+    // deliberately don't open the picker: with a single source already selected
+    // its options list is empty, so a `.contains()` click would hang.)
     cy.get('[data-test-subj="apmSetupWizardMetricsStep"]', { timeout: 60000 }).should('be.visible');
-    cy.get('body').then(($body) => {
-      if ($body.find('[data-test-subj="apmSetupWizardFinish"]:not([disabled])').length === 0) {
-        selectComboBoxOption('apmSetupWizardMetricsPicker', APM_RESOURCES.DATA_CONNECTION_NAME);
-      }
-    });
 
     // Finish persists the APM config and closes the wizard.
     cy.get('[data-test-subj="apmSetupWizardFinish"]', { timeout: 60000 })
