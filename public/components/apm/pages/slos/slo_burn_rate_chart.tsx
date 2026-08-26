@@ -150,7 +150,7 @@ export function buildBurnRateOption(inputs: BurnRateOptionInputs): echarts.EChar
         const ts = formatTooltipTs(list[0].axisValue, tz);
         const rows = list
           .map((p) => {
-            const raw = Array.isArray(p.value) ? p.value[2] ?? p.value[1] : (p.value as number);
+            const raw = Array.isArray(p.value) ? (p.value[2] ?? p.value[1]) : (p.value as number);
             const swatch = `<span style="display:inline-block;width:10px;height:10px;background:${p.color};margin-right:6px;border-radius:2px;"></span>`;
             // Delta versus this tier's threshold: how much over/under the burn
             // rate that would fire the alert.
@@ -284,11 +284,10 @@ const TierFetcher: React.FC<TierFetcherProps> = ({
   errorBudget,
   onChange,
 }) => {
-  const query = useMemo(() => buildErrorRatioExprForWindow(slo, objective, tier.longWindow), [
-    slo,
-    objective,
-    tier.longWindow,
-  ]);
+  const query = useMemo(
+    () => buildErrorRatioExprForWindow(slo, objective, tier.longWindow),
+    [slo, objective, tier.longWindow]
+  );
   const { series, isLoading, error } = usePromQLChartData({
     promqlQuery: query ?? '',
     timeRange,
@@ -448,46 +447,56 @@ export const SloBurnRateChart: React.FC<SloBurnRateChartProps> = ({
           <EuiText size="s">{firstError.message}</EuiText>
         </EuiCallOut>
       )}
-      {tiers.length > 0 && !firstError && !isLoading && !hasData && !probeLoading && !metricExists && (
-        <EuiCallOut
-          size="s"
-          color="warning"
-          iconType="alert"
-          title={i18n.translate('observability.apm.slo.burnRateChart.missingMetric.title', {
-            defaultMessage: 'SLI source metric not found in this datasource',
-          })}
-          data-test-subj="slosBurnRateMissingMetric"
-        >
-          <EuiText size="s">
-            {i18n.translate('observability.apm.slo.burnRateChart.missingMetric.bodyPrefix', {
-              defaultMessage: 'No samples exist for the metric this SLI queries on',
+      {tiers.length > 0 &&
+        !firstError &&
+        !isLoading &&
+        !hasData &&
+        !probeLoading &&
+        !metricExists && (
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="alert"
+            title={i18n.translate('observability.apm.slo.burnRateChart.missingMetric.title', {
+              defaultMessage: 'SLI source metric not found in this datasource',
             })}
-            <strong> {prometheusConnectionId}</strong>
-            {i18n.translate('observability.apm.slo.burnRateChart.missingMetric.bodySuffix', {
-              defaultMessage:
-                ". Burn rate is derived from the same error ratio as the budget chart — if that metric is absent, burn rate can't populate. Waiting won't help; re-check the SLI's metric / selectors.",
+            data-test-subj="slosBurnRateMissingMetric"
+          >
+            <EuiText size="s">
+              {i18n.translate('observability.apm.slo.burnRateChart.missingMetric.bodyPrefix', {
+                defaultMessage: 'No samples exist for the metric this SLI queries on',
+              })}
+              <strong> {prometheusConnectionId}</strong>
+              {i18n.translate('observability.apm.slo.burnRateChart.missingMetric.bodySuffix', {
+                defaultMessage:
+                  ". Burn rate is derived from the same error ratio as the budget chart — if that metric is absent, burn rate can't populate. Waiting won't help; re-check the SLI's metric / selectors.",
+              })}
+            </EuiText>
+          </EuiCallOut>
+        )}
+      {tiers.length > 0 &&
+        !firstError &&
+        !isLoading &&
+        !hasData &&
+        !probeLoading &&
+        metricExists && (
+          <EuiCallOut
+            size="s"
+            color="primary"
+            iconType="iInCircle"
+            title={i18n.translate('observability.apm.slo.burnRateChart.emptyRange.title', {
+              defaultMessage: 'No samples in the selected time range',
             })}
-          </EuiText>
-        </EuiCallOut>
-      )}
-      {tiers.length > 0 && !firstError && !isLoading && !hasData && !probeLoading && metricExists && (
-        <EuiCallOut
-          size="s"
-          color="primary"
-          iconType="iInCircle"
-          title={i18n.translate('observability.apm.slo.burnRateChart.emptyRange.title', {
-            defaultMessage: 'No samples in the selected time range',
-          })}
-          data-test-subj="slosBurnRateEmpty"
-        >
-          <EuiText size="s">
-            {i18n.translate('observability.apm.slo.burnRateChart.emptyRange.body', {
-              defaultMessage:
-                'The metric exists in this datasource but the current range returned no burn-rate samples. Widen the time range, or wait for the next Prometheus scrape + rule evaluation.',
-            })}
-          </EuiText>
-        </EuiCallOut>
-      )}
+            data-test-subj="slosBurnRateEmpty"
+          >
+            <EuiText size="s">
+              {i18n.translate('observability.apm.slo.burnRateChart.emptyRange.body', {
+                defaultMessage:
+                  'The metric exists in this datasource but the current range returned no burn-rate samples. Widen the time range, or wait for the next Prometheus scrape + rule evaluation.',
+              })}
+            </EuiText>
+          </EuiCallOut>
+        )}
       {tiers.length > 0 && hasData && <EchartsRender spec={spec} height={260} />}
       {overflow > 0 && (
         <>

@@ -45,9 +45,7 @@ jest.mock('@osd/ui-shared-deps/theme', () => ({
   },
 }));
 
-function makeSlo(
-  overrides: Partial<SloDocument['spec']> = {}
-): SloDocument & {
+function makeSlo(overrides: Partial<SloDocument['spec']> = {}): SloDocument & {
   liveStatus: SloLiveStatus;
 } {
   return {
@@ -345,9 +343,7 @@ describe('SloBudgetRemainingChart', () => {
       refetch: jest.fn(),
     });
     const slo = makeSlo({ window: { type: 'calendar', period: 'week', timezone: 'UTC' } });
-    render(
-      <SloBudgetRemainingChart slo={slo} objective={slo.spec.objectives[0]} {...baseProps} />
-    );
+    render(<SloBudgetRemainingChart slo={slo} objective={slo.spec.objectives[0]} {...baseProps} />);
     expect(screen.getByText(/calendar-week/i)).toBeInTheDocument();
     // The equivalent rolling range for a week is 7d — the old code hardcoded 30d.
     expect(screen.getByText(/7d/)).toBeInTheDocument();

@@ -54,9 +54,7 @@ const CALENDAR_PERIOD_DURATIONS: Record<CalendarWindow['period'], string> = {
 
 /** Resolve the PromQL range duration the chart should query for this window. */
 export function deriveWindowDuration(window: Window): string {
-  return window.type === 'rolling'
-    ? window.duration
-    : CALENDAR_PERIOD_DURATIONS[window.period];
+  return window.type === 'rolling' ? window.duration : CALENDAR_PERIOD_DURATIONS[window.period];
 }
 
 /**
@@ -264,11 +262,10 @@ export const SloBudgetRemainingChart: React.FC<SloBudgetRemainingChartProps> = (
   // rolling range of equal length (recording rules for calendar windows aren't
   // wired up yet). Never hardcode "30d" — that mislabeled every calendar SLO.
   const window = useMemo(() => deriveWindowDuration(slo.spec.window), [slo.spec.window]);
-  const query = useMemo(() => buildBudgetRemainingExpr(slo, objective, window), [
-    slo,
-    objective,
-    window,
-  ]);
+  const query = useMemo(
+    () => buildBudgetRemainingExpr(slo, objective, window),
+    [slo, objective, window]
+  );
 
   // The first budget-warning threshold drives the "at risk" line. Sort
   // descending so a list like [0.25, 0.5, 0.1] still surfaces the most

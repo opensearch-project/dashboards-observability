@@ -272,16 +272,14 @@ const TierCard: React.FC<TierCardProps> = ({
   reportKey,
   onHealthChange,
 }) => {
-  const shortQuery = useMemo(() => buildErrorRatioExprForWindow(slo, objective, tier.shortWindow), [
-    slo,
-    objective,
-    tier.shortWindow,
-  ]);
-  const longQuery = useMemo(() => buildErrorRatioExprForWindow(slo, objective, tier.longWindow), [
-    slo,
-    objective,
-    tier.longWindow,
-  ]);
+  const shortQuery = useMemo(
+    () => buildErrorRatioExprForWindow(slo, objective, tier.shortWindow),
+    [slo, objective, tier.shortWindow]
+  );
+  const longQuery = useMemo(
+    () => buildErrorRatioExprForWindow(slo, objective, tier.longWindow),
+    [slo, objective, tier.longWindow]
+  );
 
   const shortData = usePromQLChartData({
     promqlQuery: shortQuery ?? '',
