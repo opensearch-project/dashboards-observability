@@ -479,21 +479,16 @@ describe('AlertsDashboard', () => {
     const toggle = screen.getByLabelText('Show or hide grouped anomaly occurrences');
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(toggle);
-    expect(
-      screen.getByLabelText('Show or hide grouped anomaly occurrences')
-    ).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByLabelText('Show or hide grouped anomaly occurrences')).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
   });
 
   // OBS1: a deep link (`#/alerts?q=...`) seeds the search box on first render,
   // and the user can still type over it afterwards.
   it('seeds the search box from initialSearchQuery without blocking later input', () => {
-    render(
-      <AlertsDashboard
-        {...baseProps}
-        alerts={[sampleAlert]}
-        initialSearchQuery="HighCPU"
-      />
-    );
+    render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} initialSearchQuery="HighCPU" />);
     const searchInput = screen.getByLabelText('Search alerts') as HTMLInputElement;
     expect(searchInput.value).toBe('HighCPU');
     // Seeded query actually filters the table down to the match.
