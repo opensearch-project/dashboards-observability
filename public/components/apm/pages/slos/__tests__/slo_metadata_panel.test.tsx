@@ -117,6 +117,21 @@ describe('SloMetadataPanel', () => {
     expect(button!.getAttribute('aria-expanded')).toBe('false');
   });
 
+  it('renders a runbook-URL annotation value as a clickable external link (SRE2)', () => {
+    render(<SloMetadataPanel slo={makeSlo()} />);
+    // makeSlo() seeds `annotations: { runbook: 'https://runbooks.example/api' }`.
+    const link = screen.getByText('https://runbooks.example/api');
+    expect(link.tagName).toBe('A');
+    expect(link).toHaveAttribute('href', 'https://runbooks.example/api');
+    expect(link).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders a non-URL annotation value as plain text, not a link', () => {
+    render(<SloMetadataPanel slo={makeSlo({ annotations: { note: 'ask oncall' } })} />);
+    const node = screen.getByText('ask oncall');
+    expect(node.tagName).not.toBe('A');
+  });
+
   it('renders empty-state text when labels, annotations, and exclusion windows are missing', () => {
     render(
       <SloMetadataPanel slo={makeSlo({ labels: {}, annotations: {}, exclusionWindows: [] })} />

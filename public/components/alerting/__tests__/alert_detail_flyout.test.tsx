@@ -63,8 +63,20 @@ jest.mock('../query_services/alerting_opensearch_service', () => ({
   })),
 }));
 
+// Stub the shared core refs so the cross-app SLO deep-link can assert on
+// `navigateToApp` without a real Core start contract.
+jest.mock('../../../framework/core_refs', () => ({
+  coreRefs: {
+    application: { navigateToApp: jest.fn() },
+  },
+}));
+
 import { AlertDetailFlyout } from '../alert_detail_flyout';
+import { coreRefs } from '../../../framework/core_refs';
+import { observabilityApmSloID } from '../../../../common/constants/apm';
 import type { Datasource, UnifiedAlertSummary } from '../../../../common/types/alerting';
+
+const navigateToApp = coreRefs.application!.navigateToApp as jest.Mock;
 
 const baseAlert: UnifiedAlertSummary = {
   id: 'alert-42',
@@ -401,6 +413,77 @@ describe('AlertDetailFlyout', () => {
       );
       fireEvent.click(getByText('Raw Alert Data'));
       expect(mockGetAlertDetail).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('source deep-link (OBS1)', () => {
+    beforeEach(() => {
+      navigateToApp.mockClear();
+    });
+
+    it('pivots an SLO burn-rate alert to the SLO detail page in the SLO app', () => {
+      const onClose = jest.fn();
+      const sloAlert: UnifiedAlertSummary = {
+        ...baseAlert,
+        datasourceType: 'prometheus',
+        labels: { slo_id: 'slo/api ok', alertname: 'BurnRate' },
+      };
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={sloAlert}
+          datasources={datasources}
+          onClose={onClose}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // The action is labelled "Open SLO" whenever `slo_id` is present.
+      fireEvent.click(getByText('Open SLO'));
+      expect(onClose).toHaveBeenCalledTimes(1);
+      // Cross-app navigation to the SLO detail route, with the id encoded.
+      expect(navigateToApp).toHaveBeenCalledWith(observabilityApmSloID, {
+        path: `#/slos/${encodeURIComponent('slo/api ok')}`,
+      });
+    });
+
+    it('does not cross apps for a monitor rule deep-link', () => {
+      const monitorAlert: UnifiedAlertSummary = {
+        ...baseAlert,
+        datasourceType: 'opensearch',
+        labels: { monitor_id: 'mon-7' },
+      };
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={monitorAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      fireEvent.click(getByText('Open rule'));
+      // Rule deep-links stay inside the alerting app (hash-only), so
+      // navigateToApp must not fire.
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('annotation runbook links (SRE2)', () => {
+    it('renders a runbook URL annotation as a clickable external link', () => {
+      const alertWithRunbook: UnifiedAlertSummary = {
+        ...baseAlert,
+        annotations: { runbook: 'https://runbooks.example/api' },
+      };
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={alertWithRunbook}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const link = getByText('https://runbooks.example/api');
+      expect(link.tagName).toBe('A');
+      expect(link).toHaveAttribute('href', 'https://runbooks.example/api');
+      expect(link).toHaveAttribute('target', '_blank');
     });
   });
 
