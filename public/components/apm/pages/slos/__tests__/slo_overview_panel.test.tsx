@@ -16,7 +16,7 @@ function summary(
     enabled?: boolean;
   } = {}
 ): SloSummary {
-  return ({
+  return {
     id: overrides.id ?? 'slo-1',
     datasourceId: 'prom-1',
     datasourceType: 'prometheus',
@@ -50,7 +50,7 @@ function summary(
       computedAt: '2026-04-01T00:00:00Z',
     },
     ...overrides,
-  } as unknown) as SloSummary;
+  } as unknown as SloSummary;
 }
 
 describe('SloOverviewPanel', () => {
@@ -150,7 +150,7 @@ describe('SloOverviewPanel', () => {
     render(
       <SloOverviewPanel
         items={[
-          summary({ id: 'a', firing: (NaN as unknown) as number }),
+          summary({ id: 'a', firing: NaN as unknown as number }),
           summary({ id: 'b', firing: 2 }),
         ]}
       />

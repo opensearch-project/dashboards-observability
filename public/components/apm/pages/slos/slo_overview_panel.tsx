@@ -730,8 +730,8 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
                 const color = overBudget
                   ? euiThemeVars.euiColorDangerText
                   : critical
-                  ? euiThemeVars.euiColorAccentText
-                  : euiThemeVars.euiColorSuccessText;
+                    ? euiThemeVars.euiColorAccentText
+                    : euiThemeVars.euiColorSuccessText;
                 return (
                   <div
                     key={s.id}
