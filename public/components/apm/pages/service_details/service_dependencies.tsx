@@ -467,8 +467,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           latencyPercentile === 'p99'
             ? dep.p99Duration
             : latencyPercentile === 'p90'
-            ? dep.p90Duration
-            : dep.p50Duration;
+              ? dep.p90Duration
+              : dep.p50Duration;
         if (
           depLatency === undefined ||
           depLatency < latencyRange[0] ||
@@ -754,8 +754,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           latencyPercentile === 'p99'
             ? 'p99Duration'
             : latencyPercentile === 'p90'
-            ? 'p90Duration'
-            : 'p50Duration',
+              ? 'p90Duration'
+              : 'p50Duration',
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -981,15 +981,15 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                 style={{ paddingTop: '8px', paddingRight: '8px' }}
               >
                 <DependencyFilterSidebar
-                  availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
+                  availabilityThresholds={AVAILABILITY_THRESHOLD_OPTIONS as unknown as string[]}
                   selectedAvailabilityThresholds={
-                    (selectedAvailabilityThresholds as unknown) as string[]
+                    selectedAvailabilityThresholds as unknown as string[]
                   }
                   onAvailabilityThresholdsChange={
                     setSelectedAvailabilityThresholds as (selected: string[]) => void
                   }
-                  errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
-                  selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
+                  errorRateThresholds={ERROR_RATE_THRESHOLD_OPTIONS as unknown as string[]}
+                  selectedErrorRateThresholds={selectedErrorRateThresholds as unknown as string[]}
                   onErrorRateThresholdsChange={
                     setSelectedErrorRateThresholds as (selected: string[]) => void
                   }

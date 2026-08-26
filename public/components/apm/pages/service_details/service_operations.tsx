@@ -255,7 +255,11 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   }, [timeRange]);
 
   // Fetch operations list from PPL
-  const { data: operationsData, isLoading: opsLoading, error: opsError } = useOperations({
+  const {
+    data: operationsData,
+    isLoading: opsLoading,
+    error: opsError,
+  } = useOperations({
     serviceName,
     environment,
     startTime: parsedTimeRange.startTime,
@@ -408,8 +412,8 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
           latencyPercentile === 'p99'
             ? op.p99Duration
             : latencyPercentile === 'p90'
-            ? op.p90Duration
-            : op.p50Duration;
+              ? op.p90Duration
+              : op.p50Duration;
         if (opLatency < latencyRange[0] || opLatency > latencyRange[1]) {
           return false;
         }
@@ -702,8 +706,8 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
           latencyPercentile === 'p99'
             ? 'p99Duration'
             : latencyPercentile === 'p90'
-            ? 'p90Duration'
-            : 'p50Duration',
+              ? 'p90Duration'
+              : 'p50Duration',
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -911,15 +915,15 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
                 style={{ paddingTop: '8px', paddingRight: '8px' }}
               >
                 <OperationFilterSidebar
-                  availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
+                  availabilityThresholds={AVAILABILITY_THRESHOLD_OPTIONS as unknown as string[]}
                   selectedAvailabilityThresholds={
-                    (selectedAvailabilityThresholds as unknown) as string[]
+                    selectedAvailabilityThresholds as unknown as string[]
                   }
                   onAvailabilityThresholdsChange={
                     setSelectedAvailabilityThresholds as (selected: string[]) => void
                   }
-                  errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
-                  selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
+                  errorRateThresholds={ERROR_RATE_THRESHOLD_OPTIONS as unknown as string[]}
+                  selectedErrorRateThresholds={selectedErrorRateThresholds as unknown as string[]}
                   onErrorRateThresholdsChange={
                     setSelectedErrorRateThresholds as (selected: string[]) => void
                   }
