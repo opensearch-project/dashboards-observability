@@ -62,7 +62,12 @@ export const ApmEmptyState = ({ onGetStartedClick }: ApmEmptyStateProps) => {
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) || tabs[0];
 
   return (
-    <EuiFlexGroup direction="column" alignItems="center" gutterSize="none">
+    <EuiFlexGroup
+      direction="column"
+      alignItems="center"
+      gutterSize="none"
+      data-test-subj="apmEmptyState"
+    >
       <EuiFlexItem grow={false}>
         <EuiText textAlign="center">
           <h1>{i18nTexts.title}</h1>
@@ -70,7 +75,7 @@ export const ApmEmptyState = ({ onGetStartedClick }: ApmEmptyStateProps) => {
 
         <EuiFlexGroup justifyContent="center" gutterSize="m">
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={onGetStartedClick}>
+            <EuiButton fill onClick={onGetStartedClick} data-test-subj="apmGetStartedButton">
               {i18nTexts.getStarted}
             </EuiButton>
           </EuiFlexItem>

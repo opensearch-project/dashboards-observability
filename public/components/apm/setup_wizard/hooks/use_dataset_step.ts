@@ -174,6 +174,11 @@ export function useDatasetStep<TOutcome extends DatasetCreateOutcome>({
       const stillPresent = allScopedDatasets.find((d) => d.value?.id === state.existingId);
       const nowValid = scopedDatasets.find((d) => d.value?.id === state.existingId);
       if (nowValid) {
+        // Intentional fall-through: do NOT return here. After promoting to
+        // 'exists' we drop into the reuse branch below so onDatasetIdChange
+        // captures the id — that is what keeps canFinish correct after a
+        // "Refresh fields" promotion. Adding a return here silently breaks
+        // finish-gating.
         onStateChange({ status: 'exists', existingId: nowValid.value!.id, detail: nowValid.label });
       } else if (stillPresent) {
         return; // still invalid, still on this source — leave selection as-is
