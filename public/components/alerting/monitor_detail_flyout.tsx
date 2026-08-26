@@ -39,6 +39,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
   AlertHistoryEntry,
+  Datasource,
   OSMonitor,
   OSMonitorInput,
   UnifiedRuleSummary,
@@ -50,6 +51,8 @@ import { humanizeCondition } from './monitor_detail/humanize_condition';
 import { normalizeDuration } from './utils/duration';
 import { observabilityAlertingID } from '../../../common/constants/shared';
 import { coreRefs } from '../../framework/core_refs';
+import { formatTimestamp } from './time_format';
+import { EMPTY_VALUE } from './enum_labels';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
 
@@ -89,6 +92,28 @@ export interface MonitorDetailFlyoutProps {
    * explanatory tooltip until their edit path is implemented.
    */
   onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
+  /**
+   * Registered datasources, used to resolve the monitor's `datasourceId` (a raw
+   * UUID) to its human-readable name in the Details section. Optional so the
+   * flyout still renders (falling back to the raw id) in contexts that don't
+   * have the list to hand.
+   */
+  datasources?: Datasource[];
+}
+
+/**
+ * Resolve a datasource id to its registered display name, falling back to the
+ * raw id and then {@link EMPTY_VALUE}. Mirrors the resolution in
+ * `alert_detail_flyout.tsx` so a monitor and its alerts label the same
+ * datasource identically. Exported for direct testing.
+ */
+export function resolveDatasourceName(
+  datasources: Datasource[] | undefined,
+  datasourceId: string | undefined
+): string {
+  return (
+    datasources?.find((d) => d.id === datasourceId)?.name || datasourceId || EMPTY_VALUE
+  );
 }
 
 /**
@@ -113,6 +138,27 @@ function extractGroupByFields(aggregations: unknown): string[] {
   return Array.from(new Set(fields));
 }
 
+/**
+ * Tooltip that stays reachable when the control it explains is disabled.
+ *
+ * A native disabled button emits no pointer or focus events, so an
+ * `EuiToolTip` anchored directly on it never opens — the user is told nothing
+ * about why the action is unavailable (A11Y8). Anchoring the tooltip on a
+ * focusable wrapper `<span>` instead (the standard OUI workaround) keeps the
+ * explanation reachable by both mouse hover and keyboard focus.
+ */
+const DisabledControlTooltip: React.FC<{
+  content: string;
+  children: React.ReactNode;
+  'data-test-subj'?: string;
+}> = ({ content, children, 'data-test-subj': dataTestSubj }) => (
+  <EuiToolTip content={content}>
+    <span tabIndex={0} style={{ display: 'inline-block' }} data-test-subj={dataTestSubj}>
+      {children}
+    </span>
+  </EuiToolTip>
+);
+
 // ============================================================================
 // Main Component
 // ============================================================================
@@ -124,6 +170,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   onClone,
   onEdit,
   onToggleEnabled,
+  datasources,
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditRedirectConfirm, setShowEditRedirectConfirm] = useState(false);
@@ -281,7 +328,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
         defaultMessage: 'Time',
       }),
       width: '180px',
-      render: (ts: string) => new Date(ts).toLocaleString(),
+      render: (ts: string) => formatTimestamp(ts),
     },
     {
       field: 'state',
@@ -371,13 +418,14 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   </EuiButtonEmpty>
                 </EuiToolTip>
               ) : (
-                <EuiToolTip
+                <DisabledControlTooltip
                   content={i18n.translate(
                     'observability.alerting.monitorDetailFlyout.editTooltip',
                     {
                       defaultMessage: 'Editing is only supported for PPL alert rules',
                     }
                   )}
+                  data-test-subj="alertManagerMonitorDetailEditDisabled"
                 >
                   <EuiButtonEmpty size="s" iconType="pencil" isDisabled>
                     <FormattedMessage
@@ -385,19 +433,22 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                       defaultMessage="Edit"
                     />
                   </EuiButtonEmpty>
-                </EuiToolTip>
+                </DisabledControlTooltip>
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {isComposite ? (
-                <EuiToolTip content={compositeActionTooltip}>
+                <DisabledControlTooltip
+                  content={compositeActionTooltip}
+                  data-test-subj="alertManagerMonitorDetailCloneDisabled"
+                >
                   <EuiButtonEmpty size="s" iconType="copy" isDisabled>
                     <FormattedMessage
                       id="observability.alerting.monitorDetailFlyout.cloneButton"
                       defaultMessage="Clone"
                     />
                   </EuiButtonEmpty>
-                </EuiToolTip>
+                </DisabledControlTooltip>
               ) : (
                 <EuiButtonEmpty size="s" iconType="copy" onClick={() => onClone(monitor)}>
                   <FormattedMessage
@@ -409,14 +460,17 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {isComposite ? (
-                <EuiToolTip content={compositeActionTooltip}>
+                <DisabledControlTooltip
+                  content={compositeActionTooltip}
+                  data-test-subj="alertManagerMonitorDetailDeleteDisabled"
+                >
                   <EuiButtonEmpty size="s" iconType="trash" color="danger" isDisabled>
                     <FormattedMessage
                       id="observability.alerting.monitorDetailFlyout.deleteButton"
                       defaultMessage="Delete"
                     />
                   </EuiButtonEmpty>
-                </EuiToolTip>
+                </DisabledControlTooltip>
               ) : (
                 <EuiButtonEmpty
                   size="s"
@@ -943,13 +997,13 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     {monitor.datasourceType === 'prometheus' ? (
                       <FormattedMessage
                         id="observability.alerting.monitorDetailFlyout.firingPendingAlertsHeader"
-                        defaultMessage="Currently firing/pending alerts ({count})"
+                        defaultMessage="Firing/pending alerts for this rule ({count})"
                         values={{ count: alertHistory.length }}
                       />
                     ) : (
                       <FormattedMessage
                         id="observability.alerting.monitorDetailFlyout.recentAlertsHeader"
-                        defaultMessage="Recent alerts ({count})"
+                        defaultMessage="Recent alerts for this rule ({count})"
                         values={{ count: alertHistory.length }}
                       />
                     )}
@@ -1002,30 +1056,28 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                         'observability.alerting.monitorDetailFlyout.history.createdBy',
                         { defaultMessage: 'Created By' }
                       ),
-                      description: monitor.createdBy,
+                      description: monitor.createdBy || EMPTY_VALUE,
                     },
                     {
                       title: i18n.translate(
                         'observability.alerting.monitorDetailFlyout.history.createdAt',
                         { defaultMessage: 'Created At' }
                       ),
-                      description: new Date(monitor.createdAt).toLocaleString(),
+                      description: formatTimestamp(monitor.createdAt),
                     },
                     {
                       title: i18n.translate(
                         'observability.alerting.monitorDetailFlyout.history.lastModified',
                         { defaultMessage: 'Last Modified' }
                       ),
-                      description: new Date(monitor.lastModified).toLocaleString(),
+                      description: formatTimestamp(monitor.lastModified),
                     },
                     {
                       title: i18n.translate(
                         'observability.alerting.monitorDetailFlyout.history.lastTriggered',
                         { defaultMessage: 'Last Triggered' }
                       ),
-                      description: monitor.lastTriggered
-                        ? new Date(monitor.lastTriggered).toLocaleString()
-                        : '—',
+                      description: formatTimestamp(monitor.lastTriggered),
                     },
                     {
                       title: i18n.translate(
@@ -1036,10 +1088,10 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     },
                     {
                       title: i18n.translate(
-                        'observability.alerting.monitorDetailFlyout.history.datasourceId',
-                        { defaultMessage: 'Datasource ID' }
+                        'observability.alerting.monitorDetailFlyout.history.datasource',
+                        { defaultMessage: 'Datasource' }
                       ),
-                      description: monitor.datasourceId,
+                      description: resolveDatasourceName(datasources, monitor.datasourceId),
                     },
                   ]}
                 />
@@ -1087,13 +1139,14 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                           )}
                     </EuiButton>
                   ) : (
-                    <EuiToolTip
+                    <DisabledControlTooltip
                       content={i18n.translate(
                         'observability.alerting.monitorDetailFlyout.enableDisableTooltip',
                         {
                           defaultMessage: 'Enable/disable is only supported for PPL alert rules.',
                         }
                       )}
+                      data-test-subj="alertManagerMonitorDetailToggleEnabledDisabled"
                     >
                       <EuiButton size="s" isDisabled>
                         {monitor.enabled === false
@@ -1106,7 +1159,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                               { defaultMessage: 'Disable rule' }
                             )}
                       </EuiButton>
-                    </EuiToolTip>
+                    </DisabledControlTooltip>
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
