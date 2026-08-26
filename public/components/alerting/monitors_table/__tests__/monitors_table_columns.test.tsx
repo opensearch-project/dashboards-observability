@@ -26,8 +26,7 @@ const renderCell = (field: string, value: unknown) => {
     visibleColumns: new Set([field]),
   });
   const col = cols.find((c) => c.field === field) as
-    | { render?: (v: unknown, item?: UnifiedRuleSummary) => React.ReactNode }
-    | undefined;
+    { render?: (v: unknown, item?: UnifiedRuleSummary) => React.ReactNode } | undefined;
   if (!col?.render) throw new Error(`no render for column "${field}"`);
   return render(<div>{col.render(value)}</div>);
 };
