@@ -55,13 +55,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { ADDetector, ADForecaster, Datasource } from '../../../common/types/alerting';
+import {
+  ADDetector,
+  ADForecaster,
+  Datasource,
+  MonitorStatus,
+  UnifiedRuleSummary,
+} from '../../../common/types/alerting';
 import { coreRefs } from '../../framework/core_refs';
 import { toAdApiDataSourceId, withAdApiDataSource } from './utils/ad_api_paths';
 import { useIndexMappings } from './hooks/use_index_mappings';
 import { useIndices } from './hooks/use_indices';
 import { useRuleDetail } from './hooks/use_rule_detail';
-import { isStandardOpenSearchDatasource } from './shared_constants';
+import { isAdResourceRunning, isStandardOpenSearchDatasource } from './shared_constants';
 
 export type CreateAdRuleType = 'detector' | 'forecaster';
 type AdRuleFlyoutMode = 'create' | 'edit';
@@ -691,7 +697,29 @@ const isForecasterTestInitializing = (resource?: ADDetector | ADForecaster): boo
   return stateMatches(state, [FORECASTER_INIT_TEST_STATE, 'INIT_TEST']);
 };
 
+/**
+ * Adapts a raw forecaster/detector resource into the minimal `UnifiedRuleSummary`
+ * shape that `isAdResourceRunning` reads (`status` + `enabled` + resource kind).
+ * `curState`/`cur_state` is typed as `MonitorStatus`, the same human-readable domain
+ * the shared status sets are keyed on, so the shared predicate can be reused verbatim.
+ */
+const asForecasterRunningInput = (resource?: ADDetector | ADForecaster): UnifiedRuleSummary =>
+  (({
+    monitorType: 'forecaster',
+    definitionType: 'forecaster',
+    status: getResourceState(resource) as MonitorStatus,
+    enabled: booleanValue(getField(asRecord(resource), 'enabled', 'enabled'), false),
+  } as unknown) as UnifiedRuleSummary);
+
 const isForecasterActiveForEdit = (resource?: ADDetector | ADForecaster): boolean => {
+  // Gate edits on the same running-state predicate the detail flyout uses to show its
+  // Stop button. `isAdResourceRunning` enumerates every status the backend treats as an
+  // active job (including the generic "Initializing" state this list used to miss), so
+  // aligning here closes the gap that let the backend reject the update with a raw
+  // "Job is running: forecast-<id>" error. The explicit checks below remain as a
+  // defensive superset for the uppercase enum forms of `curState` that the
+  // human-readable status map does not enumerate.
+  if (isAdResourceRunning(asForecasterRunningInput(resource))) return true;
   const state = getResourceState(resource);
   return (
     booleanValue(getField(asRecord(resource), 'enabled', 'enabled'), false) ||
@@ -710,7 +738,7 @@ const isForecasterActiveForEdit = (resource?: ADDetector | ADForecaster): boolea
   );
 };
 
-const getEditLifecycleBlocker = (
+export const getEditLifecycleBlocker = (
   ruleType: CreateAdRuleType,
   resource: ADDetector | ADForecaster | undefined,
   hasStoppedForEdit: boolean
@@ -942,6 +970,26 @@ const buildErrorMessage = (error: unknown): string => {
   return i18n.translate('observability.alerting.createAdRuleFlyout.unknownError', {
     defaultMessage: 'Unknown error',
   });
+};
+
+/**
+ * The AD/forecasting backend rejects updates to a running resource with a raw
+ * `Job is running: forecast-<id>` (or `detector-<id>`) string that leaks an internal
+ * job id and offers no guidance. Detect that rejection and swap in actionable copy.
+ */
+const RUNNING_JOB_ERROR_PATTERN = /job is running/i;
+
+export const humanizeAdUpdateError = (rawMessage: string, ruleType: CreateAdRuleType): string => {
+  if (!RUNNING_JOB_ERROR_PATTERN.test(rawMessage)) return rawMessage;
+  return ruleType === 'detector'
+    ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorRunningUpdateGuidance', {
+        defaultMessage:
+          'Stop the detector before editing its configuration, then restart it after your changes are saved.',
+      })
+    : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterRunningUpdateGuidance', {
+        defaultMessage:
+          'Stop the forecaster before editing its configuration, then restart it after your changes are saved.',
+      });
 };
 
 const featureErrorKey = (
@@ -2519,7 +2567,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
         }
       }
     } catch (error) {
-      const message = buildErrorMessage(error);
+      // Never surface the backend's raw "Job is running: forecast-<id>" string — it
+      // leaks an internal job id and gives no guidance. Swap in actionable copy.
+      const message = humanizeAdUpdateError(buildErrorMessage(error), ruleType);
       setSubmitError(message);
       coreRefs.toasts?.addDanger({
         title: isEdit
