@@ -4,7 +4,11 @@
  */
 
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-import type { UnifiedAlertSeverity, UnifiedAlertState } from '../../../common/types/alerting';
+import type {
+  UnifiedAlertKind,
+  UnifiedAlertSeverity,
+  UnifiedAlertState,
+} from '../../../common/types/alerting';
 
 /**
  * Theme-derived colors for alert severity, state, and row kind.
@@ -42,7 +46,7 @@ export const STATE_HEX: Record<UnifiedAlertState, string> = {
  * Row kind → theme color. Anomaly rows use the darker warning tone so they read
  * as distinct from a `high`-severity alert rather than merely similar.
  */
-export const ALERT_KIND_HEX: Record<string, string> = {
+export const ALERT_KIND_HEX: Record<UnifiedAlertKind, string> = {
   alert: euiThemeVars.euiColorPrimary,
   anomaly: euiThemeVars.euiColorWarningText,
 };
@@ -62,5 +66,6 @@ export function getSeverityHex(severity?: string | null): string {
  */
 export function getStateHex(state?: string | null): string {
   if (!state) return UNKNOWN_HEX;
-  return STATE_HEX[state as UnifiedAlertState] ?? ALERT_KIND_HEX[state] ?? UNKNOWN_HEX;
+  const kindHex = ALERT_KIND_HEX[state as UnifiedAlertKind];
+  return STATE_HEX[state as UnifiedAlertState] ?? kindHex ?? UNKNOWN_HEX;
 }
