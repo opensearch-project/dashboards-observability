@@ -37,6 +37,8 @@ import { AnomalyDetailContent } from './anomaly_detail_flyout';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { LinkifyAnnotation } from './linkify_annotation';
 import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
+import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
+import { formatTimestamp } from './time_format';
 
 /** Internal label keys filtered from the Labels accordion display. */
 const INTERNAL_LABEL_KEYS = new Set([
@@ -296,10 +298,12 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiHealth color={STATE_COLORS[alert.state]}>{alert.state}</EuiHealth>
+                <EuiHealth color={STATE_COLORS[alert.state]}>{getStateLabel(alert.state)}</EuiHealth>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color={SEVERITY_COLORS[alert.severity]}>{alert.severity}</EuiBadge>
+                <EuiBadge color={SEVERITY_COLORS[alert.severity]}>
+                  {getSeverityLabel(alert.severity)}
+                </EuiBadge>
               </EuiFlexItem>
               {sourceLink && (
                 <EuiFlexItem grow={false}>
@@ -355,25 +359,25 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 title: i18n.translate('observability.alerting.alertDetailFlyout.alertId', {
                   defaultMessage: 'Alert ID',
                 }),
-                description: alert.id || '\u2014',
+                description: alert.id || EMPTY_VALUE,
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.state', {
                   defaultMessage: 'State',
                 }),
-                description: alert.state || '\u2014',
+                description: getStateLabel(alert.state),
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.severity', {
                   defaultMessage: 'Severity',
                 }),
-                description: alert.severity || '\u2014',
+                description: getSeverityLabel(alert.severity),
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.backend', {
                   defaultMessage: 'Backend',
                 }),
-                description: alert.datasourceType || '\u2014',
+                description: alert.datasourceType || EMPTY_VALUE,
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.datasource', {
@@ -385,17 +389,16 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 title: i18n.translate('observability.alerting.alertDetailFlyout.started', {
                   defaultMessage: 'Started',
                 }),
-                description: alert.startTime
-                  ? new Date(alert.startTime).toLocaleString()
-                  : '\u2014',
+                // Zone-labelled so this reads identically to the Started column in
+                // the alerts table; a bare `toLocaleString()` hides which zone it
+                // rendered in, so two readers see different "start" times.
+                description: formatTimestamp(alert.startTime),
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.lastUpdated', {
                   defaultMessage: 'Last Updated',
                 }),
-                description: alert.lastUpdated
-                  ? new Date(alert.lastUpdated).toLocaleString()
-                  : '\u2014',
+                description: formatTimestamp(alert.lastUpdated),
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.duration', {

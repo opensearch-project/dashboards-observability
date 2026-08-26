@@ -492,6 +492,56 @@ describe('AlertDetailFlyout', () => {
     });
   });
 
+  describe('detail-list formatting parity with the alerts table', () => {
+    it('title-cases the State and Severity values instead of showing raw enums', () => {
+      const { getAllByText, queryByText } = render(
+        <AlertDetailFlyout
+          alert={baseAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // The alerts table renders "Active"/"Critical"; the flyout used to show
+      // the raw backend enums, so the same alert read two different ways on
+      // the same screen. Each value appears twice — once as a header chip, once
+      // in the detail list — and no lowercase rendering may survive anywhere.
+      expect(getAllByText('Active')).toHaveLength(2);
+      expect(getAllByText('Critical')).toHaveLength(2);
+      expect(queryByText('active')).toBeNull();
+      expect(queryByText('critical')).toBeNull();
+    });
+
+    it('names the timezone on the Started and Last Updated timestamps', () => {
+      const { getAllByText } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, startTime: '2026-06-04T20:00:00.000Z' }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // `toLocaleString()` never says which zone it rendered in. Assert the
+      // zone-labelled shape rather than a fixed string, so the test doesn't
+      // depend on the machine's timezone. Both Started and Last Updated match.
+      expect(getAllByText(/^\w{3} \d{1,2}, 20\d{2} @ \d{2}:\d{2}:\d{2} \S+$/)).toHaveLength(2);
+    });
+
+    it('renders the shared em-dash placeholder when a timestamp is missing', () => {
+      const { getAllByText } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, lastUpdated: '' }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // Not "Invalid date", and not the flyout's old "Not available" wording —
+      // the same glyph the table uses for an empty cell.
+      expect(getAllByText('—').length).toBeGreaterThan(0);
+    });
+  });
+
   describe('annotation runbook links (SRE2)', () => {
     it('renders a runbook URL annotation as a clickable external link', () => {
       const alertWithRunbook: UnifiedAlertSummary = {
