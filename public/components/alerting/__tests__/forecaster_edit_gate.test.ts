@@ -47,19 +47,19 @@ const ALL_STATUSES: MonitorStatus[] = [
 ];
 
 const summaryForStatus = (status: MonitorStatus, enabled = false): UnifiedRuleSummary =>
-  (({
+  ({
     monitorType: 'forecaster',
     definitionType: 'forecaster',
     status,
     enabled,
-  } as unknown) as UnifiedRuleSummary);
+  }) as unknown as UnifiedRuleSummary;
 
 const rawForecasterForStatus = (status: MonitorStatus, enabled = false): ADForecaster =>
-  (({
+  ({
     id: 'forecast-1',
     curState: status,
     enabled,
-  } as unknown) as ADForecaster);
+  }) as unknown as ADForecaster;
 
 describe('forecaster edit gate vs shared running-state predicate (BUG-AD1)', () => {
   it.each(ALL_STATUSES)(

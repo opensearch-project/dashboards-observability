@@ -704,12 +704,12 @@ const isForecasterTestInitializing = (resource?: ADDetector | ADForecaster): boo
  * the shared status sets are keyed on, so the shared predicate can be reused verbatim.
  */
 const asForecasterRunningInput = (resource?: ADDetector | ADForecaster): UnifiedRuleSummary =>
-  (({
+  ({
     monitorType: 'forecaster',
     definitionType: 'forecaster',
     status: getResourceState(resource) as MonitorStatus,
     enabled: booleanValue(getField(asRecord(resource), 'enabled', 'enabled'), false),
-  } as unknown) as UnifiedRuleSummary);
+  }) as unknown as UnifiedRuleSummary;
 
 const isForecasterActiveForEdit = (resource?: ADDetector | ADForecaster): boolean => {
   // Gate edits on the same running-state predicate the detail flyout uses to show its
