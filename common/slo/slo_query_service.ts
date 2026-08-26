@@ -235,9 +235,12 @@ export class SloQueryService {
     // returning rows that don't match the active filters.
     const effectivePage =
       decoded && decoded.fh === filterFingerprint ? Math.min(decoded.p, MAX_CURSOR_PAGE) : 1;
-    // Default to `_id` for stable cursor pagination. The visible row order is
-    // re-derived client-side over the page slice (worst-budget first); the
-    // server-side order only needs to be stable across cursor steps. Sorting
+    // Default to `_id` for stable cursor pagination. The listing renders rows
+    // in this server order as-is (M7) — error-budget-remaining is a derived,
+    // per-read value the store can't sort or index on, so the page must not
+    // fake a "worst-first" ordering the paginated list never actually had; the
+    // per-row health cell carries the breach signal instead. The server-side
+    // order therefore only needs to be stable across cursor steps. Sorting
     // by `name` directly fails on the existing text-typed mapping, and adding
     // a keyword subfield would require a mapping migration the listing
     // change shouldn't be coupled to. `_id` is a top-level keyword the OSD
