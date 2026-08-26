@@ -80,7 +80,6 @@ interface DependenciesTablePanelProps {
   filteredDependencies: GroupedDependency[];
   columns: Array<EuiBasicTableColumn<GroupedDependency>>;
   isLoading: boolean;
-  latencyPercentile: string;
   itemIdToExpandedRowMap: Record<string, React.ReactNode>;
   noDataMessage: string;
   noFilteredDataMessage: string;
@@ -91,7 +90,6 @@ const DependenciesTablePanelUI: React.FC<DependenciesTablePanelProps> = ({
   filteredDependencies,
   columns,
   isLoading,
-  latencyPercentile,
   itemIdToExpandedRowMap,
   noDataMessage,
   noFilteredDataMessage,
@@ -103,8 +101,10 @@ const DependenciesTablePanelUI: React.FC<DependenciesTablePanelProps> = ({
         <p>{dependenciesCount === 0 ? noDataMessage : noFilteredDataMessage}</p>
       </EuiText>
     ) : (
+      // Don't key the table on latencyPercentile
+      // Switching percentile only swaps the latency column
+      // Remounting would reset pagination and reload the row charts
       <EuiInMemoryTable
-        key={`dependencies-table-${latencyPercentile}`}
         items={filteredDependencies}
         columns={columns}
         loading={isLoading}
@@ -458,15 +458,17 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     return textFilteredDependencies.filter((dep) => {
       // Latency range filter (only if range has been adjusted)
       const isLatencyFilterActive =
-        latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max;
+        // Gating on latencyUserModified avoids a false positive after a percentile switch
+        latencyUserModified.current &&
+        (latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max);
       if (isLatencyFilterActive) {
         // Use the selected percentile's duration for filtering
         const depLatency =
           latencyPercentile === 'p99'
             ? dep.p99Duration
             : latencyPercentile === 'p90'
-            ? dep.p90Duration
-            : dep.p50Duration;
+              ? dep.p90Duration
+              : dep.p50Duration;
         if (
           depLatency === undefined ||
           depLatency < latencyRange[0] ||
@@ -752,8 +754,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           latencyPercentile === 'p99'
             ? 'p99Duration'
             : latencyPercentile === 'p90'
-            ? 'p90Duration'
-            : 'p50Duration',
+              ? 'p90Duration'
+              : 'p50Duration',
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -979,15 +981,15 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                 style={{ paddingTop: '8px', paddingRight: '8px' }}
               >
                 <DependencyFilterSidebar
-                  availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
+                  availabilityThresholds={AVAILABILITY_THRESHOLD_OPTIONS as unknown as string[]}
                   selectedAvailabilityThresholds={
-                    (selectedAvailabilityThresholds as unknown) as string[]
+                    selectedAvailabilityThresholds as unknown as string[]
                   }
                   onAvailabilityThresholdsChange={
                     setSelectedAvailabilityThresholds as (selected: string[]) => void
                   }
-                  errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
-                  selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
+                  errorRateThresholds={ERROR_RATE_THRESHOLD_OPTIONS as unknown as string[]}
+                  selectedErrorRateThresholds={selectedErrorRateThresholds as unknown as string[]}
                   onErrorRateThresholdsChange={
                     setSelectedErrorRateThresholds as (selected: string[]) => void
                   }
@@ -1026,7 +1028,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                   filteredDependencies={filteredDependencies}
                   columns={columns}
                   isLoading={isLoading}
-                  latencyPercentile={latencyPercentile}
                   itemIdToExpandedRowMap={itemIdToExpandedRowMap}
                   noDataMessage={i18n.translate('observability.apm.dependencies.noData', {
                     defaultMessage:

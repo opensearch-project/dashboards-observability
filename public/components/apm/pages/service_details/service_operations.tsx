@@ -106,7 +106,6 @@ interface OperationsTablePanelProps {
   filteredOperations: OperationRow[];
   columns: Array<EuiBasicTableColumn<OperationRow>>;
   isLoading: boolean;
-  latencyPercentile: string;
   itemIdToExpandedRowMap: Record<string, React.ReactNode>;
   noDataMessage: string;
   noFilteredDataMessage: string;
@@ -117,7 +116,6 @@ const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
   filteredOperations,
   columns,
   isLoading,
-  latencyPercentile,
   itemIdToExpandedRowMap,
   noDataMessage,
   noFilteredDataMessage,
@@ -129,8 +127,10 @@ const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
         <p>{operationsCount === 0 ? noDataMessage : noFilteredDataMessage}</p>
       </EuiText>
     ) : (
+      // Don't key the table on latencyPercentile
+      // Switching percentile only swaps the latency column
+      // Remounting would reset pagination and reload the row charts
       <EuiInMemoryTable
-        key={`operations-table-${latencyPercentile}`}
         items={filteredOperations}
         columns={columns}
         loading={isLoading}
@@ -255,7 +255,11 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   }, [timeRange]);
 
   // Fetch operations list from PPL
-  const { data: operationsData, isLoading: opsLoading, error: opsError } = useOperations({
+  const {
+    data: operationsData,
+    isLoading: opsLoading,
+    error: opsError,
+  } = useOperations({
     serviceName,
     environment,
     startTime: parsedTimeRange.startTime,
@@ -399,15 +403,17 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     return textFilteredOperations.filter((op) => {
       // Latency range filter (only if range has been adjusted)
       const isLatencyFilterActive =
-        latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max;
+        // Gating on latencyUserModified avoids a false positive after a percentile switch
+        latencyUserModified.current &&
+        (latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max);
       if (isLatencyFilterActive) {
         // Use the selected percentile's duration for filtering
         const opLatency =
           latencyPercentile === 'p99'
             ? op.p99Duration
             : latencyPercentile === 'p90'
-            ? op.p90Duration
-            : op.p50Duration;
+              ? op.p90Duration
+              : op.p50Duration;
         if (opLatency < latencyRange[0] || opLatency > latencyRange[1]) {
           return false;
         }
@@ -700,8 +706,8 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
           latencyPercentile === 'p99'
             ? 'p99Duration'
             : latencyPercentile === 'p90'
-            ? 'p90Duration'
-            : 'p50Duration',
+              ? 'p90Duration'
+              : 'p50Duration',
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -909,15 +915,15 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
                 style={{ paddingTop: '8px', paddingRight: '8px' }}
               >
                 <OperationFilterSidebar
-                  availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
+                  availabilityThresholds={AVAILABILITY_THRESHOLD_OPTIONS as unknown as string[]}
                   selectedAvailabilityThresholds={
-                    (selectedAvailabilityThresholds as unknown) as string[]
+                    selectedAvailabilityThresholds as unknown as string[]
                   }
                   onAvailabilityThresholdsChange={
                     setSelectedAvailabilityThresholds as (selected: string[]) => void
                   }
-                  errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
-                  selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
+                  errorRateThresholds={ERROR_RATE_THRESHOLD_OPTIONS as unknown as string[]}
+                  selectedErrorRateThresholds={selectedErrorRateThresholds as unknown as string[]}
                   onErrorRateThresholdsChange={
                     setSelectedErrorRateThresholds as (selected: string[]) => void
                   }
@@ -950,7 +956,6 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
                   filteredOperations={filteredOperations}
                   columns={columns}
                   isLoading={isLoading}
-                  latencyPercentile={latencyPercentile}
                   itemIdToExpandedRowMap={itemIdToExpandedRowMap}
                   noDataMessage={i18n.translate('observability.apm.operations.noData', {
                     defaultMessage:
