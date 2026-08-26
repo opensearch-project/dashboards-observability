@@ -298,7 +298,9 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiHealth color={STATE_COLORS[alert.state]}>{getStateLabel(alert.state)}</EuiHealth>
+                <EuiHealth color={STATE_COLORS[alert.state]}>
+                  {getStateLabel(alert.state)}
+                </EuiHealth>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge color={SEVERITY_COLORS[alert.severity]}>
