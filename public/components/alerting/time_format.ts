@@ -60,11 +60,7 @@ export function formatTimestamp(
   value?: string | number | Date | null,
   options: FormatTimestampOptions = {}
 ): string {
-  const {
-    withZone = true,
-    format = DEFAULT_TIMESTAMP_FORMAT,
-    fallback = EMPTY_VALUE,
-  } = options;
+  const { withZone = true, format = DEFAULT_TIMESTAMP_FORMAT, fallback = EMPTY_VALUE } = options;
 
   if (value === null || value === undefined || value === '') return fallback;
 

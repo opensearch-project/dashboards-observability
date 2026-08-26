@@ -55,7 +55,9 @@ describe('time_format', () => {
 
     it('honors a custom format', () => {
       getSpy.mockReturnValue('UTC');
-      expect(formatTimestamp(INSTANT, { format: 'YYYY-MM-DD', withZone: false })).toBe('2026-08-25');
+      expect(formatTimestamp(INSTANT, { format: 'YYYY-MM-DD', withZone: false })).toBe(
+        '2026-08-25'
+      );
     });
 
     it('accepts epoch millis and Date instances', () => {
