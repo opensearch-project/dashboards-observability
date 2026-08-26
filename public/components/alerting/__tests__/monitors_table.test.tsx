@@ -222,6 +222,47 @@ describe('MonitorsTable', () => {
     ).toHaveClass('euiListGroupItem-isDisabled');
   });
 
+  // Regression (audit M8): rule-creation enablement must follow the
+  // datasources AVAILABLE to the user, not the current facet (browse)
+  // selection. A Prometheus datasource exists, so Metrics create stays enabled
+  // even with nothing selected in the facet.
+  it('keeps metrics creation enabled with a Prometheus datasource and no facet selection', () => {
+    const onCreateMonitor = jest.fn();
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        datasources={
+          [{ id: 'prom-1', name: 'prom1', type: 'prometheus' }] as unknown as Datasource[]
+        }
+        selectedDsIds={[]}
+        onCreateMonitor={onCreateMonitor}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    fireEvent.click(screen.getByText('Metrics alert rule'));
+    expect(onCreateMonitor).toHaveBeenCalledWith('metrics');
+  });
+
+  it('disables logs creation when no OpenSearch datasource exists', () => {
+    const onCreateMonitor = jest.fn();
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        datasources={
+          [{ id: 'prom-1', name: 'prom1', type: 'prometheus' }] as unknown as Datasource[]
+        }
+        selectedDsIds={['prom-1']}
+        onCreateMonitor={onCreateMonitor}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    expect(screen.getByLabelText('Create logs rule').closest('.euiListGroupItem')).toHaveClass(
+      'euiListGroupItem-isDisabled'
+    );
+  });
+
   // Regression: deselecting all datasources must wipe both the dependent
   // facet selections AND the search box, mirroring the cascade-clear in
   // alerts_dashboard.tsx. Keep the two tabs aligned.
