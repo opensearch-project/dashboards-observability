@@ -106,7 +106,6 @@ interface OperationsTablePanelProps {
   filteredOperations: OperationRow[];
   columns: Array<EuiBasicTableColumn<OperationRow>>;
   isLoading: boolean;
-  latencyPercentile: string;
   itemIdToExpandedRowMap: Record<string, React.ReactNode>;
   noDataMessage: string;
   noFilteredDataMessage: string;
@@ -117,7 +116,6 @@ const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
   filteredOperations,
   columns,
   isLoading,
-  latencyPercentile,
   itemIdToExpandedRowMap,
   noDataMessage,
   noFilteredDataMessage,
@@ -129,8 +127,10 @@ const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
         <p>{operationsCount === 0 ? noDataMessage : noFilteredDataMessage}</p>
       </EuiText>
     ) : (
+      // Don't key the table on latencyPercentile
+      // Switching percentile only swaps the latency column
+      // Remounting would reset pagination and reload the row charts
       <EuiInMemoryTable
-        key={`operations-table-${latencyPercentile}`}
         items={filteredOperations}
         columns={columns}
         loading={isLoading}
@@ -399,7 +399,9 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     return textFilteredOperations.filter((op) => {
       // Latency range filter (only if range has been adjusted)
       const isLatencyFilterActive =
-        latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max;
+        // Gating on latencyUserModified avoids a false positive after a percentile switch
+        latencyUserModified.current &&
+        (latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max);
       if (isLatencyFilterActive) {
         // Use the selected percentile's duration for filtering
         const opLatency =
@@ -950,7 +952,6 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
                   filteredOperations={filteredOperations}
                   columns={columns}
                   isLoading={isLoading}
-                  latencyPercentile={latencyPercentile}
                   itemIdToExpandedRowMap={itemIdToExpandedRowMap}
                   noDataMessage={i18n.translate('observability.apm.operations.noData', {
                     defaultMessage:
