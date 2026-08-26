@@ -228,7 +228,9 @@ describe('alerts_charts', () => {
 
   it('AlertTimeline: no title is rendered when nothing was excluded', () => {
     const start = END - HOUR_MS;
-    const alerts = [makeAlert({ id: 'in', startTime: new Date(END - 10 * 60 * 1000).toISOString() })];
+    const alerts = [
+      makeAlert({ id: 'in', startTime: new Date(END - 10 * 60 * 1000).toISOString() }),
+    ];
     render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} />);
 
     const option = mockSetOption.mock.calls[0][0] as { title?: unknown };

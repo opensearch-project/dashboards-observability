@@ -178,14 +178,11 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
           ? {
               left: 'center' as const,
               top: 0,
-              text: i18n.translate(
-                'observability.alerting.alertsCharts.excludedBeforeWindow',
-                {
-                  defaultMessage:
-                    '{count, plural, one {# alert started} other {# alerts started}} before this window',
-                  values: { count: excludedBeforeWindow },
-                }
-              ),
+              text: i18n.translate('observability.alerting.alertsCharts.excludedBeforeWindow', {
+                defaultMessage:
+                  '{count, plural, one {# alert started} other {# alerts started}} before this window',
+                values: { count: excludedBeforeWindow },
+              }),
               textStyle: { fontSize: 10, fontWeight: 'normal' as const, color: '#98A2B3' },
             }
           : undefined,
@@ -224,7 +221,7 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
         name: s.key,
         type: 'bar' as const,
         stack: 'severity',
-        data: buckets.map((b) => ((b as unknown) as Record<string, number>)[s.key]),
+        data: buckets.map((b) => (b as unknown as Record<string, number>)[s.key]),
         itemStyle: { color: s.color },
         barMaxWidth: 32,
       })),
