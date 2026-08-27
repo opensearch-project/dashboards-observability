@@ -949,7 +949,10 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           <EuiSuperSelect
             options={LATENCY_OPTIONS}
             valueOfSelected={latencyPercentile}
-            onChange={(value) => setLatencyPercentile(value as 'p99' | 'p90' | 'p50')}
+            onChange={(value) => {
+              latencyUserModified.current = false;
+              setLatencyPercentile(value as 'p99' | 'p90' | 'p50');
+            }}
             compressed
             prepend="Latency"
           />

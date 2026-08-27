@@ -882,7 +882,10 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
           <EuiSuperSelect
             options={LATENCY_OPTIONS}
             valueOfSelected={latencyPercentile}
-            onChange={(value) => setLatencyPercentile(value as 'p99' | 'p90' | 'p50')}
+            onChange={(value) => {
+              latencyUserModified.current = false;
+              setLatencyPercentile(value as 'p99' | 'p90' | 'p50');
+            }}
             compressed
             prepend="Latency"
             data-test-subj="latencyPercentileSelector"
