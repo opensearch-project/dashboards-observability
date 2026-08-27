@@ -265,6 +265,7 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                           )
                     }
                     iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                    aria-expanded={isExpanded}
                     onClick={() => onToggleExpand(row.serviceName)}
                     data-test-subj={`slosSuggestServiceExpand-${row.serviceName}`}
                   />

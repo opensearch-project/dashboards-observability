@@ -122,6 +122,29 @@ describe('ServiceTreeTable', () => {
     expect(onToggleExpand).toHaveBeenCalledWith('cart');
   });
 
+  it('exposes aria-expanded on the row expander reflecting the expanded state', () => {
+    render(
+      <ServiceTreeTable
+        serviceRows={[row({ serviceName: 'cart' }), row({ serviceName: 'checkout' })]}
+        expandedMap={{ cart: true, checkout: false }}
+        onToggleExpand={jest.fn()}
+        onToggleServiceSelection={jest.fn()}
+        selected={new Set()}
+        overrides={{}}
+        onToggleDraft={jest.fn()}
+        onOverrideChange={jest.fn()}
+      />
+    );
+    expect(screen.getByTestId('slosSuggestServiceExpand-cart')).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
+    expect(screen.getByTestId('slosSuggestServiceExpand-checkout')).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+  });
+
   it('fires onToggleServiceSelection when the service-level checkbox is clicked', () => {
     const onToggleServiceSelection = jest.fn();
     const r = row();

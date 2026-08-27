@@ -105,6 +105,61 @@ describe('FacetFilterGroup', () => {
   });
 });
 
+describe('FacetFilterGroup — accessibility (no nested interactive controls)', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('renders the error indicator OUTSIDE the checkbox label (not a nested interactive control)', () => {
+    const { getByTestId } = render(
+      <FacetFilterGroup {...defaultProps} errorMap={{ active: 'Cluster unreachable (timeout)' }} />
+    );
+    const errorButton = getByTestId('facetGroup-status-error-active');
+    // The interactive error button must not be nested inside a <label> element.
+    expect(errorButton.closest('label')).toBeNull();
+    // And it must not live inside the option's checkbox label wrapper.
+    const checkboxLabel = document.querySelector('label[for="status-active"]');
+    expect(checkboxLabel).not.toBeNull();
+    expect(checkboxLabel?.contains(errorButton)).toBe(false);
+  });
+
+  it('exposes aria-expanded on the header toggle button reflecting the open state', () => {
+    const { getByTestId, rerender } = render(
+      <FacetFilterGroup {...defaultProps} isCollapsed={false} />
+    );
+    const toggle = getByTestId('facetGroup-status-toggle');
+    // A real <button> element, not a div with role="button".
+    expect(toggle.tagName.toLowerCase()).toBe('button');
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    rerender(<FacetFilterGroup {...defaultProps} isCollapsed={true} />);
+    expect(getByTestId('facetGroup-status-toggle')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('toggles the accordion when the header toggle button is clicked', () => {
+    const onToggleCollapse = jest.fn();
+    const { getByTestId } = render(
+      <FacetFilterGroup {...defaultProps} onToggleCollapse={onToggleCollapse} />
+    );
+    fireEvent.click(getByTestId('facetGroup-status-toggle'));
+    expect(onToggleCollapse).toHaveBeenCalledWith('status');
+  });
+
+  it('clears the selection without toggling the accordion when Clear is clicked', () => {
+    const onChange = jest.fn();
+    const onToggleCollapse = jest.fn();
+    const { getByTestId } = render(
+      <FacetFilterGroup
+        {...defaultProps}
+        selected={['active']}
+        onChange={onChange}
+        onToggleCollapse={onToggleCollapse}
+      />
+    );
+    // Clear must be a sibling of the toggle, so activating it never expands/collapses.
+    fireEvent.click(getByTestId('facetGroup-status-clear'));
+    expect(onChange).toHaveBeenCalledWith([]);
+    expect(onToggleCollapse).not.toHaveBeenCalled();
+  });
+});
+
 describe('useFacetCollapse', () => {
   it('honors per-call defaultCollapsed when no override is set, then persists toggles', () => {
     let snapshot: ReturnType<typeof useFacetCollapse> | null = null;
