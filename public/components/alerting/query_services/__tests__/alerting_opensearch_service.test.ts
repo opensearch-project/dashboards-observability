@@ -116,4 +116,47 @@ describe('AlertingOpenSearchService', () => {
       });
     });
   });
+
+  describe('getNotificationConfigs', () => {
+    it('calls /api/notifications/get_configs with channel-type filters', async () => {
+      mockGet.mockResolvedValueOnce({
+        config_list: [
+          {
+            config_id: 'ch-1',
+            config: { name: 'channel-1', config_type: 'sns', is_enabled: true },
+          },
+        ],
+        total_hits: 1,
+      });
+      const svc = new AlertingOpenSearchService();
+      const result = await svc.getNotificationConfigs('ds-1');
+
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      expect(mockGet.mock.calls[0][0]).toBe('/api/notifications/get_configs');
+      const query = mockGet.mock.calls[0][1].query;
+      expect(query.dataSourceId).toBe('ds-1');
+      expect(query.config_type).toContain('slack');
+      expect(query.config_type).toContain('sns');
+      expect(result.destinations).toEqual([{ id: 'ch-1', name: 'channel-1', type: 'sns' }]);
+      expect(result.totalDestinations).toBe(1);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('omits dataSourceId for the synthetic local-cluster id', async () => {
+      mockGet.mockResolvedValueOnce({ config_list: [], total_hits: 0 });
+      const svc = new AlertingOpenSearchService();
+      await svc.getNotificationConfigs('local-cluster');
+
+      const query = mockGet.mock.calls[0][1].query;
+      expect(query).not.toHaveProperty('dataSourceId');
+    });
+
+    it('does not fall back to the legacy alerting destinations route on failure', async () => {
+      mockGet.mockRejectedValueOnce(new Error('get_configs failed'));
+      const svc = new AlertingOpenSearchService();
+
+      await expect(svc.getNotificationConfigs('ds-1')).rejects.toThrow('get_configs failed');
+      expect(mockGet).toHaveBeenCalledTimes(1);
+    });
+  });
 });
