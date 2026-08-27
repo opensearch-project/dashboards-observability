@@ -212,15 +212,22 @@ describe('SLO rule health — recovery flow (real Cortex)', () => {
       });
     };
     recheck(0);
-    cy.get(`[data-test-subj="slosRulesBadge-${sloId}"]`)
-      .should('have.attr', 'data-test-rule-state', 'missing');
+    cy.get(`[data-test-subj="slosRulesBadge-${sloId}"]`).should(
+      'have.attr',
+      'data-test-rule-state',
+      'missing'
+    );
 
     // -----------------------------------------------------------------------
     // Step D — Restore flow
     // -----------------------------------------------------------------------
     cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
-    cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 20000 }).should(
+    // F-CRUD2 grace window: the destructive "rules missing" callout is held
+    // back for RULE_HEALTH_MAX_RETRIES (5) × RULE_HEALTH_RETRY_INTERVAL_MS (5s)
+    // = 25s of re-probing, showing a soft "propagating" callout first. Wait
+    // past that window before asserting the alarm callout appears.
+    cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 35000 }).should(
       'be.visible'
     );
 
@@ -248,7 +255,11 @@ describe('SLO rule health — recovery flow (real Cortex)', () => {
 
     cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
-    cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 20000 }).should(
+    // F-CRUD2 grace window: the destructive "rules missing" callout is held
+    // back for RULE_HEALTH_MAX_RETRIES (5) × RULE_HEALTH_RETRY_INTERVAL_MS (5s)
+    // = 25s of re-probing, showing a soft "propagating" callout first. Wait
+    // past that window before asserting the alarm callout appears.
+    cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 35000 }).should(
       'be.visible'
     );
 
