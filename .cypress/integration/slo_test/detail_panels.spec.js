@@ -150,7 +150,8 @@ describe('SLO detail page — panels render', () => {
     cy.get('[data-test-subj="slosDetailSliList"]').should('be.visible');
 
     // Objectives table renders one row for the single objective.
-    cy.get('[data-test-subj="slosDetailObjectivesTable"]').should('be.visible')
+    cy.get('[data-test-subj="slosDetailObjectivesTable"]')
+      .should('be.visible')
       .and('contain.text', 'primary');
   });
 
@@ -195,19 +196,23 @@ describe('SLO detail page — panels render', () => {
     cy.get('[data-test-subj="slosDetailAdvancedAccordion"]').click();
     cy.get('[data-test-subj="slosDetailAdvancedOps"]').should('exist');
     cy.get('[data-test-subj="slosDetailRecordingRulesAccordion"]').click();
-    cy.get('[data-test-subj^="slosDetailRecordingRule-"]')
-      .should('have.length.greaterThan', 0);
+    cy.get('[data-test-subj^="slosDetailRecordingRule-"]').should('have.length.greaterThan', 0);
   });
 
-  it('active SLO: View alert rules + Toggle + Delete buttons exist in the header', function () {
+  it('active SLO: View alerts + Toggle + Delete buttons exist in the header', function () {
     if (!activeId) {
       this.skip();
       return;
     }
     cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(activeId)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
-    cy.get('[data-test-subj="slosDetailViewRules"]').should('exist');
-    cy.get('[data-test-subj="slosDetailToggle"]').should('be.visible')
+    // Header pivot renamed to "View alerts": it now deep-links to Alert Manager's
+    // Alerts (firing) tab rather than the Rules definition list (OBS1).
+    cy.get('[data-test-subj="slosDetailViewAlerts"]')
+      .should('exist')
+      .and('contain.text', 'View alerts');
+    cy.get('[data-test-subj="slosDetailToggle"]')
+      .should('be.visible')
       .and('contain.text', 'Disable');
     cy.get('[data-test-subj="slosDetailDelete"]').should('be.visible');
     cy.get('[data-test-subj="slosBack"]').should('exist');
