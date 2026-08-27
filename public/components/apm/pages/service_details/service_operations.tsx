@@ -414,7 +414,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
             : latencyPercentile === 'p90'
               ? op.p90Duration
               : op.p50Duration;
-        if (opLatency < latencyRange[0] || opLatency > latencyRange[1]) {
+        if (opLatency === undefined || opLatency < latencyRange[0] || opLatency > latencyRange[1]) {
           return false;
         }
       }
