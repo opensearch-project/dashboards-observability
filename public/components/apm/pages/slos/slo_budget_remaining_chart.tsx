@@ -40,6 +40,18 @@ import { formatPct } from '../../../../../common/slo/format';
 import { uiSettingsService } from '../../../../../common/utils';
 
 /**
+ * Escape values interpolated into the ECharts tooltip HTML. The tooltip
+ * `formatter` returns a raw HTML string, so any dynamic value (timestamp,
+ * formatted percentages, delta) must be escaped to prevent HTML injection
+ * should an upstream value ever contain angle brackets or quotes.
+ */
+const escapeHtml = (s: string): string =>
+  String(s).replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string
+  );
+
+/**
  * Prometheus range-duration equivalents for each calendar period. Calendar
  * windows aren't backed by recording rules yet, so the inline chart approximates
  * the period with a rolling range of equal length. Deriving the duration from
@@ -189,15 +201,16 @@ export function buildBudgetRemainingOption(
         if (warningThreshold && Number.isFinite(v)) {
           const delta = v - warningThreshold.threshold;
           const sign = delta >= 0 ? '+' : '';
-          deltaLine = `<br/>${i18n.translate(
-            'observability.apm.slo.budgetRemainingChart.tooltip.deltaVsThreshold',
-            {
+          deltaLine = `<br/>${escapeHtml(
+            i18n.translate('observability.apm.slo.budgetRemainingChart.tooltip.deltaVsThreshold', {
               defaultMessage: '{delta} vs warning threshold',
               values: { delta: `${sign}${formatPct(delta)}` },
-            }
+            })
           )}`;
         }
-        return `${ts}<br/><strong>${formatPct(v)}</strong> ${remainingLabel}${deltaLine}`;
+        return `${escapeHtml(ts)}<br/><strong>${escapeHtml(formatPct(v))}</strong> ${escapeHtml(
+          remainingLabel
+        )}${deltaLine}`;
       },
     },
     xAxis: {

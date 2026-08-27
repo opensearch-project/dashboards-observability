@@ -35,6 +35,18 @@ import { buildCoverageProbeQuery, buildErrorRatioExprForWindow } from './slo_que
 import { uiSettingsService } from '../../../../../common/utils';
 
 /**
+ * Escape values interpolated into the ECharts tooltip HTML. The tooltip
+ * `formatter` returns a raw HTML string, so any dynamic value (series names,
+ * colours, formatted numbers) must be escaped to prevent HTML/attribute
+ * injection should an upstream value ever contain angle brackets or quotes.
+ */
+const escapeHtml = (s: string): string =>
+  String(s).replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string
+  );
+
+/**
  * Resolve the timezone the user configured via `dateFormat:tz`, falling back to
  * the browser zone. Kept local (rather than shared) so this file owns its copy.
  */
@@ -151,7 +163,9 @@ export function buildBurnRateOption(inputs: BurnRateOptionInputs): echarts.EChar
         const rows = list
           .map((p) => {
             const raw = Array.isArray(p.value) ? (p.value[2] ?? p.value[1]) : (p.value as number);
-            const swatch = `<span style="display:inline-block;width:10px;height:10px;background:${p.color};margin-right:6px;border-radius:2px;"></span>`;
+            const swatch = `<span style="display:inline-block;width:10px;height:10px;background:${escapeHtml(
+              p.color
+            )};margin-right:6px;border-radius:2px;"></span>`;
             // Delta versus this tier's threshold: how much over/under the burn
             // rate that would fire the alert.
             const threshold = thresholdByName.get(p.seriesName);
@@ -167,12 +181,12 @@ export function buildBurnRateOption(inputs: BurnRateOptionInputs): echarts.EChar
                       Math.abs(delta)
                     )} under)</span>`;
             }
-            return `<div>${swatch}${p.seriesName}: <strong>${formatMultiplier(
-              raw
+            return `<div>${swatch}${escapeHtml(p.seriesName)}: <strong>${escapeHtml(
+              formatMultiplier(raw)
             )}</strong>${deltaStr}</div>`;
           })
           .join('');
-        return `<div>${ts}</div>${rows}`;
+        return `<div>${escapeHtml(ts)}</div>${rows}`;
       },
     },
     xAxis: {
