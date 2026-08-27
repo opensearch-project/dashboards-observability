@@ -57,6 +57,14 @@ export interface FormState {
   description: string;
   service: string;
   ownerTeam: string;
+  /**
+   * Secondary owner teams (`owner.teams[1..]`) carried through edit but not
+   * shown/edited in the wizard, which only authors the primary team. The saved
+   * object already supports up to 5 teams; without carrying these, editing a
+   * multi-team SLO (creatable via the API) would drop them on save because the
+   * server does a shallow top-level merge of `owner`. Always `[]` in create mode.
+   */
+  ownerTeamsSecondary: string[];
   ownerPrimaryUser: string;
   tier: string;
   windowDuration: '7d' | '14d' | '28d' | '30d';
@@ -229,6 +237,7 @@ export function initialState(): FormState {
     description: '',
     service: '',
     ownerTeam: '',
+    ownerTeamsSecondary: [],
     ownerPrimaryUser: '',
     tier: '',
     windowDuration: '28d',
@@ -747,6 +756,9 @@ export function hydrateFromDoc(doc: SloDocument): EditHydration | null {
     description: spec.description ?? '',
     service: spec.service,
     ownerTeam: spec.owner.teams[0] ?? '',
+    // Carry teams[1..] so a multi-team SLO isn't truncated to its primary on
+    // save (the wizard UI only edits the primary team).
+    ownerTeamsSecondary: spec.owner.teams.slice(1),
     ownerPrimaryUser: spec.owner.primaryUser ?? '',
     tier: spec.tier ?? '',
     windowDuration,

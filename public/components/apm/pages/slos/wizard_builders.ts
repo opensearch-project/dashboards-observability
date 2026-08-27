@@ -114,7 +114,11 @@ export function buildCreateInput(state: FormState, template: SloTemplate): SloCr
     mode: state.shadow ? 'shadow' : 'active',
     service: state.service,
     owner: {
-      teams: state.ownerTeam ? [state.ownerTeam] : [],
+      // Primary team (the only one the wizard edits) first, then any secondary
+      // teams carried from an edited SLO — deduped, blanks dropped — so editing
+      // a multi-team SLO doesn't truncate `owner.teams` to just the primary.
+      // `ownerTeamsSecondary` is always empty in create mode.
+      teams: Array.from(new Set([state.ownerTeam, ...state.ownerTeamsSecondary].filter(Boolean))),
       primaryUser: state.ownerPrimaryUser || undefined,
     },
     tier: state.tier || undefined,

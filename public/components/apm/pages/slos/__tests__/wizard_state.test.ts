@@ -298,6 +298,31 @@ describe('hydrateFromDoc (edit-mode prefill)', () => {
     expect(rebuilt.spec.window).toEqual({ type: 'rolling', duration: '14d' });
   });
 
+  it('preserves secondary owner teams through an edit (no truncation to primary)', () => {
+    // The saved object supports up to 5 teams, but the wizard only edits the
+    // primary. A multi-team SLO (API-created) must keep teams[1..] on save,
+    // else the server's shallow owner merge would drop them.
+    const doc = makeDoc();
+    doc.spec.owner = { teams: ['sre', 'oncall', 'platform'], primaryUser: 'alice' };
+    const hydrated = hydrateFromDoc(doc)!;
+    expect(hydrated.state.ownerTeam).toBe('sre');
+    expect(hydrated.state.ownerTeamsSecondary).toEqual(['oncall', 'platform']);
+    const rebuilt = buildCreateInput(hydrated.state, hydrated.template);
+    expect(rebuilt.spec.owner.teams).toEqual(['sre', 'oncall', 'platform']);
+  });
+
+  it('dedupes when the edited primary team already appears among the secondaries', () => {
+    const doc = makeDoc();
+    doc.spec.owner = { teams: ['sre', 'oncall'], primaryUser: 'alice' };
+    const hydrated = hydrateFromDoc(doc)!;
+    expect(hydrated.state.ownerTeamsSecondary).toEqual(['oncall']);
+    // User sets the primary team to one that's already a secondary: the result
+    // must not contain a duplicate, and primary stays first.
+    const state = { ...hydrated.state, ownerTeam: 'oncall' };
+    const rebuilt = buildCreateInput(state, hydrated.template);
+    expect(rebuilt.spec.owner.teams).toEqual(['oncall']);
+  });
+
   it('returns null for composite SLIs (cannot be edited in the wizard)', () => {
     const doc = makeDoc();
     doc.spec.sli = {
