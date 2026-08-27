@@ -27,8 +27,16 @@ export function formatPct(value: number, options: FormatPctOptions = {}): string
   if (!Number.isFinite(value)) return fallback;
   // `Intl.NumberFormat` percent style places the `%` sign (and any grouping)
   // per locale and multiplies by 100 itself, so we pass the raw ratio — NOT
-  // `value * 100` — and pin both fraction-digit bounds to `decimals` to keep
-  // the previous fixed-precision rounding (e.g. `99.95%` for `0.9995`/2).
+  // `value * 100` — and pin both fraction-digit bounds to `decimals` for a
+  // fixed number of decimals.
+  //
+  // Rounding note: `Intl` uses half-expand (round half away from zero), which
+  // can differ in the last digit from the old `(value*100).toFixed(decimals)`
+  // at exact half-way inputs (e.g. `0.99985`/2 → `99.99%` here vs `99.98%`
+  // from `toFixed`, whose result is driven by the IEEE-754 representation).
+  // This is intentional — standard rounding, and no caller parses the string
+  // back to a number — so display may shift by one unit in the last decimal
+  // versus the pre-i18n formatter.
   return new Intl.NumberFormat(i18n.getLocale(), {
     style: 'percent',
     minimumFractionDigits: decimals,
