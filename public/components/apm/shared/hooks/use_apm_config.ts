@@ -12,6 +12,10 @@ interface DatasetOptionData {
   id: string;
   displayName?: string;
   title: string;
+  /** Backing OpenSearch data source id; undefined for the local cluster. */
+  datasourceId?: string;
+  /** DataView field names, used to detect a dataset's shape (e.g. service map). */
+  fieldNames?: string[];
 }
 
 /**
@@ -52,41 +56,48 @@ export const useDatasets = () => {
     const fetchDatasets = async () => {
       try {
         const allDataViews = await dataService.dataViews.getIdsWithTitle(true);
+
+        // Resolve every index pattern concurrently. dataViews.get routes through
+        // the core saved-objects client, which batches concurrent gets into a
+        // single _bulk_get and resolves each data source once — so firing them
+        // together collapses N round-trips into one. A serial await loop here
+        // defeats that batching and costs one round-trip per pattern (slow in
+        // workspaces with many index patterns).
+        const resolved = await Promise.all(
+          allDataViews.map(async ({ id, title }) => {
+            try {
+              const dataView = await dataService.dataViews.get(id);
+              const displayName = dataView.getDisplayName();
+              const fieldNames = dataView.fields?.getAll?.().map((f) => f.name) ?? [];
+              const datasourceId = dataView.dataSourceRef?.id;
+              const option: EuiComboBoxOptionOption<DatasetOptionData> = {
+                label: displayName,
+                value: { id, displayName, title, datasourceId, fieldNames },
+              };
+              return { option, datasourceId, signalType: dataView.signalType };
+            } catch (err) {
+              console.error(`Failed to fetch dataset ${id}:`, err);
+              return null;
+            }
+          })
+        );
+
         const tracesOptions: Array<EuiComboBoxOptionOption<DatasetOptionData>> = [];
         const allOptions: Array<EuiComboBoxOptionOption<DatasetOptionData>> = [];
-        // Backing data-source id per option, used to drop AnalyticEngine-backed datasets
-        // after the loop (single bulkGet rather than one lookup per dataset).
+        // Backing data-source id per option, used to drop AnalyticEngine-backed
+        // datasets below (single bulkGet rather than one lookup per dataset).
         const dataSourceIdByOption = new Map<
           EuiComboBoxOptionOption<DatasetOptionData>,
           string | undefined
         >();
 
-        for (const { id, title } of allDataViews) {
-          if (abortController.signal.aborted) break;
-
-          try {
-            const dataView = await dataService.dataViews.get(id);
-            const displayName = dataView.getDisplayName();
-
-            const option = {
-              label: displayName,
-              value: {
-                id,
-                displayName,
-                title,
-              },
-            };
-            dataSourceIdByOption.set(option, dataView.dataSourceRef?.id);
-
-            // Add to all datasets
-            allOptions.push(option);
-
-            // Add to traces if signalType matches
-            if (dataView.signalType === 'traces') {
-              tracesOptions.push(option);
-            }
-          } catch (err) {
-            console.error(`Failed to fetch dataset ${id}:`, err);
+        // Preserves getIdsWithTitle order (Promise.all keeps array order).
+        for (const entry of resolved) {
+          if (!entry) continue;
+          allOptions.push(entry.option);
+          dataSourceIdByOption.set(entry.option, entry.datasourceId);
+          if (entry.signalType === 'traces') {
+            tracesOptions.push(entry.option);
           }
         }
 
@@ -128,6 +139,9 @@ export const useDatasets = () => {
 
   return { ...state, refresh: () => setRefresh({}) };
 };
+
+/** Return shape of {@link useDatasets}, shared so the wizard loads datasets once. */
+export type ApmDatasetsHook = ReturnType<typeof useDatasets>;
 
 /**
  * Hook for loading Prometheus data connections
