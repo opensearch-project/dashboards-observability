@@ -307,4 +307,22 @@ describe('hydrateFromDoc (edit-mode prefill)', () => {
     };
     expect(hydrateFromDoc(doc)).toBeNull();
   });
+
+  it('returns null for a rolling window the wizard cannot represent (no silent coercion)', () => {
+    // The server accepts any 1d–30d rolling window, but the wizard only offers
+    // 7/14/28/30d. A 21d SLO must be reported UNSUPPORTED — not coerced to 28d —
+    // otherwise saving an edit to any unrelated field would silently rewrite the
+    // window (and its alert/error-budget math) via the server's shallow merge.
+    const doc = makeDoc();
+    doc.spec.window = { type: 'rolling', duration: '21d' };
+    expect(hydrateFromDoc(doc)).toBeNull();
+  });
+
+  it('returns null for a calendar window (wizard only models rolling windows)', () => {
+    // A calendar window isn't representable at all; coercing would silently
+    // change the window TYPE (calendar → 28d rolling) on save.
+    const doc = makeDoc();
+    doc.spec.window = { type: 'calendar', period: 'month' };
+    expect(hydrateFromDoc(doc)).toBeNull();
+  });
 });

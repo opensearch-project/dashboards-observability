@@ -625,8 +625,17 @@ function formatTargetPercent(target: number): string {
   return String(Number((target * 100).toFixed(6)));
 }
 
-/** Only the four rolling windows the wizard offers are editable; anything else falls back. */
-function normalizeWindowDuration(window: Window): FormState['windowDuration'] {
+/**
+ * Map a persisted window to the wizard's editable set — the four rolling
+ * durations it offers. Returns `null` for anything the wizard cannot represent
+ * (a calendar window, or a rolling duration like `21d` the server accepts but
+ * the wizard doesn't). Callers MUST treat `null` as "unsupported" rather than
+ * substituting a default: `buildCreateInput` always re-emits `window`, and the
+ * server update does a shallow top-level merge, so coercing here would silently
+ * rewrite the stored window (and its alert/error-budget math) on any save —
+ * even when the user only edited an unrelated field.
+ */
+function toEditableWindowDuration(window: Window): FormState['windowDuration'] | null {
   if (window.type === 'rolling') {
     if (
       window.duration === '7d' ||
@@ -637,7 +646,7 @@ function normalizeWindowDuration(window: Window): FormState['windowDuration'] {
       return window.duration;
     }
   }
-  return '28d';
+  return null;
 }
 
 /** Flatten a labels/annotations record back into ordered key/value rows. */
@@ -720,6 +729,13 @@ export function hydrateFromDoc(doc: SloDocument): EditHydration | null {
   const def = sli.definition;
   if (def.backend !== 'prometheus') return null;
 
+  // The wizard only models the four rolling windows. A calendar window or a
+  // non-standard rolling duration cannot be edited without silently rewriting
+  // it on save, so treat it as unsupported (same contract as composite/
+  // non-Prometheus above) rather than coercing to a default.
+  const windowDuration = toEditableWindowDuration(spec.window);
+  if (windowDuration === null) return null;
+
   const fresh = initialState();
   const template = deriveEditTemplate(spec, def, sli.dimensions);
 
@@ -733,7 +749,7 @@ export function hydrateFromDoc(doc: SloDocument): EditHydration | null {
     ownerTeam: spec.owner.teams[0] ?? '',
     ownerPrimaryUser: spec.owner.primaryUser ?? '',
     tier: spec.tier ?? '',
-    windowDuration: normalizeWindowDuration(spec.window),
+    windowDuration,
     objectives:
       spec.objectives.length > 0
         ? spec.objectives.map((o) => ({
