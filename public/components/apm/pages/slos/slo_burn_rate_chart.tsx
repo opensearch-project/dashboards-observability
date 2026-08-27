@@ -174,12 +174,12 @@ export function buildBurnRateOption(inputs: BurnRateOptionInputs): echarts.EChar
               const delta = raw - threshold;
               deltaStr =
                 delta >= 0
-                  ? ` <span style="color:${euiThemeVars.euiColorDanger};">(${formatMultiplier(
-                      delta
-                    )} over)</span>`
-                  : ` <span style="color:${euiThemeVars.euiColorDarkShade};">(${formatMultiplier(
-                      Math.abs(delta)
-                    )} under)</span>`;
+                  ? ` <span style="color:${escapeHtml(
+                      euiThemeVars.euiColorDanger
+                    )};">(${escapeHtml(formatMultiplier(delta))} over)</span>`
+                  : ` <span style="color:${escapeHtml(
+                      euiThemeVars.euiColorDarkShade
+                    )};">(${escapeHtml(formatMultiplier(Math.abs(delta)))} under)</span>`;
             }
             return `<div>${swatch}${escapeHtml(p.seriesName)}: <strong>${escapeHtml(
               formatMultiplier(raw)
