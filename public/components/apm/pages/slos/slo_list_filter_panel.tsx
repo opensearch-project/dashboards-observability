@@ -37,7 +37,11 @@ import type {
   SloSummary,
   SuggestionKind,
 } from '../../../../../common/slo/slo_types';
-import { SLO_HEALTH_COLOR, SLO_HEALTH_ORDER } from '../../../../../common/slo/state';
+import {
+  getSloHealthLabel,
+  SLO_HEALTH_COLOR,
+  SLO_HEALTH_ORDER,
+} from '../../../../../common/slo/state';
 import { TruncatedLabel } from '../../../common/truncated_label';
 import { KIND_LABEL } from './suggest_engine';
 import './slo_list_filter_panel.scss';
@@ -50,33 +54,6 @@ import './slo_list_filter_panel.scss';
 export const DATASOURCE_SELECTION_CAP = 5;
 
 type SloMode = 'active' | 'shadow';
-
-const STATE_LABEL: Record<SloHealthState, string> = {
-  breached: i18n.translate('observability.apm.slo.listFilterPanel.state.breached', {
-    defaultMessage: 'Breached',
-  }),
-  warning: i18n.translate('observability.apm.slo.listFilterPanel.state.warning', {
-    defaultMessage: 'Warning',
-  }),
-  ok: i18n.translate('observability.apm.slo.listFilterPanel.state.ok', {
-    defaultMessage: 'Healthy',
-  }),
-  no_data: i18n.translate('observability.apm.slo.listFilterPanel.state.noData', {
-    defaultMessage: 'No data',
-  }),
-  source_idle: i18n.translate('observability.apm.slo.listFilterPanel.state.sourceIdle', {
-    defaultMessage: 'Source idle',
-  }),
-  stale: i18n.translate('observability.apm.slo.listFilterPanel.state.stale', {
-    defaultMessage: 'Stale',
-  }),
-  disabled: i18n.translate('observability.apm.slo.listFilterPanel.state.disabled', {
-    defaultMessage: 'Disabled',
-  }),
-  rules_missing: i18n.translate('observability.apm.slo.listFilterPanel.state.rulesMissing', {
-    defaultMessage: 'Rules missing',
-  }),
-};
 
 const MODE_LABEL: Record<SloMode, string> = {
   active: i18n.translate('observability.apm.slo.listFilterPanel.mode.active', {
@@ -508,7 +485,7 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
           id: s,
           label: (
             <EuiHealth color={SLO_HEALTH_COLOR[s]}>
-              <span style={{ fontSize: 12 }}>{STATE_LABEL[s]}</span>
+              <span style={{ fontSize: 12 }}>{getSloHealthLabel(s)}</span>
             </EuiHealth>
           ),
         }))}

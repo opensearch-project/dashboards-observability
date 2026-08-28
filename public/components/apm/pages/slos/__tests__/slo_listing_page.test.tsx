@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { SloListingPage } from '../slo_listing_page';
 import type { SloApiClient } from '../slo_api_client';
@@ -400,7 +400,7 @@ describe('SloListingPage — Rules column badge', () => {
   });
 });
 
-describe('SloListingPage — default sort (P1 #7)', () => {
+describe('SloListingPage — row order preserves the server order (M7)', () => {
   function reportingSummary(id: string, remaining: number, name: string): SloSummary {
     // A row with one objective whose remaining budget is `remaining`, so the
     // component's `worstBudgetRemaining` resolves to that number. Using `ok`
@@ -442,7 +442,13 @@ describe('SloListingPage — default sort (P1 #7)', () => {
     };
   }
 
-  it('renders the lowest-remaining-budget SLO first by default', async () => {
+  it('does NOT re-sort the page client-side by remaining budget', async () => {
+    // Error-budget-remaining is a derived value the backend cannot sort on, so
+    // re-ordering only the current page by it implied a global "worst first"
+    // ordering the paginated list never had (a breached SLO on page 2 would
+    // never surface on page 1). The page now renders rows in the order the
+    // server returned them. Server order here is [a=0.1, b=0.9, c=0.05]; the
+    // old behavior would have reordered to worst-first [c, a, b].
     const a = reportingSummary('a-slo', 0.1, 'a-slo');
     const b = reportingSummary('b-slo', 0.9, 'b-slo');
     const c = reportingSummary('c-slo', 0.05, 'c-slo');
@@ -458,12 +464,82 @@ describe('SloListingPage — default sort (P1 #7)', () => {
       renderPage(list);
     });
     await screen.findByTestId('slosTable');
-    // Name-cell anchors inherit row order; grab them in DOM order and assert
-    // the ids come out worst-first (C=0.05, A=0.10, B=0.90).
     const links = Array.from(
       document.querySelectorAll<HTMLAnchorElement>('[data-test-subj^="slosLink-"]')
     );
     const ids = links.map((el) => el.getAttribute('data-test-subj'));
-    expect(ids).toEqual(['slosLink-c-slo', 'slosLink-a-slo', 'slosLink-b-slo']);
+    expect(ids).toEqual(['slosLink-a-slo', 'slosLink-b-slo', 'slosLink-c-slo']);
+  });
+});
+
+describe('SloListingPage — health cell state label (M3/CLAR7)', () => {
+  function renderOne(results: SloSummary[]) {
+    const list = jest
+      .fn<ReturnType<SloApiClient['list']>, Parameters<SloApiClient['list']>>()
+      .mockResolvedValue({
+        results,
+        total: results.length,
+        pageSize: 20,
+        hasMore: false,
+        nextCursor: null,
+        prevCursor: null,
+      });
+    return renderPage(list);
+  }
+
+  it('renders a human, capitalized state label — never the raw enum', async () => {
+    const breached = makeSummary({
+      id: 'slo-breached',
+      status: { ...makeSummary().status, sloId: 'slo-breached', state: 'breached' },
+    });
+    await act(async () => {
+      renderOne([breached]);
+    });
+    const cell = await screen.findByTestId('slosHealthCell-slo-breached');
+    expect(within(cell).getByText('Breached')).toBeInTheDocument();
+    // The raw machine value must not leak into the cell.
+    expect(within(cell).queryByText('breached')).not.toBeInTheDocument();
+  });
+
+  it('humanizes the multi-word source_idle state', async () => {
+    const idle = makeSummary({
+      id: 'slo-idle',
+      status: { ...makeSummary().status, sloId: 'slo-idle', state: 'source_idle' },
+    });
+    await act(async () => {
+      renderOne([idle]);
+    });
+    const cell = await screen.findByTestId('slosHealthCell-slo-idle');
+    expect(within(cell).getByText('Source idle')).toBeInTheDocument();
+    expect(within(cell).queryByText('source_idle')).not.toBeInTheDocument();
+  });
+});
+
+describe('SloListingPage — fixed target precision (M4)', () => {
+  function renderOne(results: SloSummary[]) {
+    const list = jest
+      .fn<ReturnType<SloApiClient['list']>, Parameters<SloApiClient['list']>>()
+      .mockResolvedValue({
+        results,
+        total: results.length,
+        pageSize: 20,
+        hasMore: false,
+        nextCursor: null,
+        prevCursor: null,
+      });
+    return renderPage(list);
+  }
+
+  it('renders every target with the same (2-decimal) precision so columns line up', async () => {
+    // Old behavior: 0.999 → "99.90%" (2dp) but 0.99 → "99.0%" (1dp), so the
+    // decimals varied per row. Both must now render at 2 decimals.
+    const high = makeSummary({ id: 'slo-high', worstTarget: 0.999 });
+    const low = makeSummary({ id: 'slo-low', worstTarget: 0.99 });
+    await act(async () => {
+      renderOne([high, low]);
+    });
+    await screen.findByTestId('slosTable');
+    expect(screen.getByText('1 • 99.90%')).toBeInTheDocument();
+    expect(screen.getByText('1 • 99.00%')).toBeInTheDocument();
   });
 });

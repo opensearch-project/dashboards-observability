@@ -17,7 +17,7 @@ import {
   EuiHealth,
   EuiIcon,
   EuiLink,
-  EuiLoadingSpinner,
+  EuiLoadingContent,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -58,8 +58,8 @@ import type {
   SloListFilters,
   SloSummary,
 } from '../../../../../common/slo/slo_types';
-import { formatPct } from '../../../../../common/slo/format';
-import { getSloHealthColor } from '../../../../../common/slo/state';
+import { formatPct, SLO_PRECISION, TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
+import { getSloHealthColor, getSloHealthLabel } from '../../../../../common/slo/state';
 import { templateIconFor } from './template_icons';
 import { KIND_LABEL } from './suggest_engine';
 
@@ -71,8 +71,12 @@ export interface SloListingPageProps {
   parentBreadcrumb: { text: string; href: string };
 }
 
+// Fixed precision (M4): a per-row `toFixed(target >= 0.999 ? 2 : 1)` made the
+// decimal count vary between rows so the target column never lined up. Route
+// through the shared `formatPct` at the shared `SLO_PRECISION.target` so every
+// target renders with the same number of decimals.
 function formatTargetPct(target: number): string {
-  return `${(target * 100).toFixed(target >= 0.999 ? 2 : 1)}%`;
+  return formatPct(target, { decimals: SLO_PRECISION.target });
 }
 
 /**
@@ -170,11 +174,16 @@ const SloHealthCell: React.FC<{ row: SloSummary }> = ({ row }) => {
           <EuiToolTip
             content={i18n.translate('observability.apm.slo.listing.stateTooltip', {
               defaultMessage: 'State: {state}',
-              values: { state },
+              // Human, localized label (M3/CLAR7) — never the raw machine enum
+              // (`breached`, `at_risk`, …). Routed through the shared, localized
+              // `getSloHealthLabel` (common/slo/state.ts) — the single source of
+              // truth — which also maps an out-of-union state to "Unknown"
+              // rather than leaking the raw token.
+              values: { state: getSloHealthLabel(state) },
             })}
           >
             <EuiHealth color={getSloHealthColor(state)}>
-              <span style={{ fontSize: 12 }}>{state}</span>
+              <span style={{ fontSize: 12 }}>{getSloHealthLabel(state)}</span>
             </EuiHealth>
           </EuiToolTip>
         </EuiFlexItem>
@@ -188,7 +197,7 @@ const SloHealthCell: React.FC<{ row: SloSummary }> = ({ row }) => {
               <EuiText
                 size="s"
                 color={budgetColor === 'default' ? 'default' : budgetColor}
-                style={{ fontWeight: 600 }}
+                style={{ fontWeight: 600, ...TABULAR_NUMS_STYLE }}
               >
                 {budgetLabel}
               </EuiText>
@@ -237,33 +246,6 @@ function filterStateToTile(state: SloHealthState[] | undefined): SloHealthState 
   if (!state || state.length !== 1) return null;
   return state[0];
 }
-
-const STATE_LABEL: Record<SloHealthState, string> = {
-  breached: i18n.translate('observability.apm.slo.listing.stateLabel.breached', {
-    defaultMessage: 'Breached',
-  }),
-  warning: i18n.translate('observability.apm.slo.listing.stateLabel.warning', {
-    defaultMessage: 'Warning',
-  }),
-  ok: i18n.translate('observability.apm.slo.listing.stateLabel.ok', {
-    defaultMessage: 'Healthy',
-  }),
-  no_data: i18n.translate('observability.apm.slo.listing.stateLabel.noData', {
-    defaultMessage: 'No data',
-  }),
-  source_idle: i18n.translate('observability.apm.slo.listing.stateLabel.sourceIdle', {
-    defaultMessage: 'Source idle',
-  }),
-  stale: i18n.translate('observability.apm.slo.listing.stateLabel.stale', {
-    defaultMessage: 'Stale',
-  }),
-  disabled: i18n.translate('observability.apm.slo.listing.stateLabel.disabled', {
-    defaultMessage: 'Disabled',
-  }),
-  rules_missing: i18n.translate('observability.apm.slo.listing.stateLabel.rulesMissing', {
-    defaultMessage: 'Rules missing',
-  }),
-};
 
 /**
  * Derives the "Rules" column badge from the server-computed `status.state`
@@ -866,20 +848,22 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     };
   }, [items]);
 
-  // Default sort for the listing: worst remaining budget first (P1 #7).
-  // The server returns the page in `name asc` order so the catalog reads the
-  // same way regardless of cursor, and we re-sort the visible page client-
-  // side here so "what's burning" rises to the top within the rendered
-  // window. Stable tiebreaker on name keeps the no-data cluster (every row
-  // returns `remaining = 1`) reading alphabetically.
-  const sortedItems = useMemo(() => {
-    return [...items].sort((a, b) => {
-      const diff = worstBudgetRemaining(a) - worstBudgetRemaining(b);
-      if (diff !== 0) return diff;
-      return a.name.localeCompare(b.name);
-    });
-  }, [items]);
-
+  // M7: we intentionally render rows in the *server's* order rather than
+  // re-sorting the current page.
+  //
+  // The previous implementation re-sorted only the visible page by
+  // `worstBudgetRemaining` (worst first). Error-budget-remaining is a
+  // *derived* value — it's recomputed from live status on every read and is
+  // not stored or indexed on the saved object, so the backend genuinely
+  // cannot sort on it (see the sort-field note in
+  // `common/slo/slo_query_service.ts`, which sorts on the stable `_id`
+  // keyword). Sorting a single page client-side implied a global "worst
+  // first" ordering the paginated list never actually had: a breached SLO
+  // sitting on page 2+ would never surface on page 1. That is a correctness
+  // bug, so rather than fake an ordering we don't have, we drop the page-local
+  // re-sort and present the real, stable server order. The per-row health
+  // cell still carries the budget/breach signal so an operator can spot the
+  // worst rows on whatever page they land on.
   const defaultsLine = useMemo(() => {
     const parts: string[] = [];
     if (traitMajorities.tier.isDominant && traitMajorities.tier.value) {
@@ -1008,7 +992,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         }),
         width: '120px',
         render: (row: SloSummary) => (
-          <EuiText size="s" style={{ whiteSpace: 'nowrap' }}>
+          <EuiText size="s" style={{ whiteSpace: 'nowrap', ...TABULAR_NUMS_STYLE }}>
             {row.objectiveCount} • {formatTargetPct(row.worstTarget)}
           </EuiText>
         ),
@@ -1224,7 +1208,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         category: i18n.translate('observability.apm.slo.listing.activeFilter.state', {
           defaultMessage: 'State',
         }),
-        values: filters.state.map((v) => STATE_LABEL[v] ?? v),
+        values: filters.state.map((v) => getSloHealthLabel(v)),
         onRemove: () => clearKey('state'),
       });
     }
@@ -1396,11 +1380,23 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
           <EuiPageContentBody>
             {isFirstLoad ? (
-              <EuiFlexGroup alignItems="center" justifyContent="center" style={{ minHeight: 200 }}>
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="xl" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              // m5: first load previously swapped the whole region for a single
+              // centered spinner, so the table jumped in when data arrived.
+              // Render skeleton rows in a panel of the same shape as the table
+              // panel instead, so the layout stays put. This EUI version has no
+              // EuiSkeleton; EuiLoadingContent is the shipped skeleton primitive
+              // (animated placeholder lines) and is used elsewhere in the repo.
+              <EuiPanel data-test-subj="slosLoadingSkeleton">
+                <EuiText size="m">
+                  <h4>
+                    {i18n.translate('observability.apm.slo.listing.catalogTitle', {
+                      defaultMessage: 'SLO catalog',
+                    })}
+                  </h4>
+                </EuiText>
+                <EuiSpacer size="s" />
+                <EuiLoadingContent lines={8} />
+              </EuiPanel>
             ) : error ? (
               <EuiPanel>
                 <EuiEmptyPrompt
@@ -1520,7 +1516,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
                       <EuiSpacer size="s" />
 
                       <SlosTablePanel
-                        items={sortedItems}
+                        items={items}
                         columns={columns}
                         loading={loading}
                         resultCount={items.length}
