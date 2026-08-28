@@ -9,11 +9,11 @@
  */
 import { renderHook, waitFor, act } from '@testing-library/react';
 
-const mockListDestinations = jest.fn();
+const mockGetNotificationConfigs = jest.fn();
 
 jest.mock('../../query_services/alerting_opensearch_service', () => ({
   AlertingOpenSearchService: jest.fn().mockImplementation(() => ({
-    listDestinations: mockListDestinations,
+    getNotificationConfigs: mockGetNotificationConfigs,
   })),
 }));
 
@@ -22,22 +22,22 @@ import { useDestinations } from '../use_destinations';
 const emptyResult = { destinations: [], totalDestinations: 0, truncated: false };
 
 beforeEach(() => {
-  mockListDestinations.mockReset();
-  mockListDestinations.mockResolvedValue(emptyResult);
+  mockGetNotificationConfigs.mockReset();
+  mockGetNotificationConfigs.mockResolvedValue(emptyResult);
 });
 
 describe('useDestinations', () => {
   it('does not call the service when dsId is empty', async () => {
     const { result } = renderHook(() => useDestinations({ dsId: '' }));
     await Promise.resolve();
-    expect(mockListDestinations).not.toHaveBeenCalled();
+    expect(mockGetNotificationConfigs).not.toHaveBeenCalled();
     expect(result.current.destinations).toEqual([]);
     expect(result.current.totalDestinations).toBe(0);
     expect(result.current.truncated).toBe(false);
   });
 
   it('returns destinations + total + truncated from the service', async () => {
-    mockListDestinations.mockResolvedValueOnce({
+    mockGetNotificationConfigs.mockResolvedValueOnce({
       destinations: [
         { id: 'd-1', name: 'ops', type: 'slack' },
         { id: 'd-2', name: 'pager', type: 'pagerduty' },
@@ -50,11 +50,11 @@ describe('useDestinations', () => {
     expect(result.current.totalDestinations).toBe(2);
     expect(result.current.truncated).toBe(false);
     expect(result.current.error).toBeNull();
-    expect(mockListDestinations).toHaveBeenCalledWith('ds-1');
+    expect(mockGetNotificationConfigs).toHaveBeenCalledWith('ds-1');
   });
 
   it('propagates truncated=true and the cluster-side total', async () => {
-    mockListDestinations.mockResolvedValueOnce({
+    mockGetNotificationConfigs.mockResolvedValueOnce({
       destinations: Array.from({ length: 200 }, (_, i) => ({
         id: `d-${i}`,
         name: `n-${i}`,
@@ -70,7 +70,7 @@ describe('useDestinations', () => {
   });
 
   it('captures errors thrown by the service', async () => {
-    mockListDestinations.mockRejectedValueOnce(new Error('forbidden'));
+    mockGetNotificationConfigs.mockRejectedValueOnce(new Error('forbidden'));
     const { result } = renderHook(() => useDestinations({ dsId: 'ds-1' }));
     await waitFor(() => expect(result.current.error?.message).toBe('forbidden'));
     expect(result.current.isLoading).toBe(false);
@@ -82,21 +82,21 @@ describe('useDestinations', () => {
       ({ token }: { token: number }) => useDestinations({ dsId: 'ds-1', refreshToken: token }),
       { initialProps: { token: 0 } }
     );
-    await waitFor(() => expect(mockListDestinations).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockGetNotificationConfigs).toHaveBeenCalledTimes(1));
     rerender({ token: 1 });
-    await waitFor(() => expect(mockListDestinations).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(mockGetNotificationConfigs).toHaveBeenCalledTimes(2));
   });
 
   it('refetches when refetch() is called', async () => {
     const { result } = renderHook(() => useDestinations({ dsId: 'ds-1' }));
-    await waitFor(() => expect(mockListDestinations).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockGetNotificationConfigs).toHaveBeenCalledTimes(1));
     act(() => result.current.refetch());
-    await waitFor(() => expect(mockListDestinations).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(mockGetNotificationConfigs).toHaveBeenCalledTimes(2));
   });
 
   it('does not write the resolved value into state after unmount', async () => {
     let resolveCall: (v: unknown) => void = () => undefined;
-    mockListDestinations.mockImplementationOnce(() => new Promise((r) => (resolveCall = r)));
+    mockGetNotificationConfigs.mockImplementationOnce(() => new Promise((r) => (resolveCall = r)));
     const { result, unmount } = renderHook(() => useDestinations({ dsId: 'ds-1' }));
     unmount();
     resolveCall({

@@ -103,27 +103,48 @@ export class AlertingOpenSearchService {
   }
 
   /**
-   * List notification destinations for a datasource. Used by the create/edit
-   * flyout to populate the action destination picker. Returns a thin
+   * List notification channel configs for a datasource. Used by the
+   * create/edit flyout to populate the action channel picker. Returns a thin
    * summary — id, name, and type are all the picker needs.
    *
-   * The upstream alerting API isn't paginated; the server caps at size=200
-   * and surfaces `truncated`/`totalDestinations` so the UI can hint when
-   * older entries are unreachable.
+   * Calls `/api/notifications/get_configs` — the notifications-dashboards
+   * plugin's own route (the same one alerting-dashboards-plugin uses for its
+   * channel picker). It carries the correct per-environment client routing
+   * (MDS-aware). The legacy alerting destinations APIs were removed in the
+   * 3.0 release and are intentionally not used here.
    */
-  async listDestinations(dsId: string): Promise<DestinationsListResult> {
-    const resp = (await this.requireHttp().get(
-      `/api/alerting/opensearch/${encodeURIComponent(dsId)}/destinations`
-    )) as {
-      destinations: DestinationSummary[];
-      totalDestinations?: number;
-      truncated?: boolean;
+  async getNotificationConfigs(dsId: string): Promise<DestinationsListResult> {
+    const configTypes = ['slack', 'chime', 'webhook', 'email', 'sns', 'microsoft_teams'];
+    // The synthetic local-cluster ids aren't MDS data-source saved objects;
+    // the notifications route addresses the local cluster by omitting the
+    // dataSourceId param entirely.
+    const isLocalCluster = dsId === 'local-cluster' || dsId === 'local_cluster';
+    const query: Record<string, string | string[]> = {
+      ...(isLocalCluster ? {} : { dataSourceId: dsId }),
+      from_index: '0',
+      max_items: '5000',
+      sort_field: 'name',
+      sort_order: 'asc',
+      config_type: configTypes,
     };
-    const destinations = resp.destinations || [];
+    const resp = (await this.requireHttp().get('/api/notifications/get_configs', {
+      query,
+    })) as {
+      config_list?: Array<{
+        config_id: string;
+        config?: { name?: string; config_type?: string; is_enabled?: boolean };
+      }>;
+      total_hits?: number;
+    };
+    const destinations: DestinationSummary[] = (resp.config_list || []).map((item) => ({
+      id: item.config_id || '',
+      name: item.config?.name || '',
+      type: item.config?.config_type || 'custom_webhook',
+    }));
     return {
       destinations,
-      totalDestinations: resp.totalDestinations ?? destinations.length,
-      truncated: resp.truncated ?? false,
+      totalDestinations: resp.total_hits ?? destinations.length,
+      truncated: (resp.total_hits ?? 0) > destinations.length,
     };
   }
 

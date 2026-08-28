@@ -54,7 +54,7 @@ export function useDestinations({
     setError(null);
     (async () => {
       try {
-        const result = await service.listDestinations(dsId);
+        const result = await service.getNotificationConfigs(dsId);
         if (!cancelled) {
           setDestinations(result.destinations);
           setTotalDestinations(result.totalDestinations);
