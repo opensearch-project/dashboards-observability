@@ -55,13 +55,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { ADDetector, ADForecaster, Datasource } from '../../../common/types/alerting';
+import {
+  ADDetector,
+  ADForecaster,
+  Datasource,
+  MonitorStatus,
+  UnifiedRuleSummary,
+} from '../../../common/types/alerting';
 import { coreRefs } from '../../framework/core_refs';
 import { toAdApiDataSourceId, withAdApiDataSource } from './utils/ad_api_paths';
 import { useIndexMappings } from './hooks/use_index_mappings';
 import { useIndices } from './hooks/use_indices';
 import { useRuleDetail } from './hooks/use_rule_detail';
-import { isStandardOpenSearchDatasource } from './shared_constants';
+import { isAdResourceRunning, isStandardOpenSearchDatasource } from './shared_constants';
 
 export type CreateAdRuleType = 'detector' | 'forecaster';
 type AdRuleFlyoutMode = 'create' | 'edit';
@@ -641,6 +647,23 @@ const getResourceState = (resource?: ADDetector | ADForecaster): string =>
 const getTaskState = (resource?: ADDetector | ADForecaster): string =>
   normalizeStateValue(getField(asRecord(resource), 'task_state', 'taskState'));
 
+/**
+ * Normalize a raw `curState` into the human-readable `MonitorStatus` domain that
+ * {@link isAdResourceRunning} keys its Sets on. A real forecaster/detector
+ * `cur_state` is the backend UPPER_SNAKE enum (`RUNNING`, `INITIALIZING_FORECAST`,
+ * `AWAITING_DATA_TO_INIT`), while the shared predicate compares against the
+ * prose form (`Running`, `Initializing forecast`, …). For every AD/forecaster
+ * state the prose form is exactly the enum humanized — lowercase, `_`→space,
+ * first letter capitalized — so normalizing here lets the shared predicate
+ * actually engage instead of comparing an enum against prose (which never
+ * matched). Values already in prose form are unchanged (idempotent).
+ */
+const toMonitorStatus = (rawState: string): MonitorStatus => {
+  const spaced = rawState.trim().toLowerCase().replace(/_+/g, ' ');
+  if (!spaced) return rawState as MonitorStatus;
+  return (spaced.charAt(0).toUpperCase() + spaced.slice(1)) as MonitorStatus;
+};
+
 const getDetectorJob = (resource?: ADDetector | ADForecaster): Record<string, unknown> =>
   asRecord(getField(asRecord(resource), 'anomaly_detector_job', 'anomalyDetectorJob'));
 
@@ -688,10 +711,48 @@ const getDetectorRunningJobsLabel = (resource?: ADDetector | ADForecaster): stri
 
 const isForecasterTestInitializing = (resource?: ADDetector | ADForecaster): boolean => {
   const state = getResourceState(resource);
-  return stateMatches(state, [FORECASTER_INIT_TEST_STATE, 'INIT_TEST']);
+  // Match both the prose form and the backend enum forms a real `curState` carries
+  // (`INIT_TEST` / `INITIALIZING_TEST`) so the test-initializing state routes to the
+  // dedicated "forecaster-test" blocker whether or not it was humanized upstream.
+  return stateMatches(state, [FORECASTER_INIT_TEST_STATE, 'INIT_TEST', 'INITIALIZING_TEST']);
 };
 
+/**
+ * Adapts a raw forecaster resource into the minimal `UnifiedRuleSummary` shape that
+ * `isAdResourceRunning` reads (`status` + `enabled` + resource kind).
+ *
+ * The raw `curState`/`cur_state` is the backend UPPER_SNAKE enum, not the
+ * human-readable `MonitorStatus` the shared status Sets are keyed on, so it is
+ * run through {@link toMonitorStatus} first — otherwise `isAdResourceRunning`
+ * would compare an enum against prose and never match (it would silently fall
+ * back to `enabled`), defeating the point of sharing the predicate.
+ *
+ * The parameter type is the broad `ADDetector | ADForecaster` only because the single
+ * caller (`isForecasterActiveForEdit`) holds that union; this adapter is forecaster-only
+ * and intentionally hardcodes the `'forecaster'` kind (detectors use a different edit
+ * lifecycle and never reach this path).
+ */
+const asForecasterRunningInput = (resource?: ADDetector | ADForecaster): UnifiedRuleSummary =>
+  ({
+    monitorType: 'forecaster',
+    definitionType: 'forecaster',
+    status: toMonitorStatus(getResourceState(resource)),
+    enabled: booleanValue(getField(asRecord(resource), 'enabled', 'enabled'), false),
+  }) as unknown as UnifiedRuleSummary;
+
 const isForecasterActiveForEdit = (resource?: ADDetector | ADForecaster): boolean => {
+  // This gate is a deliberate SUPERSET of `isAdResourceRunning` (the predicate the
+  // detail flyout uses to show its Stop button) — the two do NOT fully agree, by design:
+  //   - It reuses `isAdResourceRunning` (via `asForecasterRunningInput`, which
+  //     normalizes the raw enum into the prose MonitorStatus domain) to block every
+  //     running/initializing state — including the generic "Initializing" this gate
+  //     used to miss, the gap that let the backend reject the update with a raw
+  //     "Job is running: forecast-<id>" error.
+  //   - It additionally blocks an enabled forecaster and the failure states (e.g.
+  //     `FORECAST_FAILURE`) that `isAdResourceRunning` classifies as *not* running but
+  //     that still can't be edited in place. The `stateMatches` list below (which also
+  //     compares the uppercase enum form) is retained as defense-in-depth.
+  if (isAdResourceRunning(asForecasterRunningInput(resource))) return true;
   const state = getResourceState(resource);
   return (
     booleanValue(getField(asRecord(resource), 'enabled', 'enabled'), false) ||
@@ -710,7 +771,7 @@ const isForecasterActiveForEdit = (resource?: ADDetector | ADForecaster): boolea
   );
 };
 
-const getEditLifecycleBlocker = (
+export const getEditLifecycleBlocker = (
   ruleType: CreateAdRuleType,
   resource: ADDetector | ADForecaster | undefined,
   hasStoppedForEdit: boolean
@@ -942,6 +1003,26 @@ const buildErrorMessage = (error: unknown): string => {
   return i18n.translate('observability.alerting.createAdRuleFlyout.unknownError', {
     defaultMessage: 'Unknown error',
   });
+};
+
+/**
+ * The AD/forecasting backend rejects updates to a running resource with a raw
+ * `Job is running: forecast-<id>` (or `detector-<id>`) string that leaks an internal
+ * job id and offers no guidance. Detect that rejection and swap in actionable copy.
+ */
+const RUNNING_JOB_ERROR_PATTERN = /job is running/i;
+
+export const humanizeAdUpdateError = (rawMessage: string, ruleType: CreateAdRuleType): string => {
+  if (!RUNNING_JOB_ERROR_PATTERN.test(rawMessage)) return rawMessage;
+  return ruleType === 'detector'
+    ? i18n.translate('observability.alerting.createAdRuleFlyout.detectorRunningUpdateGuidance', {
+        defaultMessage:
+          'Stop the detector before editing its configuration, then restart it after your changes are saved.',
+      })
+    : i18n.translate('observability.alerting.createAdRuleFlyout.forecasterRunningUpdateGuidance', {
+        defaultMessage:
+          'Stop the forecaster before editing its configuration, then restart it after your changes are saved.',
+      });
 };
 
 const featureErrorKey = (
@@ -2519,7 +2600,9 @@ export const CreateAdRuleFlyout: React.FC<CreateAdRuleFlyoutProps> = ({
         }
       }
     } catch (error) {
-      const message = buildErrorMessage(error);
+      // Never surface the backend's raw "Job is running: forecast-<id>" string — it
+      // leaks an internal job id and gives no guidance. Swap in actionable copy.
+      const message = humanizeAdUpdateError(buildErrorMessage(error), ruleType);
       setSubmitError(message);
       coreRefs.toasts?.addDanger({
         title: isEdit
