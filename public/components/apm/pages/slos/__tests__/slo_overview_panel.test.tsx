@@ -161,8 +161,11 @@ describe('SloOverviewPanel', () => {
   it('clamps the aggregate-budget hero at 0% when budgets are overspent (CLAR8)', () => {
     render(<SloOverviewPanel items={[summary({ state: 'breached', remaining: -2 })]} />);
     const budget = screen.getByTestId('slosOverviewBudget');
-    // Never shows a nonsensical negative percentage like -200%.
-    expect(budget.textContent).not.toContain('-');
+    // Never shows a nonsensical negative percentage like -200%. Match a hyphen
+    // immediately before a digit so the assertion targets an actual negative
+    // number, not incidental hyphens in the tile's aria-description text (e.g.
+    // the tooltip's "Weighted-average …").
+    expect(budget.textContent).not.toMatch(/-\d/);
     expect(budget).toHaveTextContent('0');
   });
 
@@ -182,6 +185,22 @@ describe('SloOverviewPanel', () => {
     // firing-only facet), so it must not announce a pressed state — otherwise a
     // firing click would map to and announce the Breached tile.
     expect(screen.getByTestId('slosOverviewFiring')).not.toHaveAttribute('aria-pressed');
+  });
+
+  it('keeps the read-only "Alerts firing" tile keyboard-reachable and describes its tooltip (a11y)', () => {
+    render(<SloOverviewPanel items={[summary({ firing: 3, state: 'breached' })]} />);
+    const firing = screen.getByTestId('slosOverviewFiring');
+    // Even without a filter role, the readout stays focusable so its
+    // explanatory tooltip isn't mouse-only, and it is NOT a toggle.
+    expect(firing).toHaveAttribute('tabindex', '0');
+    expect(firing).not.toHaveAttribute('aria-pressed');
+    expect(firing).not.toHaveAttribute('role', 'button');
+    // The tooltip text is exposed to assistive tech via aria-describedby.
+    const descId = firing.getAttribute('aria-describedby');
+    expect(descId).toBeTruthy();
+    const desc = document.getElementById(descId as string);
+    expect(desc).not.toBeNull();
+    expect(desc).toHaveTextContent(/firing/i);
   });
 
   it('activates on Space and calls preventDefault so the page does not scroll (A11Y5)', () => {

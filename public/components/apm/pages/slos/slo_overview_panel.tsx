@@ -19,7 +19,7 @@
  *            the listing filtered to remaining < 25%.
  */
 
-import React, { useMemo } from 'react';
+import React, { useId, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -27,6 +27,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiPanel,
+  EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -165,15 +166,29 @@ const KpiCell: React.FC<{
   dataTestSubj?: string;
 }> = ({ value, label, accent, tooltip, onClick, active, dataTestSubj }) => {
   const clickable = Boolean(onClick);
+  // A non-clickable readout tile (e.g. "Alerts firing") that still carries an
+  // explanatory tooltip must stay reachable by keyboard/SR — otherwise the
+  // tooltip is mouse-hover-only, unlike every clickable tile (ps48 review).
+  // Make it focusable (so EuiToolTip also shows on focus) and expose the
+  // tooltip text via aria-describedby to a screen-reader-only note, without a
+  // misleading button/toggle role.
+  const describable = !clickable && Boolean(tooltip);
+  const descId = useId();
+  const accessibleName =
+    typeof value === 'string' || typeof value === 'number' ? `${value} ${label}` : label;
   const content = (
     <div
       role={clickable ? 'button' : undefined}
-      tabIndex={clickable ? 0 : undefined}
+      tabIndex={clickable || describable ? 0 : undefined}
       // Expose toggle state to assistive tech so SR users can tell which KPI
       // filter is active — mirrors how HealthRail's segment buttons do it
       // (A11Y2). The tile's accessible name comes from its text content (the
       // value + label spans), e.g. "3 Breached".
       aria-pressed={clickable ? Boolean(active) : undefined}
+      // A focusable readout has no widget role to name it from content, so give
+      // it an explicit name + description for keyboard/SR users.
+      aria-label={describable ? accessibleName : undefined}
+      aria-describedby={describable ? descId : undefined}
       onClick={onClick}
       onKeyDown={(e) => {
         if (!clickable) return;
@@ -198,6 +213,11 @@ const KpiCell: React.FC<{
         minWidth: 72,
       }}
     >
+      {describable && (
+        <EuiScreenReaderOnly>
+          <span id={descId}>{tooltip}</span>
+        </EuiScreenReaderOnly>
+      )}
       <span
         style={{
           width: 3,
