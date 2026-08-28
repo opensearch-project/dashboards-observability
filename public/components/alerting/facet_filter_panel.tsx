@@ -140,7 +140,7 @@ const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
           iconType="alert"
           color="danger"
           size="xs"
-          className="altFacetErrorBtn"
+          className="altFacetErrorBtn altFacetTarget"
           aria-label={ariaLabel}
           onClick={() => setOpen((v) => !v)}
           data-test-subj={`facetGroup-${facetId}-error-${option}`}
@@ -260,6 +260,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
             iconSide="left"
             onClick={() => onToggleCollapse(id)}
             aria-expanded={!isCollapsed}
+            aria-controls={`facetGroup-${id}-region`}
             data-test-subj={`facetGroup-${id}-toggle`}
           >
             <strong>{label}</strong>
@@ -288,14 +289,8 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
               color="primary"
               onClick={() => onChange([])}
               data-test-subj={`facetGroup-${id}-clear`}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: 24,
-                minHeight: 24,
-                padding: '0 4px',
-              }}
+              className="altFacetTarget"
+              style={{ padding: '0 4px' }}
             >
               <EuiText size="xs">
                 <FormattedMessage
@@ -308,7 +303,12 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
         )}
       </EuiFlexGroup>
       {!isCollapsed && (
-        <div style={{ paddingLeft: 4 }}>
+        <div
+          id={`facetGroup-${id}-region`}
+          role="region"
+          aria-label={label}
+          style={{ paddingLeft: 4 }}
+        >
           {searchable && (
             <>
               <EuiFieldSearch

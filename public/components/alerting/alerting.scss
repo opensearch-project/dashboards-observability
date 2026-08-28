@@ -16,6 +16,22 @@
   flex-shrink: 0;
 }
 
+/*
+ * Shared >=24px hit target (WCAG 2.5.8 AA) for the small interactive controls
+ * in the facet header — the per-option error button and the "Clear" link. Kept
+ * as one class so the target-size rule lives in SCSS alongside the other facet
+ * styling instead of being re-declared inline per control (which is how the
+ * error button was missed the first time). `min-width`/`min-height` win over
+ * any smaller intrinsic size EUI sets on `size="xs"` controls.
+ */
+.altFacetTarget {
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .altFacetErrorPopover {
   max-width: 260px;
 }

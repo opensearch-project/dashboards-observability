@@ -133,6 +133,28 @@ describe('FacetFilterGroup — accessibility (no nested interactive controls)', 
     expect(getByTestId('facetGroup-status-toggle')).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('wires aria-controls on the toggle to the id/role="region" of the options region', () => {
+    const { getByTestId, container } = render(
+      <FacetFilterGroup {...defaultProps} isCollapsed={false} />
+    );
+    const toggle = getByTestId('facetGroup-status-toggle');
+    const controls = toggle.getAttribute('aria-controls');
+    expect(controls).toBe('facetGroup-status-region');
+    const region = container.querySelector(`#${controls}`);
+    expect(region).not.toBeNull();
+    expect(region).toHaveAttribute('role', 'region');
+    expect(region).toHaveAttribute('aria-label', 'Status');
+  });
+
+  it('gives the per-option error button a >=24px target via the shared class', () => {
+    const { getByTestId } = render(
+      <FacetFilterGroup {...defaultProps} errorMap={{ active: 'Cluster unreachable (timeout)' }} />
+    );
+    // The 24px hit-target rule lives in the shared `.altFacetTarget` SCSS class
+    // (jsdom doesn't apply stylesheets, so we assert the class is present).
+    expect(getByTestId('facetGroup-status-error-active').className).toContain('altFacetTarget');
+  });
+
   it('toggles the accordion when the header toggle button is clicked', () => {
     const onToggleCollapse = jest.fn();
     const { getByTestId } = render(

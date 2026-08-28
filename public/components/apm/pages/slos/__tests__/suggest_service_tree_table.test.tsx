@@ -145,6 +145,26 @@ describe('ServiceTreeTable', () => {
     );
   });
 
+  it('wires aria-controls on the expander to the id/role="region" of the expanded panel', () => {
+    render(
+      <ServiceTreeTable
+        serviceRows={[row({ serviceName: 'cart' })]}
+        expandedMap={{ cart: true }}
+        onToggleExpand={jest.fn()}
+        onToggleServiceSelection={jest.fn()}
+        selected={new Set()}
+        overrides={{}}
+        onToggleDraft={jest.fn()}
+        onOverrideChange={jest.fn()}
+      />
+    );
+    const expander = screen.getByTestId('slosSuggestServiceExpand-cart');
+    expect(expander).toHaveAttribute('aria-controls', 'slosSuggestServiceExpanded-cart');
+    const region = screen.getByTestId('slosSuggestServiceExpanded-cart');
+    expect(region).toHaveAttribute('id', 'slosSuggestServiceExpanded-cart');
+    expect(region).toHaveAttribute('role', 'region');
+  });
+
   it('fires onToggleServiceSelection when the service-level checkbox is clicked', () => {
     const onToggleServiceSelection = jest.fn();
     const r = row();

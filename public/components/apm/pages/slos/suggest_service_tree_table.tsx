@@ -266,6 +266,7 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                     }
                     iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
                     aria-expanded={isExpanded}
+                    aria-controls={`slosSuggestServiceExpanded-${row.serviceName}`}
                     onClick={() => onToggleExpand(row.serviceName)}
                     data-test-subj={`slosSuggestServiceExpand-${row.serviceName}`}
                   />
@@ -364,7 +365,12 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
               {isExpanded && (
                 <>
                   <EuiSpacer size="m" />
-                  <div data-test-subj={`slosSuggestServiceExpanded-${row.serviceName}`}>
+                  <div
+                    id={`slosSuggestServiceExpanded-${row.serviceName}`}
+                    role="region"
+                    aria-label={row.serviceName}
+                    data-test-subj={`slosSuggestServiceExpanded-${row.serviceName}`}
+                  >
                     {row.drafts.map((draft) => (
                       <SuggestionInlineRow
                         key={draft.key}
