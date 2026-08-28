@@ -15,8 +15,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiText,
+  EuiTextColor,
   EuiBadge,
   EuiCheckbox,
   EuiHealth,
@@ -105,13 +107,11 @@ export interface FacetFilterGroupProps extends FacetGroupConfig {
 // ============================================================================
 //
 // Per-option error icon. Extracted into a sub-component so each row can own
-// its popover state (a hook inside .map() is not permitted). The button lives
-// inside the checkbox row's `<label>`, so it stops event propagation on
-// pointer AND keyboard activation (click / mousedown / keydown / keyup) — a
-// nested control does not activate the labeled input per spec, but stopping
-// propagation also prevents React's synthetic bubbling from reaching the row's
-// handlers and toggling the datasource selection when the user only wanted to
-// read the error.
+// its popover state (a hook inside .map() is not permitted). It renders as a
+// SIBLING of the row's checkbox — NOT inside the checkbox's `<label>` — so an
+// interactive button is never nested inside a label (WCAG 4.1.2). Because it
+// is no longer nested in an activatable control, it needs no event-propagation
+// workaround: clicking it only toggles the error popover.
 interface FacetErrorIndicatorProps {
   facetId: string;
   option: string;
@@ -125,7 +125,6 @@ const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
   error,
 }) => {
   const [open, setOpen] = useState(false);
-  const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   const ariaLabel = i18n.translate('observability.alerting.facetFilterPanel.errorIconAriaLabel', {
     defaultMessage: '{displayLabel} — connection error, click for details',
     values: { displayLabel },
@@ -141,15 +140,9 @@ const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
           iconType="alert"
           color="danger"
           size="xs"
-          className="altFacetErrorBtn"
+          className="altFacetErrorBtn altFacetTarget"
           aria-label={ariaLabel}
-          onClick={(e: React.MouseEvent) => {
-            stop(e);
-            setOpen((v) => !v);
-          }}
-          onMouseDown={stop}
-          onKeyDown={stop}
-          onKeyUp={stop}
+          onClick={() => setOpen((v) => !v)}
           data-test-subj={`facetGroup-${facetId}-error-${option}`}
         />
       }
@@ -242,38 +235,53 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
         gutterSize="xs"
         alignItems="center"
         responsive={false}
-        style={{ cursor: 'pointer', marginBottom: 4 }}
-        onClick={() => onToggleCollapse(id)}
-        role="button"
-        tabIndex={0}
-        aria-expanded={!isCollapsed}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onToggleCollapse(id);
-          }
-        }}
+        style={{ marginBottom: 4 }}
       >
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={isCollapsed ? 'arrowRight' : 'arrowDown'} size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs">
+        {/*
+         * The expand/collapse control is a real <button> (EuiButtonEmpty) so it
+         * is natively keyboard-operable (Enter/Space toggle) and exposes
+         * `aria-expanded`. It covers only the toggle/title area; the "Clear"
+         * link is a SIBLING outside it (never a link nested inside a button),
+         * which is why Clear no longer needs a stopPropagation workaround.
+         */}
+        <EuiFlexItem grow={true}>
+          <EuiButtonEmpty
+            size="xs"
+            color="text"
+            flush="left"
+            // The button spans the full facet width (a large keyboard/touch
+            // target), but its content span defaults to `justify-content:
+            // center`, which centers the arrow + title instead of leaving them
+            // flush-left. Pin the content to the start so the header aligns
+            // with the plain-text groups (e.g. "Labels") at every panel width.
+            // `flush="left"` only strips padding, not alignment.
+            contentProps={{ style: { justifyContent: 'flex-start', width: '100%' } }}
+            iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+            iconSide="left"
+            onClick={() => onToggleCollapse(id)}
+            aria-expanded={!isCollapsed}
+            // Only reference the region while it's actually in the DOM. The
+            // options region renders under `!isCollapsed`, so pointing
+            // `aria-controls` at it while collapsed would be a dangling
+            // reference (axe `aria-valid-attr-value`). `aria-expanded` already
+            // conveys the collapsed state; `aria-controls` is optional here.
+            aria-controls={isCollapsed ? undefined : `facetGroup-${id}-region`}
+            data-test-subj={`facetGroup-${id}-toggle`}
+          >
             <strong>{label}</strong>
             {showOptionCount && (
               <>
                 {' '}
-                <EuiText
-                  size="xs"
+                <EuiTextColor
                   color="subdued"
                   className="altFacetCount"
                   data-test-subj={`facetGroup-${id}-optionCount`}
                 >
                   {options.length}
-                </EuiText>
+                </EuiTextColor>
               </>
             )}
-          </EuiText>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         {activeCount > 0 && (
           <EuiFlexItem grow={false}>
@@ -284,11 +292,10 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
           <EuiFlexItem grow={false}>
             <EuiLink
               color="primary"
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                onChange([]);
-              }}
+              onClick={() => onChange([])}
               data-test-subj={`facetGroup-${id}-clear`}
+              className="altFacetTarget"
+              style={{ padding: '0 4px' }}
             >
               <EuiText size="xs">
                 <FormattedMessage
@@ -301,7 +308,12 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
         )}
       </EuiFlexGroup>
       {!isCollapsed && (
-        <div style={{ paddingLeft: 4 }}>
+        <div
+          id={`facetGroup-${id}-region`}
+          role="region"
+          aria-label={label}
+          style={{ paddingLeft: 4 }}
+        >
           {searchable && (
             <>
               <EuiFieldSearch
@@ -373,14 +385,6 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                   )}
                   {/* Explicit 12/18 preserves Alert Manager's existing look. */}
                   <TruncatedLabel text={displayLabel} fontSize={12} lineHeight={18} />
-                  {errorMap?.[opt] && (
-                    <FacetErrorIndicator
-                      facetId={id}
-                      option={opt}
-                      displayLabel={displayLabel}
-                      error={errorMap[opt]}
-                    />
-                  )}
                 </span>
                 {showCounts && (
                   <EuiText size="xs" color="subdued" className="altFacetCount">
@@ -391,36 +395,53 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
             );
 
             return (
+              // The error indicator is a SIBLING of the checkbox (not part of
+              // the checkbox `label`), so no interactive button is nested inside
+              // a `<label>` (WCAG 4.1.2 nested-interactive).
               <div key={opt} className="altFacetCheckboxRow">
-                <EuiCheckbox
-                  id={checkboxId}
-                  label={labelContent}
-                  checked={isActive}
-                  disabled={isDisabled}
-                  aria-label={
-                    isDisabled
-                      ? i18n.translate(
-                          'observability.alerting.facetFilterPanel.disabledAriaLabel',
-                          {
-                            defaultMessage: '{displayLabel} (maximum datasources reached)',
-                            values: { displayLabel },
-                          }
-                        )
-                      : undefined
-                  }
-                  onChange={() => {
-                    if (isActive) {
-                      onChange(selected.filter((s) => s !== opt));
-                      return;
-                    }
-                    if (capReached && onCapReached) {
-                      onCapReached();
-                      return;
-                    }
-                    onChange([...selected, opt]);
-                  }}
-                  compressed
-                />
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+                    <EuiCheckbox
+                      id={checkboxId}
+                      label={labelContent}
+                      checked={isActive}
+                      disabled={isDisabled}
+                      aria-label={
+                        isDisabled
+                          ? i18n.translate(
+                              'observability.alerting.facetFilterPanel.disabledAriaLabel',
+                              {
+                                defaultMessage: '{displayLabel} (maximum datasources reached)',
+                                values: { displayLabel },
+                              }
+                            )
+                          : undefined
+                      }
+                      onChange={() => {
+                        if (isActive) {
+                          onChange(selected.filter((s) => s !== opt));
+                          return;
+                        }
+                        if (capReached && onCapReached) {
+                          onCapReached();
+                          return;
+                        }
+                        onChange([...selected, opt]);
+                      }}
+                      compressed
+                    />
+                  </EuiFlexItem>
+                  {errorMap?.[opt] && (
+                    <EuiFlexItem grow={false}>
+                      <FacetErrorIndicator
+                        facetId={id}
+                        option={opt}
+                        displayLabel={displayLabel}
+                        error={errorMap[opt]}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </div>
             );
           })}
