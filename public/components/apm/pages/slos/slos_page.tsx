@@ -9,13 +9,14 @@
  *   /slos                       — listing
  *   /slos/create                — template selector (picks a template, then opens wizard)
  *   /slos/create/:templateId    — wizard prefilled from the named template
+ *   /slos/:id/edit              — wizard prefilled from an existing SLO (update path)
  *   /slos/:id                   — detail view
  */
 
 import React, { useMemo } from 'react';
 import { EuiCallOut, EuiCode, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { HashRouter, Redirect, Route, Switch } from 'react-router-dom';
+import { HashRouter, Redirect, Route, Switch, useParams } from 'react-router-dom';
 import { ChromeStart, HttpStart, NotificationsStart } from '../../../../../../../src/core/public';
 import { SloListingPage } from './slo_listing_page';
 import { SloWizardPage } from './slo_wizard_page';
@@ -92,6 +93,29 @@ export interface SlosPageProps {
   [key: string]: unknown;
 }
 
+/**
+ * Reads the `:id` route param and renders the wizard in edit mode. Kept as a
+ * thin wrapper so `useParams` runs inside the router tree — the wizard itself
+ * stays route-shape-agnostic and just takes an `editSloId` prop.
+ */
+const SloWizardEditRoute: React.FC<{
+  apiClient: SloApiClient;
+  chrome: ChromeStart;
+  notifications: NotificationsStart;
+  parentBreadcrumb: { text: string; href: string };
+}> = ({ apiClient, chrome, notifications, parentBreadcrumb }) => {
+  const { id } = useParams<{ id: string }>();
+  return (
+    <SloWizardPage
+      apiClient={apiClient}
+      chrome={chrome}
+      notifications={notifications}
+      parentBreadcrumb={parentBreadcrumb}
+      editSloId={id}
+    />
+  );
+};
+
 export const SlosPage: React.FC<SlosPageProps> = ({
   http,
   chrome,
@@ -132,6 +156,14 @@ export const SlosPage: React.FC<SlosPageProps> = ({
           </Route>
           <Route exact path="/slos/create/:templateId">
             <SloWizardPage
+              apiClient={apiClient}
+              chrome={chrome}
+              notifications={notifications}
+              parentBreadcrumb={parentBreadcrumb}
+            />
+          </Route>
+          <Route exact path="/slos/:id/edit">
+            <SloWizardEditRoute
               apiClient={apiClient}
               chrome={chrome}
               notifications={notifications}

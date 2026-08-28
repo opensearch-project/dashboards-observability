@@ -4,7 +4,15 @@
  */
 
 import { SLO_TEMPLATES } from '../../../../../../common/slo/slo_templates';
-import { initialState, reducer, applyTemplate } from '../wizard_state';
+import type { SloDocument } from '../../../../../../common/slo/slo_types';
+import {
+  hydrateFromDoc,
+  initialState,
+  isSloEditable,
+  reducer,
+  applyTemplate,
+} from '../wizard_state';
+import { buildCreateInput } from '../wizard_builders';
 
 describe('wizard_state reducer', () => {
   it('starts with a single objective and the 28d window default', () => {
@@ -193,8 +201,199 @@ describe('wizard_state reducer', () => {
     const oneoff =
       schedule.type === 'oneoff'
         ? schedule
-        : ((undefined as never) as typeof schedule & { type: 'oneoff' });
+        : (undefined as never as typeof schedule & { type: 'oneoff' });
     expect(oneoff.start).toMatch(/T/);
     expect(oneoff.end).toMatch(/T/);
+  });
+});
+
+describe('hydrateFromDoc (edit-mode prefill)', () => {
+  function makeDoc(): SloDocument {
+    return {
+      id: 'slo-1',
+      spec: {
+        datasourceId: 'prom_conn',
+        name: 'api-availability',
+        description: 'checkout availability',
+        enabled: true,
+        mode: 'shadow',
+        service: 'checkout',
+        owner: { teams: ['sre'], primaryUser: 'alice' },
+        tier: 'tier-1',
+        sli: {
+          type: 'single',
+          definition: {
+            backend: 'prometheus',
+            type: 'availability',
+            calcMethod: 'events',
+            metric: 'http_requests_total',
+            goodEventsFilter: 'status!~"5.."',
+          },
+          dimensions: [{ name: 'service', value: 'checkout' }],
+        },
+        objectives: [{ name: 'obj-1', target: 0.999 }],
+        budgetWarningThresholds: [{ threshold: 0.5, severity: 'warning' }],
+        window: { type: 'rolling', duration: '14d' },
+        alerting: {
+          strategy: 'mwmbr',
+          burnRates: [
+            {
+              shortWindow: '5m',
+              longWindow: '1h',
+              burnRateMultiplier: 14,
+              severity: 'page',
+              createAlarm: true,
+              forDuration: '2m',
+            },
+          ],
+        },
+        alarms: {
+          sliHealth: { enabled: false },
+          attainmentBreach: { enabled: false },
+          budgetWarning: { enabled: true },
+          noData: { enabled: false, forDuration: '10m' },
+          resolved: { enabled: false },
+        },
+        exclusionWindows: [],
+        labels: { compliance: 'pci' },
+        annotations: { runbook: 'https://wiki/slo' },
+      },
+      status: {
+        version: 4,
+        createdAt: '2026-01-01T00:00:00Z',
+        createdBy: 'tester',
+        updatedAt: '2026-01-02T00:00:00Z',
+        updatedBy: 'tester',
+        provisioning: { backend: 'prometheus', rulerNamespace: 'ns' },
+      },
+    };
+  }
+
+  it('maps a persisted spec back into the form state and carries the version', () => {
+    const hydrated = hydrateFromDoc(makeDoc());
+    expect(hydrated).not.toBeNull();
+    const { state, version } = hydrated!;
+    expect(version).toBe(4);
+    expect(state.datasourceId).toBe('prom_conn');
+    expect(state.name).toBe('api-availability');
+    expect(state.service).toBe('checkout');
+    expect(state.ownerTeam).toBe('sre');
+    expect(state.ownerPrimaryUser).toBe('alice');
+    expect(state.windowDuration).toBe('14d');
+    expect(state.shadow).toBe(true);
+    // Decimal target → percent string, no float artifacts.
+    expect(state.objectives[0].target).toBe('99.9');
+    expect(state.metric).toBe('http_requests_total');
+    expect(state.labels).toEqual([{ key: 'compliance', value: 'pci' }]);
+    expect(state.annotations).toEqual([{ key: 'runbook', value: 'https://wiki/slo' }]);
+  });
+
+  it('round-trips: buildCreateInput(hydrated) reproduces the persisted spec', () => {
+    const doc = makeDoc();
+    const hydrated = hydrateFromDoc(doc)!;
+    const rebuilt = buildCreateInput(hydrated.state, hydrated.template);
+    expect(rebuilt.spec.name).toBe(doc.spec.name);
+    expect(rebuilt.spec.service).toBe(doc.spec.service);
+    expect(rebuilt.spec.mode).toBe('shadow');
+    expect(rebuilt.spec.objectives[0].target).toBeCloseTo(0.999, 6);
+    const rebuiltSli = rebuilt.spec.sli;
+    expect(rebuiltSli.type).toBe('single');
+    if (rebuiltSli.type === 'single') {
+      expect(rebuiltSli.definition.type).toBe('availability');
+    }
+    expect(rebuilt.spec.window).toEqual({ type: 'rolling', duration: '14d' });
+  });
+
+  it('preserves array-valued labels through an edit instead of flattening them to CSV', () => {
+    // SloSpec.labels is Record<string, string | string[]>. The wizard editor
+    // only authors scalars, so an API-created array label must round-trip
+    // verbatim — otherwise hydrate would flatten {region:['us','eu']} to the
+    // scalar 'us,eu' and the server's shallow labels merge would persist it.
+    const doc = makeDoc();
+    doc.spec.labels = { compliance: 'pci', region: ['us', 'eu'] };
+    const hydrated = hydrateFromDoc(doc)!;
+    // The array label is carried out-of-band, NOT shown as an editable scalar row.
+    expect(hydrated.state.preservedArrayLabels).toEqual({ region: ['us', 'eu'] });
+    expect(hydrated.state.labels).toEqual([{ key: 'compliance', value: 'pci' }]);
+    // …and re-emitted verbatim (still an array) on save.
+    const rebuilt = buildCreateInput(hydrated.state, hydrated.template);
+    expect(rebuilt.spec.labels).toEqual({ region: ['us', 'eu'], compliance: 'pci' });
+  });
+
+  it('preserves secondary owner teams through an edit (no truncation to primary)', () => {
+    // The saved object supports up to 5 teams, but the wizard only edits the
+    // primary. A multi-team SLO (API-created) must keep teams[1..] on save,
+    // else the server's shallow owner merge would drop them.
+    const doc = makeDoc();
+    doc.spec.owner = { teams: ['sre', 'oncall', 'platform'], primaryUser: 'alice' };
+    const hydrated = hydrateFromDoc(doc)!;
+    expect(hydrated.state.ownerTeam).toBe('sre');
+    expect(hydrated.state.ownerTeamsSecondary).toEqual(['oncall', 'platform']);
+    const rebuilt = buildCreateInput(hydrated.state, hydrated.template);
+    expect(rebuilt.spec.owner.teams).toEqual(['sre', 'oncall', 'platform']);
+  });
+
+  it('dedupes when the edited primary team already appears among the secondaries', () => {
+    const doc = makeDoc();
+    doc.spec.owner = { teams: ['sre', 'oncall'], primaryUser: 'alice' };
+    const hydrated = hydrateFromDoc(doc)!;
+    expect(hydrated.state.ownerTeamsSecondary).toEqual(['oncall']);
+    // User sets the primary team to one that's already a secondary: the result
+    // must not contain a duplicate, and primary stays first.
+    const state = { ...hydrated.state, ownerTeam: 'oncall' };
+    const rebuilt = buildCreateInput(state, hydrated.template);
+    expect(rebuilt.spec.owner.teams).toEqual(['oncall']);
+  });
+
+  it('returns null for composite SLIs (cannot be edited in the wizard)', () => {
+    const doc = makeDoc();
+    doc.spec.sli = {
+      type: 'composite',
+      operator: 'all',
+      members: [{ sloId: 'a' }],
+    };
+    expect(hydrateFromDoc(doc)).toBeNull();
+  });
+
+  it('returns null for a rolling window the wizard cannot represent (no silent coercion)', () => {
+    // The server accepts any 1d–30d rolling window, but the wizard only offers
+    // 7/14/28/30d. A 21d SLO must be reported UNSUPPORTED — not coerced to 28d —
+    // otherwise saving an edit to any unrelated field would silently rewrite the
+    // window (and its alert/error-budget math) via the server's shallow merge.
+    const doc = makeDoc();
+    doc.spec.window = { type: 'rolling', duration: '21d' };
+    expect(hydrateFromDoc(doc)).toBeNull();
+  });
+
+  it('returns null for a calendar window (wizard only models rolling windows)', () => {
+    // A calendar window isn't representable at all; coercing would silently
+    // change the window TYPE (calendar → 28d rolling) on save.
+    const doc = makeDoc();
+    doc.spec.window = { type: 'calendar', period: 'month' };
+    expect(hydrateFromDoc(doc)).toBeNull();
+  });
+
+  describe('isSloEditable (detail-page Edit gating)', () => {
+    it('agrees with hydrateFromDoc across editable and unsupported SLOs', () => {
+      // Editable: single Prometheus SLI + representable rolling window.
+      const ok = makeDoc();
+      expect(isSloEditable(ok)).toBe(true);
+      expect(hydrateFromDoc(ok)).not.toBeNull();
+
+      // Composite SLI → not editable.
+      const composite = makeDoc();
+      composite.spec.sli = { type: 'composite', operator: 'all', members: [{ sloId: 'a' }] };
+      expect(isSloEditable(composite)).toBe(false);
+
+      // Calendar window → not editable.
+      const calendar = makeDoc();
+      calendar.spec.window = { type: 'calendar', period: 'month' };
+      expect(isSloEditable(calendar)).toBe(false);
+
+      // Non-representable rolling window → not editable.
+      const oddWindow = makeDoc();
+      oddWindow.spec.window = { type: 'rolling', duration: '21d' };
+      expect(isSloEditable(oddWindow)).toBe(false);
+    });
   });
 });

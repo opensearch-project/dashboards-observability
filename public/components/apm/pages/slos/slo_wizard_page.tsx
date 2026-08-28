@@ -26,6 +26,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -45,6 +46,7 @@ import { redactForDisplay } from '../../../../../common/error';
 import type { SloApiClient, SloRulerErrorEnvelope } from './slo_api_client';
 import { GeneratedRulesPreview } from './generated_rules_preview';
 import { DatasourceSelect } from './datasource_select';
+import { useDatasources } from '../../../alerting/hooks/use_datasources';
 import { SuggestingComboBox } from './suggesting_combo_box';
 import { useOwnerSuggestions } from './use_owner_suggestions';
 import { ObjectivesSection } from './objectives_section';
@@ -55,9 +57,10 @@ import { AdvancedSection } from './advanced_section';
 import { ExclusionWindowsEditor } from './exclusion_windows_editor';
 import type { SloCreateInput } from '../../../../../common/slo/slo_types';
 import { SLO_TEMPLATES } from '../../../../../common/slo/slo_templates';
+import type { SloTemplate } from '../../../../../common/slo/slo_templates';
 import { buildProbeQueries } from '../../../../../common/slo/slo_promql_generator';
 import { validateSloSpec } from '../../../../../common/slo/slo_validators';
-import { initialState, reducer } from './wizard_state';
+import { hydrateFromDoc, initialState, reducer } from './wizard_state';
 import type { FormState } from './wizard_state';
 import { buildCreateInput } from './wizard_builders';
 import { WizardNav } from './wizard_nav';
@@ -81,6 +84,12 @@ export interface SloWizardPageProps {
   chrome: ChromeStart;
   notifications: NotificationsStart;
   parentBreadcrumb: { text: string; href: string };
+  /**
+   * When present, the wizard runs in EDIT mode: it loads the existing SLO,
+   * hydrates the form from it, and its submit PUTs an update rather than
+   * POSTing a new SLO. Absent → the create flow, unchanged.
+   */
+  editSloId?: string;
 }
 
 // ============================================================================
@@ -154,8 +163,10 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   chrome,
   notifications,
   parentBreadcrumb: _parentBreadcrumb,
+  editSloId,
 }) => {
   const history = useHistory();
+  const isEditMode = !!editSloId;
   const { templateId: urlTemplateId } = useParams<{ templateId?: string }>();
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -163,15 +174,65 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
   const [rulerError, setRulerError] = useState<SloRulerErrorEnvelope | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // Sync template state with URL param.
+  // Edit-mode: the template is synthesized from the loaded doc (not a picker
+  // template), and `editVersion` carries the optimistic-concurrency version
+  // the update PUT must echo back.
+  const [editTemplate, setEditTemplate] = useState<SloTemplate | null>(null);
+  const [editVersion, setEditVersion] = useState<number | null>(null);
+  const [editLoading, setEditLoading] = useState<boolean>(isEditMode);
+  const [editLoadError, setEditLoadError] = useState<string | null>(null);
+  const [editUnsupported, setEditUnsupported] = useState<boolean>(false);
+  // The wizard has no "enabled" control (enable/disable lives on the detail
+  // page), and `buildCreateInput` hardcodes `enabled: true`. Preserve the
+  // loaded SLO's enabled flag so saving an edit to a *disabled* SLO doesn't
+  // silently re-enable it (the server merges the PUT spec over the stored one).
+  const [editEnabled, setEditEnabled] = useState<boolean>(true);
+
+  // Sync template state with URL param — CREATE mode only. In edit mode there
+  // is no `:templateId` param and the template is synthesized from the loaded
+  // doc, so running this effect would wrongly clear the hydrated selection.
   useEffect(() => {
+    if (isEditMode) return;
     if (urlTemplateId && state.templateId !== urlTemplateId) {
       dispatch({ kind: 'setTemplate', templateId: urlTemplateId });
     } else if (!urlTemplateId && state.templateId) {
       // User navigated back to /slos/create (no templateId in URL) — clear selection
       dispatch({ kind: 'setTemplate', templateId: null });
     }
-  }, [urlTemplateId, state.templateId]);
+  }, [isEditMode, urlTemplateId, state.templateId]);
+
+  // Edit-mode: load the existing SLO once and hydrate the form from it.
+  useEffect(() => {
+    if (!editSloId) return;
+    let cancelled = false;
+    setEditLoading(true);
+    setEditLoadError(null);
+    setEditUnsupported(false);
+    (async () => {
+      try {
+        const doc = await apiClient.get(editSloId);
+        if (cancelled) return;
+        const hydrated = hydrateFromDoc(doc);
+        if (!hydrated) {
+          setEditUnsupported(true);
+          setEditLoading(false);
+          return;
+        }
+        dispatch({ kind: 'hydrate', state: hydrated.state });
+        setEditTemplate(hydrated.template);
+        setEditVersion(hydrated.version);
+        setEditEnabled(doc.spec.enabled);
+        setEditLoading(false);
+      } catch (e) {
+        if (cancelled) return;
+        setEditLoadError(e instanceof Error ? e.message : String(e));
+        setEditLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [apiClient, editSloId]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -182,16 +243,21 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
         href: '#/slos',
       },
       {
-        text: i18n.translate('observability.apm.slo.wizard.breadcrumb.create', {
-          defaultMessage: 'Create',
-        }),
+        text: isEditMode
+          ? i18n.translate('observability.apm.slo.wizard.breadcrumb.edit', {
+              defaultMessage: 'Edit',
+            })
+          : i18n.translate('observability.apm.slo.wizard.breadcrumb.create', {
+              defaultMessage: 'Create',
+            }),
       },
     ]);
-  }, [chrome]);
+  }, [chrome, isEditMode]);
 
   const template = useMemo(
-    () => SLO_TEMPLATES.find((t) => t.id === state.templateId) ?? null,
-    [state.templateId]
+    () =>
+      isEditMode ? editTemplate : (SLO_TEMPLATES.find((t) => t.id === state.templateId) ?? null),
+    [isEditMode, editTemplate, state.templateId]
   );
 
   // Reset scroll to the top whenever a template is (re)selected, so picking a
@@ -285,6 +351,34 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     setRulerError(null);
     setSubmitting(true);
     try {
+      if (isEditMode && editSloId) {
+        // Optimistic concurrency: the server 409s if `version` is stale. If we
+        // somehow reach submit before the load resolved `editVersion`, bail
+        // rather than send an update with no version.
+        if (editVersion === null) {
+          setSubmitting(false);
+          return;
+        }
+        const doc = await apiClient.update(editSloId, {
+          // Preserve the SLO's enabled state — `buildCreateInput` always emits
+          // `enabled: true`, which would re-enable a disabled SLO on save.
+          spec: { ...input.spec, enabled: editEnabled },
+          version: editVersion,
+        });
+        // Advance the version so a second save in the same session doesn't 409.
+        setEditVersion(doc.status.version);
+        notifications.toasts.addSuccess({
+          title: i18n.translate('observability.apm.slo.wizard.updateSuccess.title', {
+            defaultMessage: 'SLO updated',
+          }),
+          text: i18n.translate('observability.apm.slo.wizard.updateSuccess.text', {
+            defaultMessage: '{name} was saved.',
+            values: { name: doc.spec.name },
+          }),
+        });
+        history.push(`/slos/${encodeURIComponent(doc.id)}`);
+        return;
+      }
       const doc = await apiClient.create(input);
       notifications.toasts.addSuccess({
         title: i18n.translate('observability.apm.slo.wizard.createSuccess.title', {
@@ -306,16 +400,136 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
       } else {
         const err = e instanceof Error ? e : new Error(String(e));
         notifications.toasts.addDanger({
-          title: i18n.translate('observability.apm.slo.wizard.createFailed', {
-            defaultMessage: 'Failed to create SLO',
-          }),
+          title: isEditMode
+            ? i18n.translate('observability.apm.slo.wizard.updateFailed', {
+                defaultMessage: 'Failed to update SLO',
+              })
+            : i18n.translate('observability.apm.slo.wizard.createFailed', {
+                defaultMessage: 'Failed to create SLO',
+              }),
           text: err.message,
         });
       }
     } finally {
       setSubmitting(false);
     }
-  }, [apiClient, history, notifications, state, template]);
+  }, [
+    apiClient,
+    history,
+    notifications,
+    state,
+    template,
+    isEditMode,
+    editSloId,
+    editVersion,
+    editEnabled,
+  ]);
+
+  // Edit-mode gate states — the template selector is never shown for edits.
+  if (isEditMode) {
+    if (editLoading) {
+      return (
+        <EuiPage data-test-subj="sloWizardPage">
+          <EuiPageBody component="main">
+            <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
+              <EuiPageContentBody>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  data-test-subj="sloWizardEditLoading"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      {i18n.translate('observability.apm.slo.wizard.edit.loading', {
+                        defaultMessage: 'Loading SLO…',
+                      })}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPageContentBody>
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+      );
+    }
+    if (editUnsupported) {
+      return (
+        <EuiPage data-test-subj="sloWizardPage">
+          <EuiPageBody component="main">
+            <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
+              <EuiPageContentBody>
+                <EuiCallOut
+                  color="warning"
+                  iconType="alert"
+                  title={i18n.translate('observability.apm.slo.wizard.edit.unsupportedTitle', {
+                    defaultMessage: 'This SLO can’t be edited here',
+                  })}
+                  data-test-subj="sloWizardEditUnsupported"
+                >
+                  <EuiText size="s">
+                    {i18n.translate('observability.apm.slo.wizard.edit.unsupportedBody', {
+                      defaultMessage:
+                        'Only single Prometheus-backed SLOs can be edited in this wizard. Composite or other-backend SLOs must be recreated.',
+                    })}
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <EuiButton
+                    size="s"
+                    href={`#/slos/${encodeURIComponent(editSloId ?? '')}`}
+                    data-test-subj="sloWizardEditUnsupportedBack"
+                  >
+                    {i18n.translate('observability.apm.slo.wizard.edit.backToSlo', {
+                      defaultMessage: 'Back to SLO',
+                    })}
+                  </EuiButton>
+                </EuiCallOut>
+              </EuiPageContentBody>
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+      );
+    }
+    if (editLoadError || !template) {
+      return (
+        <EuiPage data-test-subj="sloWizardPage">
+          <EuiPageBody component="main">
+            <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
+              <EuiPageContentBody>
+                <EuiCallOut
+                  color="danger"
+                  iconType="alert"
+                  title={i18n.translate('observability.apm.slo.wizard.edit.loadErrorTitle', {
+                    defaultMessage: 'Could not load this SLO',
+                  })}
+                  data-test-subj="sloWizardEditLoadError"
+                >
+                  {editLoadError && (
+                    <EuiText size="s">
+                      <p>{editLoadError}</p>
+                    </EuiText>
+                  )}
+                  <EuiSpacer size="s" />
+                  <EuiButton
+                    size="s"
+                    href={`#/slos/${encodeURIComponent(editSloId ?? '')}`}
+                    data-test-subj="sloWizardEditLoadErrorBack"
+                  >
+                    {i18n.translate('observability.apm.slo.wizard.edit.backToSlo', {
+                      defaultMessage: 'Back to SLO',
+                    })}
+                  </EuiButton>
+                </EuiCallOut>
+              </EuiPageContentBody>
+            </EuiPageContent>
+          </EuiPageBody>
+        </EuiPage>
+      );
+    }
+  }
 
   if (!template) {
     const pickActions = [
@@ -345,22 +559,38 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
     );
   }
 
-  // Header keeps only the contextual "Change template" affordance. The
-  // primary Create / Cancel actions live in a sticky bottom bar so they're
-  // always reachable on this long form — no scrolling back to the top.
-  const wizardActions = [
-    <EuiButtonEmpty
-      key="template-back"
-      iconType="arrowLeft"
-      onClick={() => history.replace('/slos/create')}
-      size="s"
-      data-test-subj="slosTemplateBack"
-    >
-      {i18n.translate('observability.apm.slo.wizard.changeTemplateButton', {
-        defaultMessage: 'Change template',
-      })}
-    </EuiButtonEmpty>,
-  ];
+  // Header keeps only the contextual navigation affordance. The primary
+  // Save/Create + Cancel actions live in a bottom bar so they're always
+  // reachable on this long form — no scrolling back to the top.
+  // In edit mode the "Change template" affordance is meaningless (the template
+  // is fixed by the persisted SLI), so it's replaced by a "Back to SLO" link.
+  const wizardActions = isEditMode
+    ? [
+        <EuiButtonEmpty
+          key="edit-back"
+          iconType="arrowLeft"
+          href={`#/slos/${encodeURIComponent(editSloId ?? '')}`}
+          size="s"
+          data-test-subj="slosEditBack"
+        >
+          {i18n.translate('observability.apm.slo.wizard.edit.backToSlo', {
+            defaultMessage: 'Back to SLO',
+          })}
+        </EuiButtonEmpty>,
+      ]
+    : [
+        <EuiButtonEmpty
+          key="template-back"
+          iconType="arrowLeft"
+          onClick={() => history.replace('/slos/create')}
+          size="s"
+          data-test-subj="slosTemplateBack"
+        >
+          {i18n.translate('observability.apm.slo.wizard.changeTemplateButton', {
+            defaultMessage: 'Change template',
+          })}
+        </EuiButtonEmpty>,
+      ];
 
   const visibleSectionIds: WizardSectionId[] = [
     'identity',
@@ -397,6 +627,7 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                         errors={errors}
                         dispatch={dispatch}
                         template={template.name}
+                        readOnlyDatasource={isEditMode}
                       />
                     </div>
 
@@ -623,7 +854,13 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                       data-test-subj="slosWizardActionFooter"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty href="#/slos" size="s" data-test-subj="slosWizardCancel">
+                        <EuiButtonEmpty
+                          href={
+                            isEditMode ? `#/slos/${encodeURIComponent(editSloId ?? '')}` : '#/slos'
+                          }
+                          size="s"
+                          data-test-subj="slosWizardCancel"
+                        >
                           {i18n.translate('observability.apm.slo.wizard.cancelButton', {
                             defaultMessage: 'Cancel',
                           })}
@@ -637,9 +874,13 @@ export const SloWizardPage: React.FC<SloWizardPageProps> = ({
                           onClick={onSubmit}
                           data-test-subj="slosWizardSubmit"
                         >
-                          {i18n.translate('observability.apm.slo.wizard.submitButton', {
-                            defaultMessage: 'Create SLO',
-                          })}
+                          {isEditMode
+                            ? i18n.translate('observability.apm.slo.wizard.saveButton', {
+                                defaultMessage: 'Save changes',
+                              })
+                            : i18n.translate('observability.apm.slo.wizard.submitButton', {
+                                defaultMessage: 'Create SLO',
+                              })}
                         </EuiButton>
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -668,11 +909,36 @@ interface PanelProps {
   dispatch: React.Dispatch<import('./wizard_state').Action>;
 }
 
-const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
+/**
+ * Read-only datasource display for edit mode. Resolves the connection id
+ * (`spec.datasourceId`) to the friendly name the interactive `DatasourceSelect`
+ * shows, via the same `useDatasources` source, so the read-only view isn't less
+ * legible than the picker it replaces. Falls back to the raw id if the
+ * datasource can't be resolved (e.g. list still loading).
+ */
+const ReadOnlyDatasourceField: React.FC<{ datasourceId: string }> = ({ datasourceId }) => {
+  const { datasources } = useDatasources();
+  const displayName = datasources.find((d) => d.id === datasourceId)?.name ?? datasourceId;
+  return (
+    <EuiFieldText
+      value={displayName}
+      readOnly
+      disabled
+      data-test-subj="slosWizardDatasourceReadOnly"
+      aria-label={i18n.translate(
+        'observability.apm.slo.wizard.identity.datasourceReadOnlyAriaLabel',
+        { defaultMessage: 'Datasource (read-only)' }
+      )}
+    />
+  );
+};
+
+const IdentityPanel: React.FC<PanelProps & { template: string; readOnlyDatasource?: boolean }> = ({
   state,
   errors,
   dispatch,
   template,
+  readOnlyDatasource,
 }) => (
   <EuiPanel>
     <EuiText size="m">
@@ -688,14 +954,31 @@ const IdentityPanel: React.FC<PanelProps & { template: string }> = ({
       label={i18n.translate('observability.apm.slo.wizard.identity.datasourceLabel', {
         defaultMessage: 'Datasource',
       })}
-      isInvalid={!!errors['spec.datasourceId']}
-      error={errors['spec.datasourceId']}
+      isInvalid={!readOnlyDatasource && !!errors['spec.datasourceId']}
+      error={readOnlyDatasource ? undefined : errors['spec.datasourceId']}
+      helpText={
+        readOnlyDatasource
+          ? i18n.translate('observability.apm.slo.wizard.identity.datasourceReadOnlyHelp', {
+              defaultMessage:
+                'The datasource is fixed after creation — the SLO’s recording and alerting rules are keyed to it. To move an SLO to another datasource, recreate it there.',
+            })
+          : undefined
+      }
     >
-      <DatasourceSelect
-        value={state.datasourceId}
-        isInvalid={!!errors['spec.datasourceId']}
-        onChange={(value) => dispatch({ kind: 'setField', field: 'datasourceId', value })}
-      />
+      {readOnlyDatasource ? (
+        // Datasource is IMMUTABLE on edit: the server pins rules to the
+        // create-time datasource, so allowing a change here would orphan the
+        // already-provisioned Prometheus/Cortex rule groups. Render a disabled
+        // field showing the friendly name (matching the interactive picker),
+        // not the raw connection id.
+        <ReadOnlyDatasourceField datasourceId={state.datasourceId} />
+      ) : (
+        <DatasourceSelect
+          value={state.datasourceId}
+          isInvalid={!!errors['spec.datasourceId']}
+          onChange={(value) => dispatch({ kind: 'setField', field: 'datasourceId', value })}
+        />
+      )}
     </EuiFormRow>
     <EuiFormRow
       label={i18n.translate('observability.apm.slo.wizard.identity.nameLabel', {

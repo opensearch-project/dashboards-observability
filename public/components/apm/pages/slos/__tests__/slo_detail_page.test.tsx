@@ -304,6 +304,27 @@ describe('SloDetailPage — View alerts pivot (OBS1)', () => {
   });
 });
 
+describe('SloDetailPage — Edit affordance (BUG-S3)', () => {
+  it('renders an Edit action linking to the SLO edit route', async () => {
+    renderPage({ get: jest.fn().mockResolvedValue(makeDoc()) });
+
+    const editButton = await screen.findByTestId('slosDetailEdit');
+    expect(editButton).toHaveAttribute('href', '#/slos/slo-1/edit');
+  });
+
+  it('hides Edit for an SLO the wizard cannot edit (no dead-end round trip)', async () => {
+    // Calendar-window SLO is unsupported by the wizard, so the detail page must
+    // not offer Edit (it would only land on "This SLO can't be edited here").
+    const doc = makeDoc();
+    doc.spec.window = { type: 'calendar', period: 'month' };
+    renderPage({ get: jest.fn().mockResolvedValue(doc) });
+
+    // The page rendered (Delete is always present), but Edit is absent.
+    expect(await screen.findByTestId('slosDetailDelete')).toBeInTheDocument();
+    expect(screen.queryByTestId('slosDetailEdit')).not.toBeInTheDocument();
+  });
+});
+
 describe('SloDetailPage — rule-health grace window + re-poll (F-CRUD2)', () => {
   beforeEach(() => {
     jest.useFakeTimers();

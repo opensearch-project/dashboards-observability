@@ -114,7 +114,11 @@ export function buildCreateInput(state: FormState, template: SloTemplate): SloCr
     mode: state.shadow ? 'shadow' : 'active',
     service: state.service,
     owner: {
-      teams: state.ownerTeam ? [state.ownerTeam] : [],
+      // Primary team (the only one the wizard edits) first, then any secondary
+      // teams carried from an edited SLO — deduped, blanks dropped — so editing
+      // a multi-team SLO doesn't truncate `owner.teams` to just the primary.
+      // `ownerTeamsSecondary` is always empty in create mode.
+      teams: Array.from(new Set([state.ownerTeam, ...state.ownerTeamsSecondary].filter(Boolean))),
       primaryUser: state.ownerPrimaryUser || undefined,
     },
     tier: state.tier || undefined,
@@ -134,7 +138,12 @@ export function buildCreateInput(state: FormState, template: SloTemplate): SloCr
       resolved: { enabled: state.alarms.resolved.enabled },
     },
     exclusionWindows: state.exclusionWindows.map((ew) => ({ ...ew, schedule: { ...ew.schedule } })),
-    labels: entriesToRecord(state.labels),
+    // Re-emit array-valued labels verbatim alongside the editable scalar rows.
+    // The editor only authors scalars; without this, an API-created SLO's array
+    // label (e.g. `{region: ['us','eu']}`) would be dropped on save because the
+    // server shallow-merges the whole `labels` object. `preservedArrayLabels` is
+    // always `{}` in create mode. Editable rows win on key collision.
+    labels: { ...state.preservedArrayLabels, ...entriesToRecord(state.labels) },
     annotations: entriesToRecord(state.annotations),
   };
   return { spec };
