@@ -998,6 +998,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
             }}
             compressed
             prepend="Latency"
+            data-test-subj="dependencyLatencyPercentileSelector"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

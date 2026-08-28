@@ -85,11 +85,10 @@ const props = {
   serviceMapDataset: 'otel-v1-apm-span',
 };
 
-// EuiSuperSelect is not a native <select> (and the dependencies one has no data-test-subj):
-// click the control to open the popover, then click the option.
+// EuiSuperSelect is not a native <select>: click the control to open the popover, then click
+// the option. Targeting the stable data-test-subj avoids grabbing an unrelated EuiSuperSelect.
 const switchPercentile = (label: 'P99' | 'P90' | 'P50') => {
-  const control = document.querySelector('.euiSuperSelectControl') as HTMLElement;
-  fireEvent.click(control);
+  fireEvent.click(screen.getByTestId('dependencyLatencyPercentileSelector'));
   const listbox = screen.getByRole('listbox');
   fireEvent.click(within(listbox).getByText(label));
 };
