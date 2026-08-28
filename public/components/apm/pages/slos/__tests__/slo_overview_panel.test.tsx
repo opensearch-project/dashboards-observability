@@ -178,6 +178,10 @@ describe('SloOverviewPanel', () => {
     expect(screen.getByTestId('slosOverviewOk')).toHaveAttribute('aria-pressed', 'false');
     // The aggregate-budget tile is not a filter toggle — it exposes no pressed state.
     expect(screen.getByTestId('slosOverviewBudget')).not.toHaveAttribute('aria-pressed');
+    // "Alerts firing" is a read-only stat, not a filter (no server-side
+    // firing-only facet), so it must not announce a pressed state — otherwise a
+    // firing click would map to and announce the Breached tile.
+    expect(screen.getByTestId('slosOverviewFiring')).not.toHaveAttribute('aria-pressed');
   });
 
   it('activates on Space and calls preventDefault so the page does not scroll (A11Y5)', () => {

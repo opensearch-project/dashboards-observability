@@ -388,7 +388,9 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
       // contributes 0 here. The two therefore measure different units — the
       // tile is labelled "Alerts firing" (not "Firing") so a value of 0 next
       // to a non-zero breached count is unambiguous rather than contradictory
-      // (M12). Guard against absent/NaN status so one bad row can't NaN the sum.
+      // (M12). Guard only a NaN/absent `firingCount` so one bad row can't NaN
+      // the sum — `s.status` itself is assumed present here, as everywhere else
+      // in this reducer (`s.status.state` is read unguarded just below).
       firing += Number.isFinite(s.status.firingCount) ? s.status.firingCount : 0;
       switch (s.status.state) {
         case 'breached':
@@ -622,8 +624,12 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
               defaultMessage:
                 'Burn-rate alert instances currently firing across all SLOs — a count of alerts, not SLOs. A breached SLO with no alert rules configured contributes 0, so this can read 0 even while SLOs are breached; use the Breached tile for the SLO count.',
             })}
-            onClick={toggle('firing')}
-            active={activeStateFilter === 'firing'}
+            // Read-only stat, not a filter: there is no server-side
+            // "firingCount > 0" facet, so a click could only map to the closest
+            // real state (breached) — which would tint the *Breached* tile and,
+            // via the aria-pressed below, announce "Breached, pressed" for a
+            // firing click. Rather than mislead keyboard/SR users, the firing
+            // tile carries no toggle affordance; use the Breached tile to filter.
             dataTestSubj="slosOverviewFiring"
           />
           <KpiCell
