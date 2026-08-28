@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { UnifiedRuleSummary } from '../../../../common/types/alerting';
+import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alerting';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { DetectorDetailFlyout } from '../detector_detail_flyout';
 import { ForecasterDetailFlyout } from '../forecaster_detail_flyout';
@@ -123,6 +123,12 @@ export interface MonitorsMainPanelProps {
    * flyout shows a loading spinner on the button until it resolves.
    */
   onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
+  /**
+   * Registered datasources, forwarded to {@link MonitorDetailFlyout} so it can
+   * resolve a monitor's `datasourceId` (a raw UUID) to its human-readable
+   * name. Optional: when absent the flyout falls back to showing the raw id.
+   */
+  datasources?: Datasource[];
 }
 
 export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
@@ -167,6 +173,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   onStopResources,
   lifecycleActionPending = false,
   onToggleEnabled,
+  datasources,
 }) => {
   const selectedRules = filtered.filter((rule) => selectedIds.has(rule.id));
   const selectedAdResources = selectedRules.filter(
@@ -222,7 +229,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           'observability.alerting.monitorsTable.mainPanel.logsDisabledTooltip',
                           {
                             defaultMessage:
-                              'Logs rules require an OpenSearch datasource. Select one to enable.',
+                              'Logs rules require an OpenSearch datasource. Connect one to enable.',
                           }
                         )}
                       >
@@ -269,7 +276,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                           'observability.alerting.monitorsTable.mainPanel.metricsDisabledTooltip',
                           {
                             defaultMessage:
-                              'Metrics rules require a Prometheus datasource. Select one to enable.',
+                              'Metrics rules require a Prometheus datasource. Connect one to enable.',
                           }
                         )}
                       >
@@ -710,6 +717,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               : undefined
           }
           onToggleEnabled={onToggleEnabled}
+          datasources={datasources}
         />
       ) : null}
     </>

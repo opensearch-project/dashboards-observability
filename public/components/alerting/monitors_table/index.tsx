@@ -466,6 +466,10 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
             >
               <MonitorsMainPanel
                 rules={rules}
+                // Forwarded to the detail flyout so it can resolve a rule's
+                // datasource id to its display name (CLAR15) instead of
+                // showing a raw UUID.
+                datasources={datasources}
                 filtered={filtered}
                 loading={loading}
                 tableColumns={tableColumns}

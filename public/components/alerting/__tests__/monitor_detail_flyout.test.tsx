@@ -42,9 +42,13 @@ jest.mock('../../../framework/core_refs', () => ({
   },
 }));
 
-import { MonitorDetailFlyout } from '../monitor_detail_flyout';
+import { MonitorDetailFlyout, resolveDatasourceName } from '../monitor_detail_flyout';
 import { coreRefs } from '../../../framework/core_refs';
-import type { UnifiedRule, UnifiedRuleSummary } from '../../../../common/types/alerting';
+import type {
+  Datasource,
+  UnifiedRule,
+  UnifiedRuleSummary,
+} from '../../../../common/types/alerting';
 
 const navigateToApp = coreRefs.application!.navigateToApp as jest.Mock;
 
@@ -96,6 +100,26 @@ describe('MonitorDetailFlyout', () => {
       />
     );
     expect(getByText('Test Monitor')).toBeInTheDocument();
+  });
+
+  it('title-cases the status, severity, and health chips instead of showing raw enums', () => {
+    const { getByText, queryByText } = render(
+      <MonitorDetailFlyout
+        monitor={mockMonitor}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+      />
+    );
+    // The alerts table reads "Active"/"Medium"; this flyout used to show the
+    // raw backend tokens, so the same rule read two different ways depending
+    // on which surface you opened it from.
+    expect(getByText('Active')).toBeInTheDocument();
+    expect(getByText('Medium')).toBeInTheDocument();
+    expect(getByText('Healthy')).toBeInTheDocument();
+    expect(queryByText('active')).toBeNull();
+    expect(queryByText('medium')).toBeNull();
+    expect(queryByText('healthy')).toBeNull();
   });
 
   it('calls onClose when close button is clicked', () => {
@@ -389,5 +413,140 @@ describe('MonitorDetailFlyout', () => {
         path: '#/monitors/mon-1?action=edit-monitor&monitorType=doc_level_monitor&dataSourceId=',
       });
     });
+  });
+
+  // ==========================================================================
+  // CLAR15 — datasource id → name resolution + "Created By" fallback.
+  // ==========================================================================
+  describe('resolveDatasourceName', () => {
+    const datasources = [
+      { id: 'ds-1', name: 'Prod OpenSearch', type: 'opensearch' },
+      { id: 'ds-2', name: 'Metrics Prometheus', type: 'prometheus' },
+    ] as unknown as Datasource[];
+
+    it('resolves a known id to its registered name', () => {
+      expect(resolveDatasourceName(datasources, 'ds-1')).toBe('Prod OpenSearch');
+    });
+
+    it('falls back to the raw id when the datasource is not in the list', () => {
+      expect(resolveDatasourceName(datasources, 'ds-unknown')).toBe('ds-unknown');
+      expect(resolveDatasourceName(undefined, 'ds-unknown')).toBe('ds-unknown');
+    });
+
+    it('falls back to the EMPTY_VALUE placeholder when neither is available', () => {
+      // Em dash — the shared EMPTY_VALUE. Never blank / undefined.
+      expect(resolveDatasourceName(datasources, undefined)).toBe('—');
+      expect(resolveDatasourceName(undefined, '')).toBe('—');
+    });
+  });
+
+  it('shows the resolved datasource name (not the raw UUID) in the Details section', async () => {
+    const datasources = [
+      { id: 'ds-1', name: 'Prod OpenSearch', type: 'opensearch' },
+    ] as unknown as Datasource[];
+    const { getByText, queryByText } = render(
+      <MonitorDetailFlyout
+        monitor={mockMonitor}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+        datasources={datasources}
+      />
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    // Details accordion is collapsed by default — expand it.
+    fireEvent.click(getByText('Details'));
+    expect(getByText('Prod OpenSearch')).toBeInTheDocument();
+    // The raw UUID must NOT be shown as the datasource value.
+    expect(queryByText('ds-1')).toBeNull();
+  });
+
+  it('renders the EMPTY_VALUE placeholder for a blank "Created By" instead of leaving it empty', async () => {
+    // mockMonitor.createdBy is '' — the backend leaves it unset.
+    const { getByText } = render(
+      <MonitorDetailFlyout
+        monitor={mockMonitor}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+      />
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    fireEvent.click(getByText('Details'));
+    // The "Created By" term's value cell must be the em-dash placeholder, not blank.
+    const term = getByText('Created By').closest('dt');
+    const value = term?.nextElementSibling as HTMLElement | null;
+    expect(value?.textContent).toBe('—');
+  });
+
+  // ==========================================================================
+  // A11Y8 — a tooltip on a disabled button must remain reachable. The disabled
+  // control is wrapped in a focusable span that owns the tooltip anchor.
+  // ==========================================================================
+  it('wraps the disabled enable/disable button in a focusable tooltip anchor', async () => {
+    // No onToggleEnabled + a metric monitor → the footer renders the disabled
+    // enable/disable control behind a tooltip.
+    const { getByTestId } = render(
+      <MonitorDetailFlyout
+        monitor={mockMonitor}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+      />
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const anchor = getByTestId('alertManagerMonitorDetailToggleEnabledDisabled');
+    // The wrapper is a focusable span (tabIndex 0) — keyboard users can reach
+    // it and trigger the tooltip; a bare EuiToolTip on the disabled button
+    // would not be reachable by pointer or focus.
+    expect(anchor.tagName).toBe('SPAN');
+    expect(anchor.getAttribute('tabindex')).toBe('0');
+    // The disabled button lives inside the focusable wrapper.
+    const button = anchor.querySelector('button');
+    expect(button).toBeDisabled();
+  });
+
+  // ==========================================================================
+  // F-CRUD1 — the alert-history count is scoped to THIS rule; the label must
+  // say so rather than reading like a global firing count.
+  // ==========================================================================
+  it('labels the recent-alerts count as scoped to this rule', async () => {
+    const { getByText } = render(
+      <MonitorDetailFlyout
+        monitor={mockMonitor}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+      />
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(getByText('Recent alerts for this rule (0)')).toBeInTheDocument();
+  });
+
+  it('labels the Prometheus firing/pending count as scoped to this rule', async () => {
+    const promMonitor: UnifiedRuleSummary = {
+      ...mockMonitor,
+      datasourceType: 'prometheus',
+    };
+    const { getByText } = render(
+      <MonitorDetailFlyout
+        monitor={promMonitor}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+      />
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(getByText('Firing/pending alerts for this rule (0)')).toBeInTheDocument();
   });
 });
