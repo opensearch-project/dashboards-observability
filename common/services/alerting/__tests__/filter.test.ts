@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { emptyFilters, filterAlerts, matchesFilters, matchesSearch, sortRules } from '../filter';
+import {
+  alertMatchesSearch,
+  emptyFilters,
+  filterAlerts,
+  matchesFilters,
+  matchesSearch,
+  sortRules,
+} from '../filter';
 
 describe('filter', () => {
   describe('emptyFilters', () => {
@@ -170,6 +177,41 @@ describe('filter', () => {
       expect(filterAlerts(alerts, { search: 'storage' }).map((a) => a.name)).toEqual(['LowDisk']);
       // alert without message still searches name/labels
       expect(filterAlerts(alerts, { search: 'oom' }).map((a) => a.name)).toEqual(['OomKill']);
+    });
+
+    it('scopes to a single SLO via a `slo_id:<id>` label deep-link (SLO detail "View alerts" pivot)', () => {
+      const sloAlerts = [
+        { name: 'BurnA', severity: 'critical', state: 'firing', labels: { slo_id: 'abc-123' } },
+        { name: 'BurnB', severity: 'warning', state: 'firing', labels: { slo_id: 'def-456' } },
+      ];
+      // The value alone won't appear as a literal `slo_id:abc-123` substring in
+      // any field — the label-aware branch is what makes this match.
+      expect(filterAlerts(sloAlerts, { search: 'slo_id:abc-123' }).map((a) => a.name)).toEqual([
+        'BurnA',
+      ]);
+      expect(filterAlerts(sloAlerts, { search: 'slo_id:none' })).toHaveLength(0);
+    });
+  });
+
+  describe('alertMatchesSearch', () => {
+    const alert = { name: 'HighCpu', message: 'CPU over threshold', labels: { slo_id: 'abc-123' } };
+
+    it('matches an empty query', () => {
+      expect(alertMatchesSearch(alert, '')).toBe(true);
+      expect(alertMatchesSearch(alert, '   ')).toBe(true);
+    });
+
+    it('matches a single labelKey:value term against the label, not as a substring', () => {
+      expect(alertMatchesSearch(alert, 'slo_id:abc-123')).toBe(true);
+      expect(alertMatchesSearch(alert, 'slo_id:abc')).toBe(true); // includes()
+      expect(alertMatchesSearch(alert, 'slo_id:zzz')).toBe(false);
+      expect(alertMatchesSearch(alert, 'other:abc-123')).toBe(false); // wrong key
+    });
+
+    it('keeps whole-string substring behavior for free-text (with a space)', () => {
+      expect(alertMatchesSearch(alert, 'cpu over')).toBe(true); // message substring
+      expect(alertMatchesSearch(alert, 'highcpu')).toBe(true); // name substring
+      expect(alertMatchesSearch(alert, 'no match')).toBe(false);
     });
   });
 });

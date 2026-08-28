@@ -56,6 +56,38 @@ export function matchesSearch(
   });
 }
 
+/**
+ * Search predicate for alert summaries (name + message + labels).
+ *
+ * A single `labelKey:value` term (no whitespace, e.g. `slo_id:<id>`) is matched
+ * against the label rather than as a literal substring — the SLO detail
+ * "View alerts" pivot deep-links with exactly this shape, and a plain substring
+ * search would never match because the label value doesn't contain the `key:`
+ * prefix. Any other query keeps the original whole-string substring behavior
+ * over name / message / label values, so multi-word free-text search is
+ * unchanged.
+ */
+export function alertMatchesSearch(
+  alert: { name: string; message?: string; labels: Record<string, string> },
+  query: string
+): boolean {
+  const raw = query.trim();
+  if (!raw) return true;
+  const colonIdx = raw.indexOf(':');
+  if (colonIdx > 0 && !/\s/.test(raw)) {
+    const key = raw.slice(0, colonIdx).toLowerCase();
+    const val = raw.slice(colonIdx + 1).toLowerCase();
+    const labelVal = alert.labels[key];
+    return Boolean(labelVal && labelVal.toLowerCase().includes(val));
+  }
+  const q = raw.toLowerCase();
+  return (
+    alert.name.toLowerCase().includes(q) ||
+    (alert.message || '').toLowerCase().includes(q) ||
+    Object.values(alert.labels).some((v) => v.toLowerCase().includes(q))
+  );
+}
+
 export function matchesFilters(
   rule: {
     status: string;
@@ -99,9 +131,9 @@ export function sortRules<T>(
   const sorted = [...rules];
   sorted.sort((a, b) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic field access for generic sort
-    let aVal = accessor ? accessor(a, field) : (a as Record<string, any>)[field] ?? '';
+    let aVal = accessor ? accessor(a, field) : ((a as Record<string, any>)[field] ?? '');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic field access for generic sort
-    let bVal = accessor ? accessor(b, field) : (b as Record<string, any>)[field] ?? '';
+    let bVal = accessor ? accessor(b, field) : ((b as Record<string, any>)[field] ?? '');
     if (typeof aVal === 'string') aVal = aVal.toLowerCase();
     if (typeof bVal === 'string') bVal = bVal.toLowerCase();
     if (aVal < bVal) return direction === 'asc' ? -1 : 1;
@@ -119,7 +151,7 @@ export function filterAlerts<
     labels: Record<string, string>;
     name: string;
     message?: string;
-  }
+  },
 >(
   alerts: T[],
   filters: {
@@ -142,15 +174,8 @@ export function filterAlerts<
         if (values.length > 0 && (!a.labels[key] || !values.includes(a.labels[key]))) return false;
       }
     }
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      if (
-        !a.name.toLowerCase().includes(q) &&
-        !(a.message || '').toLowerCase().includes(q) &&
-        !Object.values(a.labels).some((v) => v.toLowerCase().includes(q))
-      ) {
-        return false;
-      }
+    if (filters.search && !alertMatchesSearch(a, filters.search)) {
+      return false;
     }
     return true;
   });
