@@ -5,7 +5,13 @@
 
 import { SLO_TEMPLATES } from '../../../../../../common/slo/slo_templates';
 import type { SloDocument } from '../../../../../../common/slo/slo_types';
-import { hydrateFromDoc, initialState, reducer, applyTemplate } from '../wizard_state';
+import {
+  hydrateFromDoc,
+  initialState,
+  isSloEditable,
+  reducer,
+  applyTemplate,
+} from '../wizard_state';
 import { buildCreateInput } from '../wizard_builders';
 
 describe('wizard_state reducer', () => {
@@ -298,6 +304,22 @@ describe('hydrateFromDoc (edit-mode prefill)', () => {
     expect(rebuilt.spec.window).toEqual({ type: 'rolling', duration: '14d' });
   });
 
+  it('preserves array-valued labels through an edit instead of flattening them to CSV', () => {
+    // SloSpec.labels is Record<string, string | string[]>. The wizard editor
+    // only authors scalars, so an API-created array label must round-trip
+    // verbatim — otherwise hydrate would flatten {region:['us','eu']} to the
+    // scalar 'us,eu' and the server's shallow labels merge would persist it.
+    const doc = makeDoc();
+    doc.spec.labels = { compliance: 'pci', region: ['us', 'eu'] };
+    const hydrated = hydrateFromDoc(doc)!;
+    // The array label is carried out-of-band, NOT shown as an editable scalar row.
+    expect(hydrated.state.preservedArrayLabels).toEqual({ region: ['us', 'eu'] });
+    expect(hydrated.state.labels).toEqual([{ key: 'compliance', value: 'pci' }]);
+    // …and re-emitted verbatim (still an array) on save.
+    const rebuilt = buildCreateInput(hydrated.state, hydrated.template);
+    expect(rebuilt.spec.labels).toEqual({ region: ['us', 'eu'], compliance: 'pci' });
+  });
+
   it('preserves secondary owner teams through an edit (no truncation to primary)', () => {
     // The saved object supports up to 5 teams, but the wizard only edits the
     // primary. A multi-team SLO (API-created) must keep teams[1..] on save,
@@ -349,5 +371,29 @@ describe('hydrateFromDoc (edit-mode prefill)', () => {
     const doc = makeDoc();
     doc.spec.window = { type: 'calendar', period: 'month' };
     expect(hydrateFromDoc(doc)).toBeNull();
+  });
+
+  describe('isSloEditable (detail-page Edit gating)', () => {
+    it('agrees with hydrateFromDoc across editable and unsupported SLOs', () => {
+      // Editable: single Prometheus SLI + representable rolling window.
+      const ok = makeDoc();
+      expect(isSloEditable(ok)).toBe(true);
+      expect(hydrateFromDoc(ok)).not.toBeNull();
+
+      // Composite SLI → not editable.
+      const composite = makeDoc();
+      composite.spec.sli = { type: 'composite', operator: 'all', members: [{ sloId: 'a' }] };
+      expect(isSloEditable(composite)).toBe(false);
+
+      // Calendar window → not editable.
+      const calendar = makeDoc();
+      calendar.spec.window = { type: 'calendar', period: 'month' };
+      expect(isSloEditable(calendar)).toBe(false);
+
+      // Non-representable rolling window → not editable.
+      const oddWindow = makeDoc();
+      oddWindow.spec.window = { type: 'rolling', duration: '21d' };
+      expect(isSloEditable(oddWindow)).toBe(false);
+    });
   });
 });

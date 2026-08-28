@@ -46,6 +46,7 @@ import { redactForDisplay } from '../../../../../common/error';
 import type { SloApiClient, SloRulerErrorEnvelope } from './slo_api_client';
 import { GeneratedRulesPreview } from './generated_rules_preview';
 import { DatasourceSelect } from './datasource_select';
+import { useDatasources } from '../../../alerting/hooks/use_datasources';
 import { SuggestingComboBox } from './suggesting_combo_box';
 import { useOwnerSuggestions } from './use_owner_suggestions';
 import { ObjectivesSection } from './objectives_section';
@@ -908,6 +909,30 @@ interface PanelProps {
   dispatch: React.Dispatch<import('./wizard_state').Action>;
 }
 
+/**
+ * Read-only datasource display for edit mode. Resolves the connection id
+ * (`spec.datasourceId`) to the friendly name the interactive `DatasourceSelect`
+ * shows, via the same `useDatasources` source, so the read-only view isn't less
+ * legible than the picker it replaces. Falls back to the raw id if the
+ * datasource can't be resolved (e.g. list still loading).
+ */
+const ReadOnlyDatasourceField: React.FC<{ datasourceId: string }> = ({ datasourceId }) => {
+  const { datasources } = useDatasources();
+  const displayName = datasources.find((d) => d.id === datasourceId)?.name ?? datasourceId;
+  return (
+    <EuiFieldText
+      value={displayName}
+      readOnly
+      disabled
+      data-test-subj="slosWizardDatasourceReadOnly"
+      aria-label={i18n.translate(
+        'observability.apm.slo.wizard.identity.datasourceReadOnlyAriaLabel',
+        { defaultMessage: 'Datasource (read-only)' }
+      )}
+    />
+  );
+};
+
 const IdentityPanel: React.FC<PanelProps & { template: string; readOnlyDatasource?: boolean }> = ({
   state,
   errors,
@@ -944,17 +969,9 @@ const IdentityPanel: React.FC<PanelProps & { template: string; readOnlyDatasourc
         // Datasource is IMMUTABLE on edit: the server pins rules to the
         // create-time datasource, so allowing a change here would orphan the
         // already-provisioned Prometheus/Cortex rule groups. Render a disabled
-        // field rather than the interactive picker.
-        <EuiFieldText
-          value={state.datasourceId}
-          readOnly
-          disabled
-          data-test-subj="slosWizardDatasourceReadOnly"
-          aria-label={i18n.translate(
-            'observability.apm.slo.wizard.identity.datasourceReadOnlyAriaLabel',
-            { defaultMessage: 'Datasource (read-only)' }
-          )}
-        />
+        // field showing the friendly name (matching the interactive picker),
+        // not the raw connection id.
+        <ReadOnlyDatasourceField datasourceId={state.datasourceId} />
       ) : (
         <DatasourceSelect
           value={state.datasourceId}

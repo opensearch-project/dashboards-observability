@@ -55,6 +55,7 @@ import type {
 import { getSloHealthColor, getSloHealthLabel } from '../../../../../common/slo/state';
 import { formatPct, SLO_PRECISION, TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
 import { templateIconFor } from './template_icons';
+import { isSloEditable } from './wizard_state';
 import { observabilityAlertingID } from '../../../../../common/constants/shared';
 import { coreRefs } from '../../../../framework/core_refs';
 
@@ -1095,18 +1096,26 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
         defaultMessage: 'View alerts',
       })}
     </EuiButtonEmpty>,
-    <EuiButton
-      key="edit"
-      size="s"
-      fill
-      iconType="pencil"
-      href={`#/slos/${encodeURIComponent(doc.id)}/edit`}
-      data-test-subj="slosDetailEdit"
-    >
-      {i18n.translate('observability.apm.slo.detail.editButton', {
-        defaultMessage: 'Edit',
-      })}
-    </EuiButton>,
+    // Only offer Edit for SLOs the wizard can actually edit (single Prometheus
+    // SLI + representable rolling window). For composite / non-Prometheus /
+    // calendar-window SLOs, editing lands on the wizard's "can't be edited here"
+    // message, so we don't show a dead-end button. Not `fill`: Edit is one of
+    // several equal header actions, not the primary CTA.
+    ...(isSloEditable(doc)
+      ? [
+          <EuiButton
+            key="edit"
+            size="s"
+            iconType="pencil"
+            href={`#/slos/${encodeURIComponent(doc.id)}/edit`}
+            data-test-subj="slosDetailEdit"
+          >
+            {i18n.translate('observability.apm.slo.detail.editButton', {
+              defaultMessage: 'Edit',
+            })}
+          </EuiButton>,
+        ]
+      : []),
     <EuiButton key="toggle" size="s" onClick={onToggleEnabled} data-test-subj="slosDetailToggle">
       {doc.spec.enabled
         ? i18n.translate('observability.apm.slo.detail.disableButton', {

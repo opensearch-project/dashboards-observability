@@ -138,7 +138,12 @@ export function buildCreateInput(state: FormState, template: SloTemplate): SloCr
       resolved: { enabled: state.alarms.resolved.enabled },
     },
     exclusionWindows: state.exclusionWindows.map((ew) => ({ ...ew, schedule: { ...ew.schedule } })),
-    labels: entriesToRecord(state.labels),
+    // Re-emit array-valued labels verbatim alongside the editable scalar rows.
+    // The editor only authors scalars; without this, an API-created SLO's array
+    // label (e.g. `{region: ['us','eu']}`) would be dropped on save because the
+    // server shallow-merges the whole `labels` object. `preservedArrayLabels` is
+    // always `{}` in create mode. Editable rows win on key collision.
+    labels: { ...state.preservedArrayLabels, ...entriesToRecord(state.labels) },
     annotations: entriesToRecord(state.annotations),
   };
   return { spec };

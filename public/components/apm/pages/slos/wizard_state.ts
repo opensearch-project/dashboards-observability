@@ -80,6 +80,17 @@ export interface FormState {
   latencyThresholdUnit: 'seconds' | 'milliseconds';
   customPromql: CustomPromqlState;
   labels: KeyValueEntry[];
+  /**
+   * Array-valued labels (`Record<string, string[]>`) carried through edit but
+   * NOT shown in the key/value editor, which only authors scalar string values.
+   * `SloSpec.labels` is `Record<string, string | string[]>`; the wizard can only
+   * create scalar labels, so array labels only exist on API-created SLOs. Without
+   * carrying them out-of-band, hydration would flatten `{region: ['us','eu']}` to
+   * the scalar `'us,eu'` and — because the server shallow-merges the whole
+   * `labels` object on save — permanently rewrite the array to a CSV string.
+   * Re-emitted verbatim by `buildCreateInput`. Always `{}` in create mode.
+   */
+  preservedArrayLabels: Record<string, string[]>;
   annotations: KeyValueEntry[];
   shadow: boolean;
 
@@ -248,6 +259,7 @@ export function initialState(): FormState {
     latencyThresholdUnit: 'seconds',
     customPromql: { mode: 'events', goodQuery: '', totalQuery: '', errorRatioQuery: '' },
     labels: [],
+    preservedArrayLabels: {},
     annotations: [],
     shadow: false,
     burnRates: defaultBurnRates(),
@@ -666,6 +678,28 @@ function recordToEntries(record: Record<string, string | string[]>): KeyValueEnt
   });
 }
 
+/**
+ * Split a labels record into scalar rows the key/value editor can author and
+ * array-valued labels it can't. Array labels are carried out-of-band (see
+ * {@link FormState.preservedArrayLabels}) and re-emitted verbatim on save, so
+ * editing an API-created SLO with an array label like `{region: ['us','eu']}`
+ * no longer flattens it to the scalar `'us,eu'` (which the server's shallow
+ * `labels` merge would then persist).
+ */
+function splitLabels(record: Record<string, string | string[]>): {
+  entries: KeyValueEntry[];
+  arrays: Record<string, string[]>;
+} {
+  const entries: KeyValueEntry[] = [];
+  const arrays: Record<string, string[]> = {};
+  Object.keys(record).forEach((key) => {
+    const value = record[key];
+    if (Array.isArray(value)) arrays[key] = value.slice();
+    else entries.push({ key, value });
+  });
+  return { entries, arrays };
+}
+
 /** Rebuild the custom-PromQL editor state from a persisted custom SLI. */
 function deriveCustomPromqlState(def: PrometheusSli, base: CustomPromqlState): CustomPromqlState {
   if (def.type !== 'custom' || !def.customExpr) return base;
@@ -731,6 +765,20 @@ function deriveEditTemplate(
  * i.e. a composite SLI (P2) or any non-Prometheus backend. Callers surface an
  * "unsupported" state instead of a half-populated form.
  */
+/**
+ * Whether the wizard can edit this SLO in place. Mirrors the guards in
+ * {@link hydrateFromDoc} (single Prometheus SLI + a representable rolling
+ * window) without building the full form, so callers — e.g. the detail page's
+ * Edit button — can avoid offering a dead-end "Edit" that only lands on the
+ * wizard's "This SLO can't be edited here" message.
+ */
+export function isSloEditable(doc: SloDocument): boolean {
+  const { sli, window } = doc.spec;
+  if (sli.type !== 'single') return false;
+  if (sli.definition.backend !== 'prometheus') return false;
+  return toEditableWindowDuration(window) !== null;
+}
+
 export function hydrateFromDoc(doc: SloDocument): EditHydration | null {
   const spec = doc.spec;
   const sli = spec.sli;
@@ -747,6 +795,8 @@ export function hydrateFromDoc(doc: SloDocument): EditHydration | null {
 
   const fresh = initialState();
   const template = deriveEditTemplate(spec, def, sli.dimensions);
+  // Keep array-valued labels out of the editable rows and carry them verbatim.
+  const { entries: labelEntries, arrays: preservedArrayLabels } = splitLabels(spec.labels ?? {});
 
   const state: FormState = {
     ...fresh,
@@ -781,7 +831,8 @@ export function hydrateFromDoc(doc: SloDocument): EditHydration | null {
     goodEventsFilter: def.goodEventsFilter ?? '',
     latencyThresholdUnit: def.latencyThresholdUnit ?? 'seconds',
     customPromql: deriveCustomPromqlState(def, fresh.customPromql),
-    labels: recordToEntries(spec.labels ?? {}),
+    labels: labelEntries,
+    preservedArrayLabels,
     annotations: recordToEntries(spec.annotations ?? {}),
     shadow: spec.mode === 'shadow',
     burnRates: spec.alerting.burnRates.map((b) => ({ ...b })),
