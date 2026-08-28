@@ -36,7 +36,7 @@ import type {
   Window,
 } from '../../../../../common/slo/slo_types';
 import { buildCoverageProbeQuery, buildErrorRatioExprForWindow } from './slo_query_builders';
-import { formatPct } from '../../../../../common/slo/format';
+import { formatPct, SLO_PRECISION } from '../../../../../common/slo/format';
 import { uiSettingsService } from '../../../../../common/utils';
 
 /**
@@ -170,7 +170,9 @@ export function buildBudgetRemainingOption(
         width: 1,
       },
       label: {
-        formatter: `${warningThreshold.severity} @ ${formatPct(warningThreshold.threshold)}`,
+        formatter: `${warningThreshold.severity} @ ${formatPct(warningThreshold.threshold, {
+          decimals: SLO_PRECISION.budget,
+        })}`,
         // Pin the warning label to the end so it doesn't collide with the
         // "exhausted" label in deep-breach renders where the axis is stretched
         // downward and both markLines sit near the chart's top edge.
@@ -204,13 +206,13 @@ export function buildBudgetRemainingOption(
           deltaLine = `<br/>${escapeHtml(
             i18n.translate('observability.apm.slo.budgetRemainingChart.tooltip.deltaVsThreshold', {
               defaultMessage: '{delta} vs warning threshold',
-              values: { delta: `${sign}${formatPct(delta)}` },
+              values: { delta: `${sign}${formatPct(delta, { decimals: SLO_PRECISION.budget })}` },
             })
           )}`;
         }
-        return `${escapeHtml(ts)}<br/><strong>${escapeHtml(formatPct(v))}</strong> ${escapeHtml(
-          remainingLabel
-        )}${deltaLine}`;
+        return `${escapeHtml(ts)}<br/><strong>${escapeHtml(
+          formatPct(v, { decimals: SLO_PRECISION.budget })
+        )}</strong> ${escapeHtml(remainingLabel)}${deltaLine}`;
       },
     },
     xAxis: {
@@ -234,7 +236,7 @@ export function buildBudgetRemainingOption(
       axisLabel: {
         color: euiThemeVars.euiColorDarkShade,
         fontSize: 11,
-        formatter: (value: number) => formatPct(value),
+        formatter: (value: number) => formatPct(value, { decimals: SLO_PRECISION.budget }),
       },
       splitLine: {
         lineStyle: { color: euiThemeVars.euiColorLightestShade, type: 'dashed' },

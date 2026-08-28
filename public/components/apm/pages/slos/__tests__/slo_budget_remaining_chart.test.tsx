@@ -178,8 +178,11 @@ describe('buildBudgetRemainingOption', () => {
     const html = tooltip.formatter([{ axisValue: 0, value: [0, 0.6] }]);
     expect(html).toContain('UTC');
     expect(html).toContain('vs warning threshold');
+    // Budget surfaces render at SLO_PRECISION.budget (2 decimals), matching the
+    // budget panel — so 0.6 reads "60.00%", not "60.0%".
+    expect(html).toContain('60.00%');
     // 0.6 remaining is 10 points above the 0.5 warning threshold.
-    expect(html).toContain('+10.0%');
+    expect(html).toContain('+10.00%');
   });
 
   it('renders warning-threshold markLine with severity label', () => {
@@ -201,7 +204,8 @@ describe('buildBudgetRemainingOption', () => {
     expect(markLine.data[1].yAxis).toBe(0.5);
     const secondLabel = markLine.data[1].label as { formatter: string };
     expect(secondLabel.formatter).toContain('warning');
-    expect(secondLabel.formatter).toContain('50.0%');
+    // Budget precision (2 decimals) — matches the budget panel.
+    expect(secondLabel.formatter).toContain('50.00%');
   });
 
   it('omits the warning-threshold line when the spec has no budget warnings', () => {

@@ -42,7 +42,7 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { EchartsRender } from '../../../alerting/echarts_render';
 import { usePromQLChartData } from '../../shared/hooks/use_promql_chart_data';
-import { formatPct } from '../../../../../common/slo/format';
+import { formatPct, SLO_PRECISION } from '../../../../../common/slo/format';
 
 /** Fixed 7d window. Independent of the page time picker by design. */
 const TIME_RANGE = { from: 'now-7d', to: 'now' } as const;
@@ -90,7 +90,7 @@ const t = {
   tooltipRemaining: (v: number, ts: string) =>
     i18n.translate('observability.apm.services.sloBudgetSparkline.tooltip', {
       defaultMessage: '{ts}: {pct} error ratio',
-      values: { ts, pct: formatPct(v) },
+      values: { ts, pct: formatPct(v, { decimals: SLO_PRECISION.budget }) },
     }),
 };
 
