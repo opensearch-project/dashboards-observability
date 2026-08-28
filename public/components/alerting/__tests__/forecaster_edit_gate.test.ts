@@ -54,10 +54,17 @@ const summaryForStatus = (status: MonitorStatus, enabled = false): UnifiedRuleSu
     enabled,
   }) as unknown as UnifiedRuleSummary;
 
+// A real forecaster `curState` is the backend UPPER_SNAKE enum (`RUNNING`,
+// `INITIALIZING_FORECAST`), NOT the prose `MonitorStatus`. Feed that enum so the
+// gate's raw→prose normalization + the shared `isAdResourceRunning` predicate are
+// what's actually exercised — the prose form is a domain the gate never receives
+// in production, so feeding it would prove a code path that doesn't run.
+const toRawEnum = (status: MonitorStatus): string => status.toUpperCase().replace(/ /g, '_');
+
 const rawForecasterForStatus = (status: MonitorStatus, enabled = false): ADForecaster =>
   ({
     id: 'forecast-1',
-    curState: status,
+    curState: toRawEnum(status),
     enabled,
   }) as unknown as ADForecaster;
 
@@ -100,6 +107,23 @@ describe('forecaster edit gate vs shared running-state predicate (BUG-AD1)', () 
     expect(
       getEditLifecycleBlocker('forecaster', rawForecasterForStatus('Stopped', true), false)
     ).not.toBeNull();
+  });
+
+  it('engages the shared predicate on the raw UPPER_SNAKE curState a forecaster actually carries', () => {
+    // Explicit guard for the production shape: cur_state is the enum, not prose.
+    // The raw→prose normalization must let isAdResourceRunning fire so these block.
+    const raw = (curState: string, enabled = false): ADForecaster =>
+      ({ id: 'forecast-1', curState, enabled }) as unknown as ADForecaster;
+    expect(getEditLifecycleBlocker('forecaster', raw('RUNNING'), false)).not.toBeNull();
+    expect(getEditLifecycleBlocker('forecaster', raw('INITIALIZING'), false)).not.toBeNull();
+    expect(
+      getEditLifecycleBlocker('forecaster', raw('INITIALIZING_FORECAST'), false)
+    ).not.toBeNull();
+    expect(
+      getEditLifecycleBlocker('forecaster', raw('AWAITING_DATA_TO_INIT'), false)
+    ).not.toBeNull();
+    // A genuinely stopped, disabled forecaster carries no running enum → editable.
+    expect(getEditLifecycleBlocker('forecaster', raw('STOPPED'), false)).toBeNull();
   });
 });
 
