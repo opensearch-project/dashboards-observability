@@ -680,9 +680,24 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
   // leak or poll forever.
   useEffect(() => {
     if (!doc) return undefined;
-    const calloutState = deriveSloCalloutState(ruleHealth?.state, doc.liveStatus.state);
-    const missing = calloutState === 'rules_missing' || calloutState === 'rules_partial';
-    if (!missing) {
+    // Keep re-probing while EITHER the live probe OR the persisted live-status
+    // flag reads missing — deliberately NOT `deriveSloCalloutState`, which lets
+    // a healthy probe win for the *callout* (so a fresh-create SLO never shows a
+    // false destructive alarm). For *polling* we must be more eager: the
+    // rule-health probe is cached server-side (~90s TTL), so right after a real
+    // regression the first probe can still read a stale `ok` while the persisted
+    // state already flipped to `rules_missing`. If we stopped polling on that
+    // stale `ok`, we'd never re-check and the genuine "missing" callout would
+    // never surface. Polling while `liveState` is missing lets a later probe
+    // catch the fresh `rules_missing` and escalate; a genuinely-healthy probe
+    // just runs the bounded budget out harmlessly without ever escalating.
+    const probeState = ruleHealth?.state;
+    const probeMissing =
+      probeState === 'rules_missing' ||
+      probeState === 'rules_partial' ||
+      probeState === 'ruler_unreachable';
+    const keepProbing = probeMissing || doc.liveStatus.state === 'rules_missing';
+    if (!keepProbing) {
       if (ruleHealthRetries !== 0) setRuleHealthRetries(0);
       return undefined;
     }

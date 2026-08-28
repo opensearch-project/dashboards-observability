@@ -430,6 +430,34 @@ describe('SloDetailPage — rule-health grace window + re-poll (F-CRUD2)', () =>
     await exhaustRetries();
     expect(screen.queryByTestId('slosDetailRuleHealthCallout')).not.toBeInTheDocument();
   });
+
+  it('keeps probing on a stale cached-healthy probe while liveStatus is missing, then escalates once the probe catches up', async () => {
+    // Mirrors rule_health.spec Step E: the group was really deleted, but the
+    // server-cached rule-health probe (~90s TTL) first returns a stale `ok`
+    // while the persisted liveStatus is already `rules_missing`. Polling is
+    // driven by liveStatus (not the callout state), so it must keep re-probing
+    // until the probe re-reads `rules_missing` and then escalate — rather than
+    // trusting the stale healthy probe, going quiet, and never surfacing the
+    // genuine "rules missing" alarm.
+    const getRuleHealth = jest
+      .fn()
+      .mockResolvedValueOnce(makeHealth({ state: 'ok' })) // stale cached read
+      .mockResolvedValue(makeHealth({ state: 'rules_missing', missingGroups: ['grp-a'] }));
+    renderPage({
+      get: jest.fn().mockResolvedValue(makeDoc({ liveStatusState: 'rules_missing' })),
+      getRuleHealth,
+    });
+
+    await settle();
+    // Stale healthy probe wins the callout (no false alarm), but polling continues.
+    expect(screen.queryByTestId('slosDetailRuleHealthCallout')).not.toBeInTheDocument();
+
+    await exhaustRetries();
+
+    // Probe caught up to missing and the budget is spent → escalate.
+    expect(screen.getByTestId('slosDetailRuleHealthCallout')).toBeInTheDocument();
+    expect(getRuleHealth.mock.calls.length).toBeGreaterThan(1);
+  });
 });
 
 describe('SloDetailPage — rule-health callout (escalated) actions', () => {
