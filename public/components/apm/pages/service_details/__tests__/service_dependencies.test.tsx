@@ -154,4 +154,25 @@ describe('ServiceDependencies - percentile switch does not remount the table (#2
     expect(screen.getByText(svc(14))).toBeInTheDocument();
     expect(screen.queryByText(svc(0))).not.toBeInTheDocument();
   });
+
+  // Unlike a percentile switch, changing a filter produces a new result set, so the user should
+  // land back on page 1 (the top of the filtered results) rather than a stale high page.
+  it('should reset to page 1 when a filter changes', async () => {
+    render(<ServiceDependencies {...props} />);
+
+    await waitFor(() => expect(screen.getByText(svc(0))).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('pagination-button-1')); // page 2
+    expect(screen.getByText(svc(14))).toBeInTheDocument();
+    expect(screen.queryByText(svc(0))).not.toBeInTheDocument();
+
+    // Typing a query that still matches all 15 rows keeps 2 pages, so the jump back to page 1
+    // is a deliberate filter reset, not the row-count clamp.
+    fireEvent.change(screen.getByPlaceholderText('Filter dependencies...'), {
+      target: { value: 'dep' },
+    });
+
+    expect(screen.getByText(svc(0))).toBeInTheDocument();
+    expect(screen.queryByText(svc(14))).not.toBeInTheDocument();
+  });
 });

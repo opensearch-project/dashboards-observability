@@ -156,4 +156,24 @@ describe('ServiceOperations - percentile switch does not remount the table (#262
     expect(screen.getByText(padded(14))).toBeInTheDocument();
     expect(screen.queryByText(padded(0))).not.toBeInTheDocument();
   });
+
+  // Unlike a percentile switch, changing a filter produces a new result set, so the user should
+  // land back on page 1 (the top of the filtered results) rather than a stale high page.
+  it('should reset to page 1 when a filter changes', async () => {
+    render(<ServiceOperations {...props} />);
+
+    await waitFor(() => expect(screen.getByText(padded(0))).toBeInTheDocument());
+
+    // Go to page 2.
+    fireEvent.click(screen.getByTestId('pagination-button-1'));
+    expect(screen.getByText(padded(14))).toBeInTheDocument();
+    expect(screen.queryByText(padded(0))).not.toBeInTheDocument();
+
+    // Typing a query that still matches all 15 rows keeps 2 pages, so the jump back to page 1
+    // is a deliberate filter reset, not the row-count clamp.
+    fireEvent.change(screen.getByTestId('operationsSearchBar'), { target: { value: 'op' } });
+
+    expect(screen.getByText(padded(0))).toBeInTheDocument();
+    expect(screen.queryByText(padded(14))).not.toBeInTheDocument();
+  });
 });

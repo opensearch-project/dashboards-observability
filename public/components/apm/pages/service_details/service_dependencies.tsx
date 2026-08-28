@@ -44,6 +44,7 @@ import {
 } from '../../query_services/query_requests/promql_queries';
 import { useDependencies } from '../../shared/hooks/use_dependencies';
 import { useDependencyMetrics } from '../../shared/hooks/use_dependency_metrics';
+import { useControlledPagination } from '../../shared/hooks/use_controlled_pagination';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 import { DependencyFilterSidebar } from '../../shared/components/dependency_filter_sidebar';
@@ -226,17 +227,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     togglePanelRef.current?.('dependencies-filter-sidebar', { direction: 'left' });
   }, []);
 
-  // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer
-  const onLatencyRangeChange = useCallback((val: [number, number]) => {
-    latencyUserModified.current = true;
-    setLatencyRange(val);
-  }, []);
-
-  const onRequestsRangeChange = useCallback((val: [number, number]) => {
-    requestsUserModified.current = true;
-    setRequestsRange(val);
-  }, []);
-
   // Threshold filter states (using semantic enum keys)
   const [selectedAvailabilityThresholds, setSelectedAvailabilityThresholds] = useState<
     AvailabilityThreshold[]
@@ -249,15 +239,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 150);
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState<number>(SERVICE_DETAILS_CONSTANTS.DEFAULT_PAGE_SIZE);
-
-  const onTableChange = useCallback(({ page }: Criteria<GroupedDependency>) => {
-    if (page) {
-      setPageIndex(page.index);
-      setPageSize(page.size);
-    }
-  }, []);
 
   // Range filter states
   const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 0]);
@@ -517,14 +498,48 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     latencyPercentile,
   ]);
 
+  // Controlled pagination (clamped against the current row count). Declared after
+  // filteredDependencies because the hook needs the row count to clamp.
+  const { pageIndex, pageSize, onTableChange, resetPage } =
+    useControlledPagination<GroupedDependency>(filteredDependencies.length);
+
+  // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer.
+  // Range-slider changes reset the page to 1 (a filter change), unlike a percentile switch.
+  const onLatencyRangeChange = useCallback(
+    (val: [number, number]) => {
+      latencyUserModified.current = true;
+      setLatencyRange(val);
+      resetPage();
+    },
+    [resetPage]
+  );
+
+  const onRequestsRangeChange = useCallback(
+    (val: [number, number]) => {
+      requestsUserModified.current = true;
+      setRequestsRange(val);
+      resetPage();
+    },
+    [resetPage]
+  );
+
+  // Reset to page 1 on filter changes. Excludes latencyRange/requestsRange on purpose: a
+  // percentile switch resets latencyRange, so watching the ranges here would reset the page on
+  // a percentile switch too and defeat the fix (#2849). The sliders reset in their own handlers.
+  useEffect(() => {
+    resetPage();
+  }, [
+    debouncedSearchQuery,
+    selectedDependencies,
+    selectedServiceOperations,
+    selectedRemoteOperations,
+    selectedAvailabilityThresholds,
+    selectedErrorRateThresholds,
+    resetPage,
+  ]);
+
   const isLoading = depsLoading || metricsLoading;
   const error = depsError;
-
-  // If a filter shrinks the row count below the current page, clamp to the last valid page so
-  // the table never shows an empty, out-of-range page. Computed during render (not in an effect)
-  // so the clamp applies on the same paint, with no flash of an empty page.
-  const lastPageIndex = Math.max(0, Math.ceil(filteredDependencies.length / pageSize) - 1);
-  const clampedPageIndex = Math.min(pageIndex, lastPageIndex);
 
   // Build active filter badges from current filter state
   const activeFilters: FilterBadge[] = useMemo(() => {
@@ -608,6 +623,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         onRemove: () => {
           latencyUserModified.current = false;
           setLatencyRange([latencyBounds.min, latencyBounds.max]);
+          resetPage();
         },
       });
     }
@@ -626,6 +642,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         onRemove: () => {
           requestsUserModified.current = false;
           setRequestsRange([requestsBounds.min, requestsBounds.max]);
+          resetPage();
         },
       });
     }
@@ -641,6 +658,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     requestsRange,
     latencyBounds,
     requestsBounds,
+    resetPage,
   ]);
 
   // Clear all filters handler
@@ -654,7 +672,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     requestsUserModified.current = false;
     setLatencyRange([latencyBounds.min, latencyBounds.max]);
     setRequestsRange([requestsBounds.min, requestsBounds.max]);
-  }, [latencyBounds, requestsBounds]);
+    resetPage();
+  }, [latencyBounds, requestsBounds, resetPage]);
 
   // Auto-expand the first row (lowest availability) on initial page load
   useEffect(() => {
@@ -1068,7 +1087,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                     }
                   )}
                   dependenciesCount={dependencies.length}
-                  pageIndex={clampedPageIndex}
+                  pageIndex={pageIndex}
                   pageSize={pageSize}
                   onTableChange={onTableChange}
                 />
