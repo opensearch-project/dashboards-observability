@@ -146,6 +146,18 @@ describe('FacetFilterGroup — accessibility (no nested interactive controls)', 
     expect(region).toHaveAttribute('aria-label', 'Status');
   });
 
+  it('drops aria-controls while collapsed so it never dangles at an unmounted region', () => {
+    const { getByTestId, container } = render(
+      <FacetFilterGroup {...defaultProps} isCollapsed={true} />
+    );
+    const toggle = getByTestId('facetGroup-status-toggle');
+    // Collapsed: the region is not rendered, so the toggle must not reference it
+    // (axe aria-valid-attr-value). aria-expanded conveys the state instead.
+    expect(toggle).not.toHaveAttribute('aria-controls');
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(container.querySelector('#facetGroup-status-region')).toBeNull();
+  });
+
   it('gives the per-option error button a >=24px target via the shared class', () => {
     const { getByTestId } = render(
       <FacetFilterGroup {...defaultProps} errorMap={{ active: 'Cluster unreachable (timeout)' }} />

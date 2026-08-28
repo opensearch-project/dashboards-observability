@@ -260,7 +260,12 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
             iconSide="left"
             onClick={() => onToggleCollapse(id)}
             aria-expanded={!isCollapsed}
-            aria-controls={`facetGroup-${id}-region`}
+            // Only reference the region while it's actually in the DOM. The
+            // options region renders under `!isCollapsed`, so pointing
+            // `aria-controls` at it while collapsed would be a dangling
+            // reference (axe `aria-valid-attr-value`). `aria-expanded` already
+            // conveys the collapsed state; `aria-controls` is optional here.
+            aria-controls={isCollapsed ? undefined : `facetGroup-${id}-region`}
             data-test-subj={`facetGroup-${id}-toggle`}
           >
             <strong>{label}</strong>

@@ -165,6 +165,27 @@ describe('ServiceTreeTable', () => {
     expect(region).toHaveAttribute('role', 'region');
   });
 
+  it('drops aria-controls on a collapsed row so it never dangles at an unmounted region', () => {
+    render(
+      <ServiceTreeTable
+        serviceRows={[row({ serviceName: 'cart' })]}
+        expandedMap={{ cart: false }}
+        onToggleExpand={jest.fn()}
+        onToggleServiceSelection={jest.fn()}
+        selected={new Set()}
+        overrides={{}}
+        onToggleDraft={jest.fn()}
+        onOverrideChange={jest.fn()}
+      />
+    );
+    const expander = screen.getByTestId('slosSuggestServiceExpand-cart');
+    // Collapsed: the expanded panel isn't rendered, so the expander must not
+    // reference it (axe aria-valid-attr-value); aria-expanded conveys the state.
+    expect(expander).not.toHaveAttribute('aria-controls');
+    expect(expander).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByTestId('slosSuggestServiceExpanded-cart')).not.toBeInTheDocument();
+  });
+
   it('fires onToggleServiceSelection when the service-level checkbox is clicked', () => {
     const onToggleServiceSelection = jest.fn();
     const r = row();

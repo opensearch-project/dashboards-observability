@@ -266,7 +266,14 @@ export const ServiceTreeTable: React.FC<ServiceTreeTableProps> = ({
                     }
                     iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
                     aria-expanded={isExpanded}
-                    aria-controls={`slosSuggestServiceExpanded-${row.serviceName}`}
+                    // Only reference the region while it's mounted. The expanded
+                    // panel renders under `isExpanded`, so pointing
+                    // `aria-controls` at it while collapsed would be a dangling
+                    // reference (axe `aria-valid-attr-value`). `aria-expanded`
+                    // already conveys state; `aria-controls` is optional here.
+                    aria-controls={
+                      isExpanded ? `slosSuggestServiceExpanded-${row.serviceName}` : undefined
+                    }
                     onClick={() => onToggleExpand(row.serviceName)}
                     data-test-subj={`slosSuggestServiceExpand-${row.serviceName}`}
                   />
