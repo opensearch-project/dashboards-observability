@@ -41,7 +41,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
-import { filterAlerts } from '../../../common/services/alerting/filter';
+import { alertMatchesSearch, filterAlerts } from '../../../common/services/alerting/filter';
 import { AlertTimeline } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import {
@@ -829,15 +829,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
   // Facet counts (against search-matched but not filter-matched alerts)
   const facetCounts = useMemo(() => {
-    const searchMatched = alerts.filter((a) => {
-      if (!searchQuery) return true;
-      const q = searchQuery.toLowerCase();
-      return (
-        a.name.toLowerCase().includes(q) ||
-        (a.message || '').toLowerCase().includes(q) ||
-        Object.values(a.labels).some((v) => v.toLowerCase().includes(q))
-      );
-    });
+    const searchMatched = alerts.filter((a) => alertMatchesSearch(a, searchQuery));
     const counts: Record<string, Record<string, number>> = {
       alertKind: {},
       severity: {},
