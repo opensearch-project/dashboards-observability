@@ -698,10 +698,15 @@ const isForecasterTestInitializing = (resource?: ADDetector | ADForecaster): boo
 };
 
 /**
- * Adapts a raw forecaster/detector resource into the minimal `UnifiedRuleSummary`
- * shape that `isAdResourceRunning` reads (`status` + `enabled` + resource kind).
+ * Adapts a raw forecaster resource into the minimal `UnifiedRuleSummary` shape that
+ * `isAdResourceRunning` reads (`status` + `enabled` + resource kind).
  * `curState`/`cur_state` is typed as `MonitorStatus`, the same human-readable domain
  * the shared status sets are keyed on, so the shared predicate can be reused verbatim.
+ *
+ * The parameter type is the broad `ADDetector | ADForecaster` only because the single
+ * caller (`isForecasterActiveForEdit`) holds that union; this adapter is forecaster-only
+ * and intentionally hardcodes the `'forecaster'` kind (detectors use a different edit
+ * lifecycle and never reach this path).
  */
 const asForecasterRunningInput = (resource?: ADDetector | ADForecaster): UnifiedRuleSummary =>
   ({
@@ -712,13 +717,16 @@ const asForecasterRunningInput = (resource?: ADDetector | ADForecaster): Unified
   }) as unknown as UnifiedRuleSummary;
 
 const isForecasterActiveForEdit = (resource?: ADDetector | ADForecaster): boolean => {
-  // Gate edits on the same running-state predicate the detail flyout uses to show its
-  // Stop button. `isAdResourceRunning` enumerates every status the backend treats as an
-  // active job (including the generic "Initializing" state this list used to miss), so
-  // aligning here closes the gap that let the backend reject the update with a raw
-  // "Job is running: forecast-<id>" error. The explicit checks below remain as a
-  // defensive superset for the uppercase enum forms of `curState` that the
-  // human-readable status map does not enumerate.
+  // This gate is a deliberate SUPERSET of `isAdResourceRunning` (the predicate the
+  // detail flyout uses to show its Stop button) — the two do NOT fully agree, by design:
+  //   - It reuses `isAdResourceRunning` to block everything the backend treats as an
+  //     active job, including the generic "Initializing" state this gate used to miss —
+  //     the gap that let the backend reject the update with a raw
+  //     "Job is running: forecast-<id>" error.
+  //   - It additionally blocks failure states (e.g. `FORECAST_FAILURE`) that
+  //     `isAdResourceRunning` classifies as *not* running but that still can't be edited
+  //     in place, plus the uppercase enum forms of `curState` the human-readable status
+  //     map doesn't enumerate.
   if (isAdResourceRunning(asForecasterRunningInput(resource))) return true;
   const state = getResourceState(resource);
   return (
