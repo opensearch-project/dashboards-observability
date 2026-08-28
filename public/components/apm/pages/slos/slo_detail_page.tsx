@@ -122,6 +122,18 @@ export const RULE_HEALTH_MAX_RETRIES = 5;
 export const RULE_HEALTH_RETRY_INTERVAL_MS = 5000;
 
 /**
+ * Detect an OSD `IHttpFetchError` that surfaced as a 404 — the SLO was deleted
+ * or the deep link is stale. Mirrors the helper in `slo_health_summary.ts`
+ * (kept local so this file stays self-contained). Routes to the "not found"
+ * prompt instead of the generic load-error branch.
+ */
+export function isNotFoundError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const status = (err as { response?: { status?: number } }).response?.status;
+  return status === 404;
+}
+
+/**
  * Fold the fresh rule-health probe and the persisted live-status flag into a
  * single callout mode. The probe wins whenever it reports a concrete state;
  * we fall back to the live-status flag so the callout still surfaces before
@@ -132,13 +144,20 @@ export function deriveSloCalloutState(
   ruleHealthState: SloRuleHealthState | undefined,
   liveState: SloHealthState
 ): 'rules_missing' | 'rules_partial' | 'ruler_unreachable' | null {
-  if (
-    ruleHealthState === 'rules_missing' ||
-    ruleHealthState === 'rules_partial' ||
-    ruleHealthState === 'ruler_unreachable'
-  ) {
-    return ruleHealthState;
+  // A concrete probe result always wins — it's the fresh truth, and the
+  // persisted `liveState` can lag server-side recomputation. In particular, a
+  // freshly-created SLO whose rules have finished propagating reports a healthy
+  // probe while `liveStatus.state` is still `rules_missing`; letting the probe
+  // win there is exactly what prevents the false destructive callout (F-CRUD2).
+  if (ruleHealthState !== undefined) {
+    return ruleHealthState === 'rules_missing' ||
+      ruleHealthState === 'rules_partial' ||
+      ruleHealthState === 'ruler_unreachable'
+      ? ruleHealthState
+      : null;
   }
+  // No probe result yet — fall back to the persisted flag so the callout still
+  // surfaces before the first probe returns.
   return liveState === 'rules_missing' ? 'rules_missing' : null;
 }
 
@@ -322,13 +341,13 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
                         { defaultMessage: 'percentage points' }
                       )}
                     >
-                      <abbr
-                        title={i18n.translate(
-                          'observability.apm.slo.detail.percentagePointsTooltip',
-                          { defaultMessage: 'percentage points' }
-                        )}
-                        data-test-subj="slosDetailAttainmentDeltaUnit"
-                      >
+                      {/*
+                        No native `title` here: the wrapping EuiToolTip already
+                        provides the "percentage points" hover text, and a
+                        `title` on the <abbr> too would render a second (native)
+                        tooltip and translate the message twice.
+                      */}
+                      <abbr data-test-subj="slosDetailAttainmentDeltaUnit">
                         {i18n.translate('observability.apm.slo.detail.percentagePointsAbbr', {
                           defaultMessage: 'pp',
                         })}
@@ -514,6 +533,11 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
   const [doc, setDoc] = useState<FullDoc | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  // A 404 (deleted SLO / stale deep link) is distinct from a generic load
+  // failure: it routes to the friendly "SLO not found" prompt (CLAR16) instead
+  // of the raw error branch. `apiClient.get` rejects on 404, so we must detect
+  // it in the catch — the resolved-but-falsy path never happens in production.
+  const [notFound, setNotFound] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   // Shared, persisted time range (sessionStorage) so the SLO detail picker
   // stays in sync with the rest of APM. Falls back to a 1h window — a more
@@ -545,12 +569,21 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     async (isCurrent: () => boolean = ALWAYS_CURRENT) => {
       setLoading(true);
       setError(null);
+      setNotFound(false);
       try {
         const result = await apiClient.get(id);
         if (!isCurrent()) return;
         setDoc(result);
       } catch (e) {
         if (!isCurrent()) return;
+        // A 404 means the SLO doesn't exist — show the "not found" prompt
+        // (CLAR16), not the raw error branch. Clear any stale doc so a
+        // re-load that 404s doesn't keep rendering the previous SLO.
+        if (isNotFoundError(e)) {
+          setDoc(null);
+          setNotFound(true);
+          return;
+        }
         const err = e instanceof Error ? e : new Error(String(e));
         setError(err);
       } finally {
@@ -569,7 +602,10 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
   }, [load]);
 
   const loadRuleHealth = useCallback(
-    async (isCurrent: () => boolean = ALWAYS_CURRENT) => {
+    async (
+      isCurrent: () => boolean = ALWAYS_CURRENT,
+      { silent = false }: { silent?: boolean } = {}
+    ) => {
       setRuleHealthLoading(true);
       try {
         const result = await apiClient.getRuleHealth(id);
@@ -580,13 +616,18 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
         const err = e instanceof Error ? e : new Error(String(e));
         // Don't render the callout on fetch failure — fall back to the
         // live-status-derived state. Surface the fetch error as a neutral toast
-        // so users have a breadcrumb if they want to investigate.
-        notifications.toasts.addDanger({
-          title: i18n.translate('observability.apm.slo.detail.ruleHealthLoadFailed', {
-            defaultMessage: 'Could not load rule health',
-          }),
-          text: err.message,
-        });
+        // so users have a breadcrumb — but only for the initial/manual probe.
+        // The bounded re-poll (up to RULE_HEALTH_MAX_RETRIES) passes
+        // `silent: true` so a flapping endpoint can't spew ~6 identical toasts
+        // in the ~25s grace window.
+        if (!silent) {
+          notifications.toasts.addDanger({
+            title: i18n.translate('observability.apm.slo.detail.ruleHealthLoadFailed', {
+              defaultMessage: 'Could not load rule health',
+            }),
+            text: err.message,
+          });
+        }
         setRuleHealth(null);
       } finally {
         if (isCurrent()) setRuleHealthLoading(false);
@@ -652,7 +693,10 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
       // Gate the async re-probe so a response that arrives after navigating
       // away (or unmounting) is discarded instead of writing another SLO's
       // rule health onto this view. See pollLiveIdRef/pollMountedRef above.
-      loadRuleHealth(() => pollMountedRef.current && pollLiveIdRef.current === scheduledId);
+      // `silent: true` — poll failures don't toast (see loadRuleHealth).
+      loadRuleHealth(() => pollMountedRef.current && pollLiveIdRef.current === scheduledId, {
+        silent: true,
+      });
     }, RULE_HEALTH_RETRY_INTERVAL_MS);
     return () => clearTimeout(timer);
   }, [doc, ruleHealth, ruleHealthRetries, loadRuleHealth, id]);
@@ -805,12 +849,12 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
     );
   }
 
-  // We only reach here with no doc once loading has finished and no fetch
-  // error was raised (both handled above) — i.e. the id genuinely resolved to
-  // nothing. Surface an explicit "not found" state (CLAR16) rather than a
-  // blank page, distinct from the fetch-error branch above. The loading guard
-  // upstream ensures a still-resolving request never flashes this prompt.
-  if (!doc) {
+  // Reached when the id resolved to nothing: either a 404 (deleted SLO / stale
+  // deep link, flagged via `notFound`) or a resolved-but-empty body. Surface an
+  // explicit "not found" state (CLAR16) rather than a blank page, distinct from
+  // the fetch-error branch above. The loading guard upstream ensures a
+  // still-resolving request never flashes this prompt.
+  if (notFound || !doc) {
     return (
       <EuiPage>
         <EuiPageBody>

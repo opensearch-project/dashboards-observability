@@ -226,8 +226,14 @@ describe('deriveSloCalloutState', () => {
     expect(deriveSloCalloutState('ruler_unreachable', 'ok')).toBe('ruler_unreachable');
   });
 
-  it('falls back to the live-status flag when the probe is healthy or absent', () => {
-    expect(deriveSloCalloutState('ok', 'rules_missing')).toBe('rules_missing');
+  it('lets a concrete healthy probe win over a stale rules_missing live-status (F-CRUD2)', () => {
+    // The fresh-create shape: rules have propagated (probe → ok) but the
+    // persisted liveStatus.state hasn't been recomputed yet. The probe must
+    // win so the destructive callout never shows on a healthy SLO.
+    expect(deriveSloCalloutState('ok', 'rules_missing')).toBeNull();
+  });
+
+  it('falls back to the live-status flag only when the probe is absent', () => {
     expect(deriveSloCalloutState(undefined, 'rules_missing')).toBe('rules_missing');
   });
 
@@ -246,6 +252,17 @@ describe('SloDetailPage — not-found / loading / error states', () => {
     expect(prompt).toHaveTextContent(/slo-1/);
     expect(screen.getByTestId('slosDetailNotFoundBack')).toBeInTheDocument();
     // Not the fetch-error branch.
+    expect(screen.queryByText(/Unable to load SLO/i)).not.toBeInTheDocument();
+  });
+
+  it('routes a 404 rejection to the not-found prompt, not the error branch (CLAR16)', async () => {
+    // Production path: apiClient.get rejects with an IHttpFetchError-shaped 404
+    // (a deleted SLO / stale deep link) rather than resolving null.
+    renderPage({ get: jest.fn().mockRejectedValue({ response: { status: 404 } }) });
+
+    const prompt = await screen.findByTestId('slosDetailNotFound');
+    expect(prompt).toHaveTextContent(/SLO not found/i);
+    // The raw fetch-error branch must NOT render for a 404.
     expect(screen.queryByText(/Unable to load SLO/i)).not.toBeInTheDocument();
   });
 
@@ -381,6 +398,36 @@ describe('SloDetailPage — rule-health grace window + re-poll (F-CRUD2)', () =>
     await settle();
 
     expect(screen.queryByTestId('slosDetailRulePropagatingCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('slosDetailRuleHealthCallout')).not.toBeInTheDocument();
+  });
+
+  it('never escalates on the real fresh-create shape: liveStatus stays rules_missing but the probe recovers to ok', async () => {
+    // The scenario F-CRUD2 exists for: the SLO was just created, so the
+    // persisted liveStatus.state is still `rules_missing` (server hasn't
+    // recomputed), and `doc` is never reloaded by the poll — but the rule-health
+    // probe recovers to `ok` once the groups propagate. The concrete healthy
+    // probe must win so the destructive alarm never shows.
+    const getRuleHealth = jest
+      .fn()
+      .mockResolvedValueOnce(makeHealth({ state: 'rules_missing', missingGroups: ['grp-a'] }))
+      .mockResolvedValue(makeHealth({ state: 'ok' }));
+    renderPage({
+      get: jest.fn().mockResolvedValue(makeDoc({ liveStatusState: 'rules_missing' })),
+      getRuleHealth,
+    });
+
+    await settle();
+    expect(screen.getByTestId('slosDetailRulePropagatingCallout')).toBeInTheDocument();
+
+    await advanceOneRetry();
+    await settle();
+
+    expect(screen.queryByTestId('slosDetailRulePropagatingCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('slosDetailRuleHealthCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('slosDetailRestore')).not.toBeInTheDocument();
+
+    // And it must not keep escalating even if we let the full retry budget run.
+    await exhaustRetries();
     expect(screen.queryByTestId('slosDetailRuleHealthCallout')).not.toBeInTheDocument();
   });
 });
