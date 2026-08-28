@@ -117,48 +117,92 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
     const bucketCount = clamp(rawBucketCount, MIN_BUCKETS, MAX_BUCKETS);
     const bucketDuration = rangeMs / bucketCount;
 
-    const buckets: Array<{
-      label: string;
-      critical: number;
-      high: number;
-      medium: number;
-      low: number;
-      info: number;
-    }> = [];
+    const tz = resolveDisplayTz();
 
-    // Parse each alert's start time once (perf: avoid re-parsing per bucket).
+    // Parse each alert's start time once, then bucket in a single O(alerts)
+    // pass. The previous approach re-scanned the whole alerts array per bucket
+    // and ran five more severity `.filter` passes inside each — O(buckets ×
+    // alerts × 6). A single pass that computes the bucket index per alert is
+    // O(alerts), which matters once the list runs into the thousands.
     const alertStartMs = alerts.map((a) => new Date(a.startTime).getTime());
+
+    const buckets = Array.from({ length: bucketCount }, (_, i) => ({
+      label: formatBucketLabel(startMs + i * bucketDuration, rangeMs, tz),
+      critical: 0,
+      high: 0,
+      medium: 0,
+      low: 0,
+      info: 0,
+    }));
 
     // This histogram counts alert *starts* per time bucket. The OS backend's
     // interval-overlap filter (opensearch_backend.ts) also returns alerts that
     // began BEFORE the picked window but are still firing / recently resolved
     // inside it. Those alerts are real, but they did not *start* in any visible
     // bucket — the previous `Math.max(startMs, ...)` clamp forced them into
-    // bucket 0, painting a false spike at the left edge of the timeline. We
-    // instead leave the true start time unclamped (so the bucket filter below
-    // naturally excludes anything before `startMs`) and surface the excluded
-    // count in the chart title, so the data is honest rather than silently
-    // dropped and users can still reconcile it against the summary cards.
-    const excludedBeforeWindow = alertStartMs.filter((t) => t < startMs).length;
-
-    const tz = resolveDisplayTz();
-
-    for (let i = 0; i < bucketCount; i++) {
-      const bucketStart = startMs + i * bucketDuration;
-      const bucketEnd = bucketStart + bucketDuration;
-      const label = formatBucketLabel(bucketStart, rangeMs, tz);
-      const inBucket = alerts.filter(
-        (_, idx) => alertStartMs[idx] >= bucketStart && alertStartMs[idx] < bucketEnd
-      );
-      buckets.push({
-        label,
-        critical: inBucket.filter((a) => a.severity === 'critical').length,
-        high: inBucket.filter((a) => a.severity === 'high').length,
-        medium: inBucket.filter((a) => a.severity === 'medium').length,
-        low: inBucket.filter((a) => a.severity === 'low').length,
-        info: inBucket.filter((a) => a.severity === 'info').length,
-      });
+    // bucket 0, painting a false spike at the left edge. We instead count them
+    // separately and surface the count in the title. A malformed/missing
+    // `startTime` parses to `NaN`; it is counted as its own "unknown start
+    // time" note. Together these keep every alert reconcilable against the
+    // summary cards — each is either in a bar, before the window, or unknown —
+    // rather than silently vanishing from both the bars and the notes.
+    let excludedBeforeWindow = 0;
+    let unknownStart = 0;
+    for (let idx = 0; idx < alerts.length; idx++) {
+      const t = alertStartMs[idx];
+      if (Number.isNaN(t)) {
+        unknownStart += 1;
+        continue;
+      }
+      if (t < startMs) {
+        excludedBeforeWindow += 1;
+        continue;
+      }
+      // Bucket index. `bucketDuration` is a float, so a start at exactly `endMs`
+      // computes an index of `bucketCount` (out of range). Fold a start at (or
+      // right at the float edge of) `endMs` into the last bucket so it isn't
+      // dropped, but leave a start strictly after `endMs` excluded from the
+      // bars — the backend's overlap filter shouldn't return those, and folding
+      // them in would paint a false spike on the right edge.
+      let bucketIdx = Math.floor((t - startMs) / bucketDuration);
+      if (bucketIdx >= bucketCount) {
+        if (t > endMs) continue;
+        bucketIdx = bucketCount - 1;
+      }
+      const severity = alerts[idx].severity;
+      if (
+        severity === 'critical' ||
+        severity === 'high' ||
+        severity === 'medium' ||
+        severity === 'low' ||
+        severity === 'info'
+      ) {
+        buckets[bucketIdx][severity] += 1;
+      }
     }
+
+    // Build the reconciliation note(s) shown above the chart. Joined with a
+    // middot when both are present so no dropped alert is left unexplained.
+    const notes: string[] = [];
+    if (excludedBeforeWindow > 0) {
+      notes.push(
+        i18n.translate('observability.alerting.alertsCharts.excludedBeforeWindow', {
+          defaultMessage:
+            '{count, plural, one {# alert started} other {# alerts started}} before this window',
+          values: { count: excludedBeforeWindow },
+        })
+      );
+    }
+    if (unknownStart > 0) {
+      notes.push(
+        i18n.translate('observability.alerting.alertsCharts.unknownStart', {
+          defaultMessage:
+            '{count, plural, one {# alert has} other {# alerts have}} an unknown start time',
+          values: { count: unknownStart },
+        })
+      );
+    }
+    const noteText = notes.join(' · ');
 
     const timeLabels = buckets.map((b) => b.label);
     const severities: Array<{ key: string; color: string }> = [
@@ -170,22 +214,17 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
     ];
 
     return {
-      // Surface alerts that started before the window (see excludedBeforeWindow
-      // above) as a small subtitle instead of silently dropping them from the
-      // bars. Omitted entirely when nothing was excluded.
-      title:
-        excludedBeforeWindow > 0
-          ? {
-              left: 'center' as const,
-              top: 0,
-              text: i18n.translate('observability.alerting.alertsCharts.excludedBeforeWindow', {
-                defaultMessage:
-                  '{count, plural, one {# alert started} other {# alerts started}} before this window',
-                values: { count: excludedBeforeWindow },
-              }),
-              textStyle: { fontSize: 10, fontWeight: 'normal' as const, color: '#98A2B3' },
-            }
-          : undefined,
+      // Surface alerts excluded from the bars (started before the window, or
+      // with an unknown start time — see the counting pass above) as a small
+      // subtitle instead of silently dropping them. Omitted when there's none.
+      title: noteText
+        ? {
+            left: 'center' as const,
+            top: 0,
+            text: noteText,
+            textStyle: { fontSize: 10, fontWeight: 'normal' as const, color: '#98A2B3' },
+          }
+        : undefined,
       tooltip: {
         trigger: 'axis' as const,
         axisPointer: { type: 'shadow' as const },
@@ -196,8 +235,10 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
         confine: false,
       },
       legend: { bottom: 0, left: 'center', textStyle: { fontSize: 10 } },
-      // Reserve extra headroom for the excluded-count subtitle when present.
-      grid: { top: excludedBeforeWindow > 0 ? 24 : 10, right: 15, bottom: 36, left: 44 },
+      // Reserve extra headroom for the reconciliation subtitle when present.
+      // `left: 50` (was 44) gives the rotated y-axis name + 3-digit count tick
+      // labels room so they don't clip the chart's left edge.
+      grid: { top: noteText ? 24 : 10, right: 15, bottom: 36, left: 50 },
       xAxis: {
         type: 'category' as const,
         data: timeLabels,

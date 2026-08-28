@@ -237,6 +237,45 @@ describe('alerts_charts', () => {
     expect(option.title).toBeUndefined();
   });
 
+  it('AlertTimeline: an unparseable start time is surfaced as an "unknown start time" note, not dropped', () => {
+    const start = END - HOUR_MS;
+    const alerts = [
+      makeAlert({ id: 'in', startTime: new Date(END - 10 * 60 * 1000).toISOString() }),
+      // Malformed startTime → NaN. Must not vanish from both bars and notes.
+      makeAlert({ id: 'bad', startTime: 'not a date' }),
+    ];
+    render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} />);
+
+    const option = mockSetOption.mock.calls[0][0] as {
+      title?: { text: string };
+      series: Array<{ name: string; data: number[] }>;
+    };
+    // Only the in-window alert is on the bars.
+    const critical = option.series.find((s) => s.name === 'critical');
+    const total = (critical!.data as number[]).reduce((a, b) => a + b, 0);
+    expect(total).toBe(1);
+    // The bad one is reconcilable via the title note.
+    expect(option.title).toBeDefined();
+    expect(option.title!.text).toContain('unknown start time');
+  });
+
+  it('AlertTimeline: an alert starting exactly at endMs lands in the last bucket (not dropped)', () => {
+    const start = END - HOUR_MS;
+    const alerts = [
+      makeAlert({ id: 'edge', severity: 'critical', startTime: new Date(END).toISOString() }),
+    ];
+    render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} />);
+
+    const option = mockSetOption.mock.calls[0][0] as {
+      series: Array<{ name: string; data: number[] }>;
+    };
+    const critical = option.series.find((s) => s.name === 'critical');
+    const data = critical!.data as number[];
+    // Counted, and specifically in the final bucket.
+    expect(data.reduce((a, b) => a + b, 0)).toBe(1);
+    expect(data[data.length - 1]).toBe(1);
+  });
+
   it('AlertTimeline: y-axis has an "Alerts" title (DVZ-AT2)', () => {
     const alerts = [makeAlert({ startTime: new Date(END - 30 * 60 * 1000).toISOString() })];
     render(<AlertTimeline alerts={alerts} startMs={END - HOUR_MS} endMs={END} />);
