@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import type { SloHealthState } from './slo_types';
 
 export const SLO_HEALTH_COLOR: Record<SloHealthState, string> = {
@@ -38,25 +39,35 @@ export function getSloHealthColor(state: SloHealthState | string | undefined | n
 }
 
 /**
- * Short operator-facing labels for each SLO health state. Used by the detail
- * header's EuiHealth so the state is carried in text — not color alone (VD4).
- * Kept plain (no i18n) for symmetry with the rest of common/slo/state.ts; the
- * localized copy already lives on the service-details tab's internal table.
+ * Short operator-facing labels for each SLO health state — THE single source of
+ * truth. Every SLO surface (detail header EuiHealth, listing Health cell,
+ * listing filter panel) routes through {@link getSloHealthLabel} so the state
+ * is carried in text — not color alone (VD4) — and reads identically everywhere.
+ * Localized: en output matches the previous plain-English labels byte-for-byte,
+ * so existing call sites are unaffected while non-en locales now translate.
  */
 const SLO_HEALTH_LABEL: Record<SloHealthState, string> = {
-  breached: 'Breached',
-  warning: 'Warning',
-  ok: 'Healthy',
-  no_data: 'No data',
-  source_idle: 'Source idle',
-  stale: 'Stale',
-  disabled: 'Disabled',
-  rules_missing: 'Rules missing',
+  breached: i18n.translate('observability.slo.state.label.breached', {
+    defaultMessage: 'Breached',
+  }),
+  warning: i18n.translate('observability.slo.state.label.warning', { defaultMessage: 'Warning' }),
+  ok: i18n.translate('observability.slo.state.label.ok', { defaultMessage: 'Healthy' }),
+  no_data: i18n.translate('observability.slo.state.label.noData', { defaultMessage: 'No data' }),
+  source_idle: i18n.translate('observability.slo.state.label.sourceIdle', {
+    defaultMessage: 'Source idle',
+  }),
+  stale: i18n.translate('observability.slo.state.label.stale', { defaultMessage: 'Stale' }),
+  disabled: i18n.translate('observability.slo.state.label.disabled', {
+    defaultMessage: 'Disabled',
+  }),
+  rules_missing: i18n.translate('observability.slo.state.label.rulesMissing', {
+    defaultMessage: 'Rules missing',
+  }),
 };
 
 export function getSloHealthLabel(state: SloHealthState | string | undefined | null): string {
   if (state && Object.prototype.hasOwnProperty.call(SLO_HEALTH_LABEL, state)) {
     return SLO_HEALTH_LABEL[state as SloHealthState];
   }
-  return 'Unknown';
+  return i18n.translate('observability.slo.state.label.unknown', { defaultMessage: 'Unknown' });
 }

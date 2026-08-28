@@ -59,7 +59,7 @@ import type {
   SloSummary,
 } from '../../../../../common/slo/slo_types';
 import { formatPct, SLO_PRECISION, TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
-import { getSloHealthColor } from '../../../../../common/slo/state';
+import { getSloHealthColor, getSloHealthLabel } from '../../../../../common/slo/state';
 import { templateIconFor } from './template_icons';
 import { KIND_LABEL } from './suggest_engine';
 
@@ -175,14 +175,15 @@ const SloHealthCell: React.FC<{ row: SloSummary }> = ({ row }) => {
             content={i18n.translate('observability.apm.slo.listing.stateTooltip', {
               defaultMessage: 'State: {state}',
               // Human, localized label (M3/CLAR7) — never the raw machine enum
-              // (`breached`, `at_risk`, …). Routed through the in-file
-              // localized STATE_LABEL map; see the note in the report about the
-              // overlapping (non-i18n) getSloHealthLabel in common/slo/state.ts.
-              values: { state: STATE_LABEL[state] ?? state },
+              // (`breached`, `at_risk`, …). Routed through the shared, localized
+              // `getSloHealthLabel` (common/slo/state.ts) — the single source of
+              // truth — which also maps an out-of-union state to "Unknown"
+              // rather than leaking the raw token.
+              values: { state: getSloHealthLabel(state) },
             })}
           >
             <EuiHealth color={getSloHealthColor(state)}>
-              <span style={{ fontSize: 12 }}>{STATE_LABEL[state] ?? state}</span>
+              <span style={{ fontSize: 12 }}>{getSloHealthLabel(state)}</span>
             </EuiHealth>
           </EuiToolTip>
         </EuiFlexItem>
@@ -245,33 +246,6 @@ function filterStateToTile(state: SloHealthState[] | undefined): SloHealthState 
   if (!state || state.length !== 1) return null;
   return state[0];
 }
-
-const STATE_LABEL: Record<SloHealthState, string> = {
-  breached: i18n.translate('observability.apm.slo.listing.stateLabel.breached', {
-    defaultMessage: 'Breached',
-  }),
-  warning: i18n.translate('observability.apm.slo.listing.stateLabel.warning', {
-    defaultMessage: 'Warning',
-  }),
-  ok: i18n.translate('observability.apm.slo.listing.stateLabel.ok', {
-    defaultMessage: 'Healthy',
-  }),
-  no_data: i18n.translate('observability.apm.slo.listing.stateLabel.noData', {
-    defaultMessage: 'No data',
-  }),
-  source_idle: i18n.translate('observability.apm.slo.listing.stateLabel.sourceIdle', {
-    defaultMessage: 'Source idle',
-  }),
-  stale: i18n.translate('observability.apm.slo.listing.stateLabel.stale', {
-    defaultMessage: 'Stale',
-  }),
-  disabled: i18n.translate('observability.apm.slo.listing.stateLabel.disabled', {
-    defaultMessage: 'Disabled',
-  }),
-  rules_missing: i18n.translate('observability.apm.slo.listing.stateLabel.rulesMissing', {
-    defaultMessage: 'Rules missing',
-  }),
-};
 
 /**
  * Derives the "Rules" column badge from the server-computed `status.state`
@@ -1234,7 +1208,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
         category: i18n.translate('observability.apm.slo.listing.activeFilter.state', {
           defaultMessage: 'State',
         }),
-        values: filters.state.map((v) => STATE_LABEL[v] ?? v),
+        values: filters.state.map((v) => getSloHealthLabel(v)),
         onRemove: () => clearKey('state'),
       });
     }
