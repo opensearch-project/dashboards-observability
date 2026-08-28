@@ -31,9 +31,14 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlert, UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
+import { observabilityApmSloID } from '../../../common/constants/apm';
+import { coreRefs } from '../../framework/core_refs';
 import { AnomalyDetailContent } from './anomaly_detail_flyout';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
+import { LinkifyAnnotation } from './linkify_annotation';
 import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
+import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
+import { formatTimestamp } from './time_format';
 
 /** Internal label keys filtered from the Labels accordion display. */
 const INTERNAL_LABEL_KEYS = new Set([
@@ -143,54 +148,58 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   const dsName =
     datasources.find((d) => d.id === alert.datasourceId)?.name || alert.datasourceId || '\u2014';
   // Memoize so `allLabels` keeps a stable reference between renders when
-  // `alertData.labels` is unchanged \u2014 the `useMemo` for `sourceLinkPath`
+  // `alertData.labels` is unchanged \u2014 the `useMemo` for `sourceLink`
   // below depends on it, and a fresh `{}` from the `||` fallback would
   // otherwise re-run the dep-list check every render.
   const allLabels = useMemo(() => alertData.labels || {}, [alertData.labels]);
 
-  // Source-rule deep-link computation (BUG-14). The unified alert shape
-  // doesn't carry a typed pointer to the originating monitor; we derive
-  // one from the labels available per-backend:
-  //   - OpenSearch alerts: `labels.monitor_id` is reliably populated.
-  //     Match on `monitor_id:<id>` so the Rules tab's `matchesSearch`
-  //     narrows to the originating monitor (rules carry the same id).
-  //   - Prometheus alerts: no `monitor_*` label exists; the closest
-  //     stable handle is `labels.alertname` (Prom convention) which
-  //     equals the rule's `name`. Match by name.
-  // SLO burn-rate alerts (Prometheus side) carry `slo_id` \u2014 match on
-  // that label so the Rules tab narrows to the burn-rate group rather
-  // than just the single firing tier.
-  // Falls back to undefined when no usable handle exists, in which case
-  // the source-link surfaces are simply not rendered. Includes the
-  // backing datasource id (`ds=\u2026`) so the Rules tab DS filter
-  // auto-selects the right cluster on landing \u2014 same mechanism as the
-  // SLO detail "View alert rules" deep-link (BUG-12).
-  const sourceLinkPath = useMemo(() => {
+  // Source deep-link computation (BUG-14 / OBS1). The unified alert shape
+  // doesn't carry a typed pointer to its origin; we derive a navigation
+  // target from the labels available per-backend. The target is an object so
+  // each surface knows whether it must cross an OSD app boundary (`appId`)
+  // or can stay within the alerting app (hash-only):
+  //   - SLO burn-rate alerts (either backend) carry `slo_id`. These open the
+  //     SLO *detail* page, which lives in the separate SLO app
+  //     (`observabilityApmSloID`) \u2014 so carry that app id and point at
+  //     `#/slos/<id>` (matches the SLO listing/detail deep-link convention).
+  //     Checked first, and backend-agnostically, so it stays in lock-step
+  //     with `sourceLinkLabel` below (which shows "Open SLO" whenever
+  //     `slo_id` is present).
+  //   - OpenSearch alerts: `labels.monitor_id` is reliably populated. Match
+  //     on `monitor_id:<id>` so the Rules tab's `matchesSearch` narrows to
+  //     the originating monitor (rules carry the same id).
+  //   - Prometheus alerts: no `monitor_*` label exists; the closest stable
+  //     handle is `labels.alertname` (Prom convention) which equals the
+  //     rule's `name`. Match by name.
+  // Falls back to undefined when no usable handle exists, in which case the
+  // source-link surfaces are simply not rendered. Rules deep-links include
+  // the backing datasource id (`ds=\u2026`) so the Rules tab DS filter
+  // auto-selects the right cluster on landing (BUG-12).
+  const sourceLink = useMemo<{ path: string; appId?: string } | undefined>(() => {
     const dsId = alert.datasourceId;
     if (!dsId) return undefined;
     const labels = (allLabels as Record<string, string>) ?? {};
+    const sloId = labels.slo_id;
+    if (sloId) {
+      return { path: `#/slos/${encodeURIComponent(sloId)}`, appId: observabilityApmSloID };
+    }
     if (alert.datasourceType === 'opensearch') {
       const monitorId = labels.monitor_id;
       if (!monitorId) return undefined;
       const params = new URLSearchParams({ q: `monitor_id:${monitorId}`, ds: dsId });
-      return `#/rules?${params.toString()}`;
+      return { path: `#/rules?${params.toString()}` };
     }
     if (alert.datasourceType === 'prometheus') {
-      const sloId = labels.slo_id;
-      if (sloId) {
-        const params = new URLSearchParams({ q: `slo_id:${sloId}`, ds: dsId });
-        return `#/rules?${params.toString()}`;
-      }
       const alertname = labels.alertname;
       if (!alertname) return undefined;
       const params = new URLSearchParams({ q: alertname, ds: dsId });
-      return `#/rules?${params.toString()}`;
+      return { path: `#/rules?${params.toString()}` };
     }
     return undefined;
   }, [alert.datasourceId, alert.datasourceType, allLabels]);
 
-  const monitorDisplayName = (allLabels as Record<string, string>)?.monitor_name;
-  const sourceLinkLabel = (allLabels as Record<string, string>)?.slo_id
+  const sloId = (allLabels as Record<string, string>)?.slo_id;
+  const sourceLinkLabel = sloId
     ? i18n.translate('observability.alerting.alertDetailFlyout.openSlo', {
         defaultMessage: 'Open SLO',
       })
@@ -198,14 +207,48 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
         defaultMessage: 'Open rule',
       });
 
+  // The description-list row names the *source*, so it must never fall back to
+  // the action label (`sourceLinkLabel`) — that both duplicates the header
+  // button verbatim and mislabels an SLO as if "Open SLO" were its name.
+  // Preference order per backend: the monitor's own name (OpenSearch), the SLO
+  // name then its id (SLO burn-rate alerts, both carry `slo_name`/`slo_id` per
+  // `slo_promql_generator`), then the Prometheus `alertname`, then the raw
+  // `monitor_id`. `sourceLink` only exists when one of `slo_id` / `monitor_id` /
+  // `alertname` is present, so this chain always resolves to a string.
+  const labelRecord = allLabels as Record<string, string>;
+  const sourceDisplayName =
+    labelRecord?.monitor_name ??
+    labelRecord?.slo_name ??
+    sloId ??
+    labelRecord?.alertname ??
+    labelRecord?.monitor_id;
+  const sourceRowTitle = sloId
+    ? i18n.translate('observability.alerting.alertDetailFlyout.sourceSlo', {
+        defaultMessage: 'Source SLO',
+      })
+    : i18n.translate('observability.alerting.alertDetailFlyout.sourceRule', {
+        defaultMessage: 'Source rule',
+      });
+
   const navigateToSource = () => {
-    if (!sourceLinkPath) return;
-    // Same-app navigation: directly update the hash and dispatch a
-    // synthetic hashchange event so the AlarmsPage listener picks it up.
-    // Setting window.location.hash alone doesn't fire the event when
-    // called programmatically from within the same page.
+    if (!sourceLink) return;
     onClose();
-    window.location.hash = sourceLinkPath;
+    if (sourceLink.appId) {
+      // Cross-app navigation: the SLO detail page lives in a different OSD
+      // application than the alerting app, so go through
+      // `application.navigateToApp` to switch apps (workspace-aware), then
+      // fire a synthetic hashchange for the target app's HashRouter to pick
+      // up the route \u2014 navigateToApp uses pushState, which does not emit
+      // hashchange on its own.
+      coreRefs?.application?.navigateToApp(sourceLink.appId, { path: sourceLink.path });
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+      return;
+    }
+    // Same-app navigation: directly update the hash and dispatch a synthetic
+    // hashchange event so the AlarmsPage listener picks it up. Setting
+    // window.location.hash alone doesn't fire the event when called
+    // programmatically from within the same page.
+    window.location.hash = sourceLink.path;
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   };
 
@@ -255,12 +298,16 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiHealth color={STATE_COLORS[alert.state]}>{alert.state}</EuiHealth>
+                <EuiHealth color={STATE_COLORS[alert.state]}>
+                  {getStateLabel(alert.state)}
+                </EuiHealth>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color={SEVERITY_COLORS[alert.severity]}>{alert.severity}</EuiBadge>
+                <EuiBadge color={SEVERITY_COLORS[alert.severity]}>
+                  {getSeverityLabel(alert.severity)}
+                </EuiBadge>
               </EuiFlexItem>
-              {sourceLinkPath && (
+              {sourceLink && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
@@ -314,25 +361,25 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 title: i18n.translate('observability.alerting.alertDetailFlyout.alertId', {
                   defaultMessage: 'Alert ID',
                 }),
-                description: alert.id || '\u2014',
+                description: alert.id || EMPTY_VALUE,
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.state', {
                   defaultMessage: 'State',
                 }),
-                description: alert.state || '\u2014',
+                description: getStateLabel(alert.state),
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.severity', {
                   defaultMessage: 'Severity',
                 }),
-                description: alert.severity || '\u2014',
+                description: getSeverityLabel(alert.severity),
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.backend', {
                   defaultMessage: 'Backend',
                 }),
-                description: alert.datasourceType || '\u2014',
+                description: alert.datasourceType || EMPTY_VALUE,
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.datasource', {
@@ -344,17 +391,16 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 title: i18n.translate('observability.alerting.alertDetailFlyout.started', {
                   defaultMessage: 'Started',
                 }),
-                description: alert.startTime
-                  ? new Date(alert.startTime).toLocaleString()
-                  : '\u2014',
+                // Zone-labelled so this reads identically to the Started column in
+                // the alerts table; a bare `toLocaleString()` hides which zone it
+                // rendered in, so two readers see different "start" times.
+                description: formatTimestamp(alert.startTime),
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.lastUpdated', {
                   defaultMessage: 'Last Updated',
                 }),
-                description: alert.lastUpdated
-                  ? new Date(alert.lastUpdated).toLocaleString()
-                  : '\u2014',
+                description: formatTimestamp(alert.lastUpdated),
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.duration', {
@@ -362,18 +408,16 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 }),
                 description: getAlertDuration(alert.startTime),
               },
-              ...(sourceLinkPath
+              ...(sourceLink
                 ? [
                     {
-                      title: i18n.translate('observability.alerting.alertDetailFlyout.sourceRule', {
-                        defaultMessage: 'Source rule',
-                      }),
+                      title: sourceRowTitle,
                       description: (
                         <EuiLink
                           onClick={navigateToSource}
                           data-test-subj="alertDetailSourceRuleLink"
                         >
-                          {monitorDisplayName ?? sourceLinkLabel}
+                          {sourceDisplayName}
                         </EuiLink>
                       ),
                     },
@@ -469,7 +513,9 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
               compressed
               listItems={Object.entries(annotations).map(([k, v]) => ({
                 title: k,
-                description: v || '\u2014',
+                // Annotations often hold runbook URLs \u2014 render them clickable
+                // (safe http/https only) instead of plain text (SRE2).
+                description: <LinkifyAnnotation value={v} />,
               }))}
             />
           ) : (

@@ -36,6 +36,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { LinkifyAnnotation } from '../../../alerting/linkify_annotation';
 import type {
   BudgetWarningThreshold,
   BurnRateConfig,
@@ -129,6 +130,11 @@ const ANNOTATION_COLUMNS: Array<EuiBasicTableColumn<{ key: string; value: string
       defaultMessage: 'Value',
     }),
     width: '70%',
+    // Annotation values are often runbook URLs — render them clickable (safe
+    // http/https only) rather than plain table text (SRE2).
+    render: (value: string) => (
+      <LinkifyAnnotation value={value} data-test-subj="slosDetailMetadataAnnotationValue" />
+    ),
   },
 ];
 

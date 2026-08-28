@@ -63,8 +63,20 @@ jest.mock('../query_services/alerting_opensearch_service', () => ({
   })),
 }));
 
+// Stub the shared core refs so the cross-app SLO deep-link can assert on
+// `navigateToApp` without a real Core start contract.
+jest.mock('../../../framework/core_refs', () => ({
+  coreRefs: {
+    application: { navigateToApp: jest.fn() },
+  },
+}));
+
 import { AlertDetailFlyout } from '../alert_detail_flyout';
+import { coreRefs } from '../../../framework/core_refs';
+import { observabilityApmSloID } from '../../../../common/constants/apm';
 import type { Datasource, UnifiedAlertSummary } from '../../../../common/types/alerting';
+
+const navigateToApp = coreRefs.application!.navigateToApp as jest.Mock;
 
 const baseAlert: UnifiedAlertSummary = {
   id: 'alert-42',
@@ -401,6 +413,153 @@ describe('AlertDetailFlyout', () => {
       );
       fireEvent.click(getByText('Raw Alert Data'));
       expect(mockGetAlertDetail).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('source deep-link (OBS1)', () => {
+    beforeEach(() => {
+      navigateToApp.mockClear();
+    });
+
+    it('pivots an SLO burn-rate alert to the SLO detail page in the SLO app', () => {
+      const onClose = jest.fn();
+      const sloAlert: UnifiedAlertSummary = {
+        ...baseAlert,
+        datasourceType: 'prometheus',
+        labels: { slo_id: 'slo/api ok', slo_name: 'API availability', alertname: 'BurnRate' },
+      };
+      const { getByText, getByTestId } = render(
+        <AlertDetailFlyout
+          alert={sloAlert}
+          datasources={datasources}
+          onClose={onClose}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // The action is labelled "Open SLO" whenever `slo_id` is present, and the
+      // source row names the SLO instead of repeating the action label.
+      expect(getByText('Source SLO')).toBeInTheDocument();
+      expect(getByTestId('alertDetailOpenSource')).toHaveTextContent('Open SLO');
+      expect(getByTestId('alertDetailSourceRuleLink')).toHaveTextContent('API availability');
+      fireEvent.click(getByTestId('alertDetailOpenSource'));
+      expect(onClose).toHaveBeenCalledTimes(1);
+      // Cross-app navigation to the SLO detail route, with the id encoded.
+      expect(navigateToApp).toHaveBeenCalledWith(observabilityApmSloID, {
+        path: `#/slos/${encodeURIComponent('slo/api ok')}`,
+      });
+    });
+
+    it('does not cross apps for a monitor rule deep-link', () => {
+      const monitorAlert: UnifiedAlertSummary = {
+        ...baseAlert,
+        datasourceType: 'opensearch',
+        labels: { monitor_id: 'mon-7', monitor_name: 'High latency' },
+      };
+      const { getByText, getByTestId } = render(
+        <AlertDetailFlyout
+          alert={monitorAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      expect(getByText('Source rule')).toBeInTheDocument();
+      expect(getByTestId('alertDetailOpenSource')).toHaveTextContent('Open rule');
+      expect(getByTestId('alertDetailSourceRuleLink')).toHaveTextContent('High latency');
+      fireEvent.click(getByTestId('alertDetailOpenSource'));
+      // Rule deep-links stay inside the alerting app (hash-only), so
+      // navigateToApp must not fire.
+      expect(navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the source id, never the action label, when no name label exists', () => {
+      const namelessAlert: UnifiedAlertSummary = {
+        ...baseAlert,
+        datasourceType: 'opensearch',
+        labels: { monitor_id: 'mon-7' },
+      };
+      const { getByTestId } = render(
+        <AlertDetailFlyout
+          alert={namelessAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const sourceRow = getByTestId('alertDetailSourceRuleLink');
+      expect(sourceRow).toHaveTextContent('mon-7');
+      expect(sourceRow).not.toHaveTextContent('Open rule');
+    });
+  });
+
+  describe('detail-list formatting parity with the alerts table', () => {
+    it('title-cases the State and Severity values instead of showing raw enums', () => {
+      const { getAllByText, queryByText } = render(
+        <AlertDetailFlyout
+          alert={baseAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // The alerts table renders "Active"/"Critical"; the flyout used to show
+      // the raw backend enums, so the same alert read two different ways on
+      // the same screen. Each value appears twice — once as a header chip, once
+      // in the detail list — and no lowercase rendering may survive anywhere.
+      expect(getAllByText('Active')).toHaveLength(2);
+      expect(getAllByText('Critical')).toHaveLength(2);
+      expect(queryByText('active')).toBeNull();
+      expect(queryByText('critical')).toBeNull();
+    });
+
+    it('names the timezone on the Started and Last Updated timestamps', () => {
+      const { getAllByText } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, startTime: '2026-06-04T20:00:00.000Z' }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // `toLocaleString()` never says which zone it rendered in. Assert the
+      // zone-labelled shape rather than a fixed string, so the test doesn't
+      // depend on the machine's timezone. Both Started and Last Updated match.
+      expect(getAllByText(/^\w{3} \d{1,2}, 20\d{2} @ \d{2}:\d{2}:\d{2} \S+$/)).toHaveLength(2);
+    });
+
+    it('renders the shared em-dash placeholder when a timestamp is missing', () => {
+      const { getAllByText } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, lastUpdated: '' }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      // Not "Invalid date", and not the flyout's old "Not available" wording —
+      // the same glyph the table uses for an empty cell.
+      expect(getAllByText('—').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('annotation runbook links (SRE2)', () => {
+    it('renders a runbook URL annotation as a clickable external link', () => {
+      const alertWithRunbook: UnifiedAlertSummary = {
+        ...baseAlert,
+        annotations: { runbook: 'https://runbooks.example/api' },
+      };
+      const { getByText } = render(
+        <AlertDetailFlyout
+          alert={alertWithRunbook}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const link = getByText('https://runbooks.example/api');
+      expect(link.tagName).toBe('A');
+      expect(link).toHaveAttribute('href', 'https://runbooks.example/api');
+      expect(link).toHaveAttribute('target', '_blank');
     });
   });
 
