@@ -31,7 +31,7 @@ Compatible with OpenSearch and OpenSearch Dashboards version 3.7.0
 
 ### Maintenance
 
-* Fix typo in application deletion error toast: "occured" → "occurred" ([#2674](https://github.com/opensearch-project/dashboards-observability/pull/2674))
+* Fix typo in application deletion error toast: "occured" → "occurred" ([0f223f5](https://github.com/opensearch-project/dashboards-observability/commit/0f223f546c6cc9f55172253bf1bdbfb7af3cafb7))
 * Bump uuid to 3.4.0 to resolve CVE-2026-41907 in transitive dependency ([#2679](https://github.com/opensearch-project/dashboards-observability/pull/2679))
 * Improve Alerts empty state with primary Rules button and updated layout ([#2686](https://github.com/opensearch-project/dashboards-observability/pull/2686))
 * Migrate plugin to TypeScript 6.0.2 compatibility by removing conflicting dependencies ([#2652](https://github.com/opensearch-project/dashboards-observability/pull/2652))
