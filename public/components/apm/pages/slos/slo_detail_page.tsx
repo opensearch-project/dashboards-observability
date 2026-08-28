@@ -1072,10 +1072,14 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
         // selection regardless of which tab is active — so the Alerts view
         // lands with this SLO's Prometheus datasource already selected.
         //
-        // `q=slo_id:<id>` is carried through for the day the Alerts tab
-        // honours the deep-link query the way the Rules tab already does
-        // (today only MonitorsTable seeds its search from `deepLink.q`); it
-        // is harmless until then. The recording-rule list on this page stays
+        // `q=slo_id:<id>` scopes the Alerts view to this SLO once the Alerts
+        // tab honours the deep-link query. That support lands in #2827
+        // (`alertMatchesSearch` treats a single `key:value` term as a label
+        // match, used by `filterAlerts`; `alarms_page` already forwards
+        // `deepLink.q` to `AlertsDashboard`). Until #2827 merges the Alerts tab
+        // ignores `q` (only MonitorsTable seeds its search from `deepLink.q`),
+        // so the pivot degrades gracefully to a datasource-scoped view rather
+        // than erroring. The recording-rule list on this page stays
         // informational — recording rules never surface in Alert Manager.
         const params = new URLSearchParams({
           q: `slo_id:${doc.id}`,
