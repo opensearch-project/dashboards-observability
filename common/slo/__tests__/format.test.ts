@@ -65,6 +65,17 @@ describe('formatPct', () => {
     it('formats the percent per the active locale', () => {
       i18n.setLocale('en');
       const enOutput = formatPct(0.9995, { decimals: 2 });
+      expect(enOutput).toBe('99.95%');
+
+      // A small-ICU Node build ships no `de` locale data and silently falls
+      // back to `en`, which would fail the divergence assertions below for a
+      // reason unrelated to this code. Detect real `de` support (comma decimal
+      // separator) and skip the locale-specific assertions when it's absent.
+      // CI runs full-ICU Node 22, so this exercises the real path there.
+      const deSupported = new Intl.NumberFormat('de', { minimumFractionDigits: 2 })
+        .format(1.5)
+        .includes(',');
+      if (!deSupported) return;
 
       i18n.setLocale('de');
       const deOutput = formatPct(0.9995, { decimals: 2 });
@@ -72,7 +83,6 @@ describe('formatPct', () => {
       // German uses a comma decimal separator; the exact spacing glyph before
       // `%` varies by ICU version, so assert the locale-defining separator and
       // that the two locales diverge rather than pinning the whole string.
-      expect(enOutput).toBe('99.95%');
       expect(deOutput).toContain('99,95');
       expect(deOutput).not.toBe(enOutput);
     });

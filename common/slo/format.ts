@@ -22,13 +22,41 @@ export const EMPTY_VALUE_FALLBACK = i18n.translate('observability.slo.format.emp
   defaultMessage: '—',
 });
 
+/**
+ * Cache of percent formatters keyed by `${locale}:${decimals}`. Constructing an
+ * `Intl.NumberFormat` is markedly heavier than the old `toFixed`, and
+ * `formatPct` is wired into ECharts axis/tooltip formatters that fire on every
+ * render and hover — so we build each (locale, decimals) formatter once and
+ * reuse it. Keying on the locale means a runtime `setLocale` still resolves to
+ * the correct formatter (a different key) rather than a stale one. The map is
+ * bounded by (locales × the handful of `decimals` values) so it can't grow
+ * unboundedly.
+ */
+const percentFormatterCache = new Map<string, Intl.NumberFormat>();
+
+function getPercentFormatter(decimals: number): Intl.NumberFormat {
+  const locale = i18n.getLocale();
+  const key = `${locale}:${decimals}`;
+  let formatter = percentFormatterCache.get(key);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, {
+      style: 'percent',
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    percentFormatterCache.set(key, formatter);
+  }
+  return formatter;
+}
+
 export function formatPct(value: number, options: FormatPctOptions = {}): string {
   const { decimals = 1, fallback = EMPTY_VALUE_FALLBACK } = options;
   if (!Number.isFinite(value)) return fallback;
   // `Intl.NumberFormat` percent style places the `%` sign (and any grouping)
   // per locale and multiplies by 100 itself, so we pass the raw ratio — NOT
   // `value * 100` — and pin both fraction-digit bounds to `decimals` for a
-  // fixed number of decimals.
+  // fixed number of decimals. The formatter is memoized per (locale, decimals)
+  // — see getPercentFormatter — because this runs on every chart render/hover.
   //
   // Rounding note: `Intl` uses half-expand (round half away from zero), which
   // can differ in the last digit from the old `(value*100).toFixed(decimals)`
@@ -37,11 +65,7 @@ export function formatPct(value: number, options: FormatPctOptions = {}): string
   // This is intentional — standard rounding, and no caller parses the string
   // back to a number — so display may shift by one unit in the last decimal
   // versus the pre-i18n formatter.
-  return new Intl.NumberFormat(i18n.getLocale(), {
-    style: 'percent',
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals,
-  }).format(value);
+  return getPercentFormatter(decimals).format(value);
 }
 
 /**
