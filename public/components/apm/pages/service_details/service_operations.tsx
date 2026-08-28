@@ -7,6 +7,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
+  Criteria,
   EuiPanel,
   EuiSpacer,
   EuiCallOut,
@@ -110,6 +111,9 @@ interface OperationsTablePanelProps {
   noDataMessage: string;
   noFilteredDataMessage: string;
   operationsCount: number;
+  pageIndex: number;
+  pageSize: number;
+  onTableChange: (criteria: Criteria<OperationRow>) => void;
 }
 
 const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
@@ -120,6 +124,9 @@ const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
   noDataMessage,
   noFilteredDataMessage,
   operationsCount,
+  pageIndex,
+  pageSize,
+  onTableChange,
 }) => (
   <EuiPanel>
     {!isLoading && filteredOperations.length === 0 ? (
@@ -127,9 +134,9 @@ const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
         <p>{operationsCount === 0 ? noDataMessage : noFilteredDataMessage}</p>
       </EuiText>
     ) : (
-      // Don't key the table on latencyPercentile
-      // Switching percentile only swaps the latency column
-      // Remounting would reset pagination and reload the row charts
+      // Switching percentile rebuilds the items array (new reference). Keying the table on it
+      // would remount and reload the row charts; leaving pagination uncontrolled would reset
+      // pageIndex to 0. So the table is not keyed and pagination is controlled.
       <EuiInMemoryTable
         items={filteredOperations}
         columns={columns}
@@ -141,9 +148,11 @@ const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
           },
         }}
         pagination={{
-          initialPageSize: SERVICE_DETAILS_CONSTANTS.DEFAULT_PAGE_SIZE,
+          pageIndex,
+          pageSize,
           pageSizeOptions: SERVICE_DETAILS_CONSTANTS.PAGE_SIZE_OPTIONS,
         }}
+        onTableChange={onTableChange}
         itemId="operationName"
         isExpandable={true}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
@@ -206,6 +215,15 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 150);
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState<number>(SERVICE_DETAILS_CONSTANTS.DEFAULT_PAGE_SIZE);
+
+  const onTableChange = useCallback(({ page }: Criteria<OperationRow>) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
+  }, []);
 
   // Flyout state for viewing correlated spans/logs
   const [flyoutState, setFlyoutState] = useState<{
@@ -441,6 +459,12 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
 
   const isLoading = opsLoading || metricsLoading;
   const error = opsError;
+
+  // If a filter shrinks the row count below the current page, clamp to the last valid page so
+  // the table never shows an empty, out-of-range page. Computed during render (not in an effect)
+  // so the clamp applies on the same paint, with no flash of an empty page.
+  const lastPageIndex = Math.max(0, Math.ceil(filteredOperations.length / pageSize) - 1);
+  const clampedPageIndex = Math.min(pageIndex, lastPageIndex);
 
   // Build active filter badges from current filter state
   const activeFilters: FilterBadge[] = useMemo(() => {
@@ -972,6 +996,9 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
                     }
                   )}
                   operationsCount={operations.length}
+                  pageIndex={clampedPageIndex}
+                  pageSize={pageSize}
+                  onTableChange={onTableChange}
                 />
               </EuiResizablePanel>
             </>
