@@ -67,6 +67,14 @@ describe('time_format', () => {
       expect(formatTimestamp(new Date(INSTANT))).toBe('Aug 25, 2026 @ 18:04:05 UTC');
     });
 
+    it('accepts an epoch serialized as a string (backend JSON drift)', () => {
+      getSpy.mockReturnValue('UTC');
+      const ms = String(new Date(INSTANT).getTime());
+      // `new Date('1756145045000')` is Invalid Date; the all-digit string must
+      // be coerced to a number so it parses like the numeric epoch path.
+      expect(formatTimestamp(ms)).toBe('Aug 25, 2026 @ 18:04:05 UTC');
+    });
+
     it('returns the placeholder rather than "Invalid date" for bad input', () => {
       getSpy.mockReturnValue('UTC');
       expect(formatTimestamp(undefined)).toBe(EMPTY_VALUE);

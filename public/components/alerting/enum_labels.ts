@@ -68,9 +68,24 @@ export const STATE_LABELS: Record<UnifiedAlertState, string> = {
  * disappearing behind a placeholder.
  */
 function humanizeUnknown(value: string): string {
-  const spaced = value.replace(/[_-]+/g, ' ').trim();
+  const trimmed = value.trim();
+  if (!trimmed) return EMPTY_VALUE;
+  // A value that already contains a space is a display-ready sentence — the
+  // AD/forecaster side sends statuses like "Awaiting data to init" — so pass
+  // it through untouched rather than re-casing it.
+  if (/\s/.test(trimmed)) return trimmed;
+  // A separated (`at_risk`) or all-caps (`AT_RISK`, `RUNNING`) token is
+  // machine-style: normalize to sentence case so it reads as prose instead of
+  // shouting ("At risk", not "AT RISK"). A token that's already mixed/lower
+  // case with no separators only gets its first letter capitalized, so any
+  // intentional internal casing is preserved.
+  const machineStyle = /[_-]/.test(trimmed) || trimmed === trimmed.toUpperCase();
+  const spaced = trimmed.replace(/[_-]+/g, ' ').trim();
+  // A token that was only separators (`__`) collapses to empty — fall back to
+  // the placeholder rather than rendering a lone space.
   if (!spaced) return EMPTY_VALUE;
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+  const rest = machineStyle ? spaced.slice(1).toLowerCase() : spaced.slice(1);
+  return spaced.charAt(0).toUpperCase() + rest;
 }
 
 /** Display label for an alert severity. Returns {@link EMPTY_VALUE} when absent. */

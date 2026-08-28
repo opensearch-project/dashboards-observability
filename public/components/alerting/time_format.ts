@@ -33,7 +33,8 @@ export function resolveDisplayTz(): string {
 
 /**
  * Short label for a zone at a given instant — `UTC`, `PDT`, or a numeric offset
- * such as `+05:30` for zones without an abbreviation.
+ * such as `+0530` (moment's `z` token emits the offset without a colon) for
+ * zones without an abbreviation.
  */
 export function getTimezoneLabel(
   value: string | number | Date = Date.now(),
@@ -64,10 +65,16 @@ export function formatTimestamp(
 
   if (value === null || value === undefined || value === '') return fallback;
 
+  // A backend that serializes an epoch as a JSON string (`"1756145045000"`)
+  // would otherwise hit `new Date('1756145045000')` → `Invalid Date`. Coerce an
+  // all-digit string to a number first so it parses like the numeric epoch path.
+  const normalized =
+    typeof value === 'string' && /^\d+$/.test(value.trim()) ? Number(value.trim()) : value;
+
   // Normalise through `Date` first: handing moment an unparseable string makes it
   // fall back to the `Date` constructor anyway, but with a deprecation warning
   // that would fire on every malformed timestamp the backend hands us.
-  const date = value instanceof Date ? value : new Date(value);
+  const date = normalized instanceof Date ? normalized : new Date(normalized);
   if (Number.isNaN(date.getTime())) return fallback;
 
   const tz = resolveDisplayTz();

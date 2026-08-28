@@ -58,6 +58,20 @@ describe('enum_labels', () => {
     expect(getSeverityLabel('sev-one')).toBe('Sev one');
   });
 
+  it('sentence-cases machine-style tokens instead of shouting them', () => {
+    // A separated or all-caps unknown token must read as prose, not SHOUT:
+    // `AT_RISK` → "At risk", not "AT RISK".
+    expect(getStateLabel('AT_RISK')).toBe('At risk');
+    expect(getSeverityLabel('CRITICAL_OVERRIDE')).toBe('Critical override');
+    expect(getMonitorStateLabel('RUNNING')).toBe('Running');
+  });
+
+  it('preserves intentional internal casing on unknown non-separated tokens', () => {
+    // A single mixed-case token with no separators is only first-letter-capped,
+    // so camelCase-ish statuses are not flattened.
+    expect(getMonitorStateLabel('inProgress')).toBe('InProgress');
+  });
+
   it('falls back to the placeholder when an unknown value is only separators', () => {
     expect(getStateLabel('__')).toBe(EMPTY_VALUE);
   });
