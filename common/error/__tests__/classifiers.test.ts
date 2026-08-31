@@ -110,11 +110,22 @@ describe('default classifiers — coverage table', () => {
       operation: 'rule.create.metric',
       upstreamCode: 'RULER_AUTH_FAILED',
       httpStatus: 403,
+      rawBody:
+        'no permissions for [cluster:admin/opensearch/directquery/write] and User [name=test] at https://host.internal:9090',
     });
     expect(forbidden.code).toBe('PERMISSION_DENIED');
 
-    // Auth failures carry no raw upstream detail.
+    // 401 re-auth carries no raw upstream detail.
     expect(unauthorized.details).toBeUndefined();
+
+    // 403 surfaces the missing permission (redacted) so the user can
+    // self-diagnose, while topology (host/URL) is still scrubbed.
+    const safe = forbidden.details?.find((d) => d.sensitivity === 'safe');
+    expect(safe?.value).toContain(
+      'no permissions for [cluster:admin/opensearch/directquery/write]'
+    );
+    expect(safe?.value).not.toContain('host.internal');
+    expect(safe?.value).toContain('<redacted-url>');
   });
 
   it('UNKNOWN: unmatched error still surfaces a redacted message + keeps raw sensitive', () => {

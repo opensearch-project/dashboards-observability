@@ -31,20 +31,23 @@ export const rulerClassifier: ErrorClassifier = {
           details: rawDetails(ctx.rawBody),
         };
       case 'RULER_AUTH_FAILED':
-        // No raw details for auth failures — upstream auth errors can echo
-        // tokens/headers. Split 401 (re-auth) from 403 (lacks permission).
         return ctx.httpStatus === 401
-          ? {
+          ? // 401 carries no details. The fix is to re-authenticate.
+            {
               category: 'PERMISSION_DENIED',
               code: ErrorCode.AUTH_REQUIRED,
               retryable: false,
               httpStatus: ctx.httpStatus,
             }
-          : {
+          : // 403 keeps the redacted body so the caller sees the missing
+            // permission. Redaction leaves RBAC principal names (`User
+            // [name=...]`) intact, which is the caller's own identity.
+            {
               category: 'PERMISSION_DENIED',
               code: ErrorCode.PERMISSION_DENIED,
               retryable: false,
               httpStatus: ctx.httpStatus,
+              details: rawDetails(ctx.rawBody),
             };
       case 'RULER_UNREACHABLE':
       default:
