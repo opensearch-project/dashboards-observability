@@ -293,8 +293,8 @@ export class DirectQueryRulerClient implements RulerClient {
       typeof raw?.statusCode === 'number'
         ? raw.statusCode
         : typeof raw?.meta?.statusCode === 'number'
-        ? raw.meta.statusCode
-        : 0;
+          ? raw.meta.statusCode
+          : 0;
     const rawBody = stringifyBody(raw?.body ?? raw?.meta?.body ?? raw?.message ?? String(err));
 
     let code: 'RULER_VALIDATION_FAILED' | 'RULER_AUTH_FAILED' | 'RULER_UNREACHABLE';

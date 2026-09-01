@@ -166,9 +166,7 @@ export class SloApiClient {
     });
   }
 
-  get(
-    id: string
-  ): Promise<
+  get(id: string): Promise<
     SloDocument & {
       liveStatus: SloLiveStatus;
       /**

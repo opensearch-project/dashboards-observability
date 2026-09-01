@@ -110,8 +110,8 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
     ruleHealth?.expectedGroups && ruleHealth.expectedGroups.length > 0
       ? ruleHealth.expectedGroups
       : prov.alertGroupName
-      ? [prov.alertGroupName]
-      : [];
+        ? [prov.alertGroupName]
+        : [];
   const presentGroups = new Set(ruleHealth?.presentGroups ?? []);
 
   const ruleCount = doc.liveStatus.ruleCount ?? 0;

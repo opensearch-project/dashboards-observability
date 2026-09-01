@@ -16,7 +16,7 @@ jest.mock('../../../shared/components/metric_sparkline', () => ({
 }));
 
 function makeClient(probeSli: jest.Mock): Pick<SloApiClient, 'probeSli'> {
-  return ({ probeSli } as unknown) as Pick<SloApiClient, 'probeSli'>;
+  return { probeSli } as unknown as Pick<SloApiClient, 'probeSli'>;
 }
 
 describe('ProbeSliPanel', () => {

@@ -468,8 +468,8 @@ export class SloLifecycleService {
       existing.status.provisioning.rulerNamespace
         ? existing.status.provisioning.rulerNamespace
         : deploy
-        ? sloRulerNamespaceFor(deploy.workspaceId)
-        : SLO_RULER_NAMESPACE;
+          ? sloRulerNamespaceFor(deploy.workspaceId)
+          : SLO_RULER_NAMESPACE;
 
     const updated: SloDocument = {
       id: existing.id,
@@ -549,7 +549,7 @@ export class SloLifecycleService {
     const newFingerprints = this.computeObjectiveFingerprints(merged);
     const oldFingerprints =
       existing.status.provisioning.backend === 'prometheus'
-        ? existing.status.provisioning.recordingFingerprints ?? {}
+        ? (existing.status.provisioning.recordingFingerprints ?? {})
         : {};
     const newUnique = new Set(uniqueValues(newFingerprints));
     const oldUnique = new Set(uniqueValues(oldFingerprints));

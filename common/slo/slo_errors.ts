@@ -32,7 +32,10 @@ export class SloNotFoundError extends Error {
 }
 
 export class SloVersionConflictError extends Error {
-  constructor(public readonly current: SloDocument, public readonly attemptedVersion: number) {
+  constructor(
+    public readonly current: SloDocument,
+    public readonly attemptedVersion: number
+  ) {
     super(
       `SLO version conflict: client sent version ${attemptedVersion} but server has ${current.status.version}`
     );
@@ -47,9 +50,7 @@ export class SloVersionConflictError extends Error {
  * PromQL: parse error").
  */
 export type SloRulerErrorCode =
-  | 'RULER_VALIDATION_FAILED'
-  | 'RULER_AUTH_FAILED'
-  | 'RULER_UNREACHABLE';
+  'RULER_VALIDATION_FAILED' | 'RULER_AUTH_FAILED' | 'RULER_UNREACHABLE';
 
 /**
  * Thrown when the ruler dual-write fails during SLO create / update / delete.
@@ -82,7 +83,10 @@ export class SloRulerError extends Error {
  * to force a ruler-side cleanup) before the SLO can be removed.
  */
 export class SloRulerTeardownRequiredError extends Error {
-  constructor(public readonly sloId: string, public readonly datasourceId: string) {
+  constructor(
+    public readonly sloId: string,
+    public readonly datasourceId: string
+  ) {
     super(
       `Cannot delete SLO "${sloId}": its datasource "${datasourceId}" is not registered, ` +
         `so the rule group cannot be removed from Prometheus. Re-register the datasource and retry.`

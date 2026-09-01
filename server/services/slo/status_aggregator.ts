@@ -806,7 +806,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       dataSourceId: ds.mdsId,
       sourceRequest: ctx.sourceRequest,
     });
-    return parseInstantResponseWithNonFinite((envelope as unknown) as Record<string, unknown>);
+    return parseInstantResponseWithNonFinite(envelope as unknown as Record<string, unknown>);
   }
 }
 

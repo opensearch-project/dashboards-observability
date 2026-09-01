@@ -103,9 +103,10 @@ function dedupDoc(
   };
 }
 
-function instantForMetrics(
-  samples: Array<{ name: string; ratio: number; tsSec?: number }>
-): { resultType: 'vector'; result: unknown[] } {
+function instantForMetrics(samples: Array<{ name: string; ratio: number; tsSec?: number }>): {
+  resultType: 'vector';
+  result: unknown[];
+} {
   return {
     resultType: 'vector',
     result: samples.map((s) => ({
@@ -180,15 +181,15 @@ function mockClient(
     if (p.path.endsWith('/api/v1/alerts')) return { statusCode: 200, body: alertsHandler() };
     throw new Error(`Unexpected transport path: ${p.path}`);
   });
-  const searcher = (jest.fn(async (_ctx, req, _options) => {
+  const searcher = jest.fn(async (_ctx, req, _options) => {
     const reqBody = (req as { body?: unknown }).body;
     return envelopeToDataFrame(
       queryHandler(reqBody) as Parameters<typeof envelopeToDataFrame>[0]
     ) as never;
-  }) as unknown) as jest.MockedFunction<PromQLSearcher>;
+  }) as unknown as jest.MockedFunction<PromQLSearcher>;
   setPromQLSearcher(searcher as PromQLSearcher);
   return {
-    client: ({ transport: { request } } as unknown) as AlertingOSClient,
+    client: { transport: { request } } as unknown as AlertingOSClient,
     request,
     searcher,
   };

@@ -111,7 +111,8 @@ export function validateCustomPromQL(expr: string): string | null {
  * Allowed: `status="200"`, `code=~"5.."`, `path!="/healthz"`.
  * Rejected: `status="x",pwn="y"`, `path="\nfoo"`, `code=~"5.."[`.
  */
-const GOOD_EVENTS_FILTER_RE = /^[a-zA-Z_][a-zA-Z_0-9]*\s*(=|!=|=~|!~)\s*"([^"\\\n\r\t\x00-\x1F\x7F]|\\.)*"$/;
+const GOOD_EVENTS_FILTER_RE =
+  /^[a-zA-Z_][a-zA-Z_0-9]*\s*(=|!=|=~|!~)\s*"([^"\\\n\r\t\x00-\x1F\x7F]|\\.)*"$/;
 function validateGoodEventsFilter(filter: string): string | null {
   if (/[\n\r\t\x00-\x1F\x7F]/.test(filter)) {
     return 'Good events filter must not contain control characters';
@@ -262,9 +263,8 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
           prom.latencyThresholdUnit !== 'seconds' &&
           prom.latencyThresholdUnit !== 'milliseconds'
         ) {
-          errors[
-            'spec.sli.definition.latencyThresholdUnit'
-          ] = `latencyThresholdUnit must be 'seconds' or 'milliseconds'`;
+          errors['spec.sli.definition.latencyThresholdUnit'] =
+            `latencyThresholdUnit must be 'seconds' or 'milliseconds'`;
         }
       } else if (prom.type === 'custom') {
         if (!prom.customExpr) {
@@ -371,9 +371,8 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
         'No burn-rate tiers configured — no MWMBR alerts will be generated';
     } else {
       if (input.alerting.burnRates.length > MWMBR_MAX_TIERS) {
-        errors[
-          'spec.alerting.burnRates'
-        ] = `At most ${MWMBR_MAX_TIERS} burn-rate tiers are supported; received ${input.alerting.burnRates.length}.`;
+        errors['spec.alerting.burnRates'] =
+          `At most ${MWMBR_MAX_TIERS} burn-rate tiers are supported; received ${input.alerting.burnRates.length}.`;
       }
       const firstObjTarget = input.objectives?.[0]?.target;
       const errorBudget = firstObjTarget !== undefined ? 1 - firstObjTarget : undefined;
@@ -431,9 +430,8 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
       }
       const values = Array.isArray(v) ? v : [v];
       if (values.length > MAX_LABEL_VALUES_PER_KEY) {
-        errors[
-          `spec.labels["${k}"]`
-        ] = `At most ${MAX_LABEL_VALUES_PER_KEY} values per label key are allowed`;
+        errors[`spec.labels["${k}"]`] =
+          `At most ${MAX_LABEL_VALUES_PER_KEY} values per label key are allowed`;
       }
       for (const val of values) {
         if (typeof val !== 'string') {

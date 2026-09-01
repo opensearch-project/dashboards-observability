@@ -110,9 +110,9 @@ function makeHarness() {
     enabled: true,
     directQueryName: 'prom-connection',
   };
-  const client = ({
+  const client = {
     transport: { request: () => Promise.resolve({}) },
-  } as unknown) as AlertingOSClient;
+  } as unknown as AlertingOSClient;
 
   const deploy: SloDeployContext = {
     ruler,
@@ -350,9 +350,9 @@ function makeDedupHarness() {
     enabled: true,
     directQueryName: 'prom-connection',
   };
-  const client = ({
+  const client = {
     transport: { request: () => Promise.resolve({}) },
-  } as unknown) as AlertingOSClient;
+  } as unknown as AlertingOSClient;
   const deploy: SloDeployContext = {
     ruler,
     client,

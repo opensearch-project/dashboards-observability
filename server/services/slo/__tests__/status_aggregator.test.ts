@@ -132,9 +132,9 @@ function instantResponse(
   };
 }
 
-function alertsResponse(
-  alerts: Array<{ sloId: string; state: 'firing' | 'pending' }>
-): { data: { alerts: Array<Record<string, unknown>> } } {
+function alertsResponse(alerts: Array<{ sloId: string; state: 'firing' | 'pending' }>): {
+  data: { alerts: Array<Record<string, unknown>> };
+} {
   return {
     data: {
       alerts: alerts.map((a) => ({
@@ -217,10 +217,7 @@ function envelopeToDataFrame(envelope: {
  *     helper used to multiplex both paths through a single mock — now it
  *     splits them so the wire-contract assertions match the migration.
  */
-function mockClient(handlers: {
-  query?: (body: unknown) => unknown;
-  alerts?: () => unknown;
-}): {
+function mockClient(handlers: { query?: (body: unknown) => unknown; alerts?: () => unknown }): {
   client: AlertingOSClient;
   requestMock: jest.Mock;
   searcherMock: jest.MockedFunction<PromQLSearcher>;
@@ -233,15 +230,15 @@ function mockClient(handlers: {
     }
     throw new Error(`Unexpected transport path: ${p.path}`);
   });
-  const searcherMock = (jest.fn(async (_ctx, request, _options) => {
+  const searcherMock = jest.fn(async (_ctx, request, _options) => {
     const body = handlers.query
       ? handlers.query((request as { body?: unknown }).body)
       : { resultType: 'vector', result: [] };
     return envelopeToDataFrame(body as Parameters<typeof envelopeToDataFrame>[0]) as never;
-  }) as unknown) as jest.MockedFunction<PromQLSearcher>;
+  }) as unknown as jest.MockedFunction<PromQLSearcher>;
   setPromQLSearcher(searcherMock as PromQLSearcher);
   return {
-    client: ({ transport: { request: requestMock } } as unknown) as AlertingOSClient,
+    client: { transport: { request: requestMock } } as unknown as AlertingOSClient,
     requestMock,
     searcherMock,
   };
@@ -746,9 +743,7 @@ describe('rule-health priority merge', () => {
           state: 'ok' | 'rules_partial' | 'rules_missing' | 'ruler_unreachable';
           rulerErrorCode?: string;
         }
-      | ((
-          input: Parameters<SloRuleHealthChecker['check']>[0]
-        ) => {
+      | ((input: Parameters<SloRuleHealthChecker['check']>[0]) => {
           state: 'ok' | 'rules_partial' | 'rules_missing' | 'ruler_unreachable';
           rulerErrorCode?: string;
         })

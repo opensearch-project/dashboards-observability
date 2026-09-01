@@ -34,7 +34,7 @@ import { SloReconciler } from '../slo_reconciler';
 // --------------------------------------------------------------------- helpers
 
 function noopLogger(): Logger {
-  return ({
+  return {
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
@@ -43,7 +43,7 @@ function noopLogger(): Logger {
     log: jest.fn(),
     trace: jest.fn(),
     get: jest.fn(),
-  } as unknown) as Logger;
+  } as unknown as Logger;
 }
 
 interface Stored {
@@ -96,7 +96,7 @@ class FakeRepo {
             let m: RegExpExecArray | null;
             while ((m = re.exec(filter)) !== null) checks.push([m[1], m[2]]);
             for (const [k, v] of checks) {
-              const av = ((a as unknown) as Record<string, string | number | undefined>)[k];
+              const av = (a as unknown as Record<string, string | number | undefined>)[k];
               if (String(av) !== v) return false;
             }
             return true;
@@ -153,14 +153,14 @@ function buildReconciler(
   ruler: FakeRuler,
   opts: { graceMs?: number; intervalMs?: number; now?: () => Date } = {}
 ): SloReconciler {
-  const savedObjects = ({
+  const savedObjects = {
     createInternalRepository: () => repo.asClient(),
-  } as unknown) as import('../../../../../../src/core/server').SavedObjectsServiceStart;
-  const opensearch = ({
+  } as unknown as import('../../../../../../src/core/server').SavedObjectsServiceStart;
+  const opensearch = {
     client: {
       asInternalUser: { transport: { request: async () => ({ statusCode: 200, body: {} }) } },
     },
-  } as unknown) as import('../../../../../../src/core/server').OpenSearchServiceStart;
+  } as unknown as import('../../../../../../src/core/server').OpenSearchServiceStart;
   return new SloReconciler(noopLogger(), savedObjects, opensearch, ruler, {
     intervalMs: opts.intervalMs ?? 60_000,
     graceMs: opts.graceMs ?? 24 * 3600 * 1000,

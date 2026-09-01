@@ -27,9 +27,7 @@ function noopLogger(): Logger {
   };
 }
 
-function mockClient(
-  handler?: (params: unknown) => Promise<unknown>
-): {
+function mockClient(handler?: (params: unknown) => Promise<unknown>): {
   client: AlertingOSClient;
   requestMock: jest.Mock;
 } {
@@ -38,7 +36,7 @@ function mockClient(
     return { statusCode: 200, body: {} };
   });
   return {
-    client: ({ transport: { request: requestMock } } as unknown) as AlertingOSClient,
+    client: { transport: { request: requestMock } } as unknown as AlertingOSClient,
     requestMock,
   };
 }
@@ -405,18 +403,18 @@ describe('DirectQueryRulerClient.getRuleGroup', () => {
     );
     const svc = new DirectQueryRulerClient(noopLogger());
 
-    await expect(
-      svc.getRuleGroup(client, promDatasource(), 'ns', 'group-1')
-    ).rejects.toMatchObject({ name: 'SloRulerError', code: 'RULER_UNREACHABLE', httpStatus: 500 });
+    await expect(svc.getRuleGroup(client, promDatasource(), 'ns', 'group-1')).rejects.toMatchObject(
+      { name: 'SloRulerError', code: 'RULER_UNREACHABLE', httpStatus: 500 }
+    );
   });
 
   it('401 → throws SloRulerError with RULER_AUTH_FAILED', async () => {
     const { client } = mockClient(() => Promise.reject(rejectWithStatus(401, 'no org id')));
     const svc = new DirectQueryRulerClient(noopLogger());
 
-    await expect(
-      svc.getRuleGroup(client, promDatasource(), 'ns', 'group-1')
-    ).rejects.toMatchObject({ name: 'SloRulerError', code: 'RULER_AUTH_FAILED', httpStatus: 401 });
+    await expect(svc.getRuleGroup(client, promDatasource(), 'ns', 'group-1')).rejects.toMatchObject(
+      { name: 'SloRulerError', code: 'RULER_AUTH_FAILED', httpStatus: 401 }
+    );
   });
 });
 

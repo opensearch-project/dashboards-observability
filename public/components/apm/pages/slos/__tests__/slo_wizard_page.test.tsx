@@ -74,16 +74,16 @@ function withSuggestionStubs(apiClient: Partial<SloApiClient>): Partial<SloApiCl
 }
 
 function renderWizard(apiClient: Partial<SloApiClient>, templateId = 'http-availability') {
-  const chrome = ({ setBreadcrumbs: jest.fn() } as unknown) as Parameters<
+  const chrome = { setBreadcrumbs: jest.fn() } as unknown as Parameters<
     typeof SloWizardPage
   >[0]['chrome'];
-  const notifications = ({
+  const notifications = {
     toasts: {
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
       addDanger: jest.fn(),
     },
-  } as unknown) as Parameters<typeof SloWizardPage>[0]['notifications'];
+  } as unknown as Parameters<typeof SloWizardPage>[0]['notifications'];
 
   return render(
     <MemoryRouter initialEntries={[`/slos/create/${templateId}`]}>
@@ -226,16 +226,16 @@ describe('SloWizardPage — Wave 2 additions', () => {
     // renderWizard builds its own notifications; grab the spy off the
     // NotificationsStart shape so we can assert on it afterwards.
     const addDanger = jest.fn();
-    const chrome = ({ setBreadcrumbs: jest.fn() } as unknown) as Parameters<
+    const chrome = { setBreadcrumbs: jest.fn() } as unknown as Parameters<
       typeof SloWizardPage
     >[0]['chrome'];
-    const notifications = ({
+    const notifications = {
       toasts: {
         addSuccess: jest.fn(),
         addWarning: jest.fn(),
         addDanger,
       },
-    } as unknown) as Parameters<typeof SloWizardPage>[0]['notifications'];
+    } as unknown as Parameters<typeof SloWizardPage>[0]['notifications'];
 
     render(
       <MemoryRouter initialEntries={[`/slos/create/http-availability`]}>

@@ -51,7 +51,7 @@ export function computeSliFingerprint(
     metric: normalizeMetric(prom.metric),
     goodEventsFilter: normalizeGoodEventsFilter(prom.goodEventsFilter),
     latencyThresholdUnit:
-      prom.type === 'latency_threshold' ? prom.latencyThresholdUnit ?? null : null,
+      prom.type === 'latency_threshold' ? (prom.latencyThresholdUnit ?? null) : null,
     // Hash the *formatted* latency bound (the same `le=` string the
     // recording-rule generator emits) rather than the raw number. Two
     // semantically identical thresholds that differ only in float

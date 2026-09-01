@@ -264,9 +264,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
    * `metadataService` instances are short-lived and die when the handler
    * returns.
    */
-  function buildRequestServices(
-    ctx: AlertingHandlerContext
-  ): {
+  function buildRequestServices(ctx: AlertingHandlerContext): {
     alertService: MultiBackendAlertService;
     metadataService: PrometheusMetadataService;
     datasourceService: SavedObjectDatasourceService;

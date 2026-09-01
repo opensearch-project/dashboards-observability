@@ -139,7 +139,7 @@ function makeDeps() {
     enabled: true,
     directQueryName: 'prom-connection',
   };
-  const client = ({ transport: { request: jest.fn() } } as unknown) as AlertingOSClient;
+  const client = { transport: { request: jest.fn() } } as unknown as AlertingOSClient;
 
   const deploy: SloDeployContext = {
     ruler,

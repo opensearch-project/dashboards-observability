@@ -28,11 +28,11 @@ function noopLogger(): Logger {
 }
 
 function mockClient(): AlertingOSClient {
-  return ({
+  return {
     transport: {
       request: jest.fn(async () => ({ statusCode: 200, body: {} })),
     },
-  } as unknown) as AlertingOSClient;
+  } as unknown as AlertingOSClient;
 }
 
 function mockDatasource(overrides: Partial<Datasource> = {}): Datasource {
@@ -66,11 +66,11 @@ function mockRulerClient(): {
   getRuleGroup: jest.Mock<Promise<GeneratedRuleGroup | null>, unknown[]>;
 } {
   const getRuleGroup = jest.fn<Promise<GeneratedRuleGroup | null>, unknown[]>(async () => null);
-  const ruler = ({
+  const ruler = {
     upsertRuleGroup: jest.fn(async () => undefined),
     deleteRuleGroup: jest.fn(async () => undefined),
     getRuleGroup,
-  } as unknown) as RulerClient;
+  } as unknown as RulerClient;
   return { ruler, getRuleGroup };
 }
 
