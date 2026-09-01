@@ -22,7 +22,20 @@ jest.mock('../../../shared/hooks/use_debounced_value', () => ({
   useDebouncedValue: (value: unknown) => value,
 }));
 jest.mock('../../../shared/components/operation_filter_sidebar', () => ({
-  OperationFilterSidebar: () => <div data-test-subj="operationFilterSidebar" />,
+  // Expose the latency slider callback so tests can activate the range filter. Narrowing to
+  // [latencyMax, latencyMax] leaves only the single highest-latency row.
+  OperationFilterSidebar: (props: {
+    latencyMax: number;
+    onLatencyRangeChange: (range: [number, number]) => void;
+  }) => (
+    <div data-test-subj="operationFilterSidebar">
+      <button
+        type="button"
+        data-test-subj="mockNarrowLatencyRange"
+        onClick={() => props.onLatencyRangeChange([props.latencyMax, props.latencyMax])}
+      />
+    </div>
+  ),
 }));
 jest.mock('../../../shared/components/service_correlations_flyout', () => ({
   ServiceCorrelationsFlyout: () => <div data-test-subj="correlationsFlyout" />,
@@ -175,5 +188,28 @@ describe('ServiceOperations - percentile switch does not remount the table (#262
 
     expect(screen.getByText(padded(0))).toBeInTheDocument();
     expect(screen.queryByText(padded(14))).not.toBeInTheDocument();
+  });
+
+  // A percentile switch resets the latency gate, so a range filter set under one percentile does
+  // not carry over to the next; moving the slider again re-engages it. This locks the gate's
+  // user-facing behavior and is not sensitive to the ref-vs-state implementation of the flag.
+  it('should clear the latency filter on a percentile switch and re-engage it when the slider moves again', async () => {
+    render(<ServiceOperations {...props} />);
+
+    await waitFor(() => expect(screen.getByText(padded(0))).toBeInTheDocument());
+
+    // Move the slider to the top of the range: only the highest-latency row (op-14) survives.
+    fireEvent.click(screen.getByTestId('mockNarrowLatencyRange'));
+    expect(screen.getByText(padded(14))).toBeInTheDocument();
+    expect(screen.queryByText(padded(0))).not.toBeInTheDocument();
+
+    // Switching percentile clears the filter: every row returns.
+    switchPercentile('P90');
+    expect(screen.getByText(padded(0))).toBeInTheDocument();
+
+    // Moving the slider again re-engages the filter under the new percentile.
+    fireEvent.click(screen.getByTestId('mockNarrowLatencyRange'));
+    expect(screen.getByText(padded(14))).toBeInTheDocument();
+    expect(screen.queryByText(padded(0))).not.toBeInTheDocument();
   });
 });
