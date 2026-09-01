@@ -365,7 +365,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     logger
   );
 
-  // Prometheus rule mutation routes (create/delete via Cortex ruler).
+  // Prometheus rule mutation routes (create/delete via Prometheus ruler).
   // Only registered when a RulerClient is provided (SLO feature enabled).
   if (deps.rulerClient) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires

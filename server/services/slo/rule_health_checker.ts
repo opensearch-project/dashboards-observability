@@ -4,7 +4,7 @@
  */
 
 /**
- * RuleHealthChecker — per-SLO probe of the Prometheus-compatible ruler (Cortex)
+ * RuleHealthChecker — per-SLO probe of the Prometheus-compatible ruler
  * that answers: "are the rule groups this SLO's saved object expects to be
  * deployed actually present on the ruler right now?"
  *

@@ -193,7 +193,7 @@ interface InstantSample {
 
 /**
  * Variant of `InstantSample` that retains samples whose value was non-finite
- * (NaN / Infinity). The recording rule is alive — Cortex returned a series at
+ * (NaN / Infinity). The recording rule is alive — Prometheus returned a series at
  * the requested timestamp — but the recorded expression evaluated to e.g.
  * `1 - (0 / 0)` because the source metric had no traffic in the window. The
  * aggregator differentiates "rule fires NaN" (`source_idle`) from "ruler
@@ -691,7 +691,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
    * `__name__` and map samples back to objectives via the provided
    * `recordingFingerprints`. One `__name__=~` query per call covers every
    * fingerprint this SLO references, so a multi-objective SLO with N unique
-   * SLIs pays one Cortex round-trip regardless of N.
+   * SLIs pays one Prometheus round-trip regardless of N.
    *
    * Samples are keyed by `__name__` label; the map returned is
    * `objectiveName → sample` so the caller's existing per-objective loop
@@ -818,7 +818,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
  * Maximum SLO ids folded into a single batched PromQL `slo_id=~"..."` regex
  * alternation. Each id contributes its own length plus a `|` separator and any
  * RE2 escapes; UUIDs hover around 40 chars after escaping. 200 ids keeps the
- * query body under ~10 KB which sits well below typical Prometheus / Cortex
+ * query body under ~10 KB which sits well below typical Prometheus
  * `max-query-length` limits while still amortising the round-trip cost over a
  * large fleet.
  */

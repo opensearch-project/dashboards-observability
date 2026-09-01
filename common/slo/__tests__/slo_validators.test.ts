@@ -211,7 +211,7 @@ describe('validateSloSpec', () => {
 
 // Custom-expr PromQL defensive checks. The character set closes the classes
 // most likely to confuse downstream parsers; the real PromQL parse happens
-// at Cortex when the rule group is upserted.
+// at Prometheus when the rule group is upserted.
 describe('validateSloSpec — custom PromQL defensive checks', () => {
   function customSpec(expr: {
     mode: 'events';

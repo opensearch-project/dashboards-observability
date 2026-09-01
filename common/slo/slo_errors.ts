@@ -43,7 +43,7 @@ export class SloVersionConflictError extends Error {
 /**
  * Stable error codes for ruler dual-write failures. The wizard branches on
  * `code` to render a self-service message; the raw upstream body is
- * preserved so the user can read Cortex's own diagnostic (e.g. "invalid
+ * preserved so the user can read Prometheus's own diagnostic (e.g. "invalid
  * PromQL: parse error").
  */
 export type SloRulerErrorCode =
@@ -77,7 +77,7 @@ export class SloRulerError extends Error {
  * provisioned rule group but has no deploy context — typically because the
  * SLO's `datasourceId` is no longer registered (datasource was removed or
  * renamed). Delete is ruler-first, so we refuse to drop the SO here: that
- * would leave a dangling rule group in Cortex still evaluating against the
+ * would leave a dangling rule group in Prometheus still evaluating against the
  * live cluster. The user has to restore the datasource (or the operator has
  * to force a ruler-side cleanup) before the SLO can be removed.
  */
@@ -85,7 +85,7 @@ export class SloRulerTeardownRequiredError extends Error {
   constructor(public readonly sloId: string, public readonly datasourceId: string) {
     super(
       `Cannot delete SLO "${sloId}": its datasource "${datasourceId}" is not registered, ` +
-        `so the rule group cannot be removed from Cortex. Re-register the datasource and retry.`
+        `so the rule group cannot be removed from Prometheus. Re-register the datasource and retry.`
     );
     this.name = 'SloRulerTeardownRequiredError';
   }

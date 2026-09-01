@@ -52,11 +52,11 @@ function noopLogger(): Logger {
 function promDatasource(overrides: Partial<Datasource> = {}): Datasource {
   return {
     id: 'prom-ds-001',
-    name: 'my cortex',
+    name: 'my prometheus',
     type: 'prometheus',
     url: '',
     enabled: true,
-    directQueryName: 'my-cortex-connection',
+    directQueryName: 'my-prometheus-connection',
     ...overrides,
   };
 }
@@ -188,7 +188,7 @@ function envelopeToDataFrame(envelope: {
     type: 'data_frame',
     body: {
       type: 'data_frame',
-      name: 'cortex',
+      name: 'prometheus',
       schema: [
         { name: 'Time', type: 'time', values: [] },
         { name: 'Series', type: 'string', values: [] },
@@ -394,7 +394,7 @@ describe('parseInstantResponse', () => {
   it('unwraps the DirectQuery results-by-datasource envelope', () => {
     const samples = parseInstantResponse({
       results: {
-        'my cortex': {
+        'my prometheus': {
           resultType: 'vector',
           result: [{ metric: { slo_objective: 'a' }, value: [1700000000, '0.5'] }],
         },
@@ -478,7 +478,7 @@ describe('DirectQueryStatusAggregator.aggregate — happy paths', () => {
     expect(options).toEqual({ strategy: 'promql' });
     const reqBody = (request as { body: Record<string, Record<string, unknown>> }).body;
     expect(reqBody.query.language).toBe('PROMQL');
-    expect(reqBody.query.dataset).toEqual({ id: 'my-cortex-connection', type: 'PROMETHEUS' });
+    expect(reqBody.query.dataset).toEqual({ id: 'my-prometheus-connection', type: 'PROMETHEUS' });
     expect(reqBody.options.queryType).toBe('INSTANT');
 
     const transportCalls = requestMock.mock.calls.map(
@@ -601,7 +601,7 @@ describe('DirectQueryStatusAggregator.aggregate — disabled / missing data', ()
   });
 
   it('recording rule fires NaN (source metric idle) → state=source_idle', async () => {
-    // Cortex returned a sample at the requested timestamp, but the recorded
+    // Prometheus returned a sample at the requested timestamp, but the recorded
     // expression evaluated to NaN — typically `1 - (0/0)` because the source
     // metric has no traffic in the window. The aggregator surfaces
     // source_idle so the listing badge points at the upstream metric

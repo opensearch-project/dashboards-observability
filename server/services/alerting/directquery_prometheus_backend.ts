@@ -724,7 +724,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       series = await matrixPromise;
     } catch (err) {
       // Matrix failed — still surface live alerts when window ends at now,
-      // so a transient Cortex error doesn't blank the UI for what's firing
+      // so a transient Prometheus error doesn't blank the UI for what's firing
       // RIGHT NOW.
       const live = await liveSettled;
       if (!live.ok || live.alerts.length === 0) {

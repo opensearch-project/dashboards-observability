@@ -46,11 +46,11 @@ function mockClient(
 function promDatasource(overrides: Partial<Datasource> = {}): Datasource {
   return {
     id: 'ds-1',
-    name: 'my Cortex',
+    name: 'my Prometheus',
     type: 'prometheus',
     url: '',
     enabled: true,
-    directQueryName: 'my-cortex-connection',
+    directQueryName: 'my-prometheus-connection',
     ...overrides,
   };
 }
@@ -133,7 +133,7 @@ describe('DirectQueryRulerClient.upsertRuleGroup', () => {
     const svc = new DirectQueryRulerClient(noopLogger());
     await svc.upsertRuleGroup(
       client,
-      promDatasource({ directQueryName: 'my cortex' }), // space to force encoding
+      promDatasource({ directQueryName: 'my prometheus' }), // space to force encoding
       'slo-generated-ws1',
       sampleGroup()
     );
@@ -146,7 +146,7 @@ describe('DirectQueryRulerClient.upsertRuleGroup', () => {
     };
     expect(call.method).toBe('POST');
     expect(call.path).toBe(
-      '/_plugins/_directquery/_resources/my%20cortex/api/v1/rules/slo-generated-ws1'
+      '/_plugins/_directquery/_resources/my%20prometheus/api/v1/rules/slo-generated-ws1'
     );
     expect(typeof call.body).toBe('string');
     const parsed = yamlLoad(call.body) as { name: string; rules: unknown[] };
@@ -178,7 +178,7 @@ describe('DirectQueryRulerClient.deleteRuleGroup', () => {
     const call = requestMock.mock.calls[0][0] as { method: string; path: string };
     expect(call.method).toBe('DELETE');
     expect(call.path).toBe(
-      '/_plugins/_directquery/_resources/my-cortex-connection/api/v1/rules/slo-generated-ws1/slo%3Agroup_abcd'
+      '/_plugins/_directquery/_resources/my-prometheus-connection/api/v1/rules/slo-generated-ws1/slo%3Agroup_abcd'
     );
   });
 });
@@ -341,7 +341,7 @@ describe('DirectQueryRulerClient.getRuleGroup', () => {
     expect(call.method).toBe('GET');
     // Hit the namespace-list path, not the single-group path.
     expect(call.path).toBe(
-      '/_plugins/_directquery/_resources/my-cortex-connection/api/v1/rules/slo-generated-ws1'
+      '/_plugins/_directquery/_resources/my-prometheus-connection/api/v1/rules/slo-generated-ws1'
     );
     expect(parsed).not.toBeNull();
     expect(parsed!.groupName).toBe('slo:group_bbb');
@@ -431,11 +431,11 @@ describe('DirectQueryRulerClient.listRuleGroups', () => {
     const call = requestMock.mock.calls[0][0] as { method: string; path: string };
     expect(call.method).toBe('GET');
     expect(call.path).toBe(
-      '/_plugins/_directquery/_resources/my-cortex-connection/api/v1/rules/slo-generated-ws1'
+      '/_plugins/_directquery/_resources/my-prometheus-connection/api/v1/rules/slo-generated-ws1'
     );
   });
 
-  it('Cortex namespace-keyed envelope → returns all groups parsed', async () => {
+  it('Prometheus namespace-keyed envelope → returns all groups parsed', async () => {
     const yamlEnvelope = yamlDump({
       'slo-generated-ws1': [
         {
@@ -623,7 +623,7 @@ describe('DirectQueryRulerClient.deleteRuleGroup — 404 tolerance', () => {
     const call = requestMock.mock.calls[0][0] as { method: string; path: string };
     expect(call.method).toBe('DELETE');
     expect(call.path).toBe(
-      '/_plugins/_directquery/_resources/my-cortex-connection/api/v1/rules/ns/group-already-gone'
+      '/_plugins/_directquery/_resources/my-prometheus-connection/api/v1/rules/ns/group-already-gone'
     );
   });
 

@@ -205,7 +205,7 @@ describe('SloWizardPage — Wave 2 additions', () => {
     await waitFor(() => {
       expect(screen.getByTestId('slosWizardRulerError')).toBeInTheDocument();
     });
-    // The raw Cortex diagnostic is surfaced verbatim — not swallowed into a
+    // The raw Prometheus diagnostic is surfaced verbatim — not swallowed into a
     // generic "Create failed" toast.
     expect(screen.getByTestId('slosWizardRulerErrorBody')).toHaveTextContent(
       'invalid PromQL: parse error at char 42'

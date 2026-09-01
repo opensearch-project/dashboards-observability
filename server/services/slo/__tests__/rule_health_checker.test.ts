@@ -38,11 +38,11 @@ function mockClient(): AlertingOSClient {
 function mockDatasource(overrides: Partial<Datasource> = {}): Datasource {
   return {
     id: 'ds-1',
-    name: 'my-cortex',
+    name: 'my-prometheus',
     type: 'prometheus',
     url: '',
     enabled: true,
-    directQueryName: 'my-cortex-connection',
+    directQueryName: 'my-prometheus-connection',
     ...overrides,
   };
 }

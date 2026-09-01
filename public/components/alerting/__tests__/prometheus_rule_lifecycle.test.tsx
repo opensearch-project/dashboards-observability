@@ -5,8 +5,8 @@
 
 /**
  * Tests for Prometheus rule lifecycle operations:
- * - Clone routes through Cortex ruler API (not OS Alerting)
- * - Delete routes through Cortex ruler API
+ * - Clone routes through Prometheus ruler API (not OS Alerting)
+ * - Delete routes through Prometheus ruler API
  * - Edit persists evaluationInterval and forDuration
  * - Optimistic insert on clone
  * - Disable/Acknowledge buttons hidden for Prometheus

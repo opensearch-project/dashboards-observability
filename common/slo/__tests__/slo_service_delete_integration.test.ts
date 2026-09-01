@@ -200,7 +200,7 @@ function makeHarness() {
 
 describe('SloService.delete — integration', () => {
   it('ruler 404-tolerant delete: group already gone → delete succeeds and SO is removed', async () => {
-    // Real-world case: out-of-band delete removed the rule group from Cortex
+    // Real-world case: out-of-band delete removed the rule group from Prometheus
     // *before* the user clicked Delete in the UI. The fake ruler's
     // `deleteRuleGroup` resolves (404-tolerant by design); the service must
     // not treat that as a failure.
@@ -235,7 +235,7 @@ describe('SloService.delete — integration', () => {
       code: 'RULER_UNREACHABLE',
     });
 
-    // SO survives so the user can retry once Cortex is back.
+    // SO survives so the user can retry once Prometheus is back.
     const preserved = await store.get(doc.id);
     expect(preserved).not.toBeNull();
     expect(preserved?.id).toBe(doc.id);

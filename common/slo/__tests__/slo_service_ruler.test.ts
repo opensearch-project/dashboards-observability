@@ -285,7 +285,7 @@ describe('SloService.delete with deploy', () => {
   it('calls ruler.deleteRuleGroup BEFORE store.delete', async () => {
     // Ruler-first, SO-second: the SO is the only pointer back to the rule
     // group's name; if we drop it first and the ruler call fails, the group
-    // lives on in Cortex forever, silently evaluating dead alerts. Ruler
+    // lives on in Prometheus forever, silently evaluating dead alerts. Ruler
     // confirmation must precede the SO removal so failures keep the SO.
     //
     // The create-via-deploy path provisions the rule group (without this,
@@ -318,7 +318,7 @@ describe('SloService.delete with deploy', () => {
     await expect(svc.delete(doc.id, deploy)).rejects.toBeInstanceOf(SloRulerError);
 
     // SO must still be there: the ruler group is still live, so the user
-    // has a path to retry after Cortex recovers.
+    // has a path to retry after Prometheus recovers.
     expect(await store.get(doc.id)).not.toBeNull();
   });
 

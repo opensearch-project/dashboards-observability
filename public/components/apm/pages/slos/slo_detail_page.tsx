@@ -112,7 +112,7 @@ function iconSummaryFromDoc(doc: SloDocument): SloSummary {
 
 /**
  * Rule-health re-poll bounds (F-CRUD2). A freshly-created SLO's rule groups
- * take a little while to propagate through the Cortex/AMP ruler, during which
+ * take a little while to propagate through the Prometheus/AMP ruler, during which
  * the health probe legitimately reports them as missing. Rather than alarm
  * immediately, we re-probe up to {@link RULE_HEALTH_MAX_RETRIES} times, one
  * every {@link RULE_HEALTH_RETRY_INTERVAL_MS}, and only escalate to the
@@ -673,7 +673,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
 
   // While rule health reads as missing/partial, re-probe on a bounded
   // interval (F-CRUD2). A freshly-created SLO's rule groups take time to
-  // propagate through the Cortex/AMP ruler, so a "missing" reading is
+  // propagate through the Prometheus/AMP ruler, so a "missing" reading is
   // routinely transient right after create. Each probe that still comes back
   // missing schedules the next one until RULE_HEALTH_MAX_RETRIES is hit; once
   // health recovers we reset the budget so a later regression re-polls. The
@@ -1204,7 +1204,7 @@ export const SloDetailPage: React.FC<SloDetailPageProps> = ({
                   color="danger"
                   iconType="alert"
                   title={i18n.translate('observability.apm.slo.detail.rulesMissingCallout.title', {
-                    defaultMessage: 'Rule groups missing in Cortex',
+                    defaultMessage: 'Rule groups missing in Prometheus',
                   })}
                   data-test-subj="slosDetailRuleHealthCallout"
                 >

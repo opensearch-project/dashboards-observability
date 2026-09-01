@@ -109,7 +109,7 @@ describe('ProbeSliPanel', () => {
   });
 
   it('renders the request-error callout when probeSli rejects', async () => {
-    const probeSli = jest.fn().mockRejectedValue(new Error('cortex 500'));
+    const probeSli = jest.fn().mockRejectedValue(new Error('prometheus 500'));
     render(
       <ProbeSliPanel
         apiClient={makeClient(probeSli)}
@@ -121,7 +121,7 @@ describe('ProbeSliPanel', () => {
     fireEvent.click(screen.getByTestId('slosWizardProbeButton'));
 
     expect(await screen.findByTestId('slosWizardProbeRequestError')).toBeInTheDocument();
-    expect(screen.getByText('cortex 500')).toBeInTheDocument();
+    expect(screen.getByText('prometheus 500')).toBeInTheDocument();
   });
 
   it('shows the empty-vector callout when the response has emptyVector=true', async () => {

@@ -5,16 +5,16 @@
 
 /**
  * Ruler client — writes SLO rule groups to a Prometheus-compatible ruler
- * (Cortex / Mimir) via the OpenSearch SQL plugin's DirectQuery resource proxy.
+ * (Prometheus / Mimir) via the OpenSearch SQL plugin's DirectQuery resource proxy.
  *
  * Path: plugin → OSD scoped cluster client → /_plugins/_directquery/_resources/
  *       {dqName}/api/v1/rules/{namespace}[/{groupName}] → SQL plugin's
- *       Prometheus connector → Cortex ruler.
+ *       Prometheus connector → Prometheus ruler.
  *
  * Contract (verified upstream, 2026-04-23 pre-check):
  *   - Create/update: POST .../api/v1/rules/{namespace} with body = rule-group YAML
  *   - Delete:        DELETE .../api/v1/rules/{namespace}/{groupName}
- *   Bodies are forwarded verbatim to Cortex with Content-Type: application/yaml
+ *   Bodies are forwarded verbatim to Prometheus with Content-Type: application/yaml
  *   (the SQL plugin's PrometheusClientImpl sets that header on the upstream call;
  *    the OSD transport does not expose per-request headers so we rely on that).
  *
@@ -41,7 +41,7 @@ import { SloRulerError } from '../../../common/slo/slo_errors';
  */
 export interface RulerClient {
   /**
-   * Upsert a rule group into the given namespace. Cortex's POST semantics are
+   * Upsert a rule group into the given namespace. Prometheus's POST semantics are
    * create-or-replace within `(namespace, group.name)`, so replaying the same
    * body is idempotent — useful for the compensation retry path.
    */
@@ -88,11 +88,11 @@ export interface RulerClient {
 }
 
 // ============================================================================
-// YAML serialization — Cortex / Prometheus rule-group format
+// YAML serialization — Prometheus rule-group format
 // ============================================================================
 
 /**
- * Serialize a GeneratedRuleGroup to the YAML shape Cortex accepts:
+ * Serialize a GeneratedRuleGroup to the YAML shape Prometheus accepts:
  *
  *   name: <groupName>
  *   interval: <Ns|Nm|Nh>
@@ -180,7 +180,7 @@ export class DirectQueryRulerClient implements RulerClient {
     try {
       // The OSD transport doesn't let us set Content-Type per request, but the
       // SQL plugin's PrometheusClientImpl forces Content-Type: application/yaml
-      // on the upstream Cortex call — bodies are forwarded verbatim.
+      // on the upstream Prometheus call — bodies are forwarded verbatim.
       await client.transport.request({
         method: 'POST',
         path,
@@ -260,7 +260,7 @@ export class DirectQueryRulerClient implements RulerClient {
       if (extractHttpStatus(err) === 404) {
         return [];
       }
-      // The SQL plugin wraps Cortex's "no rule groups found" 404 as HTTP 400
+      // The SQL plugin wraps Prometheus's "no rule groups found" 404 as HTTP 400
       // with a `DataSourceClientException` / `PrometheusClientException`
       // envelope whose `details` contains `"Ruler request failed with code:
       // 404. Error details: no rule groups found"`. Treat that as an empty
@@ -327,7 +327,7 @@ function stringifyBody(body: unknown): string {
  * probe paths can branch on 404 without building a full SloRulerError.
  */
 /**
- * Cortex's ruler returns HTTP 404 with body `no rule groups found` when a
+ * Prometheus's ruler returns HTTP 404 with body `no rule groups found` when a
  * namespace exists but holds nothing (or hasn't yet been created). The
  * OpenSearch SQL plugin's DirectQuery proxy does not forward that status —
  * it wraps the response as HTTP 400 with a structured envelope:
@@ -352,7 +352,7 @@ function isWrappedEmptyNamespaceError(err: unknown): boolean {
     const { type, details } = error as { type?: unknown; details?: unknown };
     if (typeof type !== 'string' || !/ClientException$/.test(type)) continue;
     if (typeof details !== 'string') continue;
-    // Upstream Cortex status is embedded as `code: <N>` inside details.
+    // Upstream Prometheus status is embedded as `code: <N>` inside details.
     const match = /\bcode:\s*(\d{3})\b/.exec(details);
     if (match && match[1] === '404') return true;
   }
@@ -430,7 +430,7 @@ function isGeneratedRule(rule: GeneratedRule | null): rule is GeneratedRule {
 /**
  * Coerce the list-namespace response. The ruler's HTTP API answers with the
  * Prometheus envelope `{ status: "success", data: { groups: [ { name, file,
- * interval, rules, ... }, ... ] } }`. Cortex's ruler CRUD admin surface also
+ * interval, rules, ... }, ... ] } }`. Prometheus's ruler CRUD admin surface also
  * accepts `{ "<ns>": [ { name, interval, rules }, ... ] }`; some tests feed a
  * top-level array or a single group. Accept all four shapes.
  */
@@ -462,7 +462,7 @@ function coerceRuleGroupList(doc: unknown): GeneratedRuleGroup[] {
         return groups.map(coerceRuleGroup).filter(isGeneratedRuleGroup);
       }
     }
-    // Cortex namespace-keyed envelope: take every array-valued field and
+    // Prometheus namespace-keyed envelope: take every array-valued field and
     // flatten — namespaces are already filtered server-side by the URL, so
     // this is safe even if multiple keys appear.
     const fromEnvelope: GeneratedRuleGroup[] = [];

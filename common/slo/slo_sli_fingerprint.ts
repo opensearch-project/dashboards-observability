@@ -7,7 +7,7 @@
  * Deterministic fingerprint of an SLO's SLI definition + the objective
  * fields that materially affect the generated recording rule. Two SLOs that
  * produce identical recording-rule PromQL must produce identical fingerprints;
- * two SLOs that differ in any way that would affect what Cortex evaluates
+ * two SLOs that differ in any way that would affect what Prometheus evaluates
  * must produce different fingerprints.
  *
  * Output: 16-char lowercase hex (first 8 bytes of sha256). Chosen for

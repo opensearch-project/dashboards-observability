@@ -264,7 +264,7 @@ describe('SloReconciler.sweep', () => {
     const repo = new FakeRepo();
     const ruler = new FakeRuler();
     ruler.deleteImpl = async () => {
-      throw new Error('Cortex 503: backend unavailable');
+      throw new Error('Prometheus 503: backend unavailable');
     };
     repo.put(ref('ws-A', 'ds-1', 'fp-A', 0, '2026-05-21T00:00:00.000Z'));
     const recon = buildReconciler(repo, ruler, {

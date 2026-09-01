@@ -176,7 +176,7 @@ describe('useLivePreview', () => {
   it('survives executeInstantQuery rejection (per-query catch) and yields a success row with undefined values', async () => {
     const preview = jest.fn().mockResolvedValue(fakeGroup);
     const apiClient = ({ preview } as unknown) as Pick<SloApiClient, 'preview'>;
-    mockExecuteInstantQuery.mockRejectedValue(new Error('cortex 502'));
+    mockExecuteInstantQuery.mockRejectedValue(new Error('prometheus 502'));
     const { result } = renderHook(() =>
       useLivePreview({
         apiClient,

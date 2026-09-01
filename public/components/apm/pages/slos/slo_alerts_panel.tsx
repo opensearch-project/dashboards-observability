@@ -203,7 +203,7 @@ export const SloAlertsPanel: React.FC<SloAlertsPanelProps> = ({ doc, ruleHealth 
             const probeReturned = ruleHealth !== null;
             const present = probeReturned ? presentGroups.has(groupName) : true;
             // Recording groups (`slo:rec:…`) don't surface in Alert Manager
-            // — alert_service.fetchRulesRaw filters Cortex rules with
+            // — alert_service.fetchRulesRaw filters Prometheus rules with
             // `r.type === 'alerting'` before they reach MonitorsTable — so
             // a "View" link on those rows would land on an empty list.
             // Only render the deep-link affordance for alert groups.

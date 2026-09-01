@@ -144,7 +144,7 @@ export const EditMonitor: React.FC<EditMonitorProps> = ({
     if (data.datasourceType === 'prometheus') {
       // Prometheus rule edit — seed from the unified rule summary + raw data.
       // The summary carries pre-parsed human-readable fields; raw has the
-      // Cortex wire format which may use empty strings or numeric seconds.
+      // Prometheus wire format which may use empty strings or numeric seconds.
       const raw = (data.raw || {}) as Record<string, unknown>;
       const rules = (raw.rules as Array<Record<string, unknown>>) || [];
       const firstRule = rules[0] || {};

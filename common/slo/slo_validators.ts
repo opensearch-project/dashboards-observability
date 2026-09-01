@@ -48,7 +48,7 @@ function validateUserField(label: string, value: string | undefined): string | n
  * in the generator (every line is prefixed with 6 spaces, so the user
  * cannot terminate the block), but unbalanced parens or trailing backslashes
  * escape the generator's wrapping parens and produce malformed PromQL that
- * Cortex rejects only at deploy time. Validating here keeps the error local
+ * Prometheus rejects only at deploy time. Validating here keeps the error local
  * (wizard rejects at save) and forbids the class of input most likely to
  * confuse downstream parsers. Returns `null` when shaped reasonably, or an
  * error string to surface at `spec.sli.definition.customExpr.*`.
@@ -164,7 +164,7 @@ const RESERVED_LABEL_KEYS = new Set([
   'slo_window_approximated',
   'slo_budget_threshold',
   // Prototype-pollution guard. `LABEL_NAME_RE` matches `__proto__` /
-  // `constructor` / `prototype`. Cortex would reject the resulting rule
+  // `constructor` / `prototype`. Prometheus would reject the resulting rule
   // (`slo_label___proto__: "x"`) at deploy time, so blocking earlier
   // gives the user a clear validation error instead of an opaque ruler
   // 400.

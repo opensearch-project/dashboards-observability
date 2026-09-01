@@ -33,7 +33,7 @@ const SLO_BASE = `${OBSERVABILITY_BASE}/v1/slos`;
 /**
  * Ruler dual-write envelope mirrored from the server's SloRulerError mapping
  * (see server/routes/slo/handlers.ts:toSloError). The wizard renders
- * `rawBody` verbatim so the user sees Cortex's own diagnostic (e.g.
+ * `rawBody` verbatim so the user sees Prometheus's own diagnostic (e.g.
  * "invalid PromQL: parse error at char 42"), not a generic create-failed
  * toast. `code` lets the wizard branch on coarse failure mode.
  */
