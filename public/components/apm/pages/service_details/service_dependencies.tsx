@@ -243,8 +243,10 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   // Range filter states
   const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 0]);
   const [requestsRange, setRequestsRange] = useState<[number, number]>([0, 0]);
-  const latencyUserModified = useRef(false);
-  const requestsUserModified = useRef(false);
+  // Track whether the user has explicitly interacted with range filters.
+  // Use as state, so the memos that read them re-run when a flag flips.
+  const [latencyUserModified, setLatencyUserModified] = useState(false);
+  const [requestsUserModified, setRequestsUserModified] = useState(false);
 
   // Parse time range
   const parsedTimeRange = useMemo(() => {
@@ -421,7 +423,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   // Step 3: Reset slider ranges when bounds change
   // Use functional update to prevent unnecessary re-renders when values haven't changed
   useEffect(() => {
-    latencyUserModified.current = false;
+    setLatencyUserModified(false);
     setLatencyRange((prev) => {
       if (prev[0] === latencyBounds.min && prev[1] === latencyBounds.max) {
         return prev; // Return same reference to avoid re-render
@@ -431,7 +433,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   }, [latencyBounds.min, latencyBounds.max]);
 
   useEffect(() => {
-    requestsUserModified.current = false;
+    setRequestsUserModified(false);
     setRequestsRange((prev) => {
       if (prev[0] === requestsBounds.min && prev[1] === requestsBounds.max) {
         return prev; // Return same reference to avoid re-render
@@ -458,7 +460,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
       // Latency range filter (only if range has been adjusted)
       const isLatencyFilterActive =
         // Gating on latencyUserModified avoids a false positive after a percentile switch
-        latencyUserModified.current &&
+        latencyUserModified &&
         (latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max);
       if (isLatencyFilterActive) {
         // Use the selected percentile's duration for filtering
@@ -491,6 +493,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     });
   }, [
     textFilteredDependencies,
+    latencyUserModified,
     latencyRange,
     requestsRange,
     latencyBounds,
@@ -507,7 +510,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   // Range-slider changes reset the page to 1 (a filter change), unlike a percentile switch.
   const onLatencyRangeChange = useCallback(
     (val: [number, number]) => {
-      latencyUserModified.current = true;
+      setLatencyUserModified(true);
       setLatencyRange(val);
       resetPage();
     },
@@ -516,7 +519,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
 
   const onRequestsRangeChange = useCallback(
     (val: [number, number]) => {
-      requestsUserModified.current = true;
+      setRequestsUserModified(true);
       setRequestsRange(val);
       resetPage();
     },
@@ -611,7 +614,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
 
     // Latency range filter badge (only if user has interacted and modified from default bounds)
     const isLatencyModified =
-      latencyUserModified.current &&
+      latencyUserModified &&
       (latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max);
     if (isLatencyModified) {
       badges.push({
@@ -621,7 +624,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         }),
         values: [`${latencyRange[0].toFixed(0)}-${latencyRange[1].toFixed(0)}ms`],
         onRemove: () => {
-          latencyUserModified.current = false;
+          setLatencyUserModified(false);
           setLatencyRange([latencyBounds.min, latencyBounds.max]);
           resetPage();
         },
@@ -630,7 +633,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
 
     // Requests range filter badge (only if user has interacted and modified from default bounds)
     const isRequestsModified =
-      requestsUserModified.current &&
+      requestsUserModified &&
       (requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max);
     if (isRequestsModified) {
       badges.push({
@@ -640,7 +643,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         }),
         values: [`${requestsRange[0].toFixed(0)}-${requestsRange[1].toFixed(0)}`],
         onRemove: () => {
-          requestsUserModified.current = false;
+          setRequestsUserModified(false);
           setRequestsRange([requestsBounds.min, requestsBounds.max]);
           resetPage();
         },
@@ -654,6 +657,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     selectedRemoteOperations,
     selectedAvailabilityThresholds,
     selectedErrorRateThresholds,
+    latencyUserModified,
+    requestsUserModified,
     latencyRange,
     requestsRange,
     latencyBounds,
@@ -668,8 +673,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     setSelectedRemoteOperations([]);
     setSelectedAvailabilityThresholds([]);
     setSelectedErrorRateThresholds([]);
-    latencyUserModified.current = false;
-    requestsUserModified.current = false;
+    setLatencyUserModified(false);
+    setRequestsUserModified(false);
     setLatencyRange([latencyBounds.min, latencyBounds.max]);
     setRequestsRange([requestsBounds.min, requestsBounds.max]);
     resetPage();
@@ -993,7 +998,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
             options={LATENCY_OPTIONS}
             valueOfSelected={latencyPercentile}
             onChange={(value) => {
-              latencyUserModified.current = false;
+              setLatencyUserModified(false);
               setLatencyPercentile(value as 'p99' | 'p90' | 'p50');
             }}
             compressed

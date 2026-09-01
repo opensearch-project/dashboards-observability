@@ -309,9 +309,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   // Latency percentile selector state
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
-  // Track whether user has explicitly interacted with range filters (prevents badge flicker on hydration)
-  const latencyUserModified = useRef(false);
-  const throughputUserModified = useRef(false);
+  // Track whether the user has explicitly interacted with range filters.
+  // Use as state, so the activeFilters memo re-runs when a flag flips.
+  const [latencyUserModified, setLatencyUserModified] = useState(false);
+  const [throughputUserModified, setThroughputUserModified] = useState(false);
 
   // EuiResizableContainer togglePanel ref — captured inside render-prop, never passed as a prop
   const togglePanelRef = useRef<((id: string, options: { direction: string }) => void) | null>(
@@ -323,12 +324,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
   // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer
   const onLatencyRangeChange = useCallback((val: [number, number]) => {
-    latencyUserModified.current = true;
+    setLatencyUserModified(true);
     setLatencyRange(val);
   }, []);
 
   const onThroughputRangeChange = useCallback((val: [number, number]) => {
-    throughputUserModified.current = true;
+    setThroughputUserModified(true);
     setThroughputRange(val);
   }, []);
 
@@ -652,8 +653,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   useEffect(() => {
     setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
     setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
-    latencyUserModified.current = false;
-    throughputUserModified.current = false;
+    setLatencyUserModified(false);
+    setThroughputUserModified(false);
   }, [metricRanges]);
 
   // Apply metric filters for display (on top of already filtered items)
@@ -734,7 +735,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Latency range filter badge (only if user explicitly modified)
     const isLatencyModified =
-      latencyUserModified.current &&
+      latencyUserModified &&
       (latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax);
     if (isLatencyModified) {
       badges.push({
@@ -742,7 +743,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         category: i18nTexts.filters.latency,
         values: [`${latencyRange[0].toFixed(0)}-${latencyRange[1].toFixed(0)}ms`],
         onRemove: () => {
-          latencyUserModified.current = false;
+          setLatencyUserModified(false);
           setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
         },
       });
@@ -750,7 +751,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Throughput range filter badge (only if user explicitly modified)
     const isThroughputModified =
-      throughputUserModified.current &&
+      throughputUserModified &&
       (throughputRange[0] > metricRanges.throughputMin ||
         throughputRange[1] < metricRanges.throughputMax);
     if (isThroughputModified) {
@@ -761,7 +762,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           `${formatThroughput(throughputRange[0])} - ${formatThroughput(throughputRange[1])}`,
         ],
         onRemove: () => {
-          throughputUserModified.current = false;
+          setThroughputUserModified(false);
           setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
         },
       });
@@ -801,6 +802,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return badges;
   }, [
     selectedEnvironments,
+    latencyUserModified,
+    throughputUserModified,
     latencyRange,
     throughputRange,
     selectedFailureRateThresholds,
@@ -815,8 +818,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
     setSelectedFailureRateThresholds([]);
     setSelectedGroupByAttributes({});
-    latencyUserModified.current = false;
-    throughputUserModified.current = false;
+    setLatencyUserModified(false);
+    setThroughputUserModified(false);
   }, [metricRanges]);
 
   const columns: Array<EuiBasicTableColumn<ServiceTableItem>> = useMemo(
