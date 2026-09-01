@@ -7,6 +7,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
+  Criteria,
   EuiPanel,
   EuiSpacer,
   EuiCallOut,
@@ -43,6 +44,7 @@ import {
 } from '../../query_services/query_requests/promql_queries';
 import { useDependencies } from '../../shared/hooks/use_dependencies';
 import { useDependencyMetrics } from '../../shared/hooks/use_dependency_metrics';
+import { useControlledPagination } from '../../shared/hooks/use_controlled_pagination';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 import { DependencyFilterSidebar } from '../../shared/components/dependency_filter_sidebar';
@@ -84,6 +86,9 @@ interface DependenciesTablePanelProps {
   noDataMessage: string;
   noFilteredDataMessage: string;
   dependenciesCount: number;
+  pageIndex: number;
+  pageSize: number;
+  onTableChange: (criteria: Criteria<GroupedDependency>) => void;
 }
 
 const DependenciesTablePanelUI: React.FC<DependenciesTablePanelProps> = ({
@@ -94,6 +99,9 @@ const DependenciesTablePanelUI: React.FC<DependenciesTablePanelProps> = ({
   noDataMessage,
   noFilteredDataMessage,
   dependenciesCount,
+  pageIndex,
+  pageSize,
+  onTableChange,
 }) => (
   <EuiPanel>
     {!isLoading && filteredDependencies.length === 0 ? (
@@ -101,9 +109,9 @@ const DependenciesTablePanelUI: React.FC<DependenciesTablePanelProps> = ({
         <p>{dependenciesCount === 0 ? noDataMessage : noFilteredDataMessage}</p>
       </EuiText>
     ) : (
-      // Don't key the table on latencyPercentile
-      // Switching percentile only swaps the latency column
-      // Remounting would reset pagination and reload the row charts
+      // Switching percentile rebuilds the items array (new reference). Keying the table on it
+      // would remount and reload the row charts; leaving pagination uncontrolled would reset
+      // pageIndex to 0. So the table is not keyed and pagination is controlled.
       <EuiInMemoryTable
         items={filteredDependencies}
         columns={columns}
@@ -115,9 +123,11 @@ const DependenciesTablePanelUI: React.FC<DependenciesTablePanelProps> = ({
           },
         }}
         pagination={{
-          initialPageSize: SERVICE_DETAILS_CONSTANTS.DEFAULT_PAGE_SIZE,
+          pageIndex,
+          pageSize,
           pageSizeOptions: SERVICE_DETAILS_CONSTANTS.PAGE_SIZE_OPTIONS,
         }}
+        onTableChange={onTableChange}
         itemId={(item: GroupedDependency) => `${item.serviceName}:${item.remoteOperation}`}
         isExpandable={true}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
@@ -215,17 +225,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   );
   const handleTogglePanel = useCallback(() => {
     togglePanelRef.current?.('dependencies-filter-sidebar', { direction: 'left' });
-  }, []);
-
-  // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer
-  const onLatencyRangeChange = useCallback((val: [number, number]) => {
-    latencyUserModified.current = true;
-    setLatencyRange(val);
-  }, []);
-
-  const onRequestsRangeChange = useCallback((val: [number, number]) => {
-    requestsUserModified.current = true;
-    setRequestsRange(val);
   }, []);
 
   // Threshold filter states (using semantic enum keys)
@@ -499,6 +498,46 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     latencyPercentile,
   ]);
 
+  // Controlled pagination (clamped against the current row count). Declared after
+  // filteredDependencies because the hook needs the row count to clamp.
+  const { pageIndex, pageSize, onTableChange, resetPage } =
+    useControlledPagination<GroupedDependency>(filteredDependencies.length);
+
+  // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer.
+  // Range-slider changes reset the page to 1 (a filter change), unlike a percentile switch.
+  const onLatencyRangeChange = useCallback(
+    (val: [number, number]) => {
+      latencyUserModified.current = true;
+      setLatencyRange(val);
+      resetPage();
+    },
+    [resetPage]
+  );
+
+  const onRequestsRangeChange = useCallback(
+    (val: [number, number]) => {
+      requestsUserModified.current = true;
+      setRequestsRange(val);
+      resetPage();
+    },
+    [resetPage]
+  );
+
+  // Reset to page 1 on filter changes. Excludes latencyRange/requestsRange on purpose: a
+  // percentile switch resets latencyRange, so watching the ranges here would reset the page on
+  // a percentile switch too and defeat the fix (#2849). The sliders reset in their own handlers.
+  useEffect(() => {
+    resetPage();
+  }, [
+    debouncedSearchQuery,
+    selectedDependencies,
+    selectedServiceOperations,
+    selectedRemoteOperations,
+    selectedAvailabilityThresholds,
+    selectedErrorRateThresholds,
+    resetPage,
+  ]);
+
   const isLoading = depsLoading || metricsLoading;
   const error = depsError;
 
@@ -584,6 +623,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         onRemove: () => {
           latencyUserModified.current = false;
           setLatencyRange([latencyBounds.min, latencyBounds.max]);
+          resetPage();
         },
       });
     }
@@ -602,6 +642,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         onRemove: () => {
           requestsUserModified.current = false;
           setRequestsRange([requestsBounds.min, requestsBounds.max]);
+          resetPage();
         },
       });
     }
@@ -617,6 +658,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     requestsRange,
     latencyBounds,
     requestsBounds,
+    resetPage,
   ]);
 
   // Clear all filters handler
@@ -630,7 +672,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     requestsUserModified.current = false;
     setLatencyRange([latencyBounds.min, latencyBounds.max]);
     setRequestsRange([requestsBounds.min, requestsBounds.max]);
-  }, [latencyBounds, requestsBounds]);
+    resetPage();
+  }, [latencyBounds, requestsBounds, resetPage]);
 
   // Auto-expand the first row (lowest availability) on initial page load
   useEffect(() => {
@@ -955,6 +998,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
             }}
             compressed
             prepend="Latency"
+            data-test-subj="dependencyLatencyPercentileSelector"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -1044,6 +1088,9 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                     }
                   )}
                   dependenciesCount={dependencies.length}
+                  pageIndex={pageIndex}
+                  pageSize={pageSize}
+                  onTableChange={onTableChange}
                 />
               </EuiResizablePanel>
             </>

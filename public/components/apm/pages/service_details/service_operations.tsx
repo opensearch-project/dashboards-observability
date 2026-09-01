@@ -7,6 +7,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
+  Criteria,
   EuiPanel,
   EuiSpacer,
   EuiCallOut,
@@ -44,6 +45,7 @@ import {
 } from '../../query_services/query_requests/promql_queries';
 import { useOperations } from '../../shared/hooks/use_operations';
 import { useOperationMetrics } from '../../shared/hooks/use_operation_metrics';
+import { useControlledPagination } from '../../shared/hooks/use_controlled_pagination';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 import { OperationFilterSidebar } from '../../shared/components/operation_filter_sidebar';
@@ -110,6 +112,9 @@ interface OperationsTablePanelProps {
   noDataMessage: string;
   noFilteredDataMessage: string;
   operationsCount: number;
+  pageIndex: number;
+  pageSize: number;
+  onTableChange: (criteria: Criteria<OperationRow>) => void;
 }
 
 const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
@@ -120,6 +125,9 @@ const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
   noDataMessage,
   noFilteredDataMessage,
   operationsCount,
+  pageIndex,
+  pageSize,
+  onTableChange,
 }) => (
   <EuiPanel>
     {!isLoading && filteredOperations.length === 0 ? (
@@ -127,9 +135,9 @@ const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
         <p>{operationsCount === 0 ? noDataMessage : noFilteredDataMessage}</p>
       </EuiText>
     ) : (
-      // Don't key the table on latencyPercentile
-      // Switching percentile only swaps the latency column
-      // Remounting would reset pagination and reload the row charts
+      // Switching percentile rebuilds the items array (new reference). Keying the table on it
+      // would remount and reload the row charts; leaving pagination uncontrolled would reset
+      // pageIndex to 0. So the table is not keyed and pagination is controlled.
       <EuiInMemoryTable
         items={filteredOperations}
         columns={columns}
@@ -141,9 +149,11 @@ const OperationsTablePanelUI: React.FC<OperationsTablePanelProps> = ({
           },
         }}
         pagination={{
-          initialPageSize: SERVICE_DETAILS_CONSTANTS.DEFAULT_PAGE_SIZE,
+          pageIndex,
+          pageSize,
           pageSizeOptions: SERVICE_DETAILS_CONSTANTS.PAGE_SIZE_OPTIONS,
         }}
+        onTableChange={onTableChange}
         itemId="operationName"
         isExpandable={true}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
@@ -228,17 +238,6 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   );
   const handleTogglePanel = useCallback(() => {
     togglePanelRef.current?.('operations-filter-sidebar', { direction: 'left' });
-  }, []);
-
-  // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer
-  const onLatencyRangeChange = useCallback((val: [number, number]) => {
-    latencyUserModified.current = true;
-    setLatencyRange(val);
-  }, []);
-
-  const onRequestsRangeChange = useCallback((val: [number, number]) => {
-    requestsUserModified.current = true;
-    setRequestsRange(val);
   }, []);
 
   // Parse time range
@@ -439,6 +438,45 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     latencyPercentile,
   ]);
 
+  // Controlled pagination (clamped against the current row count). Declared after
+  // filteredOperations because the hook needs the row count to clamp.
+  const { pageIndex, pageSize, onTableChange, resetPage } = useControlledPagination<OperationRow>(
+    filteredOperations.length
+  );
+
+  // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer.
+  // Range-slider changes reset the page to 1 (a filter change), unlike a percentile switch.
+  const onLatencyRangeChange = useCallback(
+    (val: [number, number]) => {
+      latencyUserModified.current = true;
+      setLatencyRange(val);
+      resetPage();
+    },
+    [resetPage]
+  );
+
+  const onRequestsRangeChange = useCallback(
+    (val: [number, number]) => {
+      requestsUserModified.current = true;
+      setRequestsRange(val);
+      resetPage();
+    },
+    [resetPage]
+  );
+
+  // Reset to page 1 on filter changes. Excludes latencyRange/requestsRange on purpose: a
+  // percentile switch resets latencyRange, so watching the ranges here would reset the page on
+  // a percentile switch too and defeat the fix (#2849). The sliders reset in their own handlers.
+  useEffect(() => {
+    resetPage();
+  }, [
+    debouncedSearchQuery,
+    selectedOperations,
+    selectedAvailabilityThresholds,
+    selectedErrorRateThresholds,
+    resetPage,
+  ]);
+
   const isLoading = opsLoading || metricsLoading;
   const error = opsError;
 
@@ -500,6 +538,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
         onRemove: () => {
           latencyUserModified.current = false;
           setLatencyRange([latencyBounds.min, latencyBounds.max]);
+          resetPage();
         },
       });
     }
@@ -518,6 +557,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
         onRemove: () => {
           requestsUserModified.current = false;
           setRequestsRange([requestsBounds.min, requestsBounds.max]);
+          resetPage();
         },
       });
     }
@@ -531,6 +571,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     requestsRange,
     latencyBounds,
     requestsBounds,
+    resetPage,
   ]);
 
   // Clear all filters handler
@@ -542,7 +583,8 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     requestsUserModified.current = false;
     setLatencyRange([latencyBounds.min, latencyBounds.max]);
     setRequestsRange([requestsBounds.min, requestsBounds.max]);
-  }, [latencyBounds, requestsBounds]);
+    resetPage();
+  }, [latencyBounds, requestsBounds, resetPage]);
 
   // Auto-expand the first row (lowest availability) on initial page load
   useEffect(() => {
@@ -972,6 +1014,9 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
                     }
                   )}
                   operationsCount={operations.length}
+                  pageIndex={pageIndex}
+                  pageSize={pageSize}
+                  onTableChange={onTableChange}
                 />
               </EuiResizablePanel>
             </>
