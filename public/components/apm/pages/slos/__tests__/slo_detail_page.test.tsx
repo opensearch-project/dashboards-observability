@@ -389,7 +389,7 @@ describe('SloDetailPage — rule-health grace window + re-poll (F-CRUD2)', () =>
     await exhaustRetries();
 
     const callout = screen.getByTestId('slosDetailRuleHealthCallout');
-    expect(callout).toHaveTextContent(/Rule groups missing in Cortex/i);
+    expect(callout).toHaveTextContent(/Rule groups missing in Prometheus/i);
     expect(callout).toHaveTextContent(/2 of 2 expected rule groups/i);
     expect(screen.getByTestId('slosDetailRestore')).toBeInTheDocument();
     expect(screen.getByTestId('slosDetailBrokenDelete')).toBeInTheDocument();

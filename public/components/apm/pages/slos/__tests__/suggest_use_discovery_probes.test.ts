@@ -91,7 +91,7 @@ describe('useDiscoveryProbes', () => {
   it('per-probe failure leaves siblings unaffected and console.warn is called', async () => {
     const http = makeHttp({
       labelValues: {
-        rpc_server_duration_seconds_count: new Error('cortex 400'),
+        rpc_server_duration_seconds_count: new Error('prometheus 400'),
         http_server_request_duration_seconds_count: { service_name: ['cart'] },
       },
     });

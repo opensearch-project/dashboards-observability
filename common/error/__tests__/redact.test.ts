@@ -37,7 +37,7 @@ describe('redactForDisplay', () => {
   });
 
   it('redacts FQDN-like hosts with generic infra suffixes', () => {
-    expect(redactForDisplay('lookup failed for cortex.svc.cluster.local')).toContain(
+    expect(redactForDisplay('lookup failed for prometheus.svc.cluster.local')).toContain(
       '<redacted-host>'
     );
   });

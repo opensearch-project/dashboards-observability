@@ -337,7 +337,7 @@ const previewBody = schema.object({
  * datasource isn't discovered, or it isn't a DirectQuery Prometheus — throws
  * `SloValidationError`. This prevents the prior failure mode where a
  * typo'd datasource ID produced a silent no-op: the SO saved, the UI
- * reported "N rules provisioned", but Cortex never received the rule group.
+ * reported "N rules provisioned", but the ruler never received the rule group.
  *
  * TODO: derive `workspaceId` from OSD's workspace scope once the SLO spec
  * carries a workspace reference. For now the datasource ID doubles as a
@@ -840,7 +840,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       // Delete is ruler-first, SO-second — if there's a rule group to remove,
       // we need a working deploy context (i.e. a resolvable datasource). An
       // unresolvable datasource here surfaces to the user as a 409: dropping
-      // the SO while the rule group stays live in Cortex would leave dead
+      // the SO while the rule group stays live in the ruler would leave dead
       // alerts evaluating against the cluster.
       const built = await tryBuildDeployContext(
         ctx as SloHandlerContext,

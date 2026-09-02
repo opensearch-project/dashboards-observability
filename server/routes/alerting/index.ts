@@ -264,9 +264,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
    * `metadataService` instances are short-lived and die when the handler
    * returns.
    */
-  function buildRequestServices(
-    ctx: AlertingHandlerContext
-  ): {
+  function buildRequestServices(ctx: AlertingHandlerContext): {
     alertService: MultiBackendAlertService;
     metadataService: PrometheusMetadataService;
     datasourceService: SavedObjectDatasourceService;
@@ -365,7 +363,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     logger
   );
 
-  // Prometheus rule mutation routes (create/delete via Cortex ruler).
+  // Prometheus rule mutation routes (create/delete via Prometheus ruler).
   // Only registered when a RulerClient is provided (SLO feature enabled).
   if (deps.rulerClient) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires

@@ -697,7 +697,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       }
       try {
         if (rule.datasourceType === 'prometheus') {
-          // Prometheus rules are deleted via the Cortex ruler API. Passing
+          // Prometheus rules are deleted via the Prometheus ruler API. Passing
           // the rule name makes the server splice just this rule out of the
           // group, preserving sibling rules in shared groups (the group is
           // only removed once it becomes empty).
@@ -820,7 +820,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         monitor.definitionType
       );
 
-      // Prometheus rules must be cloned via the Cortex ruler API, not the
+      // Prometheus rules must be cloned via the Prometheus ruler API, not the
       // OpenSearch Alerting monitor API (which requires `schedule`).
       if (detail.datasourceType === 'prometheus') {
         // Use a suffix that's safe for the ruleId regex [A-Za-z0-9_-]+
@@ -878,7 +878,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             defaultMessage: 'Monitor cloned',
           })
         );
-        // Background refetch to reconcile with Cortex once it propagates
+        // Background refetch to reconcile with Prometheus once it propagates
         refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
         return;
       }
@@ -1039,7 +1039,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const newRule = buildOptimisticRule(formState);
     try {
       if (formState.datasourceType === 'prometheus') {
-        // Prometheus rules go to the Cortex ruler API
+        // Prometheus rules go to the Prometheus ruler API
         const promForm = formState as PrometheusFormState;
         // _ruleGroup is a form-transport metadata label, not a real Prometheus
         // label — extract it into groupName and strip it from persisted labels.
@@ -1062,7 +1062,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         });
         await mutations.createPrometheusRule(payload, dsId);
 
-        // Cortex has eventual consistency (~30-60s propagation). Use
+        // Prometheus has eventual consistency (~30-60s propagation). Use
         // optimistic pattern: close flyout immediately, show toast, and
         // schedule a background refetch after 15s to sync the list.
         refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
@@ -1109,7 +1109,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
    * Post-save handler for the shared CreateMetricsMonitor flyout (the same
    * component the Metrics Explore page uses). The flyout persists the rule
    * itself via the http client; this handler only reconciles the page:
-   * optimistic insert, close, and a delayed refetch to bridge Cortex's
+   * optimistic insert, close, and a delayed refetch to bridge Prometheus's
    * eventual consistency (~30-60s propagation).
    */
   const handleMetricsRuleSaved = (form: MetricsMonitorFormState) => {
@@ -1203,7 +1203,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             // Orphaned old rule — harmless, user can delete manually
           }
         }
-        // Background refetch to reconcile with Cortex once it propagates
+        // Background refetch to reconcile with Prometheus once it propagates
         refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
       } else {
         await mutations.updateMonitor(ruleId, buildPayload(formState), dsId);

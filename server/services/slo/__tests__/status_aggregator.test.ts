@@ -52,11 +52,11 @@ function noopLogger(): Logger {
 function promDatasource(overrides: Partial<Datasource> = {}): Datasource {
   return {
     id: 'prom-ds-001',
-    name: 'my cortex',
+    name: 'my prometheus',
     type: 'prometheus',
     url: '',
     enabled: true,
-    directQueryName: 'my-cortex-connection',
+    directQueryName: 'my-prometheus-connection',
     ...overrides,
   };
 }
@@ -132,9 +132,9 @@ function instantResponse(
   };
 }
 
-function alertsResponse(
-  alerts: Array<{ sloId: string; state: 'firing' | 'pending' }>
-): { data: { alerts: Array<Record<string, unknown>> } } {
+function alertsResponse(alerts: Array<{ sloId: string; state: 'firing' | 'pending' }>): {
+  data: { alerts: Array<Record<string, unknown>> };
+} {
   return {
     data: {
       alerts: alerts.map((a) => ({
@@ -188,7 +188,7 @@ function envelopeToDataFrame(envelope: {
     type: 'data_frame',
     body: {
       type: 'data_frame',
-      name: 'cortex',
+      name: 'prometheus',
       schema: [
         { name: 'Time', type: 'time', values: [] },
         { name: 'Series', type: 'string', values: [] },
@@ -217,10 +217,7 @@ function envelopeToDataFrame(envelope: {
  *     helper used to multiplex both paths through a single mock — now it
  *     splits them so the wire-contract assertions match the migration.
  */
-function mockClient(handlers: {
-  query?: (body: unknown) => unknown;
-  alerts?: () => unknown;
-}): {
+function mockClient(handlers: { query?: (body: unknown) => unknown; alerts?: () => unknown }): {
   client: AlertingOSClient;
   requestMock: jest.Mock;
   searcherMock: jest.MockedFunction<PromQLSearcher>;
@@ -233,15 +230,15 @@ function mockClient(handlers: {
     }
     throw new Error(`Unexpected transport path: ${p.path}`);
   });
-  const searcherMock = (jest.fn(async (_ctx, request, _options) => {
+  const searcherMock = jest.fn(async (_ctx, request, _options) => {
     const body = handlers.query
       ? handlers.query((request as { body?: unknown }).body)
       : { resultType: 'vector', result: [] };
     return envelopeToDataFrame(body as Parameters<typeof envelopeToDataFrame>[0]) as never;
-  }) as unknown) as jest.MockedFunction<PromQLSearcher>;
+  }) as unknown as jest.MockedFunction<PromQLSearcher>;
   setPromQLSearcher(searcherMock as PromQLSearcher);
   return {
-    client: ({ transport: { request: requestMock } } as unknown) as AlertingOSClient,
+    client: { transport: { request: requestMock } } as unknown as AlertingOSClient,
     requestMock,
     searcherMock,
   };
@@ -394,7 +391,7 @@ describe('parseInstantResponse', () => {
   it('unwraps the DirectQuery results-by-datasource envelope', () => {
     const samples = parseInstantResponse({
       results: {
-        'my cortex': {
+        'my prometheus': {
           resultType: 'vector',
           result: [{ metric: { slo_objective: 'a' }, value: [1700000000, '0.5'] }],
         },
@@ -478,7 +475,7 @@ describe('DirectQueryStatusAggregator.aggregate — happy paths', () => {
     expect(options).toEqual({ strategy: 'promql' });
     const reqBody = (request as { body: Record<string, Record<string, unknown>> }).body;
     expect(reqBody.query.language).toBe('PROMQL');
-    expect(reqBody.query.dataset).toEqual({ id: 'my-cortex-connection', type: 'PROMETHEUS' });
+    expect(reqBody.query.dataset).toEqual({ id: 'my-prometheus-connection', type: 'PROMETHEUS' });
     expect(reqBody.options.queryType).toBe('INSTANT');
 
     const transportCalls = requestMock.mock.calls.map(
@@ -601,7 +598,7 @@ describe('DirectQueryStatusAggregator.aggregate — disabled / missing data', ()
   });
 
   it('recording rule fires NaN (source metric idle) → state=source_idle', async () => {
-    // Cortex returned a sample at the requested timestamp, but the recorded
+    // Prometheus returned a sample at the requested timestamp, but the recorded
     // expression evaluated to NaN — typically `1 - (0/0)` because the source
     // metric has no traffic in the window. The aggregator surfaces
     // source_idle so the listing badge points at the upstream metric
@@ -746,9 +743,7 @@ describe('rule-health priority merge', () => {
           state: 'ok' | 'rules_partial' | 'rules_missing' | 'ruler_unreachable';
           rulerErrorCode?: string;
         }
-      | ((
-          input: Parameters<SloRuleHealthChecker['check']>[0]
-        ) => {
+      | ((input: Parameters<SloRuleHealthChecker['check']>[0]) => {
           state: 'ok' | 'rules_partial' | 'rules_missing' | 'ruler_unreachable';
           rulerErrorCode?: string;
         })
