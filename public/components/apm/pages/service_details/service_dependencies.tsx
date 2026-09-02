@@ -481,7 +481,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
 
       // Requests range filter (only if range has been adjusted)
       const isRequestsFilterActive =
-        requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max;
+        requestsUserModified &&
+        (requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max);
       if (isRequestsFilterActive) {
         const depRequestCount = dep.requestCount ?? 0;
         if (depRequestCount < requestsRange[0] || depRequestCount > requestsRange[1]) {
@@ -494,6 +495,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   }, [
     textFilteredDependencies,
     latencyUserModified,
+    requestsUserModified,
     latencyRange,
     requestsRange,
     latencyBounds,

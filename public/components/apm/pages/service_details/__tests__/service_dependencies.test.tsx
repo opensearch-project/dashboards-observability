@@ -211,3 +211,42 @@ describe('ServiceDependencies - percentile switch does not remount the table (#2
     expect(screen.queryByText(svc(0))).not.toBeInTheDocument();
   });
 });
+
+describe('ServiceDependencies - requests filter does not blank the table on load', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const dependencies = buildDependencies();
+    (useDependencies as jest.Mock).mockReturnValue({
+      data: dependencies,
+      groupedData: dependencies,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    (useDependencyMetrics as jest.Mock).mockReturnValue({
+      metrics: buildMetricsMap(dependencies),
+      isLoading: false,
+      error: null,
+    });
+  });
+
+  // requestsRange starts at [0,0] while requestsBounds derives from the data, so an ungated filter
+  // reads active and blanks the table for the one commit before the bounds effect resets the range.
+  // The profiler is needed because render() flushes that effect before returning, hiding the transient.
+  it('should show rows on every commit while bounds and range settle', () => {
+    const rowVisiblePerCommit: boolean[] = [];
+    render(
+      <React.Profiler
+        id="dependencies"
+        onRender={() => {
+          rowVisiblePerCommit.push(document.body.textContent?.includes(svc(0)) ?? false);
+        }}
+      >
+        <ServiceDependencies {...props} />
+      </React.Profiler>
+    );
+
+    expect(rowVisiblePerCommit.length).toBeGreaterThan(0);
+    expect(rowVisiblePerCommit.every(Boolean)).toBe(true);
+  });
+});

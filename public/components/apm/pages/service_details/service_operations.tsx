@@ -422,7 +422,8 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
 
       // Requests range filter (only if range has been adjusted)
       const isRequestsFilterActive =
-        requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max;
+        requestsUserModified &&
+        (requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max);
       if (isRequestsFilterActive) {
         if (op.requestCount < requestsRange[0] || op.requestCount > requestsRange[1]) {
           return false;
@@ -434,6 +435,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   }, [
     textFilteredOperations,
     latencyUserModified,
+    requestsUserModified,
     latencyRange,
     requestsRange,
     latencyBounds,

@@ -668,7 +668,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Filter by latency range (only if range has been adjusted from full range)
     const isLatencyFilterActive =
-      latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax;
+      latencyUserModified &&
+      (latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax);
     if (isLatencyFilterActive) {
       filtered = filtered.filter((service) => {
         const metrics = metricsMap.get(service.serviceName);
@@ -681,8 +682,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Filter by throughput range (only if range has been adjusted from full range)
     const isThroughputFilterActive =
-      throughputRange[0] > metricRanges.throughputMin ||
-      throughputRange[1] < metricRanges.throughputMax;
+      throughputUserModified &&
+      (throughputRange[0] > metricRanges.throughputMin ||
+        throughputRange[1] < metricRanges.throughputMax);
     if (isThroughputFilterActive) {
       filtered = filtered.filter((service) => {
         const metrics = metricsMap.get(service.serviceName);
@@ -711,6 +713,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     fullyFilteredItems,
     metricsMap,
     metricRanges,
+    latencyUserModified,
+    throughputUserModified,
     latencyRange,
     throughputRange,
     selectedFailureRateThresholds,

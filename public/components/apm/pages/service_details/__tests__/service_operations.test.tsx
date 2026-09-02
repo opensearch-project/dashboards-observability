@@ -213,3 +213,41 @@ describe('ServiceOperations - percentile switch does not remount the table (#262
     expect(screen.queryByText(padded(0))).not.toBeInTheDocument();
   });
 });
+
+describe('ServiceOperations - requests filter does not blank the table on load', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const operations = buildOperations();
+    (useOperations as jest.Mock).mockReturnValue({
+      data: operations,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    (useOperationMetrics as jest.Mock).mockReturnValue({
+      metrics: buildMetricsMap(operations),
+      isLoading: false,
+      error: null,
+    });
+  });
+
+  // requestsRange starts at [0,0] while requestsBounds derives from the data, so an ungated filter
+  // reads active and blanks the table for the one commit before the bounds effect resets the range.
+  // The profiler is needed because render() flushes that effect before returning, hiding the transient.
+  it('should show rows on every commit while bounds and range settle', () => {
+    const rowVisiblePerCommit: boolean[] = [];
+    render(
+      <React.Profiler
+        id="operations"
+        onRender={() => {
+          rowVisiblePerCommit.push(document.body.textContent?.includes(padded(0)) ?? false);
+        }}
+      >
+        <ServiceOperations {...props} />
+      </React.Profiler>
+    );
+
+    expect(rowVisiblePerCommit.length).toBeGreaterThan(0);
+    expect(rowVisiblePerCommit.every(Boolean)).toBe(true);
+  });
+});
