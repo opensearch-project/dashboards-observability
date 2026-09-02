@@ -164,23 +164,20 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     [datasources, selectedDsIds]
   );
 
-  // Logs / Metrics popover entries are grayed out when the parent's selection
-  // can't satisfy them: Logs needs at least one OpenSearch datasource, Metrics
-  // needs at least one Prometheus. The empty-selection case is "no datasource
-  // selected → no create options viable", so gate both. When a selection
-  // exists, each option is disabled iff EVERY selected datasource is the wrong
-  // type for it — i.e. only-Prometheus disables Logs, only-OpenSearch disables
-  // Metrics (symmetric).
-  const [logsCreateDisabled, metricsCreateDisabled] = useMemo(() => {
-    const selected = selectedDsIds
-      .map((id) => datasources.find((d) => d.id === id))
-      .filter((d): d is Datasource => !!d);
-    if (selected.length === 0) return [true, true];
-    return [
-      selected.every((d) => d.type === 'prometheus'),
-      selected.every((d) => d.type === 'opensearch'),
-    ];
-  }, [datasources, selectedDsIds]);
+  // Logs / Metrics popover entries reflect what the user is ALLOWED to create,
+  // which depends on the datasources AVAILABLE to them — not on the current
+  // facet (browse) selection. Logs create needs at least one OpenSearch
+  // datasource to exist; Metrics create needs at least one Prometheus. The user
+  // then picks the specific datasource inside the create wizard. Keying this on
+  // the facet selection wrongly hid a capability whenever the unrelated browse
+  // filter didn't happen to include a matching datasource (audit M8).
+  const [logsCreateDisabled, metricsCreateDisabled] = useMemo(
+    () => [
+      !datasources.some((d) => d.type === 'opensearch'),
+      !datasources.some((d) => d.type === 'prometheus'),
+    ],
+    [datasources]
+  );
 
   const adCreateDisabled = !selectedDatasources.some(isStandardOpenSearchDatasource);
 
