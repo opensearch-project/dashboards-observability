@@ -711,7 +711,7 @@ export class SloLifecycleService {
    * Tear down an SLO.
    *
    * The ruler-side `deleteRuleGroup` is 404-tolerant — if the rule group was
-   * already removed out-of-band (someone DELETE'd it in Prometheus directly, or
+   * already removed out-of-band (someone DELETE'd it in the ruler directly, or
    * the reconciler swept an orphan), the ruler call resolves successfully
    * and we proceed to remove the SO. This keeps a live out-of-band delete
    * from wedging the SO in an un-deletable state. Any other ruler failure

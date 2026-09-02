@@ -76,7 +76,7 @@ export interface SloDeployContext {
    *
    * In production this is the canonical datasource id (`ds.id`), so the
    * recording-rule namespace is shared by every OSD workspace that targets
-   * the same Prometheus tenant. The shared namespace is the deduplication unit
+   * the same ruler tenant. The shared namespace is the deduplication unit
    * — two workspaces creating SLOs over the same SLI fingerprint share
    * one rule group on the ruler. The slo-rule-ref refcount is what
    * partitions per workspace; see `OSDWorkspaceId`.
@@ -249,7 +249,7 @@ export interface SloStatusAggregationContext {
 
 /**
  * Workspace ids accepted by `sloRulerNamespaceFor`. The value lands in a URL
- * path segment that Prometheus uses to key rule groups; allowing arbitrary text
+ * path segment that the ruler uses to key rule groups; allowing arbitrary text
  * opens path traversal, ambiguous `%`-encoded segments, and unicode-
  * normalization surprises. Mirrors the OSD saved-object id shape.
  */

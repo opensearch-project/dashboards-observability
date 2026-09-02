@@ -231,7 +231,7 @@ export class SloRuleRefStore {
    *
    * Read-time aggregation (vs. a materialized aggregate SO): the GC pass
    * fires on a slow timer, the per-fingerprint cardinality is bounded by
-   * the number of workspaces a single Prometheus tenant serves, and the
+   * the number of workspaces a single ruler tenant serves, and the
    * matching slo-rule-ref docs all live behind the wrapper anyway — paying
    * one O(workspaces) find here is cheaper than coordinating writes to a
    * second SO on every increment/decrement.

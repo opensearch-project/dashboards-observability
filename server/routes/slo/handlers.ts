@@ -30,7 +30,7 @@ import type { ClassifiedError } from '../../../common/error';
 import { redactForDisplay } from '../../../common/error';
 
 /**
- * Cap on the upstream ruler diagnostic surfaced to the client. Prometheus's
+ * Cap on the upstream ruler diagnostic surfaced to the client. The ruler's
  * verbose error envelopes can carry tenant ids, internal hostnames, or
  * stack traces that don't belong in a multi-tenant OSD toast — the full
  * body is logged server-side at `warn`, the client gets a short, ANSI-

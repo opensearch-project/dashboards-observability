@@ -388,7 +388,7 @@ export class ObservabilityPlugin implements Plugin<
       // SLO documents and slo-rule-ref refcount registry are partitioned
       // per OSD workspace via the saved-objects workspace wrapper. The
       // ruler recording-rule namespace (`slo-generated-<datasourceId>`)
-      // is shared across workspaces that target the same Prometheus tenant —
+      // is shared across workspaces that target the same ruler tenant —
       // two workspaces creating SLOs over the same SLI fingerprint share
       // one rule group on the ruler, with refcount tracked separately
       // per workspace. The grace-GC pass owns recording-group cleanup

@@ -78,7 +78,7 @@ export class SloRulerError extends Error {
  * provisioned rule group but has no deploy context — typically because the
  * SLO's `datasourceId` is no longer registered (datasource was removed or
  * renamed). Delete is ruler-first, so we refuse to drop the SO here: that
- * would leave a dangling rule group in Prometheus still evaluating against the
+ * would leave a dangling rule group in the ruler still evaluating against the
  * live cluster. The user has to restore the datasource (or the operator has
  * to force a ruler-side cleanup) before the SLO can be removed.
  */

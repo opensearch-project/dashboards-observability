@@ -15,7 +15,7 @@
  * id (`getWorkspaceState(request).requestWorkspaceId`, or `'default'` on
  * non-workspace-enabled clusters). Two workspaces over the same datasource
  * + fingerprint allocate separate slo-rule-ref SOs, each refcounted
- * independently. `datasourceId` continues to identify the Prometheus tenant
+ * independently. `datasourceId` continues to identify the ruler tenant
  * (and the ruler namespace via `slo-generated-<datasourceId>`) — the ruler
  * namespace is shared, the slo-rule-refs are not. Grace-GC fires only when
  * the cross-workspace aggregate refcount for a (datasourceId, fingerprint)

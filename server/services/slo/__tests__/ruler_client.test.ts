@@ -433,7 +433,7 @@ describe('DirectQueryRulerClient.listRuleGroups', () => {
     );
   });
 
-  it('Prometheus namespace-keyed envelope → returns all groups parsed', async () => {
+  it('ruler namespace-keyed CRUD envelope → returns all groups parsed', async () => {
     const yamlEnvelope = yamlDump({
       'slo-generated-ws1': [
         {
