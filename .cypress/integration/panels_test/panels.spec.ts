@@ -461,28 +461,37 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       // Wait for the unfiltered chart to render
       cy.get('.xtick', { timeout: 60000 }).should('exist');
 
-      // Type the PPL filter
-      cy.get('[data-test-subj="searchAutocompleteTextArea"]')
-        .click({ force: true })
-        .type(PPL_FILTER, { force: true, delay: 50 })
-        .blur();
-
-      // Ensure autocomplete dropdown is closed (confirms React state is committed)
-      cy.get('.aa-Panel').should('not.exist');
+      // Type the PPL filter into the panel search bar. The autocomplete recreates
+      // its input on every keystroke, so under load a character can be dropped;
+      // retype until the committed value matches before applying.
+      const typeFilter = (attempt = 0) => {
+        cy.get('[data-test-subj="searchAutocompleteTextArea"]')
+          .click({ force: true })
+          .clear({ force: true })
+          .type(PPL_FILTER, { force: true, delay: 50 })
+          .blur();
+        // Autocomplete dropdown closed confirms React state is committed
+        cy.get('.aa-Panel').should('not.exist');
+        cy.get('[data-test-subj="searchAutocompleteTextArea"]').then(($input) => {
+          if ($input.val() !== PPL_FILTER && attempt < 3) {
+            typeFilter(attempt + 1);
+          }
+        });
+      };
+      typeFilter();
 
       // Verify the filter text is in the input before triggering refresh
       cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('have.value', PPL_FILTER);
 
-      // Trigger refresh via the date picker update button
+      // Apply the filter via the date picker refresh
       cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
 
-      // Wait for chart to update with filtered data — only Munich Airport should remain
+      // The filter narrows the chart to a single OpenSearch-Air/Munich bar.
+      // Asserting the exact tick count guards against passing on the unfiltered
+      // chart, where Munich Airport is one label among many.
       cy.get('.xtick', { timeout: 40000 })
-        .should('contain', 'Munich Airport')
-        .and('not.contain', 'Zurich Airport')
-        .and('not.contain', 'BeatsWest')
-        .and('not.contain', 'Logstash Airways')
-        .and('not.contain', 'OpenSearch Dashboards Airlines');
+        .should('have.length', 1)
+        .and('contain', 'Munich Airport');
     });
 
     it('Drag and drop a visualization', () => {
