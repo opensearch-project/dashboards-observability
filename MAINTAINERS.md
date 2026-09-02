@@ -19,6 +19,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Adam Tackett            | [TackAdam](https://github.com/TackAdam)         | Amazon      |
 | Jialiang Liang          | [RyanL1997](https://github.com/RyanL1997)       | Amazon      |
 | Ashish Agrawal          | [lezzago](https://github.com/lezzago)           | Amazon      |
+| Riya Saxena             | [riysaxen-amzn](https://github.com/riysaxen-amzn) | Amazon    |
 
 ## Emeritus Maintainers
 
