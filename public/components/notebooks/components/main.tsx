@@ -337,6 +337,7 @@ export class Main extends React.Component<MainProps, MainState> {
         });
       }
       const visIds: string[] = [];
+      // Sample data only suffixes titles when installed against a data source, so gate on the id.
       await this.props.http
         .get('../api/saved_objects/_find', {
           query: {
@@ -344,18 +345,21 @@ export class Main extends React.Component<MainProps, MainState> {
             search_fields: 'title',
             search:
               `[Logs] Response Codes Over Time + Annotations` +
-              (dataSourceMDSLabel ? `_${dataSourceMDSLabel}` : ''),
+              (dataSourceMDSId ? `_${dataSourceMDSLabel}` : ''),
           },
         })
         .then((resp) => {
           if (this.props.dataSourceEnabled) {
-            const searchTitle = `[Logs] Response Codes Over Time + Annotations_${dataSourceMDSLabel}`;
+            const searchTitle =
+              `[Logs] Response Codes Over Time + Annotations` +
+              (dataSourceMDSId ? `_${dataSourceMDSLabel}` : '');
             const savedObjects = resp.saved_objects;
 
             const foundObject = savedObjects.find((obj) => obj.attributes.title === searchTitle);
-            if (foundObject) {
-              visIds.push(foundObject.id);
+            if (!foundObject) {
+              throw new Error(`Unable to locate sample visualization "${searchTitle}"`);
             }
+            visIds.push(foundObject.id);
           } else {
             visIds.push(resp.saved_objects[0].id);
           }
@@ -367,18 +371,21 @@ export class Main extends React.Component<MainProps, MainState> {
             search_fields: 'title',
             search:
               `[Logs] Unique Visitors vs. Average Bytes` +
-              (dataSourceMDSLabel ? `_${dataSourceMDSLabel}` : ''),
+              (dataSourceMDSId ? `_${dataSourceMDSLabel}` : ''),
           },
         })
         .then((resp) => {
           if (this.props.dataSourceEnabled) {
-            const searchTitle = `[Logs] Unique Visitors vs. Average Bytes_${dataSourceMDSLabel}`;
+            const searchTitle =
+              `[Logs] Unique Visitors vs. Average Bytes` +
+              (dataSourceMDSId ? `_${dataSourceMDSLabel}` : '');
             const savedObjects = resp.saved_objects;
 
             const foundObject = savedObjects.find((obj) => obj.attributes.title === searchTitle);
-            if (foundObject) {
-              visIds.push(foundObject.id);
+            if (!foundObject) {
+              throw new Error(`Unable to locate sample visualization "${searchTitle}"`);
             }
+            visIds.push(foundObject.id);
           } else {
             visIds.push(resp.saved_objects[0].id);
           }
@@ -390,18 +397,21 @@ export class Main extends React.Component<MainProps, MainState> {
             search_fields: 'title',
             search:
               `[Flights] Flight Count and Average Ticket Price` +
-              (dataSourceMDSLabel ? `_${dataSourceMDSLabel}` : ''),
+              (dataSourceMDSId ? `_${dataSourceMDSLabel}` : ''),
           },
         })
         .then((resp) => {
           if (this.props.dataSourceEnabled) {
-            const searchTitle = `[Flights] Flight Count and Average Ticket Price_${dataSourceMDSLabel}`;
+            const searchTitle =
+              `[Flights] Flight Count and Average Ticket Price` +
+              (dataSourceMDSId ? `_${dataSourceMDSLabel}` : '');
             const savedObjects = resp.saved_objects;
 
             const foundObject = savedObjects.find((obj) => obj.attributes.title === searchTitle);
-            if (foundObject) {
-              visIds.push(foundObject.id);
+            if (!foundObject) {
+              throw new Error(`Unable to locate sample visualization "${searchTitle}"`);
             }
+            visIds.push(foundObject.id);
           } else {
             visIds.push(resp.saved_objects[0].id);
           }
@@ -423,8 +433,9 @@ export class Main extends React.Component<MainProps, MainState> {
         });
       this.setToast(`Sample notebooks successfully added.`);
     } catch (err: any) {
-      this.setToast('Error adding sample notebooks.', 'danger');
-      console.error(err.body.message);
+      const message = err.body?.message ?? err.message;
+      this.setToast('Error adding sample notebooks.', 'danger', message);
+      console.error(message);
     } finally {
       this.setState({ loading: false });
     }
