@@ -31,7 +31,7 @@ import {
 import get from 'lodash/get';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { useServices } from '../../shared/hooks/use_services';
-import { useServicesRedMetrics } from '../../shared/hooks/use_services_red_metrics';
+import { useServicesRedMetrics, serviceNodeKey } from '../../shared/hooks/use_services_red_metrics';
 import { useApmConfig } from '../../config/apm_config_context';
 import { SloApiClient } from '../slos/slo_api_client';
 import {
@@ -615,7 +615,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Iterate only over filtered services' metrics
     fullyFilteredItems.forEach((service) => {
-      const metrics = metricsMap.get(service.serviceName);
+      const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
       if (!metrics) return;
 
       // Get average latency value over the time period (already in ms from PromQL)
@@ -677,7 +677,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     const isLatencyFilterActive = latencyUserModified.current;
     if (isLatencyFilterActive) {
       filtered = filtered.filter((service) => {
-        const metrics = metricsMap.get(service.serviceName);
+        const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
         if (!metrics) return false;
         // Use average latency for filtering
         const avgLatency = metrics.avgLatency || 0;
@@ -688,7 +688,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     const isThroughputFilterActive = throughputUserModified.current;
     if (isThroughputFilterActive) {
       filtered = filtered.filter((service) => {
-        const metrics = metricsMap.get(service.serviceName);
+        const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
         if (!metrics) return false;
         // Filter by total throughput over the time period
         const avgThroughput = metrics.avgThroughput || 0;
@@ -699,7 +699,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     // Filter by failure rate threshold (OR logic - match ANY selected threshold)
     if (selectedFailureRateThresholds.length > 0) {
       filtered = filtered.filter((service) => {
-        const metrics = metricsMap.get(service.serviceName);
+        const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
         if (!metrics) return false;
         // Use average failure ratio for filtering
         const avgFailureRatio = metrics.avgFailureRatio || 0;
@@ -942,11 +942,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           return metrics?.avgLatency || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const latencyData = metrics?.latency || [];
           // Use average latency over the time period
           const avgLatency = metrics?.avgLatency || 0;
@@ -994,12 +994,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           // Sort by average throughput over the time period
           return metrics?.avgThroughput || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const throughputData = metrics?.throughput || [];
           // Display average throughput over the time period
           const avgThroughput = metrics?.avgThroughput || 0;
@@ -1043,11 +1043,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           return metrics?.avgFailureRatio || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const failureData = metrics?.failureRatio || [];
           // Use average failure ratio over the time period
           const avgFailureRatio = metrics?.avgFailureRatio || 0;

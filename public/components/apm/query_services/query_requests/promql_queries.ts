@@ -48,7 +48,7 @@ const buildServicesNodeSelector = (serviceFilter: string): string =>
  */
 export const getQueryServicesThroughput = (serviceFilter: string = ''): string =>
   `
-sum by (service) (
+sum by (environment, service) (
   request{${buildServicesNodeSelector(serviceFilter)}}
 )
 `.trim();
@@ -65,7 +65,7 @@ export const getQueryServicesThroughputTotal = (
   timeRange: string
 ): string =>
   `
-sum by (service) (
+sum by (environment, service) (
   sum_over_time(request{${buildServicesNodeSelector(serviceFilter)}}[${timeRange}])
 )
 `.trim();
@@ -79,12 +79,35 @@ export const getQueryServicesFailureRatio = (serviceFilter: string = ''): string
   const selector = buildServicesNodeSelector(serviceFilter);
   return `
 (
-  sum by (service) (error{${selector}})
+  sum by (environment, service) (error{${selector}})
   +
-  sum by (service) (fault{${selector}})
+  sum by (environment, service) (fault{${selector}})
 )
 /
-clamp_min(sum by (service) (request{${selector}}), 1)
+clamp_min(sum by (environment, service) (request{${selector}}), 1)
+* 100
+`.trim();
+};
+
+/**
+ * Services failure ratio as a single windowed value — ratio of summed totals
+ * over the range: (Σerror + Σfault) / Σrequest * 100. Unbiased vs averaging the
+ * per-step ratio (a low-traffic step should not weigh the same as a busy one).
+ * @page Services Home — Failure rate column value
+ */
+export const getQueryServicesFailureRatioTotal = (
+  serviceFilter: string = '',
+  timeRange: string
+): string => {
+  const selector = buildServicesNodeSelector(serviceFilter);
+  return `
+(
+  sum by (environment, service) (sum_over_time(error{${selector}}[${timeRange}]))
+  +
+  sum by (environment, service) (sum_over_time(fault{${selector}}[${timeRange}]))
+)
+/
+clamp_min(sum by (environment, service) (sum_over_time(request{${selector}}[${timeRange}])), 1)
 * 100
 `.trim();
 };
@@ -98,7 +121,7 @@ clamp_min(sum by (service) (request{${selector}}), 1)
 export const getQueryServicesLatency = (serviceFilter: string = '', percentile: number): string =>
   `
 histogram_quantile(${percentile},
-  sum by (service, le) (
+  sum by (environment, service, le) (
     latency_seconds_bucket{${buildServicesNodeSelector(serviceFilter)}}
   )
 ) * 1000
@@ -116,7 +139,7 @@ export const getQueryServicesLatencyInstant = (
   timeRange: string
 ): string =>
   `histogram_quantile(${percentile},
-  sum by (service, le) (
+  sum by (environment, service, le) (
     sum_over_time(latency_seconds_bucket{${buildServicesNodeSelector(serviceFilter)}}[${timeRange}])
   )
 ) * 1000`.trim();
