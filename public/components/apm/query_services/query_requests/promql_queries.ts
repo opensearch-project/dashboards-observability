@@ -368,13 +368,25 @@ export const getQueryServiceErrorRateCard = (environment: string, serviceName: s
  * Returns milliseconds
  * @page Service Overview — P99 latency metric card
  */
-export const getQueryServiceLatencyP99Card = (environment: string, serviceName: string): string => `
+export const getQueryServiceLatencyP99Card = (
+  environment: string,
+  serviceName: string,
+  window?: string
+): string => {
+  const selector = `latency_seconds_bucket{environment="${escapePromQLLabel(
+    environment
+  )}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}`;
+  // Windowed over the selected range so the value is the P99 across the whole
+  // range (not a single scrape), matching the catalog's instant P99.
+  const buckets = window ? `sum_over_time(${selector}[${window}])` : selector;
+  return `
 histogram_quantile(0.99,
   sum by (le) (
-    latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}
+    ${buckets}
   )
 ) * 1000
 `;
+};
 
 /**
  * Service Fault Rate Over Time by Operations
