@@ -68,29 +68,25 @@ export const useOperationMetrics = (
       return;
     }
 
+    const abortController = new AbortController();
+
     const fetchMetrics = async () => {
       setIsLoading(true);
       setError(null);
 
-      try {
-        // Calculate time range duration for aggregate queries
-        const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
+      const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
+      const time = Math.floor(params.endTime.getTime() / 1000);
 
-        // Make 4 consolidated queries
-        // Each query returns ALL operations in a single response
-        const [
-          latencyPercentilesResponse,
-          errorRateResponse,
-          availabilityResponse,
-          requestCountResponse,
-        ] = await Promise.all([
+      // Settle each query independently so one failed query cannot blank every column.
+      const [latencyResult, errorRateResult, availabilityResult, requestCountResult] =
+        await Promise.allSettled([
           promqlService.executeInstantQuery({
             query: getQueryAllOperationsLatencyPercentiles(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            time: Math.floor(params.endTime.getTime() / 1000),
+            time,
           }),
           promqlService.executeInstantQuery({
             query: getQueryAllOperationsErrorRateAvg(
@@ -98,7 +94,7 @@ export const useOperationMetrics = (
               params.serviceName,
               timeRangeDuration
             ),
-            time: Math.floor(params.endTime.getTime() / 1000),
+            time,
           }),
           promqlService.executeInstantQuery({
             query: getQueryAllOperationsAvailabilityAvg(
@@ -106,7 +102,7 @@ export const useOperationMetrics = (
               params.serviceName,
               timeRangeDuration
             ),
-            time: Math.floor(params.endTime.getTime() / 1000),
+            time,
           }),
           promqlService.executeInstantQuery({
             query: getQueryAllOperationsRequestCountTotal(
@@ -114,43 +110,60 @@ export const useOperationMetrics = (
               params.serviceName,
               timeRangeDuration
             ),
-            time: Math.floor(params.endTime.getTime() / 1000),
+            time,
           }),
         ]);
 
-        // Initialize metrics map with default values for all operations
-        const metricsMap = new Map<string, OperationMetrics>();
-        params.operations.forEach((op) => {
-          metricsMap.set(op.operationName, {
-            p50Duration: 0,
-            p90Duration: 0,
-            p99Duration: 0,
-            errorRate: 0,
-            availability: 0,
-            dependencyCount: 0,
-            requestCount: 0,
-          });
+      if (abortController.signal.aborted) return;
+
+      // Initialize metrics map with default values for all operations
+      const metricsMap = new Map<string, OperationMetrics>();
+      params.operations.forEach((op) => {
+        metricsMap.set(op.operationName, {
+          p50Duration: 0,
+          p90Duration: 0,
+          p99Duration: 0,
+          errorRate: 0,
+          availability: 0,
+          dependencyCount: 0,
+          requestCount: 0,
         });
+      });
 
-        // Extract latency percentiles from the combined response
-        // The combined query uses label_replace to tag each series with a "percentile" label
-        extractPercentilesByOperation(latencyPercentilesResponse, metricsMap);
+      const valueOf = (r: PromiseSettledResult<any>) =>
+        r.status === 'fulfilled' ? r.value : undefined;
 
-        // Extract other metrics by operation from each response
-        extractMetricsByOperation(errorRateResponse, metricsMap, 'errorRate');
-        extractMetricsByOperation(availabilityResponse, metricsMap, 'availability');
-        extractMetricsByOperation(requestCountResponse, metricsMap, 'requestCount');
+      // Missing (rejected) responses leave the defaulted 0 values in place.
+      extractPercentilesByOperation(valueOf(latencyResult), metricsMap);
+      extractMetricsByOperation(valueOf(errorRateResult), metricsMap, 'errorRate');
+      extractMetricsByOperation(valueOf(availabilityResult), metricsMap, 'availability');
+      extractMetricsByOperation(valueOf(requestCountResult), metricsMap, 'requestCount');
 
-        setMetrics(metricsMap);
-      } catch (err) {
-        console.error('[useOperationMetrics] Error fetching metrics:', err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
-      } finally {
-        setIsLoading(false);
+      setMetrics(metricsMap);
+
+      const firstRejection = [
+        latencyResult,
+        errorRateResult,
+        availabilityResult,
+        requestCountResult,
+      ].find((r): r is PromiseRejectedResult => r.status === 'rejected');
+      if (firstRejection) {
+        console.error(
+          '[useOperationMetrics] Partial failure fetching metrics:',
+          firstRejection.reason
+        );
+        setError(
+          firstRejection.reason instanceof Error
+            ? firstRejection.reason
+            : new Error('Failed to fetch some operation metrics')
+        );
       }
+      setIsLoading(false);
     };
 
     fetchMetrics();
+
+    return () => abortController.abort();
   }, [
     params.operations,
     params.serviceName,
@@ -179,6 +192,7 @@ function extractPercentilesByOperation(
   response: any,
   metricsMap: Map<string, OperationMetrics>
 ): void {
+  if (!response) return;
   try {
     if (response?.meta?.instantData?.rows) {
       const rows = response.meta.instantData.rows;
@@ -237,6 +251,7 @@ function extractMetricsByOperation(
   metricsMap: Map<string, OperationMetrics>,
   metricField: keyof OperationMetrics
 ): void {
+  if (!response) return;
   try {
     // Handle data frame format (query enhancements plugin response)
     // Response structure: { meta: { instantData: { rows: [{Time, operation, Value}] } } }

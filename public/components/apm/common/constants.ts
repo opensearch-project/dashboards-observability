@@ -348,6 +348,15 @@ export const APPLICATION_MAP_CONSTANTS = {
 
   /** Map container minimum height */
   MAP_MIN_HEIGHT: 500,
+
+  /**
+   * Max nodes rendered in the Services / groupByValue graph. Above this the
+   * graph switches to a "narrow your selection" notice instead of laying out
+   * the full graph (dagre layout is O(N+E)). Set as a pathological-case guard;
+   * layout only recomputes on structural change now, so typical large fleets
+   * (a few hundred services) still render.
+   */
+  MAX_RENDERED_NODES: 500,
 } as const;
 
 // Platform utility functions moved to shared/utils/platform_utils.ts

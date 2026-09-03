@@ -229,7 +229,6 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     isLoading: mapLoading,
     error: mapError,
     availableGroupByAttributes,
-    refetch: refetchMap,
   } = useServiceMap({
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
@@ -351,12 +350,13 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
 
   // Handle refresh
   const handleRefresh = useCallback(() => {
+    // Map refetches via the refreshTrigger prop; the metrics hook only exposes
+    // refetch(). Bumping the trigger AND calling refetchMap() double-fetched the map.
     setRefreshTrigger((prev) => prev + 1);
-    refetchMap();
     refetchMetrics();
     // Clear selected edge on refresh
     setSelectedEdge(null);
-  }, [refetchMap, refetchMetrics]);
+  }, [refetchMetrics]);
 
   // Handle filter changes
   const handleFiltersChange = useCallback((newFilters: ApplicationMapFilters) => {

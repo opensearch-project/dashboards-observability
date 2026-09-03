@@ -648,13 +648,19 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return { latencyMin, latencyMax, throughputMin, throughputMax };
   }, [metricsMap, fullyFilteredItems]);
 
-  // Sync selected ranges to metricRanges whenever they change
+  // Initialize slider ranges to the metric bounds once metrics have settled.
+  // Only updates sliders the user has not touched and never clears the
+  // user-modified flags, so an active filter survives refreshes and partial
+  // metric loads (which can transiently collapse metricRanges to one service).
   useEffect(() => {
-    setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
-    setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
-    latencyUserModified.current = false;
-    throughputUserModified.current = false;
-  }, [metricRanges]);
+    if (metricsLoading || metricsMap.size === 0) return;
+    if (!latencyUserModified.current) {
+      setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
+    }
+    if (!throughputUserModified.current) {
+      setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
+    }
+  }, [metricRanges, metricsLoading, metricsMap]);
 
   // Apply metric filters for display (on top of already filtered items)
   const displayedServices = useMemo(() => {
@@ -665,9 +671,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       return filtered;
     }
 
-    // Filter by latency range (only if range has been adjusted from full range)
-    const isLatencyFilterActive =
-      latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax;
+    // Active only when the user actually adjusted the slider. Deriving this from
+    // a live-vs-selected bounds comparison misfires during partial metric loads
+    // and collapses the table to a single service.
+    const isLatencyFilterActive = latencyUserModified.current;
     if (isLatencyFilterActive) {
       filtered = filtered.filter((service) => {
         const metrics = metricsMap.get(service.serviceName);
@@ -678,10 +685,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       });
     }
 
-    // Filter by throughput range (only if range has been adjusted from full range)
-    const isThroughputFilterActive =
-      throughputRange[0] > metricRanges.throughputMin ||
-      throughputRange[1] < metricRanges.throughputMax;
+    const isThroughputFilterActive = throughputUserModified.current;
     if (isThroughputFilterActive) {
       filtered = filtered.filter((service) => {
         const metrics = metricsMap.get(service.serviceName);
@@ -709,7 +713,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   }, [
     fullyFilteredItems,
     metricsMap,
-    metricRanges,
     latencyRange,
     throughputRange,
     selectedFailureRateThresholds,

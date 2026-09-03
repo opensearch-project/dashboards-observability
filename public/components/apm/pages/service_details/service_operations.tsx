@@ -253,6 +253,10 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     }
   }, [timeRange]);
 
+  // The operations list (PPL) and the metrics (PromQL) must query the same
+  // environment, otherwise rows and metrics line up under different env values.
+  const normalizedEnvironment = environment || 'generic:default';
+
   // Fetch operations list from PPL
   const {
     data: operationsData,
@@ -260,7 +264,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     error: opsError,
   } = useOperations({
     serviceName,
-    environment,
+    environment: normalizedEnvironment,
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     refreshTrigger,
@@ -270,7 +274,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   const { metrics: operationMetrics, isLoading: metricsLoading } = useOperationMetrics({
     operations: operationsData || [],
     serviceName,
-    environment: environment || 'generic:default',
+    environment: normalizedEnvironment,
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     prometheusConnectionId,
@@ -365,27 +369,28 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     return { min, max: Math.max(max, min + 1) };
   }, [textFilteredOperations]);
 
-  // Step 3: Reset slider ranges when bounds change
-  // Use functional update to prevent unnecessary re-renders when values haven't changed
+  // Step 3: Track slider ranges to the metric bounds only while the user has not
+  // adjusted them, and only once metrics have settled. Never clears the
+  // user-modified flags, so an active filter survives refreshes and partial loads.
   useEffect(() => {
-    latencyUserModified.current = false;
+    if (metricsLoading || latencyUserModified.current) return;
     setLatencyRange((prev) => {
       if (prev[0] === latencyBounds.min && prev[1] === latencyBounds.max) {
         return prev; // Return same reference to avoid re-render
       }
       return [latencyBounds.min, latencyBounds.max];
     });
-  }, [latencyBounds.min, latencyBounds.max]);
+  }, [latencyBounds.min, latencyBounds.max, metricsLoading]);
 
   useEffect(() => {
-    requestsUserModified.current = false;
+    if (metricsLoading || requestsUserModified.current) return;
     setRequestsRange((prev) => {
       if (prev[0] === requestsBounds.min && prev[1] === requestsBounds.max) {
         return prev; // Return same reference to avoid re-render
       }
       return [requestsBounds.min, requestsBounds.max];
     });
-  }, [requestsBounds.min, requestsBounds.max]);
+  }, [requestsBounds.min, requestsBounds.max, metricsLoading]);
 
   // Cleanup expanded rows when operations list changes to remove stale entries
   useEffect(() => {
@@ -418,9 +423,11 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
         }
       }
 
-      // Requests range filter (only if range has been adjusted)
+      // Requests range filter (only if the user actually adjusted the slider;
+      // deriving activity from live bounds misfires during partial metric loads)
       const isRequestsFilterActive =
-        requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max;
+        requestsUserModified.current &&
+        (requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max);
       if (isRequestsFilterActive) {
         if (op.requestCount < requestsRange[0] || op.requestCount > requestsRange[1]) {
           return false;

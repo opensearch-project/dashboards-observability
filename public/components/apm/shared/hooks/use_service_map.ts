@@ -91,32 +91,32 @@ export const useServiceMap = (params: UseServiceMapParams): UseServiceMapResult 
       return;
     }
 
-    const fetchServiceMap = async () => {
-      setIsLoading(true);
-      setError(null);
+    const abortController = new AbortController();
+    setIsLoading(true);
+    setError(null);
 
+    const fetchServiceMap = async () => {
       try {
         const response: ServiceMapResponse = await pplSearchService.getServiceMap(fetchParams);
+        if (abortController.signal.aborted) return;
 
-        // Extract nodes and edges from response
-        const responseNodes = response.Nodes || [];
-        const responseEdges = response.Edges || [];
-        const groupByAttributes = response.AvailableGroupByAttributes || {};
-
-        setNodes(responseNodes);
-        setEdges(responseEdges);
-        setAvailableGroupByAttributes(groupByAttributes);
+        setNodes(response.Nodes || []);
+        setEdges(response.Edges || []);
+        setAvailableGroupByAttributes(response.AvailableGroupByAttributes || {});
       } catch (err) {
+        if (abortController.signal.aborted) return;
         console.error('[useServiceMap] Error fetching service map:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setNodes([]);
         setEdges([]);
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) setIsLoading(false);
       }
     };
 
     fetchServiceMap();
+
+    return () => abortController.abort();
   }, [pplSearchService, fetchParams, refetchTrigger, params.refreshTrigger, queryIndex, dataset]);
 
   const refetch = useCallback(() => {

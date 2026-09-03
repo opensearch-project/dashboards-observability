@@ -135,8 +135,8 @@ export class PPLSearchService {
    * @param pplQuery The PPL query string
    * @param dataset The dataset configuration
    */
-  async executeQuery(pplQuery: string, dataset: DatasetConfig): Promise<any> {
-    return this.executePPLQuery(pplQuery, dataset);
+  async executeQuery(pplQuery: string, dataset: DatasetConfig, signal?: AbortSignal): Promise<any> {
+    return this.executePPLQuery(pplQuery, dataset, signal);
   }
 
   /**
@@ -199,7 +199,11 @@ export class PPLSearchService {
    * @param pplQuery The PPL query string
    * @param dataset The dataset configuration with id, title, and optional dataSource
    */
-  private async executePPLQuery(pplQuery: string, dataset: DatasetConfig): Promise<any> {
+  private async executePPLQuery(
+    pplQuery: string,
+    dataset: DatasetConfig,
+    signal?: AbortSignal
+  ): Promise<any> {
     // Build request body matching query enhancements API format
     const requestBody = {
       query: {
@@ -219,6 +223,7 @@ export class PPLSearchService {
       // Call query enhancements API directly - includes auth from browser session
       const response = await coreRefs.http!.post('/api/enhancements/search/ppl', {
         body: JSON.stringify(requestBody),
+        ...(signal && { signal }),
       });
 
       // Transform response to expected format with jsonData

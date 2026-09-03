@@ -105,12 +105,17 @@ export const useServicesRedMetrics = (
     return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
   }, [prometheusConnectionId, prometheusConnectionMeta]);
 
-  // Build service filter (service=~"service1|service2|...")
-  const serviceFilter = useMemo(() => {
-    if (params.services.length === 0) return '';
-    const serviceNames = params.services.map((s) => s.serviceName).join('|');
-    return `service=~"${serviceNames}"`;
-  }, [params.services]);
+  // Rely on `sum by (service)` grouping rather than a service=~"..." filter.
+  // Embedding the full service list made this query grow past the 10,000-char
+  // PromQL limit at scale; the grouping already yields one series per service.
+  const serviceFilter = '';
+
+  // Stable key over the service set, used only to retrigger fetches when the
+  // set changes (the query itself no longer depends on the list).
+  const servicesKey = useMemo(
+    () => params.services.map((s) => s.serviceName).join('|'),
+    [params.services]
+  );
 
   // Memoize time values to avoid unnecessary re-fetches
   const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);
@@ -120,73 +125,91 @@ export const useServicesRedMetrics = (
   useEffect(() => {
     if (params.services.length === 0 || !promqlService) {
       setThroughputFailureMap(new Map());
+      setTotalCountMap(new Map());
       setIsLoadingThroughputFailure(false);
       return;
     }
+
+    const abortController = new AbortController();
 
     const fetchThroughputFailure = async () => {
       setIsLoadingThroughputFailure(true);
       setThroughputFailureError(null);
 
-      try {
-        const throughputQuery = getQueryServicesThroughput(serviceFilter);
-        const failureRatioQuery = getQueryServicesFailureRatio(serviceFilter);
-        const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
-        const totalQuery = getQueryServicesThroughputTotal(serviceFilter, timeRangeDuration);
+      const throughputQuery = getQueryServicesThroughput(serviceFilter);
+      const failureRatioQuery = getQueryServicesFailureRatio(serviceFilter);
+      const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
+      const totalQuery = getQueryServicesThroughputTotal(serviceFilter, timeRangeDuration);
+      const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
 
-        const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
+      // Settle each query independently: a single failure (e.g. a rejected
+      // failure-ratio query) must not blank the throughput/total that succeeded.
+      const [throughputResult, failureRatioResult, totalResult] = await Promise.allSettled([
+        promqlService.executeMetricRequest({
+          query: throughputQuery,
+          startTime: startTimeSec,
+          endTime: endTimeSec,
+          step,
+          signal: abortController.signal,
+        }),
+        promqlService.executeMetricRequest({
+          query: failureRatioQuery,
+          startTime: startTimeSec,
+          endTime: endTimeSec,
+          step,
+          signal: abortController.signal,
+        }),
+        promqlService.executeInstantQuery({
+          query: totalQuery,
+          time: endTimeSec,
+          signal: abortController.signal,
+        }),
+      ]);
 
-        const [throughputResp, failureRatioResp, totalResp] = await Promise.all([
-          promqlService.executeMetricRequest({
-            query: throughputQuery,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
-            step,
-          }),
-          promqlService.executeMetricRequest({
-            query: failureRatioQuery,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
-            step,
-          }),
-          // Instant query for total request count per service
-          promqlService.executeInstantQuery({
-            query: totalQuery,
-            time: endTimeSec,
-          }),
-        ]);
+      // Drop stale results if params changed while this fetch was in flight.
+      if (abortController.signal.aborted) return;
 
-        const newMap = new Map<string, ThroughputFailureMetrics>();
-        params.services.forEach(({ serviceName }) => {
-          newMap.set(serviceName, {
-            throughput: extractServiceData(throughputResp, serviceName),
-            failureRatio: extractServiceData(failureRatioResp, serviceName),
-          });
+      const throughputResp =
+        throughputResult.status === 'fulfilled' ? throughputResult.value : null;
+      const failureRatioResp =
+        failureRatioResult.status === 'fulfilled' ? failureRatioResult.value : null;
+      const totalResp = totalResult.status === 'fulfilled' ? totalResult.value : null;
+
+      const newMap = new Map<string, ThroughputFailureMetrics>();
+      const newTotalMap = new Map<string, number>();
+      params.services.forEach(({ serviceName }) => {
+        newMap.set(serviceName, {
+          throughput: extractServiceData(throughputResp, serviceName),
+          failureRatio: extractServiceData(failureRatioResp, serviceName),
         });
+        const data = extractServiceData(totalResp, serviceName);
+        newTotalMap.set(serviceName, data.length > 0 ? data[0].value : 0);
+      });
 
-        // Extract total counts per service from the instant query
-        const newTotalMap = new Map<string, number>();
-        params.services.forEach(({ serviceName }) => {
-          const data = extractServiceData(totalResp, serviceName);
-          newTotalMap.set(serviceName, data.length > 0 ? data[0].value : 0);
-        });
+      setThroughputFailureMap(newMap);
+      setTotalCountMap(newTotalMap);
 
-        setThroughputFailureMap(newMap);
-        setTotalCountMap(newTotalMap);
-      } catch (err) {
-        console.error('[useServicesRedMetrics] Error fetching throughput/failure metrics:', err);
-        setThroughputFailureError(err instanceof Error ? err : new Error('Unknown error'));
-        setThroughputFailureMap(new Map());
-      } finally {
-        setIsLoadingThroughputFailure(false);
+      const rejected = [throughputResult, failureRatioResult, totalResult].find(
+        (r) => r.status === 'rejected'
+      ) as PromiseRejectedResult | undefined;
+      if (rejected) {
+        console.error(
+          '[useServicesRedMetrics] Partial failure fetching throughput/failure metrics:',
+          rejected.reason
+        );
+        setThroughputFailureError(
+          rejected.reason instanceof Error ? rejected.reason : new Error('Unknown error')
+        );
       }
+      setIsLoadingThroughputFailure(false);
     };
 
     fetchThroughputFailure();
-    // Note: params.services is intentionally omitted to prevent infinite loops.
-    // serviceFilter already tracks changes to the services list.
+
+    return () => abortController.abort();
+    // serviceFilter is constant; servicesKey tracks changes to the service set.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [promqlService, serviceFilter, startTimeSec, endTimeSec, refetchAllTrigger]);
+  }, [promqlService, servicesKey, startTimeSec, endTimeSec, refetchAllTrigger]);
 
   // Effect 2: Fetch latency (dependent on latencyPercentile)
   useEffect(() => {
@@ -196,72 +219,80 @@ export const useServicesRedMetrics = (
       return;
     }
 
+    const abortController = new AbortController();
+
     const fetchLatency = async () => {
       setIsLoadingLatency(true);
       setLatencyError(null);
 
-      try {
-        const percentileValue =
-          params.latencyPercentile === 'p50'
-            ? 0.5
-            : params.latencyPercentile === 'p90'
-            ? 0.9
-            : 0.99; // default p99
+      const percentileValue =
+        params.latencyPercentile === 'p50' ? 0.5 : params.latencyPercentile === 'p90' ? 0.9 : 0.99; // default p99
 
-        const latencyQuery = getQueryServicesLatency(serviceFilter, percentileValue);
-        const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
-        const latencyInstantQuery = getQueryServicesLatencyInstant(
-          serviceFilter,
-          percentileValue,
-          timeRangeDuration
+      const latencyQuery = getQueryServicesLatency(serviceFilter, percentileValue);
+      const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
+      const latencyInstantQuery = getQueryServicesLatencyInstant(
+        serviceFilter,
+        percentileValue,
+        timeRangeDuration
+      );
+      const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
+
+      const [latencyResult, latencyInstantResult] = await Promise.allSettled([
+        promqlService.executeMetricRequest({
+          query: latencyQuery,
+          startTime: startTimeSec,
+          endTime: endTimeSec,
+          step,
+          signal: abortController.signal,
+        }),
+        // Instant query for true percentile over the full time range
+        promqlService.executeInstantQuery({
+          query: latencyInstantQuery,
+          time: endTimeSec,
+          signal: abortController.signal,
+        }),
+      ]);
+
+      if (abortController.signal.aborted) return;
+
+      const latencyResp = latencyResult.status === 'fulfilled' ? latencyResult.value : null;
+      const latencyInstantResp =
+        latencyInstantResult.status === 'fulfilled' ? latencyInstantResult.value : null;
+
+      const newMap = new Map<string, MetricDataPoint[]>();
+      const newInstantMap = new Map<string, number>();
+      params.services.forEach(({ serviceName }) => {
+        newMap.set(serviceName, extractServiceData(latencyResp, serviceName));
+        const data = extractServiceData(latencyInstantResp, serviceName);
+        newInstantMap.set(serviceName, data.length > 0 ? data[0].value : 0);
+      });
+
+      setLatencyMap(newMap);
+      setLatencyInstantMap(newInstantMap);
+
+      const rejected = [latencyResult, latencyInstantResult].find(
+        (r) => r.status === 'rejected'
+      ) as PromiseRejectedResult | undefined;
+      if (rejected) {
+        console.error(
+          '[useServicesRedMetrics] Partial failure fetching latency metrics:',
+          rejected.reason
         );
-
-        const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
-
-        const [latencyResp, latencyInstantResp] = await Promise.all([
-          promqlService.executeMetricRequest({
-            query: latencyQuery,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
-            step,
-          }),
-          // Instant query for true percentile over the full time range
-          promqlService.executeInstantQuery({
-            query: latencyInstantQuery,
-            time: endTimeSec,
-          }),
-        ]);
-
-        const newMap = new Map<string, MetricDataPoint[]>();
-        params.services.forEach(({ serviceName }) => {
-          newMap.set(serviceName, extractServiceData(latencyResp, serviceName));
-        });
-
-        // Extract instant latency values per service
-        const newInstantMap = new Map<string, number>();
-        params.services.forEach(({ serviceName }) => {
-          const data = extractServiceData(latencyInstantResp, serviceName);
-          newInstantMap.set(serviceName, data.length > 0 ? data[0].value : 0);
-        });
-
-        setLatencyMap(newMap);
-        setLatencyInstantMap(newInstantMap);
-      } catch (err) {
-        console.error('[useServicesRedMetrics] Error fetching latency metrics:', err);
-        setLatencyError(err instanceof Error ? err : new Error('Unknown error'));
-        setLatencyMap(new Map());
-      } finally {
-        setIsLoadingLatency(false);
+        setLatencyError(
+          rejected.reason instanceof Error ? rejected.reason : new Error('Unknown error')
+        );
       }
+      setIsLoadingLatency(false);
     };
 
     fetchLatency();
-    // Note: params.services is intentionally omitted to prevent infinite loops.
-    // serviceFilter already tracks changes to the services list.
+
+    return () => abortController.abort();
+    // serviceFilter is constant; servicesKey tracks changes to the service set.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     promqlService,
-    serviceFilter,
+    servicesKey,
     startTimeSec,
     endTimeSec,
     refetchAllTrigger,
