@@ -408,7 +408,7 @@ export class Main extends React.Component<MainProps, MainState> {
         });
       await this.props.http
         .post(`${NOTEBOOKS_API_PREFIX}/note/savedNotebook/addSampleNotebooks`, {
-          body: JSON.stringify({ visIds }),
+          body: JSON.stringify({ visIds, dataSourceMDSId, dataSourceMDSLabel }),
         })
         .then((res) => {
           const newData = res.body.map((notebook: any) => ({

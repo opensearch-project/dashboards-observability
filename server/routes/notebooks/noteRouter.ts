@@ -237,6 +237,8 @@ export function registerNoteRoute(router: IRouter) {
       validate: {
         body: schema.object({
           visIds: schema.arrayOf(schema.string()),
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+          dataSourceMDSLabel: schema.maybe(schema.string({ defaultValue: '' })),
         }),
       },
     },
@@ -250,7 +252,9 @@ export function registerNoteRoute(router: IRouter) {
       try {
         const sampleNotebooks = await addSampleNotes(
           opensearchNotebooksClient,
-          request.body.visIds
+          request.body.visIds,
+          request.body.dataSourceMDSId,
+          request.body.dataSourceMDSLabel
         );
         return response.ok({
           body: sampleNotebooks,
