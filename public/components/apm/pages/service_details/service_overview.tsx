@@ -286,8 +286,8 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             title={i18n.translate('observability.apm.serviceOverview.latencyP99', {
               defaultMessage: 'Latency (P99)',
             })}
-            subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
-              defaultMessage: 'Avg',
+            subtitle={i18n.translate('observability.apm.serviceOverview.latest', {
+              defaultMessage: 'Latest',
             })}
             promqlQuery={getQueryServiceLatencyP99Card(environment, serviceName)}
             timeRange={timeRange}
@@ -295,7 +295,6 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             formatValue={formatLatency}
             invertColor
             refreshTrigger={refreshTrigger}
-            showTotal
           />
         </EuiFlexItem>
       </EuiFlexGroup>
