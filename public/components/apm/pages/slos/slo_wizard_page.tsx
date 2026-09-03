@@ -968,7 +968,7 @@ const IdentityPanel: React.FC<PanelProps & { template: string; readOnlyDatasourc
       {readOnlyDatasource ? (
         // Datasource is IMMUTABLE on edit: the server pins rules to the
         // create-time datasource, so allowing a change here would orphan the
-        // already-provisioned Prometheus/Cortex rule groups. Render a disabled
+        // already-provisioned Prometheus rule groups. Render a disabled
         // field showing the friendly name (matching the interactive picker),
         // not the raw connection id.
         <ReadOnlyDatasourceField datasourceId={state.datasourceId} />

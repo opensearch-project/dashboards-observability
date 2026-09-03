@@ -5,7 +5,7 @@
 
 /**
  * Prometheus rule mutation handlers. Creates, updates, and deletes alerting
- * rules via the Cortex ruler API (through the DirectQueryRulerClient).
+ * rules via the Prometheus ruler API (through the DirectQueryRulerClient).
  *
  * Route registrations live in `prometheus_routes.ts`; this file is pure
  * handler logic, testable in isolation.
@@ -14,7 +14,7 @@ import type { AlertingOSClient, Datasource, Logger } from '../../../../common/ty
 import type { GeneratedRule, GeneratedRuleGroup } from '../../../../common/slo/slo_types';
 import type { RulerClient } from '../../../services/slo/ruler_client';
 
-/** The namespace under which user-created alerting rules are stored in Cortex. */
+/** The namespace under which user-created alerting rules are stored in the ruler. */
 export const USER_RULES_NAMESPACE = 'observability-alerting';
 
 export interface PrometheusRulePayload {
@@ -37,7 +37,7 @@ export interface PrometheusRulePayload {
 
 /**
  * Converts a form payload into a GeneratedRuleGroup suitable for the
- * Cortex ruler upsert API.
+ * Prometheus ruler upsert API.
  */
 export function buildRuleGroup(payload: PrometheusRulePayload): GeneratedRuleGroup {
   // The query alone is the alert expression unless a legacy operator/threshold
@@ -94,15 +94,15 @@ export async function handleCreatePrometheusRule(
   const group = buildRuleGroup(payload);
 
   // Rule groups are shared: multiple rules may live in the same group, and
-  // Cortex's POST is create-or-replace on (namespace, groupName). Merge with
+  // the ruler's POST is create-or-replace on (namespace, groupName). Merge with
   // the existing group so sibling rules are preserved — the new rule replaces
   // any same-named rule, others are kept.
   //
-  // NOTE: this read-modify-write is not atomic. The Cortex ruler API offers
+  // NOTE: this read-modify-write is not atomic. The ruler API offers
   // no compare-and-swap, so two concurrent writers targeting the same group
   // can still lose an update (the second upsert wins). This protects against
   // the common single-writer clobber; true concurrent safety would need
-  // server-side coordination in Cortex itself.
+  // server-side coordination in the ruler itself.
   const existing = await rulerClient.getRuleGroup(
     client,
     datasource,
@@ -139,7 +139,7 @@ export async function handleDeletePrometheusRule(
   // sibling rules in a shared group are preserved. The whole group is only
   // deleted when it would become empty (or no ruleName was given).
   // Same non-atomicity caveat as the create-merge above: no CAS on the
-  // Cortex ruler, so concurrent writers to one group can race.
+  // ruler, so concurrent writers to one group can race.
   if (ruleName) {
     const existing = await rulerClient.getRuleGroup(
       client,

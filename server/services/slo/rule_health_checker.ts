@@ -4,7 +4,7 @@
  */
 
 /**
- * RuleHealthChecker — per-SLO probe of the Prometheus-compatible ruler (Cortex)
+ * RuleHealthChecker — per-SLO probe of the Prometheus-compatible ruler
  * that answers: "are the rule groups this SLO's saved object expects to be
  * deployed actually present on the ruler right now?"
  *
@@ -148,7 +148,7 @@ export function createRuleHealthChecker(
   // production the ruler passed in is a real `RulerClient`; in tests the
   // caller passes a jest.fn-backed partial. The cast happens once at
   // construction time so the hot path stays type-safe.
-  const probe = (ruler as unknown) as RuleGroupProbe;
+  const probe = ruler as unknown as RuleGroupProbe;
 
   async function probeGroup(
     input: RuleHealthCheckInput,
@@ -188,19 +188,17 @@ export function createRuleHealthChecker(
       | { kind: 'unknown_error'; err: unknown };
 
     const outcomes = await Promise.all(
-      expected.map(
-        async (group): Promise<ProbeOutcome> => {
-          try {
-            const g = await probeGroup(input, group);
-            return g ? { kind: 'present', group } : { kind: 'missing', group };
-          } catch (err: unknown) {
-            if (err instanceof SloRulerError) {
-              return { kind: 'ruler_error', group, err };
-            }
-            return { kind: 'unknown_error', err };
+      expected.map(async (group): Promise<ProbeOutcome> => {
+        try {
+          const g = await probeGroup(input, group);
+          return g ? { kind: 'present', group } : { kind: 'missing', group };
+        } catch (err: unknown) {
+          if (err instanceof SloRulerError) {
+            return { kind: 'ruler_error', group, err };
           }
+          return { kind: 'unknown_error', err };
         }
-      )
+      })
     );
 
     // Bug-class errors (non-SloRulerError throws) take precedence — surface

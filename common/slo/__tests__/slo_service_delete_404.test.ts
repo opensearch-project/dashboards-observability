@@ -100,7 +100,7 @@ function makeDeps() {
     enabled: true,
     directQueryName: 'prom-connection',
   };
-  const client = ({ transport: { request: jest.fn() } } as unknown) as AlertingOSClient;
+  const client = { transport: { request: jest.fn() } } as unknown as AlertingOSClient;
 
   const deploy: SloDeployContext = {
     ruler,
@@ -128,7 +128,7 @@ describe('SloService.delete — ruler 404 tolerance', () => {
 
   it('ruler already succeeded on 404 (mock resolves undefined) → SO still deletes and generatedRuleNames surface', async () => {
     // Simulates the real-world case: somebody DELETE'd the rule group in
-    // Cortex out-of-band. DirectQueryRulerClient.deleteRuleGroup sees the
+    // Prometheus out-of-band. DirectQueryRulerClient.deleteRuleGroup sees the
     // 404 and resolves cleanly. The service must NOT treat this as a
     // failure; the SO tear-down continues, and the caller gets a clean
     // { deleted: true, generatedRuleNames } envelope.

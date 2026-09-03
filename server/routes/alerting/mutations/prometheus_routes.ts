@@ -9,7 +9,7 @@
  *   POST   /api/alerting/prometheus/{dsId}/rules       — create rule
  *   DELETE /api/alerting/prometheus/{dsId}/rules/{groupName} — delete rule
  *
- * These routes proxy to the Cortex ruler API via the DirectQueryRulerClient,
+ * These routes proxy to the Prometheus ruler API via the DirectQueryRulerClient,
  * which communicates through the OpenSearch DirectQuery plugin.
  */
 import { schema } from '@osd/config-schema';
