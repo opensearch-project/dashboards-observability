@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export const DEFAULT_CONFIG = {
   layout: {
     autosize: true,
