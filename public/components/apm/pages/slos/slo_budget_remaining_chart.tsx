@@ -22,6 +22,7 @@
 import React, { useMemo } from 'react';
 import { EuiCallOut, EuiIcon, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import * as echarts from 'echarts';
+import moment from 'moment-timezone';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { EchartsRender } from '../../../alerting/echarts_render';
@@ -29,11 +30,62 @@ import { usePromQLChartData } from '../../shared/hooks/use_promql_chart_data';
 import { TimeRange } from '../../common/types/service_types';
 import type {
   BudgetWarningThreshold,
+  CalendarWindow,
   Objective,
   SloDocument,
+  Window,
 } from '../../../../../common/slo/slo_types';
 import { buildCoverageProbeQuery, buildErrorRatioExprForWindow } from './slo_query_builders';
-import { formatPct } from '../../../../../common/slo/format';
+import { formatPct, SLO_PRECISION } from '../../../../../common/slo/format';
+import { uiSettingsService } from '../../../../../common/utils';
+
+/**
+ * Escape values interpolated into the ECharts tooltip HTML. The tooltip
+ * `formatter` returns a raw HTML string, so any dynamic value (timestamp,
+ * formatted percentages, delta) must be escaped to prevent HTML injection
+ * should an upstream value ever contain angle brackets or quotes.
+ */
+const escapeHtml = (s: string): string =>
+  String(s).replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string
+  );
+
+/**
+ * Prometheus range-duration equivalents for each calendar period. Calendar
+ * windows aren't backed by recording rules yet, so the inline chart approximates
+ * the period with a rolling range of equal length. Deriving the duration from
+ * the spec (rather than hardcoding "30d") keeps the chart's copy honest: a
+ * calendar-week SLO no longer claims to cover a rolling 30-day window.
+ */
+const CALENDAR_PERIOD_DURATIONS: Record<CalendarWindow['period'], string> = {
+  week: '7d',
+  month: '30d',
+  quarter: '90d',
+};
+
+/** Resolve the PromQL range duration the chart should query for this window. */
+export function deriveWindowDuration(window: Window): string {
+  return window.type === 'rolling' ? window.duration : CALENDAR_PERIOD_DURATIONS[window.period];
+}
+
+/**
+ * Resolve the timezone the user configured via `dateFormat:tz`, falling back to
+ * the browser zone. Mirrors the alerts dashboard's helper (kept local so this
+ * file owns its own copy rather than reaching across the plugin).
+ */
+function resolveDisplayTz(): string {
+  const tz = uiSettingsService.get('dateFormat:tz');
+  if (!tz || tz === 'Browser') {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+  return tz;
+}
+
+/** Format an epoch-ms tooltip timestamp with an explicit timezone abbreviation. */
+function formatTooltipTs(ms: number, tz: string): string {
+  return moment.tz(ms, tz).format('YYYY-MM-DD HH:mm z');
+}
 
 export interface SloBudgetRemainingChartProps {
   slo: SloDocument;
@@ -72,6 +124,8 @@ export interface BudgetRemainingOptionInputs {
   data: Array<[number, number]>;
   warningThreshold?: BudgetWarningThreshold;
   atZero: boolean;
+  /** Timezone for tooltip timestamps. Defaults to the user's `dateFormat:tz`. */
+  tz?: string;
 }
 
 /**
@@ -82,13 +136,21 @@ export function buildBudgetRemainingOption(
   inputs: BudgetRemainingOptionInputs
 ): echarts.EChartsOption {
   const { seriesName, data, warningThreshold, atZero } = inputs;
+  const tz = inputs.tz ?? resolveDisplayTz();
   const fillColor = atZero ? euiThemeVars.euiColorDanger : euiThemeVars.euiColorSuccess;
   const fillRgba = atZero ? 'rgba(189, 39, 30, 0.35)' : 'rgba(84, 179, 153, 0.25)';
+  // WCAG 1.4.1: don't rely on hue alone to distinguish a breached (at-zero)
+  // series from a healthy one. A dashed stroke + visible markers give a
+  // redundant, color-independent cue for the danger state.
+  const lineType = atZero ? 'dashed' : 'solid';
+  const symbol = atZero ? 'triangle' : 'none';
 
   const markLines: Array<Record<string, unknown>> = [
     {
       yAxis: 0,
-      lineStyle: { color: euiThemeVars.euiColorDanger, type: 'solid', width: 1 },
+      // Dashed so this threshold annotation reads as a reference line, not as
+      // plotted data.
+      lineStyle: { color: euiThemeVars.euiColorDanger, type: 'dashed', width: 1 },
       label: {
         formatter: i18n.translate('observability.apm.slo.budgetRemainingChart.exhaustedMarkLabel', {
           defaultMessage: 'exhausted',
@@ -108,7 +170,9 @@ export function buildBudgetRemainingOption(
         width: 1,
       },
       label: {
-        formatter: `${warningThreshold.severity} @ ${formatPct(warningThreshold.threshold)}`,
+        formatter: `${warningThreshold.severity} @ ${formatPct(warningThreshold.threshold, {
+          decimals: SLO_PRECISION.budget,
+        })}`,
         // Pin the warning label to the end so it doesn't collide with the
         // "exhausted" label in deep-breach renders where the axis is stretched
         // downward and both markLines sit near the chart's top edge.
@@ -127,9 +191,28 @@ export function buildBudgetRemainingOption(
         const list = params as Array<{ axisValue: number; value: [number, number] }>;
         if (!list || list.length === 0) return '';
         const p = list[0];
-        const ts = new Date(p.axisValue).toLocaleString();
+        const ts = formatTooltipTs(p.axisValue, tz);
         const v = Array.isArray(p.value) ? p.value[1] : (p.value as number);
-        return `${ts}<br/><strong>${formatPct(v)}</strong> remaining`;
+        const remainingLabel = i18n.translate(
+          'observability.apm.slo.budgetRemainingChart.tooltip.remaining',
+          { defaultMessage: 'remaining' }
+        );
+        // Delta versus the warning threshold: positive = headroom left before
+        // escalation, negative = already past the guardrail.
+        let deltaLine = '';
+        if (warningThreshold && Number.isFinite(v)) {
+          const delta = v - warningThreshold.threshold;
+          const sign = delta >= 0 ? '+' : '';
+          deltaLine = `<br/>${escapeHtml(
+            i18n.translate('observability.apm.slo.budgetRemainingChart.tooltip.deltaVsThreshold', {
+              defaultMessage: '{delta} vs warning threshold',
+              values: { delta: `${sign}${formatPct(delta, { decimals: SLO_PRECISION.budget })}` },
+            })
+          )}`;
+        }
+        return `${escapeHtml(ts)}<br/><strong>${escapeHtml(
+          formatPct(v, { decimals: SLO_PRECISION.budget })
+        )}</strong> ${escapeHtml(remainingLabel)}${deltaLine}`;
       },
     },
     xAxis: {
@@ -153,7 +236,7 @@ export function buildBudgetRemainingOption(
       axisLabel: {
         color: euiThemeVars.euiColorDarkShade,
         fontSize: 11,
-        formatter: (value: number) => formatPct(value),
+        formatter: (value: number) => formatPct(value, { decimals: SLO_PRECISION.budget }),
       },
       splitLine: {
         lineStyle: { color: euiThemeVars.euiColorLightestShade, type: 'dashed' },
@@ -165,8 +248,11 @@ export function buildBudgetRemainingOption(
         type: 'line',
         data,
         smooth: false,
-        symbol: 'none',
-        lineStyle: { color: fillColor, width: 2 },
+        // Redundant non-color cues for the breached state (see lineType/symbol).
+        symbol,
+        symbolSize: 5,
+        showSymbol: atZero,
+        lineStyle: { color: fillColor, width: 2, type: lineType },
         itemStyle: { color: fillColor },
         areaStyle: { color: fillRgba },
         markLine: {
@@ -186,12 +272,15 @@ export const SloBudgetRemainingChart: React.FC<SloBudgetRemainingChartProps> = (
   timeRange,
   refreshTrigger,
 }) => {
-  const window = slo.spec.window.type === 'rolling' ? slo.spec.window.duration : '30d';
-  const query = useMemo(() => buildBudgetRemainingExpr(slo, objective, window), [
-    slo,
-    objective,
-    window,
-  ]);
+  // Derive the actual PromQL range from the spec's window. Rolling windows use
+  // their configured duration; calendar windows approximate their period with a
+  // rolling range of equal length (recording rules for calendar windows aren't
+  // wired up yet). Never hardcode "30d" — that mislabeled every calendar SLO.
+  const window = useMemo(() => deriveWindowDuration(slo.spec.window), [slo.spec.window]);
+  const query = useMemo(
+    () => buildBudgetRemainingExpr(slo, objective, window),
+    [slo, objective, window]
+  );
 
   // The first budget-warning threshold drives the "at risk" line. Sort
   // descending so a list like [0.25, 0.5, 0.1] still surfaces the most
@@ -283,11 +372,17 @@ export const SloBudgetRemainingChart: React.FC<SloBudgetRemainingChartProps> = (
         </h4>
       </EuiText>
       <EuiText size="xs" color="subdued">
-        {i18n.translate('observability.apm.slo.budgetRemainingChart.description', {
-          defaultMessage:
-            'Fraction of the {window} error budget still available. Starts at 100% and trends toward 0 as bad events accumulate. Crossing the warning threshold means an escalation is close.',
-          values: { window },
-        })}
+        {slo.spec.window.type === 'calendar'
+          ? i18n.translate('observability.apm.slo.budgetRemainingChart.description.calendar', {
+              defaultMessage:
+                'Fraction of the calendar-{period} error budget still available (approximated over a rolling {window} range until calendar recording rules land). Starts at 100% and trends toward 0 as bad events accumulate. Crossing the warning threshold means an escalation is close.',
+              values: { period: slo.spec.window.period, window },
+            })
+          : i18n.translate('observability.apm.slo.budgetRemainingChart.description', {
+              defaultMessage:
+                'Fraction of the rolling {window} error budget still available. Starts at 100% and trends toward 0 as bad events accumulate. Crossing the warning threshold means an escalation is close.',
+              values: { window },
+            })}
       </EuiText>
       <EuiSpacer size="s" />
       {error && (
