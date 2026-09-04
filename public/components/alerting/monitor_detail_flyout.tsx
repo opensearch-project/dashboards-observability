@@ -153,6 +153,10 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
     dsId: monitor.datasourceId,
     ruleId: monitor.id,
     definitionType: monitor.definitionType || 'monitor',
+    // A pending optimistic row carries a synthetic `new-` id the backend can't
+    // resolve — skip the detail fetch so it doesn't 404 on every open; the
+    // flyout falls back to the summary props until the rule confirms.
+    enabled: !pending,
   });
   const { detail, isLoading: detailLoading, error: detailError } = detailState;
 

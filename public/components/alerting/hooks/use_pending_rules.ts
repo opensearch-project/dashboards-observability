@@ -92,14 +92,11 @@ export interface UsePendingRulesParams {
   /** Currently selected datasource ids — scopes which pending rows are shown. */
   selectedDsIds: string[];
   /**
-   * Fired once per entry that timed out (expired / attempts exhausted). The
-   * page shows a soft WARNING toast — a timeout means "not propagated yet",
-   * not "creation failed".
+   * Fired once per entry that timed out (aged past `ttlMs`). The page shows a
+   * soft WARNING toast — a timeout means "not propagated yet", not "creation
+   * failed".
    */
-  onEvictWarning: (
-    entry: PendingEntry,
-    reason: Extract<EvictReason, 'expired' | 'exhausted'>
-  ) => void;
+  onEvictWarning: (entry: PendingEntry, reason: Extract<EvictReason, 'expired'>) => void;
   config?: PendingRulesConfig;
 }
 
@@ -144,7 +141,7 @@ export function usePendingRules({
     );
     pendingRulesStore.replace(nextPending);
     for (const ev of evicted) {
-      if (ev.reason === 'expired' || ev.reason === 'exhausted') {
+      if (ev.reason === 'expired') {
         onEvictWarningRef.current(ev.entry, ev.reason);
       }
     }

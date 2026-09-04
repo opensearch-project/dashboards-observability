@@ -70,7 +70,12 @@ export interface PendingEntry {
   dsId: string;
   /** The row rendered while the rule is unconfirmed (status `pending`, `new-` id). */
   optimisticRule: UnifiedRuleSummary;
-  /** Number of reconcile passes this entry has survived (one per querier refetch). */
+  /**
+   * Number of reconcile passes this entry has survived (one per querier
+   * refetch). Informational only — eviction is driven purely by `ttlMs` so a
+   * healthy-but-slow rule isn't dropped early just because focus/visibility
+   * refetches bumped the pass count faster than wall-clock time elapsed.
+   */
   attempts: number;
   /** Epoch ms the entry was added — drives the TTL eviction. */
   createdAt: number;
@@ -78,18 +83,15 @@ export interface PendingEntry {
 }
 
 export interface PendingRulesConfig {
-  /** Max reconcile passes before giving up and warning. */
-  maxAttempts: number;
   /** Wall-clock budget (ms) before giving up and warning. */
   ttlMs: number;
 }
 
 export const DEFAULT_PENDING_RULES_CONFIG: PendingRulesConfig = {
-  maxAttempts: 6,
   ttlMs: 120_000,
 };
 
-export type EvictReason = 'confirmed' | 'deleted' | 'expired' | 'exhausted';
+export type EvictReason = 'confirmed' | 'deleted' | 'expired';
 
 export interface EvictedEntry {
   entry: PendingEntry;
@@ -143,8 +145,7 @@ export function mergePending(
  *   (a) key present in the querier → evict (confirmed), silent.
  *   (b) optimistic id in `deletedRuleIds` → evict (deleted), never resurrected.
  *   (c) age past `ttlMs` → evict (expired), warn.
- *   (d) attempts at `maxAttempts` → evict (exhausted), warn.
- *   (e) otherwise keep and increment attempts.
+ *   (d) otherwise keep and increment attempts (informational).
  *
  * `selectedDsIds` only scopes which surviving rows are appended to `merged`
  * (an entry on a currently-unselected datasource stays pending but is hidden);
@@ -176,15 +177,11 @@ export function reconcilePending(
       evicted.push({ entry, reason: 'deleted' });
       continue;
     }
-    // Age is checked before attempts so a slow-but-recent entry that has simply
-    // ridden many polls isn't reported as "expired" (and vice-versa the age
-    // gate fires even when attempts are still under the cap).
+    // Eviction is purely wall-clock: a rule that's simply slow to propagate
+    // shouldn't be dropped just because many focus/visibility/poll refetches
+    // bumped the pass count. Only elapsed time past `ttlMs` gives up (and warns).
     if (now - entry.createdAt > config.ttlMs) {
       evicted.push({ entry, reason: 'expired' });
-      continue;
-    }
-    if (entry.attempts >= config.maxAttempts) {
-      evicted.push({ entry, reason: 'exhausted' });
       continue;
     }
     nextPending.push({ ...entry, attempts: entry.attempts + 1 });

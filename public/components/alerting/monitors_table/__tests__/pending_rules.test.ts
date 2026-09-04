@@ -137,7 +137,7 @@ describe('reconcilePending', () => {
     expect(evicted[0].reason).toBe('confirmed');
   });
 
-  it('(e) retains an unconfirmed entry and increments attempts + keeps pending status', () => {
+  it('(d) retains an unconfirmed entry and increments attempts + keeps pending status', () => {
     const { merged, nextPending, evicted } = reconcile([], [entry({ attempts: 2 })]);
     expect(evicted).toHaveLength(0);
     expect(nextPending).toHaveLength(1);
@@ -147,15 +147,18 @@ describe('reconcilePending', () => {
     expect(isPending(merged[0])).toBe(true);
   });
 
-  it('(d) evicts as exhausted when attempts reach maxAttempts', () => {
-    const { nextPending, evicted } = reconcile([], [entry({ attempts: 6 })]);
-    expect(nextPending).toHaveLength(0);
-    expect(evicted).toEqual([
-      { entry: expect.objectContaining({ attempts: 6 }), reason: 'exhausted' },
-    ]);
+  it('never evicts on attempt count alone — a high-attempt but recent entry is retained', () => {
+    // attempts no longer drive eviction (only wall-clock ttl does), so an entry
+    // that has ridden many focus/visibility refetches within the ttl survives.
+    const { nextPending, evicted } = reconcile([], [entry({ attempts: 99, createdAt: 1_000 })], {
+      now: 1_500,
+    });
+    expect(evicted).toHaveLength(0);
+    expect(nextPending).toHaveLength(1);
+    expect(nextPending[0].attempts).toBe(100);
   });
 
-  it('(c) evicts as expired when age exceeds ttl even if attempts are under the cap', () => {
+  it('(c) evicts as expired when age exceeds ttl regardless of attempt count', () => {
     const { nextPending, evicted } = reconcile([], [entry({ attempts: 0, createdAt: 1_000 })], {
       now: 1_000 + DEFAULT_PENDING_RULES_CONFIG.ttlMs + 1,
     });
@@ -174,7 +177,7 @@ describe('reconcilePending', () => {
     expect(pass2.nextPending).toHaveLength(0);
   });
 
-  it('prioritizes confirm over delete/ttl/attempts', () => {
+  it('prioritizes confirm over delete/ttl', () => {
     const confirmed = rule();
     const { evicted } = reconcile([confirmed], [entry({ attempts: 99, createdAt: 0 })], {
       deleted: new Set(['new-100-0']),

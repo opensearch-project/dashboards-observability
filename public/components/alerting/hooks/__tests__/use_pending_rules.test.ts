@@ -100,11 +100,12 @@ describe('usePendingRules', () => {
     expect(onEvictWarning).not.toHaveBeenCalled();
   });
 
-  it('warns once when an entry is evicted for exhausting its attempts', () => {
+  it('warns once when an entry is evicted for aging past its ttl', () => {
     const onEvictWarning = jest.fn();
     const { result, rerender } = setup({ rules: [], onEvictWarning });
-    // One attempt short of the cap so the next poll evicts it as exhausted.
-    act(() => result.current.addPending(entry({ attempts: 6 })));
+    // Created well over the ttl ago (default 120s), so the next reconcile evicts
+    // it as expired.
+    act(() => result.current.addPending(entry({ createdAt: Date.now() - 200_000 })));
 
     // Two refetches (empty querier) — should only warn on the first eviction.
     act(() =>
@@ -126,7 +127,7 @@ describe('usePendingRules', () => {
     expect(onEvictWarning).toHaveBeenCalledTimes(1);
     expect(onEvictWarning).toHaveBeenCalledWith(
       expect.objectContaining({ key: entry().key }),
-      'exhausted'
+      'expired'
     );
   });
 

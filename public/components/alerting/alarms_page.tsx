@@ -568,8 +568,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       name: string,
       origin: PendingEntry['origin']
     ) => {
+      const entryKey = pendingRuleKey(dsId, group, name);
+      // Re-adding this key means a fresh create (e.g. a retry after a timeout);
+      // `pendingRulesStore.add` resets its clock, so clear any prior "didn't
+      // show up" warning too — otherwise a second timeout for the same rule
+      // would be silently suppressed by the once-per-key guard below.
+      warnedPendingKeysRef.current.delete(entryKey);
       addPending({
-        key: pendingRuleKey(dsId, group, name),
+        key: entryKey,
         dsId,
         optimisticRule: { ...rule, datasourceId: dsId, group, status: 'pending' },
         attempts: 0,
@@ -996,9 +1002,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             defaultMessage: 'Monitor cloned',
           })
         );
-        // Immediate refetch so a fast-propagating rule confirms on the next
-        // tick; otherwise the background poll reconciles the pending row.
-        refetchRules();
+        // Background refetch: the optimistic pending row is already showing, so
+        // reconcile silently (no spinner, keeps any warning banner); the poll
+        // reconciles too if the rule is slow to propagate.
+        backgroundRefetchRules();
         return;
       }
 
@@ -1195,10 +1202,19 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       setShowCreateMonitor(false);
       setCreateBackendType(null);
       setPplSubmitError(null);
-      // Optimistic pending row keeps the UI instant; the immediate refetch (and
-      // the background poll) reconcile it against the canonical querier row.
-      addOptimisticPending(newRule, dsId, optimisticGroup, formState.name, 'create');
-      refetchRules();
+      if (isProm) {
+        // Prometheus lags the querier ~60s: layer an optimistic pending row so
+        // the UI is instant, then reconcile it via a BACKGROUND refetch — no
+        // spinner over the row that's already showing, and any cross-datasource
+        // warning banner survives — plus the ongoing poll.
+        addOptimisticPending(newRule, dsId, optimisticGroup, formState.name, 'create');
+        backgroundRefetchRules();
+      } else {
+        // OpenSearch confirms immediately (no querier lag), so no optimistic
+        // pending row — one would wrongly render as a disabled spinner. A
+        // foreground refetch shows the loading state until the real row lands.
+        refetchRules();
+      }
     } catch (e: unknown) {
       const message = extractServerErrorMessage(e);
       const pplError = extractPplValidationError(message);
@@ -1281,7 +1297,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       form.monitorName,
       'metrics'
     );
-    refetchRules();
+    // Optimistic row is showing — reconcile silently via background refetch + poll.
+    backgroundRefetchRules();
   };
 
   const handleEditMonitor = async (formState: MonitorFormState, ruleId: string) => {
@@ -1386,9 +1403,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           values: { count: succeededRules.length },
         })
       );
-      for (const r of succeededRules) {
-        addOptimisticPending(r, r.datasourceId, r.group, r.name, 'batch');
-      }
+      // Batch create is OpenSearch-only (`createMonitor`), which confirms with
+      // no querier lag — so no optimistic pending rows (they'd wrongly render as
+      // disabled spinners). The foreground refetch surfaces the new rows.
       refetchRules();
     }
     // Don't close flyout — AI wizard shows its own summary step and "Done" button
@@ -1407,10 +1424,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     {
       id: 'rules' as TabId,
       name:
+        // Count what the table actually renders — `visibleRules` includes the
+        // optimistic pending rows (and drops optimistically-deleted ones), so
+        // the badge stays in sync with the list during the confirm window.
+        // `rulesTotal` (querier length) is used only for the not-yet-loaded
+        // sentinel: -1 → show "Rules" with no count.
         rulesTotal >= 0
           ? i18n.translate('observability.alerting.alarmsPage.tabs.rulesCount', {
               defaultMessage: 'Rules ({count})',
-              values: { count: rulesTotal },
+              values: { count: visibleRules.length },
             })
           : i18n.translate('observability.alerting.alarmsPage.tabs.rules', {
               defaultMessage: 'Rules',
