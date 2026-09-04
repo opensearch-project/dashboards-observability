@@ -22,8 +22,46 @@ import {
   osMonitorToUnifiedRuleSummary,
   promEpisodeToUnified,
   runtimeStateToMonitorStatus,
+  stripTrailingComparison,
 } from '../alert_utils';
 import type { MonitorStatus, OSMonitor } from '../../../../common/types/alerting';
+
+describe('stripTrailingComparison', () => {
+  it('strips a simple trailing comparison', () => {
+    expect(stripTrailingComparison('rate(http_requests_total[5m]) > 0.5')).toBe(
+      'rate(http_requests_total[5m])'
+    );
+  });
+
+  it('strips every comparison operator', () => {
+    expect(stripTrailingComparison('up >= 1')).toBe('up');
+    expect(stripTrailingComparison('up <= 1')).toBe('up');
+    expect(stripTrailingComparison('up < 1')).toBe('up');
+    expect(stripTrailingComparison('up == 0')).toBe('up');
+    expect(stripTrailingComparison('up != 0')).toBe('up');
+  });
+
+  it('handles scientific-notation and negative thresholds', () => {
+    expect(stripTrailingComparison('foo > 1e3')).toBe('foo');
+    expect(stripTrailingComparison('foo > 1.5e-3')).toBe('foo');
+    expect(stripTrailingComparison('foo > -0.5')).toBe('foo');
+  });
+
+  it('leaves a compound / multi-comparison expression unchanged rather than mangling it', () => {
+    // Stripping only the trailing `> 2` would yield the nonsensical
+    // `a > 1 and b`; the residual comparison is detected so the whole
+    // expression is preserved instead.
+    const compound = 'a > 1 and b > 2';
+    expect(stripTrailingComparison(compound)).toBe(compound);
+  });
+
+  it('returns the original when the expression is only a comparison / avoids empty output', () => {
+    // A metric-less expression trims to empty after the strip; fall back to the
+    // original so we never issue an empty query.
+    expect(stripTrailingComparison('   ')).toBe('');
+    expect(stripTrailingComparison('up')).toBe('up');
+  });
+});
 
 describe('promEpisodeToUnified', () => {
   const START = Date.UTC(2024, 0, 15, 12, 0, 0);

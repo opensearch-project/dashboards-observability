@@ -116,7 +116,7 @@ describe('handleCreatePrometheusRule — shared group merge', () => {
     expect(upserted.interval).toBe(300);
   });
 
-  it('replaces a same-named rule instead of duplicating it (edit upsert)', async () => {
+  it('replaces a same-named rule when overwrite is set (edit upsert)', async () => {
     const ruler = makeRulerClient({
       groupName: 'team-rules',
       interval: 60,
@@ -128,6 +128,7 @@ describe('handleCreatePrometheusRule — shared group merge', () => {
     await handleCreatePrometheusRule(ruler as any, mockClient, mockDatasource, {
       ...basePayload,
       groupName: 'team-rules',
+      overwrite: true,
     });
 
     const upserted = ruler.upsertRuleGroup.mock.calls[0][3] as GeneratedRuleGroup;
@@ -135,6 +136,58 @@ describe('handleCreatePrometheusRule — shared group merge', () => {
     expect(upserted.rules.map((r) => r.name).sort()).toEqual(['HighErrorRate', 'OtherRule']);
     const updated = upserted.rules.find((r) => r.name === 'HighErrorRate');
     expect(updated?.expr).toBe(basePayload.query);
+  });
+
+  it('rejects a create that collides with an existing same-named rule (no overwrite)', async () => {
+    const ruler = makeRulerClient({
+      groupName: 'team-rules',
+      interval: 60,
+      rules: [{ type: 'alerting', name: 'HighErrorRate', expr: 'old_expr', for: '1m' } as any],
+    });
+    await expect(
+      handleCreatePrometheusRule(ruler as any, mockClient, mockDatasource, {
+        ...basePayload,
+        groupName: 'team-rules',
+      })
+    ).rejects.toMatchObject({ kind: 'conflict' });
+    // Must NOT have written anything — the existing rule is untouched.
+    expect(ruler.upsertRuleGroup).not.toHaveBeenCalled();
+  });
+
+  it('reads and writes the given namespace override (defaults to the user namespace otherwise)', async () => {
+    const ruler = makeRulerClient(null);
+    const result = await handleCreatePrometheusRule(ruler as any, mockClient, mockDatasource, {
+      ...basePayload,
+      groupName: 'team-rules',
+      namespace: 'custom-ns',
+    });
+
+    expect(result.namespace).toBe('custom-ns');
+    // Both the collision read and the write target the overridden namespace.
+    expect(ruler.getRuleGroup).toHaveBeenCalledWith(
+      mockClient,
+      mockDatasource,
+      'custom-ns',
+      'team-rules'
+    );
+    expect(ruler.upsertRuleGroup.mock.calls[0][2]).toBe('custom-ns');
+  });
+
+  it('allows a create with a distinct name to merge into an existing group', async () => {
+    const ruler = makeRulerClient({
+      groupName: 'team-rules',
+      interval: 60,
+      rules: [{ type: 'alerting', name: 'OtherRule', expr: 'up == 0', for: '1m' } as any],
+    });
+    // basePayload.name differs from OtherRule → no collision, no overwrite needed.
+    await handleCreatePrometheusRule(ruler as any, mockClient, mockDatasource, {
+      ...basePayload,
+      groupName: 'team-rules',
+    });
+    const upserted = ruler.upsertRuleGroup.mock.calls[0][3] as GeneratedRuleGroup;
+    expect(upserted.rules.map((r) => r.name).sort()).toEqual(
+      ['OtherRule', basePayload.name].sort()
+    );
   });
 });
 
@@ -182,6 +235,26 @@ describe('handleDeletePrometheusRule — per-rule splice', () => {
       mockClient,
       mockDatasource,
       USER_RULES_NAMESPACE,
+      'team-rules'
+    );
+  });
+
+  it('deletes from the given namespace override', async () => {
+    const ruler = makeRulerClient(null);
+    await handleDeletePrometheusRule(
+      ruler as any,
+      mockClient,
+      mockDatasource,
+      'team-rules',
+      undefined,
+      undefined,
+      'custom-ns'
+    );
+
+    expect(ruler.deleteRuleGroup).toHaveBeenCalledWith(
+      mockClient,
+      mockDatasource,
+      'custom-ns',
       'team-rules'
     );
   });
