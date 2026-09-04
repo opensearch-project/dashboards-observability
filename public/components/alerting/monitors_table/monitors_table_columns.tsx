@@ -23,7 +23,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiLoadingSpinner,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -42,6 +44,7 @@ import {
   TYPE_LABELS,
 } from '../shared_constants';
 import { DEFAULT_WIDTHS } from './resizable_columns';
+import { isPending } from './pending_rules';
 
 // ============================================================================
 // Column Definitions
@@ -105,7 +108,9 @@ export function buildTableColumns({
   setSelectedMonitor,
 }: BuildTableColumnsParams): Array<Record<string, unknown>> {
   const w = (id: string) => `${columnWidths[id] || DEFAULT_WIDTHS[id] || 120}px`;
-  const selectable = filtered;
+  // Pending optimistic rows aren't selectable (their synthetic id would 404),
+  // so exclude them when deciding the header's "all selected" state.
+  const selectable = filtered.filter((item) => !isPending(item));
   const allSelectableSelected =
     selectable.length > 0 && selectable.every((item) => selectedIds.has(item.id));
 
@@ -132,6 +137,7 @@ export function buildTableColumns({
           <input
             type="checkbox"
             checked={selectedIds.has(item.id)}
+            disabled={isPending(item)}
             onChange={() => toggleSelect(item.id)}
             aria-label={i18n.translate(
               'observability.alerting.monitorsTable.columns.selectRowAriaLabel',
@@ -199,9 +205,35 @@ export function buildTableColumns({
         }),
         sortable: true,
         width: w('status'),
-        render: (s: MonitorStatus) => (
-          <EuiHealth color={STATUS_COLORS[s] || 'subdued'}>{s}</EuiHealth>
-        ),
+        render: (s: MonitorStatus, item: UnifiedRuleSummary) => {
+          // Optimistic rows we injected while the querier catches up render a
+          // distinct spinner badge so it's clear the rule is submitted but not
+          // yet confirmed (its actions are disabled — the id would 404).
+          if (isPending(item)) {
+            return (
+              <EuiToolTip
+                content={i18n.translate(
+                  'observability.alerting.monitorsTable.columns.pendingTooltip',
+                  { defaultMessage: 'Waiting for the querier to confirm this rule' }
+                )}
+              >
+                <EuiBadge color="hollow" data-test-subj="pendingRuleBadge">
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="s" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {i18n.translate('observability.alerting.monitorsTable.columns.pending', {
+                        defaultMessage: 'Pending',
+                      })}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiBadge>
+              </EuiToolTip>
+            );
+          }
+          return <EuiHealth color={STATUS_COLORS[s] || 'subdued'}>{s}</EuiHealth>;
+        },
       });
     } else if (colId === 'severity') {
       cols.push({

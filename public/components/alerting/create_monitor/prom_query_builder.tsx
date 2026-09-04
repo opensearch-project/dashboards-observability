@@ -165,8 +165,18 @@ export const PromQueryBuilder: React.FC<{
   }, [selectedMetric, selectedLabelName, selectedLabelValue, labelOperator, onQueryChange]);
 
   // Sync when builder field selections change; clearing the metric clears a
-  // builder-authored query so the two stay consistent
+  // builder-authored query so the two stay consistent.
+  const didMountRef = useRef(false);
   useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      // Seeded FROM the query on mount: mark ownership so a later clear can
+      // reset it, but do NOT re-emit — re-emitting would normalize whitespace
+      // the user never touched (e.g. `foo{ bar = "x" }` → `foo{bar="x"}`) and
+      // spuriously mark the form dirty / pop the discard-changes modal.
+      if (seededBuilder) builderOwnsQuery.current = true;
+      return;
+    }
     if (selectedMetric.length > 0) {
       syncBuilderToQuery();
     } else if (builderOwnsQuery.current) {
@@ -193,7 +203,15 @@ export const PromQueryBuilder: React.FC<{
               )}
               options={metricOptions}
               selectedOptions={selectedMetric}
-              onChange={(opts) => setSelectedMetric(opts)}
+              onChange={(opts) => {
+                setSelectedMetric(opts);
+                // Reset the label filter when the metric changes — a label
+                // name/value valid for the old metric can be invalid (or mean
+                // something different) for the new one, which would build an
+                // incorrect `newMetric{staleLabel="staleValue"}` query.
+                setSelectedLabelName([]);
+                setSelectedLabelValue([]);
+              }}
               singleSelection={{ asPlainText: true }}
               compressed
               isClearable

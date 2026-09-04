@@ -749,6 +749,65 @@ export class ObservabilityPlugin implements Plugin<
               const dsId = dataset?.dataSource?.id || dataset?.id;
               const dsName =
                 dataset?.dataSource?.title ?? dataset?.dataSource?.name ?? dataset?.title;
+              // The live PromQL the user has in the Explore editor. Prefer the
+              // action dependency's `queryInEditor` (the shared code editor's
+              // live buffer), then the last-executed query. On the Metrics
+              // page the query is authored in a per-row builder/code editor
+              // that is NOT wired into the shared editor, so `queryInEditor`
+              // is empty there before submit — fall back to the live value the
+              // metrics panel mirrors into the data plugin's QueryStringManager
+              // on every keystroke, so a not-yet-run query still copies over.
+              const liveQueryStringValue = (() => {
+                try {
+                  const services = props.services as {
+                    data?: { query?: { queryString?: { getQuery?: () => { query?: unknown } } } };
+                  };
+                  const q = services?.data?.query?.queryString?.getQuery?.()?.query;
+                  return typeof q === 'string' ? q : '';
+                } catch {
+                  return '';
+                }
+              })();
+              const initialQuery =
+                props.dependencies.queryInEditor ||
+                (props.dependencies.query as { query?: string })?.query ||
+                liveQueryStringValue ||
+                '';
+              // The Explore time picker the user is currently viewing. Pass it
+              // through so the flyout's "Run preview" charts the same window
+              // (rather than a fixed last-hour), resolving `now`-relative
+              // ranges to concrete epoch-second bounds. Falls back to the
+              // server default (last hour) if the timefilter isn't available.
+              const initialTimeRange = (() => {
+                try {
+                  const services = props.services as {
+                    data?: {
+                      query?: {
+                        timefilter?: {
+                          timefilter?: {
+                            getBounds?: () => {
+                              min?: { valueOf?: () => number };
+                              max?: { valueOf?: () => number };
+                            };
+                          };
+                        };
+                      };
+                    };
+                  };
+                  const bounds = services?.data?.query?.timefilter?.timefilter?.getBounds?.();
+                  const min = bounds?.min?.valueOf?.();
+                  const max = bounds?.max?.valueOf?.();
+                  // Require at least a 1s span so the floor-to-seconds below can't
+                  // collapse to start === end (which the preview route rejects as
+                  // 400). Sub-second Explore windows fall back to the last-hour default.
+                  if (typeof min === 'number' && typeof max === 'number' && max - min >= 1000) {
+                    return { start: Math.floor(min / 1000), end: Math.floor(max / 1000) };
+                  }
+                } catch {
+                  // fall through to server default
+                }
+                return undefined;
+              })();
               return (
                 <React.Suspense fallback={null}>
                   <LazyCreateMetricsMonitor
@@ -758,6 +817,8 @@ export class ObservabilityPlugin implements Plugin<
                     }}
                     datasourceId={dsId}
                     datasourceName={dsName}
+                    initialQuery={initialQuery}
+                    initialTimeRange={initialTimeRange}
                     http={props.services.http}
                     addToast={(title, color, text) => {
                       // Forward the classified error body (`text`) and honor

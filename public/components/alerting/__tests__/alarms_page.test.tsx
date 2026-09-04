@@ -63,6 +63,15 @@ jest.mock('../notification_routing_panel', () => ({
   NotificationRoutingPanel: () => <div data-test-subj="routingPanel" />,
 }));
 jest.mock('../create_monitor', () => ({ CreateMonitor: () => null }));
+// The Alert Manager "Create metrics rule" path renders CreateMetricsMonitor;
+// capture its props so we can assert the group-scoped duplicate-name checker.
+const mockMetricsFlyout = jest.fn();
+jest.mock('../create_metrics_monitor', () => ({
+  CreateMetricsMonitor: (props: unknown) => {
+    mockMetricsFlyout(props);
+    return null;
+  },
+}));
 jest.mock('../create_monitor/edit_monitor', () => ({ EditMonitor: () => null }));
 jest.mock('../alert_detail_flyout', () => ({ AlertDetailFlyout: () => null }));
 
@@ -169,6 +178,57 @@ describe('AlarmsPage', () => {
     });
     fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
     expect(screen.getByTestId('monitorsTable')).toBeInTheDocument();
+  });
+
+  it('scopes the duplicate-name check to the rule group', async () => {
+    mockMetricsFlyout.mockClear();
+    mockUseRulesData.mockReturnValue({
+      ...emptyRulesHookResult,
+      rules: [
+        { id: 'r1', name: 'HighLatency', datasourceId: 'prom-1', group: 'payments' },
+        { id: 'r2', name: 'OtherRule', datasourceId: 'prom-1', group: 'payments' },
+      ] as unknown as never,
+    });
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    // MonitorsTable only renders on the Rules tab — switch to it first.
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    });
+    // Open the metrics create flyout via the MonitorsTable's onCreateMonitor callback.
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0];
+    await act(async () => {
+      tableProps.onCreateMonitor('metrics');
+    });
+    const flyoutProps = mockMetricsFlyout.mock.calls[mockMetricsFlyout.mock.calls.length - 1][0];
+    const isNameTaken = flyoutProps.isNameTaken as (n: string, d: string, g?: string) => boolean;
+
+    // Same name in the SAME group → duplicate.
+    expect(isNameTaken('HighLatency', 'prom-1', 'payments')).toBe(true);
+    // Same name in a DIFFERENT group → allowed (valid distinct rule).
+    expect(isNameTaken('HighLatency', 'prom-1', 'checkout')).toBe(false);
+    // No group supplied → datasource-wide (back-compat for PPL monitors).
+    expect(isNameTaken('HighLatency', 'prom-1')).toBe(true);
+  });
+
+  it('refetches rules when switching into the Rules tab and forwards a Refresh handler', async () => {
+    // Fresh spy so we count only calls made after mount (the mount fetch is
+    // owned by useRulesData, which is mocked out here).
+    (emptyRulesHookResult.refetch as jest.Mock).mockClear();
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    });
+    // Switching INTO the Rules tab triggers a refetch so a rule created
+    // elsewhere (e.g. the Metrics page flyout) appears without a manual reload.
+    expect(emptyRulesHookResult.refetch).toHaveBeenCalled();
+    // MonitorsTable receives a manual Refresh handler + spinner flag.
+    const last = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0];
+    expect(typeof last.onRefresh).toBe('function');
+    expect('refreshing' in last).toBe(true);
   });
 
   it('forwards picker state + handlers to the AlertsDashboard (picker now lives in the timeline panel)', async () => {

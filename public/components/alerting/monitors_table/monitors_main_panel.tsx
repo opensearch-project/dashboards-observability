@@ -67,6 +67,10 @@ export interface MonitorsMainPanelProps {
 
   // Create
   onCreateMonitor?: (type: 'logs' | 'prometheus' | 'metrics' | 'detector' | 'forecaster') => void;
+  /** Manually refetch the rules list. Renders a Refresh button when provided. */
+  onRefresh?: () => void;
+  /** True while a refetch is in flight — shows the Refresh button spinner. */
+  refreshing?: boolean;
   /**
    * When true, the "Logs" popover entry is disabled with a hint that an
    * OpenSearch datasource is needed. Triggered when the parent's selection
@@ -150,6 +154,8 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   detectorCreateDisabled = false,
   forecasterCreateDisabled = false,
   noDatasourceSelected = false,
+  onRefresh,
+  refreshing = false,
   showCreatePopover,
   setShowCreatePopover,
   showDeleteConfirm,
@@ -193,6 +199,22 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               gutterSize="s"
               style={{ marginBottom: 8 }}
             >
+              {onRefresh && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    iconType="refresh"
+                    size="s"
+                    isLoading={refreshing}
+                    onClick={() => onRefresh()}
+                    data-test-subj="alertManagerRefreshRulesButton"
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.monitorsTable.mainPanel.refresh"
+                      defaultMessage="Refresh"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={

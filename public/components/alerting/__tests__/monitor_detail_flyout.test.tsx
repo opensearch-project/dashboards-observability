@@ -162,6 +162,52 @@ describe('MonitorDetailFlyout', () => {
     labels: { monitor_kind: 'composite', composite_delegates: 'mon-a,mon-b' },
   };
 
+  it('disables Edit / Clone / Delete / Enable for a pending optimistic rule', async () => {
+    const onClone = jest.fn();
+    const onDelete = jest.fn();
+    const onEdit = jest.fn();
+    // ppl/metric OS monitor would normally be editable + toggleable in place;
+    // the synthetic new- id + pending status must gate every mutating action.
+    const pendingMonitor: UnifiedRuleSummary = {
+      ...mockMonitor,
+      id: 'new-1-0',
+      status: 'pending',
+      monitorType: 'ppl',
+    };
+    const { getByText, queryByTestId } = render(
+      <MonitorDetailFlyout
+        monitor={pendingMonitor}
+        onClose={jest.fn()}
+        onDelete={onDelete}
+        onClone={onClone}
+        onEdit={onEdit}
+        onToggleEnabled={jest.fn()}
+      />
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const editBtn = getByText('Edit').closest('button');
+    const cloneBtn = getByText('Clone').closest('button');
+    const deleteBtn = getByText('Delete').closest('button');
+    expect(editBtn).toBeDisabled();
+    expect(cloneBtn).toBeDisabled();
+    expect(deleteBtn).toBeDisabled();
+    // Enable/Disable footer button is disabled (no active toggle control).
+    expect(getByText('Disable rule').closest('button')).toBeDisabled();
+    expect(queryByTestId('alertManagerMonitorDetailToggleEnabled')).toBeNull();
+    // Not the clickable classic-edit redirect either.
+    expect(queryByTestId('alertManagerMonitorDetailEditRedirect')).toBeNull();
+
+    fireEvent.click(editBtn!);
+    fireEvent.click(cloneBtn!);
+    fireEvent.click(deleteBtn!);
+    expect(onEdit).not.toHaveBeenCalled();
+    expect(onClone).not.toHaveBeenCalled();
+    expect(onDelete).not.toHaveBeenCalled();
+  });
+
   it('renders composite monitors with the member list and gates Clone/Delete', async () => {
     // Composite detail 404s on the monitors endpoint by design — reject so we
     // also assert the error banner is suppressed for composites.
