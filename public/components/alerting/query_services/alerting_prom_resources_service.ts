@@ -72,4 +72,28 @@ export class AlertingPromResourcesService {
       `/api/alerting/prometheus/${encodeURIComponent(this.datasourceId)}/metadata/metric-metadata`
     )) as { metadata: PrometheusMetricMetadata[] };
   }
+
+  /**
+   * Run an ad-hoc PromQL range query for the "Create alert rule" flyout preview.
+   * Returns a single flattened `{timestamp (ms), value}[]` series (empty when
+   * the query yields no data). `range` is epoch seconds; the server defaults to
+   * the last hour at a 60s step when omitted.
+   */
+  async runQueryPreview(
+    query: string,
+    range?: { start?: number; end?: number; step?: number }
+  ): Promise<{
+    points: Array<{ timestamp: number; value: number }>;
+    query?: string;
+    seriesCount?: number;
+  }> {
+    return (await this.requireHttp().post(
+      `/api/alerting/prometheus/${encodeURIComponent(this.datasourceId)}/preview`,
+      { body: JSON.stringify({ query, ...(range || {}) }) }
+    )) as {
+      points: Array<{ timestamp: number; value: number }>;
+      query?: string;
+      seriesCount?: number;
+    };
+  }
 }

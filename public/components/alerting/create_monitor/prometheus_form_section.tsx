@@ -84,6 +84,8 @@ export const PrometheusFormSection: React.FC<{
     () => form.labels.find((l) => l.key === '_ruleGroup')?.value || ''
   );
   const [showPreview, setShowPreview] = useState(false);
+  // Bumped on each "Run preview" click so QueryPreviewResults re-runs the query.
+  const [previewToken, setPreviewToken] = useState(0);
 
   // Use a ref for form.labels to avoid circular dependency:
   // handleRuleGroupChange → onUpdate('labels') → parent re-renders → new form.labels → new callback
@@ -328,7 +330,13 @@ export const PrometheusFormSection: React.FC<{
               <EuiFlexItem grow={false}>
                 <EuiButton
                   size="s"
-                  onClick={() => setShowPreview(true)}
+                  onClick={() => {
+                    setShowPreview(true);
+                    setPreviewToken((t) => t + 1);
+                  }}
+                  // Needs an expression and a datasource; disabling avoids an
+                  // empty run surfacing a misleading "returned no data" message.
+                  isDisabled={form.query.trim() === '' || !datasourceId}
                   data-test-subj="prometheusRunPreviewButton"
                   aria-label={i18n.translate(
                     'observability.alerting.prometheusFormSection.runPreviewAriaLabel',
@@ -415,7 +423,11 @@ export const PrometheusFormSection: React.FC<{
           {showPreview && (
             <>
               <EuiSpacer size="m" />
-              <QueryPreviewResults query={form.query} />
+              <QueryPreviewResults
+                query={form.query}
+                datasourceId={datasourceId}
+                runToken={previewToken}
+              />
             </>
           )}
         </EuiAccordion>

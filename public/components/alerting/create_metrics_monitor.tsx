@@ -27,7 +27,9 @@ import {
   EuiSelect,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiButtonIcon,
+  EuiCallOut,
   EuiText,
   EuiBadge,
   EuiAccordion,
@@ -47,7 +49,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../framework/core_refs';
 import { classifiedToastColor, classifiedToastText, extractClassifiedError } from '../common/error';
-import { PromQueryBuilder } from './create_monitor/prom_query_builder';
+import { PromQueryBuilder, parseBuilderQuery } from './create_monitor/prom_query_builder';
 import { RuleGroupSelector } from './create_monitor/rule_group_selector';
 import { QueryPreviewResults } from './query_preview_results';
 // Shared label editor + entry types keep both flyouts' Labels sections in sync
@@ -74,6 +76,9 @@ export interface MetricsMonitorFormState {
   annotations: AnnotationEntry[];
 }
 
+/** Which query editor the Query section shows. */
+export type QueryMode = 'code' | 'builder';
+
 export interface CreateMetricsMonitorProps {
   onCancel: () => void;
   onSave: (form: MetricsMonitorFormState) => void;
@@ -81,6 +86,21 @@ export interface CreateMetricsMonitorProps {
   datasourceId?: string;
   /** Datasource display name from the current Explore page context */
   datasourceName?: string;
+  /**
+   * PromQL the user had in the Explore Metrics editor, used to pre-fill the
+   * flyout's query. The builder seeds its fields from this when the expression
+   * is builder-representable; complex expressions stay in the visible
+   * expression field (and drive the preview) without the builder clobbering
+   * them.
+   */
+  initialQuery?: string;
+  /**
+   * Time window (epoch seconds) the preview should run over — typically the
+   * Explore time picker the user came from, so the flyout's Run preview
+   * reflects the same range they were just looking at. When omitted the
+   * preview defaults to the last hour.
+   */
+  initialTimeRange?: { start: number; end: number };
   /**
    * Selectable Prometheus datasources. Provided by the Alert Manager Rules
    * page (no page context there); when absent, the flyout is pinned to the
@@ -91,7 +111,7 @@ export interface CreateMetricsMonitorProps {
    * Duplicate-name guard, checked against the selected datasource. Provided
    * by the Alert Manager Rules page which knows the existing rules.
    */
-  isNameTaken?: (name: string, dsId: string) => boolean;
+  isNameTaken?: (name: string, dsId: string, group?: string) => boolean;
   /**
    * Show the "Build query in metrics →" round-trip link in the Query
    * section header. Set by the Alert Manager Rules page; must stay off on
@@ -157,6 +177,46 @@ const FOR_DURATION_OPTIONS = [
 
 /** The namespace all rules created from this flyout are stored under. */
 const USER_RULES_NAMESPACE = 'observability-alerting';
+
+/**
+ * The label entries that will actually be persisted: both key AND value must be
+ * non-empty (a key with a blank value is dropped). Shared by the Rule Preview
+ * (YAML) and the save payload so the preview can never advertise a different
+ * set than what is written. Keys are trimmed to match server-side storage.
+ */
+export function materializeLabels(labels: LabelEntry[]): LabelEntry[] {
+  return labels
+    .filter((l) => l.key.trim() !== '' && l.value.trim() !== '')
+    .map((l) => ({ ...l, key: l.key.trim() }));
+}
+
+/**
+ * The annotation entries that will be persisted. Drops empty key/value pairs and
+ * folds the Rule details Description field into the standard `description`
+ * annotation (which wins over a manually-typed one). Shared by preview + save so
+ * the two cannot drift.
+ */
+export function materializeAnnotations(
+  annotations: AnnotationEntry[],
+  descriptionField: string
+): AnnotationEntry[] {
+  const description = descriptionField.trim();
+  const manual = annotations
+    .filter((a) => a.key.trim() !== '' && a.value.trim() !== '')
+    .filter((a) => !(description && a.key.trim() === 'description'))
+    .map((a) => ({ ...a, key: a.key.trim() }));
+  return description ? [...manual, { key: 'description', value: description }] : manual;
+}
+
+/**
+ * A PromQL expression that starts with a comparison operator (`> 0.5`) is not a
+ * valid alert condition — the metric/series to the left is missing. Cheap guard
+ * to block obviously-malformed input at submit time (full validation happens
+ * server-side / on preview).
+ */
+export function startsWithComparison(query: string): boolean {
+  return /^\s*(>=|<=|==|!=|>|<)/.test(query);
+}
 
 // ============================================================================
 // Sub-components
@@ -230,6 +290,7 @@ const MonitorDetailsSection = React.memo<{
         onChange={(e) => onUpdate({ monitorName: e.target.value })}
         fullWidth
         compressed
+        data-test-subj="metricsMonitorNameField"
         aria-label={i18n.translate(
           'observability.alerting.createMetricsMonitor.monitorNameAriaLabel',
           { defaultMessage: 'Rule name' }
@@ -282,12 +343,19 @@ const MonitorDetailsSection = React.memo<{
   </EuiAccordion>
 ));
 
-/** Section 2: Query — shared PromQL builder with datasource picker */
+/** Section 2: Query — Code (raw PromQL) or point-and-click Builder */
 const QuerySection = React.memo<{
   form: MetricsMonitorFormState;
   onUpdate: (patch: Partial<MetricsMonitorFormState>) => void;
   showPreview: boolean;
   onRunPreview: () => void;
+  /** Bumped on each "Run preview" click so the results block re-fetches. */
+  previewToken: number;
+  /** Time window (epoch seconds) the preview runs over; undefined = last hour. */
+  previewTimeRange?: { start: number; end: number };
+  /** 'code' shows the raw PromQL editor; 'builder' shows the metric picker. */
+  queryMode: QueryMode;
+  onQueryModeChange: (mode: QueryMode) => void;
   contextDatasourceName?: string;
   /** Selectable datasources (Alert Manager); absent = pinned context ds. */
   datasources?: Array<{ id: string; name: string; type: string }>;
@@ -299,11 +367,20 @@ const QuerySection = React.memo<{
     onUpdate,
     showPreview,
     onRunPreview,
+    previewToken,
+    previewTimeRange,
+    queryMode,
+    onQueryModeChange,
     contextDatasourceName,
     datasources,
     showBuildInMetricsLink,
   }) => {
     const [showDatasourcePicker, setShowDatasourcePicker] = useState(false);
+    // A non-empty expression the builder cannot represent (e.g. a copied
+    // `rate(...) > 0.5`). Switching to the builder and picking a metric would
+    // replace it — warn instead of silently clobbering (audit finding #7).
+    const builderWouldOverwrite =
+      form.query.trim() !== '' && parseBuilderQuery(form.query) === null;
 
     // With an explicit datasource list (Alert Manager) the picker offers all
     // Prometheus datasources; otherwise it is pinned to the Explore page's
@@ -373,6 +450,11 @@ const QuerySection = React.memo<{
               <EuiButton
                 size="s"
                 onClick={onRunPreview}
+                // A preview needs both an expression and a datasource; disabling
+                // avoids running an empty query that would surface a misleading
+                // "returned no data" message for missing input.
+                isDisabled={form.query.trim() === '' || !form.datasourceId}
+                data-test-subj="metricsMonitorRunPreviewButton"
                 aria-label={i18n.translate(
                   'observability.alerting.createMetricsMonitor.runPreviewAriaLabel',
                   { defaultMessage: 'Run preview' }
@@ -424,34 +506,128 @@ const QuerySection = React.memo<{
                 closePopover={() => setShowDatasourcePicker(false)}
                 panelPaddingSize="s"
               >
-                {datasourceOptions.map((ds) => (
-                  <EuiButtonEmpty
-                    key={ds.id}
-                    size="xs"
-                    onClick={() => {
-                      onUpdate({ datasourceId: ds.id });
-                      setShowDatasourcePicker(false);
-                    }}
-                    style={{ display: 'block', width: '100%', textAlign: 'left' }}
-                  >
-                    {ds.name}
-                  </EuiButtonEmpty>
-                ))}
+                {datasourceOptions.map((ds) => {
+                  const isSelected = ds.id === form.datasourceId;
+                  return (
+                    <EuiButtonEmpty
+                      key={ds.id}
+                      size="xs"
+                      // Show which datasource is active: a check on the selected
+                      // row (empty icon keeps the others aligned) plus aria-current
+                      // so assistive tech announces the selection.
+                      iconType={isSelected ? 'check' : 'empty'}
+                      iconSide="left"
+                      color={isSelected ? 'primary' : 'text'}
+                      aria-current={isSelected}
+                      onClick={() => {
+                        onUpdate({ datasourceId: ds.id });
+                        setShowDatasourcePicker(false);
+                      }}
+                      style={{ display: 'block', width: '100%', textAlign: 'left' }}
+                    >
+                      {ds.name}
+                    </EuiButtonEmpty>
+                  );
+                })}
               </EuiPopover>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+              {/* Builder ⇄ Code toggle. Only one editor shows at a time, so a
+                copied PromQL expression (Code) is never silently overwritten by
+                the builder's output — the two no longer share a visible field. */}
+              <EuiButtonGroup
+                legend={i18n.translate(
+                  'observability.alerting.createMetricsMonitor.queryModeLegend',
+                  { defaultMessage: 'Query editor mode' }
+                )}
+                buttonSize="compressed"
+                options={[
+                  {
+                    id: 'builder',
+                    label: i18n.translate(
+                      'observability.alerting.createMetricsMonitor.queryModeBuilder',
+                      { defaultMessage: 'Builder' }
+                    ),
+                  },
+                  {
+                    id: 'code',
+                    label: i18n.translate(
+                      'observability.alerting.createMetricsMonitor.queryModeCode',
+                      { defaultMessage: 'Code' }
+                    ),
+                  },
+                ]}
+                idSelected={queryMode}
+                onChange={(id) => onQueryModeChange(id as QueryMode)}
+                data-test-subj="metricsMonitorQueryModeToggle"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
 
-          {/* Point-and-click builder — same component as the Alert Manager
-            "Create metrics rule" flyout. Seeds from the pre-filled Explore
-            query when it is builder-representable; complex expressions leave
-            the builder inert so the seeded query is preserved. */}
-          <PromQueryBuilder
-            datasourceId={form.datasourceId}
-            query={form.query}
-            onQueryChange={(q) => onUpdate({ query: q })}
-          />
+          {queryMode === 'code' ? (
+            /* Code mode: raw PromQL expression. A query copied from Explore
+              lands here as-is (including complex expressions the builder can't
+              represent), editable directly. */
+            <EuiFormRow
+              label={i18n.translate('observability.alerting.createMetricsMonitor.expressionLabel', {
+                defaultMessage: 'PromQL expression',
+              })}
+              helpText={i18n.translate(
+                'observability.alerting.createMetricsMonitor.expressionHelpText',
+                {
+                  defaultMessage:
+                    'The complete alert condition — it fires for every series the expression returns. A bare series (e.g. "up") is always-firing; add a comparison/threshold (e.g. "> 0.5") for a conditional alert. Switch to Builder to construct a simple metric/label query.',
+                }
+              )}
+              fullWidth
+            >
+              <EuiTextArea
+                value={form.query}
+                onChange={(e) => onUpdate({ query: e.target.value })}
+                placeholder={i18n.translate(
+                  'observability.alerting.createMetricsMonitor.expressionPlaceholder',
+                  { defaultMessage: 'e.g. rate(http_requests_total[5m]) > 0.5' }
+                )}
+                rows={2}
+                fullWidth
+                compressed
+                aria-label={i18n.translate(
+                  'observability.alerting.createMetricsMonitor.expressionAriaLabel',
+                  { defaultMessage: 'PromQL expression' }
+                )}
+                data-test-subj="metricsMonitorPromQlExpression"
+              />
+            </EuiFormRow>
+          ) : (
+            /* Builder mode: point-and-click metric/label picker. */
+            <>
+              {builderWouldOverwrite && (
+                <>
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    iconType="alert"
+                    title={i18n.translate(
+                      'observability.alerting.createMetricsMonitor.builderOverwriteWarning',
+                      {
+                        defaultMessage:
+                          'Your current PromQL expression can’t be represented by the builder. Selecting a metric here will replace it — switch to Code to keep editing it directly.',
+                      }
+                    )}
+                    data-test-subj="metricsMonitorBuilderOverwriteWarning"
+                  />
+                  <EuiSpacer size="s" />
+                </>
+              )}
+              <PromQueryBuilder
+                datasourceId={form.datasourceId}
+                query={form.query}
+                onQueryChange={(q) => onUpdate({ query: q })}
+              />
+            </>
+          )}
 
           <EuiSpacer size="m" />
 
@@ -489,7 +665,13 @@ const QuerySection = React.memo<{
         {showPreview && (
           <>
             <EuiSpacer size="m" />
-            <QueryPreviewResults id="cmm-preview-results" query={form.query} />
+            <QueryPreviewResults
+              id="cmm-preview-results"
+              query={form.query}
+              datasourceId={form.datasourceId}
+              timeRange={previewTimeRange}
+              runToken={previewToken}
+            />
           </>
         )}
       </EuiAccordion>
@@ -632,39 +814,45 @@ const RulePreviewSection = React.memo<{
 }>(({ form }) => {
   const yaml = useMemo(() => {
     const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n');
-    const labels = form.labels.filter((l) => l.key && l.value);
-    // Mirror the save path: the Rule details Description field persists as
-    // the `description` annotation (and wins over a manually-typed one), so
-    // the preview must show exactly what will be saved
-    const annotations = [
-      ...form.annotations.filter(
-        (a) => a.key && a.value && !(form.description.trim() && a.key === 'description')
-      ),
-      ...(form.description.trim() ? [{ key: 'description', value: form.description.trim() }] : []),
-    ];
-    let out = `- alert: "${esc(form.monitorName || '<monitor-name>')}"\n`;
+    // Use the exact same materialization as the save path so the previewed
+    // YAML is guaranteed to match the rule that gets written (WYSIWYG).
+    const labels = materializeLabels(form.labels);
+    const annotations = materializeAnnotations(form.annotations, form.description);
+    // Mirror the full rule-group the save payload creates: rules are stored
+    // under (namespace → group → rule), and the group carries the evaluation
+    // interval. Previewing only the rule body hid where it lands and how often
+    // it runs; show the whole structure so the preview matches what's written.
+    const groupName = (form.groupName || form.monitorName || '<group-name>').trim();
+    let out = `# namespace: ${form.namespace}\n`;
+    out += `name: "${esc(groupName)}"\n`;
+    out += `interval: ${form.evalInterval}\n`;
+    out += `rules:\n`;
+    out += `  - alert: "${esc(form.monitorName || '<monitor-name>')}"\n`;
     // The PromQL expression is the complete alert condition
-    out += `  expr: "${esc(form.query || '<promql-expression>')}"\n`;
-    out += `  for: ${form.forDuration}\n`;
+    out += `    expr: "${esc(form.query || '<promql-expression>')}"\n`;
+    out += `    for: ${form.forDuration}\n`;
     if (labels.length > 0) {
-      out += `  labels:\n`;
+      out += `    labels:\n`;
       // Template values are single-quoted, matching the server's js-yaml
       // serialization (unquoted `{{ ... }}` would be invalid YAML)
       for (const l of labels) {
-        out += `    "${esc(l.key)}": ${l.isDynamic ? `'${l.value}'` : `"${esc(l.value)}"`}\n`;
+        out += `      "${esc(l.key)}": ${l.isDynamic ? `'${l.value}'` : `"${esc(l.value)}"`}\n`;
       }
     }
     if (annotations.length > 0) {
-      out += `  annotations:\n`;
+      out += `    annotations:\n`;
       // Annotations lack the isDynamic flag — detect template syntax to
       // single-quote like the server's js-yaml serialization does
       for (const a of annotations) {
         const value = /\{\{.*\}\}/.test(a.value) ? `'${a.value}'` : `"${esc(a.value)}"`;
-        out += `    "${esc(a.key)}": ${value}\n`;
+        out += `      "${esc(a.key)}": ${value}\n`;
       }
     }
     return out;
   }, [
+    form.namespace,
+    form.groupName,
+    form.evalInterval,
     form.monitorName,
     form.query,
     form.forDuration,
@@ -731,6 +919,8 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
   onSave,
   datasourceId: contextDatasourceId,
   datasourceName: contextDatasourceName,
+  initialQuery,
+  initialTimeRange,
   datasources,
   isNameTaken,
   showBuildInMetricsLink,
@@ -746,11 +936,11 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
     description: '',
     namespace: USER_RULES_NAMESPACE,
     groupName: '',
-    // Empty on purpose: the query must come from an explicit builder
-    // selection. A pre-seeded expression would be submittable while the
-    // builder renders empty (it cannot represent complex expressions),
-    // silently creating a rule for a metric the user never chose.
-    query: '',
+    // Pre-filled from the Explore Metrics editor when opened from that page.
+    // Safe to seed now that the expression is shown in a visible, editable
+    // field (see QuerySection) — a complex expression the builder can't
+    // represent is no longer hidden-yet-submittable.
+    query: initialQuery ?? '',
     datasourceId: defaultDatasourceId,
     forDuration: '5m',
     evalInterval: '1m',
@@ -759,7 +949,15 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
     labels: [{ key: 'severity', value: 'warning', isDynamic: false }],
     annotations: [],
   });
+  // Default to Code mode when a query was copied in (so it shows as-is and the
+  // builder can't overwrite it); an empty flyout starts in Builder mode.
+  const [queryMode, setQueryMode] = useState<QueryMode>(() =>
+    (initialQuery ?? '').trim() ? 'code' : 'builder'
+  );
   const [showPreview, setShowPreview] = useState(false);
+  // Bumped on each "Run preview" click so QueryPreviewResults re-runs the
+  // range query even when the panel is already open.
+  const [previewToken, setPreviewToken] = useState(0);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   // JSON snapshot so ANY field edit (description, group, duration,
   // datasource, label/annotation content) arms the discard-confirm modal —
@@ -792,13 +990,20 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
 
   const handleRunPreview = useCallback(() => {
     setShowPreview(true);
+    setPreviewToken((t) => t + 1);
   }, []);
 
   const duplicateName = !!(
     isNameTaken &&
     form.monitorName.trim() !== '' &&
     form.datasourceId !== '' &&
-    isNameTaken(form.monitorName.trim(), form.datasourceId)
+    // Scope the collision to the effective rule group (defaults to the rule
+    // name), matching Prometheus's (group, name) identity.
+    isNameTaken(
+      form.monitorName.trim(),
+      form.datasourceId,
+      (form.groupName || form.monitorName).trim()
+    )
   );
   const nameError = duplicateName
     ? i18n.translate('observability.alerting.createMetricsMonitor.nameDuplicate', {
@@ -809,6 +1014,8 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
   const isValid =
     form.monitorName.trim() !== '' &&
     form.query.trim() !== '' &&
+    // Reject an expression that is only/starts-with a comparison (no series).
+    !startsWithComparison(form.query) &&
     form.datasourceId !== '' &&
     !duplicateName;
 
@@ -828,25 +1035,19 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
       // The PromQL expression is the complete alert condition — no
       // operator/threshold appended server-side.
       const payload = {
-        name: form.monitorName,
+        name: form.monitorName.trim(),
         query: form.query,
         forDuration: form.forDuration,
         evaluationInterval: form.evalInterval,
-        labels: Object.fromEntries(
-          form.labels.filter((l) => l.key.trim()).map((l) => [l.key, l.value])
+        // Same materialization the Rule Preview (YAML) shows — no drift.
+        labels: Object.fromEntries(materializeLabels(form.labels).map((l) => [l.key, l.value])),
+        annotations: Object.fromEntries(
+          materializeAnnotations(form.annotations, form.description).map(
+            (a) => [a.key, a.value] as [string, string]
+          )
         ),
-        annotations: Object.fromEntries([
-          ...form.annotations
-            .filter((a) => a.key.trim())
-            .map((a) => [a.key, a.value] as [string, string]),
-          // The Rule details Description field persists as the standard
-          // `description` annotation (the server's rule builder reads it)
-          ...(form.description.trim()
-            ? [['description', form.description.trim()] as [string, string]]
-            : []),
-        ]),
         enabled: true,
-        groupName: form.groupName || form.monitorName,
+        groupName: (form.groupName || form.monitorName).trim(),
       };
       await http.post(`/api/alerting/prometheus/${encodeURIComponent(form.datasourceId)}/rules`, {
         body: JSON.stringify(payload),
@@ -913,6 +1114,10 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
           onUpdate={updateForm}
           showPreview={showPreview}
           onRunPreview={handleRunPreview}
+          previewToken={previewToken}
+          previewTimeRange={initialTimeRange}
+          queryMode={queryMode}
+          onQueryModeChange={setQueryMode}
           contextDatasourceName={contextDatasourceName}
           datasources={datasources}
           showBuildInMetricsLink={showBuildInMetricsLink}
@@ -943,14 +1148,20 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd" responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={handleClose}>
+            <EuiButtonEmpty onClick={handleClose} data-test-subj="metricsMonitorCancelButton">
               {i18n.translate('observability.alerting.createMetricsMonitor.cancelButton', {
                 defaultMessage: 'Cancel',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleSave} isLoading={isSaving} isDisabled={!isValid}>
+            <EuiButton
+              fill
+              onClick={handleSave}
+              isLoading={isSaving}
+              isDisabled={!isValid}
+              data-test-subj="metricsMonitorCreateButton"
+            >
               {i18n.translate('observability.alerting.createMetricsMonitor.createButton', {
                 defaultMessage: 'Create',
               })}

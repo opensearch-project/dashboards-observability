@@ -55,7 +55,15 @@ const prometheusRuleBodySchema = schema.object({
     defaultValue: {},
   }),
   enabled: schema.boolean({ defaultValue: true }),
-  groupName: schema.maybe(schema.string()),
+  groupName: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+  // Optional Cortex namespace. Defaults server-side to the single user
+  // namespace; accepted here so a future surface can target another namespace
+  // without a schema change (identity is the full namespace/group/name tuple).
+  namespace: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+  // When false (the default), creating a rule whose name already exists in the
+  // target group is rejected with 409 instead of silently replacing it. Edit
+  // flows that intend to replace an existing rule pass `overwrite: true`.
+  overwrite: schema.boolean({ defaultValue: false }),
 });
 
 export function registerPrometheusRuleRoutes(
@@ -113,6 +121,7 @@ export function registerPrometheusRuleRoutes(
         }),
         query: schema.object({
           ruleName: schema.maybe(schema.string({ minLength: 1 })),
+          namespace: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
         }),
       },
     },
@@ -125,7 +134,8 @@ export function registerPrometheusRuleRoutes(
           datasource,
           req.params.groupName,
           logger,
-          req.query.ruleName
+          req.query.ruleName,
+          req.query.namespace
         );
         return res.ok({ body: result });
       } catch (e: unknown) {

@@ -35,6 +35,12 @@ jest.mock('../query_services/alerting_prom_resources_service', () => ({
     listLabelNames: jest.fn().mockResolvedValue({ labels: ['job', 'instance'] }),
     listLabelValues: jest.fn().mockResolvedValue({ values: ['node-exporter'] }),
     listRuleGroupNames: jest.fn().mockResolvedValue({ groups: ['team-a-rules', 'team-b-rules'] }),
+    runQueryPreview: jest.fn().mockResolvedValue({
+      points: [
+        { timestamp: 1_700_000_000_000, value: 0.02 },
+        { timestamp: 1_700_000_060_000, value: 0.05 },
+      ],
+    }),
   })),
 }));
 
@@ -115,13 +121,14 @@ describe('PrometheusFormSection — simplified layout', () => {
     );
   });
 
-  it('shows preview results after clicking Run preview', () => {
+  it('runs a real range query and renders the results chart after clicking Run preview', async () => {
     render(
       <PrometheusFormSection
         form={baseForm}
         onUpdate={jest.fn()}
         validationErrors={{}}
         hasSubmitted={false}
+        datasourceId="ds-1"
       />
     );
 
@@ -130,8 +137,51 @@ describe('PrometheusFormSection — simplified layout', () => {
 
     fireEvent.click(screen.getByTestId('prometheusRunPreviewButton'));
 
-    expect(screen.getByTestId('echarts-render')).toBeInTheDocument();
-    expect(screen.getByText('Sample data — run the rule to see real results')).toBeInTheDocument();
+    // The chart renders once the live range query resolves (no more hardcoded
+    // "sample data" callout).
+    expect(await screen.findByTestId('echarts-render')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Sample data — run the rule to see real results')
+    ).not.toBeInTheDocument();
+  });
+
+  it('notes when the expression matched multiple series (only the first is charted)', async () => {
+    // Reconfigure the mocked resources service so the preview reports 3 matching
+    // series — the chart still plots one line, but the UI must say so.
+    const { AlertingPromResourcesService } = jest.requireMock(
+      '../query_services/alerting_prom_resources_service'
+    );
+    // Save the file-level default so overriding it here doesn't leak into
+    // later tests that rely on the original metric/label/group fixtures.
+    const original = AlertingPromResourcesService.getMockImplementation();
+    AlertingPromResourcesService.mockImplementation(() => ({
+      listMetricNames: jest.fn().mockResolvedValue({ metrics: ['up'] }),
+      listLabelNames: jest.fn().mockResolvedValue({ labels: [] }),
+      listLabelValues: jest.fn().mockResolvedValue({ values: [] }),
+      listRuleGroupNames: jest.fn().mockResolvedValue({ groups: [] }),
+      runQueryPreview: jest.fn().mockResolvedValue({
+        points: [{ timestamp: 1_700_000_000_000, value: 1 }],
+        query: 'up',
+        seriesCount: 3,
+      }),
+    }));
+
+    try {
+      render(
+        <PrometheusFormSection
+          form={baseForm}
+          onUpdate={jest.fn()}
+          validationErrors={{}}
+          hasSubmitted={false}
+          datasourceId="ds-1"
+        />
+      );
+      fireEvent.click(screen.getByTestId('prometheusRunPreviewButton'));
+
+      expect(await screen.findByText(/Matched 3 series/)).toBeInTheDocument();
+    } finally {
+      AlertingPromResourcesService.mockImplementation(original);
+    }
   });
 
   it('renders the "Build query in metrics" link in the query panel header', () => {
@@ -402,6 +452,23 @@ describe('PrometheusFormSection — edit mode seeding', () => {
     fireEvent.click(clearButtons[0]);
 
     expect(onUpdate).toHaveBeenCalledWith('query', '');
+  });
+
+  it('does not re-emit / rewrite a non-canonically-spaced seeded query on mount', () => {
+    const onUpdate = jest.fn();
+    render(
+      <PrometheusFormSection
+        form={{ ...baseForm, query: 'up{ job = "api" }' }}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    // The builder seeds its fields from the query but must NOT rewrite it on
+    // mount — re-emitting would normalize the whitespace the user never touched
+    // (`up{ job = "api" }` → `up{job="api"}`) and spuriously mark the form dirty.
+    expect(onUpdate).not.toHaveBeenCalledWith('query', expect.anything());
   });
 
   it('does not clobber a complex seeded query on mount', () => {

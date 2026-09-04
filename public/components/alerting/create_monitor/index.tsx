@@ -121,7 +121,7 @@ export interface CreateMonitorProps {
    * up against the loaded rules list (excluding `initialForm`'s own id in
    * edit mode so renaming back to the current name passes).
    */
-  isNameTaken?: (trimmedName: string, dsId: string) => boolean;
+  isNameTaken?: (trimmedName: string, dsId: string, group?: string) => boolean;
   /**
    * Server-side error from the most recent save attempt, routed by the
    * parent to whichever form field it belongs under so the user sees it
@@ -311,11 +311,18 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   // page didn't supply a checker.
   const trimmedName = activeForm.name.trim();
   const dsForCheck = activeForm.datasourceId;
+  // For Prometheus the collision is scoped to the target rule group (the
+  // `_ruleGroup` transport label, defaulting to the rule name); OpenSearch
+  // monitors have no group so the check stays datasource-wide (group=undefined).
+  const groupForCheck =
+    backendType === 'prometheus'
+      ? (promForm.labels.find((l) => l.key === '_ruleGroup')?.value || '').trim() || trimmedName
+      : undefined;
   const duplicateName = !!(
     isNameTaken &&
     trimmedName !== '' &&
     dsForCheck !== '' &&
-    isNameTaken(trimmedName, dsForCheck)
+    isNameTaken(trimmedName, dsForCheck, groupForCheck)
   );
   const duplicateNameError = duplicateName
     ? i18n.translate('observability.alerting.createMonitor.nameDuplicate', {

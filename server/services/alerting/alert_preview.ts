@@ -31,6 +31,7 @@ import {
   extractClusterMetricValue,
   extractTimestampField,
   stripRangeFilters,
+  stripTrailingComparison,
   substituteMustacheTemplates,
 } from './alert_utils';
 
@@ -278,7 +279,7 @@ export async function fetchPromPreviewData(
 ): Promise<Array<{ timestamp: number; value: number }>> {
   if (promBackend?.queryRange && ctx) {
     try {
-      const metricQuery = query.replace(/\s*(>|<|>=|<=|==|!=)\s*[\d.]+\s*$/, '').trim();
+      const metricQuery = stripTrailingComparison(query);
       const now = Math.floor(Date.now() / 1000);
       const oneHourAgo = now - 3600;
       const step = 60;
