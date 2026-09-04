@@ -1056,7 +1056,13 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
         i18n.translate('observability.alerting.createMetricsMonitor.toast.created', {
           defaultMessage: 'Alert rule created successfully.',
         }),
-        'success'
+        'success',
+        // Prometheus/Cortex creates persist synchronously but the querier-backed
+        // list lags ~a minute; tell the user so a not-yet-visible row doesn't
+        // read as a failure. (The list also shows an optimistic "Pending" row.)
+        i18n.translate('observability.alerting.createMetricsMonitor.toast.createdPendingNote', {
+          defaultMessage: 'It may take up to a minute to appear in the list.',
+        })
       );
       onSave(form);
     } catch (err) {

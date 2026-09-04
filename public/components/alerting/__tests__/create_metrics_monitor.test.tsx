@@ -389,8 +389,13 @@ describe('CreateMetricsMonitor', () => {
     expect(body).not.toHaveProperty('operator');
     expect(body).not.toHaveProperty('threshold');
 
-    // Should call onSave and show success toast
+    // Should call onSave and show success toast, including the querier-lag
+    // note as the toast body (Prometheus creates take ~a minute to appear).
     expect(onSave).toHaveBeenCalled();
-    expect(addToast).toHaveBeenCalledWith(expect.any(String), 'success');
+    expect(addToast).toHaveBeenCalledWith(
+      expect.any(String),
+      'success',
+      expect.stringContaining('take up to a minute')
+    );
   });
 });
