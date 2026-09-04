@@ -357,10 +357,11 @@ export const renameCustomPanel = (editedCustomPanelName: string, id: string) => 
  ** UTILITY FUNCTIONS
  */
 const savedObjectToCustomPanel = (so: SimpleSavedObject<PanelType>): CustomPanelType => ({
-  id: so.id,
+  ...so.attributes,
+  // Spread first so stale copies of these in attributes cannot shadow the real values.
   type: so.type,
   objectId: so.type + ':' + so.id,
-  ...so.attributes,
+  id: so.id,
   savedObject: true,
 });
 
