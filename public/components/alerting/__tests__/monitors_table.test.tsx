@@ -239,4 +239,32 @@ describe('MonitorsTable', () => {
     expect(onDatasourceChange).toHaveBeenCalledWith([]);
     expect(searchInput.value).toBe('');
   });
+
+  // ---- Pending optimistic rows -------------------------------------------
+  describe('pending optimistic rows', () => {
+    const pendingRule = () =>
+      sampleRule({ id: 'new-123-0', name: 'PendingRule', status: 'pending' as const });
+
+    it('renders the pending badge instead of the status health pill', () => {
+      const { container } = render(<MonitorsTable {...defaultProps} rules={[pendingRule()]} />);
+      expect(container.querySelector('[data-test-subj="pendingRuleBadge"]')).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
+    });
+
+    it('disables the checkbox for a pending row (not selectable)', () => {
+      render(<MonitorsTable {...defaultProps} rules={[pendingRule()]} />);
+      expect(screen.getByLabelText('Select PendingRule')).toBeDisabled();
+    });
+
+    it('keeps a confirmed row selectable alongside a pending row', () => {
+      render(
+        <MonitorsTable
+          {...defaultProps}
+          rules={[pendingRule(), sampleRule({ id: 'r2', name: 'ConfirmedRule' })]}
+        />
+      );
+      expect(screen.getByLabelText('Select PendingRule')).toBeDisabled();
+      expect(screen.getByLabelText('Select ConfirmedRule')).not.toBeDisabled();
+    });
+  });
 });

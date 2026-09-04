@@ -80,6 +80,21 @@ describe('showMonitorCreatedToast', () => {
     expect(opts.path).toContain('ds=ds-with-dash');
   });
 
+  it('appends the propagation note only when pending is set (Prometheus creates)', () => {
+    // Without pending: no note.
+    showMonitorCreatedToast({ monitorName: 'os-mon', dsId: 'ds-1' });
+    const noPending = render(<>{mockAddSuccess.mock.calls[0][0].text}</>);
+    expect(noPending.queryByText(/take up to a minute/i)).toBeNull();
+    noPending.unmount();
+
+    // With pending: note is present alongside the View rule link.
+    mockAddSuccess.mockReset();
+    showMonitorCreatedToast({ monitorName: 'prom-mon', dsId: 'ds-1', pending: true });
+    const withPending = render(<>{mockAddSuccess.mock.calls[0][0].text}</>);
+    expect(withPending.getByText(/take up to a minute/i)).toBeInTheDocument();
+    expect(withPending.getByTestId('alertManagerToastViewRule')).toBeInTheDocument();
+  });
+
   it('no-ops gracefully when the toasts service is unavailable', () => {
     // Re-mock coreRefs without `toasts` for this test only.
     jest.isolateModules(() => {

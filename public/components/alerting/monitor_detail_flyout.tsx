@@ -50,6 +50,7 @@ import { humanizeCondition } from './monitor_detail/humanize_condition';
 import { normalizeDuration } from './utils/duration';
 import { observabilityAlertingID } from '../../../common/constants/shared';
 import { coreRefs } from '../../framework/core_refs';
+import { isPending } from './monitors_table/pending_rules';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
 
@@ -128,10 +129,23 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditRedirectConfirm, setShowEditRedirectConfirm] = useState(false);
   const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
+  // Optimistic rows we injected while the querier catches up carry a synthetic
+  // `new-` id the backend doesn't know yet, so every mutating action (edit,
+  // clone, delete, enable/disable) would 404 — gate them all off until the
+  // rule confirms.
+  const pending = isPending(monitor);
+  const pendingActionTooltip = i18n.translate(
+    'observability.alerting.monitorDetailFlyout.pendingActionTooltip',
+    {
+      defaultMessage:
+        'This rule is still being confirmed by the querier. Actions are available once it appears in the list.',
+    }
+  );
   // Mirror the Edit-button gate (PPL only). Non-PPL types stay read-only;
   // the existing tooltip surfaces explains the limitation.
   // Prometheus rules cannot be disabled via the OS Alerting API.
   const canToggleEnabled =
+    !pending &&
     !!onToggleEnabled &&
     monitor.datasourceType !== 'prometheus' &&
     (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric');
@@ -203,12 +217,12 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   // flyout, so rather than disable Edit we send the user to the classic
   // alerting app after a heads-up confirmation.
   const canEditInPlace =
-    !!onEdit && (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric');
+    !pending && !!onEdit && (monitor.monitorType === 'ppl' || monitor.monitorType === 'metric');
   // Only OpenSearch monitors have a real `_id` + monitor_type the classic
   // editor understands; detectors/forecasters/Prometheus rules do not.
   const isOpenSearchMonitor =
     (monitor.definitionType ?? 'monitor') === 'monitor' && monitor.datasourceType === 'opensearch';
-  const canRedirectToClassicEdit = !canEditInPlace && isOpenSearchMonitor;
+  const canRedirectToClassicEdit = !pending && !canEditInPlace && isOpenSearchMonitor;
   // The classic `monitorType` param is advisory (the classic app re-derives
   // the form from the fetched monitor body), but we send the best value we
   // have. Cluster-metrics monitors are stored as `query_level_monitor` and
@@ -372,12 +386,13 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 </EuiToolTip>
               ) : (
                 <EuiToolTip
-                  content={i18n.translate(
-                    'observability.alerting.monitorDetailFlyout.editTooltip',
-                    {
-                      defaultMessage: 'Editing is only supported for PPL alert rules',
-                    }
-                  )}
+                  content={
+                    pending
+                      ? pendingActionTooltip
+                      : i18n.translate('observability.alerting.monitorDetailFlyout.editTooltip', {
+                          defaultMessage: 'Editing is only supported for PPL alert rules',
+                        })
+                  }
                 >
                   <EuiButtonEmpty size="s" iconType="pencil" isDisabled>
                     <FormattedMessage
@@ -389,8 +404,8 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {isComposite ? (
-                <EuiToolTip content={compositeActionTooltip}>
+              {isComposite || pending ? (
+                <EuiToolTip content={pending ? pendingActionTooltip : compositeActionTooltip}>
                   <EuiButtonEmpty size="s" iconType="copy" isDisabled>
                     <FormattedMessage
                       id="observability.alerting.monitorDetailFlyout.cloneButton"
@@ -408,8 +423,8 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {isComposite ? (
-                <EuiToolTip content={compositeActionTooltip}>
+              {isComposite || pending ? (
+                <EuiToolTip content={pending ? pendingActionTooltip : compositeActionTooltip}>
                   <EuiButtonEmpty size="s" iconType="trash" color="danger" isDisabled>
                     <FormattedMessage
                       id="observability.alerting.monitorDetailFlyout.deleteButton"
@@ -1088,12 +1103,17 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     </EuiButton>
                   ) : (
                     <EuiToolTip
-                      content={i18n.translate(
-                        'observability.alerting.monitorDetailFlyout.enableDisableTooltip',
-                        {
-                          defaultMessage: 'Enable/disable is only supported for PPL alert rules.',
-                        }
-                      )}
+                      content={
+                        pending
+                          ? pendingActionTooltip
+                          : i18n.translate(
+                              'observability.alerting.monitorDetailFlyout.enableDisableTooltip',
+                              {
+                                defaultMessage:
+                                  'Enable/disable is only supported for PPL alert rules.',
+                              }
+                            )
+                      }
                     >
                       <EuiButton size="s" isDisabled>
                         {monitor.enabled === false

@@ -76,6 +76,8 @@ import {
   formStateToRule,
   resolveDatasourceTokens,
 } from './alarms_page_helpers';
+import { usePendingRules } from './hooks/use_pending_rules';
+import { key as pendingRuleKey, PendingEntry } from './monitors_table/pending_rules';
 
 // ============================================================================
 // Main Page Component
@@ -273,12 +275,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // value — that way cross-tab deep-links inside the same app (alert
   // flyout's "Open monitor") still re-apply.
   const lastAppliedDsRef = useRef<string | undefined>(undefined);
-  const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    return () => {
-      if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
-    };
-  }, []);
   useEffect(() => {
     const dsId = deepLink.ds;
     if (!dsId) return;
@@ -529,6 +525,61 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const [selectedAlert, setSelectedAlert] = useState<UnifiedAlertSummary | null>(null);
   const { setToast: addToast } = useToast();
 
+  // Optimistic "pending rule" cache. A freshly-created Prometheus/metrics rule
+  // is persisted synchronously but only appears in the querier-backed list
+  // ~60s+ later; this layers an optimistic row on top and reconciles it against
+  // each background poll / refetch (no dedicated timer). A poll that hasn't
+  // seen the rule means "not propagated yet", so eviction on timeout warns
+  // softly rather than reporting a failure.
+  const warnedPendingKeysRef = useRef<Set<string>>(new Set());
+  const { mergedRules, addPending, dropPendingOutsideDsIds } = usePendingRules({
+    rules,
+    deletedRuleIds,
+    selectedDsIds,
+    onEvictWarning: (entry) => {
+      // One warning per key — reconcile can surface the same eviction on the
+      // same tick from multiple triggers.
+      if (warnedPendingKeysRef.current.has(entry.key)) return;
+      warnedPendingKeysRef.current.add(entry.key);
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.pendingRuleUnconfirmed.title', {
+          defaultMessage: "'{name}' isn't showing up yet",
+          values: { name: entry.optimisticRule.name },
+        }),
+        'warning',
+        i18n.translate('observability.alerting.alarmsPage.toast.pendingRuleUnconfirmed.body', {
+          defaultMessage:
+            "The rule was submitted but the querier hasn't confirmed it after 2 minutes. It may still appear — click Refresh, or check the datasource is reachable.",
+        })
+      );
+    },
+  });
+
+  // Register an optimistic pending row after a successful create/clone POST.
+  // The row is keyed on the create payload's (dsId, group, name) so it lines up
+  // with the eventual querier row; forcing `status: 'pending'` makes it render
+  // as the pending badge and keeps its actions disabled (its synthetic id would
+  // 404). See `pending_rules.ts`.
+  const addOptimisticPending = useCallback(
+    (
+      rule: UnifiedRuleSummary,
+      dsId: string,
+      group: string | undefined,
+      name: string,
+      origin: PendingEntry['origin']
+    ) => {
+      addPending({
+        key: pendingRuleKey(dsId, group, name),
+        dsId,
+        optimisticRule: { ...rule, datasourceId: dsId, group, status: 'pending' },
+        attempts: 0,
+        createdAt: Date.now(),
+        origin,
+      });
+    },
+    [addPending]
+  );
+
   const handleNavigateToDetectorResults = useCallback((href: string) => {
     if (coreRefs.application?.navigateToUrl) {
       coreRefs.application.navigateToUrl(href);
@@ -537,7 +588,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     window.location.assign(href);
   }, []);
 
-  const visibleRules = rules.filter((r) => !deletedRuleIds.has(r.id));
+  const visibleRules = useMemo(
+    () => mergedRules.filter((r) => !deletedRuleIds.has(r.id)),
+    [mergedRules, deletedRuleIds]
+  );
 
   // Fires when a user tries to select past `maxDatasources`. Pops a warning
   // toast with an in-toast link to the Advanced Settings entry so they can
@@ -615,8 +669,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     (ids: string[]) => {
       setSelectedDsIds(ids);
       setDeletedRuleIds(new Set());
+      // Drop pending rows whose datasource is no longer selected (but keep the
+      // rest — this is a scope change, not a blanket clear).
+      dropPendingOutsideDsIds(ids);
     },
-    [setSelectedDsIds]
+    [setSelectedDsIds, dropPendingOutsideDsIds]
   );
 
   // ---- Handlers ----
@@ -918,7 +975,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           enabled: true,
         };
         await mutations.createPrometheusRule(payload, monitor.datasourceId);
-        // Optimistic insert — show the cloned rule immediately in the UI
+        // Optimistic pending row — the clone POST has no groupName, so the
+        // server defaults the group to the (cloned) rule name.
         const optimisticClone: UnifiedRuleSummary = {
           ...monitor,
           id: `new-clone-${Date.now()}`,
@@ -926,15 +984,21 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           group: clonedName,
           status: 'pending',
         };
-        setRules((prev) => [optimisticClone, ...prev]);
-        setRulesTotal((prev) => prev + 1);
+        addOptimisticPending(
+          optimisticClone,
+          monitor.datasourceId,
+          clonedName,
+          clonedName,
+          'clone'
+        );
         addToast(
           i18n.translate('observability.alerting.alarmsPage.toast.monitorCloned', {
             defaultMessage: 'Monitor cloned',
           })
         );
-        // Background refetch to reconcile with Prometheus once it propagates
-        refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
+        // Immediate refetch so a fast-propagating rule confirms on the next
+        // tick; otherwise the background poll reconciles the pending row.
+        refetchRules();
         return;
       }
 
@@ -1092,13 +1156,19 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const dsId = resolveDatasourceId(formState);
     if (!dsId) return;
     const newRule = buildOptimisticRule(formState);
+    const isProm = formState.datasourceType === 'prometheus';
+    // Group the optimistic pending row is keyed on. Prometheus rules carry a
+    // group (from the _ruleGroup transport label or the rule name); OpenSearch
+    // monitors have none.
+    let optimisticGroup: string | undefined;
     try {
-      if (formState.datasourceType === 'prometheus') {
+      if (isProm) {
         // Prometheus rules go to the Prometheus ruler API
         const promForm = formState as PrometheusFormState;
         // _ruleGroup is a form-transport metadata label, not a real Prometheus
         // label — extract it into groupName and strip it from persisted labels.
         const ruleGroupLabel = promForm.labels.find((l) => l.key === '_ruleGroup')?.value;
+        optimisticGroup = ruleGroupLabel || promForm.name;
         const payload = buildPrometheusRulePayload({
           name: promForm.name,
           query: promForm.query,
@@ -1113,26 +1183,21 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             promForm.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
           ),
           enabled: promForm.enabled,
-          groupName: ruleGroupLabel || promForm.name,
+          groupName: optimisticGroup,
         });
         await mutations.createPrometheusRule(payload, dsId);
-
-        // Prometheus has eventual consistency (~30-60s propagation). Use
-        // optimistic pattern: close flyout immediately, show toast, and
-        // schedule a background refetch after 15s to sync the list.
-        refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
       } else {
         await mutations.createMonitor(buildPayload(formState), dsId);
       }
-      showMonitorCreatedToast({ monitorName: formState.name, dsId });
+      // Prometheus creates lag the querier (~30-60s), so hint at the delay;
+      // OpenSearch monitors confirm immediately.
+      showMonitorCreatedToast({ monitorName: formState.name, dsId, pending: isProm });
       setShowCreateMonitor(false);
       setCreateBackendType(null);
       setPplSubmitError(null);
-      // Refetch rules so the new monitor (with backend-assigned id /
-      // last_update_time) shows up in the list. Optimistic insert is kept
-      // for the UI to feel instant; the refetch reconciles.
-      setRules((prev) => [newRule, ...prev]);
-      setRulesTotal((prev) => prev + 1);
+      // Optimistic pending row keeps the UI instant; the immediate refetch (and
+      // the background poll) reconcile it against the canonical querier row.
+      addOptimisticPending(newRule, dsId, optimisticGroup, formState.name, 'create');
       refetchRules();
     } catch (e: unknown) {
       const message = extractServerErrorMessage(e);
@@ -1207,10 +1272,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const newRule = buildOptimisticRule(promForm);
     setShowCreateMonitor(false);
     setCreateBackendType(null);
-    setRules((prev) => [newRule, ...prev]);
-    setRulesTotal((prev) => prev + 1);
+    // The flyout persisted the rule itself with groupName `form.groupName ||
+    // form.monitorName` — key the optimistic pending row on the same tuple.
+    addOptimisticPending(
+      newRule,
+      form.datasourceId,
+      form.groupName || form.monitorName,
+      form.monitorName,
+      'metrics'
+    );
     refetchRules();
-    refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
   };
 
   const handleEditMonitor = async (formState: MonitorFormState, ruleId: string) => {
@@ -1261,8 +1332,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             // Orphaned old rule — harmless, user can delete manually
           }
         }
-        // Background refetch to reconcile with Prometheus once it propagates
-        refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
+        // Immediate refetch; the background poll continues to reconcile once
+        // Prometheus propagates the edited rule.
+        refetchRules();
       } else {
         await mutations.updateMonitor(ruleId, buildPayload(formState), dsId);
         // Immediate refetch for OpenSearch monitors (no propagation delay)
@@ -1314,8 +1386,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           values: { count: succeededRules.length },
         })
       );
-      setRules((prev) => [...succeededRules, ...prev]);
-      setRulesTotal((prev) => prev + succeededRules.length);
+      for (const r of succeededRules) {
+        addOptimisticPending(r, r.datasourceId, r.group, r.name, 'batch');
+      }
+      refetchRules();
     }
     // Don't close flyout — AI wizard shows its own summary step and "Done" button
   };
