@@ -237,8 +237,8 @@ export function registerNoteRoute(router: IRouter) {
       validate: {
         body: schema.object({
           visIds: schema.arrayOf(schema.string()),
-          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
-          dataSourceMDSLabel: schema.maybe(schema.string({ defaultValue: '' })),
+          dataSourceMDSId: schema.maybe(schema.string()),
+          dataSourceMDSLabel: schema.maybe(schema.string()),
         }),
       },
     },
