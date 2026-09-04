@@ -48,6 +48,7 @@ import { CustomPanelListType, CustomPanelType } from '../../../common/types/cust
 import { getSampleDataModal } from '../common/helpers/add_sample_modal';
 import { DeleteModal } from '../common/helpers/delete_modal';
 import {
+  clonePanel,
   createPanel,
   deletePanels,
   fetchPanels,
@@ -154,12 +155,7 @@ export const CustomPanelTable = ({
           sourcePanel = legacyFetchResult.operationalPanel;
         }
 
-        const { ...newPanel } = {
-          ...sourcePanel,
-          title: newName,
-        };
-
-        dispatch(createPanel(newPanel));
+        dispatch(clonePanel(sourcePanel, newName));
       } catch (err) {
         setToast(
           'Error cloning Observability Dashboard, please make sure you have the correct permission.',
