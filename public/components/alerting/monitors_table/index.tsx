@@ -58,6 +58,10 @@ interface MonitorsTableProps {
   onCreateMonitor?: (
     type: 'logs' | 'prometheus' | 'metrics' | 'slo' | 'detector' | 'forecaster'
   ) => void;
+  /** Manually refetch the rules list (e.g. to pick up a just-created rule). */
+  onRefresh?: () => void;
+  /** True while a refetch is in flight — drives the Refresh button spinner. */
+  refreshing?: boolean;
   /** Currently selected datasource IDs */
   selectedDsIds: string[];
   /** Callback when datasource selection changes */
@@ -98,6 +102,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   onStopResources,
   onToggleEnabled,
   onCreateMonitor,
+  onRefresh,
+  refreshing,
   selectedDsIds,
   onDatasourceChange,
   maxDatasources,
@@ -485,6 +491,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 selectedIds={selectedIds}
                 setSelectedIds={setSelectedIds}
                 onCreateMonitor={onCreateMonitor}
+                onRefresh={onRefresh}
+                refreshing={refreshing}
                 logsCreateDisabled={logsCreateDisabled}
                 metricsCreateDisabled={metricsCreateDisabled}
                 detectorCreateDisabled={adCreateDisabled}

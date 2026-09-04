@@ -13,6 +13,7 @@
 import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { GeneratedRule, GeneratedRuleGroup } from '../../../../common/slo/slo_types';
 import type { RulerClient } from '../../../services/slo/ruler_client';
+import { createConflictError } from '../../../services/alerting/errors';
 
 /** The namespace under which user-created alerting rules are stored in the ruler. */
 export const USER_RULES_NAMESPACE = 'observability-alerting';
@@ -33,6 +34,20 @@ export interface PrometheusRulePayload {
   enabled: boolean;
   /** Optional group name override. Defaults to the rule name. */
   groupName?: string;
+  /**
+   * Optional Cortex namespace override. Defaults to `USER_RULES_NAMESPACE`.
+   * Rules are identified by the full (namespace, group, name) tuple; the
+   * flyout currently pins this to the one user namespace, but threading it
+   * explicitly keeps the create/delete guard correct if a future surface
+   * writes to a different namespace.
+   */
+  namespace?: string;
+  /**
+   * When false (default), a create that collides with an existing same-named
+   * rule in the target group is rejected (409) rather than silently replacing
+   * it. Edit flows that intend to replace pass `true`.
+   */
+  overwrite?: boolean;
 }
 
 /**
@@ -92,6 +107,10 @@ export async function handleCreatePrometheusRule(
   logger?: Logger
 ): Promise<{ success: boolean; groupName: string; namespace: string }> {
   const group = buildRuleGroup(payload);
+  // Rules are identified by the full (namespace, group, name) tuple. Default
+  // to the single user namespace, but honor an explicit override so the guard
+  // below compares within the right namespace.
+  const namespace = payload.namespace ?? USER_RULES_NAMESPACE;
 
   // Rule groups are shared: multiple rules may live in the same group, and
   // the ruler's POST is create-or-replace on (namespace, groupName). Merge with
@@ -103,13 +122,19 @@ export async function handleCreatePrometheusRule(
   // can still lose an update (the second upsert wins). This protects against
   // the common single-writer clobber; true concurrent safety would need
   // server-side coordination in the ruler itself.
-  const existing = await rulerClient.getRuleGroup(
-    client,
-    datasource,
-    USER_RULES_NAMESPACE,
-    group.groupName
-  );
+  const existing = await rulerClient.getRuleGroup(client, datasource, namespace, group.groupName);
   if (existing && existing.rules.length > 0) {
+    // Guard against silently clobbering an existing same-named rule. A create
+    // (overwrite=false) that collides is a conflict; only an explicit edit
+    // (overwrite=true) may replace. This is the primary protection for the
+    // Metrics-page create flow, which has no client-side duplicate check.
+    if (!payload.overwrite && existing.rules.some((r) => r.name === payload.name)) {
+      throw createConflictError(
+        `A rule named "${payload.name}" already exists in group "${group.groupName}". ` +
+          `Choose a different rule name or group.`,
+        payload.name
+      );
+    }
     const siblings = existing.rules.filter((r) => r.name !== payload.name);
     group.rules = [...siblings, ...group.rules];
     // The evaluation interval is a group-level property shared by all rules.
@@ -120,11 +145,11 @@ export async function handleCreatePrometheusRule(
     }
   }
 
-  await rulerClient.upsertRuleGroup(client, datasource, USER_RULES_NAMESPACE, group);
+  await rulerClient.upsertRuleGroup(client, datasource, namespace, group);
   logger?.info(
-    `alerting: createPrometheusRule success — ds=${datasource.id} group=${group.groupName} rules=${group.rules.length}`
+    `alerting: createPrometheusRule success — ds=${datasource.id} ns=${namespace} group=${group.groupName} rules=${group.rules.length}`
   );
-  return { success: true, groupName: group.groupName, namespace: USER_RULES_NAMESPACE };
+  return { success: true, groupName: group.groupName, namespace };
 }
 
 export async function handleDeletePrometheusRule(
@@ -133,35 +158,36 @@ export async function handleDeletePrometheusRule(
   datasource: Datasource,
   groupName: string,
   logger?: Logger,
-  ruleName?: string
+  ruleName?: string,
+  namespaceOverride?: string
 ): Promise<{ success: boolean }> {
+  // Identity is (namespace, group, name); default to the single user
+  // namespace but honor an explicit override for symmetry with create.
+  const namespace = namespaceOverride ?? USER_RULES_NAMESPACE;
   // When a ruleName is provided, splice just that rule out of the group so
   // sibling rules in a shared group are preserved. The whole group is only
   // deleted when it would become empty (or no ruleName was given).
   // Same non-atomicity caveat as the create-merge above: no CAS on the
   // ruler, so concurrent writers to one group can race.
   if (ruleName) {
-    const existing = await rulerClient.getRuleGroup(
-      client,
-      datasource,
-      USER_RULES_NAMESPACE,
-      groupName
-    );
+    const existing = await rulerClient.getRuleGroup(client, datasource, namespace, groupName);
     if (existing) {
       const remaining = existing.rules.filter((r) => r.name !== ruleName);
       if (remaining.length > 0) {
-        await rulerClient.upsertRuleGroup(client, datasource, USER_RULES_NAMESPACE, {
+        await rulerClient.upsertRuleGroup(client, datasource, namespace, {
           ...existing,
           rules: remaining,
         });
         logger?.info(
-          `alerting: deletePrometheusRule spliced rule=${ruleName} from group=${groupName} — ds=${datasource.id} remaining=${remaining.length}`
+          `alerting: deletePrometheusRule spliced rule=${ruleName} from group=${groupName} — ds=${datasource.id} ns=${namespace} remaining=${remaining.length}`
         );
         return { success: true };
       }
     }
   }
-  await rulerClient.deleteRuleGroup(client, datasource, USER_RULES_NAMESPACE, groupName);
-  logger?.info(`alerting: deletePrometheusRule success — ds=${datasource.id} group=${groupName}`);
+  await rulerClient.deleteRuleGroup(client, datasource, namespace, groupName);
+  logger?.info(
+    `alerting: deletePrometheusRule success — ds=${datasource.id} ns=${namespace} group=${groupName}`
+  );
   return { success: true };
 }

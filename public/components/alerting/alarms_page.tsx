@@ -172,6 +172,12 @@ function buildPrometheusRulePayload(opts: {
   annotations: Record<string, string>;
   enabled: boolean;
   groupName?: string;
+  /**
+   * Allow replacing an existing same-named rule in the group. Edit flows set
+   * this; create flows leave it false so the server rejects a name collision
+   * (409) instead of silently overwriting.
+   */
+  overwrite?: boolean;
 }) {
   return {
     name: opts.name,
@@ -182,6 +188,7 @@ function buildPrometheusRulePayload(opts: {
     annotations: opts.annotations,
     enabled: opts.enabled,
     ...(opts.groupName ? { groupName: opts.groupName } : {}),
+    ...(opts.overwrite ? { overwrite: true } : {}),
   };
 }
 
@@ -407,7 +414,57 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     setRules,
     setRulesTotal,
     refetch: refetchRules,
+    backgroundRefetch: backgroundRefetchRules,
   } = useRulesData({ selectedDsIds });
+
+  // Keep the rules list fresh without a manual reload. A rule created
+  // elsewhere (e.g. the Metrics page "Create alert rule" flyout) only lands
+  // in the unified list once Cortex's querier has loaded and first-evaluated
+  // it, which can lag the create by up to the rule's evaluation interval — so
+  // the initial mount fetch can miss it and the list would otherwise stay
+  // stale until a filter toggle. Refetch when the user switches INTO the Rules
+  // tab so a freshly-created rule shows up on navigation.
+  const prevTabRef = useRef(activeTab);
+  useEffect(() => {
+    if (activeTab === 'rules' && prevTabRef.current !== 'rules') {
+      refetchRules();
+    }
+    prevTabRef.current = activeTab;
+  }, [activeTab, refetchRules]);
+
+  // Also refetch when the window/tab regains focus, so returning to an
+  // already-open Alerts app re-syncs (e.g. after creating a rule in another
+  // browser tab). Cheap: only re-runs the rules query. `focus` and
+  // `visibilitychange` both fire when refocusing a window, so throttle to
+  // one refetch per second to avoid a redundant double request.
+  const lastFocusRefetchRef = useRef(0);
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const nowMs = Date.now();
+      if (nowMs - lastFocusRefetchRef.current < 1000) return;
+      lastFocusRefetchRef.current = nowMs;
+      refetchRules();
+    };
+    window.addEventListener('focus', onVisible);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('focus', onVisible);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [refetchRules]);
+
+  // While the Rules tab is open and visible, poll silently every 15s so a rule
+  // that was just created — here or from the Metrics page — shows on its own
+  // once Cortex's querier has loaded it, without the user clicking Refresh.
+  // Background refetch = no spinner / no error-banner clobber.
+  useEffect(() => {
+    if (activeTab !== 'rules') return undefined;
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') backgroundRefetchRules();
+    }, 15000);
+    return () => window.clearInterval(intervalId);
+  }, [activeTab, backgroundRefetchRules]);
 
   const [deletedRuleIds, setDeletedRuleIds] = useState<Set<string>>(new Set());
   const [showCreateMonitor, setShowCreateMonitor] = useState(false);
@@ -425,40 +482,37 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // datasource filter has surfaced — saving against an unselected DS could
   // still create a same-name monitor on that DS, but that's a much narrower
   // footgun than the original "two identical names on the same cluster".
-  const rulesByDsName = useMemo(() => {
-    const map = new Map<string, Set<string>>();
-    rules.forEach((r) => {
-      if (deletedRuleIds.has(r.id)) return;
-      const dsKey = r.datasourceId;
-      const names = map.get(dsKey) ?? new Set<string>();
-      names.add(r.name.trim().toLowerCase());
-      map.set(dsKey, names);
-    });
-    return map;
-  }, [rules, deletedRuleIds]);
-
-  const isNameTakenForCreate = useCallback(
-    (name: string, dsId: string) => {
-      const set = rulesByDsName.get(dsId);
-      return !!set?.has(name.trim().toLowerCase());
-    },
-    [rulesByDsName]
-  );
-
-  const buildIsNameTakenForEdit = useCallback(
-    (excludeRuleId: string) => (name: string, dsId: string) => {
+  // Duplicate-rule detection. Prometheus rule identity is (datasource, group,
+  // name), so when a `group` is supplied the collision is scoped to that group
+  // — this lets a user legitimately keep `HighLatency` in two different groups
+  // without a false "already exists". When no group is supplied (OpenSearch/PPL
+  // monitors, which have no group) the check falls back to datasource-wide.
+  const isRuleNameTaken = useCallback(
+    (name: string, dsId: string, group: string | undefined, excludeRuleId?: string) => {
       const trimmed = name.trim().toLowerCase();
-      // Walk the rule list directly so we can exclude the monitor being
-      // edited; the cached map doesn't carry id information.
+      if (!trimmed) return false;
+      const g = group?.trim().toLowerCase();
       return rules.some(
         (r) =>
           r.id !== excludeRuleId &&
           !deletedRuleIds.has(r.id) &&
           r.datasourceId === dsId &&
-          r.name.trim().toLowerCase() === trimmed
+          r.name.trim().toLowerCase() === trimmed &&
+          (g === undefined || g === '' || (r.group ?? '').trim().toLowerCase() === g)
       );
     },
     [rules, deletedRuleIds]
+  );
+
+  const isNameTakenForCreate = useCallback(
+    (name: string, dsId: string, group?: string) => isRuleNameTaken(name, dsId, group),
+    [isRuleNameTaken]
+  );
+
+  const buildIsNameTakenForEdit = useCallback(
+    (excludeRuleId: string) => (name: string, dsId: string, group?: string) =>
+      isRuleNameTaken(name, dsId, group, excludeRuleId),
+    [isRuleNameTaken]
   );
   // The popover's "Logs" entry maps to an OpenSearch monitor and "Metrics"
   // maps to a Prometheus rule. When the user picks Logs the flyout is forced
@@ -1184,6 +1238,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           ),
           enabled: promForm.enabled,
           groupName: ruleGroupLabel || promForm.name,
+          // Edit intends to replace the existing rule (same name+group) —
+          // opt into overwrite so the server's create-collision guard allows it.
+          overwrite: true,
         });
         // Create new rule first, then delete old on success (prevents data loss
         // if create fails — worst case is a harmless duplicate).
@@ -1339,6 +1396,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           rules={visibleRules}
           datasources={datasources}
           loading={dataLoading}
+          onRefresh={refetchRules}
+          refreshing={dataLoading}
           onDelete={handleDeleteRules}
           onClone={handleCloneRule}
           onEdit={(monitor) => setEditTarget({ dsId: monitor.datasourceId, ruleId: monitor.id })}

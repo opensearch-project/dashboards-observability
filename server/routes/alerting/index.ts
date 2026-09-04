@@ -28,6 +28,7 @@ import {
 } from '../../services/alerting';
 import { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
 import { MonitorMutationService } from '../../services/alerting/monitor_mutation_service';
+import { stripTrailingComparison } from '../../services/alerting/alert_utils';
 import { registerAlertingMutationRoutes } from './mutations';
 import { toErrorBody, toHandlerResult } from './route_utils';
 import { isAlertManagerError } from '../../services/alerting';
@@ -928,6 +929,85 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
             req.params.dsId,
             logger
           );
+        })
+    );
+
+    // POST /api/alerting/prometheus/{dsId}/preview — run an ad-hoc PromQL range
+    // query so the "Create alert rule" flyout can show a real preview chart of
+    // the current expression (replacing the former hardcoded sample series).
+    // Reuses the same `promBackend.queryRange` path the rule-detail condition
+    // preview uses (see alert_preview.ts:fetchPromPreviewData).
+    router.post(
+      {
+        path: '/api/alerting/prometheus/{dsId}/preview',
+        validate: {
+          params: schema.object({ dsId: alertingIdSchema }),
+          body: schema.object({
+            query: schema.string({ minLength: 1, maxLength: 4096 }),
+            // Epoch seconds; default to the last hour at a 60s step. Bounded so
+            // a hand-crafted request can't ask the upstream for an enormous
+            // window at fine resolution (the point budget below is the real
+            // guard; these keep individual fields sane). 1s..1d step.
+            start: schema.maybe(schema.number({ min: 0 })),
+            end: schema.maybe(schema.number({ min: 0 })),
+            step: schema.maybe(schema.number({ min: 1, max: 86400 })),
+          }),
+        },
+      },
+      async (ctx, req, res) =>
+        runHandler(res, async () => {
+          const promDs = await resolvePrometheusDatasource(
+            ctx as AlertingHandlerContext,
+            req.params.dsId
+          );
+          if (!promDs) {
+            return {
+              status: 404,
+              body: { message: `Prometheus datasource not found: ${req.params.dsId}` },
+            };
+          }
+          const now = Math.floor(Date.now() / 1000);
+          // Clamp end to now (no future ranges) and default to a last-hour /
+          // 60s window when the caller omits them.
+          const end = Math.min(req.body.end ?? now, now);
+          const start = req.body.start ?? end - 3600;
+          const step = req.body.step ?? 60;
+          if (start >= end) {
+            return { status: 400, body: { message: 'start must be earlier than end.' } };
+          }
+          // Cap the requested resolution so a preview can't fan out into a
+          // huge range query. 1500 points comfortably covers any chart width.
+          const MAX_PREVIEW_POINTS = 1500;
+          if ((end - start) / step > MAX_PREVIEW_POINTS) {
+            return {
+              status: 400,
+              body: {
+                message: `Preview range too large for step ${step}s (max ${MAX_PREVIEW_POINTS} points); widen the step or shorten the range.`,
+              },
+            };
+          }
+          // Strip a trailing comparison so we chart the metric series, not the
+          // boolean alert condition (shared with the rule-detail preview).
+          const metricQuery = stripTrailingComparison(req.body.query);
+          // Use `queryRangeMatrix` (not `queryRange`) deliberately: it throws on
+          // a bad query / unreachable upstream instead of swallowing to [], so
+          // the client can tell a real failure apart from a genuinely empty
+          // result, and it caps points per series. Forward the inbound request
+          // so the datasource read uses the caller's credentials. Flatten to
+          // the first series — the preview is a single line.
+          const series = await promBackend.queryRangeMatrix(
+            ctx,
+            promDs,
+            metricQuery,
+            start,
+            end,
+            step,
+            { sourceRequest: req }
+          );
+          const points = series[0]?.values ?? [];
+          // Return the effective (stripped) query so the UI caption reflects
+          // exactly what was plotted rather than the full alert condition.
+          return { status: 200, body: { points, query: metricQuery } };
         })
     );
   }
