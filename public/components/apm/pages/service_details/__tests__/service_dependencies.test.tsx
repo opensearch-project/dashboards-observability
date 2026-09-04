@@ -24,10 +24,12 @@ jest.mock('../../../shared/components/dependency_filter_sidebar', () => ({
   // Expose the latency slider callback so tests can activate the range filter. Narrowing to
   // [latencyMax, latencyMax] leaves only the single highest-latency row.
   DependencyFilterSidebar: (props: {
+    latencyRange: [number, number];
     latencyMax: number;
     onLatencyRangeChange: (range: [number, number]) => void;
   }) => (
     <div data-test-subj="dependencyFilterSidebar">
+      <span data-test-subj="mockLatencyRange">{JSON.stringify(props.latencyRange)}</span>
       <button
         type="button"
         data-test-subj="mockNarrowLatencyRange"
@@ -89,6 +91,13 @@ const buildMetricsMap = (deps: ReturnType<typeof buildDependencies>) =>
       },
     ])
   );
+
+// Every percentile here floors/ceils to {30, 31}, so latencyBounds is unchanged across a switch
+// and the bounds effect (keyed on those bounds) never fires to reset the range.
+const tiedBounds = (items: ReturnType<typeof buildDependencies>) =>
+  items.map((dep, i) => ({ ...dep, p99Duration: 30.1 + i * 0.05, p90Duration: 30.2 + i * 0.04 }));
+
+const latencyRangeText = () => screen.getByTestId('mockLatencyRange').textContent;
 
 const props = {
   serviceName: 'checkout',
@@ -209,6 +218,35 @@ describe('ServiceDependencies - percentile switch does not remount the table (#2
     fireEvent.click(screen.getByTestId('mockNarrowLatencyRange'));
     expect(screen.getByText(svc(14))).toBeInTheDocument();
     expect(screen.queryByText(svc(0))).not.toBeInTheDocument();
+  });
+
+  // The percentile handler resets latencyRange itself rather than relying on the bounds effect,
+  // which does not fire when the new percentile rounds to the same bounds. The stale range is
+  // invisible in the table (the gate is off), so assert on the range the sidebar receives.
+  it('should reset the latency range on a percentile switch when the rounded bounds are unchanged', () => {
+    const dependencies = tiedBounds(buildDependencies());
+    (useDependencies as jest.Mock).mockReturnValue({
+      data: dependencies,
+      groupedData: dependencies,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    (useDependencyMetrics as jest.Mock).mockReturnValue({
+      metrics: buildMetricsMap(dependencies),
+      isLoading: false,
+      error: null,
+    });
+
+    render(<ServiceDependencies {...props} />);
+    expect(latencyRangeText()).toBe('[30,31]');
+
+    fireEvent.click(screen.getByTestId('mockNarrowLatencyRange'));
+    expect(latencyRangeText()).toBe('[31,31]');
+
+    switchPercentile('P90');
+
+    expect(latencyRangeText()).toBe('[30,31]');
   });
 });
 
