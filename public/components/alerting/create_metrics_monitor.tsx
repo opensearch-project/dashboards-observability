@@ -450,6 +450,10 @@ const QuerySection = React.memo<{
               <EuiButton
                 size="s"
                 onClick={onRunPreview}
+                // A preview needs both an expression and a datasource; disabling
+                // avoids running an empty query that would surface a misleading
+                // "returned no data" message for missing input.
+                isDisabled={form.query.trim() === '' || !form.datasourceId}
                 data-test-subj="metricsMonitorRunPreviewButton"
                 aria-label={i18n.translate(
                   'observability.alerting.createMetricsMonitor.runPreviewAriaLabel',
@@ -574,7 +578,7 @@ const QuerySection = React.memo<{
                 'observability.alerting.createMetricsMonitor.expressionHelpText',
                 {
                   defaultMessage:
-                    'The complete alert condition. Switch to Builder to construct a simple metric/label query.',
+                    'The complete alert condition — it fires for every series the expression returns. A bare series (e.g. "up") is always-firing; add a comparison/threshold (e.g. "> 0.5") for a conditional alert. Switch to Builder to construct a simple metric/label query.',
                 }
               )}
               fullWidth

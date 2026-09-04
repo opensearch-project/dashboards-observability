@@ -434,9 +434,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
   // Also refetch when the window/tab regains focus, so returning to an
   // already-open Alerts app re-syncs (e.g. after creating a rule in another
-  // browser tab). Cheap: only re-runs the rules query. `focus` and
-  // `visibilitychange` both fire when refocusing a window, so throttle to
-  // one refetch per second to avoid a redundant double request.
+  // browser tab). Uses the BACKGROUND refetch (no spinner, no error/warning
+  // banner clobber) — a silent refocus re-sync, matching the 15s poll's
+  // intent. `focus` and `visibilitychange` both fire when refocusing a
+  // window, so throttle to one refetch per second to avoid a double request.
   const lastFocusRefetchRef = useRef(0);
   useEffect(() => {
     const onVisible = () => {
@@ -444,7 +445,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       const nowMs = Date.now();
       if (nowMs - lastFocusRefetchRef.current < 1000) return;
       lastFocusRefetchRef.current = nowMs;
-      refetchRules();
+      backgroundRefetchRules();
     };
     window.addEventListener('focus', onVisible);
     document.addEventListener('visibilitychange', onVisible);
@@ -452,7 +453,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       window.removeEventListener('focus', onVisible);
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [refetchRules]);
+  }, [backgroundRefetchRules]);
 
   // While the Rules tab is open and visible, poll silently every 15s so a rule
   // that was just created — here or from the Metrics page — shows on its own

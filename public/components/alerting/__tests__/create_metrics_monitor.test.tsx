@@ -286,6 +286,38 @@ describe('CreateMetricsMonitor', () => {
     expect(body).toContain('- alert: "my-rule"');
   });
 
+  it('disables Run preview until there is an expression and a datasource', () => {
+    // Empty flyout (no initialQuery) → no expression yet → Run preview disabled.
+    const { unmount } = render(
+      <CreateMetricsMonitor onCancel={jest.fn()} onSave={jest.fn()} datasourceId="prom-1" />
+    );
+    expect(
+      (
+        document.querySelector(
+          '[data-test-subj="metricsMonitorRunPreviewButton"]'
+        ) as HTMLButtonElement
+      ).disabled
+    ).toBe(true);
+    unmount();
+
+    // With a copied expression it enables.
+    render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        initialQuery="up > 0"
+      />
+    );
+    expect(
+      (
+        document.querySelector(
+          '[data-test-subj="metricsMonitorRunPreviewButton"]'
+        ) as HTMLButtonElement
+      ).disabled
+    ).toBe(false);
+  });
+
   it('shows the "Build query in metrics" link only when requested (Alert Manager)', () => {
     const { unmount } = render(
       <CreateMetricsMonitor

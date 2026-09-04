@@ -334,6 +334,9 @@ export const PrometheusFormSection: React.FC<{
                     setShowPreview(true);
                     setPreviewToken((t) => t + 1);
                   }}
+                  // Needs an expression and a datasource; disabling avoids an
+                  // empty run surfacing a misleading "returned no data" message.
+                  isDisabled={form.query.trim() === '' || !datasourceId}
                   data-test-subj="prometheusRunPreviewButton"
                   aria-label={i18n.translate(
                     'observability.alerting.prometheusFormSection.runPreviewAriaLabel',

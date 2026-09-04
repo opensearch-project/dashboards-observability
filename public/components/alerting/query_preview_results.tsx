@@ -70,6 +70,12 @@ interface PreviewState {
   plottedQuery: string;
   /** How many series the expression matched (only the first is charted). */
   seriesCount: number;
+  /**
+   * True before any query has been run, or when Run preview was clicked with no
+   * expression / datasource. Distinguishes "nothing ran" from "ran and got zero
+   * rows" so the empty-result warning isn't shown for missing input.
+   */
+  noInput: boolean;
 }
 
 const EMPTY_STATE: PreviewState = {
@@ -79,6 +85,7 @@ const EMPTY_STATE: PreviewState = {
   requestedQuery: '',
   plottedQuery: '',
   seriesCount: 0,
+  noInput: true,
 };
 
 /**
@@ -134,7 +141,7 @@ export const QueryPreviewResults: React.FC<{
       return;
     }
     let stale = false;
-    setState({ ...EMPTY_STATE, loading: true, requestedQuery: trimmed });
+    setState({ ...EMPTY_STATE, loading: true, requestedQuery: trimmed, noInput: false });
     const range = timeRangeRef.current;
     const previewRange = range
       ? { start: range.start, end: range.end, step: deriveStep(range) }
@@ -150,6 +157,7 @@ export const QueryPreviewResults: React.FC<{
             requestedQuery: trimmed,
             plottedQuery: plotted || trimmed,
             seriesCount: seriesCount ?? (points && points.length ? 1 : 0),
+            noInput: false,
           });
         }
       })
@@ -159,6 +167,7 @@ export const QueryPreviewResults: React.FC<{
             ...EMPTY_STATE,
             error: err instanceof Error ? err.message : String(err),
             requestedQuery: trimmed,
+            noInput: false,
           });
         }
       });
@@ -193,31 +202,57 @@ export const QueryPreviewResults: React.FC<{
       initialIsOpen
       paddingSize="s"
     >
-      <EuiText size="xs" color="subdued">
-        {state.plottedQuery || query}
-      </EuiText>
-      {state.seriesCount > 1 && (
-        <EuiText size="xs" color="subdued">
-          <em>
-            {i18n.translate('observability.alerting.queryPreviewResults.multiSeriesNote', {
-              defaultMessage:
-                'Matched {count} series — charting the first. The alert evaluates every matching series.',
-              values: { count: state.seriesCount },
-            })}
-          </em>
-        </EuiText>
-      )}
-      {comparisonStripped && (
-        <EuiText size="xs" color="subdued">
-          <em>
-            {i18n.translate('observability.alerting.queryPreviewResults.comparisonStrippedNote', {
-              defaultMessage: 'Comparison removed to plot the underlying metric series.',
-            })}
-          </em>
-        </EuiText>
+      {!state.noInput && (
+        <>
+          <EuiText size="xs" color="subdued">
+            {state.plottedQuery || query}
+          </EuiText>
+          {state.seriesCount > 1 && (
+            <EuiText size="xs" color="subdued">
+              <em>
+                {i18n.translate('observability.alerting.queryPreviewResults.multiSeriesNote', {
+                  defaultMessage:
+                    'Matched {count} series — charting the first. The alert evaluates every matching series.',
+                  values: { count: state.seriesCount },
+                })}
+              </em>
+            </EuiText>
+          )}
+          {comparisonStripped && (
+            <EuiText size="xs" color="subdued">
+              <em>
+                {i18n.translate(
+                  'observability.alerting.queryPreviewResults.comparisonStrippedNote',
+                  {
+                    defaultMessage: 'Comparison removed to plot the underlying metric series.',
+                  }
+                )}
+              </em>
+            </EuiText>
+          )}
+        </>
       )}
       <EuiSpacer size="s" />
-      {state.loading ? (
+      {state.noInput ? (
+        // Nothing has been run (or Run preview was clicked with no expression /
+        // datasource). Neutral prompt — NOT the "returned no data" warning,
+        // which would wrongly blame a valid metric for missing input.
+        <EuiCallOut
+          size="s"
+          color="primary"
+          iconType="iInCircle"
+          title={i18n.translate('observability.alerting.queryPreviewResults.notRunTitle', {
+            defaultMessage: 'Nothing to preview yet',
+          })}
+        >
+          <EuiText size="xs">
+            {i18n.translate('observability.alerting.queryPreviewResults.notRunBody', {
+              defaultMessage:
+                'Enter a PromQL expression and select a datasource, then click Run preview.',
+            })}
+          </EuiText>
+        </EuiCallOut>
+      ) : state.loading ? (
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 200 }}>
           <EuiFlexItem grow={false}>
             <EuiLoadingChart size="l" mono />
