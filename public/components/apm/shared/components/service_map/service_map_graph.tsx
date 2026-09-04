@@ -89,71 +89,62 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
     return map;
   }, [nodes]);
 
-  // Transform ALL nodes to CelestialMap format based on navigation level
-  const { celestialNodes, celestialEdges } = useMemo(() => {
+  // Structural graph for the current level: which raw nodes/edges render.
+  // Excludes metric values and edge selection so a metrics tick or edge click
+  // does not rebuild it (and does not force a dagre relayout of all nodes).
+  const levelGraph = useMemo(() => {
     if (navigationState.level === 'application') {
-      // Aggregated application view - single node representing all services
-      const aggregatedNode = createAggregatedApplicationNode(nodes, metricsMap);
-      return {
-        celestialNodes: aggregatedNode ? [aggregatedNode] : [],
-        celestialEdges: [],
-      };
+      return { kind: 'application' as const };
     }
-
     if (navigationState.level === 'groupBy' && navigationState.groupByAttribute) {
-      // Group by attribute view - show group nodes for each unique value
-      const groupNodes = createGroupByNodes(nodes, metricsMap, navigationState.groupByAttribute);
-      return {
-        celestialNodes: groupNodes,
-        celestialEdges: [], // No edges between groups
-      };
+      return { kind: 'groupBy' as const };
     }
-
     if (
       navigationState.level === 'groupByValue' &&
       navigationState.groupByAttribute &&
       navigationState.groupByValue
     ) {
-      // Filter nodes to those matching the selected group value
-      const filteredNodes = nodes.filter((node) => {
-        const attrValue = node.GroupByAttributes?.[navigationState.groupByAttribute];
-        return attrValue === navigationState.groupByValue;
-      });
-
-      // Get node IDs for edge filtering
+      const filteredNodes = nodes.filter(
+        (node) =>
+          node.GroupByAttributes?.[navigationState.groupByAttribute!] ===
+          navigationState.groupByValue
+      );
       const filteredNodeIds = new Set(filteredNodes.map((n) => n.NodeId));
-
-      // Filter edges to only those between filtered nodes
       const filteredEdges = edges.filter(
         (edge) =>
           filteredNodeIds.has(edge.SourceNodeId) && filteredNodeIds.has(edge.DestinationNodeId)
       );
-
-      const transformed = transformToCelestialFormat(
-        filteredNodes,
-        filteredEdges,
-        metricsMap,
-        selectedEdge?.edgeId || null
-      );
-      return {
-        celestialNodes: transformed.nodes,
-        celestialEdges: transformed.edges,
-      };
+      return { kind: 'graph' as const, nodes: filteredNodes, edges: filteredEdges };
     }
+    // Services view - all nodes (filtering handled by nodesInFocus)
+    return { kind: 'graph' as const, nodes, edges };
+  }, [nodes, edges, navigationState]);
 
-    // Services view - transform all nodes (filtering handled by nodesInFocus)
-    const transformed = transformToCelestialFormat(
-      nodes,
-      edges,
-      metricsMap,
-      selectedEdge?.edgeId || null
-    );
+  // Node overlay: metric values applied on top of the structural graph.
+  // Recomputes on metric ticks but leaves edges (layout inputs) untouched.
+  const celestialNodes = useMemo(() => {
+    if (levelGraph.kind === 'application') {
+      const aggregatedNode = createAggregatedApplicationNode(nodes, metricsMap);
+      return aggregatedNode ? [aggregatedNode] : [];
+    }
+    if (levelGraph.kind === 'groupBy') {
+      return createGroupByNodes(nodes, metricsMap, navigationState.groupByAttribute!);
+    }
+    return buildCelestialNodes(levelGraph.nodes, metricsMap);
+  }, [levelGraph, nodes, metricsMap, navigationState.groupByAttribute]);
 
-    return {
-      celestialNodes: transformed.nodes,
-      celestialEdges: transformed.edges,
-    };
-  }, [nodes, edges, metricsMap, navigationState, selectedEdge?.edgeId]);
+  // Edge overlay: selection styling applied on top of the structural edges.
+  // Recomputes only when the selected edge changes, never rebuilding nodes.
+  const celestialEdges = useMemo(() => {
+    if (levelGraph.kind !== 'graph') return [];
+    return buildCelestialEdges(levelGraph.edges, selectedEdge?.edgeId || null);
+  }, [levelGraph, selectedEdge?.edgeId]);
+
+  // Above the cap the graph switches to a guidance notice instead of laying out
+  // hundreds of nodes (dagre is O(N+E) and re-runs on interaction).
+  const exceedsRenderCap =
+    levelGraph.kind === 'graph' &&
+    celestialNodes.length > APPLICATION_MAP_CONSTANTS.MAX_RENDERED_NODES;
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
@@ -346,6 +337,7 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
       // Return celestial nodes that match the filters
       return celestialNodes.filter((n) => matchingNodeIds.has(n.id));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     nodes,
     filters,
@@ -584,6 +576,22 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
     );
   }
 
+  // Too-large state: guide the user to narrow the selection instead of
+  // laying out more nodes than the map can render responsively.
+  if (exceedsRenderCap) {
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        title={<h2>Too many services to display</h2>}
+        body={
+          <p>
+            {`This view has ${celestialNodes.length} services, above the ${APPLICATION_MAP_CONSTANTS.MAX_RENDERED_NODES} node display limit. Narrow the selection with filters, group by an attribute, or reduce the time range.`}
+          </p>
+        }
+      />
+    );
+  }
+
   return (
     <EuiPanel paddingSize="s" style={{ height: '100%', position: 'relative' }}>
       {/* CelestialMap - click/keyboard handlers for deselecting edges */}
@@ -738,15 +746,13 @@ function createGroupByNodes(
 }
 
 /**
- * Transform PPL nodes/edges to CelestialMap format
+ * Build CelestialMap nodes with metric values applied.
  */
-function transformToCelestialFormat(
+function buildCelestialNodes(
   nodes: ServiceMapNode[],
-  edges: ServiceMapEdge[],
-  metricsMap: Map<string, ServiceMapNodeMetrics>,
-  selectedEdgeId: string | null
-): { nodes: CelestialMapNode[]; edges: CelestialMapEdge[] } {
-  const celestialNodes: CelestialMapNode[] = nodes.map((node) => {
+  metricsMap: Map<string, ServiceMapNodeMetrics>
+): CelestialMapNode[] {
+  return nodes.map((node) => {
     const serviceName = node.KeyAttributes.Name;
     const environment = node.KeyAttributes.Environment;
     const nodeId = `${serviceName}::${environment}`;
@@ -785,8 +791,16 @@ function transformToCelestialFormat(
       },
     };
   });
+}
 
-  const celestialEdges: CelestialMapEdge[] = edges.map((edge) => {
+/**
+ * Build CelestialMap edges with selection styling applied.
+ */
+function buildCelestialEdges(
+  edges: ServiceMapEdge[],
+  selectedEdgeId: string | null
+): CelestialMapEdge[] {
+  return edges.map((edge) => {
     const isSelected = edge.EdgeId === selectedEdgeId;
 
     return {
@@ -804,8 +818,6 @@ function transformToCelestialFormat(
       style: isSelected ? { strokeWidth: 3, stroke: '#0077cc' } : undefined,
     };
   });
-
-  return { nodes: celestialNodes, edges: celestialEdges };
 }
 
 /**

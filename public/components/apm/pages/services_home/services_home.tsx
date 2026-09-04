@@ -31,7 +31,7 @@ import {
 import get from 'lodash/get';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { useServices } from '../../shared/hooks/use_services';
-import { useServicesRedMetrics } from '../../shared/hooks/use_services_red_metrics';
+import { useServicesRedMetrics, serviceNodeKey } from '../../shared/hooks/use_services_red_metrics';
 import { useApmConfig } from '../../config/apm_config_context';
 import { SloApiClient } from '../slos/slo_api_client';
 import {
@@ -91,6 +91,10 @@ interface ServicesTablePanelProps {
   displayedServices: ServiceTableItem[];
   columns: Array<EuiBasicTableColumn<ServiceTableItem>>;
   isTableLoading: boolean;
+  onTableChange: (change: {
+    page?: { index: number; size: number };
+    sort?: { field: string; direction: 'asc' | 'desc' };
+  }) => void;
   refreshTrigger: number;
   searchQuery: string;
   latencyPercentile: string;
@@ -130,6 +134,7 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
   displayedServices,
   columns,
   isTableLoading,
+  onTableChange,
   refreshTrigger,
   searchQuery,
   latencyPercentile,
@@ -243,6 +248,7 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
             },
           }}
           loading={isTableLoading}
+          onTableChange={onTableChange}
           data-test-subj="servicesTable"
         />
       )}
@@ -308,6 +314,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
   // Latency percentile selector state
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
+
+  // Visible-page tracking: sparklines are fetched only for the shown rows.
+  const [visibleServices, setVisibleServices] = useState<
+    Array<{ serviceName: string; environment?: string }>
+  >([]);
+  const [tablePageIndex, setTablePageIndex] = useState(0);
+  const [tablePageSize, setTablePageSize] = useState<number>(APM_CONSTANTS.DEFAULT_PAGE_SIZE);
+  const [tableSortField, setTableSortField] = useState<string>('serviceName');
+  const [tableSortDirection, setTableSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // Track whether user has explicitly interacted with range filters (prevents badge flicker on hydration)
   const latencyUserModified = useRef(false);
@@ -583,6 +598,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       serviceName: s.serviceName,
       environment: s.environment,
     })),
+    sparklineServices: visibleServices,
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     latencyPercentile,
@@ -593,6 +609,28 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     refetch();
     refetchMetrics();
   }, [refetch, refetchMetrics]);
+
+  // Capture the table's page + sort so we can fetch sparklines for just the
+  // visible rows. The table stays uncontrolled; we only mirror its state.
+  const handleTableChange = useCallback(
+    ({
+      page,
+      sort,
+    }: {
+      page?: { index: number; size: number };
+      sort?: { field: string; direction: 'asc' | 'desc' };
+    }) => {
+      if (page) {
+        setTablePageIndex(page.index);
+        setTablePageSize(page.size);
+      }
+      if (sort) {
+        setTableSortField(sort.field);
+        setTableSortDirection(sort.direction);
+      }
+    },
+    []
+  );
 
   // Combined loading state for table and filters
   const isTableLoading = isLoading || metricsLoading;
@@ -615,7 +653,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Iterate only over filtered services' metrics
     fullyFilteredItems.forEach((service) => {
-      const metrics = metricsMap.get(service.serviceName);
+      const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
       if (!metrics) return;
 
       // Get average latency value over the time period (already in ms from PromQL)
@@ -648,13 +686,19 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return { latencyMin, latencyMax, throughputMin, throughputMax };
   }, [metricsMap, fullyFilteredItems]);
 
-  // Sync selected ranges to metricRanges whenever they change
+  // Initialize slider ranges to the metric bounds once metrics have settled.
+  // Only updates sliders the user has not touched and never clears the
+  // user-modified flags, so an active filter survives refreshes and partial
+  // metric loads (which can transiently collapse metricRanges to one service).
   useEffect(() => {
-    setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
-    setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
-    latencyUserModified.current = false;
-    throughputUserModified.current = false;
-  }, [metricRanges]);
+    if (metricsLoading || metricsMap.size === 0) return;
+    if (!latencyUserModified.current) {
+      setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
+    }
+    if (!throughputUserModified.current) {
+      setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
+    }
+  }, [metricRanges, metricsLoading, metricsMap]);
 
   // Apply metric filters for display (on top of already filtered items)
   const displayedServices = useMemo(() => {
@@ -665,12 +709,13 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       return filtered;
     }
 
-    // Filter by latency range (only if range has been adjusted from full range)
-    const isLatencyFilterActive =
-      latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax;
+    // Active only when the user actually adjusted the slider. Deriving this from
+    // a live-vs-selected bounds comparison misfires during partial metric loads
+    // and collapses the table to a single service.
+    const isLatencyFilterActive = latencyUserModified.current;
     if (isLatencyFilterActive) {
       filtered = filtered.filter((service) => {
-        const metrics = metricsMap.get(service.serviceName);
+        const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
         if (!metrics) return false;
         // Use average latency for filtering
         const avgLatency = metrics.avgLatency || 0;
@@ -678,13 +723,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       });
     }
 
-    // Filter by throughput range (only if range has been adjusted from full range)
-    const isThroughputFilterActive =
-      throughputRange[0] > metricRanges.throughputMin ||
-      throughputRange[1] < metricRanges.throughputMax;
+    const isThroughputFilterActive = throughputUserModified.current;
     if (isThroughputFilterActive) {
       filtered = filtered.filter((service) => {
-        const metrics = metricsMap.get(service.serviceName);
+        const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
         if (!metrics) return false;
         // Filter by total throughput over the time period
         const avgThroughput = metrics.avgThroughput || 0;
@@ -695,7 +737,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     // Filter by failure rate threshold (OR logic - match ANY selected threshold)
     if (selectedFailureRateThresholds.length > 0) {
       filtered = filtered.filter((service) => {
-        const metrics = metricsMap.get(service.serviceName);
+        const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
         if (!metrics) return false;
         // Use average failure ratio for filtering
         const avgFailureRatio = metrics.avgFailureRatio || 0;
@@ -709,10 +751,56 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   }, [
     fullyFilteredItems,
     metricsMap,
-    metricRanges,
     latencyRange,
     throughputRange,
     selectedFailureRateThresholds,
+  ]);
+
+  // Mirror the table's current sort + page to derive the visible rows, so the
+  // metrics hook fetches sparklines only for those. Sorting uses the same
+  // instant metric values the columns sort by. The name guard prevents a
+  // refetch loop when only sparkline data (not order) changes.
+  useEffect(() => {
+    const getSortVal = (item: ServiceTableItem): string | number => {
+      const m = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
+      switch (tableSortField) {
+        case 'latency':
+          return m?.avgLatency ?? -1;
+        case 'throughput':
+          return m?.avgThroughput ?? -1;
+        case 'failureRatio':
+          return m?.avgFailureRatio ?? -1;
+        case 'environment':
+          return item.environment ?? '';
+        default:
+          return item.serviceName ?? '';
+      }
+    };
+    const sorted = [...displayedServices].sort((a, b) => {
+      const va = getSortVal(a);
+      const vb = getSortVal(b);
+      const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+      return tableSortDirection === 'desc' ? -cmp : cmp;
+    });
+    const start = tablePageIndex * tablePageSize;
+    const slice = sorted.slice(start, start + tablePageSize);
+    setVisibleServices((prev) => {
+      const sameKeys =
+        prev.length === slice.length &&
+        prev.every(
+          (p, i) => p.serviceName === slice[i].serviceName && p.environment === slice[i].environment
+        );
+      return sameKeys
+        ? prev
+        : slice.map((s) => ({ serviceName: s.serviceName, environment: s.environment }));
+    });
+  }, [
+    displayedServices,
+    metricsMap,
+    tableSortField,
+    tableSortDirection,
+    tablePageIndex,
+    tablePageSize,
   ]);
 
   // Build active filter badges from current filter state
@@ -939,11 +1027,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           return metrics?.avgLatency || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const latencyData = metrics?.latency || [];
           // Use average latency over the time period
           const avgLatency = metrics?.avgLatency || 0;
@@ -991,12 +1079,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           // Sort by average throughput over the time period
           return metrics?.avgThroughput || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const throughputData = metrics?.throughput || [];
           // Display average throughput over the time period
           const avgThroughput = metrics?.avgThroughput || 0;
@@ -1040,11 +1128,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           return metrics?.avgFailureRatio || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const failureData = metrics?.failureRatio || [];
           // Use average failure ratio over the time period
           const avgFailureRatio = metrics?.avgFailureRatio || 0;
@@ -1490,6 +1578,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           displayedServices={displayedServices}
                           columns={columns}
                           isTableLoading={isTableLoading}
+                          onTableChange={handleTableChange}
                           refreshTrigger={refreshTrigger}
                           searchQuery={searchQuery}
                           latencyPercentile={latencyPercentile}

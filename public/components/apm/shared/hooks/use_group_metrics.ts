@@ -15,6 +15,7 @@ import {
   getQueryGroupErrors,
   getQueryGroupLatencyPercentile,
 } from '../../query_services/query_requests/promql_queries';
+import { escapePromQLLabel } from '../../query_services/query_requests/escape_utils';
 
 export interface UseGroupMetricsParams {
   /** Group by attribute path (e.g., "telemetry.sdk.language") */
@@ -96,8 +97,10 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
       setError(null);
 
       try {
-        // Build label filter for the group attribute value
-        const labelFilter = `${prometheusLabel}="${params.groupByValue}",namespace="span_derived"`;
+        // Build label filter for the group attribute value (SERVER spans only)
+        const labelFilter = `${prometheusLabel}="${escapePromQLLabel(
+          params.groupByValue
+        )}",remoteService="",namespace="span_derived"`;
 
         // Define queries - using centralized query functions from promql_queries.ts
         const queries = {
