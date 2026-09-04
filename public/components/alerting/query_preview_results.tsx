@@ -68,6 +68,8 @@ interface PreviewState {
   requestedQuery: string;
   /** The effective expression the server plotted (comparison stripped). */
   plottedQuery: string;
+  /** How many series the expression matched (only the first is charted). */
+  seriesCount: number;
 }
 
 const EMPTY_STATE: PreviewState = {
@@ -76,6 +78,7 @@ const EMPTY_STATE: PreviewState = {
   points: [],
   requestedQuery: '',
   plottedQuery: '',
+  seriesCount: 0,
 };
 
 /**
@@ -138,7 +141,7 @@ export const QueryPreviewResults: React.FC<{
       : undefined;
     new AlertingPromResourcesService(datasourceId)
       .runQueryPreview(trimmed, previewRange)
-      .then(({ points, query: plotted }) => {
+      .then(({ points, query: plotted, seriesCount }) => {
         if (!stale) {
           setState({
             loading: false,
@@ -146,6 +149,7 @@ export const QueryPreviewResults: React.FC<{
             points: points || [],
             requestedQuery: trimmed,
             plottedQuery: plotted || trimmed,
+            seriesCount: seriesCount ?? (points && points.length ? 1 : 0),
           });
         }
       })
@@ -179,7 +183,7 @@ export const QueryPreviewResults: React.FC<{
             <strong>
               <FormattedMessage
                 id="observability.alerting.queryPreviewResults.resultsTitle"
-                defaultMessage="Results ({count})"
+                defaultMessage="Samples ({count})"
                 values={{ count: resultCount }}
               />
             </strong>
@@ -192,6 +196,17 @@ export const QueryPreviewResults: React.FC<{
       <EuiText size="xs" color="subdued">
         {state.plottedQuery || query}
       </EuiText>
+      {state.seriesCount > 1 && (
+        <EuiText size="xs" color="subdued">
+          <em>
+            {i18n.translate('observability.alerting.queryPreviewResults.multiSeriesNote', {
+              defaultMessage:
+                'Matched {count} series — charting the first. The alert evaluates every matching series.',
+              values: { count: state.seriesCount },
+            })}
+          </em>
+        </EuiText>
+      )}
       {comparisonStripped && (
         <EuiText size="xs" color="subdued">
           <em>

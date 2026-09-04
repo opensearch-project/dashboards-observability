@@ -145,6 +145,45 @@ describe('PrometheusFormSection — simplified layout', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('notes when the expression matched multiple series (only the first is charted)', async () => {
+    // Reconfigure the mocked resources service so the preview reports 3 matching
+    // series — the chart still plots one line, but the UI must say so.
+    const { AlertingPromResourcesService } = jest.requireMock(
+      '../query_services/alerting_prom_resources_service'
+    );
+    // Save the file-level default so overriding it here doesn't leak into
+    // later tests that rely on the original metric/label/group fixtures.
+    const original = AlertingPromResourcesService.getMockImplementation();
+    AlertingPromResourcesService.mockImplementation(() => ({
+      listMetricNames: jest.fn().mockResolvedValue({ metrics: ['up'] }),
+      listLabelNames: jest.fn().mockResolvedValue({ labels: [] }),
+      listLabelValues: jest.fn().mockResolvedValue({ values: [] }),
+      listRuleGroupNames: jest.fn().mockResolvedValue({ groups: [] }),
+      runQueryPreview: jest.fn().mockResolvedValue({
+        points: [{ timestamp: 1_700_000_000_000, value: 1 }],
+        query: 'up',
+        seriesCount: 3,
+      }),
+    }));
+
+    try {
+      render(
+        <PrometheusFormSection
+          form={baseForm}
+          onUpdate={jest.fn()}
+          validationErrors={{}}
+          hasSubmitted={false}
+          datasourceId="ds-1"
+        />
+      );
+      fireEvent.click(screen.getByTestId('prometheusRunPreviewButton'));
+
+      expect(await screen.findByText(/Matched 3 series/)).toBeInTheDocument();
+    } finally {
+      AlertingPromResourcesService.mockImplementation(original);
+    }
+  });
+
   it('renders the "Build query in metrics" link in the query panel header', () => {
     render(
       <PrometheusFormSection

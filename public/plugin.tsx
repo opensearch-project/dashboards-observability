@@ -797,7 +797,10 @@ export class ObservabilityPlugin implements Plugin<
                   const bounds = services?.data?.query?.timefilter?.timefilter?.getBounds?.();
                   const min = bounds?.min?.valueOf?.();
                   const max = bounds?.max?.valueOf?.();
-                  if (typeof min === 'number' && typeof max === 'number' && max > min) {
+                  // Require at least a 1s span so the floor-to-seconds below can't
+                  // collapse to start === end (which the preview route rejects as
+                  // 400). Sub-second Explore windows fall back to the last-hour default.
+                  if (typeof min === 'number' && typeof max === 'number' && max - min >= 1000) {
                     return { start: Math.floor(min / 1000), end: Math.floor(max / 1000) };
                   }
                 } catch {

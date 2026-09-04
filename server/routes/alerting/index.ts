@@ -935,8 +935,10 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     // POST /api/alerting/prometheus/{dsId}/preview — run an ad-hoc PromQL range
     // query so the "Create alert rule" flyout can show a real preview chart of
     // the current expression (replacing the former hardcoded sample series).
-    // Reuses the same `promBackend.queryRange` path the rule-detail condition
-    // preview uses (see alert_preview.ts:fetchPromPreviewData).
+    // Uses `promBackend.queryRangeMatrix` (throws on bad/unreachable queries
+    // rather than swallowing to [], and caps points per series), the same
+    // datasource read path the rule-detail condition preview uses
+    // (see alert_preview.ts:fetchPromPreviewData, which calls queryRange).
     router.post(
       {
         path: '/api/alerting/prometheus/{dsId}/preview',
@@ -1006,8 +1008,10 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           );
           const points = series[0]?.values ?? [];
           // Return the effective (stripped) query so the UI caption reflects
-          // exactly what was plotted rather than the full alert condition.
-          return { status: 200, body: { points, query: metricQuery } };
+          // exactly what was plotted rather than the full alert condition, plus
+          // the total number of matching series so the UI can be honest that a
+          // multi-series expression is only charting the first one.
+          return { status: 200, body: { points, query: metricQuery, seriesCount: series.length } };
         })
     );
   }
