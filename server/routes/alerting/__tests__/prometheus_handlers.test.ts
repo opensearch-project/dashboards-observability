@@ -154,23 +154,25 @@ describe('handleCreatePrometheusRule — shared group merge', () => {
     expect(ruler.upsertRuleGroup).not.toHaveBeenCalled();
   });
 
-  it('reads and writes the given namespace override (defaults to the user namespace otherwise)', async () => {
+  it('ignores a client-supplied namespace and always uses the user namespace', async () => {
     const ruler = makeRulerClient(null);
+    // A crafted `namespace` field (not part of the payload contract) must not
+    // let a caller target another namespace of the ruler — the create is pinned
+    // to USER_RULES_NAMESPACE for both the collision read and the write.
     const result = await handleCreatePrometheusRule(ruler as any, mockClient, mockDatasource, {
       ...basePayload,
       groupName: 'team-rules',
       namespace: 'custom-ns',
-    });
+    } as any);
 
-    expect(result.namespace).toBe('custom-ns');
-    // Both the collision read and the write target the overridden namespace.
+    expect(result.namespace).toBe(USER_RULES_NAMESPACE);
     expect(ruler.getRuleGroup).toHaveBeenCalledWith(
       mockClient,
       mockDatasource,
-      'custom-ns',
+      USER_RULES_NAMESPACE,
       'team-rules'
     );
-    expect(ruler.upsertRuleGroup.mock.calls[0][2]).toBe('custom-ns');
+    expect(ruler.upsertRuleGroup.mock.calls[0][2]).toBe(USER_RULES_NAMESPACE);
   });
 
   it('allows a create with a distinct name to merge into an existing group', async () => {
@@ -239,24 +241,33 @@ describe('handleDeletePrometheusRule — per-rule splice', () => {
     );
   });
 
-  it('deletes from the given namespace override', async () => {
-    const ruler = makeRulerClient(null);
+  it('pins deletes to the user namespace (no client-controllable namespace)', async () => {
+    // The splice path (ruleName leaves siblings) must also target only
+    // USER_RULES_NAMESPACE — this route can never touch another namespace.
+    const ruler = makeRulerClient({
+      groupName: 'team-rules',
+      interval: 60,
+      rules: [
+        { type: 'alerting', name: 'RuleA', expr: 'up == 0', for: '1m' } as any,
+        { type: 'alerting', name: 'RuleB', expr: 'up == 1', for: '1m' } as any,
+      ],
+    });
     await handleDeletePrometheusRule(
       ruler as any,
       mockClient,
       mockDatasource,
       'team-rules',
       undefined,
-      undefined,
-      'custom-ns'
+      'RuleA'
     );
 
-    expect(ruler.deleteRuleGroup).toHaveBeenCalledWith(
+    expect(ruler.getRuleGroup).toHaveBeenCalledWith(
       mockClient,
       mockDatasource,
-      'custom-ns',
+      USER_RULES_NAMESPACE,
       'team-rules'
     );
+    expect(ruler.upsertRuleGroup.mock.calls[0][2]).toBe(USER_RULES_NAMESPACE);
   });
 
   it('deletes the whole group when no ruleName is provided', async () => {

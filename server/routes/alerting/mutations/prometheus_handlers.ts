@@ -35,14 +35,6 @@ export interface PrometheusRulePayload {
   /** Optional group name override. Defaults to the rule name. */
   groupName?: string;
   /**
-   * Optional Cortex namespace override. Defaults to `USER_RULES_NAMESPACE`.
-   * Rules are identified by the full (namespace, group, name) tuple; the
-   * flyout currently pins this to the one user namespace, but threading it
-   * explicitly keeps the create/delete guard correct if a future surface
-   * writes to a different namespace.
-   */
-  namespace?: string;
-  /**
    * When false (default), a create that collides with an existing same-named
    * rule in the target group is rejected (409) rather than silently replacing
    * it. Edit flows that intend to replace pass `true`.
@@ -107,10 +99,12 @@ export async function handleCreatePrometheusRule(
   logger?: Logger
 ): Promise<{ success: boolean; groupName: string; namespace: string }> {
   const group = buildRuleGroup(payload);
-  // Rules are identified by the full (namespace, group, name) tuple. Default
-  // to the single user namespace, but honor an explicit override so the guard
-  // below compares within the right namespace.
-  const namespace = payload.namespace ?? USER_RULES_NAMESPACE;
+  // Rules created through this route always live in the single user namespace.
+  // The namespace is intentionally NOT client-controllable: exposing it would
+  // let any caller of this route read/merge/overwrite rule groups in other
+  // namespaces of the same ruler (e.g. SLO or recording-rule groups). Pinning
+  // it here keeps this route scoped to user-authored alerting rules.
+  const namespace = USER_RULES_NAMESPACE;
 
   // Rule groups are shared: multiple rules may live in the same group, and
   // the ruler's POST is create-or-replace on (namespace, groupName). Merge with
@@ -158,12 +152,12 @@ export async function handleDeletePrometheusRule(
   datasource: Datasource,
   groupName: string,
   logger?: Logger,
-  ruleName?: string,
-  namespaceOverride?: string
+  ruleName?: string
 ): Promise<{ success: boolean }> {
-  // Identity is (namespace, group, name); default to the single user
-  // namespace but honor an explicit override for symmetry with create.
-  const namespace = namespaceOverride ?? USER_RULES_NAMESPACE;
+  // Deletes are pinned to the single user namespace — not client-controllable,
+  // so this route can never delete rule groups in other namespaces of the same
+  // ruler (e.g. SLO groups). Mirrors the create handler.
+  const namespace = USER_RULES_NAMESPACE;
   // When a ruleName is provided, splice just that rule out of the group so
   // sibling rules in a shared group are preserved. The whole group is only
   // deleted when it would become empty (or no ruleName was given).

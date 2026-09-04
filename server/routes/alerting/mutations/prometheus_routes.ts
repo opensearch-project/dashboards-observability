@@ -56,10 +56,10 @@ const prometheusRuleBodySchema = schema.object({
   }),
   enabled: schema.boolean({ defaultValue: true }),
   groupName: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
-  // Optional Cortex namespace. Defaults server-side to the single user
-  // namespace; accepted here so a future surface can target another namespace
-  // without a schema change (identity is the full namespace/group/name tuple).
-  namespace: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+  // Note: the Cortex namespace is intentionally NOT a client input — it is
+  // pinned server-side to the single user namespace (see prometheus_handlers).
+  // Accepting it here would let a caller target arbitrary namespaces of the
+  // same ruler (e.g. SLO/recording-rule groups).
   // When false (the default), creating a rule whose name already exists in the
   // target group is rejected with 409 instead of silently replacing it. Edit
   // flows that intend to replace an existing rule pass `overwrite: true`.
@@ -121,7 +121,8 @@ export function registerPrometheusRuleRoutes(
         }),
         query: schema.object({
           ruleName: schema.maybe(schema.string({ minLength: 1 })),
-          namespace: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+          // No `namespace` input — deletes are pinned server-side to the user
+          // namespace so this route can't remove other namespaces' rule groups.
         }),
       },
     },
@@ -134,8 +135,7 @@ export function registerPrometheusRuleRoutes(
           datasource,
           req.params.groupName,
           logger,
-          req.query.ruleName,
-          req.query.namespace
+          req.query.ruleName
         );
         return res.ok({ body: result });
       } catch (e: unknown) {
