@@ -932,7 +932,9 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
             options={LATENCY_OPTIONS}
             valueOfSelected={latencyPercentile}
             onChange={(value) => {
+              // Reset the range: the bounds effect will not fire if the bounds round the same.
               setLatencyUserModified(false);
+              setLatencyRange([latencyBounds.min, latencyBounds.max]);
               setLatencyPercentile(value as 'p99' | 'p90' | 'p50');
             }}
             compressed
