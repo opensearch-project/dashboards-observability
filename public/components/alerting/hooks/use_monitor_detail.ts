@@ -26,6 +26,14 @@ export interface UseMonitorDetailParams {
   dsId: string;
   ruleId: string;
   definitionType?: UnifiedDefinitionType;
+  /**
+   * Skip the fetch entirely when false — used for optimistic pending rows whose
+   * synthetic `new-` id the backend doesn't know yet, so `getRuleDetail` would
+   * be a guaranteed 404. Defaults to true (fetch). When false the hook stays in
+   * a resolved, empty state (no loading, no error) and the flyout renders
+   * against its summary props.
+   */
+  enabled?: boolean;
 }
 
 export interface UseMonitorDetailResult {
@@ -38,6 +46,7 @@ export function useMonitorDetail({
   dsId,
   ruleId,
   definitionType,
+  enabled = true,
 }: UseMonitorDetailParams): UseMonitorDetailResult {
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const [detail, setDetail] = useState<UnifiedRule | null>(null);
@@ -46,6 +55,15 @@ export function useMonitorDetail({
 
   useEffect(() => {
     let cancelled = false;
+    // Disabled (e.g. an optimistic pending row): nothing to fetch — drop into a
+    // resolved, empty state so the flyout renders its summary props instead of a
+    // permanent spinner or a doomed 404 request.
+    if (!enabled) {
+      setDetail(null);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
     // Reset detail alongside error so a switch from rule A to rule B
     // doesn't render A's history/preview behind the loading indicator
     // until B's fetch resolves.
@@ -69,7 +87,7 @@ export function useMonitorDetail({
     return () => {
       cancelled = true;
     };
-  }, [dsId, ruleId, definitionType, osService]);
+  }, [dsId, ruleId, definitionType, osService, enabled]);
 
   return { detail, isLoading, error };
 }

@@ -23,6 +23,7 @@ import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alertin
 import { useFacetCollapse } from '../facet_filter_panel';
 import { isStandardOpenSearchDatasource } from '../shared_constants';
 import { buildTableColumns, DEFAULT_VISIBLE } from './monitors_table_columns';
+import { isPending } from './pending_rules';
 import {
   buildSuggestions,
   collectLabelKeys,
@@ -229,7 +230,13 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     () => rules.filter((r) => matchesSearch(r, searchQuery) && matchesFilters(r, filters)),
     [rules, searchQuery, filters]
   );
-  const selectableIds = useMemo(() => new Set(rules.map((r) => r.id)), [rules]);
+  // Pending (optimistic, unconfirmed) rows carry a synthetic id the backend
+  // doesn't know yet, so they must not be checkbox-selectable — a bulk delete
+  // against a `new-` id would 404.
+  const selectableIds = useMemo(
+    () => new Set(rules.filter((r) => !isPending(r)).map((r) => r.id)),
+    [rules]
+  );
   useEffect(() => {
     setSelectedIds((prev) => {
       const next = new Set(Array.from(prev).filter((id) => selectableIds.has(id)));
@@ -268,7 +275,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     setSelectedIds(next);
   };
   const toggleSelectAll = () => {
-    const selectableFiltered = filtered;
+    const selectableFiltered = filtered.filter((r) => selectableIds.has(r.id));
     const allSelected =
       selectableFiltered.length > 0 && selectableFiltered.every((r) => selectedIds.has(r.id));
     const next = new Set(selectedIds);
