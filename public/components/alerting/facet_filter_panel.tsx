@@ -244,7 +244,15 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
          * link is a SIBLING outside it (never a link nested inside a button),
          * which is why Clear no longer needs a stopPropagation workaround.
          */}
-        <EuiFlexItem grow={true}>
+        {/*
+         * `minWidth: 0` lets this item shrink below the title's intrinsic
+         * width — without it, the badge + "Clear" link (siblings below,
+         * fixed-width) push the header row wider than the ~182px facet
+         * column instead of the title truncating. See the `textProps`
+         * comment below for why this is inline style rather than a class in
+         * alerting.scss.
+         */}
+        <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
           <EuiButtonEmpty
             size="xs"
             color="text"
@@ -254,8 +262,31 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
             // center`, which centers the arrow + title instead of leaving them
             // flush-left. Pin the content to the start so the header aligns
             // with the plain-text groups (e.g. "Labels") at every panel width.
-            // `flush="left"` only strips padding, not alignment.
-            contentProps={{ style: { justifyContent: 'flex-start', width: '100%' } }}
+            // `flush="left"` only strips padding, not alignment. `minWidth: 0`
+            // continues the shrink cascade from the EuiFlexItem above.
+            contentProps={{
+              style: { justifyContent: 'flex-start', width: '100%', minWidth: 0 },
+            }}
+            // The title text (plus the optional option-count suffix) has no
+            // truncation of its own, so a long facet label — or even a short
+            // one once the badge + "Clear" link are showing — overflows this
+            // narrow column instead of shrinking. `textProps` targets EUI's
+            // internal `.euiButtonEmpty__text` span directly (there's no
+            // approved-file entry for `.eui*` selectors in alerting.scss, so
+            // this has to be inline style rather than CSS); `flex`/`minWidth`
+            // let it shrink inside the content span above, and the rest is a
+            // plain single-line ellipsis truncation.
+            textProps={{
+              style: {
+                display: 'block',
+                flex: 1,
+                minWidth: 0,
+                maxWidth: '100%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              },
+            }}
             iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
             iconSide="left"
             onClick={() => onToggleCollapse(id)}

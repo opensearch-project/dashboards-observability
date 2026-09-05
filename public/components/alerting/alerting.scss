@@ -37,7 +37,13 @@
 }
 
 .altResizableContainer {
-  min-height: calc(100vh - 140px);
+  /* Cap (not floor) the table region to the viewport so the inner
+   * `.monitors-table-wrapper` scrolls internally instead of the whole page
+   * growing past the viewport (double-scroll regression from #2686, which used
+   * `min-height` here). `min-height: 0` lets the flex children shrink so the
+   * inner overflow engages. */
+  height: calc(100vh - 140px);
+  min-height: 0;
 }
 
 .altFiltersPanel {
@@ -50,6 +56,20 @@
   overflow-y: auto;
 }
 
+/*
+ * FacetFilterGroup's header title (the toggle button's `flush="left"`
+ * EuiButtonEmpty) had no truncation of its own. In this ~182px-wide column,
+ * a long facet label — or even a short one once the active-count badge +
+ * "Clear" link are showing alongside it — didn't fit, and the non-wrapping
+ * header row overflowed the panel instead of the title shrinking. Fixed via
+ * `contentProps`/`textProps`/EuiFlexItem `style` inline styles in
+ * facet_filter_panel.tsx rather than here — the `min-width: 0` + ellipsis
+ * cascade needs to reach through several EUI-internal elements (the flex
+ * item, the button, its content span, its text span) that this file isn't
+ * allowed to select (`no_modifying_global_selectors` — alerting.scss has no
+ * approved-file entry for `.eui*`).
+ */
+
 .altFiltersBody {
   margin-top: 8px;
 }
@@ -61,15 +81,31 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+
+  /* Allow the column to shrink so its flex:1 table child can bound its own
+   * scroll region rather than expanding to content height. */
+  min-height: 0;
 }
 
 .altTablePanel {
   flex: 1;
+  min-height: 0;
+
+  /* Column so the title/search/count stay fixed and the table fills the rest
+   * and scrolls internally — one scroll region, page doesn't overflow.
+   * (Alerts-tab only; the Rules tab uses .altContentPanel + its own wrapper.) */
+  display: flex;
+  flex-direction: column;
 }
 
 .altAlertsTable {
   min-width: 0;
   overflow-x: auto;
+  overflow-y: auto;
+
+  /* Fill the remaining panel height so the table body — not the page — scrolls. */
+  flex: 1;
+  min-height: 0;
 
   .euiTable {
     table-layout: fixed;
@@ -80,6 +116,23 @@
     min-width: 0;
     overflow: hidden;
   }
+
+  /*
+   * EuiBasicTable's own footer (rows-per-page + pagination) renders an
+   * EuiFlexGroup with `gutterSize="l"`. EUI implements that gutter via
+   * `padding: 12px` on each flex item counteracted by `margin: -12px` on the
+   * group itself — a trick that assumes the surrounding panel already has
+   * >=12px of padding to absorb the negative margin. This scroll wrapper has
+   * none, so the -12px bleeds 12px past the right edge and manufactures a
+   * permanent phantom horizontal scrollbar even when the table content
+   * itself fits (`scrollWidth` includes the bled-out footer even though
+   * nothing is visibly clipped). Reserving that same 12px back as padding
+   * absorbs the bleed inside the box instead of past its edge, without
+   * touching any EUI-internal selector. `overflow-x: auto` above still
+   * engages a real scrollbar once the table's own min-width genuinely
+   * doesn't fit.
+   */
+  padding-right: 12px;
 }
 
 .altAlertCell {
@@ -258,6 +311,12 @@
       border-right: none;
     }
   }
+
+  /* Same EuiBasicTable footer negative-margin bleed as `.altAlertsTable`'s
+   * `padding-right` — see that rule's comment for the full explanation.
+   * Absorbing it here too so the Rules table doesn't grow a phantom ~12px
+   * horizontal scrollbar. */
+  padding-right: 12px;
 }
 
 // PPL preview panel — column-share layout that prevents trace ids and
