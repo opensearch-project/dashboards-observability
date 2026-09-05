@@ -43,13 +43,14 @@ import {
   EuiToolTip,
   EuiPopover,
   EuiIcon,
-  EuiBetaBadge,
+  EuiFormLabel,
   EuiConfirmModal,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { coreRefs } from '../../framework/core_refs';
 import { classifiedToastColor, classifiedToastText, extractClassifiedError } from '../common/error';
-import { PromQueryBuilder, parseBuilderQuery } from './create_monitor/prom_query_builder';
+import { PromQueryBuilder, parseExpr } from './create_monitor/prom_query_builder';
+import { isAlwaysFiring } from './create_monitor/prom_condition';
 import { RuleGroupSelector } from './create_monitor/rule_group_selector';
 import { QueryPreviewResults } from './query_preview_results';
 // Shared label editor + entry types keep both flyouts' Labels sections in sync
@@ -379,8 +380,18 @@ const QuerySection = React.memo<{
     // A non-empty expression the builder cannot represent (e.g. a copied
     // `rate(...) > 0.5`). Switching to the builder and picking a metric would
     // replace it — warn instead of silently clobbering (audit finding #7).
-    const builderWouldOverwrite =
-      form.query.trim() !== '' && parseBuilderQuery(form.query) === null;
+    const parsedCondition = parseExpr(form.query);
+    const builderWouldOverwrite = form.query.trim() !== '' && parsedCondition === null;
+    // Feed the parsed threshold to the preview so it draws the threshold line +
+    // "would fire now" badge. Undefined for condition-less or unparseable exprs.
+    const previewCondition =
+      parsedCondition && parsedCondition.conditionOp !== 'none'
+        ? {
+            op: parsedCondition.conditionOp,
+            thresholdA: parsedCondition.thresholdA,
+            thresholdB: parsedCondition.thresholdB,
+          }
+        : undefined;
 
     // With an explicit datasource list (Alert Manager) the picker offers all
     // Prometheus datasources; otherwise it is pinned to the Explore page's
@@ -472,14 +483,18 @@ const QuerySection = React.memo<{
         <EuiPanel paddingSize="s" hasBorder style={{ borderRadius: 4 }}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
             <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label="PromQL"
-                tooltipContent={i18n.translate(
+              {/* Neutral language tag — a BetaBadge would wrongly imply the
+                feature is experimental; this just labels the query language. */}
+              <EuiToolTip
+                content={i18n.translate(
                   'observability.alerting.createMetricsMonitor.promqlTooltip',
-                  { defaultMessage: 'Prometheus Query Language' }
+                  {
+                    defaultMessage: 'Prometheus Query Language',
+                  }
                 )}
-                size="s"
-              />
+              >
+                <EuiBadge color="hollow">PromQL</EuiBadge>
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
@@ -532,6 +547,16 @@ const QuerySection = React.memo<{
               </EuiPopover>
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+              <EuiFormLabel>
+                {i18n.translate(
+                  'observability.alerting.createMetricsMonitor.queryModeEditorLabel',
+                  {
+                    defaultMessage: 'Editor',
+                  }
+                )}
+              </EuiFormLabel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               {/* Builder ⇄ Code toggle. Only one editor shows at a time, so a
                 copied PromQL expression (Code) is never silently overwritten by
                 the builder's output — the two no longer share a visible field. */}
@@ -578,7 +603,7 @@ const QuerySection = React.memo<{
                 'observability.alerting.createMetricsMonitor.expressionHelpText',
                 {
                   defaultMessage:
-                    'The complete alert condition — it fires for every series the expression returns. A bare series (e.g. "up") is always-firing; add a comparison/threshold (e.g. "> 0.5") for a conditional alert. Switch to Builder to construct a simple metric/label query.',
+                    'The complete PromQL alert condition — it fires for every series the expression returns.',
                 }
               )}
               fullWidth
@@ -593,6 +618,9 @@ const QuerySection = React.memo<{
                 rows={2}
                 fullWidth
                 compressed
+                // Monospace so brackets/labels align and it reads as a query,
+                // not a comment box (EUI code font token, no custom font).
+                style={{ fontFamily: 'var(--euiCodeFontFamily)' }}
                 aria-label={i18n.translate(
                   'observability.alerting.createMetricsMonitor.expressionAriaLabel',
                   { defaultMessage: 'PromQL expression' }
@@ -625,6 +653,29 @@ const QuerySection = React.memo<{
                 datasourceId={form.datasourceId}
                 query={form.query}
                 onQueryChange={(q) => onUpdate({ query: q })}
+              />
+            </>
+          )}
+
+          {/* Always-firing guard (both modes): a valid expression with no
+            comparison returns samples whenever the series exists, so the alert
+            fires continuously. Non-blocking — a condition-less rule is legal
+            PromQL — but surfaced so it isn't created by accident. */}
+          {isAlwaysFiring(form.query) && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut
+                size="s"
+                color="warning"
+                iconType="alert"
+                title={i18n.translate(
+                  'observability.alerting.createMetricsMonitor.alwaysFiringWarning',
+                  {
+                    defaultMessage:
+                      'This expression has no condition, so the alert fires whenever the series exists. Add a comparison (e.g. “> 0.5”) — or a Condition in the builder — for a conditional alert.',
+                  }
+                )}
+                data-test-subj="metricsMonitorAlwaysFiringWarning"
               />
             </>
           )}
@@ -671,6 +722,7 @@ const QuerySection = React.memo<{
               datasourceId={form.datasourceId}
               timeRange={previewTimeRange}
               runToken={previewToken}
+              condition={previewCondition}
             />
           </>
         )}
@@ -949,11 +1001,14 @@ export const CreateMetricsMonitor: React.FC<CreateMetricsMonitorProps> = ({
     labels: [{ key: 'severity', value: 'warning', isDynamic: false }],
     annotations: [],
   });
-  // Default to Code mode when a query was copied in (so it shows as-is and the
-  // builder can't overwrite it); an empty flyout starts in Builder mode.
-  const [queryMode, setQueryMode] = useState<QueryMode>(() =>
-    (initialQuery ?? '').trim() ? 'code' : 'builder'
-  );
+  // Default to Builder (point-and-click) — the primary experience on both the
+  // Explore Metrics "Create alert rule" flow and the Alerts page Rules tab.
+  // Exception: a query copied in that the builder can't represent opens in Code
+  // so it's shown as-is and never clobbered. Users can toggle either way.
+  const [queryMode, setQueryMode] = useState<QueryMode>(() => {
+    const seeded = (initialQuery ?? '').trim();
+    return seeded && parseExpr(seeded) === null ? 'code' : 'builder';
+  });
   const [showPreview, setShowPreview] = useState(false);
   // Bumped on each "Run preview" click so QueryPreviewResults re-runs the
   // range query even when the panel is already open.
