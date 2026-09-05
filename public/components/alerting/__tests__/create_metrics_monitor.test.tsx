@@ -24,21 +24,22 @@ jest.mock('../promql_editor', () => ({
 jest.mock('../metric_browser', () => ({
   MetricBrowser: () => <div data-test-subj="metricBrowserMock" />,
 }));
-// Stub the shared builder with a button that emits a query, so tests can
-// simulate an explicit builder selection (the form seeds query: '' and the
-// Create button stays disabled until the builder produces one)
-jest.mock('../create_monitor/prom_query_builder', () => ({
-  PromQueryBuilder: ({ onQueryChange }: { onQueryChange: (q: string) => void }) => (
-    <button data-test-subj="mockBuilderSetQuery" onClick={() => onQueryChange('up{job="api"}')} />
-  ),
-  // Lightweight stand-in: builder-representable = a bare metric or metric{...};
-  // anything else (rates, comparisons) returns null. Used by the Query section
-  // to decide the "builder will overwrite your expression" warning.
-  parseBuilderQuery: (q: string) => {
-    const m = (q || '').trim().match(/^([a-zA-Z_:][a-zA-Z0-9_:]*)(\{[^}]*\})?$/);
-    return m ? { metric: m[1] } : null;
-  },
-}));
+// Stub the shared builder *component* with a button that emits a query, but keep
+// the REAL parse/compose core (from prom_condition) so representability decisions
+// in these tests match what the component actually does. Using a hand-rolled
+// stand-in `parseExpr` here previously diverged from the real one (it only
+// recognised bare selectors), which made "non-representable" fixtures pass for
+// the wrong reason. `up{job="api"}` (a bare selector) is builder-representable.
+jest.mock('../create_monitor/prom_query_builder', () => {
+  const realCore = jest.requireActual('../create_monitor/prom_condition');
+  return {
+    PromQueryBuilder: ({ onQueryChange }: { onQueryChange: (q: string) => void }) => (
+      <button data-test-subj="mockBuilderSetQuery" onClick={() => onQueryChange('up{job="api"}')} />
+    ),
+    parseExpr: realCore.parseExpr,
+    buildExpr: realCore.buildExpr,
+  };
+});
 
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
@@ -152,22 +153,22 @@ describe('CreateMetricsMonitor', () => {
   });
 
   it('seeds the query from initialQuery copied off the Explore Metrics page', () => {
+    // A copied expression the builder cannot represent (histogram_quantile) opens
+    // in Code mode, pre-filled, visible/editable — never hidden-yet-submittable.
     render(
       <CreateMetricsMonitor
         onCancel={jest.fn()}
         onSave={jest.fn()}
         datasourceId="prom-1"
-        initialQuery="rate(http_requests_total[5m])"
+        initialQuery="histogram_quantile(0.9, rate(http_requests_total[5m]))"
       />
     );
 
-    // The pre-filled expression is visible/editable (not hidden), so a complex
-    // expression the builder can't represent is never hidden-yet-submittable.
     const expr = document.querySelector(
       '[data-test-subj="metricsMonitorPromQlExpression"]'
     ) as HTMLTextAreaElement;
     expect(expr).not.toBeNull();
-    expect(expr.value).toBe('rate(http_requests_total[5m])');
+    expect(expr.value).toBe('histogram_quantile(0.9, rate(http_requests_total[5m]))');
 
     // With the query seeded, Create enables as soon as a name is entered — no
     // separate builder selection required.
@@ -179,14 +180,15 @@ describe('CreateMetricsMonitor', () => {
     expect(createBtn.disabled).toBe(false);
   });
 
-  it('defaults to Code mode when a query is copied in, Builder mode when empty', () => {
-    // Copied query -> Code mode: raw expression shown, builder hidden.
+  it('defaults to Builder mode, but Code mode for a copied query the builder cannot represent', () => {
+    // Copied query the real parser can't represent (histogram_quantile) -> Code
+    // mode so it shows as-is and is never clobbered.
     const { unmount } = render(
       <CreateMetricsMonitor
         onCancel={jest.fn()}
         onSave={jest.fn()}
         datasourceId="prom-1"
-        initialQuery="rate(http_requests_total[5m]) > 0.5"
+        initialQuery="histogram_quantile(0.9, rate(http_requests_total[5m]))"
       />
     );
     expect(
@@ -195,7 +197,20 @@ describe('CreateMetricsMonitor', () => {
     expect(document.querySelector('[data-test-subj="mockBuilderSetQuery"]')).toBeNull();
     unmount();
 
-    // Empty flyout -> Builder mode: builder shown, raw expression hidden.
+    // A copied query the builder CAN represent (rate + comparison) opens in
+    // Builder mode — the real parseExpr recognises it, so it isn't stuck in Code.
+    const rep = render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        initialQuery="rate(http_requests_total[5m]) > 0.5"
+      />
+    );
+    expect(document.querySelector('[data-test-subj="mockBuilderSetQuery"]')).not.toBeNull();
+    rep.unmount();
+
+    // Empty flyout opens in Builder mode (the default point-and-click experience).
     render(<CreateMetricsMonitor onCancel={jest.fn()} onSave={jest.fn()} datasourceId="prom-1" />);
     expect(document.querySelector('[data-test-subj="mockBuilderSetQuery"]')).not.toBeNull();
     expect(document.querySelector('[data-test-subj="metricsMonitorPromQlExpression"]')).toBeNull();
@@ -207,7 +222,7 @@ describe('CreateMetricsMonitor', () => {
         onCancel={jest.fn()}
         onSave={jest.fn()}
         datasourceId="prom-1"
-        initialQuery="rate(http_requests_total[5m]) > 0.5"
+        initialQuery="histogram_quantile(0.9, rate(http_requests_total[5m]))"
       />
     );
     // Starts in Code mode — no overwrite warning yet.
@@ -354,9 +369,11 @@ describe('CreateMetricsMonitor', () => {
     );
 
     // Fill in required fields: monitorName + an explicit builder selection
-    // (the form seeds query: '' — no invisible default expression)
+    // (the form seeds query: '' — no invisible default expression). The flyout
+    // opens in Code mode now, so switch to Builder to reach the mock builder.
     const nameInput = document.querySelector('input[aria-label="Rule name"]') as HTMLInputElement;
     fireEvent.change(nameInput, { target: { value: 'my-test-rule' } });
+    fireEvent.click(screen.getByText('Builder'));
     fireEvent.click(document.querySelector('[data-test-subj="mockBuilderSetQuery"]')!);
 
     // Click Create button

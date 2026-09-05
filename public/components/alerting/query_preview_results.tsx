@@ -19,6 +19,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
+  EuiBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -30,14 +31,58 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { EchartsRender } from './echarts_render';
 import { AlertingPromResourcesService } from './query_services/alerting_prom_resources_service';
+import { ConditionOp } from './create_monitor/prom_condition';
 
 interface PreviewPoint {
   timestamp: number;
   value: number;
 }
 
+/** The alert condition parsed from the query, used to overlay the threshold. */
+export interface PreviewCondition {
+  op: ConditionOp;
+  thresholdA?: number;
+  thresholdB?: number;
+}
+
+/** The threshold value(s) to draw as horizontal marker line(s). */
+function thresholdValues(condition?: PreviewCondition): number[] {
+  if (!condition || condition.op === 'none') return [];
+  const a = condition.thresholdA;
+  if (condition.op === 'outside' || condition.op === 'within') {
+    return [a, condition.thresholdB].filter((v): v is number => Number.isFinite(v as number));
+  }
+  return Number.isFinite(a as number) ? [a as number] : [];
+}
+
+/** Would the alert fire, given the most recent sample value? */
+function conditionMet(value: number, condition: PreviewCondition): boolean {
+  const a = condition.thresholdA ?? 0;
+  const b = condition.thresholdB ?? 0;
+  switch (condition.op) {
+    case 'gt':
+      return value > a;
+    case 'gte':
+      return value >= a;
+    case 'lt':
+      return value < a;
+    case 'lte':
+      return value <= a;
+    case 'eq':
+      return value === a;
+    case 'neq':
+      return value !== a;
+    case 'outside':
+      return value < a || value > b;
+    case 'within':
+      return value >= a && value <= b;
+    default:
+      return false;
+  }
+}
+
 /** Build the echarts line-chart spec from live range-query points. */
-function buildChartOption(points: PreviewPoint[]): Record<string, unknown> {
+function buildChartOption(points: PreviewPoint[], thresholds: number[]): Record<string, unknown> {
   const timeLabels = points.map((p) =>
     new Date(p.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   );
@@ -55,6 +100,24 @@ function buildChartOption(points: PreviewPoint[]): Record<string, unknown> {
         showSymbol: false,
         itemStyle: { color: '#006BB4' },
         areaStyle: { color: 'rgba(0,107,180,0.1)' },
+        // Dashed red threshold line(s) so the user sees where the condition
+        // trips relative to the plotted metric.
+        ...(thresholds.length > 0
+          ? {
+              markLine: {
+                silent: true,
+                symbol: 'none',
+                data: thresholds.map((v) => ({ yAxis: v })),
+                lineStyle: { color: '#BD271E', type: 'dashed' },
+                label: {
+                  formatter: i18n.translate(
+                    'observability.alerting.queryPreviewResults.thresholdLineLabel',
+                    { defaultMessage: 'threshold' }
+                  ),
+                },
+              },
+            }
+          : {}),
       },
     ],
   };
@@ -118,9 +181,15 @@ export const QueryPreviewResults: React.FC<{
   timeRange?: PreviewTimeRange;
   /** Bumped on each "Run preview" click to re-run the query. */
   runToken?: number;
+  /**
+   * Parsed alert condition (from the current query). When present, its
+   * threshold(s) are drawn on the chart and the latest sample is evaluated
+   * into a "would fire now" badge.
+   */
+  condition?: PreviewCondition;
   /** Unique accordion id — pass a distinct one per mount point. */
   id?: string;
-}> = ({ query, datasourceId, timeRange, runToken, id = 'prom-preview-results' }) => {
+}> = ({ query, datasourceId, timeRange, runToken, condition, id = 'prom-preview-results' }) => {
   const [state, setState] = useState<PreviewState>(EMPTY_STATE);
 
   // Snapshot the live query in a ref so editing it does NOT re-fire the range
@@ -183,6 +252,15 @@ export const QueryPreviewResults: React.FC<{
   // caption isn't mistaken for a threshold-applied series.
   const comparisonStripped = !!state.plottedQuery && state.plottedQuery !== state.requestedQuery;
 
+  const thresholds = thresholdValues(condition);
+  // Evaluate the most recent plotted sample against the condition for the
+  // "would fire now" badge. Only meaningful once we have data and a condition.
+  const latestValue = resultCount > 0 ? state.points[resultCount - 1].value : undefined;
+  const wouldFire =
+    condition && condition.op !== 'none' && latestValue !== undefined
+      ? conditionMet(latestValue, condition)
+      : undefined;
+
   return (
     <EuiAccordion
       id={id}
@@ -197,6 +275,22 @@ export const QueryPreviewResults: React.FC<{
               />
             </strong>
           </EuiFlexItem>
+          {wouldFire !== undefined && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge
+                color={wouldFire ? 'danger' : 'hollow'}
+                data-test-subj="previewWouldFireBadge"
+              >
+                {wouldFire
+                  ? i18n.translate('observability.alerting.queryPreviewResults.wouldFire', {
+                      defaultMessage: 'Would fire now',
+                    })
+                  : i18n.translate('observability.alerting.queryPreviewResults.wouldNotFire', {
+                      defaultMessage: 'Would not fire',
+                    })}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       }
       initialIsOpen
@@ -291,7 +385,7 @@ export const QueryPreviewResults: React.FC<{
           </EuiText>
         </EuiCallOut>
       ) : (
-        <EchartsRender spec={buildChartOption(state.points)} height={200} />
+        <EchartsRender spec={buildChartOption(state.points, thresholds)} height={200} />
       )}
     </EuiAccordion>
   );
