@@ -21,7 +21,22 @@ jest.mock('../../../shared/hooks/use_debounced_value', () => ({
   useDebouncedValue: (value: unknown) => value,
 }));
 jest.mock('../../../shared/components/dependency_filter_sidebar', () => ({
-  DependencyFilterSidebar: () => <div data-test-subj="dependencyFilterSidebar" />,
+  // Expose the latency slider callback so tests can activate the range filter. Narrowing to
+  // [latencyMax, latencyMax] leaves only the single highest-latency row.
+  DependencyFilterSidebar: (props: {
+    latencyRange: [number, number];
+    latencyMax: number;
+    onLatencyRangeChange: (range: [number, number]) => void;
+  }) => (
+    <div data-test-subj="dependencyFilterSidebar">
+      <span data-test-subj="mockLatencyRange">{JSON.stringify(props.latencyRange)}</span>
+      <button
+        type="button"
+        data-test-subj="mockNarrowLatencyRange"
+        onClick={() => props.onLatencyRangeChange([props.latencyMax, props.latencyMax])}
+      />
+    </div>
+  ),
 }));
 jest.mock('../../../shared/components/promql_line_chart', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -76,6 +91,13 @@ const buildMetricsMap = (deps: ReturnType<typeof buildDependencies>) =>
       },
     ])
   );
+
+// Every percentile here floors/ceils to {30, 31}, so latencyBounds is unchanged across a switch
+// and the bounds effect (keyed on those bounds) never fires to reset the range.
+const tiedBounds = (items: ReturnType<typeof buildDependencies>) =>
+  items.map((dep, i) => ({ ...dep, p99Duration: 30.1 + i * 0.05, p90Duration: 30.2 + i * 0.04 }));
+
+const latencyRangeText = () => screen.getByTestId('mockLatencyRange').textContent;
 
 const props = {
   serviceName: 'checkout',
@@ -173,5 +195,96 @@ describe('ServiceDependencies - percentile switch does not remount the table (#2
 
     expect(screen.getByText(svc(0))).toBeInTheDocument();
     expect(screen.queryByText(svc(14))).not.toBeInTheDocument();
+  });
+
+  // A percentile switch resets the latency gate, so a range filter set under one percentile does
+  // not carry over to the next; moving the slider again re-engages it. This locks the gate's
+  // user-facing behavior and is not sensitive to the ref-vs-state implementation of the flag.
+  it('should clear the latency filter on a percentile switch and re-engage it when the slider moves again', async () => {
+    render(<ServiceDependencies {...props} />);
+
+    await waitFor(() => expect(screen.getByText(svc(0))).toBeInTheDocument());
+
+    // Move the slider to the top of the range: only the highest-latency row (dep-svc-14) survives.
+    fireEvent.click(screen.getByTestId('mockNarrowLatencyRange'));
+    expect(screen.getByText(svc(14))).toBeInTheDocument();
+    expect(screen.queryByText(svc(0))).not.toBeInTheDocument();
+
+    // Switching percentile clears the filter: every row returns.
+    switchPercentile('P90');
+    expect(screen.getByText(svc(0))).toBeInTheDocument();
+
+    // Moving the slider again re-engages the filter under the new percentile.
+    fireEvent.click(screen.getByTestId('mockNarrowLatencyRange'));
+    expect(screen.getByText(svc(14))).toBeInTheDocument();
+    expect(screen.queryByText(svc(0))).not.toBeInTheDocument();
+  });
+
+  // The percentile handler resets latencyRange itself rather than relying on the bounds effect,
+  // which does not fire when the new percentile rounds to the same bounds. The stale range is
+  // invisible in the table (the gate is off), so assert on the range the sidebar receives.
+  it('should reset the latency range on a percentile switch when the rounded bounds are unchanged', () => {
+    const dependencies = tiedBounds(buildDependencies());
+    (useDependencies as jest.Mock).mockReturnValue({
+      data: dependencies,
+      groupedData: dependencies,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    (useDependencyMetrics as jest.Mock).mockReturnValue({
+      metrics: buildMetricsMap(dependencies),
+      isLoading: false,
+      error: null,
+    });
+
+    render(<ServiceDependencies {...props} />);
+    expect(latencyRangeText()).toBe('[30,31]');
+
+    fireEvent.click(screen.getByTestId('mockNarrowLatencyRange'));
+    expect(latencyRangeText()).toBe('[31,31]');
+
+    switchPercentile('P90');
+
+    expect(latencyRangeText()).toBe('[30,31]');
+  });
+});
+
+describe('ServiceDependencies - requests filter does not blank the table on load', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const dependencies = buildDependencies();
+    (useDependencies as jest.Mock).mockReturnValue({
+      data: dependencies,
+      groupedData: dependencies,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    (useDependencyMetrics as jest.Mock).mockReturnValue({
+      metrics: buildMetricsMap(dependencies),
+      isLoading: false,
+      error: null,
+    });
+  });
+
+  // requestsRange starts at [0,0] while requestsBounds derives from the data, so an ungated filter
+  // reads active and blanks the table for the one commit before the bounds effect resets the range.
+  // The profiler is needed because render() flushes that effect before returning, hiding the transient.
+  it('should show rows on every commit while bounds and range settle', () => {
+    const rowVisiblePerCommit: boolean[] = [];
+    render(
+      <React.Profiler
+        id="dependencies"
+        onRender={() => {
+          rowVisiblePerCommit.push(document.body.textContent?.includes(svc(0)) ?? false);
+        }}
+      >
+        <ServiceDependencies {...props} />
+      </React.Profiler>
+    );
+
+    expect(rowVisiblePerCommit.length).toBeGreaterThan(0);
+    expect(rowVisiblePerCommit.every(Boolean)).toBe(true);
   });
 });

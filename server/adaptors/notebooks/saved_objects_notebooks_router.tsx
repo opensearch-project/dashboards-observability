@@ -68,13 +68,31 @@ export function renameNotebook(noteBookObj: { name: string; noteId: string }) {
 
 export async function addSampleNotes(
   opensearchNotebooksClient: SavedObjectsClientContract,
-  visIds: string[]
+  visIds: string[],
+  dataSourceMDSId?: string,
+  dataSourceMDSLabel?: string
 ) {
   const notebooks = getSampleNotebooks(visIds);
   const sampleNotebooks = [];
   try {
+    // Without a stored binding, each code block's selector falls back to the default data
+    // source rather than the one the sample data was just installed against.
     for (const item of notebooks) {
-      const createdNotebooks = await opensearchNotebooksClient.create(NOTEBOOK_SAVED_OBJECT, item);
+      const notebook = {
+        ...item,
+        savedNotebook: {
+          ...item.savedNotebook,
+          paragraphs: item.savedNotebook.paragraphs.map((paragraph) => ({
+            ...paragraph,
+            dataSourceMDSId: dataSourceMDSId ?? '',
+            dataSourceMDSLabel: dataSourceMDSLabel ?? '',
+          })),
+        },
+      };
+      const createdNotebooks = await opensearchNotebooksClient.create(
+        NOTEBOOK_SAVED_OBJECT,
+        notebook
+      );
       sampleNotebooks.push({
         dateCreated: createdNotebooks.attributes.savedNotebook.dateCreated,
         dateModified: createdNotebooks.attributes.savedNotebook.dateModified,
