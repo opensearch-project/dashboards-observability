@@ -9,12 +9,20 @@ import {
   getQueryServicesThroughput,
   getQueryServicesThroughputTotal,
   getQueryServicesFailureRatio,
+  getQueryServicesFailureRatioTotal,
   getQueryServicesLatency,
   getQueryServicesLatencyInstant,
 } from '../../query_services/query_requests/promql_queries';
 import { getTimeInSeconds, calculateTimeRangeDuration } from '../utils/time_utils';
 import { calculateStep, RESOLUTION_LOW } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
+
+/**
+ * Composite key for a service node. Metrics are grouped by (environment, service),
+ * so the catalog keys rows on both to avoid summing a service across environments.
+ */
+export const serviceNodeKey = (serviceName: string, environment?: string): string =>
+  `${serviceName}::${environment ?? ''}`;
 
 export interface ServiceRedMetrics {
   latency: MetricDataPoint[];
@@ -79,6 +87,10 @@ export const useServicesRedMetrics = (
   >(new Map());
   // Total request counts per service (from sum_over_time instant query)
   const [totalCountMap, setTotalCountMap] = useState<Map<string, number>>(new Map());
+  // Windowed failure ratio per service (ratio-of-sums over the range, unbiased)
+  const [failureRatioInstantMap, setFailureRatioInstantMap] = useState<Map<string, number>>(
+    new Map()
+  );
   // Instant latency per service (true percentile over full time range)
   const [latencyInstantMap, setLatencyInstantMap] = useState<Map<string, number>>(new Map());
 
@@ -126,6 +138,7 @@ export const useServicesRedMetrics = (
     if (params.services.length === 0 || !promqlService) {
       setThroughputFailureMap(new Map());
       setTotalCountMap(new Map());
+      setFailureRatioInstantMap(new Map());
       setIsLoadingThroughputFailure(false);
       return;
     }
@@ -140,31 +153,41 @@ export const useServicesRedMetrics = (
       const failureRatioQuery = getQueryServicesFailureRatio(serviceFilter);
       const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
       const totalQuery = getQueryServicesThroughputTotal(serviceFilter, timeRangeDuration);
+      const failureRatioTotalQuery = getQueryServicesFailureRatioTotal(
+        serviceFilter,
+        timeRangeDuration
+      );
       const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
 
       // Settle each query independently: a single failure (e.g. a rejected
       // failure-ratio query) must not blank the throughput/total that succeeded.
-      const [throughputResult, failureRatioResult, totalResult] = await Promise.allSettled([
-        promqlService.executeMetricRequest({
-          query: throughputQuery,
-          startTime: startTimeSec,
-          endTime: endTimeSec,
-          step,
-          signal: abortController.signal,
-        }),
-        promqlService.executeMetricRequest({
-          query: failureRatioQuery,
-          startTime: startTimeSec,
-          endTime: endTimeSec,
-          step,
-          signal: abortController.signal,
-        }),
-        promqlService.executeInstantQuery({
-          query: totalQuery,
-          time: endTimeSec,
-          signal: abortController.signal,
-        }),
-      ]);
+      const [throughputResult, failureRatioResult, totalResult, failureRatioTotalResult] =
+        await Promise.allSettled([
+          promqlService.executeMetricRequest({
+            query: throughputQuery,
+            startTime: startTimeSec,
+            endTime: endTimeSec,
+            step,
+            signal: abortController.signal,
+          }),
+          promqlService.executeMetricRequest({
+            query: failureRatioQuery,
+            startTime: startTimeSec,
+            endTime: endTimeSec,
+            step,
+            signal: abortController.signal,
+          }),
+          promqlService.executeInstantQuery({
+            query: totalQuery,
+            time: endTimeSec,
+            signal: abortController.signal,
+          }),
+          promqlService.executeInstantQuery({
+            query: failureRatioTotalQuery,
+            time: endTimeSec,
+            signal: abortController.signal,
+          }),
+        ]);
 
       // Drop stale results if params changed while this fetch was in flight.
       if (abortController.signal.aborted) return;
@@ -174,24 +197,34 @@ export const useServicesRedMetrics = (
       const failureRatioResp =
         failureRatioResult.status === 'fulfilled' ? failureRatioResult.value : null;
       const totalResp = totalResult.status === 'fulfilled' ? totalResult.value : null;
+      const failureRatioTotalResp =
+        failureRatioTotalResult.status === 'fulfilled' ? failureRatioTotalResult.value : null;
 
       const newMap = new Map<string, ThroughputFailureMetrics>();
       const newTotalMap = new Map<string, number>();
-      params.services.forEach(({ serviceName }) => {
-        newMap.set(serviceName, {
-          throughput: extractServiceData(throughputResp, serviceName),
-          failureRatio: extractServiceData(failureRatioResp, serviceName),
+      const newFailureRatioInstantMap = new Map<string, number>();
+      params.services.forEach(({ serviceName, environment }) => {
+        const key = serviceNodeKey(serviceName, environment);
+        newMap.set(key, {
+          throughput: extractServiceData(throughputResp, serviceName, environment),
+          failureRatio: extractServiceData(failureRatioResp, serviceName, environment),
         });
-        const data = extractServiceData(totalResp, serviceName);
-        newTotalMap.set(serviceName, data.length > 0 ? data[0].value : 0);
+        const data = extractServiceData(totalResp, serviceName, environment);
+        newTotalMap.set(key, data.length > 0 ? data[0].value : 0);
+        const frData = extractServiceData(failureRatioTotalResp, serviceName, environment);
+        newFailureRatioInstantMap.set(key, frData.length > 0 ? frData[0].value : 0);
       });
 
       setThroughputFailureMap(newMap);
       setTotalCountMap(newTotalMap);
+      setFailureRatioInstantMap(newFailureRatioInstantMap);
 
-      const rejected = [throughputResult, failureRatioResult, totalResult].find(
-        (r) => r.status === 'rejected'
-      ) as PromiseRejectedResult | undefined;
+      const rejected = [
+        throughputResult,
+        failureRatioResult,
+        totalResult,
+        failureRatioTotalResult,
+      ].find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined;
       if (rejected) {
         console.error(
           '[useServicesRedMetrics] Partial failure fetching throughput/failure metrics:',
@@ -261,10 +294,11 @@ export const useServicesRedMetrics = (
 
       const newMap = new Map<string, MetricDataPoint[]>();
       const newInstantMap = new Map<string, number>();
-      params.services.forEach(({ serviceName }) => {
-        newMap.set(serviceName, extractServiceData(latencyResp, serviceName));
-        const data = extractServiceData(latencyInstantResp, serviceName);
-        newInstantMap.set(serviceName, data.length > 0 ? data[0].value : 0);
+      params.services.forEach(({ serviceName, environment }) => {
+        const key = serviceNodeKey(serviceName, environment);
+        newMap.set(key, extractServiceData(latencyResp, serviceName, environment));
+        const data = extractServiceData(latencyInstantResp, serviceName, environment);
+        newInstantMap.set(key, data.length > 0 ? data[0].value : 0);
       });
 
       setLatencyMap(newMap);
@@ -320,8 +354,10 @@ export const useServicesRedMetrics = (
       const timeRangeSeconds = endTimeSec - startTimeSec;
       const totalRequests = totalCountMap.get(serviceName) || 0;
       const avgThroughput = timeRangeSeconds > 0 ? totalRequests / timeRangeSeconds : 0;
-      const avgFailureRatio =
-        failureData.length > 0
+      // Ratio-of-sums over the window (unbiased); fall back to the sparkline mean.
+      const avgFailureRatio = failureRatioInstantMap.has(serviceName)
+        ? failureRatioInstantMap.get(serviceName)!
+        : failureData.length > 0
           ? failureData.reduce((sum, point) => sum + point.value, 0) / failureData.length
           : 0;
 
@@ -340,6 +376,7 @@ export const useServicesRedMetrics = (
     latencyInstantMap,
     throughputFailureMap,
     totalCountMap,
+    failureRatioInstantMap,
     startTimeSec,
     endTimeSec,
   ]);
@@ -361,7 +398,11 @@ export const useServicesRedMetrics = (
  * Extract metric data for a specific service from Prometheus response
  * Handles data frame format, range query, and instant query formats
  */
-function extractServiceData(response: any, serviceName: string): MetricDataPoint[] {
+function extractServiceData(
+  response: any,
+  serviceName: string,
+  environment?: string
+): MetricDataPoint[] {
   if (!response) {
     return [];
   }
@@ -378,11 +419,13 @@ function extractServiceData(response: any, serviceName: string): MetricDataPoint
       // Iterate through all data points and filter by service
       for (let i = 0; i < seriesField.values.length; i++) {
         const seriesLabel = seriesField.values[i];
-        // Parse series label: {service="ad"} -> ad
-        const match = seriesLabel.match(/service="([^"]+)"/);
-        const service = match ? match[1] : null;
+        // Parse series label: {environment="prod", service="ad"} -> match both
+        const svcMatch = seriesLabel.match(/service="([^"]+)"/);
+        const envMatch = seriesLabel.match(/environment="([^"]*)"/);
+        const service = svcMatch ? svcMatch[1] : null;
+        const env = envMatch ? envMatch[1] : undefined;
 
-        if (service === serviceName) {
+        if (service === serviceName && (environment === undefined || env === environment)) {
           dataPoints.push({
             timestamp: timeField.values[i] / 1000, // Convert ms to seconds
             value: parseFloat(valueField.values[i]) || 0,
@@ -398,7 +441,11 @@ function extractServiceData(response: any, serviceName: string): MetricDataPoint
 
   // Check for instantData format (fallback for instant queries)
   if (response?.meta?.instantData?.rows && Array.isArray(response.meta.instantData.rows)) {
-    const rows = response.meta.instantData.rows.filter((row: any) => row.service === serviceName);
+    const rows = response.meta.instantData.rows.filter(
+      (row: any) =>
+        row.service === serviceName &&
+        (environment === undefined || row.environment === environment)
+    );
 
     if (rows.length > 0) {
       return rows.map((row: any) => ({
@@ -411,7 +458,11 @@ function extractServiceData(response: any, serviceName: string): MetricDataPoint
   // Standard Prometheus response format
   const result = response?.data?.result || response?.result || [];
 
-  const serviceResult = result.find((r: any) => r.metric?.service === serviceName);
+  const serviceResult = result.find(
+    (r: any) =>
+      r.metric?.service === serviceName &&
+      (environment === undefined || r.metric?.environment === environment)
+  );
 
   if (!serviceResult) {
     return [];
