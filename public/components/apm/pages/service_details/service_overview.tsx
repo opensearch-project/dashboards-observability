@@ -41,9 +41,8 @@ import {
 } from '../../common/format_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
-import { RESOLUTION_LOW } from '../../shared/utils/step_utils';
+import { RESOLUTION_LOW, formatPrometheusDuration } from '../../shared/utils/step_utils';
 import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
-import { formatPrometheusDuration } from '../../shared/utils/step_utils';
 
 export interface ServiceOverviewProps {
   serviceName: string;

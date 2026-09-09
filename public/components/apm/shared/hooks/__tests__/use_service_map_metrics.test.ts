@@ -150,7 +150,9 @@ describe('useServiceMapMetrics', () => {
       });
 
       expect(result.current.error).toEqual(mockError);
-      expect(result.current.metricsMap.size).toBe(0);
+      // Promise.allSettled keeps sibling metrics flowing: on failure the map is
+      // still populated with zeroed entries rather than going empty.
+      expect(result.current.metricsMap.size).toBeGreaterThan(0);
     });
 
     it('should wrap non-Error throws', async () => {

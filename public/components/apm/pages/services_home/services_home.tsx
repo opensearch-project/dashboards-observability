@@ -687,13 +687,22 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return { latencyMin, latencyMax, throughputMin, throughputMax };
   }, [metricsMap, fullyFilteredItems]);
 
-  // Sync selected ranges to metricRanges whenever they change
+  // Sync selected ranges to the metric bounds whenever those bounds change.
+  // Depend on the primitive bounds rather than the metricRanges object: the
+  // object gets a fresh identity every time metricsMap changes (e.g. when a
+  // page's sparklines load during browsing), and firing on that identity churn
+  // would reset the sliders and silently clear an active filter mid-browse.
   useEffect(() => {
     setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
     setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
     setLatencyUserModified(false);
     setThroughputUserModified(false);
-  }, [metricRanges]);
+  }, [
+    metricRanges.latencyMin,
+    metricRanges.latencyMax,
+    metricRanges.throughputMin,
+    metricRanges.throughputMax,
+  ]);
 
   // Apply metric filters for display (on top of already filtered items)
   const displayedServices = useMemo(() => {
@@ -766,12 +775,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     const getSortVal = (item: ServiceTableItem): string | number => {
       const m = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
       switch (tableSortField) {
+        // Missing metrics fall back to 0 to match the column sort comparators,
+        // so this derived visible slice stays in step with the rendered rows.
         case 'latency':
-          return m?.avgLatency ?? -1;
+          return m?.avgLatency || 0;
         case 'throughput':
-          return m?.avgThroughput ?? -1;
+          return m?.avgThroughput || 0;
         case 'failureRatio':
-          return m?.avgFailureRatio ?? -1;
+          return m?.avgFailureRatio || 0;
         case 'environment':
           return item.environment ?? '';
         default:

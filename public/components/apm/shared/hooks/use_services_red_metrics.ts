@@ -143,6 +143,10 @@ export const useServicesRedMetrics = (
   // Unique service names on the visible page. Effect 3 builds a bounded
   // `service=~"..."` filter from the not-yet-cached subset (small, well under
   // the 10,000-char PromQL limit). sparklineKey drives refetch on page change.
+  // Keyed on names (not name+env): the range query filters by service name and
+  // groups by (environment, service), so a single fetch returns every
+  // environment for those names, and the per-(name, env) cache is populated for
+  // all of them at once.
   const sparklineNames = Array.from(
     new Set((params.sparklineServices ?? []).map((s) => s.serviceName))
   );
