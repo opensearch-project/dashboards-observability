@@ -91,6 +91,10 @@ interface ServicesTablePanelProps {
   displayedServices: ServiceTableItem[];
   columns: Array<EuiBasicTableColumn<ServiceTableItem>>;
   isTableLoading: boolean;
+  onTableChange: (change: {
+    page?: { index: number; size: number };
+    sort?: { field: string; direction: 'asc' | 'desc' };
+  }) => void;
   refreshTrigger: number;
   searchQuery: string;
   latencyPercentile: string;
@@ -130,6 +134,7 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
   displayedServices,
   columns,
   isTableLoading,
+  onTableChange,
   refreshTrigger,
   searchQuery,
   latencyPercentile,
@@ -243,6 +248,7 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
             },
           }}
           loading={isTableLoading}
+          onTableChange={onTableChange}
           data-test-subj="servicesTable"
         />
       )}
@@ -313,6 +319,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   // Use as state, so the activeFilters memo re-runs when a flag flips.
   const [latencyUserModified, setLatencyUserModified] = useState(false);
   const [throughputUserModified, setThroughputUserModified] = useState(false);
+
+  // Visible-page tracking: sparklines are fetched only for the shown rows.
+  const [visibleServices, setVisibleServices] = useState<
+    Array<{ serviceName: string; environment?: string }>
+  >([]);
+  const [tablePageIndex, setTablePageIndex] = useState(0);
+  const [tablePageSize, setTablePageSize] = useState<number>(APM_CONSTANTS.DEFAULT_PAGE_SIZE);
+  const [tableSortField, setTableSortField] = useState<string>('serviceName');
+  const [tableSortDirection, setTableSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // EuiResizableContainer togglePanel ref — captured inside render-prop, never passed as a prop
   const togglePanelRef = useRef<((id: string, options: { direction: string }) => void) | null>(
@@ -584,6 +599,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       serviceName: s.serviceName,
       environment: s.environment,
     })),
+    sparklineServices: visibleServices,
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     latencyPercentile,
@@ -594,6 +610,28 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     refetch();
     refetchMetrics();
   }, [refetch, refetchMetrics]);
+
+  // Capture the table's page + sort so we can fetch sparklines for just the
+  // visible rows. The table stays uncontrolled; we only mirror its state.
+  const handleTableChange = useCallback(
+    ({
+      page,
+      sort,
+    }: {
+      page?: { index: number; size: number };
+      sort?: { field: string; direction: 'asc' | 'desc' };
+    }) => {
+      if (page) {
+        setTablePageIndex(page.index);
+        setTablePageSize(page.size);
+      }
+      if (sort) {
+        setTableSortField(sort.field);
+        setTableSortDirection(sort.direction);
+      }
+    },
+    []
+  );
 
   // Combined loading state for table and filters
   const isTableLoading = isLoading || metricsLoading;
@@ -718,6 +756,53 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     latencyRange,
     throughputRange,
     selectedFailureRateThresholds,
+  ]);
+
+  // Mirror the table's current sort + page to derive the visible rows, so the
+  // metrics hook fetches sparklines only for those. Sorting uses the same
+  // instant metric values the columns sort by. The name guard prevents a
+  // refetch loop when only sparkline data (not order) changes.
+  useEffect(() => {
+    const getSortVal = (item: ServiceTableItem): string | number => {
+      const m = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
+      switch (tableSortField) {
+        case 'latency':
+          return m?.avgLatency ?? -1;
+        case 'throughput':
+          return m?.avgThroughput ?? -1;
+        case 'failureRatio':
+          return m?.avgFailureRatio ?? -1;
+        case 'environment':
+          return item.environment ?? '';
+        default:
+          return item.serviceName ?? '';
+      }
+    };
+    const sorted = [...displayedServices].sort((a, b) => {
+      const va = getSortVal(a);
+      const vb = getSortVal(b);
+      const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+      return tableSortDirection === 'desc' ? -cmp : cmp;
+    });
+    const start = tablePageIndex * tablePageSize;
+    const slice = sorted.slice(start, start + tablePageSize);
+    setVisibleServices((prev) => {
+      const sameKeys =
+        prev.length === slice.length &&
+        prev.every(
+          (p, i) => p.serviceName === slice[i].serviceName && p.environment === slice[i].environment
+        );
+      return sameKeys
+        ? prev
+        : slice.map((s) => ({ serviceName: s.serviceName, environment: s.environment }));
+    });
+  }, [
+    displayedServices,
+    metricsMap,
+    tableSortField,
+    tableSortDirection,
+    tablePageIndex,
+    tablePageSize,
   ]);
 
   // Build active filter badges from current filter state
@@ -1497,6 +1582,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           displayedServices={displayedServices}
                           columns={columns}
                           isTableLoading={isTableLoading}
+                          onTableChange={handleTableChange}
                           refreshTrigger={refreshTrigger}
                           searchQuery={searchQuery}
                           latencyPercentile={latencyPercentile}
