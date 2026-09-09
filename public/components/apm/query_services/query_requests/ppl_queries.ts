@@ -4,6 +4,10 @@
  */
 
 import { formatPPLTimestamp } from '../../shared/utils/time_utils';
+import { escapePPLString } from './escape_utils';
+
+/** Row cap for otherwise-unbounded list/topology PPL queries. */
+const DEFAULT_ROW_LIMIT = 1000;
 
 /**
  * PPL queries for APM topology data
@@ -81,6 +85,7 @@ export function getQueryListServices(
   query += buildTimeFilterClause(startTime, endTime);
   query += ` | dedup nodeConnectionHash`;
   query += ` | fields sourceNode.keyAttributes, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.groupByAttributes`;
+  query += ` | head ${DEFAULT_ROW_LIMIT}`;
   return query;
 }
 
@@ -116,14 +121,15 @@ export function getQueryGetService(
 
   // Filter by service keyAttributes if provided
   if (environment) {
-    query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
+    query += ` | where sourceNode.keyAttributes.environment = '${escapePPLString(environment)}'`;
   }
   if (serviceName) {
-    query += ` | where sourceNode.keyAttributes.name = '${serviceName}'`;
+    query += ` | where sourceNode.keyAttributes.name = '${escapePPLString(serviceName)}'`;
   }
 
   query += ` | dedup nodeConnectionHash`;
   query += ` | fields sourceNode.keyAttributes, sourceNode.groupByAttributes`;
+  query += ` | head ${DEFAULT_ROW_LIMIT}`;
   return query;
 }
 
@@ -159,8 +165,8 @@ export function getQueryServiceAttributes(
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
-  query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
-  query += ` | where sourceNode.keyAttributes.name = '${serviceName}'`;
+  query += ` | where sourceNode.keyAttributes.environment = '${escapePPLString(environment)}'`;
+  query += ` | where sourceNode.keyAttributes.name = '${escapePPLString(serviceName)}'`;
   query += ` | fields sourceNode.keyAttributes, sourceNode.groupByAttributes, timestamp`;
   query += ` | sort - timestamp`;
   query += ` | head 1`;
@@ -199,14 +205,15 @@ export function getQueryListServiceOperations(
 
   // Filter by service keyAttributes if provided
   if (environment) {
-    query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
+    query += ` | where sourceNode.keyAttributes.environment = '${escapePPLString(environment)}'`;
   }
   if (serviceName) {
-    query += ` | where sourceNode.keyAttributes.name = '${serviceName}'`;
+    query += ` | where sourceNode.keyAttributes.name = '${escapePPLString(serviceName)}'`;
   }
 
   query += ` | dedup operationConnectionHash`;
   query += ` | fields sourceNode.keyAttributes, sourceOperation.name, targetNode.keyAttributes, targetOperation.name`;
+  query += ` | head ${DEFAULT_ROW_LIMIT}`;
   return query;
 }
 
@@ -242,14 +249,15 @@ export function getQueryListServiceDependencies(
 
   // Filter by service keyAttributes if provided
   if (environment) {
-    query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
+    query += ` | where sourceNode.keyAttributes.environment = '${escapePPLString(environment)}'`;
   }
   if (serviceName) {
-    query += ` | where sourceNode.keyAttributes.name = '${serviceName}'`;
+    query += ` | where sourceNode.keyAttributes.name = '${escapePPLString(serviceName)}'`;
   }
 
   query += ` | dedup operationConnectionHash`;
   query += ` | fields sourceNode.keyAttributes, sourceOperation.name, targetNode.keyAttributes, targetOperation.name`;
+  query += ` | head ${DEFAULT_ROW_LIMIT}`;
   return query;
 }
 
@@ -279,81 +287,6 @@ export function getQueryGetServiceMap(
   query += buildTimeFilterClause(startTime, endTime);
   query += ` | dedup nodeConnectionHash`;
   query += ` | fields sourceNode.keyAttributes, targetNode.keyAttributes, sourceNode.groupByAttributes, targetNode.groupByAttributes`;
-  return query;
-}
-
-/**
- * Query to count distinct downstream dependencies for a specific operation
- * Returns the count of unique remote services that the operation calls
- *
- * @param queryIndex - Index name
- * @param startTime - Start time for filtering (Date or ISO string)
- * @param endTime - End time for filtering (Date or ISO string)
- * @param environment - Service environment
- * @param serviceName - Service name
- * @param operationName - Operation name to count dependencies for
- * @returns PPL query string
- *
- * @example
- * ```
- * source=otel-apm-service-map
- * | where timestamp >= '2026-01-19 05:44:00.000' and timestamp <= '2026-01-19 05:49:00.000'
- * | where sourceNode.keyAttributes.environment = 'generic:default'
- * | where sourceNode.keyAttributes.name = 'frontend'
- * | where sourceOperation.name = 'GET /api/users'
- * | stats distinct_count(targetNode.keyAttributes.name) as dependency_count
- * ```
- */
-export function getQueryOperationDependenciesCount(
-  queryIndex: string,
-  startTime?: string | Date,
-  endTime?: string | Date,
-  environment?: string,
-  serviceName?: string,
-  operationName?: string
-): string {
-  let query = `source=${queryIndex}`;
-  query += buildTimeFilterClause(startTime, endTime);
-
-  // Filter by service keyAttributes if provided
-  if (environment) {
-    query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
-  }
-  if (serviceName) {
-    query += ` | where sourceNode.keyAttributes.name = '${serviceName}'`;
-  }
-  if (operationName) {
-    query += ` | where sourceOperation.name = '${operationName}'`;
-  }
-  // Count distinct remote services (dependencies)
-  query += ` | stats distinct_count(targetNode.keyAttributes.name) as dependency_count`;
-  return query;
-}
-
-/**
- * Get downstream dependency count for a service
- *
- * Counts how many downstream services a given dependency service calls.
- * This is used in the dependencies table to show how many services each dependency connects to.
- *
- * @param index Index name
- * @param startTime Start time (Date or ISO string)
- * @param endTime End time (Date or ISO string)
- * @param environment Environment filter
- * @param dependencyServiceName The dependency service name to count downstream services for
- */
-export function getQueryDependencyDownstreamCount(
-  index: string,
-  startTime: string | Date,
-  endTime: string | Date,
-  environment: string,
-  dependencyServiceName: string
-): string {
-  let query = `source=${index}`;
-  query += buildTimeFilterClause(startTime, endTime);
-  query += ` | where sourceNode.keyAttributes.environment = '${environment}'`;
-  query += ` | where sourceNode.keyAttributes.name = '${dependencyServiceName}'`;
-  // Count distinct downstream services this dependency calls
-  query += ` | stats distinct_count(targetNode.keyAttributes.name) as dependency_count`;
+  query += ` | head ${DEFAULT_ROW_LIMIT}`;
   return query;
 }

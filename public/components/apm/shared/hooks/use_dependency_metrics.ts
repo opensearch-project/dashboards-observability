@@ -68,29 +68,25 @@ export const useDependencyMetrics = (
       return;
     }
 
+    const abortController = new AbortController();
+
     const fetchMetrics = async () => {
       setIsLoading(true);
       setError(null);
 
-      try {
-        // Calculate time range duration for aggregate queries
-        const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
+      const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
+      const time = Math.floor(params.endTime.getTime() / 1000);
 
-        // Make 4 consolidated queries
-        // Each query returns ALL dependencies in a single response
-        const [
-          latencyPercentilesResponse,
-          errorRateResponse,
-          availabilityResponse,
-          requestCountResponse,
-        ] = await Promise.all([
+      // Settle each query independently so one failed query cannot blank every column.
+      const [latencyResult, errorRateResult, availabilityResult, requestCountResult] =
+        await Promise.allSettled([
           promqlService.executeInstantQuery({
             query: getQueryAllDependenciesLatencyPercentiles(
               params.environment,
               params.serviceName,
               timeRangeDuration
             ),
-            time: Math.floor(params.endTime.getTime() / 1000),
+            time,
           }),
           promqlService.executeInstantQuery({
             query: getQueryAllDependenciesErrorRateAvg(
@@ -98,7 +94,7 @@ export const useDependencyMetrics = (
               params.serviceName,
               timeRangeDuration
             ),
-            time: Math.floor(params.endTime.getTime() / 1000),
+            time,
           }),
           promqlService.executeInstantQuery({
             query: getQueryAllDependenciesAvailabilityAvg(
@@ -106,7 +102,7 @@ export const useDependencyMetrics = (
               params.serviceName,
               timeRangeDuration
             ),
-            time: Math.floor(params.endTime.getTime() / 1000),
+            time,
           }),
           promqlService.executeInstantQuery({
             query: getQueryAllDependenciesRequestCountTotal(
@@ -114,42 +110,60 @@ export const useDependencyMetrics = (
               params.serviceName,
               timeRangeDuration
             ),
-            time: Math.floor(params.endTime.getTime() / 1000),
+            time,
           }),
         ]);
 
-        // Initialize metrics map with default values for all dependencies
-        const metricsMap = new Map<string, DependencyMetrics>();
-        params.dependencies.forEach((dep) => {
-          const key = `${dep.serviceName}:${dep.remoteOperation}`;
-          metricsMap.set(key, {
-            p50Duration: 0,
-            p90Duration: 0,
-            p99Duration: 0,
-            errorRate: 0,
-            availability: 0,
-            requestCount: 0,
-          });
+      if (abortController.signal.aborted) return;
+
+      // Initialize metrics map with default values for all dependencies
+      const metricsMap = new Map<string, DependencyMetrics>();
+      params.dependencies.forEach((dep) => {
+        const key = `${dep.serviceName}:${dep.remoteOperation}`;
+        metricsMap.set(key, {
+          p50Duration: 0,
+          p90Duration: 0,
+          p99Duration: 0,
+          errorRate: 0,
+          availability: 0,
+          requestCount: 0,
         });
+      });
 
-        // Extract latency percentiles from the combined response
-        extractPercentilesByDependency(latencyPercentilesResponse, metricsMap);
+      const valueOf = (r: PromiseSettledResult<any>) =>
+        r.status === 'fulfilled' ? r.value : undefined;
 
-        // Extract other metrics by dependency from each response
-        extractMetricsByDependency(errorRateResponse, metricsMap, 'errorRate');
-        extractMetricsByDependency(availabilityResponse, metricsMap, 'availability');
-        extractMetricsByDependency(requestCountResponse, metricsMap, 'requestCount');
+      // Missing (rejected) responses leave the defaulted 0 values in place.
+      extractPercentilesByDependency(valueOf(latencyResult), metricsMap);
+      extractMetricsByDependency(valueOf(errorRateResult), metricsMap, 'errorRate');
+      extractMetricsByDependency(valueOf(availabilityResult), metricsMap, 'availability');
+      extractMetricsByDependency(valueOf(requestCountResult), metricsMap, 'requestCount');
 
-        setMetrics(metricsMap);
-      } catch (err) {
-        console.error('[useDependencyMetrics] Error fetching metrics:', err);
-        setError(err instanceof Error ? err : new Error('Unknown error'));
-      } finally {
-        setIsLoading(false);
+      setMetrics(metricsMap);
+
+      const firstRejection = [
+        latencyResult,
+        errorRateResult,
+        availabilityResult,
+        requestCountResult,
+      ].find((r): r is PromiseRejectedResult => r.status === 'rejected');
+      if (firstRejection) {
+        console.error(
+          '[useDependencyMetrics] Partial failure fetching metrics:',
+          firstRejection.reason
+        );
+        setError(
+          firstRejection.reason instanceof Error
+            ? firstRejection.reason
+            : new Error('Failed to fetch some dependency metrics')
+        );
       }
+      setIsLoading(false);
     };
 
     fetchMetrics();
+
+    return () => abortController.abort();
   }, [
     params.dependencies,
     params.serviceName,
@@ -178,6 +192,7 @@ function extractPercentilesByDependency(
   response: any,
   metricsMap: Map<string, DependencyMetrics>
 ): void {
+  if (!response) return;
   try {
     if (response?.meta?.instantData?.rows) {
       const rows = response.meta.instantData.rows;
@@ -240,6 +255,7 @@ function extractMetricsByDependency(
   metricsMap: Map<string, DependencyMetrics>,
   metricField: keyof DependencyMetrics
 ): void {
+  if (!response) return;
   try {
     // Handle data frame format (query enhancements plugin response)
     // Response structure: { meta: { instantData: { rows: [{Time, remoteService, remoteOperation, Value}] } } }

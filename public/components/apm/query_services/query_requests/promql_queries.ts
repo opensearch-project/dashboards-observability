@@ -27,6 +27,16 @@
  * Edge/dependency queries filter with remoteService!="" or remoteService="target" for CLIENT spans.
  */
 
+import { escapePromQLLabel } from './escape_utils';
+
+/**
+ * Build the SERVER-span label selector for services-home node metrics.
+ * Omits the service filter when empty so query length stays constant regardless
+ * of fleet size; per-service results still come from the `sum by (service)` grouping.
+ */
+const buildServicesNodeSelector = (serviceFilter: string): string =>
+  [serviceFilter, 'remoteService=""', 'namespace="span_derived"'].filter(Boolean).join(', ');
+
 // ============================================================================
 // SERVICES HOME PAGE QUERIES
 // ============================================================================
@@ -36,10 +46,10 @@
  * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
  * @page Services Home — Throughput sparkline column
  */
-export const getQueryServicesThroughput = (serviceFilter: string): string =>
+export const getQueryServicesThroughput = (serviceFilter: string = ''): string =>
   `
 sum by (service) (
-  request{${serviceFilter},remoteService="",namespace="span_derived"}
+  request{${buildServicesNodeSelector(serviceFilter)}}
 )
 `.trim();
 
@@ -50,10 +60,13 @@ sum by (service) (
  * @param timeRange - Prometheus duration string (e.g., "15m", "1h")
  * @page Services Home — avgThroughput calculation
  */
-export const getQueryServicesThroughputTotal = (serviceFilter: string, timeRange: string): string =>
+export const getQueryServicesThroughputTotal = (
+  serviceFilter: string = '',
+  timeRange: string
+): string =>
   `
 sum by (service) (
-  sum_over_time(request{${serviceFilter},remoteService="",namespace="span_derived"}[${timeRange}])
+  sum_over_time(request{${buildServicesNodeSelector(serviceFilter)}}[${timeRange}])
 )
 `.trim();
 
@@ -62,17 +75,19 @@ sum by (service) (
  * @param serviceFilter - Service filter regex (e.g., service=~"svc1|svc2")
  * @page Services Home — Failure ratio sparkline column
  */
-export const getQueryServicesFailureRatio = (serviceFilter: string): string =>
-  `
+export const getQueryServicesFailureRatio = (serviceFilter: string = ''): string => {
+  const selector = buildServicesNodeSelector(serviceFilter);
+  return `
 (
-  sum by (service) (error{${serviceFilter},remoteService="",namespace="span_derived"})
+  sum by (service) (error{${selector}})
   +
-  sum by (service) (fault{${serviceFilter},remoteService="",namespace="span_derived"})
+  sum by (service) (fault{${selector}})
 )
 /
-clamp_min(sum by (service) (request{${serviceFilter},remoteService="",namespace="span_derived"}), 1)
+clamp_min(sum by (service) (request{${selector}}), 1)
 * 100
 `.trim();
+};
 
 /**
  * Services latency percentile over time — grouped by service
@@ -80,11 +95,11 @@ clamp_min(sum by (service) (request{${serviceFilter},remoteService="",namespace=
  * @param percentile - Percentile value (0.5, 0.9, 0.99)
  * @page Services Home — Latency sparkline column
  */
-export const getQueryServicesLatency = (serviceFilter: string, percentile: number): string =>
+export const getQueryServicesLatency = (serviceFilter: string = '', percentile: number): string =>
   `
 histogram_quantile(${percentile},
   sum by (service, le) (
-    latency_seconds_bucket{${serviceFilter},remoteService="",namespace="span_derived"}
+    latency_seconds_bucket{${buildServicesNodeSelector(serviceFilter)}}
   )
 ) * 1000
 `.trim();
@@ -96,13 +111,13 @@ histogram_quantile(${percentile},
  * @page Services Home — Latency column single value
  */
 export const getQueryServicesLatencyInstant = (
-  serviceFilter: string,
+  serviceFilter: string = '',
   percentile: number,
   timeRange: string
 ): string =>
   `histogram_quantile(${percentile},
   sum by (service, le) (
-    sum_over_time(latency_seconds_bucket{${serviceFilter},remoteService="",namespace="span_derived"}[${timeRange}])
+    sum_over_time(latency_seconds_bucket{${buildServicesNodeSelector(serviceFilter)}}[${timeRange}])
   )
 ) * 1000`.trim();
 
@@ -121,8 +136,8 @@ export const getQueryTopOperationsByVolume = (
   window?: string
 ): string => {
   const metric = window
-    ? `sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${window}])`
-    : `request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}`;
+    ? `sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${window}])`
+    : `request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}`;
   return `
 topk(${limit},
   sum by (operation) (
@@ -160,7 +175,7 @@ export const getQueryTopDependenciesByLatency = (
 topk(${limit},
   histogram_quantile(${percentile},
     sum by (remoteService, le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}
+      latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",namespace="span_derived",remoteService!=""}
     )
   ) * 1000
 )
@@ -168,7 +183,7 @@ or
 label_replace(
   histogram_quantile(${percentile},
     sum by (le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",namespace="span_derived"}
     )
   ) * 1000,
   "remoteService",
@@ -227,13 +242,14 @@ topk(${limit},
 export const getQueryServiceDependenciesByFaultRateAvg = (
   environment: string,
   serviceName: string,
-  timeRange: string
+  timeRange: string,
+  limit: number = 5
 ): string => `
-topk(5,
+topk(${limit},
   (
-    sum by (remoteService) (sum_over_time(fault{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}]))
+    sum by (remoteService) (sum_over_time(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService!="",namespace="span_derived"}[${timeRange}]))
     /
-    clamp_min(sum by (remoteService) (sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}])), 1)
+    clamp_min(sum by (remoteService) (sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService!="",namespace="span_derived"}[${timeRange}])), 1)
   ) * 100
 )
 `;
@@ -254,8 +270,8 @@ export const getQueryServiceRequests = (
   window?: string
 ): string =>
   window
-    ? `sum(sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${window}]))`
-    : `sum(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})`;
+    ? `sum(sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${window}]))`
+    : `sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})`;
 
 /**
  * Service Faults (5xx errors)
@@ -268,8 +284,8 @@ export const getQueryServiceFaults = (
   window?: string
 ): string =>
   window
-    ? `sum(sum_over_time(fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${window}]))`
-    : `sum(fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})`;
+    ? `sum(sum_over_time(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${window}]))`
+    : `sum(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})`;
 
 /**
  * Service Errors (4xx errors)
@@ -282,8 +298,8 @@ export const getQueryServiceErrors = (
   window?: string
 ): string =>
   window
-    ? `sum(sum_over_time(error{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${window}]))`
-    : `sum(error{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})`;
+    ? `sum(sum_over_time(error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${window}]))`
+    : `sum(error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})`;
 
 /**
  * Service Availability (percentage of non-faulty requests)
@@ -292,7 +308,7 @@ export const getQueryServiceErrors = (
  * @page Service Overview — Availability metric card
  */
 export const getQueryServiceAvailability = (environment: string, serviceName: string): string => `
-(1 - (sum(fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}) / clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}), 1))) * 100
+(1 - (sum(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}) / clamp_min(sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}), 1))) * 100
 `;
 
 /**
@@ -303,9 +319,9 @@ export const getQueryServiceAvailability = (environment: string, serviceName: st
  */
 export const getQueryServiceFaultRateCard = (environment: string, serviceName: string): string => `
 (
-  sum(fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
+  sum(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})
   /
-  clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}), 1)
+  clamp_min(sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}), 1)
 ) * 100
 `;
 
@@ -317,9 +333,9 @@ export const getQueryServiceFaultRateCard = (environment: string, serviceName: s
  */
 export const getQueryServiceErrorRateCard = (environment: string, serviceName: string): string => `
 (
-  sum(error{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
+  sum(error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})
   /
-  clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}), 1)
+  clamp_min(sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}), 1)
 ) * 100
 `;
 
@@ -332,7 +348,7 @@ export const getQueryServiceErrorRateCard = (environment: string, serviceName: s
 export const getQueryServiceLatencyP99Card = (environment: string, serviceName: string): string => `
 histogram_quantile(0.99,
   sum by (le) (
-    latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}
+    latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}
   )
 ) * 1000
 `;
@@ -351,16 +367,16 @@ export const getQueryServiceFaultRate = (
   limit: number = 5
 ): string => `
 topk(${limit},
-  sum by (environment, service, operation) (fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
+  sum by (environment, service, operation) (fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})
   /
-  clamp_min(sum by (environment, service, operation) (request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}), 1)
+  clamp_min(sum by (environment, service, operation) (request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}), 1)
   * 100
 )
 or
 label_replace(
-  sum(fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
+  sum(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})
   /
-  clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}), 1)
+  clamp_min(sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}), 1)
   * 100,
   "operation",
   "overall",
@@ -383,16 +399,16 @@ export const getQueryServiceErrorRateOverTime = (
   limit: number = 5
 ): string => `
 topk(${limit},
-  sum by (environment, service, operation) (error{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
+  sum by (environment, service, operation) (error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})
   /
-  clamp_min(sum by (environment, service, operation) (request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}), 1)
+  clamp_min(sum by (environment, service, operation) (request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}), 1)
   * 100
 )
 or
 label_replace(
-  sum(error{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
+  sum(error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})
   /
-  clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}), 1)
+  clamp_min(sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}), 1)
   * 100,
   "operation",
   "overall",
@@ -416,17 +432,17 @@ export const getQueryServiceAvailabilityByOperations = (
 ): string => `
 bottomk(${limit},
   (1 - (
-    sum by (environment, service, operation) (fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
+    sum by (environment, service, operation) (fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})
     /
-    clamp_min(sum by (environment, service, operation) (request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}), 1)
+    clamp_min(sum by (environment, service, operation) (request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}), 1)
   )) * 100
 )
 or
 label_replace(
   (1 - (
-    sum(fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"})
+    sum(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})
     /
-    clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}), 1)
+    clamp_min(sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}), 1)
   )) * 100,
   "operation",
   "overall",
@@ -450,7 +466,7 @@ export const getQueryAllOperationsRequestCountTotal = (
   timeRange: string
 ): string => `
 sum by (operation) (
-  sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${timeRange}])
+  sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${timeRange}])
 )
 `;
 
@@ -465,9 +481,9 @@ export const getQueryAllOperationsErrorRateAvg = (
   timeRange: string
 ): string => `
 (
-  sum by (operation) (sum_over_time(error{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${timeRange}]))
+  sum by (operation) (sum_over_time(error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${timeRange}]))
   /
-  clamp_min(sum by (operation) (sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${timeRange}])), 1)
+  clamp_min(sum by (operation) (sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${timeRange}])), 1)
 ) * 100
 `;
 
@@ -482,9 +498,9 @@ export const getQueryAllOperationsAvailabilityAvg = (
   timeRange: string
 ): string => `
 (1 - (
-  sum by (operation) (sum_over_time(fault{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${timeRange}]))
+  sum by (operation) (sum_over_time(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${timeRange}]))
   /
-  clamp_min(sum by (operation) (sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${timeRange}])), 1)
+  clamp_min(sum by (operation) (sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${timeRange}])), 1)
 )) * 100
 `;
 
@@ -502,7 +518,7 @@ export const getQueryAllOperationsLatencyPercentiles = (
 label_replace(
   histogram_quantile(0.50,
     sum by (operation, le) (
-      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${timeRange}])
+      sum_over_time(latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${timeRange}])
     )
   ) * 1000,
   "percentile", "p50", "", ""
@@ -511,7 +527,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (operation, le) (
-      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${timeRange}])
+      sum_over_time(latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${timeRange}])
     )
   ) * 1000,
   "percentile", "p90", "", ""
@@ -520,7 +536,7 @@ or
 label_replace(
   histogram_quantile(0.99,
     sum by (operation, le) (
-      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="",namespace="span_derived"}[${timeRange}])
+      sum_over_time(latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${timeRange}])
     )
   ) * 1000,
   "percentile", "p99", "", ""
@@ -539,8 +555,8 @@ export const getQueryOperationRequestsOverTime = (
   window?: string
 ): string =>
   window
-    ? `sum(sum_over_time(request{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"}[${window}]))`
-    : `sum(request{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"})`;
+    ? `sum(sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",operation="${escapePromQLLabel(operation)}",remoteService="",namespace="span_derived"}[${window}]))`
+    : `sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",operation="${escapePromQLLabel(operation)}",remoteService="",namespace="span_derived"})`;
 
 /**
  * COMBINED: Operation Faults and Errors Over Time
@@ -554,18 +570,18 @@ export const getQueryOperationFaultsAndErrorsOverTime = (
 ): string => `
 label_replace(
   (
-    sum(fault{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"})
+    sum(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",operation="${escapePromQLLabel(operation)}",remoteService="",namespace="span_derived"})
     /
-    clamp_min(sum(request{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"}), 1)
+    clamp_min(sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",operation="${escapePromQLLabel(operation)}",remoteService="",namespace="span_derived"}), 1)
   ) * 100,
   "rate_type", "Fault rate (5xx)", "", ""
 )
 or
 label_replace(
   (
-    sum(error{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"})
+    sum(error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",operation="${escapePromQLLabel(operation)}",remoteService="",namespace="span_derived"})
     /
-    clamp_min(sum(request{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"}), 1)
+    clamp_min(sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",operation="${escapePromQLLabel(operation)}",remoteService="",namespace="span_derived"}), 1)
   ) * 100,
   "rate_type", "Error rate (4xx)", "", ""
 )
@@ -585,7 +601,7 @@ export const getQueryOperationLatencyPercentilesOverTime = (
 label_replace(
   histogram_quantile(0.50,
     sum by (le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"}
+      latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",operation="${escapePromQLLabel(operation)}",remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile",
@@ -597,7 +613,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"}
+      latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",operation="${escapePromQLLabel(operation)}",remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile",
@@ -609,7 +625,7 @@ or
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",operation="${operation}",remoteService="",namespace="span_derived"}
+      latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",operation="${escapePromQLLabel(operation)}",remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile",
@@ -637,7 +653,7 @@ export const getQueryAllDependenciesLatencyPercentiles = (
 label_replace(
   histogram_quantile(0.50,
     sum by (remoteService, operation, remoteOperation, le) (
-      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}[${timeRange}])
+      sum_over_time(latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",namespace="span_derived",remoteService!=""}[${timeRange}])
     )
   ) * 1000,
   "percentile", "p50", "", ""
@@ -646,7 +662,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (remoteService, operation, remoteOperation, le) (
-      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}[${timeRange}])
+      sum_over_time(latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",namespace="span_derived",remoteService!=""}[${timeRange}])
     )
   ) * 1000,
   "percentile", "p90", "", ""
@@ -655,7 +671,7 @@ or
 label_replace(
   histogram_quantile(0.99,
     sum by (remoteService, operation, remoteOperation, le) (
-      sum_over_time(latency_seconds_bucket{environment="${environment}",service="${serviceName}",namespace="span_derived",remoteService!=""}[${timeRange}])
+      sum_over_time(latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",namespace="span_derived",remoteService!=""}[${timeRange}])
     )
   ) * 1000,
   "percentile", "p99", "", ""
@@ -673,7 +689,7 @@ export const getQueryAllDependenciesRequestCountTotal = (
   timeRange: string
 ): string => `
 sum by (remoteService, remoteOperation) (
-  sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}])
+  sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService!="",namespace="span_derived"}[${timeRange}])
 )
 `;
 
@@ -688,9 +704,9 @@ export const getQueryAllDependenciesErrorRateAvg = (
   timeRange: string
 ): string => `
 (
-  sum by (remoteService, remoteOperation) (sum_over_time(error{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}]))
+  sum by (remoteService, remoteOperation) (sum_over_time(error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService!="",namespace="span_derived"}[${timeRange}]))
   /
-  clamp_min(sum by (remoteService, remoteOperation) (sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}])), 1)
+  clamp_min(sum by (remoteService, remoteOperation) (sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService!="",namespace="span_derived"}[${timeRange}])), 1)
 ) * 100
 `;
 
@@ -705,9 +721,9 @@ export const getQueryAllDependenciesAvailabilityAvg = (
   timeRange: string
 ): string => `
 (1 - (
-  sum by (remoteService, remoteOperation) (sum_over_time(fault{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}]))
+  sum by (remoteService, remoteOperation) (sum_over_time(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService!="",namespace="span_derived"}[${timeRange}]))
   /
-  clamp_min(sum by (remoteService, remoteOperation) (sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService!="",namespace="span_derived"}[${timeRange}])), 1)
+  clamp_min(sum by (remoteService, remoteOperation) (sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService!="",namespace="span_derived"}[${timeRange}])), 1)
 )) * 100
 `;
 
@@ -721,7 +737,7 @@ export const getQueryAllDependenciesAvailabilityAvg = (
  * @page App Map Node Flyout — Application root requests chart
  */
 export const getQueryApplicationRequests = (): string => `
-sum(request{namespace="span_derived"})
+sum(request{remoteService="",namespace="span_derived"})
 `;
 
 /**
@@ -730,7 +746,7 @@ sum(request{namespace="span_derived"})
  * @page App Map Node Flyout — Application root faults chart
  */
 export const getQueryApplicationFaults = (): string => `
-sum(fault{namespace="span_derived"})
+sum(fault{remoteService="",namespace="span_derived"})
 `;
 
 /**
@@ -739,7 +755,7 @@ sum(fault{namespace="span_derived"})
  * @page App Map Node Flyout — Application root errors chart
  */
 export const getQueryApplicationErrors = (): string => `
-sum(error{namespace="span_derived"})
+sum(error{remoteService="",namespace="span_derived"})
 `;
 
 /**
@@ -752,7 +768,7 @@ export const getQueryApplicationLatency = (): string => `
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
-      latency_seconds_bucket{namespace="span_derived"}
+      latency_seconds_bucket{remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p99", "", ""
@@ -761,7 +777,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (le) (
-      latency_seconds_bucket{namespace="span_derived"}
+      latency_seconds_bucket{remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p90", "", ""
@@ -770,7 +786,7 @@ or
 label_replace(
   histogram_quantile(0.50,
     sum by (le) (
-      latency_seconds_bucket{namespace="span_derived"}
+      latency_seconds_bucket{remoteService="",namespace="span_derived"}
     )
   ) * 1000,
   "percentile", "p50", "", ""
@@ -796,7 +812,7 @@ export const getQueryEdgeRequests = (
   remoteService: string,
   timeRange: string
 ): string => `
-sum(sum_over_time(request{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}[${timeRange}]))
+sum(sum_over_time(request{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}]))
 `;
 
 /**
@@ -817,7 +833,7 @@ export const getQueryEdgeLatencyP99 = (
 ): string => `
 histogram_quantile(0.99,
   sum by (le) (
-    sum_over_time(latency_seconds_bucket{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}[${timeRange}])
+    sum_over_time(latency_seconds_bucket{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}])
   )
 ) * 1000
 `;
@@ -837,7 +853,7 @@ export const getQueryEdgeFaults = (
   remoteService: string,
   timeRange: string
 ): string => `
-sum(sum_over_time(fault{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}[${timeRange}]))
+sum(sum_over_time(fault{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}]))
 `;
 
 /**
@@ -855,7 +871,7 @@ export const getQueryEdgeErrors = (
   remoteService: string,
   timeRange: string
 ): string => `
-sum(sum_over_time(error{namespace="span_derived",service="${service}",environment="${environment}",remoteService="${remoteService}"}[${timeRange}]))
+sum(sum_over_time(error{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}]))
 `;
 
 // ============================================================================
@@ -875,8 +891,8 @@ export const getQueryDependencyRequestsOverTime = (
   window?: string
 ): string =>
   window
-    ? `sum(sum_over_time(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}[${window}]))`
-    : `sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"})`;
+    ? `sum(sum_over_time(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="${escapePromQLLabel(remoteService)}",remoteOperation="${escapePromQLLabel(remoteOperation)}",namespace="span_derived"}[${window}]))`
+    : `sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="${escapePromQLLabel(remoteService)}",remoteOperation="${escapePromQLLabel(remoteOperation)}",namespace="span_derived"})`;
 
 /**
  * Get faults and errors over time for a specific dependency
@@ -891,18 +907,18 @@ export const getQueryDependencyFaultsAndErrorsOverTime = (
 ): string => `
 label_replace(
   (
-    sum(fault{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"})
+    sum(fault{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="${escapePromQLLabel(remoteService)}",remoteOperation="${escapePromQLLabel(remoteOperation)}",namespace="span_derived"})
     /
-    clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}), 1)
+    clamp_min(sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="${escapePromQLLabel(remoteService)}",remoteOperation="${escapePromQLLabel(remoteOperation)}",namespace="span_derived"}), 1)
   ) * 100,
   "metric", "Fault Rate (%)", "", ""
 )
 or
 label_replace(
   (
-    sum(error{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"})
+    sum(error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="${escapePromQLLabel(remoteService)}",remoteOperation="${escapePromQLLabel(remoteOperation)}",namespace="span_derived"})
     /
-    clamp_min(sum(request{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}), 1)
+    clamp_min(sum(request{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="${escapePromQLLabel(remoteService)}",remoteOperation="${escapePromQLLabel(remoteOperation)}",namespace="span_derived"}), 1)
   ) * 100,
   "metric", "Error Rate (%)", "", ""
 )
@@ -922,7 +938,7 @@ export const getQueryDependencyLatencyPercentilesOverTime = (
 label_replace(
   histogram_quantile(0.50,
     sum by (le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="${escapePromQLLabel(remoteService)}",remoteOperation="${escapePromQLLabel(remoteOperation)}",namespace="span_derived"}
     )
   ) * 1000,
   "metric", "p50", "", ""
@@ -931,7 +947,7 @@ or
 label_replace(
   histogram_quantile(0.90,
     sum by (le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="${escapePromQLLabel(remoteService)}",remoteOperation="${escapePromQLLabel(remoteOperation)}",namespace="span_derived"}
     )
   ) * 1000,
   "metric", "p90", "", ""
@@ -940,7 +956,7 @@ or
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
-      latency_seconds_bucket{environment="${environment}",service="${serviceName}",remoteService="${remoteService}",remoteOperation="${remoteOperation}",namespace="span_derived"}
+      latency_seconds_bucket{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="${escapePromQLLabel(remoteService)}",remoteOperation="${escapePromQLLabel(remoteOperation)}",namespace="span_derived"}
     )
   ) * 1000,
   "metric", "p99", "", ""

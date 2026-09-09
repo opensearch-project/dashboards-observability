@@ -88,12 +88,15 @@ export const useOperations = (params: UseOperationsParams): UseOperationsResult 
       return;
     }
 
+    const abortController = new AbortController();
+
     const fetchOperations = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
         const response = await pplSearchService.listServiceOperations(fetchParams);
+        if (abortController.signal.aborted) return;
 
         // Response structure: { Operations: [...], StartTime, EndTime, NextToken }
         const operationsArray = response.Operations || [];
@@ -113,15 +116,19 @@ export const useOperations = (params: UseOperationsParams): UseOperationsResult 
 
         setData(operations);
       } catch (err) {
+        if (abortController.signal.aborted) return;
         console.error('[useOperations] Error fetching operations:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setData([]);
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) setIsLoading(false);
       }
     };
 
     fetchOperations();
+
+    return () => abortController.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pplSearchService, fetchParams, refetchTrigger, params.refreshTrigger]);
 
   const refetch = () => {
