@@ -20,16 +20,19 @@
 // checkbox row and its label must be width-bounded (min-width: 0) at every
 // level or the inner `text-overflow: ellipsis` never engages.
 //
-// Selectors are `oui*`: `@elastic/eui` in OpenSearch Dashboards is an alias for
-// `@opensearch-project/oui`, whose components render `oui*` DOM classes even
-// though the JS exports keep the `Eui*` names. `eui*` selectors match nothing.
+// Both `eui*` and `oui*` selectors are listed: the runtime EUI shipped by
+// OpenSearch Dashboards renders `eui*` DOM classes, while `@opensearch-project/oui`
+// renders `oui*` — cover both so truncation holds regardless of which is loaded.
 .apmFilterCheckboxGroup {
+  .euiCheckboxGroup__item,
+  .euiCheckbox,
   .ouiCheckboxGroup__item,
   .ouiCheckbox {
     min-width: 0;
     overflow: hidden;
   }
 
+  .euiCheckbox__label,
   .ouiCheckbox__label {
     display: block;
     width: 100%;
@@ -42,17 +45,19 @@
 // accordion header instead of pushing the caret / layout out of the panel. The
 // `min-width: 0` cascade must reach every level or the inner TruncatedLabel
 // `text-overflow: ellipsis` never engages:
-//   .ouiAccordion__button (flex-grow child of the trigger wrapper, next to the
-//   arrow) -> .ouiIEFlexWrapFix (the span OUI wraps `buttonContent` in) ->
+//   accordion button (flex-grow child of the trigger wrapper, next to the
+//   arrow) -> IEFlexWrapFix (the span EUI/OUI wraps `buttonContent` in) ->
 //   .apmAttributeTitleText (our EuiText) -> TruncatedLabel.
 // The arrow is a sibling of the button (`flex-shrink: 0` already) so it stays
-// visible next to the ellipsis.
+// visible next to the ellipsis. Both `eui*`/`oui*` class names are covered.
 .apmAttributeAccordion {
+  .euiAccordion__button,
   .ouiAccordion__button {
     min-width: 0;
     overflow: hidden;
   }
 
+  .euiIEFlexWrapFix,
   .ouiIEFlexWrapFix {
     min-width: 0;
     width: 100%;
