@@ -96,7 +96,10 @@ export const useDependencies = (params: UseDependenciesParams): UseDependenciesR
       setError(null);
 
       try {
-        const response = await pplSearchService.listServiceDependencies(fetchParams);
+        const response = await pplSearchService.listServiceDependencies(
+          fetchParams,
+          abortController.signal
+        );
         if (abortController.signal.aborted) return;
 
         // Response structure: { Dependencies: [...], StartTime, EndTime, NextToken }

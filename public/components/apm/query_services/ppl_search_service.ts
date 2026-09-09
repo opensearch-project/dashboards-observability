@@ -9,6 +9,7 @@ import {
   getQueryListServiceOperations,
   getQueryListServiceDependencies,
   getQueryGetServiceMap,
+  DEFAULT_ROW_LIMIT,
 } from './query_requests/ppl_queries';
 import { ResponseProcessor } from './query_requests/response_processor';
 import { coreRefs } from '../../../framework/core_refs';
@@ -75,7 +76,10 @@ export class PPLSearchService {
   /**
    * List service operations for a given service
    */
-  async listServiceOperations(params: ListServiceOperationsRequest): Promise<any> {
+  async listServiceOperations(
+    params: ListServiceOperationsRequest,
+    signal?: AbortSignal
+  ): Promise<any> {
     const { queryIndex, startTime, endTime, keyAttributes, dataset } = params;
 
     const pplQuery = getQueryListServiceOperations(
@@ -86,7 +90,7 @@ export class PPLSearchService {
       keyAttributes?.Name
     );
 
-    const searchResponse = await this.executePPLQuery(pplQuery, dataset);
+    const searchResponse = await this.executePPLQuery(pplQuery, dataset, signal);
 
     // Transform the response
     return ResponseProcessor.transformListServiceOperations(searchResponse);
@@ -95,7 +99,10 @@ export class PPLSearchService {
   /**
    * List service dependencies for a given service
    */
-  async listServiceDependencies(params: ListServiceDependenciesRequest): Promise<any> {
+  async listServiceDependencies(
+    params: ListServiceDependenciesRequest,
+    signal?: AbortSignal
+  ): Promise<any> {
     const { queryIndex, startTime, endTime, keyAttributes, dataset } = params;
 
     const pplQuery = getQueryListServiceDependencies(
@@ -106,7 +113,7 @@ export class PPLSearchService {
       keyAttributes?.Name
     );
 
-    const searchResponse = await this.executePPLQuery(pplQuery, dataset);
+    const searchResponse = await this.executePPLQuery(pplQuery, dataset, signal);
 
     // Transform the response
     return ResponseProcessor.transformListServiceDependencies(searchResponse);
@@ -115,15 +122,20 @@ export class PPLSearchService {
   /**
    * Get service map (topology) data
    */
-  async getServiceMap(params: GetServiceMapRequest): Promise<any> {
+  async getServiceMap(params: GetServiceMapRequest, signal?: AbortSignal): Promise<any> {
     const { queryIndex, startTime, endTime, dataset } = params;
 
     const pplQuery = getQueryGetServiceMap(queryIndex, startTime, endTime);
 
-    const searchResponse = await this.executePPLQuery(pplQuery, dataset);
+    const searchResponse = await this.executePPLQuery(pplQuery, dataset, signal);
+
+    // The edge query is capped with `| head DEFAULT_ROW_LIMIT`; if it comes back
+    // full, the topology is truncated and the UI should say so.
+    const rowCount = searchResponse?.size ?? searchResponse?.jsonData?.length ?? 0;
+    const truncated = rowCount >= DEFAULT_ROW_LIMIT;
 
     // Transform the response
-    return ResponseProcessor.transformGetServiceMap(searchResponse);
+    return { ...ResponseProcessor.transformGetServiceMap(searchResponse), truncated };
   }
 
   /**

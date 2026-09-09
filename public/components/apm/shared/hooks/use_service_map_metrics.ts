@@ -77,8 +77,10 @@ export const useServiceMapMetrics = (
   const serviceFilter = '';
 
   // Stable key over the service set; retriggers the fetch when the set changes.
+  // Keyed on name+environment so an environment-only change still refetches
+  // (nodes are identified by serviceName::environment).
   const servicesKey = useMemo(
-    () => params.services.map((s) => s.serviceName).join('|'),
+    () => params.services.map((s) => `${s.serviceName}::${s.environment}`).join('|'),
     [params.services]
   );
 
@@ -144,9 +146,9 @@ export const useServiceMapMetrics = (
       params.services.forEach(({ serviceName, environment }) => {
         const nodeId = `${serviceName}::${environment}`;
 
-        const throughputData = extractServiceData(throughputResp, serviceName);
-        const faultsData = extractServiceData(faultsResp, serviceName);
-        const errorsData = extractServiceData(errorsResp, serviceName);
+        const throughputData = extractServiceData(throughputResp, serviceName, environment);
+        const faultsData = extractServiceData(faultsResp, serviceName, environment);
+        const errorsData = extractServiceData(errorsResp, serviceName, environment);
 
         // Calculate totals and failure ratio client-side
         const totalRequests = calculateSum(throughputData);
@@ -223,7 +225,11 @@ function calculateSum(data: MetricDataPoint[]): number {
  * Extract metric data for a specific service from Prometheus response
  * Handles data frame format, range query, and instant query formats
  */
-function extractServiceData(response: any, serviceName: string): MetricDataPoint[] {
+function extractServiceData(
+  response: any,
+  serviceName: string,
+  environment?: string
+): MetricDataPoint[] {
   if (!response) {
     return [];
   }
@@ -237,14 +243,17 @@ function extractServiceData(response: any, serviceName: string): MetricDataPoint
     if (timeField && seriesField && valueField) {
       const dataPoints: MetricDataPoint[] = [];
 
-      // Iterate through all data points and filter by service
+      // Iterate through all data points and filter by service (and environment,
+      // so nodes that share a name across environments get distinct metrics).
       for (let i = 0; i < seriesField.values.length; i++) {
         const seriesLabel = seriesField.values[i];
-        // Parse series label: {service="ad"} -> ad
-        const match = seriesLabel.match(/service="([^"]+)"/);
-        const service = match ? match[1] : null;
+        // Parse series label: {environment="prod", service="ad"} -> match both
+        const svcMatch = seriesLabel.match(/service="([^"]+)"/);
+        const envMatch = seriesLabel.match(/environment="([^"]*)"/);
+        const service = svcMatch ? svcMatch[1] : null;
+        const env = envMatch ? envMatch[1] : undefined;
 
-        if (service === serviceName) {
+        if (service === serviceName && (environment === undefined || env === environment)) {
           dataPoints.push({
             timestamp: timeField.values[i] / 1000, // Convert ms to seconds
             value: parseFloat(valueField.values[i]) || 0,
@@ -260,7 +269,11 @@ function extractServiceData(response: any, serviceName: string): MetricDataPoint
 
   // Check for instantData format (fallback for instant queries)
   if (response?.meta?.instantData?.rows && Array.isArray(response.meta.instantData.rows)) {
-    const rows = response.meta.instantData.rows.filter((row: any) => row.service === serviceName);
+    const rows = response.meta.instantData.rows.filter(
+      (row: any) =>
+        row.service === serviceName &&
+        (environment === undefined || row.environment === environment)
+    );
 
     if (rows.length > 0) {
       return rows.map((row: any) => ({
@@ -273,7 +286,11 @@ function extractServiceData(response: any, serviceName: string): MetricDataPoint
   // Standard Prometheus response format
   const result = response?.data?.result || response?.result || [];
 
-  const serviceResult = result.find((r: any) => r.metric?.service === serviceName);
+  const serviceResult = result.find(
+    (r: any) =>
+      r.metric?.service === serviceName &&
+      (environment === undefined || r.metric?.environment === environment)
+  );
 
   if (!serviceResult) {
     return [];

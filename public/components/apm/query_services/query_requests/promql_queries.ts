@@ -1011,7 +1011,7 @@ label_replace(
  */
 export const getQueryServiceMapThroughput = (serviceFilter: string, timeRange: string): string =>
   `
-sum by (service) (
+sum by (environment, service) (
   sum_over_time(request{${buildServicesNodeSelector(serviceFilter)}}[${timeRange}])
 )
 `.trim();
@@ -1025,7 +1025,7 @@ sum by (service) (
  */
 export const getQueryServiceMapFaults = (serviceFilter: string, timeRange: string): string =>
   `
-sum by (service) (
+sum by (environment, service) (
   sum_over_time(fault{${buildServicesNodeSelector(serviceFilter)}}[${timeRange}])
 )
 `.trim();
@@ -1039,7 +1039,7 @@ sum by (service) (
  */
 export const getQueryServiceMapErrors = (serviceFilter: string, timeRange: string): string =>
   `
-sum by (service) (
+sum by (environment, service) (
   sum_over_time(error{${buildServicesNodeSelector(serviceFilter)}}[${timeRange}])
 )
 `.trim();

@@ -229,6 +229,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     isLoading: mapLoading,
     error: mapError,
     availableGroupByAttributes,
+    truncated: mapTruncated,
   } = useServiceMap({
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
@@ -684,6 +685,23 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                   onClearAll={handleClearAllFilters}
                   disabled={isLoading}
                 />
+              </>
+            )}
+
+            {/* Edge-cap truncation notice: the graph's node-count notice does
+                not cover a dense mesh where edges are cut before the node cap. */}
+            {mapTruncated && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  title="Showing a partial topology"
+                  color="warning"
+                  iconType="alert"
+                  size="s"
+                >
+                  The service map reached its connection limit, so some dependencies are not shown.
+                  Narrow the time range or use filters to see a complete view.
+                </EuiCallOut>
               </>
             )}
 

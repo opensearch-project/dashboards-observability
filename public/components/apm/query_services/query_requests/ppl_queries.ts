@@ -7,7 +7,7 @@ import { formatPPLTimestamp } from '../../shared/utils/time_utils';
 import { escapePPLString } from './escape_utils';
 
 /** Row cap for otherwise-unbounded list/topology PPL queries. */
-const DEFAULT_ROW_LIMIT = 1000;
+export const DEFAULT_ROW_LIMIT = 1000;
 
 /**
  * PPL queries for APM topology data

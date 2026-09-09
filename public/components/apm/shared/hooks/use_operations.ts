@@ -95,7 +95,10 @@ export const useOperations = (params: UseOperationsParams): UseOperationsResult 
       setError(null);
 
       try {
-        const response = await pplSearchService.listServiceOperations(fetchParams);
+        const response = await pplSearchService.listServiceOperations(
+          fetchParams,
+          abortController.signal
+        );
         if (abortController.signal.aborted) return;
 
         // Response structure: { Operations: [...], StartTime, EndTime, NextToken }

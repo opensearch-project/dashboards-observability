@@ -27,11 +27,13 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiResizableContainer,
+  Criteria,
 } from '@elastic/eui';
 import get from 'lodash/get';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { useServices } from '../../shared/hooks/use_services';
 import { useServicesRedMetrics, serviceNodeKey } from '../../shared/hooks/use_services_red_metrics';
+import { useControlledPagination } from '../../shared/hooks/use_controlled_pagination';
 import { useApmConfig } from '../../config/apm_config_context';
 import { SloApiClient } from '../slos/slo_api_client';
 import {
@@ -91,10 +93,13 @@ interface ServicesTablePanelProps {
   displayedServices: ServiceTableItem[];
   columns: Array<EuiBasicTableColumn<ServiceTableItem>>;
   isTableLoading: boolean;
-  onTableChange: (change: {
-    page?: { index: number; size: number };
-    sort?: { field: string; direction: 'asc' | 'desc' };
-  }) => void;
+  onTableChange: (criteria: Criteria<ServiceTableItem>) => void;
+  // Controlled pagination + sort, so the metrics hook's visible-page slice
+  // stays in step with what the table renders (and page clamps on filter).
+  pageIndex: number;
+  pageSize: number;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
   refreshTrigger: number;
   searchQuery: string;
   latencyPercentile: string;
@@ -135,6 +140,10 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
   columns,
   isTableLoading,
   onTableChange,
+  pageIndex,
+  pageSize,
+  sortField,
+  sortDirection,
   refreshTrigger,
   searchQuery,
   latencyPercentile,
@@ -238,13 +247,14 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
           items={displayedServices}
           columns={columns}
           pagination={{
-            initialPageSize: APM_CONSTANTS.DEFAULT_PAGE_SIZE,
+            pageIndex,
+            pageSize,
             pageSizeOptions: [...APM_CONSTANTS.PAGE_SIZE_OPTIONS],
           }}
           sorting={{
             sort: {
-              field: 'serviceName',
-              direction: 'asc',
+              field: sortField as keyof ServiceTableItem,
+              direction: sortDirection,
             },
           }}
           loading={isTableLoading}
@@ -324,8 +334,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   const [visibleServices, setVisibleServices] = useState<
     Array<{ serviceName: string; environment?: string }>
   >([]);
-  const [tablePageIndex, setTablePageIndex] = useState(0);
-  const [tablePageSize, setTablePageSize] = useState<number>(APM_CONSTANTS.DEFAULT_PAGE_SIZE);
+  // Sort is mirrored so the visible-page slice matches the table's order; the
+  // page index/size come from useControlledPagination (declared after
+  // displayedServices, since it needs the post-filter row count to clamp).
   const [tableSortField, setTableSortField] = useState<string>('serviceName');
   const [tableSortDirection, setTableSortDirection] = useState<'asc' | 'desc'>('asc');
 
@@ -611,28 +622,6 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     refetchMetrics();
   }, [refetch, refetchMetrics]);
 
-  // Capture the table's page + sort so we can fetch sparklines for just the
-  // visible rows. The table stays uncontrolled; we only mirror its state.
-  const handleTableChange = useCallback(
-    ({
-      page,
-      sort,
-    }: {
-      page?: { index: number; size: number };
-      sort?: { field: string; direction: 'asc' | 'desc' };
-    }) => {
-      if (page) {
-        setTablePageIndex(page.index);
-        setTablePageSize(page.size);
-      }
-      if (sort) {
-        setTableSortField(sort.field);
-        setTableSortDirection(sort.direction);
-      }
-    },
-    []
-  );
-
   // Combined loading state for table and filters
   const isTableLoading = isLoading || metricsLoading;
 
@@ -687,16 +676,24 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return { latencyMin, latencyMax, throughputMin, throughputMax };
   }, [metricsMap, fullyFilteredItems]);
 
-  // Sync selected ranges to the metric bounds whenever those bounds change.
-  // Depend on the primitive bounds rather than the metricRanges object: the
-  // object gets a fresh identity every time metricsMap changes (e.g. when a
-  // page's sparklines load during browsing), and firing on that identity churn
-  // would reset the sliders and silently clear an active filter mid-browse.
+  // Track the sliders to the metric bounds only while the user has NOT touched
+  // them, and never clear the user-modified flags here. Two reasons:
+  //  - Depend on the primitive bounds, not the metricRanges object: that object
+  //    gets a fresh identity whenever metricsMap changes (e.g. a page's
+  //    sparklines loading), and firing on identity churn would reset an active
+  //    filter mid-browse.
+  //  - Instant metrics arrive in several waves, so a bound can jump from 0 to a
+  //    real value in a later wave. Clearing the flags on that change would wipe
+  //    a filter the user set during the load; gating on the flag (and not
+  //    resetting it) keeps their selection.
   useEffect(() => {
-    setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
-    setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
-    setLatencyUserModified(false);
-    setThroughputUserModified(false);
+    if (!latencyUserModified) {
+      setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
+    }
+    if (!throughputUserModified) {
+      setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     metricRanges.latencyMin,
     metricRanges.latencyMax,
@@ -767,6 +764,45 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     selectedFailureRateThresholds,
   ]);
 
+  // Controlled pagination: clamps the page index to the post-filter row count,
+  // so shrinking the result set (via a filter) can never strand the user on an
+  // empty page with no sparklines. Sort is captured alongside so the slice below
+  // mirrors the table's actual order.
+  const {
+    pageIndex,
+    pageSize,
+    onTableChange: onPaginationChange,
+    resetPage,
+  } = useControlledPagination<ServiceTableItem>(displayedServices.length);
+
+  const handleTableChange = useCallback(
+    (criteria: Criteria<ServiceTableItem>) => {
+      onPaginationChange(criteria);
+      if (criteria.sort) {
+        setTableSortField(criteria.sort.field as string);
+        setTableSortDirection(criteria.sort.direction);
+      }
+    },
+    [onPaginationChange]
+  );
+
+  // Return to the first page when the user changes a filter, matching the
+  // service-details tables. (The clamp above already prevents an empty page;
+  // this just lands the user on page 1 rather than a mid-range page.)
+  const filterSignature = [
+    searchQuery,
+    latencyUserModified ? latencyRange.join(',') : '',
+    throughputUserModified ? throughputRange.join(',') : '',
+    selectedFailureRateThresholds.join(','),
+  ].join('|');
+  const prevFilterSignature = useRef(filterSignature);
+  useEffect(() => {
+    if (prevFilterSignature.current !== filterSignature) {
+      prevFilterSignature.current = filterSignature;
+      resetPage();
+    }
+  }, [filterSignature, resetPage]);
+
   // Mirror the table's current sort + page to derive the visible rows, so the
   // metrics hook fetches sparklines only for those. Sorting uses the same
   // instant metric values the columns sort by. The name guard prevents a
@@ -795,8 +831,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       const cmp = va < vb ? -1 : va > vb ? 1 : 0;
       return tableSortDirection === 'desc' ? -cmp : cmp;
     });
-    const start = tablePageIndex * tablePageSize;
-    const slice = sorted.slice(start, start + tablePageSize);
+    const start = pageIndex * pageSize;
+    const slice = sorted.slice(start, start + pageSize);
     setVisibleServices((prev) => {
       const sameKeys =
         prev.length === slice.length &&
@@ -807,14 +843,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         ? prev
         : slice.map((s) => ({ serviceName: s.serviceName, environment: s.environment }));
     });
-  }, [
-    displayedServices,
-    metricsMap,
-    tableSortField,
-    tableSortDirection,
-    tablePageIndex,
-    tablePageSize,
-  ]);
+  }, [displayedServices, metricsMap, tableSortField, tableSortDirection, pageIndex, pageSize]);
 
   // Build active filter badges from current filter state
   const activeFilters: FilterBadge[] = useMemo(() => {
@@ -1594,6 +1623,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           columns={columns}
                           isTableLoading={isTableLoading}
                           onTableChange={handleTableChange}
+                          pageIndex={pageIndex}
+                          pageSize={pageSize}
+                          sortField={tableSortField}
+                          sortDirection={tableSortDirection}
                           refreshTrigger={refreshTrigger}
                           searchQuery={searchQuery}
                           latencyPercentile={latencyPercentile}

@@ -212,6 +212,8 @@ export interface ServiceMapResponse {
   EndTime: number;
   NextToken: string | null;
   AwsAccountId: string | null;
+  /** True when the edge query hit its row cap, so the topology is incomplete. */
+  truncated?: boolean;
 }
 
 /**

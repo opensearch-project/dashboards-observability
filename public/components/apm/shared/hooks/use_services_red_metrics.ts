@@ -44,7 +44,12 @@ export interface MetricDataPoint {
 }
 
 export interface UseServicesRedMetricsParams {
-  /** All services in the catalog — instant metrics (numbers, sort, filter). */
+  /**
+   * All services in the catalog — instant metrics (numbers, sort, filter).
+   * `environment` should be provided: it is part of the metrics-map key and the
+   * per-series match. If omitted, a series is matched by name alone, which can
+   * blend or pick an arbitrary environment for a name that spans several.
+   */
   services: Array<{ serviceName: string; environment?: string }>;
   /**
    * Services on the currently visible table page. Sparklines (per-step range
@@ -140,17 +145,18 @@ export const useServicesRedMetrics = (
     [params.services]
   );
 
-  // Unique service names on the visible page. Effect 3 builds a bounded
-  // `service=~"..."` filter from the not-yet-cached subset (small, well under
-  // the 10,000-char PromQL limit). sparklineKey drives refetch on page change.
-  // Keyed on names (not name+env): the range query filters by service name and
-  // groups by (environment, service), so a single fetch returns every
-  // environment for those names, and the per-(name, env) cache is populated for
-  // all of them at once.
+  // Unique service names on the visible page — used to build the bounded
+  // `service=~"..."` range filter (grouped by (environment, service), so one
+  // fetch returns every environment for those names).
   const sparklineNames = Array.from(
     new Set((params.sparklineServices ?? []).map((s) => s.serviceName))
   );
-  const sparklineKey = sparklineNames.join('|');
+  // Key on (name, env) so any change to the visible node set (including an
+  // environment-only page change) retriggers Effect 3, which then fetches only
+  // the not-yet-cached nodes. sparklineKey drives refetch on page change.
+  const sparklineKey = (params.sparklineServices ?? [])
+    .map((s) => serviceNodeKey(s.serviceName, s.environment))
+    .join('|');
 
   // Memoize time values to avoid unnecessary re-fetches
   const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);

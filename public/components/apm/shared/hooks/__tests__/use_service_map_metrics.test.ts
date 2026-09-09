@@ -74,7 +74,8 @@ describe('useServiceMapMetrics', () => {
         data: {
           result: [
             {
-              metric: { service: serviceName },
+              // Metrics group by (environment, service), so the series carries both.
+              metric: { service: serviceName, environment: 'generic:default' },
               values: [
                 [1704067200, String(value)],
                 [1704067260, String(value + 1)],
@@ -202,7 +203,13 @@ describe('useServiceMapMetrics', () => {
         type: 'data_frame',
         fields: [
           { name: 'Time', values: [1704067200000, 1704067260000] },
-          { name: 'Series', values: ['{service="api-gateway"}', '{service="api-gateway"}'] },
+          {
+            name: 'Series',
+            values: [
+              '{environment="generic:default", service="api-gateway"}',
+              '{environment="generic:default", service="api-gateway"}',
+            ],
+          },
           { name: 'Value', values: [100, 101] },
         ],
       };
