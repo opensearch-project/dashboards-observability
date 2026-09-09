@@ -500,19 +500,20 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     setSelectedEnvironments({});
   }, []);
 
-  // Handle select all for a specific attribute
+  // Handle select all for a specific attribute. Merges the currently-filtered
+  // values into the existing selection (rather than replacing it) so values
+  // selected under a previous search term survive — matching the Environment
+  // filter's handleSelectAllEnvironments semantics.
   const handleSelectAllForAttribute = useCallback(
     (attrPath: string) => {
       const allValues = filteredAttributeValues[attrPath] || [];
-      const newSelections: Record<string, boolean> = {};
-      allValues.forEach((value) => {
-        newSelections[value] = true;
+      setSelectedGroupByAttributes((prev) => {
+        const next = { ...(prev[attrPath] || {}) };
+        allValues.forEach((value) => {
+          next[value] = true;
+        });
+        return { ...prev, [attrPath]: next };
       });
-
-      setSelectedGroupByAttributes((prev) => ({
-        ...prev,
-        [attrPath]: newSelections,
-      }));
     },
     [filteredAttributeValues]
   );
@@ -1342,10 +1343,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                           <EuiText size="xs">
                                             {environmentExpanded
                                               ? i18nTexts.filters.showLess
-                                              : `+${
+                                              : i18nTexts.filters.showMore(
                                                   filteredEnvironments.length -
-                                                  APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT
-                                                } more`}
+                                                    APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT
+                                                )}
                                           </EuiText>
                                         </EuiLink>
                                       </>
@@ -1582,7 +1583,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                                     <EuiText size="xs">
                                                       {isExpanded
                                                         ? i18nTexts.filters.showLess
-                                                        : `+${remainingCount} more`}
+                                                        : i18nTexts.filters.showMore(
+                                                            remainingCount
+                                                          )}
                                                     </EuiText>
                                                   </EuiLink>
                                                 </>

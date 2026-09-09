@@ -106,6 +106,11 @@ export const servicesI18nTexts = {
     showLess: i18n.translate('observability.apm.services.filters.showLess', {
       defaultMessage: 'Show less',
     }),
+    showMore: (count: number) =>
+      i18n.translate('observability.apm.services.filters.showMore', {
+        defaultMessage: '+{count} more',
+        values: { count },
+      }),
     noMatchingValues: i18n.translate('observability.apm.services.filters.noMatchingValues', {
       defaultMessage: 'No matching values',
     }),
