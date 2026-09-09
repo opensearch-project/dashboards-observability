@@ -165,7 +165,6 @@ const FORECASTER_INIT_TEST_STATE = 'Initializing test';
 const FORECASTER_FORECAST_FAILURE_STATE = 'Forecast failure';
 const MINUTES_UNIT = 'Minutes';
 const SIMPLE_FEATURE_TYPE = 'simple_aggs';
-const CUSTOM_FEATURE_TYPE = 'custom_aggs';
 const AD_DOCS_LINK = 'https://opensearch.org/docs/latest/observing-your-data/ad/index/';
 const FORECASTER_DOCS_LINK =
   'https://opensearch.org/docs/latest/observing-your-data/forecast/index/';
@@ -180,10 +179,7 @@ const AGGREGATION_OPTIONS = [
   { value: 'max', text: 'max()' },
 ];
 
-const FEATURE_TYPE_OPTIONS = [
-  { value: SIMPLE_FEATURE_TYPE, text: 'Field value' },
-  { value: CUSTOM_FEATURE_TYPE, text: 'Custom expression' },
-];
+const FEATURE_TYPE_OPTIONS = [{ value: SIMPLE_FEATURE_TYPE, text: 'Field value' }];
 
 const FEATURE_DIRECTION_OPTIONS = [
   { value: 'both', text: 'Deviation in any direction (default)' },

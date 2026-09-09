@@ -26,25 +26,16 @@
 import dateMath from '@elastic/datemath';
 
 /**
- * Parse a date-math expression (e.g. `"now-1h"`) into an epoch-seconds value.
+ * Parse a date-math expression (e.g. `"now-1h"`) into epoch milliseconds —
+ * useful for the OpenSearch backend's post-fetch filter where `start_time` /
+ * `end_time` are epoch ms, and for `new Date(ms).toISOString()` conversions.
  *
  * @param expr       Date-math string or absolute ISO timestamp.
  * @param isEndTime  When `true`, rounds UP (end-of-day semantics, so
  *                   `"now/d"` → end-of-today); when `false`, rounds DOWN
  *                   (`"now/d"` → start-of-today). Matches `EuiSuperDatePicker`
  *                   semantics for the two ends of a picked window.
- * @returns Epoch seconds (integer).
- * @throws If the expression cannot be parsed.
- */
-export function parseDateMath(expr: string, isEndTime: boolean): number {
-  return Math.floor(parseDateMathMs(expr, isEndTime) / 1000);
-}
-
-/**
- * Same as {@link parseDateMath} but returns epoch milliseconds — useful for
- * the OpenSearch backend's post-fetch filter where `start_time` / `end_time`
- * are epoch ms, and for `new Date(ms).toISOString()` conversions.
- *
+ * @returns Epoch milliseconds.
  * @throws If the expression cannot be parsed.
  */
 export function parseDateMathMs(expr: string, isEndTime: boolean): number {
@@ -53,17 +44,6 @@ export function parseDateMathMs(expr: string, isEndTime: boolean): number {
     throw new Error(`Invalid date-math expression: ${expr}`);
   }
   return parsed.valueOf();
-}
-
-/**
- * Pass-through helper for OpenSearch DSL `range` clauses. OpenSearch's
- * query DSL accepts date-math natively (`"gte": "now-1h"`), so the common
- * case is simply forwarding the string. Declared as a function for
- * call-site clarity and to reserve a seam if we later need to strip
- * whitespace / normalize.
- */
-export function dateMathToDSLString(expr: string): string {
-  return expr;
 }
 
 /**

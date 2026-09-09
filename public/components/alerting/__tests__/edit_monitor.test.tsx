@@ -16,8 +16,7 @@ jest.mock('../hooks/use_rule_detail', () => ({
 jest.mock('../create_monitor', () => ({
   CreateMonitor: (props: Record<string, unknown>) => {
     const init = props.initialForm as
-      | { name?: string; indices?: string[]; timeField?: string }
-      | undefined;
+      { name?: string; indices?: string[]; timeField?: string } | undefined;
     return (
       <div
         data-test-subj="createMonitorMock"
@@ -58,8 +57,6 @@ const pplRule = (): UnifiedRule => ({
   description: '',
   alertHistory: [],
   conditionPreviewData: [],
-  notificationRouting: [],
-  suppressionRules: [],
   raw: {
     monitor_type: 'ppl_monitor',
     inputs: [{ ppl_input: { query: 'source = logs-*', query_language: 'ppl' } }],

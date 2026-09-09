@@ -19,7 +19,6 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
@@ -32,7 +31,6 @@ import {
   EuiFlyoutHeader,
   EuiFormRow,
   EuiLink,
-  EuiPanel,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -47,8 +45,7 @@ import {
   validateMonitorForm,
   validatePplForm,
 } from '../../../../common/services/alerting/validators';
-import { validatePromQL } from '../promql_editor';
-import { MonitorTemplateWizard, AlertTemplate } from '../monitor_template_wizard';
+import { validatePromQL } from '../promql_validation';
 import { MonitorBackendType } from '../monitor_form_components';
 import {
   DEFAULT_OS_FORM,
@@ -85,8 +82,6 @@ export interface CreateMonitorProps {
    * button instead of leaving it permanently disabled.
    */
   onSave: (monitor: MonitorFormState) => void | Promise<void>;
-  /** Batch save for AI-generated monitors (does not close the flyout) */
-  onBatchSave?: (monitors: MonitorFormState[]) => void;
   onCancel: () => void;
   /** All selectable datasources (including workspace-scoped Prometheus entries) */
   datasources: Datasource[];
@@ -143,14 +138,8 @@ export interface CreateMonitorProps {
   hideBuildInLogsLink?: boolean;
 }
 
-type CreationMode = 'manual' | 'ai';
-
-/** Feature flag: enable template-based monitor creation. Flip to true when ready. */
-const TEMPLATE_MODE_ENABLED = false;
-
 export const CreateMonitor: React.FC<CreateMonitorProps> = ({
   onSave,
-  onBatchSave,
   onCancel,
   datasources,
   selectedDsIds,
@@ -194,7 +183,6 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         ? 'opensearch'
         : 'prometheus';
 
-  const [creationMode, setCreationMode] = useState<CreationMode>('manual');
   const [backendType, setBackendType] = useState<MonitorBackendType>(initialType);
   const [promForm, setPromForm] = useState<PrometheusFormState>(
     initialForm && initialForm.datasourceType === 'prometheus'
@@ -280,10 +268,6 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
 
   const handleDatasourceChange = (id: string, type: MonitorBackendType) => {
     setBackendType(type);
-    // Reset to manual if switching away from Prometheus
-    if (type !== 'prometheus' && creationMode === 'ai') {
-      setCreationMode('manual');
-    }
     if (type === 'prometheus') {
       setPromForm((prev) => ({ ...prev, datasourceId: id }));
     } else {
@@ -434,38 +418,6 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
     }
   }, [backendType, promForm, osForm, onSave, duplicateName, isSaving]);
 
-  // When AI wizard is active and user is on a Prometheus datasource, delegate to MonitorTemplateWizard
-  if (creationMode === 'ai' && backendType === 'prometheus') {
-    return (
-      <MonitorTemplateWizard
-        onClose={onCancel}
-        onCreateMonitors={(templates: AlertTemplate[]) => {
-          // Convert AI templates to MonitorFormState
-          const forms: PrometheusFormState[] = templates.map((t) => ({
-            datasourceType: 'prometheus' as const,
-            datasourceId: promForm.datasourceId,
-            name: t.name,
-            query: t.query,
-            threshold: { operator: '>' as const, value: 0, unit: '', forDuration: t.forDuration },
-            evaluationInterval: t.evaluationInterval,
-            pendingPeriod: t.forDuration,
-            firingPeriod: t.forDuration,
-            labels: Object.entries(t.labels).map(([key, value]) => ({ key, value })),
-            annotations: Object.entries(t.annotations).map(([key, value]) => ({ key, value })),
-            severity: t.severity,
-            enabled: true,
-          }));
-          // Use batch save to add all without closing the flyout
-          if (onBatchSave) {
-            onBatchSave(forms);
-          } else {
-            forms.forEach((f) => onSave(f));
-          }
-        }}
-      />
-    );
-  }
-
   return (
     <>
       <EuiFlyout
@@ -552,65 +504,6 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
             Prometheus form. */}
           {/* Prometheus datasource selector moved into the Query section
               of PrometheusFormSection to match Logs layout */}
-
-          {/* Creation Mode Toggle — hidden until template support is ready */}
-          {TEMPLATE_MODE_ENABLED && !isEdit && backendType === 'prometheus' && (
-            <>
-              <EuiPanel paddingSize="s" hasBorder>
-                <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <strong>
-                        {i18n.translate(
-                          'observability.alerting.createMonitor.creationMethodLabel',
-                          {
-                            defaultMessage: 'Creation method',
-                          }
-                        )}
-                      </strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="xs" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge
-                          color={creationMode === 'manual' ? 'primary' : 'hollow'}
-                          onClick={() => setCreationMode('manual')}
-                          onClickAriaLabel={i18n.translate(
-                            'observability.alerting.createMonitor.manualCreationAriaLabel',
-                            { defaultMessage: 'Manual creation' }
-                          )}
-                        >
-                          {i18n.translate('observability.alerting.createMonitor.manualBadge', {
-                            defaultMessage: 'Manual',
-                          })}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge
-                          color={creationMode === 'ai' ? 'secondary' : 'hollow'}
-                          onClick={() => setCreationMode('ai')}
-                          onClickAriaLabel={i18n.translate(
-                            'observability.alerting.createMonitor.fromTemplateAriaLabel',
-                            { defaultMessage: 'Create from template' }
-                          )}
-                          iconType="sparkles"
-                        >
-                          {i18n.translate(
-                            'observability.alerting.createMonitor.fromTemplateBadge',
-                            {
-                              defaultMessage: 'From template',
-                            }
-                          )}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-              <EuiSpacer size="m" />
-            </>
-          )}
 
           {/* Monitor Name — rendered here for Logs; inside the Prometheus
               form section's "Rule details" accordion for metrics rules. */}

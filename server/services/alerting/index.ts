@@ -22,8 +22,6 @@
  *     and server routes resolve datasources via the saved-object helpers in
  *     `server/routes/alerting/index.ts`.
  */
-export { PLUGIN_ID, PLUGIN_NAME } from './constants';
-
 export { MonitorMutationService } from './monitor_mutation_service';
 export { MultiBackendAlertService } from './alert_service';
 export { HttpOpenSearchBackend } from './opensearch_backend';

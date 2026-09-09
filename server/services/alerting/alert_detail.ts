@@ -105,8 +105,8 @@ function normalizeForecasterResponse(
 /**
  * Get full detail for a single rule/monitor. Real metadata where the
  * upstream API exposes it (alert history, monitor config, annotations);
- * `aiSummary` and `suppressionRules` are intentionally empty — no API
- * source today and the flyout treats them as optional.
+ * `aiSummary` is intentionally omitted — no API source today and the flyout
+ * treats it as optional.
  */
 export async function getRuleDetail(
   datasourceService: DatasourceService,
@@ -161,8 +161,6 @@ export async function getADDetectorDetail(
     description: detector.description || '',
     alertHistory: [],
     conditionPreviewData: [],
-    notificationRouting: [],
-    suppressionRules: [],
     raw: detector,
   };
 }
@@ -192,8 +190,6 @@ export async function getADForecasterDetail(
     description: forecaster.description || '',
     alertHistory: [],
     conditionPreviewData: [],
-    notificationRouting: [],
-    suppressionRules: [],
     raw: forecaster,
   };
 }
@@ -284,14 +280,6 @@ export async function getOSRuleDetail(
     lookbackPeriod: undefined,
     alertHistory,
     conditionPreviewData,
-    // Notification routing is no longer surfaced inline on the rule
-    // flyout. The standalone Routing tab (Alertmanager-fed for Prom; OS
-    // destinations for OS) owns it. We keep the empty array on the
-    // response shape so existing UnifiedRule consumers don't need a
-    // type change.
-    notificationRouting: [],
-    // Suppression rules from the in-memory service (not from OS API)
-    suppressionRules: [],
     // Faithful upstream monitor document (not the lossy `mapMonitor`
     // projection) so the clone flow re-creates the exact monitor_type +
     // wrapped triggers. CAUTION: the declared type `UnifiedRule['raw']`
@@ -354,8 +342,6 @@ export async function getPromRuleDetail(
           alertingRule,
           sourceRequest
         ),
-        notificationRouting: [],
-        suppressionRules: [],
         raw: alertingRule,
       };
     }

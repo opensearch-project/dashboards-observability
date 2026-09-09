@@ -73,6 +73,7 @@ import type { OpenSearchFormState } from './create_monitor/create_monitor_types'
 import {
   extractPplValidationError,
   extractServerErrorMessage,
+  extractServerErrorStatus,
   formStateToRule,
   resolveDatasourceTokens,
 } from './alarms_page_helpers';
@@ -1066,15 +1067,19 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             : String(raw.for || detail.pendingPeriod || '5m');
         const evalInterval = detail.evaluationInterval || '1m';
 
-        // Parse threshold from expression (e.g. "up == 0" → operator "==", threshold 0)
-        const parsed = detail.threshold || { operator: '>', value: 0 };
-
+        // Clone the stored PromQL expression VERBATIM. The expression itself is
+        // the complete alert condition, and the create/edit paths already send
+        // `query` unchanged for the server to use as-is. The clone path used to
+        // strip a trailing comparison and re-append a separately-parsed
+        // operator/threshold, which corrupted any expression whose trailing
+        // comparison differed from the first one — or had none at all. Examples
+        // that broke: `(a) > 0.8 and cap > 0` became `... and cap > 0.8`;
+        // `sum(rate(x[5m]))` gained a spurious `> 0`; `errors > 1e-05` became
+        // `errors > 1`. Sending `expr` as-is keeps the clone identical to its
+        // source.
         const payload = {
           name: clonedName,
-          query:
-            expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+(?:[eE][+-]?\d+)?\s*$/, '').trim() || expr,
-          operator: parsed.operator || '>',
-          threshold: parsed.value ?? 0,
+          query: expr,
           forDuration: duration,
           evaluationInterval: evalInterval,
           labels: rawLabels,
@@ -1452,6 +1457,26 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         // _ruleGroup is a form-transport metadata label — extract it into
         // groupName and strip it from persisted labels.
         const ruleGroupLabel = promForm.labels.find((l) => l.key === '_ruleGroup')?.value;
+
+        // Resolve the rule's ORIGINAL identity (group, name) so we can tell an
+        // in-place edit from a rename/group move. `ruleId` is normally the row
+        // the user opened, so the rule is in the loaded `rules` — but a stale
+        // list or a background-refetch race could miss it, which we treat as the
+        // unsafe case (see below).
+        const originalRule = rules.find((r) => r.id === ruleId);
+        const newGroupName = ruleGroupLabel || promForm.name;
+        // Overwrite ONLY for a confirmed in-place edit: the rule was found AND
+        // its (group, name) is unchanged — the rule replacing itself, which the
+        // server's create-collision guard would otherwise reject with a 409. For
+        // a rename, a group move, OR when the original rule can't be resolved, we
+        // must NOT force overwrite: doing so could let the create silently
+        // destroy a DIFFERENT rule already occupying the target (group, name).
+        // Without overwrite the server returns 409 and the collision surfaces as
+        // an error instead of causing silent data loss.
+        const isInPlaceEdit =
+          !!originalRule &&
+          (originalRule.group || originalRule.name) === newGroupName &&
+          originalRule.name === promForm.name;
         const payload = buildPrometheusRulePayload({
           name: promForm.name,
           query: promForm.query,
@@ -1466,23 +1491,21 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             promForm.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
           ),
           enabled: promForm.enabled,
-          groupName: ruleGroupLabel || promForm.name,
-          // Edit intends to replace the existing rule (same name+group) —
-          // opt into overwrite so the server's create-collision guard allows it.
-          overwrite: true,
+          groupName: newGroupName,
+          overwrite: isInPlaceEdit,
         });
         // Create new rule first, then delete old on success (prevents data loss
         // if create fails — worst case is a harmless duplicate).
         await mutations.createPrometheusRule(payload, dsId);
 
-        const originalRule = rules.find((r) => r.id === ruleId);
-        const originalName = originalRule?.name || promForm.name;
-        const originalGroupName = originalRule?.group || originalName;
-        const newGroupName = ruleGroupLabel || promForm.name;
-        // If the rule was renamed or moved to a different group, remove the
-        // old copy. The rule-level delete splices it out of the old group,
-        // preserving any sibling rules that share the group.
-        if (originalGroupName !== newGroupName || originalName !== promForm.name) {
+        // Remove the old copy only when we KNOW the original identity AND it
+        // changed (rename/group move). The rule-level delete splices it out of
+        // the old group, preserving siblings. When the original rule wasn't
+        // resolved we skip the delete entirely — deleting a guessed name could
+        // remove the rule we just created.
+        if (originalRule && !isInPlaceEdit) {
+          const originalName = originalRule.name;
+          const originalGroupName = originalRule.group || originalRule.name;
           try {
             await mutations.deletePrometheusRule(dsId, originalGroupName, originalName);
           } catch {
@@ -1508,47 +1531,26 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       const message = extractServerErrorMessage(e);
       const pplError = extractPplValidationError(message);
       if (pplError) setPplSubmitError(pplError);
+      // A rename/group-move that lands on an existing rule now reaches the user
+      // as a 409 (the edit no longer force-overwrites). Special-case it into an
+      // actionable title instead of the generic failure, keeping the raw server
+      // message as the toast detail.
+      const isNameCollision =
+        extractServerErrorStatus(e) === 409 || /already exists/i.test(message);
       addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.updateMonitorFailed', {
-          defaultMessage: 'Failed to update alert rule',
-        }),
+        isNameCollision
+          ? i18n.translate('observability.alerting.alarmsPage.toast.updateMonitorNameCollision', {
+              defaultMessage:
+                'A rule named "{name}" already exists in this group. Rename it or pick a different group.',
+              values: { name: formState.name },
+            })
+          : i18n.translate('observability.alerting.alarmsPage.toast.updateMonitorFailed', {
+              defaultMessage: 'Failed to update alert rule',
+            }),
         'danger',
         message
       );
     }
-  };
-
-  const handleBatchCreateMonitors = async (forms: MonitorFormState[]) => {
-    const succeededRules: UnifiedRule[] = [];
-    for (let i = 0; i < forms.length; i++) {
-      const dsId = resolveDatasourceId(forms[i]);
-      if (!dsId) continue;
-      try {
-        await mutations.createMonitor(buildPayload(forms[i]), dsId);
-        succeededRules.push(buildOptimisticRule(forms[i], i));
-      } catch (e: unknown) {
-        addToast(
-          i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
-            defaultMessage: 'Failed to create alert rule',
-          }),
-          'danger',
-          extractServerErrorMessage(e)
-        );
-      }
-    }
-    if (succeededRules.length > 0) {
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.monitorsCreated', {
-          defaultMessage: '{count} alert rule(s) created successfully',
-          values: { count: succeededRules.length },
-        })
-      );
-      // Batch create is OpenSearch-only (`createMonitor`), which confirms with
-      // no querier lag — so no optimistic pending rows (they'd wrongly render as
-      // disabled spinners). The foreground refetch surfaces the new rows.
-      refetchRules();
-    }
-    // Don't close flyout — AI wizard shows its own summary step and "Done" button
   };
 
   // ---- Render ----
@@ -1816,7 +1818,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       ) : showCreateMonitor ? (
         <CreateMonitor
           onSave={handleCreateMonitor}
-          onBatchSave={handleBatchCreateMonitors}
           onCancel={() => {
             setShowCreateMonitor(false);
             setCreateBackendType(null);

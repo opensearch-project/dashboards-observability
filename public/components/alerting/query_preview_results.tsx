@@ -55,29 +55,36 @@ function thresholdValues(condition?: PreviewCondition): number[] {
   return Number.isFinite(a as number) ? [a as number] : [];
 }
 
-/** Would the alert fire, given the most recent sample value? */
-function conditionMet(value: number, condition: PreviewCondition): boolean {
-  const a = condition.thresholdA ?? 0;
-  const b = condition.thresholdB ?? 0;
+/**
+ * Would the alert fire, given the most recent sample value? Returns `undefined`
+ * ("not evaluable") when the threshold(s) the op needs aren't finite numbers —
+ * evaluating against a defaulted `0` would render a misleading "would fire now"
+ * badge. The caller shows no badge for `undefined`.
+ */
+function conditionMet(value: number, condition: PreviewCondition): boolean | undefined {
+  const a = condition.thresholdA;
+  const b = condition.thresholdB;
+  const hasA = Number.isFinite(a as number);
+  const hasAB = hasA && Number.isFinite(b as number);
   switch (condition.op) {
     case 'gt':
-      return value > a;
+      return hasA ? value > (a as number) : undefined;
     case 'gte':
-      return value >= a;
+      return hasA ? value >= (a as number) : undefined;
     case 'lt':
-      return value < a;
+      return hasA ? value < (a as number) : undefined;
     case 'lte':
-      return value <= a;
+      return hasA ? value <= (a as number) : undefined;
     case 'eq':
-      return value === a;
+      return hasA ? value === (a as number) : undefined;
     case 'neq':
-      return value !== a;
+      return hasA ? value !== (a as number) : undefined;
     case 'outside':
-      return value < a || value > b;
+      return hasAB ? value < (a as number) || value > (b as number) : undefined;
     case 'within':
-      return value >= a && value <= b;
+      return hasAB ? value >= (a as number) && value <= (b as number) : undefined;
     default:
-      return false;
+      return undefined;
   }
 }
 

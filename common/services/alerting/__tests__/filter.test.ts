@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { emptyFilters, filterAlerts, matchesFilters, matchesSearch, sortRules } from '../filter';
+import { emptyFilters, filterAlerts, matchesFilters, matchesSearch } from '../filter';
 
 describe('filter', () => {
   describe('emptyFilters', () => {
@@ -86,42 +86,6 @@ describe('filter', () => {
       expect(matchesFilters(rule, { ...emptyFilters(), destinations: ['pagerduty-x'] })).toBe(
         false
       );
-    });
-  });
-
-  describe('sortRules', () => {
-    const rules = [
-      { name: 'bravo', score: 2 },
-      { name: 'ALPHA', score: 3 },
-      { name: 'charlie', score: 1 },
-    ];
-
-    it('sorts strings case-insensitively ascending', () => {
-      expect(sortRules(rules, 'name', 'asc').map((r) => r.name)).toEqual([
-        'ALPHA',
-        'bravo',
-        'charlie',
-      ]);
-    });
-
-    it('sorts numbers descending and does not mutate the input', () => {
-      const copy = [...rules];
-      expect(sortRules(rules, 'score', 'desc').map((r) => r.score)).toEqual([3, 2, 1]);
-      expect(rules).toEqual(copy);
-    });
-
-    it('uses a custom accessor when provided', () => {
-      const items = [
-        { name: 'bravo', score: 2 },
-        { name: 'a', score: 3 },
-        { name: 'charlie', score: 1 },
-      ];
-      const byNameLen = (r: { name: string }) => r.name.length;
-      expect(sortRules(items, 'name', 'asc', byNameLen).map((r) => r.name)).toEqual([
-        'a',
-        'bravo',
-        'charlie',
-      ]);
     });
   });
 

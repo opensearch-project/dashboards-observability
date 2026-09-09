@@ -10,7 +10,7 @@
  * touching state wiring.
  *
  * Contents:
- *   - `ColumnId` — string union of known columns plus dynamic `label:<key>`
+ *   - `ColumnId` — union of the rendered columns
  *   - `DEFAULT_VISIBLE` — columns shown on first render
  *   - `buildTableColumns` — factory that returns the EuiInMemoryTable column
  *     array, taking the bits of component state the cell renderers need as
@@ -24,7 +24,6 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiLoadingSpinner,
-  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -52,20 +51,7 @@ import { isPending } from './pending_rules';
 // ============================================================================
 
 export type ColumnId =
-  | 'name'
-  | 'status'
-  | 'severity'
-  | 'monitorType'
-  | 'healthStatus'
-  | 'datasource'
-  | 'query'
-  | 'group'
-  | 'createdBy'
-  | 'createdAt'
-  | 'lastModified'
-  | 'lastTriggered'
-  | 'destinations'
-  | string; // string for label columns
+  'name' | 'status' | 'severity' | 'monitorType' | 'healthStatus' | 'datasource';
 
 export const DEFAULT_VISIBLE: ColumnId[] = [
   'name',
@@ -166,9 +152,7 @@ export function buildTableColumns({
         render: (name: string, item: UnifiedRuleSummary) => {
           const iconType =
             item.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
-          // Avoid duplicating the group when the dedicated Rule Group column is visible
-          const showGroupBadge =
-            item.datasourceType === 'prometheus' && !!item.group && !visibleColumns.has('group');
+          const showGroupBadge = item.datasourceType === 'prometheus' && !!item.group;
           return (
             <div>
               <EuiButtonEmpty
@@ -270,29 +254,6 @@ export function buildTableColumns({
           <EuiHealth color={HEALTH_COLORS[h] || 'subdued'}>{h}</EuiHealth>
         ),
       });
-    } else if (colId === 'labels') {
-      cols.push({
-        field: 'labels',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.labels', {
-          defaultMessage: 'Labels',
-        }),
-        width: w('labels'),
-        render: (labels: Record<string, string>) => {
-          const entries = Object.entries(labels);
-          if (entries.length === 0) return <EuiTextColor color="subdued">—</EuiTextColor>;
-          return (
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {entries.map(([k, v]) => (
-                <EuiFlexItem grow={false} key={k}>
-                  <EuiBadge color="hollow" title={`${k}: ${v}`}>
-                    {k}:{v}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          );
-        },
-      });
     } else if (colId === 'datasource') {
       cols.push({
         field: 'datasourceId',
@@ -308,106 +269,6 @@ export function buildTableColumns({
         // `TruncatedLabel` (single-line ellipsis + instant full-text tooltip),
         // matching the datasource facet in the filter panel.
         render: (id: string) => <TruncatedLabel text={dsNameMap.get(id) || id} />,
-      });
-    } else if (colId === 'createdBy') {
-      cols.push({
-        field: 'createdBy',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.createdBy', {
-          defaultMessage: 'Created By',
-        }),
-        sortable: true,
-        width: w('createdBy'),
-      });
-    } else if (colId === 'createdAt') {
-      cols.push({
-        field: 'createdAt',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.created', {
-          defaultMessage: 'Created',
-        }),
-        sortable: true,
-        width: w('createdAt'),
-        render: (ts: string) => (ts ? new Date(ts).toLocaleDateString() : '-'),
-      });
-    } else if (colId === 'lastModified') {
-      cols.push({
-        field: 'lastModified',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.lastModified', {
-          defaultMessage: 'Last Modified',
-        }),
-        sortable: true,
-        width: w('lastModified'),
-        render: (ts: string) => (ts ? new Date(ts).toLocaleString() : '-'),
-      });
-    } else if (colId === 'lastTriggered') {
-      cols.push({
-        field: 'lastTriggered',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.lastTriggered', {
-          defaultMessage: 'Last Triggered',
-        }),
-        sortable: true,
-        width: w('lastTriggered'),
-        render: (ts: string) =>
-          ts
-            ? new Date(ts).toLocaleString()
-            : i18n.translate('observability.alerting.monitorsTable.columns.lastTriggered.never', {
-                defaultMessage: 'Never',
-              }),
-      });
-    } else if (colId === 'destinations') {
-      cols.push({
-        field: 'notificationDestinations',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.destinations', {
-          defaultMessage: 'Notification channels',
-        }),
-        width: w('destinations'),
-        render: (dests: string[]) =>
-          dests.length > 0 ? (
-            dests.map((d, i) => (
-              <EuiBadge key={i} color="hollow">
-                {d}
-              </EuiBadge>
-            ))
-          ) : (
-            <EuiTextColor color="subdued">
-              {i18n.translate('observability.alerting.monitorsTable.columns.destinations.none', {
-                defaultMessage: 'None',
-              })}
-            </EuiTextColor>
-          ),
-      });
-    } else if (colId === 'query') {
-      cols.push({
-        field: 'query',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.query', {
-          defaultMessage: 'Query',
-        }),
-        truncateText: true,
-        width: w('query'),
-      });
-    } else if (colId === 'group') {
-      cols.push({
-        field: 'group',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.group', {
-          defaultMessage: 'Rule Group',
-        }),
-        width: w('group'),
-        render: (g: string) => g || '-',
-      });
-    } else if (colId.startsWith('label:')) {
-      const key = colId.replace('label:', '');
-      cols.push({
-        field: 'labels',
-        name: key,
-        sortable: false,
-        width: w(colId),
-        render: (labels: Record<string, string>) => {
-          const val = labels[key];
-          return val ? (
-            <EuiBadge color="hollow">{val}</EuiBadge>
-          ) : (
-            <EuiTextColor color="subdued">—</EuiTextColor>
-          );
-        },
       });
     }
   }

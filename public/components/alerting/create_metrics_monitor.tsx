@@ -657,11 +657,13 @@ const QuerySection = React.memo<{
             </>
           )}
 
-          {/* Always-firing guard (both modes): a valid expression with no
+          {/* Always-firing guard (code mode only): a valid expression with no
             comparison returns samples whenever the series exists, so the alert
             fires continuously. Non-blocking — a condition-less rule is legal
-            PromQL — but surfaced so it isn't created by accident. */}
-          {isAlwaysFiring(form.query) && (
+            PromQL — but surfaced so it isn't created by accident. In builder
+            mode `PromQueryBuilder` renders its own "No condition set" hint for
+            this state, so gating to code mode avoids a duplicate warning. */}
+          {queryMode === 'code' && isAlwaysFiring(form.query) && (
             <>
               <EuiSpacer size="s" />
               <EuiCallOut

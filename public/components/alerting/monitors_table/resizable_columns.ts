@@ -24,15 +24,7 @@ export const DEFAULT_WIDTHS: Record<string, number> = {
   severity: 100,
   monitorType: 110,
   healthStatus: 90,
-  labels: 260,
   datasource: 150,
-  createdBy: 110,
-  createdAt: 130,
-  lastModified: 160,
-  lastTriggered: 160,
-  destinations: 160,
-  query: 200,
-  group: 100,
 };
 
 /**

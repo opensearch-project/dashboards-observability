@@ -45,8 +45,6 @@ const detectorDetail = (): UnifiedRule => ({
   description: 'Detects anomalous HTTP response behavior.',
   alertHistory: [],
   conditionPreviewData: [],
-  notificationRouting: [],
-  suppressionRules: [],
   raw: {
     id: 'det-1',
     name: 'sample-http-responses-detector',

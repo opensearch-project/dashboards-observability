@@ -30,14 +30,6 @@ export function parseDuration(input: string): { valid: boolean; seconds: number;
   return { valid: true, seconds: value * DURATION_UNITS[match[2]] };
 }
 
-export function formatDuration(seconds: number): string {
-  if (seconds <= 0) return '0s';
-  if (seconds % 86400 === 0) return `${seconds / 86400}d`;
-  if (seconds % 3600 === 0) return `${seconds / 3600}h`;
-  if (seconds % 60 === 0) return `${seconds / 60}m`;
-  return `${seconds}s`;
-}
-
 // ============================================================================
 // Monitor Form Validation
 // ============================================================================
@@ -152,9 +144,8 @@ export function validateMonitorForm(form: MonitorFormState): ValidationResult {
         annotationKeys.add(a.key);
       }
       if (a.value && a.value.length > MAX_LABEL_VALUE_LENGTH) {
-        errors[
-          `annotations[${i}].value`
-        ] = `Annotation value too long (max ${MAX_LABEL_VALUE_LENGTH} chars)`;
+        errors[`annotations[${i}].value`] =
+          `Annotation value too long (max ${MAX_LABEL_VALUE_LENGTH} chars)`;
       }
     }
   }
@@ -245,9 +236,8 @@ export function validatePplForm(form: PplFormShape): ValidationResult {
         t.numResultsValue < PPL_NUM_RESULTS_MIN ||
         t.numResultsValue > PPL_NUM_RESULTS_MAX
       ) {
-        errors[
-          `${prefix}.numResultsValue`
-        ] = `Threshold must be an integer between ${PPL_NUM_RESULTS_MIN} and ${PPL_NUM_RESULTS_MAX}`;
+        errors[`${prefix}.numResultsValue`] =
+          `Threshold must be an integer between ${PPL_NUM_RESULTS_MIN} and ${PPL_NUM_RESULTS_MAX}`;
       }
     } else if (t.type === 'custom') {
       if (!t.customCondition || !PPL_CUSTOM_CONDITION_REGEX.test(t.customCondition)) {
@@ -261,16 +251,14 @@ export function validatePplForm(form: PplFormShape): ValidationResult {
         errors[`${aPrefix}.destinationId`] = 'Destination is required';
       }
       if (a.subject && a.subject.length > PPL_NOTIFICATION_SUBJECT_MAX) {
-        errors[
-          `${aPrefix}.subject`
-        ] = `Subject must be ≤ ${PPL_NOTIFICATION_SUBJECT_MAX} characters`;
+        errors[`${aPrefix}.subject`] =
+          `Subject must be ≤ ${PPL_NOTIFICATION_SUBJECT_MAX} characters`;
       }
       if (!a.message || a.message.length === 0) {
         errors[`${aPrefix}.message`] = 'Message is required';
       } else if (a.message.length > PPL_NOTIFICATION_MESSAGE_MAX) {
-        errors[
-          `${aPrefix}.message`
-        ] = `Message must be ≤ ${PPL_NOTIFICATION_MESSAGE_MAX} characters`;
+        errors[`${aPrefix}.message`] =
+          `Message must be ≤ ${PPL_NOTIFICATION_MESSAGE_MAX} characters`;
       }
     });
   });

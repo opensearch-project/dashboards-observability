@@ -202,11 +202,6 @@ export interface PaginatedResponse<T> {
   warnings?: DatasourceWarning[];
 }
 
-export interface PaginationParams {
-  page?: number;
-  pageSize?: number;
-}
-
 // ============================================================================
 // Datasource service interface
 // ============================================================================
@@ -307,27 +302,11 @@ export type MonitorStatus =
 export type MonitorHealthStatus = 'healthy' | 'failing' | 'no_data';
 export type UnifiedDefinitionType = 'monitor' | 'prometheus_rule' | 'detector' | 'forecaster';
 
-export interface SuppressionRule {
-  id: string;
-  name: string;
-  reason: string;
-  schedule?: string; // e.g. "Sat 02:00-06:00 UTC"
-  matchLabels?: Record<string, string>;
-  active: boolean;
-}
-
 export interface AlertHistoryEntry {
   timestamp: string;
   state: UnifiedAlertState;
   value?: string;
   message?: string;
-}
-
-export interface NotificationRouting {
-  channel: string; // e.g. "Slack", "Email", "PagerDuty"
-  destination: string; // e.g. "#ops-alerts", "oncall@example.com"
-  severity?: UnifiedAlertSeverity[];
-  throttle?: string; // e.g. "10 minutes"
 }
 
 /** Lightweight rule representation for list views and tables. */
@@ -365,8 +344,6 @@ export interface UnifiedRule extends UnifiedRuleSummary {
   lookbackPeriod?: string;
   alertHistory: AlertHistoryEntry[];
   conditionPreviewData: Array<{ timestamp: number; value: number }>;
-  notificationRouting: NotificationRouting[];
-  suppressionRules: SuppressionRule[];
   raw: OSMonitor | PromAlertingRule | ADDetector | ADForecaster;
 }
 
@@ -414,9 +391,6 @@ export interface UnifiedFetchOptions {
   timeoutMs?: number;
   /** Called as each datasource completes, for progressive UI updates. */
   onProgress?: (result: DatasourceFetchResult<unknown>) => void;
-  /** Pagination params for server-side pagination. */
-  page?: number;
-  pageSize?: number;
   /** Maximum total results to return. Defaults to 5000. Prevents unbounded responses. */
   maxResults?: number;
   /**

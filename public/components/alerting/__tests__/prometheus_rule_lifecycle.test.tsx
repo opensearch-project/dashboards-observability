@@ -72,7 +72,13 @@ jest.mock('../notification_routing_panel', () => ({
   NotificationRoutingPanel: () => <div data-test-subj="routingPanel" />,
 }));
 jest.mock('../create_monitor', () => ({ CreateMonitor: () => null }));
-jest.mock('../create_monitor/edit_monitor', () => ({ EditMonitor: () => null }));
+const mockEditMonitor = jest.fn();
+jest.mock('../create_monitor/edit_monitor', () => ({
+  EditMonitor: (props: unknown) => {
+    mockEditMonitor(props);
+    return <div data-test-subj="editMonitor" />;
+  },
+}));
 jest.mock('../alert_detail_flyout', () => ({ AlertDetailFlyout: () => null }));
 
 const mockGetRuleDetail = jest.fn();
@@ -270,6 +276,143 @@ describe('Prometheus rule clone', () => {
       expect.objectContaining({ name: 'TestRule-copy-2' }),
       'ds-1'
     );
+  });
+});
+
+describe('Prometheus rule clone — expression is preserved verbatim', () => {
+  const cloneAndGetPayload = async (detail: Record<string, unknown>) => {
+    mockGetRuleDetail.mockResolvedValue(detail);
+    mockCreatePrometheusRule.mockResolvedValue({ success: true });
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0] as {
+      onClone: (monitor: unknown) => Promise<void>;
+    };
+    await act(async () => {
+      await tableProps.onClone({
+        id: `ds-1-${detail.name}-${detail.name}`,
+        name: detail.name,
+        datasourceId: 'ds-1',
+        datasourceType: 'prometheus',
+      });
+    });
+    return mockCreatePrometheusRule.mock.calls[0][0] as Record<string, unknown>;
+  };
+
+  const promDetail = (name: string, query: string, threshold: unknown) => ({
+    datasourceType: 'prometheus',
+    name,
+    query,
+    pendingPeriod: '60s',
+    evaluationInterval: '30s',
+    threshold,
+    labels: {},
+    annotations: {},
+    raw: { type: 'alerting', name, query, duration: 60, labels: {}, annotations: {} },
+  });
+
+  it('clones an expression with NO comparison without appending a spurious "> 0"', async () => {
+    // Regression: the old strip/re-append path turned this into `... > 0`,
+    // changing when the rule fires. It must be cloned unchanged.
+    const payload = await cloneAndGetPayload(
+      promDetail('NoCmp', 'sum(rate(gen_ai_tokens_total[5m]))', undefined)
+    );
+    expect(payload.query).toBe('sum(rate(gen_ai_tokens_total[5m]))');
+    // The verbatim path no longer sends operator/threshold.
+    expect(payload).not.toHaveProperty('operator');
+    expect(payload).not.toHaveProperty('threshold');
+  });
+
+  it('clones an interior-comparison expression without rewriting the trailing threshold', async () => {
+    // Regression: strip-last + reparse-first turned the trailing `> 0` into the
+    // first-parsed `> 0.8`, corrupting the second condition.
+    const query = '(queue_size / queue_capacity) > 0.8 and queue_capacity > 0';
+    const payload = await cloneAndGetPayload(
+      promDetail('Interior', query, { operator: '>', value: 0.8 })
+    );
+    expect(payload.query).toBe(query);
+  });
+
+  it('clones a scientific-notation threshold without mangling it', async () => {
+    // Regression: parseThreshold read `1e-05` as `1`, so the clone fired at a
+    // 100000x-different threshold.
+    const payload = await cloneAndGetPayload(
+      promDetail('Sci', 'errors_total > 1e-05', { operator: '>', value: 1e-5 })
+    );
+    expect(payload.query).toBe('errors_total > 1e-05');
+  });
+});
+
+describe('Prometheus rule edit — overwrite only for an in-place edit', () => {
+  const seedRule = (rule: Record<string, unknown>) =>
+    mockUseRulesData.mockReturnValue({ ...emptyRulesHookResult, rules: [rule] });
+
+  const editAndGetPayload = async (
+    formState: Record<string, unknown>,
+    ruleId: string
+  ): Promise<Record<string, unknown>> => {
+    mockCreatePrometheusRule.mockResolvedValue({ success: true });
+    mockDeletePrometheusRule.mockResolvedValue({ success: true });
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0] as {
+      onEdit: (monitor: unknown) => void;
+    };
+    act(() => {
+      tableProps.onEdit({ id: ruleId, datasourceId: 'ds-1', name: formState.name });
+    });
+    const editProps = mockEditMonitor.mock.calls[mockEditMonitor.mock.calls.length - 1][0] as {
+      onSave: (form: unknown, ruleId: string) => Promise<void>;
+    };
+    await act(async () => {
+      await editProps.onSave(formState, ruleId);
+    });
+    return mockCreatePrometheusRule.mock.calls[0][0] as Record<string, unknown>;
+  };
+
+  const promForm = (name: string) => ({
+    name,
+    datasourceId: 'ds-1',
+    datasourceType: 'prometheus' as const,
+    query: 'up > 0',
+    threshold: { operator: '>', value: 0, unit: '', forDuration: '5m' },
+    evaluationInterval: '1m',
+    labels: [{ key: 'severity', value: 'warning' }],
+    annotations: [],
+    enabled: true,
+  });
+
+  it('forces overwrite when the (group, name) is unchanged (self-replace)', async () => {
+    seedRule({ id: 'r1', name: 'MyRule', group: 'MyRule', datasourceId: 'ds-1' });
+    const payload = await editAndGetPayload(promForm('MyRule'), 'r1');
+    expect(payload.overwrite).toBe(true);
+    // In-place edit must NOT delete the "old" copy.
+    expect(mockDeletePrometheusRule).not.toHaveBeenCalled();
+  });
+
+  it('does NOT overwrite on rename, so a name collision surfaces instead of clobbering', async () => {
+    // Regression: unconditional overwrite let a rename silently destroy a
+    // different, pre-existing rule occupying the new name.
+    seedRule({ id: 'r1', name: 'OldName', group: 'OldName', datasourceId: 'ds-1' });
+    const payload = await editAndGetPayload(promForm('NewName'), 'r1');
+    expect(payload.overwrite).toBeUndefined();
+    // Rename removes the old copy after the new one is created.
+    expect(mockDeletePrometheusRule).toHaveBeenCalledWith('ds-1', 'OldName', 'OldName');
+  });
+
+  it('does NOT overwrite (and does not delete) when the edited rule is not in the loaded list', async () => {
+    // Edge (stale list / background-refetch race): if `rules.find(id)` misses,
+    // we must default to the SAFE path — no overwrite (avoid clobbering a rule
+    // that occupies the target name) and no delete (a guessed old-name delete
+    // could remove the rule we just created).
+    seedRule({ id: 'someOtherRule', name: 'Unrelated', group: 'Unrelated', datasourceId: 'ds-1' });
+    const payload = await editAndGetPayload(promForm('GhostRule'), 'missing-id');
+    expect(payload.overwrite).toBeUndefined();
+    expect(mockDeletePrometheusRule).not.toHaveBeenCalled();
   });
 });
 

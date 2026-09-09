@@ -10,20 +10,6 @@ jest.mock('echarts', () => ({
   init: jest.fn(() => ({ setOption: jest.fn(), resize: jest.fn(), dispose: jest.fn() })),
 }));
 
-jest.mock('../promql_monaco_editor', () => ({
-  PromQLMonacoEditor: ({ value }: { value: string }) => (
-    <textarea data-test-subj="promqlMock" defaultValue={value} />
-  ),
-}));
-jest.mock('../promql_editor', () => ({
-  PromQLEditor: ({ value }: { value: string }) => (
-    <textarea data-test-subj="promqlMock" defaultValue={value} />
-  ),
-}));
-
-jest.mock('../metric_browser', () => ({
-  MetricBrowser: () => <div data-test-subj="metricBrowserMock" />,
-}));
 // Stub the shared builder *component* with a button that emits a query, but keep
 // the REAL parse/compose core (from prom_condition) so representability decisions
 // in these tests match what the component actually does. Using a hand-rolled

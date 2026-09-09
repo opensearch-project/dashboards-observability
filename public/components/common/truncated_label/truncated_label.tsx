@@ -88,6 +88,15 @@ export const TruncatedLabel: React.FC<TruncatedLabelProps> = ({ text, fontSize, 
       (el.closest('label') as HTMLLabelElement | null)?.control ??
       null;
     if (!control) return undefined;
+    // A single focusable control can enclose more than one TruncatedLabel.
+    // Focus lands on the shared control (not a specific label), so every
+    // label wiring its own `reveal` here would pop all their tooltips at once
+    // on focus. Guard so at most one label per control drives the focus reveal
+    // (first mounted wins); the rest keep hover-only reveal, which is
+    // per-label and unaffected. Today there's ≤1 label per control, so this is
+    // defensive against future markup changes.
+    if (control.hasAttribute('data-obs-truncated-focus-owner')) return undefined;
+    control.setAttribute('data-obs-truncated-focus-owner', 'true');
     const onKeyDown = (e: Event) => {
       if ((e as KeyboardEvent).key === 'Escape') hide();
     };
@@ -98,6 +107,7 @@ export const TruncatedLabel: React.FC<TruncatedLabelProps> = ({ text, fontSize, 
       control.removeEventListener('focus', reveal);
       control.removeEventListener('blur', hide);
       control.removeEventListener('keydown', onKeyDown);
+      control.removeAttribute('data-obs-truncated-focus-owner');
     };
   }, [reveal, hide, text]);
 
