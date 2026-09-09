@@ -75,6 +75,7 @@ import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_
 import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../common/constants';
 import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
 import { formatThroughput } from '../../common/format_utils';
+import { TruncatedLabel } from '../../../common/truncated_label';
 import '../../shared/styles/apm_common.scss';
 
 const LATENCY_PERCENTILE_OPTIONS = [
@@ -296,6 +297,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   >({});
   const [attributeSearchQueries, setAttributeSearchQueries] = useState<Record<string, string>>({});
   const [expandedAttributes, setExpandedAttributes] = useState<Record<string, boolean>>({});
+  const [environmentSearchQuery, setEnvironmentSearchQuery] = useState('');
+  const [environmentExpanded, setEnvironmentExpanded] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -469,13 +472,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return Array.from(envSet).sort((a, b) => a.localeCompare(b));
   }, [services]);
 
-  // Create checkbox options from available environments
-  const environmentCheckboxes = useMemo(() => {
-    return availableEnvironments.map((env) => ({
-      id: env,
-      label: env,
-    }));
-  }, [availableEnvironments]);
+  const filteredEnvironments = useMemo(() => {
+    if (!environmentSearchQuery) return availableEnvironments;
+    const searchLower = environmentSearchQuery.toLowerCase();
+    return availableEnvironments.filter((env) => env.toLowerCase().includes(searchLower));
+  }, [availableEnvironments, environmentSearchQuery]);
 
   // Handle environment filter changes
   const onEnvironmentChange = useCallback((id: string) => {
@@ -483,6 +484,20 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       ...prev,
       [id]: !prev[id],
     }));
+  }, []);
+
+  const handleSelectAllEnvironments = useCallback(() => {
+    setSelectedEnvironments((prev) => {
+      const next = { ...prev };
+      filteredEnvironments.forEach((env) => {
+        next[env] = true;
+      });
+      return next;
+    });
+  }, [filteredEnvironments]);
+
+  const handleClearAllEnvironments = useCallback(() => {
+    setSelectedEnvironments({});
   }, []);
 
   // Handle select all for a specific attribute
@@ -1241,15 +1256,107 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           >
                             <EuiSpacer size="xs" />
 
-                            {/* Checkbox group */}
-                            {environmentCheckboxes.length > 0 ? (
-                              <EuiCheckboxGroup
-                                options={environmentCheckboxes}
-                                idToSelectedMap={selectedEnvironments}
-                                onChange={onEnvironmentChange}
-                                compressed
-                                data-test-subj="environmentCheckboxGroup"
-                              />
+                            {availableEnvironments.length > 0 ? (
+                              <>
+                                {/* Search box */}
+                                <EuiFieldSearch
+                                  placeholder=""
+                                  value={environmentSearchQuery}
+                                  onChange={(e) => setEnvironmentSearchQuery(e.target.value)}
+                                  isClearable
+                                  fullWidth
+                                  compressed
+                                  data-test-subj="environmentSearch"
+                                />
+
+                                <EuiSpacer size="s" />
+
+                                {/* Select all / Clear all links */}
+                                {filteredEnvironments.length > 0 && (
+                                  <>
+                                    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+                                      <EuiFlexItem grow={false}>
+                                        <EuiLink
+                                          onClick={handleSelectAllEnvironments}
+                                          data-test-subj="environmentSelectAll"
+                                          color="primary"
+                                        >
+                                          <EuiText size="xs">{i18nTexts.filters.selectAll}</EuiText>
+                                        </EuiLink>
+                                      </EuiFlexItem>
+                                      <EuiFlexItem grow={false}>
+                                        <EuiLink
+                                          onClick={handleClearAllEnvironments}
+                                          data-test-subj="environmentClearAll"
+                                          color="primary"
+                                        >
+                                          <EuiText size="xs">{i18nTexts.filters.clearAll}</EuiText>
+                                        </EuiLink>
+                                      </EuiFlexItem>
+                                    </EuiFlexGroup>
+                                    <EuiSpacer size="s" />
+                                  </>
+                                )}
+
+                                {/* Checkbox list */}
+                                {filteredEnvironments.length > 0 ? (
+                                  <>
+                                    <div
+                                      style={
+                                        environmentExpanded
+                                          ? {
+                                              maxBlockSize:
+                                                APM_CONSTANTS.FILTER_VALUES_EXPANDED_MAX_HEIGHT,
+                                              overflowY: 'auto',
+                                            }
+                                          : undefined
+                                      }
+                                    >
+                                      <EuiCheckboxGroup
+                                        className="apmFilterCheckboxGroup"
+                                        options={(environmentExpanded
+                                          ? filteredEnvironments
+                                          : filteredEnvironments.slice(
+                                              0,
+                                              APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT
+                                            )
+                                        ).map((env) => ({
+                                          id: env,
+                                          label: <TruncatedLabel text={env} />,
+                                        }))}
+                                        idToSelectedMap={selectedEnvironments}
+                                        onChange={onEnvironmentChange}
+                                        compressed
+                                        data-test-subj="environmentCheckboxGroup"
+                                      />
+                                    </div>
+                                    {/* Show more / Show less link */}
+                                    {filteredEnvironments.length >
+                                      APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT && (
+                                      <>
+                                        <EuiSpacer size="xs" />
+                                        <EuiLink
+                                          onClick={() => setEnvironmentExpanded((prev) => !prev)}
+                                          data-test-subj="environmentShowMore"
+                                        >
+                                          <EuiText size="xs">
+                                            {environmentExpanded
+                                              ? i18nTexts.filters.showLess
+                                              : `+${
+                                                  filteredEnvironments.length -
+                                                  APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT
+                                                } more`}
+                                          </EuiText>
+                                        </EuiLink>
+                                      </>
+                                    )}
+                                  </>
+                                ) : (
+                                  <EuiText size="s" color="subdued">
+                                    {i18nTexts.filters.noMatchingValues}
+                                  </EuiText>
+                                )}
+                              </>
                             ) : (
                               <EuiText size="s" color="subdued">
                                 {i18nTexts.filters.noEnvironments}
@@ -1357,10 +1464,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                         {index > 0 && <EuiHorizontalRule margin="xs" />}
 
                                         <EuiAccordion
+                                          className="apmAttributeAccordion"
                                           id={`attribute-${attrPath}-accordion`}
                                           buttonContent={
-                                            <EuiText size="xs">
-                                              <strong>{attrPath}</strong>
+                                            <EuiText size="xs" className="apmAttributeTitleText">
+                                              <TruncatedLabel text={attrPath} />
                                             </EuiText>
                                           }
                                           initialIsOpen={index === 0}
@@ -1424,26 +1532,39 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                           {/* Checkbox list */}
                                           {filteredValues.length > 0 ? (
                                             <>
-                                              <EuiCheckboxGroup
-                                                options={displayedValues.map((value) => ({
-                                                  id: value,
-                                                  label: value,
-                                                }))}
-                                                idToSelectedMap={
-                                                  selectedGroupByAttributes[attrPath] || {}
+                                              <div
+                                                style={
+                                                  isExpanded
+                                                    ? {
+                                                        maxBlockSize:
+                                                          APM_CONSTANTS.FILTER_VALUES_EXPANDED_MAX_HEIGHT,
+                                                        overflowY: 'auto',
+                                                      }
+                                                    : undefined
                                                 }
-                                                onChange={(id) => {
-                                                  setSelectedGroupByAttributes((prev) => ({
-                                                    ...prev,
-                                                    [attrPath]: {
-                                                      ...(prev[attrPath] || {}),
-                                                      [id]: !prev[attrPath]?.[id],
-                                                    },
-                                                  }));
-                                                }}
-                                                compressed
-                                                data-test-subj={`attribute-${attrPath}-checkboxGroup`}
-                                              />
+                                              >
+                                                <EuiCheckboxGroup
+                                                  className="apmFilterCheckboxGroup"
+                                                  options={displayedValues.map((value) => ({
+                                                    id: value,
+                                                    label: <TruncatedLabel text={value} />,
+                                                  }))}
+                                                  idToSelectedMap={
+                                                    selectedGroupByAttributes[attrPath] || {}
+                                                  }
+                                                  onChange={(id) => {
+                                                    setSelectedGroupByAttributes((prev) => ({
+                                                      ...prev,
+                                                      [attrPath]: {
+                                                        ...(prev[attrPath] || {}),
+                                                        [id]: !prev[attrPath]?.[id],
+                                                      },
+                                                    }));
+                                                  }}
+                                                  compressed
+                                                  data-test-subj={`attribute-${attrPath}-checkboxGroup`}
+                                                />
+                                              </div>
                                               {/* Show more / Show less link */}
                                               {filteredValues.length >
                                                 APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT && (

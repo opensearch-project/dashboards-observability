@@ -120,6 +120,8 @@ export const DEFAULT_APM_TIME_RANGE = {
 export const APM_CONSTANTS = {
   // Filter sidebar
   ATTRIBUTE_VALUES_INITIAL_LIMIT: 5,
+  // Max height (px) of a filter value list once expanded; the list scrolls beyond this.
+  FILTER_VALUES_EXPANDED_MAX_HEIGHT: 240,
 
   // Table pagination
   DEFAULT_PAGE_SIZE: 10,
