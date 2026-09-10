@@ -229,7 +229,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     isLoading: mapLoading,
     error: mapError,
     availableGroupByAttributes,
-    refetch: refetchMap,
+    truncated: mapTruncated,
   } = useServiceMap({
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
@@ -351,12 +351,13 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
 
   // Handle refresh
   const handleRefresh = useCallback(() => {
+    // Map refetches via the refreshTrigger prop; the metrics hook only exposes
+    // refetch(). Bumping the trigger AND calling refetchMap() double-fetched the map.
     setRefreshTrigger((prev) => prev + 1);
-    refetchMap();
     refetchMetrics();
     // Clear selected edge on refresh
     setSelectedEdge(null);
-  }, [refetchMap, refetchMetrics]);
+  }, [refetchMetrics]);
 
   // Handle filter changes
   const handleFiltersChange = useCallback((newFilters: ApplicationMapFilters) => {
@@ -684,6 +685,23 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                   onClearAll={handleClearAllFilters}
                   disabled={isLoading}
                 />
+              </>
+            )}
+
+            {/* Edge-cap truncation notice: the graph's node-count notice does
+                not cover a dense mesh where edges are cut before the node cap. */}
+            {mapTruncated && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  title="Showing a partial topology"
+                  color="warning"
+                  iconType="alert"
+                  size="s"
+                >
+                  The service map reached its connection limit, so some dependencies are not shown.
+                  Narrow the time range or use filters to see a complete view.
+                </EuiCallOut>
               </>
             )}
 

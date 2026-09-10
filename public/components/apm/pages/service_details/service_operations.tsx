@@ -255,6 +255,10 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     }
   }, [timeRange]);
 
+  // The operations list (PPL) and the metrics (PromQL) must query the same
+  // environment, otherwise rows and metrics line up under different env values.
+  const normalizedEnvironment = environment || 'generic:default';
+
   // Fetch operations list from PPL
   const {
     data: operationsData,
@@ -262,7 +266,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     error: opsError,
   } = useOperations({
     serviceName,
-    environment,
+    environment: normalizedEnvironment,
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     refreshTrigger,
@@ -272,7 +276,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   const { metrics: operationMetrics, isLoading: metricsLoading } = useOperationMetrics({
     operations: operationsData || [],
     serviceName,
-    environment: environment || 'generic:default',
+    environment: normalizedEnvironment,
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     prometheusConnectionId,

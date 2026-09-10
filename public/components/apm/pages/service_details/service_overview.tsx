@@ -41,7 +41,7 @@ import {
 } from '../../common/format_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
-import { RESOLUTION_LOW } from '../../shared/utils/step_utils';
+import { RESOLUTION_LOW, formatPrometheusDuration } from '../../shared/utils/step_utils';
 import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 
 export interface ServiceOverviewProps {
@@ -286,16 +286,16 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             title={i18n.translate('observability.apm.serviceOverview.latencyP99', {
               defaultMessage: 'Latency (P99)',
             })}
-            subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
-              defaultMessage: 'Avg',
-            })}
-            promqlQuery={getQueryServiceLatencyP99Card(environment, serviceName)}
+            promqlQuery={getQueryServiceLatencyP99Card(
+              environment,
+              serviceName,
+              formatPrometheusDuration(timeRangeSeconds)
+            )}
             timeRange={timeRange}
             prometheusConnectionId={prometheusConnectionId}
             formatValue={formatLatency}
             invertColor
             refreshTrigger={refreshTrigger}
-            showTotal
           />
         </EuiFlexItem>
       </EuiFlexGroup>

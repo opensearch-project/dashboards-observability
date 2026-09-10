@@ -86,11 +86,11 @@ export const useSelectedEdgeMetrics = (
     }
 
     const { sourceService, sourceEnvironment, targetService, edgeId } = params.selectedEdge;
+    const abortController = new AbortController();
+    setIsLoading(true);
+    setError(null);
 
     const fetchMetrics = async () => {
-      setIsLoading(true);
-      setError(null);
-
       try {
         // Execute all 4 queries in parallel
         const [requestsResp, latencyResp, faultsResp, errorsResp] = await Promise.all([
@@ -117,6 +117,8 @@ export const useSelectedEdgeMetrics = (
           }),
         ]);
 
+        if (abortController.signal.aborted) return;
+
         // Extract values from responses
         const requestCount = extractSingleValue(requestsResp);
         const latencyP99 = extractSingleValue(latencyResp);
@@ -134,15 +136,18 @@ export const useSelectedEdgeMetrics = (
           errorCount,
         });
       } catch (err) {
+        if (abortController.signal.aborted) return;
         console.error('[useSelectedEdgeMetrics] Error fetching edge metrics:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setMetrics(null);
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) setIsLoading(false);
       }
     };
 
     fetchMetrics();
+
+    return () => abortController.abort();
     // Using individual properties to avoid unnecessary re-fetches when only position changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [

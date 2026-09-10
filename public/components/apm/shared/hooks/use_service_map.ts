@@ -25,6 +25,8 @@ export interface UseServiceMapResult {
   isLoading: boolean;
   error: Error | null;
   availableGroupByAttributes: Record<string, string[]>;
+  /** True when the edge query hit its row cap, so the topology is incomplete. */
+  truncated: boolean;
   refetch: () => void;
 }
 
@@ -44,6 +46,7 @@ export const useServiceMap = (params: UseServiceMapParams): UseServiceMapResult 
   const { config } = useApmConfig();
   const [nodes, setNodes] = useState<ServiceMapNode[]>([]);
   const [edges, setEdges] = useState<ServiceMapEdge[]>([]);
+  const [truncated, setTruncated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [availableGroupByAttributes, setAvailableGroupByAttributes] = useState<
@@ -91,37 +94,42 @@ export const useServiceMap = (params: UseServiceMapParams): UseServiceMapResult 
       return;
     }
 
+    const abortController = new AbortController();
+    setIsLoading(true);
+    setError(null);
+
     const fetchServiceMap = async () => {
-      setIsLoading(true);
-      setError(null);
-
       try {
-        const response: ServiceMapResponse = await pplSearchService.getServiceMap(fetchParams);
+        const response: ServiceMapResponse = await pplSearchService.getServiceMap(
+          fetchParams,
+          abortController.signal
+        );
+        if (abortController.signal.aborted) return;
 
-        // Extract nodes and edges from response
-        const responseNodes = response.Nodes || [];
-        const responseEdges = response.Edges || [];
-        const groupByAttributes = response.AvailableGroupByAttributes || {};
-
-        setNodes(responseNodes);
-        setEdges(responseEdges);
-        setAvailableGroupByAttributes(groupByAttributes);
+        setNodes(response.Nodes || []);
+        setEdges(response.Edges || []);
+        setTruncated(response.truncated ?? false);
+        setAvailableGroupByAttributes(response.AvailableGroupByAttributes || {});
       } catch (err) {
+        if (abortController.signal.aborted) return;
         console.error('[useServiceMap] Error fetching service map:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setNodes([]);
         setEdges([]);
+        setTruncated(false);
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) setIsLoading(false);
       }
     };
 
     fetchServiceMap();
+
+    return () => abortController.abort();
   }, [pplSearchService, fetchParams, refetchTrigger, params.refreshTrigger, queryIndex, dataset]);
 
   const refetch = useCallback(() => {
     setRefetchTrigger((prev) => prev + 1);
   }, []);
 
-  return { nodes, edges, isLoading, error, availableGroupByAttributes, refetch };
+  return { nodes, edges, isLoading, error, availableGroupByAttributes, truncated, refetch };
 };

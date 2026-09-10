@@ -74,7 +74,8 @@ describe('useServiceMapMetrics', () => {
         data: {
           result: [
             {
-              metric: { service: serviceName },
+              // Metrics group by (environment, service), so the series carries both.
+              metric: { service: serviceName, environment: 'generic:default' },
               values: [
                 [1704067200, String(value)],
                 [1704067260, String(value + 1)],
@@ -150,7 +151,9 @@ describe('useServiceMapMetrics', () => {
       });
 
       expect(result.current.error).toEqual(mockError);
-      expect(result.current.metricsMap.size).toBe(0);
+      // Promise.allSettled keeps sibling metrics flowing: on failure the map is
+      // still populated with zeroed entries rather than going empty.
+      expect(result.current.metricsMap.size).toBeGreaterThan(0);
     });
 
     it('should wrap non-Error throws', async () => {
@@ -200,7 +203,13 @@ describe('useServiceMapMetrics', () => {
         type: 'data_frame',
         fields: [
           { name: 'Time', values: [1704067200000, 1704067260000] },
-          { name: 'Series', values: ['{service="api-gateway"}', '{service="api-gateway"}'] },
+          {
+            name: 'Series',
+            values: [
+              '{environment="generic:default", service="api-gateway"}',
+              '{environment="generic:default", service="api-gateway"}',
+            ],
+          },
           { name: 'Value', values: [100, 101] },
         ],
       };
