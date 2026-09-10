@@ -25,6 +25,9 @@ const mockMetricsReturn = {
 };
 jest.mock('../../../shared/hooks/use_services_red_metrics', () => ({
   useServicesRedMetrics: () => mockMetricsReturn,
+  // Keep the real key format — services_home derives metricsMap lookups from it.
+  serviceNodeKey: (serviceName: string, environment?: string) =>
+    `${serviceName}::${environment ?? ''}`,
 }));
 
 const mockTimeRange = { from: 'now-15m', to: 'now' };
