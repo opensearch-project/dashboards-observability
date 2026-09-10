@@ -57,6 +57,26 @@ export const applicationMapI18nTexts = {
     environment: i18n.translate('observability.apm.applicationMap.filters.environment', {
       defaultMessage: 'Environment',
     }),
+    selectAll: i18n.translate('observability.apm.applicationMap.filters.selectAll', {
+      defaultMessage: 'Select all',
+    }),
+    clearAll: i18n.translate('observability.apm.applicationMap.filters.clearAll', {
+      defaultMessage: 'Clear all',
+    }),
+    showLess: i18n.translate('observability.apm.applicationMap.filters.showLess', {
+      defaultMessage: 'Show less',
+    }),
+    showMore: (count: number) =>
+      i18n.translate('observability.apm.applicationMap.filters.showMore', {
+        defaultMessage: '+{count} more',
+        values: { count },
+      }),
+    noMatchingValues: i18n.translate('observability.apm.applicationMap.filters.noMatchingValues', {
+      defaultMessage: 'No matching values',
+    }),
+    noEnvironments: i18n.translate('observability.apm.applicationMap.filters.noEnvironments', {
+      defaultMessage: 'No environments available',
+    }),
   },
 
   // Service details panel
