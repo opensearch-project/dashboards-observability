@@ -150,6 +150,12 @@ export const APM_CONSTANTS = {
   QUERY_LIMITS: {
     SPANS: 50,
     LOGS_PER_DATASET: 10,
+    // When a filter can only be applied client-side (HTTP-status buckets on spans, or
+    // any log-level filter — those fields' names vary per dataset and can't be pushed
+    // into a PPL WHERE clause safely), the base page is fetched wider so the filter
+    // searches across many recent rows instead of only the default page.
+    SPANS_FILTERED: 1000,
+    LOGS_PER_DATASET_FILTERED: 1000,
   },
 
   // Truncation length for log messages in table display

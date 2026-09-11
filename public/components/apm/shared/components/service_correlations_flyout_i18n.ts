@@ -103,11 +103,11 @@ export const correlationsFlyoutI18nTexts = {
   // Description texts
   spansDescription: i18n.translate('observability.apm.correlationsFlyout.spansDescription', {
     defaultMessage:
-      'Showing up to 50 most recent spans correlated with this service, sorted by start time. Use the filter to narrow down by status or HTTP code, or click "Explore Traces" to view all spans in detail.',
+      'Showing the most recent spans correlated with this service, sorted by start time. Filtering by status or HTTP code searches across recent spans, not just the visible page. Click "Explore Traces" to view all spans in detail.',
   }),
   logsDescription: i18n.translate('observability.apm.correlationsFlyout.logsDescription', {
     defaultMessage:
-      'Showing up to 10 most recent logs from each correlated dataset. Use the filter to narrow by log level.',
+      'Showing the most recent logs from each correlated dataset. Filtering by log level searches across recent logs, not just the visible page.',
   }),
   attributesDescription: i18n.translate(
     'observability.apm.correlationsFlyout.attributesDescription',

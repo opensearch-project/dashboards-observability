@@ -66,25 +66,25 @@ import {
 /**
  * Creates a toggle handler for expanding/collapsing table rows with raw JSON data.
  */
-const createToggleRowHandler = (
-  setExpandedRows: React.Dispatch<React.SetStateAction<Record<string, React.ReactNode>>>
-) => (id: string, rawData: Record<string, any>) => {
-  setExpandedRows((prev) => {
-    const newExpanded = { ...prev };
-    if (newExpanded[id]) {
-      delete newExpanded[id];
-    } else {
-      newExpanded[id] = (
-        <div style={{ width: '100%' }}>
-          <EuiCodeBlock language="json" paddingSize="s" overflowHeight={300} isCopyable>
-            {JSON.stringify(rawData, null, 2)}
-          </EuiCodeBlock>
-        </div>
-      );
-    }
-    return newExpanded;
-  });
-};
+const createToggleRowHandler =
+  (setExpandedRows: React.Dispatch<React.SetStateAction<Record<string, React.ReactNode>>>) =>
+  (id: string, rawData: Record<string, any>) => {
+    setExpandedRows((prev) => {
+      const newExpanded = { ...prev };
+      if (newExpanded[id]) {
+        delete newExpanded[id];
+      } else {
+        newExpanded[id] = (
+          <div style={{ width: '100%' }}>
+            <EuiCodeBlock language="json" paddingSize="s" overflowHeight={300} isCopyable>
+              {JSON.stringify(rawData, null, 2)}
+            </EuiCodeBlock>
+          </div>
+        );
+      }
+      return newExpanded;
+    });
+  };
 
 interface ServiceCorrelationsFlyoutProps {
   serviceName: string;
@@ -265,6 +265,27 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     undefined
   );
 
+  // Push the status filter into the query so we search across ALL spans, not just the
+  // fetched page. `status.code` is the canonical, reliable field, so status/error/ok/unset
+  // go into the WHERE clause. The HTTP-status buckets can't be pushed — the HTTP field name
+  // varies per dataset (attributes.http.status_code, http.status_code, ...) and referencing a
+  // missing field errors in PPL — so for those we widen the fetch and let the client-side
+  // filter (filteredSpans) narrow the results.
+  const spanStatusWhere = useMemo(() => {
+    if (statusFilter === 'error') return ' | where `status.code` = 2';
+    if (statusFilter === 'ok') return ' | where `status.code` = 0';
+    if (statusFilter === 'unset') return ' | where `status.code` != 0 AND `status.code` != 2';
+    return '';
+  }, [statusFilter]);
+
+  const spanFetchLimit = useMemo(
+    () =>
+      statusFilter.startsWith('http-')
+        ? APM_CONSTANTS.QUERY_LIMITS.SPANS_FILTERED
+        : APM_CONSTANTS.QUERY_LIMITS.SPANS,
+    [statusFilter]
+  );
+
   // Fetch spans with optional filters
   useEffect(() => {
     if (!config?.tracesDataset) return;
@@ -291,7 +312,10 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           pplQuery += ` | where name = '${operationFilter}'`;
         }
 
-        pplQuery += ` | sort - startTime | head 50`;
+        // Server-side status filter (empty for 'all' and HTTP-status buckets)
+        pplQuery += spanStatusWhere;
+
+        pplQuery += ` | sort - startTime | head ${spanFetchLimit}`;
         const response = await pplService.executeQuery(pplQuery, dataset);
 
         const spansData: SpanData[] = (response.jsonData || []).map((item: any, idx: number) => ({
@@ -345,7 +369,27 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     };
 
     fetchSpans();
-  }, [config?.tracesDataset, serviceName, parsedTimeRange, operationFilter]);
+  }, [
+    config?.tracesDataset,
+    serviceName,
+    parsedTimeRange,
+    operationFilter,
+    spanStatusWhere,
+    spanFetchLimit,
+  ]);
+
+  // Log severity fields aren't schema-mapped and their names vary across datasets
+  // (severityText / severityNumber / severity / level), so a WHERE clause on level would
+  // error on datasets using a different field. Instead, when a level filter is active we
+  // widen the per-dataset fetch so the client-side filter searches across many recent logs
+  // rather than only the default page.
+  const logFetchLimit = useMemo(
+    () =>
+      logLevelFilter === 'all'
+        ? APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET
+        : APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET_FILTERED,
+    [logLevelFilter]
+  );
 
   // Fetch logs for each correlated dataset using traceId correlation
   useEffect(() => {
@@ -382,8 +426,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
         if (!dataset.schemaMappings?.serviceName || !dataset.schemaMappings?.timestamp) {
           coreRefs.toasts?.addDanger({
             title: `Missing schema mappings for ${dataset.displayName}`,
-            text:
-              'The log dataset is missing required schema mappings (serviceName, timestamp). Please configure the dataset properly.',
+            text: 'The log dataset is missing required schema mappings (serviceName, timestamp). Please configure the dataset properly.',
           });
           return {
             index,
@@ -437,7 +480,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             pplQuery += ` | where (\`${traceIdFieldValue}\` IN (${traceIdList}) OR \`${traceIdFieldValue}\` = '' OR isnull(\`${traceIdFieldValue}\`))`;
           }
 
-          pplQuery += ` | sort - \`${timestampField}\` | head 10`;
+          pplQuery += ` | sort - \`${timestampField}\` | head ${logFetchLimit}`;
           const response = await pplService.executeQuery(pplQuery, datasetConfig);
 
           const logsData: LogData[] = (response.jsonData || []).map((item: any, idx: number) => ({
@@ -500,6 +543,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     spanTimeRange,
     spansLoading,
     hasFilters,
+    logFetchLimit,
   ]);
 
   // Toggle row expansion handlers using shared factory function
@@ -966,8 +1010,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     return null;
   }, [operationFilter]);
 
-  // Build tabs - conditionally include Attributes tab based on filters
-  const tabs: EuiTabbedContentTab[] = useMemo(() => {
+  // Build tabs - conditionally include Attributes tab based on filters.
+  // Built inline (not memoized): the tab content fragments reference render-scoped
+  // state that changes every render, so a useMemo here would recompute every render
+  // anyway while tripping the exhaustive-deps rule.
+  const tabs: EuiTabbedContentTab[] = (() => {
     const tabList: EuiTabbedContentTab[] = [];
 
     // Only include Attributes tab when no filters are set (service-level view)
@@ -1033,7 +1080,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     });
 
     return tabList;
-  }, [hasFilters, selectedTabId, attributesTabContent, spansTabContent, logsTabContent]);
+  })();
 
   const initialSelectedTab = tabs.find((tab) => tab.id === initialTab) || tabs[0];
 
