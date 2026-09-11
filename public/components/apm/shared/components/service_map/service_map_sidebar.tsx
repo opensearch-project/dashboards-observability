@@ -17,6 +17,7 @@ import {
   EuiCheckboxGroup,
   EuiFieldSearch,
   EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FailureRateThresholdFilter, ErrorRateThreshold } from '../filters';
 import { ApplicationMapFilters } from '../../../common/types/service_map_types';
@@ -261,7 +262,18 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
       >
         <EuiSpacer size="xs" />
 
-        {availableEnvironments.length > 0 ? (
+        {isLoading && availableEnvironments.length === 0 ? (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                {i18nTexts.filters.loadingEnvironments}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : availableEnvironments.length > 0 ? (
           <>
             {/* Search box */}
             <EuiFieldSearch
@@ -286,6 +298,7 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
                       onClick={handleSelectAllEnvironments}
                       data-test-subj="environmentSelectAll"
                       color="primary"
+                      disabled={isLoading}
                     >
                       <EuiText size="xs">{i18nTexts.filters.selectAll}</EuiText>
                     </EuiLink>
@@ -295,6 +308,7 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
                       onClick={handleClearAllEnvironments}
                       data-test-subj="environmentClearAll"
                       color="primary"
+                      disabled={isLoading}
                     >
                       <EuiText size="xs">{i18nTexts.filters.clearAll}</EuiText>
                     </EuiLink>
@@ -340,6 +354,7 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
                     <EuiLink
                       onClick={() => setEnvironmentExpanded((prev) => !prev)}
                       data-test-subj="environmentShowMore"
+                      disabled={isLoading}
                     >
                       <EuiText size="xs">
                         {environmentExpanded

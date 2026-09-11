@@ -77,6 +77,12 @@ export const applicationMapI18nTexts = {
     noEnvironments: i18n.translate('observability.apm.applicationMap.filters.noEnvironments', {
       defaultMessage: 'No environments available',
     }),
+    loadingEnvironments: i18n.translate(
+      'observability.apm.applicationMap.filters.loadingEnvironments',
+      {
+        defaultMessage: 'Loading environments…',
+      }
+    ),
   },
 
   // Service details panel

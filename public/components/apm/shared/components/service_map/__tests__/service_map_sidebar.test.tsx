@@ -38,7 +38,11 @@ const baseFilters: ApplicationMapFilters = {
   groupBy: null,
 };
 
-const renderSidebar = (availableEnvironments: string[], environments: string[] = []) => {
+const renderSidebar = (
+  availableEnvironments: string[],
+  environments: string[] = [],
+  isLoading = false
+) => {
   const onFiltersChange = jest.fn();
   render(
     <ServiceMapSidebar
@@ -46,7 +50,7 @@ const renderSidebar = (availableEnvironments: string[], environments: string[] =
       onFiltersChange={onFiltersChange}
       availableGroupByAttributes={{}}
       availableEnvironments={availableEnvironments}
-      isLoading={false}
+      isLoading={isLoading}
       onToggle={jest.fn()}
     />
   );
@@ -101,6 +105,28 @@ describe('ServiceMapSidebar — Environment filter', () => {
 
     expect(screen.getByText(applicationMapI18nTexts.filters.noEnvironments)).toBeInTheDocument();
     expect(screen.queryByTestId('environmentSearch')).not.toBeInTheDocument();
+  });
+
+  it('shows a loading affordance instead of noEnvironments while loading with no envs yet', () => {
+    renderSidebar([], [], true);
+
+    expect(
+      screen.getByText(applicationMapI18nTexts.filters.loadingEnvironments)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(applicationMapI18nTexts.filters.noEnvironments)
+    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('environmentSearch')).not.toBeInTheDocument();
+  });
+
+  it('keeps showing the retained list (not the loader) during a refetch', () => {
+    renderSidebar(SEVEN_ENVS, [], true);
+
+    // Previous nodes are retained, so the checkbox list stays rendered instead of the loader.
+    expect(
+      screen.queryByText(applicationMapI18nTexts.filters.loadingEnvironments)
+    ).not.toBeInTheDocument();
+    expect(envGroup()).toBeInTheDocument();
   });
 
   it('Select all merges the currently-filtered subset into the selection', () => {

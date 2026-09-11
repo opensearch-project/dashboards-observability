@@ -272,15 +272,23 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     }));
   }, [nodes]);
 
-  // Extract unique environments from nodes (sorted alphabetically by display name)
+  // Extract unique environments from nodes (sorted alphabetically by display name).
+  // Dedupe on the display name rather than the raw env string: the map filters by
+  // display name (see service_map_graph), so two raw envs sharing a prefix (e.g.
+  // "eks:cluster1" and "eks:cluster2") must collapse into a single "eks" checkbox
+  // instead of rendering as identical duplicates.
   const availableEnvironments = useMemo(() => {
-    const envSet = new Set<string>();
+    const byDisplayName = new Map<string, string>();
     nodes.forEach((node) => {
-      if (node.KeyAttributes.Environment) {
-        envSet.add(node.KeyAttributes.Environment);
+      const env = node.KeyAttributes.Environment;
+      if (env) {
+        const displayName = getEnvironmentDisplayName(env);
+        if (!byDisplayName.has(displayName)) {
+          byDisplayName.set(displayName, env);
+        }
       }
     });
-    return Array.from(envSet).sort((a, b) =>
+    return Array.from(byDisplayName.values()).sort((a, b) =>
       getEnvironmentDisplayName(a).localeCompare(getEnvironmentDisplayName(b))
     );
   }, [nodes]);
