@@ -556,6 +556,41 @@ describe('DirectQueryRulerClient.listRuleGroups', () => {
     expect(groups).toEqual([]);
   });
 
+  // Regression (brand-new rule group / first rule create failing): the SQL
+  // plugin serves the wrapped-404 with `Content-Type: text/plain`, so the
+  // OpenSearch JS client leaves the body as an unparsed JSON *string* rather
+  // than an object. The empty-namespace classifier must parse the string
+  // envelope, not skip it — otherwise the first create in a namespace is
+  // wrongly rejected as a validation failure.
+  it('SQL plugin wrapped-404 delivered as a text/plain JSON string body → []', async () => {
+    const { client } = mockClient(() =>
+      Promise.reject(
+        rejectWithStatus(
+          400,
+          // Pretty-printed JSON string, exactly as the text/plain response
+          // reaches the transport (note the leading/inner whitespace).
+          JSON.stringify(
+            {
+              status: 400,
+              error: {
+                type: 'PrometheusClientException',
+                reason: 'Invalid Request',
+                details:
+                  'Ruler request failed with code: 404. Error details: no rule groups found\n',
+              },
+            },
+            null,
+            2
+          )
+        )
+      )
+    );
+    const svc = new DirectQueryRulerClient(noopLogger());
+
+    const groups = await svc.listRuleGroups(client, promDatasource(), 'slo-generated-ws-empty');
+    expect(groups).toEqual([]);
+  });
+
   it('HTTP 400 without the wrapped-404 marker → still throws RULER_VALIDATION_FAILED', async () => {
     const { client } = mockClient(() =>
       Promise.reject(rejectWithStatus(400, { error: { details: 'malformed namespace' } }))

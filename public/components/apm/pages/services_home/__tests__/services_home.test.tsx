@@ -25,7 +25,9 @@ const mockMetricsReturn = {
 };
 jest.mock('../../../shared/hooks/use_services_red_metrics', () => ({
   useServicesRedMetrics: () => mockMetricsReturn,
-  // Keep the real key format — services_home derives metricsMap lookups from it.
+  // `services_home.tsx` keys the metrics map with `serviceNodeKey`. Mirror the
+  // real implementation (`${serviceName}::${environment ?? ''}`) so the table
+  // cell renderers don't throw "serviceNodeKey is not a function".
   serviceNodeKey: (serviceName: string, environment?: string) =>
     `${serviceName}::${environment ?? ''}`,
 }));

@@ -345,7 +345,13 @@ function isWrappedEmptyNamespaceError(err: unknown): boolean {
   if (extractHttpStatus(err) !== 400) return false;
   const raw = err as { body?: unknown; meta?: { body?: unknown } };
   const candidates: unknown[] = [raw?.body, raw?.meta?.body];
-  for (const candidate of candidates) {
+  for (const rawCandidate of candidates) {
+    // The SQL plugin serves this error as `text/plain`, so the OpenSearch JS
+    // client leaves the body as an unparsed JSON string rather than an object.
+    // Coerce strings back into objects before the structured checks below —
+    // otherwise the (namespace-empty) 404 is misclassified as a validation
+    // failure and the first-rule / brand-new-group create is wrongly rejected.
+    const candidate = coerceErrorEnvelope(rawCandidate);
     if (!candidate || typeof candidate !== 'object') continue;
     const error = (candidate as { error?: unknown }).error;
     if (!error || typeof error !== 'object') continue;
@@ -357,6 +363,25 @@ function isWrappedEmptyNamespaceError(err: unknown): boolean {
     if (match && match[1] === '404') return true;
   }
   return false;
+}
+
+/**
+ * Normalize a transport error body into an object for structured inspection.
+ * The SQL plugin's DirectQuery proxy returns the wrapped ruler error with
+ * `Content-Type: text/plain`, so the OpenSearch JS client does not JSON-parse
+ * it — `err.body` / `err.meta.body` arrives as a raw string. Objects pass
+ * through; strings are parsed as JSON (returning `null` on non-JSON so callers
+ * fall through to their normal error handling).
+ */
+function coerceErrorEnvelope(candidate: unknown): unknown {
+  if (typeof candidate === 'string') {
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      return null;
+    }
+  }
+  return candidate;
 }
 
 function extractHttpStatus(err: unknown): number {
