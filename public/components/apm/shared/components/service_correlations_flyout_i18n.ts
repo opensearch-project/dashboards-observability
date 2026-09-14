@@ -179,7 +179,7 @@ export const correlationsFlyoutI18nTexts = {
   dashboardsTableCaption: i18n.translate(
     'observability.apm.correlationsFlyout.dashboardsTableCaption',
     {
-      defaultMessage: 'Open in a new tab, scoped to the current time range.',
+      defaultMessage: 'Open correlated dashboards in a new tab, scoped to the current time range.',
     }
   ),
   dashboardsColName: i18n.translate('observability.apm.correlationsFlyout.dashboardsColName', {
