@@ -19,6 +19,9 @@ export const correlationsFlyoutI18nTexts = {
   tabAttributes: i18n.translate('observability.apm.correlationsFlyout.tabAttributes', {
     defaultMessage: 'Service attributes',
   }),
+  tabDashboards: i18n.translate('observability.apm.correlationsFlyout.tabDashboards', {
+    defaultMessage: 'Correlated dashboards',
+  }),
 
   // Empty states
   noSpans: i18n.translate('observability.apm.correlationsFlyout.noSpans', {
@@ -158,4 +161,51 @@ export const correlationsFlyoutI18nTexts = {
       defaultMessage: 'Operation',
     }
   ),
+
+  // Correlated dashboards (optional, experimental)
+  dashboardsEmptyTitle: i18n.translate(
+    'observability.apm.correlationsFlyout.dashboardsEmptyTitle',
+    {
+      defaultMessage: 'No correlated dashboards',
+    }
+  ),
+  dashboardsEmptyBody: i18n.translate('observability.apm.correlationsFlyout.dashboardsEmptyBody', {
+    defaultMessage:
+      'Add dashboards (infrastructure or business) to open them from service/topology pages, scoped to the current time range.',
+  }),
+  dashboardsEmptyCta: i18n.translate('observability.apm.correlationsFlyout.dashboardsEmptyCta', {
+    defaultMessage: 'Add correlated dashboards',
+  }),
+  dashboardsTableCaption: i18n.translate(
+    'observability.apm.correlationsFlyout.dashboardsTableCaption',
+    {
+      defaultMessage: 'Open in a new tab, scoped to the current time range.',
+    }
+  ),
+  dashboardsColName: i18n.translate('observability.apm.correlationsFlyout.dashboardsColName', {
+    defaultMessage: 'Name',
+  }),
+  dashboardsColDescription: i18n.translate(
+    'observability.apm.correlationsFlyout.dashboardsColDescription',
+    {
+      defaultMessage: 'Description',
+    }
+  ),
+  dashboardsColLastModified: i18n.translate(
+    'observability.apm.correlationsFlyout.dashboardsColLastModified',
+    {
+      defaultMessage: 'Last modified',
+    }
+  ),
+  dashboardsSearchPlaceholder: i18n.translate(
+    'observability.apm.correlationsFlyout.dashboardsSearchPlaceholder',
+    {
+      defaultMessage: 'Search dashboards',
+    }
+  ),
+  dashboardUnavailable: (title: string) =>
+    i18n.translate('observability.apm.correlationsFlyout.dashboardUnavailable', {
+      defaultMessage: '{title} (unavailable)',
+      values: { title },
+    }),
 };

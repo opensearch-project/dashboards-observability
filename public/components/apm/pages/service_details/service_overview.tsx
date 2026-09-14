@@ -39,7 +39,6 @@ import {
   formatPercentageValue,
   formatLatency,
 } from '../../common/format_utils';
-import { useApmConfig } from '../../config/apm_config_context';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
 import { RESOLUTION_LOW, formatPrometheusDuration } from '../../shared/utils/step_utils';
 import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
@@ -73,8 +72,6 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   serviceMapDataset: _serviceMapDataset,
   refreshTrigger,
 }) => {
-  const { _config } = useApmConfig();
-
   // State for latency percentile selector
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
@@ -94,12 +91,12 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
 
   // Flyout state
   const [flyoutOpen, setFlyoutOpen] = useState(false);
-  const [flyoutInitialTab, setFlyoutInitialTab] = useState<'spans' | 'logs' | 'attributes'>(
-    'spans'
-  );
+  const [flyoutInitialTab, setFlyoutInitialTab] = useState<
+    'spans' | 'logs' | 'attributes' | 'dashboards'
+  >('spans');
 
   // Open flyout with specific tab
-  const openFlyout = (tab: 'spans' | 'logs' | 'attributes') => {
+  const openFlyout = (tab: 'spans' | 'logs' | 'attributes' | 'dashboards') => {
     setFlyoutInitialTab(tab);
     setFlyoutOpen(true);
   };
@@ -203,6 +200,20 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                 <EuiButtonEmpty iconType="discoverApp" size="s" onClick={() => openFlyout('logs')}>
                   {i18n.translate('observability.apm.serviceOverview.viewLogs', {
                     defaultMessage: 'View correlated logs',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              {/* Correlated dashboards (optional, experimental). 4th row —
+                  opens the flyout Dashboards tab (no count, matching spans/logs). */}
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="dashboardApp"
+                  size="s"
+                  onClick={() => openFlyout('dashboards')}
+                  data-test-subj="apmViewCorrelatedDashboards"
+                >
+                  {i18n.translate('observability.apm.serviceOverview.viewDashboards', {
+                    defaultMessage: 'View correlated dashboards',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
