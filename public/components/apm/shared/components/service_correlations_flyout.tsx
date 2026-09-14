@@ -60,7 +60,8 @@ import {
   getStatusLabel,
   getLogLevelColor,
   getHttpStatusColor,
-  normalizeLogLevel,
+  buildLogLevelPplWhere,
+  buildHttpStatusPplWhere,
 } from '../utils/format_utils';
 
 /**
@@ -234,30 +235,18 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     { value: 'trace', inputDisplay: <EuiBadge color="hollow">TRACE</EuiBadge> },
   ];
 
-  // Filter and sort spans based on selection
-  const filteredSpans = useMemo(() => {
-    let filtered = spans;
-    if (statusFilter === 'unset') filtered = spans.filter((s) => s.status !== 0 && s.status !== 2);
-    else if (statusFilter === 'error') filtered = spans.filter((s) => s.status === 2);
-    else if (statusFilter === 'ok') filtered = spans.filter((s) => s.status === 0);
-    else if (statusFilter === 'http-2xx')
-      filtered = spans.filter((s) => Number(s.httpStatus) >= 200 && Number(s.httpStatus) < 300);
-    else if (statusFilter === 'http-3xx')
-      filtered = spans.filter((s) => Number(s.httpStatus) >= 300 && Number(s.httpStatus) < 400);
-    else if (statusFilter === 'http-4xx')
-      filtered = spans.filter((s) => Number(s.httpStatus) >= 400 && Number(s.httpStatus) < 500);
-    else if (statusFilter === 'http-5xx')
-      filtered = spans.filter((s) => Number(s.httpStatus) >= 500);
-
-    // Sort the filtered results
-    return [...filtered].sort((a, b) => {
+  // Sort spans for display. The status/HTTP filters are applied server-side (see
+  // spanStatusWhere), so `spans` already contains only matching rows — no client-side
+  // status filtering is needed here.
+  const sortedSpans = useMemo(() => {
+    return [...spans].sort((a, b) => {
       const aValue = a[spanSortField];
       const bValue = b[spanSortField];
       if (aValue < bValue) return spanSortDirection === 'asc' ? -1 : 1;
       if (aValue > bValue) return spanSortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [spans, statusFilter, spanSortField, spanSortDirection]);
+  }, [spans, spanSortField, spanSortDirection]);
 
   // State for traceIds extracted from spans (used for log correlation)
   const [extractedTraceIds, setExtractedTraceIds] = useState<string[]>([]);
@@ -265,26 +254,17 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     undefined
   );
 
-  // Push the status filter into the query so we search across ALL spans, not just the
-  // fetched page. `status.code` is the canonical, reliable field, so status/error/ok/unset
-  // go into the WHERE clause. The HTTP-status buckets can't be pushed — the HTTP field name
-  // varies per dataset (attributes.http.status_code, http.status_code, ...) and referencing a
-  // missing field errors in PPL — so for those we widen the fetch and let the client-side
-  // filter (filteredSpans) narrow the results.
+  // Push the status filter into the query so we search across ALL spans in the selected
+  // time range, not just the fetched page. `status.code` (OTel span status) drives
+  // error/ok/unset; the HTTP-status buckets are pushed via buildHttpStatusPplWhere, which
+  // coalesces the two OTel-convention field names so a name absent from the index mapping
+  // doesn't error. Everything is server-side now, so the fetch stays at head 50.
   const spanStatusWhere = useMemo(() => {
     if (statusFilter === 'error') return ' | where `status.code` = 2';
     if (statusFilter === 'ok') return ' | where `status.code` = 0';
     if (statusFilter === 'unset') return ' | where `status.code` != 0 AND `status.code` != 2';
-    return '';
+    return buildHttpStatusPplWhere(statusFilter);
   }, [statusFilter]);
-
-  const spanFetchLimit = useMemo(
-    () =>
-      statusFilter.startsWith('http-')
-        ? APM_CONSTANTS.QUERY_LIMITS.SPANS_FILTERED
-        : APM_CONSTANTS.QUERY_LIMITS.SPANS,
-    [statusFilter]
-  );
 
   // Fetch spans with optional filters
   useEffect(() => {
@@ -315,7 +295,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
         // Server-side status filter (empty for 'all' and HTTP-status buckets)
         pplQuery += spanStatusWhere;
 
-        pplQuery += ` | sort - startTime | head ${spanFetchLimit}`;
+        pplQuery += ` | sort - startTime | head ${APM_CONSTANTS.QUERY_LIMITS.SPANS}`;
         const response = await pplService.executeQuery(pplQuery, dataset);
 
         const spansData: SpanData[] = (response.jsonData || []).map((item: any, idx: number) => ({
@@ -369,27 +349,13 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     };
 
     fetchSpans();
-  }, [
-    config?.tracesDataset,
-    serviceName,
-    parsedTimeRange,
-    operationFilter,
-    spanStatusWhere,
-    spanFetchLimit,
-  ]);
+  }, [config?.tracesDataset, serviceName, parsedTimeRange, operationFilter, spanStatusWhere]);
 
-  // Log severity fields aren't schema-mapped and their names vary across datasets
-  // (severityText / severityNumber / severity / level), so a WHERE clause on level would
-  // error on datasets using a different field. Instead, when a level filter is active we
-  // widen the per-dataset fetch so the client-side filter searches across many recent logs
-  // rather than only the default page.
-  const logFetchLimit = useMemo(
-    () =>
-      logLevelFilter === 'all'
-        ? APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET
-        : APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET_FILTERED,
-    [logLevelFilter]
-  );
+  // Push the log-level filter into the query so it searches across all correlated logs in
+  // the time range, not just the fetched page. buildLogLevelPplWhere coalesces the OTel
+  // severity fields (number and text) across their convention names so a name absent from a
+  // dataset's mapping doesn't error, keeping the fetch at head 10.
+  const logLevelWhere = useMemo(() => buildLogLevelPplWhere(logLevelFilter), [logLevelFilter]);
 
   // Fetch logs for each correlated dataset using traceId correlation
   useEffect(() => {
@@ -480,7 +446,10 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             pplQuery += ` | where (\`${traceIdFieldValue}\` IN (${traceIdList}) OR \`${traceIdFieldValue}\` = '' OR isnull(\`${traceIdFieldValue}\`))`;
           }
 
-          pplQuery += ` | sort - \`${timestampField}\` | head ${logFetchLimit}`;
+          // Server-side log-level filter (empty for 'all')
+          pplQuery += logLevelWhere;
+
+          pplQuery += ` | sort - \`${timestampField}\` | head ${APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET}`;
           const response = await pplService.executeQuery(pplQuery, datasetConfig);
 
           const logsData: LogData[] = (response.jsonData || []).map((item: any, idx: number) => ({
@@ -543,7 +512,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     spanTimeRange,
     spansLoading,
     hasFilters,
-    logFetchLimit,
+    logLevelWhere,
   ]);
 
   // Toggle row expansion handlers using shared factory function
@@ -776,11 +745,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           title={<h3>{i18nTexts.errorLoadingSpans}</h3>}
           body={<p>{spansError.message}</p>}
         />
-      ) : filteredSpans.length === 0 ? (
+      ) : sortedSpans.length === 0 ? (
         <EuiEmptyPrompt iconType="search" title={<h3>{i18nTexts.noSpans}</h3>} />
       ) : (
         <EuiBasicTable
-          items={filteredSpans}
+          items={sortedSpans}
           columns={spanColumns}
           itemId="_id"
           itemIdToExpandedRowMap={expandedSpanRows}
@@ -901,19 +870,15 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                   </EuiText>
                 ) : (
                   (() => {
-                    // Filter and sort logs
-                    const filteredLogs = result.logs
-                      .filter((log) => {
-                        if (logLevelFilter === 'all') return true;
-                        return normalizeLogLevel(log.level, log.severityNumber) === logLevelFilter;
-                      })
-                      .sort((a, b) => {
-                        const aValue = a[logSortField];
-                        const bValue = b[logSortField];
-                        if (aValue < bValue) return logSortDirection === 'asc' ? -1 : 1;
-                        if (aValue > bValue) return logSortDirection === 'asc' ? 1 : -1;
-                        return 0;
-                      });
+                    // Sort logs for display. The level filter is applied server-side (see
+                    // logLevelWhere), so result.logs already contains only matching rows.
+                    const filteredLogs = [...result.logs].sort((a, b) => {
+                      const aValue = a[logSortField];
+                      const bValue = b[logSortField];
+                      if (aValue < bValue) return logSortDirection === 'asc' ? -1 : 1;
+                      if (aValue > bValue) return logSortDirection === 'asc' ? 1 : -1;
+                      return 0;
+                    });
 
                     return filteredLogs.length === 0 ? (
                       <EuiText color="subdued" size="s">
