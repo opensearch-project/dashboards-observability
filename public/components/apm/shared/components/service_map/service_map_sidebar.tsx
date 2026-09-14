@@ -15,11 +15,16 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiCheckboxGroup,
+  EuiFieldSearch,
+  EuiLink,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FailureRateThresholdFilter, ErrorRateThreshold } from '../filters';
 import { ApplicationMapFilters } from '../../../common/types/service_map_types';
-import { getEnvironmentDisplayName } from '../../../common/constants';
+import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../../common/constants';
 import { applicationMapI18nTexts as i18nTexts } from '../../../pages/application_map/application_map_i18n';
+import { TruncatedLabel } from '../../../../common/truncated_label';
+import '../../styles/apm_common.scss';
 
 export interface ServiceMapSidebarProps {
   filters: ApplicationMapFilters;
@@ -49,6 +54,8 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
 }) => {
   // Local state for groupBy select - syncs with filter prop but gives us control
   const [localGroupBy, setLocalGroupBy] = useState<string>(filters.groupBy || '');
+  const [environmentSearchQuery, setEnvironmentSearchQuery] = useState('');
+  const [environmentExpanded, setEnvironmentExpanded] = useState(false);
 
   // Sync local state when filter prop changes (e.g., from badge removal)
   useEffect(() => {
@@ -62,13 +69,14 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
     }));
   }, [availableGroupByAttributes]);
 
-  // Environment checkbox options - dynamically built from available environments
-  const environmentCheckboxes = useMemo(() => {
-    return availableEnvironments.map((env) => ({
-      id: env,
-      label: getEnvironmentDisplayName(env),
-    }));
-  }, [availableEnvironments]);
+  // Environments narrowed by the per-filter search box (matches the display name).
+  const filteredEnvironments = useMemo(() => {
+    if (!environmentSearchQuery) return availableEnvironments;
+    const searchLower = environmentSearchQuery.toLowerCase();
+    return availableEnvironments.filter((env) =>
+      getEnvironmentDisplayName(env).toLowerCase().includes(searchLower)
+    );
+  }, [availableEnvironments, environmentSearchQuery]);
 
   // Environment selection map for checkbox group
   const environmentSelectionMap = useMemo(() => {
@@ -128,6 +136,22 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
     },
     [filters, onFiltersChange]
   );
+
+  // Merge the currently-filtered environments into the existing selection so
+  // values selected under a previous search term survive.
+  const handleSelectAllEnvironments = useCallback(() => {
+    onFiltersChange({
+      ...filters,
+      environments: Array.from(new Set([...filters.environments, ...filteredEnvironments])),
+    });
+  }, [filters, filteredEnvironments, onFiltersChange]);
+
+  const handleClearAllEnvironments = useCallback(() => {
+    onFiltersChange({
+      ...filters,
+      environments: [],
+    });
+  }, [filters, onFiltersChange]);
 
   return (
     <EuiPanel style={{ height: '100%' }}>
@@ -237,14 +261,119 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
         data-test-subj="environmentAccordion"
       >
         <EuiSpacer size="xs" />
-        <EuiCheckboxGroup
-          options={environmentCheckboxes}
-          idToSelectedMap={environmentSelectionMap}
-          onChange={handleEnvironmentChange}
-          compressed
-          disabled={isLoading}
-          data-test-subj="environmentCheckboxGroup"
-        />
+
+        {isLoading && availableEnvironments.length === 0 ? (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                {i18nTexts.filters.loadingEnvironments}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : availableEnvironments.length > 0 ? (
+          <>
+            {/* Search box */}
+            <EuiFieldSearch
+              placeholder=""
+              value={environmentSearchQuery}
+              onChange={(e) => setEnvironmentSearchQuery(e.target.value)}
+              isClearable
+              fullWidth
+              compressed
+              data-test-subj="environmentSearch"
+            />
+
+            <EuiSpacer size="s" />
+
+            {/* Select all / Clear all links */}
+            {filteredEnvironments.length > 0 && (
+              <>
+                <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      onClick={handleSelectAllEnvironments}
+                      data-test-subj="environmentSelectAll"
+                      color="primary"
+                    >
+                      <EuiText size="xs">{i18nTexts.filters.selectAll}</EuiText>
+                    </EuiLink>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiLink
+                      onClick={handleClearAllEnvironments}
+                      data-test-subj="environmentClearAll"
+                      color="primary"
+                    >
+                      <EuiText size="xs">{i18nTexts.filters.clearAll}</EuiText>
+                    </EuiLink>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+              </>
+            )}
+
+            {/* Checkbox list */}
+            {filteredEnvironments.length > 0 ? (
+              <>
+                <div
+                  style={
+                    environmentExpanded
+                      ? {
+                          maxBlockSize: APM_CONSTANTS.FILTER_VALUES_EXPANDED_MAX_HEIGHT,
+                          overflowY: 'auto',
+                        }
+                      : undefined
+                  }
+                >
+                  <EuiCheckboxGroup
+                    className="apmFilterCheckboxGroup"
+                    options={(environmentExpanded
+                      ? filteredEnvironments
+                      : filteredEnvironments.slice(0, APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT)
+                    ).map((env) => ({
+                      id: env,
+                      label: <TruncatedLabel text={getEnvironmentDisplayName(env)} />,
+                    }))}
+                    idToSelectedMap={environmentSelectionMap}
+                    onChange={handleEnvironmentChange}
+                    compressed
+                    data-test-subj="environmentCheckboxGroup"
+                  />
+                </div>
+                {/* Show more / Show less link */}
+                {filteredEnvironments.length > APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT && (
+                  <>
+                    <EuiSpacer size="xs" />
+                    <EuiLink
+                      onClick={() => setEnvironmentExpanded((prev) => !prev)}
+                      data-test-subj="environmentShowMore"
+                    >
+                      <EuiText size="xs">
+                        {environmentExpanded
+                          ? i18nTexts.filters.showLess
+                          : i18nTexts.filters.showMore(
+                              filteredEnvironments.length -
+                                APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT
+                            )}
+                      </EuiText>
+                    </EuiLink>
+                  </>
+                )}
+              </>
+            ) : (
+              <EuiText size="s" color="subdued">
+                {i18nTexts.filters.noMatchingValues}
+              </EuiText>
+            )}
+          </>
+        ) : (
+          <EuiText size="s" color="subdued">
+            {i18nTexts.filters.noEnvironments}
+          </EuiText>
+        )}
       </EuiAccordion>
     </EuiPanel>
   );
