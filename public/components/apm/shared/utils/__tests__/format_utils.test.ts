@@ -10,6 +10,9 @@ import {
   getHttpStatusColor,
   getLogLevelColor,
   normalizeLogLevel,
+  buildLogLevelPplWhere,
+  buildHttpStatusPplWhere,
+  isCoalesceUnsupportedError,
 } from '../format_utils';
 
 describe('format_utils', () => {
@@ -253,6 +256,109 @@ describe('format_utils', () => {
         // SeverityNumber indicates info (9) but text says fatal
         expect(normalizeLogLevel('fatal', 9)).toBe('info');
       });
+    });
+  });
+
+  describe('buildLogLevelPplWhere', () => {
+    it('should return empty string for "all" or unknown levels', () => {
+      expect(buildLogLevelPplWhere('all')).toBe('');
+      expect(buildLogLevelPplWhere('other')).toBe('');
+      expect(buildLogLevelPplWhere('')).toBe('');
+    });
+
+    it('should mirror the severityNumber range for the level', () => {
+      // error is 17-20, matching normalizeLogLevel's thresholds
+      const clause = buildLogLevelPplWhere('error');
+      expect(clause).toContain('>= 17');
+      expect(clause).toContain('<= 20');
+      expect(clause).toContain("LIKE '%error%'");
+    });
+
+    it('should use fatal upper bound of 24', () => {
+      const clause = buildLogLevelPplWhere('fatal');
+      expect(clause).toContain('>= 21');
+      expect(clause).toContain('<= 24');
+    });
+
+    it('should coalesce number across severityNumber and severity.number', () => {
+      expect(buildLogLevelPplWhere('info')).toContain(
+        'coalesce(`severityNumber`, `severity.number`)'
+      );
+    });
+
+    it('should coalesce text across severityText, severity.text, level (never bare severity)', () => {
+      const clause = buildLogLevelPplWhere('warn');
+      expect(clause).toContain('coalesce(`severityText`, `severity.text`, `level`)');
+      // bare `severity` is a struct and must not be referenced
+      expect(clause).not.toContain('coalesce(`severity`');
+    });
+
+    it('should start with a PPL where clause', () => {
+      expect(buildLogLevelPplWhere('trace').startsWith(' | where ')).toBe(true);
+    });
+  });
+
+  describe('buildHttpStatusPplWhere', () => {
+    it('should return empty string for non-HTTP buckets', () => {
+      expect(buildHttpStatusPplWhere('all')).toBe('');
+      expect(buildHttpStatusPplWhere('error')).toBe('');
+      expect(buildHttpStatusPplWhere('ok')).toBe('');
+    });
+
+    it('should build bounded ranges for 2xx-4xx', () => {
+      expect(buildHttpStatusPplWhere('http-2xx')).toContain('>= 200 AND');
+      expect(buildHttpStatusPplWhere('http-2xx')).toContain('< 300');
+      expect(buildHttpStatusPplWhere('http-3xx')).toContain('>= 300 AND');
+      expect(buildHttpStatusPplWhere('http-3xx')).toContain('< 400');
+      expect(buildHttpStatusPplWhere('http-4xx')).toContain('>= 400 AND');
+      expect(buildHttpStatusPplWhere('http-4xx')).toContain('< 500');
+    });
+
+    it('should build an unbounded 5xx range', () => {
+      const clause = buildHttpStatusPplWhere('http-5xx');
+      expect(clause).toContain('>= 500');
+      expect(clause).not.toContain('< 600');
+    });
+
+    it('should coalesce the two OTel status-code field names and cast to int', () => {
+      const clause = buildHttpStatusPplWhere('http-2xx');
+      expect(clause).toContain(
+        'coalesce(`attributes.http.response.status_code`, `attributes.http.status_code`)'
+      );
+      expect(clause).toContain('cast(');
+      expect(clause).toContain('as int');
+    });
+  });
+
+  describe('isCoalesceUnsupportedError', () => {
+    it('should return false for nullish input', () => {
+      expect(isCoalesceUnsupportedError(undefined)).toBe(false);
+      expect(isCoalesceUnsupportedError(null)).toBe(false);
+    });
+
+    it('should detect coalesce mention in the error message', () => {
+      expect(isCoalesceUnsupportedError(new Error('Unsupported function: coalesce'))).toBe(true);
+      expect(isCoalesceUnsupportedError({ message: 'unknown function COALESCE' })).toBe(true);
+    });
+
+    it('should detect coalesce mention in the error body', () => {
+      expect(
+        isCoalesceUnsupportedError({ body: { error: { reason: 'function coalesce not found' } } })
+      ).toBe(true);
+      expect(isCoalesceUnsupportedError({ body: 'coalesce is not recognized' })).toBe(true);
+    });
+
+    it('should return false for unrelated errors', () => {
+      expect(isCoalesceUnsupportedError(new Error('index_not_found_exception'))).toBe(false);
+      expect(
+        isCoalesceUnsupportedError({ body: { error: { reason: 'Field [x] not found.' } } })
+      ).toBe(false);
+    });
+
+    it('should not throw on a non-serializable body', () => {
+      const circular: Record<string, unknown> = {};
+      circular.self = circular;
+      expect(isCoalesceUnsupportedError({ body: circular })).toBe(false);
     });
   });
 });

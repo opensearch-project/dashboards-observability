@@ -22,6 +22,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiCallOut,
   EuiButtonIcon,
   EuiCodeBlock,
   EuiEmptyPrompt,
@@ -61,30 +62,33 @@ import {
   getLogLevelColor,
   getHttpStatusColor,
   normalizeLogLevel,
+  buildLogLevelPplWhere,
+  buildHttpStatusPplWhere,
+  isCoalesceUnsupportedError,
 } from '../utils/format_utils';
 
 /**
  * Creates a toggle handler for expanding/collapsing table rows with raw JSON data.
  */
-const createToggleRowHandler = (
-  setExpandedRows: React.Dispatch<React.SetStateAction<Record<string, React.ReactNode>>>
-) => (id: string, rawData: Record<string, any>) => {
-  setExpandedRows((prev) => {
-    const newExpanded = { ...prev };
-    if (newExpanded[id]) {
-      delete newExpanded[id];
-    } else {
-      newExpanded[id] = (
-        <div style={{ width: '100%' }}>
-          <EuiCodeBlock language="json" paddingSize="s" overflowHeight={300} isCopyable>
-            {JSON.stringify(rawData, null, 2)}
-          </EuiCodeBlock>
-        </div>
-      );
-    }
-    return newExpanded;
-  });
-};
+const createToggleRowHandler =
+  (setExpandedRows: React.Dispatch<React.SetStateAction<Record<string, React.ReactNode>>>) =>
+  (id: string, rawData: Record<string, any>) => {
+    setExpandedRows((prev) => {
+      const newExpanded = { ...prev };
+      if (newExpanded[id]) {
+        delete newExpanded[id];
+      } else {
+        newExpanded[id] = (
+          <div style={{ width: '100%' }}>
+            <EuiCodeBlock language="json" paddingSize="s" overflowHeight={300} isCopyable>
+              {JSON.stringify(rawData, null, 2)}
+            </EuiCodeBlock>
+          </div>
+        );
+      }
+      return newExpanded;
+    });
+  };
 
 interface ServiceCorrelationsFlyoutProps {
   serviceName: string;
@@ -129,6 +133,10 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
 
   // Log level filter state
   const [logLevelFilter, setLogLevelFilter] = useState('all');
+
+  // True when the span HTTP-status filter fell back to a widened client-side filter
+  // because the OpenSearch version doesn't support the server-side coalesce push (< 3.1).
+  const [spanFilterFallback, setSpanFilterFallback] = useState(false);
 
   // Sorting state for spans table
   const [spanSortField, setSpanSortField] = useState<keyof SpanData>('startTime');
@@ -234,22 +242,23 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     { value: 'trace', inputDisplay: <EuiBadge color="hollow">TRACE</EuiBadge> },
   ];
 
-  // Filter and sort spans based on selection
-  const filteredSpans = useMemo(() => {
+  // Sort spans for display. The status/HTTP filters are applied server-side (see
+  // spanStatusWhere), so `spans` already contains only matching rows. The exception is the
+  // fallback path (OpenSearch < 3.1, no coalesce), where the HTTP bucket couldn't be pushed
+  // and `spans` holds a widened unfiltered page — narrow it client-side here.
+  const sortedSpans = useMemo(() => {
     let filtered = spans;
-    if (statusFilter === 'unset') filtered = spans.filter((s) => s.status !== 0 && s.status !== 2);
-    else if (statusFilter === 'error') filtered = spans.filter((s) => s.status === 2);
-    else if (statusFilter === 'ok') filtered = spans.filter((s) => s.status === 0);
-    else if (statusFilter === 'http-2xx')
-      filtered = spans.filter((s) => Number(s.httpStatus) >= 200 && Number(s.httpStatus) < 300);
-    else if (statusFilter === 'http-3xx')
-      filtered = spans.filter((s) => Number(s.httpStatus) >= 300 && Number(s.httpStatus) < 400);
-    else if (statusFilter === 'http-4xx')
-      filtered = spans.filter((s) => Number(s.httpStatus) >= 400 && Number(s.httpStatus) < 500);
-    else if (statusFilter === 'http-5xx')
-      filtered = spans.filter((s) => Number(s.httpStatus) >= 500);
+    if (spanFilterFallback) {
+      if (statusFilter === 'http-2xx')
+        filtered = spans.filter((s) => Number(s.httpStatus) >= 200 && Number(s.httpStatus) < 300);
+      else if (statusFilter === 'http-3xx')
+        filtered = spans.filter((s) => Number(s.httpStatus) >= 300 && Number(s.httpStatus) < 400);
+      else if (statusFilter === 'http-4xx')
+        filtered = spans.filter((s) => Number(s.httpStatus) >= 400 && Number(s.httpStatus) < 500);
+      else if (statusFilter === 'http-5xx')
+        filtered = spans.filter((s) => Number(s.httpStatus) >= 500);
+    }
 
-    // Sort the filtered results
     return [...filtered].sort((a, b) => {
       const aValue = a[spanSortField];
       const bValue = b[spanSortField];
@@ -257,13 +266,25 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       if (aValue > bValue) return spanSortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [spans, statusFilter, spanSortField, spanSortDirection]);
+  }, [spans, spanFilterFallback, statusFilter, spanSortField, spanSortDirection]);
 
   // State for traceIds extracted from spans (used for log correlation)
   const [extractedTraceIds, setExtractedTraceIds] = useState<string[]>([]);
   const [spanTimeRange, setSpanTimeRange] = useState<{ minTime: Date; maxTime: Date } | undefined>(
     undefined
   );
+
+  // Push the status filter into the query so we search across ALL spans in the selected
+  // time range, not just the fetched page. `status.code` (OTel span status) drives
+  // error/ok/unset; the HTTP-status buckets are pushed via buildHttpStatusPplWhere, which
+  // coalesces the two OTel-convention field names so a name absent from the index mapping
+  // doesn't error. Everything is server-side now, so the fetch stays at head 50.
+  const spanStatusWhere = useMemo(() => {
+    if (statusFilter === 'error') return ' | where `status.code` = 2';
+    if (statusFilter === 'ok') return ' | where `status.code` = 0';
+    if (statusFilter === 'unset') return ' | where `status.code` != 0 AND `status.code` != 2';
+    return buildHttpStatusPplWhere(statusFilter);
+  }, [statusFilter]);
 
   // Fetch spans with optional filters
   useEffect(() => {
@@ -272,6 +293,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     const fetchSpans = async () => {
       setSpansLoading(true);
       setSpansError(null);
+      setSpanFilterFallback(false);
 
       try {
         const pplService = new PPLSearchService();
@@ -283,16 +305,29 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             : undefined,
         };
 
-        // Build PPL query with optional filters
-        let pplQuery = `source=${dataset.title} | where serviceName = '${serviceName}'`;
-
-        // Add operation filter if specified
+        // Base query without the status filter (shared by the primary and fallback paths)
+        let baseQuery = `source=${dataset.title} | where serviceName = '${serviceName}'`;
         if (operationFilter) {
-          pplQuery += ` | where name = '${operationFilter}'`;
+          baseQuery += ` | where name = '${operationFilter}'`;
         }
 
-        pplQuery += ` | sort - startTime | head 50`;
-        const response = await pplService.executeQuery(pplQuery, dataset);
+        // Primary: push the status/HTTP filter server-side and fetch the top 50.
+        const primaryQuery = `${baseQuery}${spanStatusWhere} | sort - startTime | head ${APM_CONSTANTS.QUERY_LIMITS.SPANS}`;
+
+        let response;
+        try {
+          response = await pplService.executeQuery(primaryQuery, dataset);
+        } catch (err) {
+          // Only the HTTP-status buckets use coalesce; on OpenSearch < 3.1 that errors, so
+          // fetch a wider unfiltered page and let sortedSpans filter the bucket client-side.
+          if (statusFilter.startsWith('http-') && isCoalesceUnsupportedError(err)) {
+            const fallbackQuery = `${baseQuery} | sort - startTime | head ${APM_CONSTANTS.QUERY_LIMITS.SPANS_FILTERED}`;
+            response = await pplService.executeQuery(fallbackQuery, dataset);
+            setSpanFilterFallback(true);
+          } else {
+            throw err;
+          }
+        }
 
         const spansData: SpanData[] = (response.jsonData || []).map((item: any, idx: number) => ({
           _id: item.spanId || `span-${idx}`,
@@ -345,7 +380,20 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     };
 
     fetchSpans();
-  }, [config?.tracesDataset, serviceName, parsedTimeRange, operationFilter]);
+  }, [
+    config?.tracesDataset,
+    serviceName,
+    parsedTimeRange,
+    operationFilter,
+    spanStatusWhere,
+    statusFilter,
+  ]);
+
+  // Push the log-level filter into the query so it searches across all correlated logs in
+  // the time range, not just the fetched page. buildLogLevelPplWhere coalesces the OTel
+  // severity fields (number and text) across their convention names so a name absent from a
+  // dataset's mapping doesn't error, keeping the fetch at head 10.
+  const logLevelWhere = useMemo(() => buildLogLevelPplWhere(logLevelFilter), [logLevelFilter]);
 
   // Fetch logs for each correlated dataset using traceId correlation
   useEffect(() => {
@@ -382,8 +430,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
         if (!dataset.schemaMappings?.serviceName || !dataset.schemaMappings?.timestamp) {
           coreRefs.toasts?.addDanger({
             title: `Missing schema mappings for ${dataset.displayName}`,
-            text:
-              'The log dataset is missing required schema mappings (serviceName, timestamp). Please configure the dataset properly.',
+            text: 'The log dataset is missing required schema mappings (serviceName, timestamp). Please configure the dataset properly.',
           });
           return {
             index,
@@ -437,8 +484,24 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             pplQuery += ` | where (\`${traceIdFieldValue}\` IN (${traceIdList}) OR \`${traceIdFieldValue}\` = '' OR isnull(\`${traceIdFieldValue}\`))`;
           }
 
-          pplQuery += ` | sort - \`${timestampField}\` | head 10`;
-          const response = await pplService.executeQuery(pplQuery, datasetConfig);
+          // Primary: push the level filter server-side and fetch the top 10.
+          const primaryQuery = `${pplQuery}${logLevelWhere} | sort - \`${timestampField}\` | head ${APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET}`;
+
+          let response;
+          let filterFallback = false;
+          try {
+            response = await pplService.executeQuery(primaryQuery, datasetConfig);
+          } catch (err) {
+            // The level filter uses coalesce; on OpenSearch < 3.1 that errors, so fetch a
+            // wider unfiltered page and filter the level client-side (see filteredLogs).
+            if (logLevelWhere && isCoalesceUnsupportedError(err)) {
+              const fallbackQuery = `${pplQuery} | sort - \`${timestampField}\` | head ${APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET_FILTERED}`;
+              response = await pplService.executeQuery(fallbackQuery, datasetConfig);
+              filterFallback = true;
+            } else {
+              throw err;
+            }
+          }
 
           const logsData: LogData[] = (response.jsonData || []).map((item: any, idx: number) => ({
             _id: `${dataset.id}-${idx}`,
@@ -460,6 +523,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
               traceIdField: traceIdFieldValue,
               logs: logsData,
               loading: false,
+              filterFallback,
               dataSourceId: dataset.dataSourceId,
               dataSourceTitle: dataset.dataSourceTitle,
             },
@@ -500,6 +564,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     spanTimeRange,
     spansLoading,
     hasFilters,
+    logLevelWhere,
   ]);
 
   // Toggle row expansion handlers using shared factory function
@@ -718,6 +783,19 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       <EuiText size="xs" color="subdued">
         {i18nTexts.spansDescription}
       </EuiText>
+      {spanFilterFallback && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="clock"
+            title={i18nTexts.filterFallbackTitle}
+          >
+            <p>{i18nTexts.filterFallbackSpansBody}</p>
+          </EuiCallOut>
+        </>
+      )}
       <EuiSpacer size="m" />
 
       {spansLoading ? (
@@ -732,11 +810,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           title={<h3>{i18nTexts.errorLoadingSpans}</h3>}
           body={<p>{spansError.message}</p>}
         />
-      ) : filteredSpans.length === 0 ? (
+      ) : sortedSpans.length === 0 ? (
         <EuiEmptyPrompt iconType="search" title={<h3>{i18nTexts.noSpans}</h3>} />
       ) : (
         <EuiBasicTable
-          items={filteredSpans}
+          items={sortedSpans}
           columns={spanColumns}
           itemId="_id"
           itemIdToExpandedRowMap={expandedSpanRows}
@@ -779,6 +857,19 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {logResults.some((result) => result.filterFallback) && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="clock"
+            title={i18nTexts.filterFallbackTitle}
+          >
+            <p>{i18nTexts.filterFallbackLogsBody}</p>
+          </EuiCallOut>
+        </>
+      )}
       <EuiSpacer size="m" />
 
       {logsLoading ? (
@@ -857,10 +948,13 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                   </EuiText>
                 ) : (
                   (() => {
-                    // Filter and sort logs
+                    // Sort logs for display. The level filter is applied server-side (see
+                    // logLevelWhere), so result.logs already contains only matching rows —
+                    // except on the fallback path (OpenSearch < 3.1), where this dataset was
+                    // fetched wider and must be filtered client-side by level here.
                     const filteredLogs = result.logs
                       .filter((log) => {
-                        if (logLevelFilter === 'all') return true;
+                        if (!result.filterFallback || logLevelFilter === 'all') return true;
                         return normalizeLogLevel(log.level, log.severityNumber) === logLevelFilter;
                       })
                       .sort((a, b) => {
@@ -966,8 +1060,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     return null;
   }, [operationFilter]);
 
-  // Build tabs - conditionally include Attributes tab based on filters
-  const tabs: EuiTabbedContentTab[] = useMemo(() => {
+  // Build tabs - conditionally include Attributes tab based on filters.
+  // Built inline (not memoized): the tab content fragments reference render-scoped
+  // state that changes every render, so a useMemo here would recompute every render
+  // anyway while tripping the exhaustive-deps rule.
+  const tabs: EuiTabbedContentTab[] = (() => {
     const tabList: EuiTabbedContentTab[] = [];
 
     // Only include Attributes tab when no filters are set (service-level view)
@@ -1033,7 +1130,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     });
 
     return tabList;
-  }, [hasFilters, selectedTabId, attributesTabContent, spansTabContent, logsTabContent]);
+  })();
 
   const initialSelectedTab = tabs.find((tab) => tab.id === initialTab) || tabs[0];
 

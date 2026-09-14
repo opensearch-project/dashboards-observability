@@ -103,16 +103,35 @@ export const correlationsFlyoutI18nTexts = {
   // Description texts
   spansDescription: i18n.translate('observability.apm.correlationsFlyout.spansDescription', {
     defaultMessage:
-      'Showing up to 50 most recent spans correlated with this service, sorted by start time. Use the filter to narrow down by status or HTTP code, or click "Explore Traces" to view all spans in detail.',
+      'Showing the most recent spans correlated with this service, sorted by start time. Filtering by status or HTTP code searches all matching spans in the selected time range and returns the most recent. Click "Explore Traces" to view all spans in detail.',
   }),
   logsDescription: i18n.translate('observability.apm.correlationsFlyout.logsDescription', {
     defaultMessage:
-      'Showing up to 10 most recent logs from each correlated dataset. Use the filter to narrow by log level.',
+      'Showing the most recent logs from each correlated dataset. Filtering by log level searches all matching logs in the selected time range and returns the most recent.',
   }),
   attributesDescription: i18n.translate(
     'observability.apm.correlationsFlyout.attributesDescription',
     {
       defaultMessage: 'Service attributes extracted from trace data.',
+    }
+  ),
+
+  // Filter fallback banner (shown on OpenSearch < 3.1, which can't push the filter server-side)
+  filterFallbackTitle: i18n.translate('observability.apm.correlationsFlyout.filterFallbackTitle', {
+    defaultMessage: 'Filtered results may be incomplete',
+  }),
+  filterFallbackSpansBody: i18n.translate(
+    'observability.apm.correlationsFlyout.filterFallbackSpansBody',
+    {
+      defaultMessage:
+        'This OpenSearch version cannot filter HTTP status across the full time range, so only the most recent spans were searched. Upgrade to OpenSearch 3.1 or later, or click "Explore Traces" to search all spans.',
+    }
+  ),
+  filterFallbackLogsBody: i18n.translate(
+    'observability.apm.correlationsFlyout.filterFallbackLogsBody',
+    {
+      defaultMessage:
+        'This OpenSearch version cannot filter log level across the full time range, so only the most recent logs were searched. Upgrade to OpenSearch 3.1 or later, or click "Explore Logs" to search all logs.',
     }
   ),
 

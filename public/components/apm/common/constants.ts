@@ -146,10 +146,17 @@ export const APM_CONSTANTS = {
     WARNING: euiThemeVars.euiColorVis5,
   },
 
-  // Query limits for fetching data
+  // Query limits for fetching data. Status/HTTP and log-level filters are pushed into
+  // the PPL WHERE clause (see service_correlations_flyout), so these return the most
+  // recent matching rows across the full time range.
   QUERY_LIMITS: {
     SPANS: 50,
     LOGS_PER_DATASET: 10,
+    // Fallback only: on OpenSearch < 3.1 the `coalesce`-based HTTP/level filters can't
+    // be pushed, so the base page is fetched wider and filtered client-side across the
+    // most recent rows. A banner tells the user the scope is limited in this case.
+    SPANS_FILTERED: 1000,
+    LOGS_PER_DATASET_FILTERED: 1000,
   },
 
   // Truncation length for log messages in table display
