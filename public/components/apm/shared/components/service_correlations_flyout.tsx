@@ -1140,7 +1140,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
 
     return (
       <>
-        <EuiText size="s" color="subdued">
+        <EuiText size="xs" color="subdued">
           {i18nTexts.dashboardsTableCaption}
         </EuiText>
         <EuiSpacer size="s" />
