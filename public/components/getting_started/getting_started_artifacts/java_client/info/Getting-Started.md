@@ -25,7 +25,7 @@ Add the OpenSearch Java client to your Maven project's `pom.xml` to interact wit
   <version>2.6.0</version>
 </dependency>
 ```
-See additional documentation [here](https://opensearch.org/docs/latest/clients/java/).
+See additional documentation [here](https://docs.opensearch.org/latest/clients/java/).
 
 ## Integrating OpenSearch with Your Java Project
 
