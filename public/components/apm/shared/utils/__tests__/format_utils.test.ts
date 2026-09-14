@@ -12,6 +12,7 @@ import {
   normalizeLogLevel,
   buildLogLevelPplWhere,
   buildHttpStatusPplWhere,
+  isCoalesceUnsupportedError,
 } from '../format_utils';
 
 describe('format_utils', () => {
@@ -326,6 +327,38 @@ describe('format_utils', () => {
       );
       expect(clause).toContain('cast(');
       expect(clause).toContain('as int');
+    });
+  });
+
+  describe('isCoalesceUnsupportedError', () => {
+    it('should return false for nullish input', () => {
+      expect(isCoalesceUnsupportedError(undefined)).toBe(false);
+      expect(isCoalesceUnsupportedError(null)).toBe(false);
+    });
+
+    it('should detect coalesce mention in the error message', () => {
+      expect(isCoalesceUnsupportedError(new Error('Unsupported function: coalesce'))).toBe(true);
+      expect(isCoalesceUnsupportedError({ message: 'unknown function COALESCE' })).toBe(true);
+    });
+
+    it('should detect coalesce mention in the error body', () => {
+      expect(
+        isCoalesceUnsupportedError({ body: { error: { reason: 'function coalesce not found' } } })
+      ).toBe(true);
+      expect(isCoalesceUnsupportedError({ body: 'coalesce is not recognized' })).toBe(true);
+    });
+
+    it('should return false for unrelated errors', () => {
+      expect(isCoalesceUnsupportedError(new Error('index_not_found_exception'))).toBe(false);
+      expect(
+        isCoalesceUnsupportedError({ body: { error: { reason: 'Field [x] not found.' } } })
+      ).toBe(false);
+    });
+
+    it('should not throw on a non-serializable body', () => {
+      const circular: Record<string, unknown> = {};
+      circular.self = circular;
+      expect(isCoalesceUnsupportedError({ body: circular })).toBe(false);
     });
   });
 });

@@ -22,6 +22,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiCallOut,
   EuiButtonIcon,
   EuiCodeBlock,
   EuiEmptyPrompt,
@@ -60,8 +61,10 @@ import {
   getStatusLabel,
   getLogLevelColor,
   getHttpStatusColor,
+  normalizeLogLevel,
   buildLogLevelPplWhere,
   buildHttpStatusPplWhere,
+  isCoalesceUnsupportedError,
 } from '../utils/format_utils';
 
 /**
@@ -130,6 +133,10 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
 
   // Log level filter state
   const [logLevelFilter, setLogLevelFilter] = useState('all');
+
+  // True when the span HTTP-status filter fell back to a widened client-side filter
+  // because the OpenSearch version doesn't support the server-side coalesce push (< 3.1).
+  const [spanFilterFallback, setSpanFilterFallback] = useState(false);
 
   // Sorting state for spans table
   const [spanSortField, setSpanSortField] = useState<keyof SpanData>('startTime');
@@ -236,17 +243,30 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
   ];
 
   // Sort spans for display. The status/HTTP filters are applied server-side (see
-  // spanStatusWhere), so `spans` already contains only matching rows — no client-side
-  // status filtering is needed here.
+  // spanStatusWhere), so `spans` already contains only matching rows. The exception is the
+  // fallback path (OpenSearch < 3.1, no coalesce), where the HTTP bucket couldn't be pushed
+  // and `spans` holds a widened unfiltered page — narrow it client-side here.
   const sortedSpans = useMemo(() => {
-    return [...spans].sort((a, b) => {
+    let filtered = spans;
+    if (spanFilterFallback) {
+      if (statusFilter === 'http-2xx')
+        filtered = spans.filter((s) => Number(s.httpStatus) >= 200 && Number(s.httpStatus) < 300);
+      else if (statusFilter === 'http-3xx')
+        filtered = spans.filter((s) => Number(s.httpStatus) >= 300 && Number(s.httpStatus) < 400);
+      else if (statusFilter === 'http-4xx')
+        filtered = spans.filter((s) => Number(s.httpStatus) >= 400 && Number(s.httpStatus) < 500);
+      else if (statusFilter === 'http-5xx')
+        filtered = spans.filter((s) => Number(s.httpStatus) >= 500);
+    }
+
+    return [...filtered].sort((a, b) => {
       const aValue = a[spanSortField];
       const bValue = b[spanSortField];
       if (aValue < bValue) return spanSortDirection === 'asc' ? -1 : 1;
       if (aValue > bValue) return spanSortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [spans, spanSortField, spanSortDirection]);
+  }, [spans, spanFilterFallback, statusFilter, spanSortField, spanSortDirection]);
 
   // State for traceIds extracted from spans (used for log correlation)
   const [extractedTraceIds, setExtractedTraceIds] = useState<string[]>([]);
@@ -273,6 +293,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     const fetchSpans = async () => {
       setSpansLoading(true);
       setSpansError(null);
+      setSpanFilterFallback(false);
 
       try {
         const pplService = new PPLSearchService();
@@ -284,19 +305,29 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             : undefined,
         };
 
-        // Build PPL query with optional filters
-        let pplQuery = `source=${dataset.title} | where serviceName = '${serviceName}'`;
-
-        // Add operation filter if specified
+        // Base query without the status filter (shared by the primary and fallback paths)
+        let baseQuery = `source=${dataset.title} | where serviceName = '${serviceName}'`;
         if (operationFilter) {
-          pplQuery += ` | where name = '${operationFilter}'`;
+          baseQuery += ` | where name = '${operationFilter}'`;
         }
 
-        // Server-side status filter (empty for 'all' and HTTP-status buckets)
-        pplQuery += spanStatusWhere;
+        // Primary: push the status/HTTP filter server-side and fetch the top 50.
+        const primaryQuery = `${baseQuery}${spanStatusWhere} | sort - startTime | head ${APM_CONSTANTS.QUERY_LIMITS.SPANS}`;
 
-        pplQuery += ` | sort - startTime | head ${APM_CONSTANTS.QUERY_LIMITS.SPANS}`;
-        const response = await pplService.executeQuery(pplQuery, dataset);
+        let response;
+        try {
+          response = await pplService.executeQuery(primaryQuery, dataset);
+        } catch (err) {
+          // Only the HTTP-status buckets use coalesce; on OpenSearch < 3.1 that errors, so
+          // fetch a wider unfiltered page and let sortedSpans filter the bucket client-side.
+          if (statusFilter.startsWith('http-') && isCoalesceUnsupportedError(err)) {
+            const fallbackQuery = `${baseQuery} | sort - startTime | head ${APM_CONSTANTS.QUERY_LIMITS.SPANS_FILTERED}`;
+            response = await pplService.executeQuery(fallbackQuery, dataset);
+            setSpanFilterFallback(true);
+          } else {
+            throw err;
+          }
+        }
 
         const spansData: SpanData[] = (response.jsonData || []).map((item: any, idx: number) => ({
           _id: item.spanId || `span-${idx}`,
@@ -349,7 +380,14 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     };
 
     fetchSpans();
-  }, [config?.tracesDataset, serviceName, parsedTimeRange, operationFilter, spanStatusWhere]);
+  }, [
+    config?.tracesDataset,
+    serviceName,
+    parsedTimeRange,
+    operationFilter,
+    spanStatusWhere,
+    statusFilter,
+  ]);
 
   // Push the log-level filter into the query so it searches across all correlated logs in
   // the time range, not just the fetched page. buildLogLevelPplWhere coalesces the OTel
@@ -446,11 +484,24 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             pplQuery += ` | where (\`${traceIdFieldValue}\` IN (${traceIdList}) OR \`${traceIdFieldValue}\` = '' OR isnull(\`${traceIdFieldValue}\`))`;
           }
 
-          // Server-side log-level filter (empty for 'all')
-          pplQuery += logLevelWhere;
+          // Primary: push the level filter server-side and fetch the top 10.
+          const primaryQuery = `${pplQuery}${logLevelWhere} | sort - \`${timestampField}\` | head ${APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET}`;
 
-          pplQuery += ` | sort - \`${timestampField}\` | head ${APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET}`;
-          const response = await pplService.executeQuery(pplQuery, datasetConfig);
+          let response;
+          let filterFallback = false;
+          try {
+            response = await pplService.executeQuery(primaryQuery, datasetConfig);
+          } catch (err) {
+            // The level filter uses coalesce; on OpenSearch < 3.1 that errors, so fetch a
+            // wider unfiltered page and filter the level client-side (see filteredLogs).
+            if (logLevelWhere && isCoalesceUnsupportedError(err)) {
+              const fallbackQuery = `${pplQuery} | sort - \`${timestampField}\` | head ${APM_CONSTANTS.QUERY_LIMITS.LOGS_PER_DATASET_FILTERED}`;
+              response = await pplService.executeQuery(fallbackQuery, datasetConfig);
+              filterFallback = true;
+            } else {
+              throw err;
+            }
+          }
 
           const logsData: LogData[] = (response.jsonData || []).map((item: any, idx: number) => ({
             _id: `${dataset.id}-${idx}`,
@@ -472,6 +523,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
               traceIdField: traceIdFieldValue,
               logs: logsData,
               loading: false,
+              filterFallback,
               dataSourceId: dataset.dataSourceId,
               dataSourceTitle: dataset.dataSourceTitle,
             },
@@ -731,6 +783,19 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       <EuiText size="xs" color="subdued">
         {i18nTexts.spansDescription}
       </EuiText>
+      {spanFilterFallback && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="clock"
+            title={i18nTexts.filterFallbackTitle}
+          >
+            <p>{i18nTexts.filterFallbackSpansBody}</p>
+          </EuiCallOut>
+        </>
+      )}
       <EuiSpacer size="m" />
 
       {spansLoading ? (
@@ -792,6 +857,19 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      {logResults.some((result) => result.filterFallback) && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="clock"
+            title={i18nTexts.filterFallbackTitle}
+          >
+            <p>{i18nTexts.filterFallbackLogsBody}</p>
+          </EuiCallOut>
+        </>
+      )}
       <EuiSpacer size="m" />
 
       {logsLoading ? (
@@ -871,14 +949,21 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                 ) : (
                   (() => {
                     // Sort logs for display. The level filter is applied server-side (see
-                    // logLevelWhere), so result.logs already contains only matching rows.
-                    const filteredLogs = [...result.logs].sort((a, b) => {
-                      const aValue = a[logSortField];
-                      const bValue = b[logSortField];
-                      if (aValue < bValue) return logSortDirection === 'asc' ? -1 : 1;
-                      if (aValue > bValue) return logSortDirection === 'asc' ? 1 : -1;
-                      return 0;
-                    });
+                    // logLevelWhere), so result.logs already contains only matching rows —
+                    // except on the fallback path (OpenSearch < 3.1), where this dataset was
+                    // fetched wider and must be filtered client-side by level here.
+                    const filteredLogs = result.logs
+                      .filter((log) => {
+                        if (!result.filterFallback || logLevelFilter === 'all') return true;
+                        return normalizeLogLevel(log.level, log.severityNumber) === logLevelFilter;
+                      })
+                      .sort((a, b) => {
+                        const aValue = a[logSortField];
+                        const bValue = b[logSortField];
+                        if (aValue < bValue) return logSortDirection === 'asc' ? -1 : 1;
+                        if (aValue > bValue) return logSortDirection === 'asc' ? 1 : -1;
+                        return 0;
+                      });
 
                     return filteredLogs.length === 0 ? (
                       <EuiText color="subdued" size="s">

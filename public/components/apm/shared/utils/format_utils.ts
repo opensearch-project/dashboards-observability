@@ -112,6 +112,30 @@ export function buildLogLevelPplWhere(level: string): string {
 }
 
 /**
+ * Detect whether a PPL query failed because the OpenSearch version doesn't support the
+ * `coalesce` function (added in 3.1). buildLogLevelPplWhere / buildHttpStatusPplWhere use
+ * coalesce, so on older domains the caller falls back to a widened fetch + client-side
+ * filter. The exact pre-3.1 error text can't be validated here (test cluster is 3.8+), so
+ * we match the function name across both the error message and the response body — the
+ * flyout's filter queries only ever reference `coalesce`, so a mention of it is a reliable
+ * signal that the function, not the data, is the problem.
+ */
+export function isCoalesceUnsupportedError(err: unknown): boolean {
+  if (!err) return false;
+  const source = err as { message?: unknown; body?: unknown };
+  const parts: string[] = [];
+  if (typeof source.message === 'string') parts.push(source.message);
+  if (source.body !== undefined) {
+    try {
+      parts.push(typeof source.body === 'string' ? source.body : JSON.stringify(source.body));
+    } catch {
+      // non-serializable body — ignore
+    }
+  }
+  return /coalesce/i.test(parts.join(' '));
+}
+
+/**
  * Build a PPL `| where` clause for an HTTP-status bucket (http-2xx … http-5xx).
  * The status-code field is coalesced across its two OTel-convention names
  * (`http.response.status_code` current, `http.status_code` deprecated); coalesce

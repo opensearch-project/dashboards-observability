@@ -116,6 +116,25 @@ export const correlationsFlyoutI18nTexts = {
     }
   ),
 
+  // Filter fallback banner (shown on OpenSearch < 3.1, which can't push the filter server-side)
+  filterFallbackTitle: i18n.translate('observability.apm.correlationsFlyout.filterFallbackTitle', {
+    defaultMessage: 'Filtered results may be incomplete',
+  }),
+  filterFallbackSpansBody: i18n.translate(
+    'observability.apm.correlationsFlyout.filterFallbackSpansBody',
+    {
+      defaultMessage:
+        'This OpenSearch version cannot filter HTTP status across the full time range, so only the most recent spans were searched. Upgrade to OpenSearch 3.1 or later, or click "Explore Traces" to search all spans.',
+    }
+  ),
+  filterFallbackLogsBody: i18n.translate(
+    'observability.apm.correlationsFlyout.filterFallbackLogsBody',
+    {
+      defaultMessage:
+        'This OpenSearch version cannot filter log level across the full time range, so only the most recent logs were searched. Upgrade to OpenSearch 3.1 or later, or click "Explore Logs" to search all logs.',
+    }
+  ),
+
   // Attributes tab labels
   environment: i18n.translate('observability.apm.correlationsFlyout.environment', {
     defaultMessage: 'Environment',

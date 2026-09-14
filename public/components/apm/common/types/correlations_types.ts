@@ -44,4 +44,9 @@ export interface LogDatasetResult {
   error?: Error;
   dataSourceId?: string;
   dataSourceTitle?: string;
+  /**
+   * True when the log-level filter couldn't be pushed server-side (OpenSearch < 3.1,
+   * no `coalesce`) and the rows were fetched wider to be filtered client-side instead.
+   */
+  filterFallback?: boolean;
 }
