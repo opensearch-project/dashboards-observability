@@ -119,7 +119,7 @@ describe('ServiceMapSidebar — Environment filter', () => {
     expect(screen.queryByTestId('environmentSearch')).not.toBeInTheDocument();
   });
 
-  it('keeps showing the retained list (not the loader) during a refetch', () => {
+  it('keeps the retained list live and interactive during a refetch', () => {
     renderSidebar(SEVEN_ENVS, [], true);
 
     // Previous nodes are retained, so the checkbox list stays rendered instead of the loader.
@@ -127,6 +127,12 @@ describe('ServiceMapSidebar — Environment filter', () => {
       screen.queryByText(applicationMapI18nTexts.filters.loadingEnvironments)
     ).not.toBeInTheDocument();
     expect(envGroup()).toBeInTheDocument();
+
+    // Controls stay interactive rather than going inert mid-search/mid-toggle.
+    expect(screen.getByTestId('environmentSearch')).not.toBeDisabled();
+    within(envGroup())
+      .getAllByRole('checkbox')
+      .forEach((box) => expect(box).not.toBeDisabled());
   });
 
   it('Select all merges the currently-filtered subset into the selection', () => {

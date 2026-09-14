@@ -283,7 +283,6 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
               isClearable
               fullWidth
               compressed
-              disabled={isLoading}
               data-test-subj="environmentSearch"
             />
 
@@ -298,7 +297,6 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
                       onClick={handleSelectAllEnvironments}
                       data-test-subj="environmentSelectAll"
                       color="primary"
-                      disabled={isLoading}
                     >
                       <EuiText size="xs">{i18nTexts.filters.selectAll}</EuiText>
                     </EuiLink>
@@ -308,7 +306,6 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
                       onClick={handleClearAllEnvironments}
                       data-test-subj="environmentClearAll"
                       color="primary"
-                      disabled={isLoading}
                     >
                       <EuiText size="xs">{i18nTexts.filters.clearAll}</EuiText>
                     </EuiLink>
@@ -343,7 +340,6 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
                     idToSelectedMap={environmentSelectionMap}
                     onChange={handleEnvironmentChange}
                     compressed
-                    disabled={isLoading}
                     data-test-subj="environmentCheckboxGroup"
                   />
                 </div>
@@ -354,7 +350,6 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
                     <EuiLink
                       onClick={() => setEnvironmentExpanded((prev) => !prev)}
                       data-test-subj="environmentShowMore"
-                      disabled={isLoading}
                     >
                       <EuiText size="xs">
                         {environmentExpanded
