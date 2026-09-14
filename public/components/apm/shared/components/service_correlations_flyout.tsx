@@ -23,6 +23,8 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiCallOut,
+  EuiInMemoryTable,
+  EuiTableFieldDataColumnType,
   EuiButtonIcon,
   EuiCodeBlock,
   EuiEmptyPrompt,
@@ -41,6 +43,8 @@ import { PPLSearchService } from '../../query_services/ppl_search_service';
 import { TimeRange } from '../../common/types/service_types';
 import { parseTimeRange, formatPPLTimestamp, formatDisplayTimestamp } from '../utils/time_utils';
 import { correlationsFlyoutI18nTexts as i18nTexts } from './service_correlations_flyout_i18n';
+import { openCorrelatedDashboard, openApmSettings } from '../utils/navigation_utils';
+import { ResolvedCorrelatedDashboard } from '../../../../../common/types/observability_saved_object_attributes';
 import {
   navigateToExploreTraces,
   navigateToSpanDetails,
@@ -95,7 +99,7 @@ interface ServiceCorrelationsFlyoutProps {
   environment: string;
   language?: string;
   timeRange: TimeRange;
-  initialTab: 'spans' | 'logs' | 'attributes';
+  initialTab: 'spans' | 'logs' | 'attributes' | 'dashboards';
   onClose: () => void;
   /** Optional: Filter spans by operation name (for operations table) */
   operationFilter?: string;
@@ -112,7 +116,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
 }) => {
   // Check if any filters are active (used for conditionally hiding Attributes tab and showing filter badge)
   const hasFilters = Boolean(operationFilter);
-  const { config } = useApmConfig();
+  const { config, loading: configLoading } = useApmConfig();
   const traceDatasetId = config?.tracesDataset?.id;
 
   // Fetch correlated log datasets using coreRefs
@@ -1060,11 +1064,110 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     return null;
   }, [operationFilter]);
 
+  // Correlated dashboards tab (optional, experimental). Renders the configured
+  // dashboards in a sortable/paginated/searchable table (name links out in a
+  // new tab, time-scoped) or an empty prompt + CTA.
+  const dashboardsTabContent = useMemo(() => {
+    // While the APM config is still loading on first mount, show a spinner
+    // rather than flashing the "no dashboards" empty state for services that
+    // actually have dashboards configured.
+    if (configLoading && !config) {
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 120 }}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
+    const dashboards = config?.correlatedDashboards ?? [];
+    if (dashboards.length === 0) {
+      return (
+        <EuiEmptyPrompt
+          iconType="dashboardApp"
+          title={<h3>{i18nTexts.dashboardsEmptyTitle}</h3>}
+          titleSize="s"
+          body={<p>{i18nTexts.dashboardsEmptyBody}</p>}
+          actions={
+            <EuiButton fill iconType="plusInCircle" onClick={() => openApmSettings(true)}>
+              {i18nTexts.dashboardsEmptyCta}
+            </EuiButton>
+          }
+        />
+      );
+    }
+
+    const dashboardColumns: Array<EuiTableFieldDataColumnType<ResolvedCorrelatedDashboard>> = [
+      {
+        field: 'title',
+        name: i18nTexts.dashboardsColName,
+        sortable: true,
+        truncateText: true,
+        render: (title: string, d: ResolvedCorrelatedDashboard) =>
+          d.missing ? (
+            <EuiText size="s" color="subdued">
+              {i18nTexts.dashboardUnavailable(title)}
+            </EuiText>
+          ) : (
+            <EuiLink
+              data-test-subj={`apmCorrelatedDashboardLink-${d.dashboardId}`}
+              onClick={() => openCorrelatedDashboard(d.dashboardId, timeRange)}
+            >
+              {title}
+            </EuiLink>
+          ),
+      },
+      {
+        field: 'description',
+        name: i18nTexts.dashboardsColDescription,
+        truncateText: true,
+        render: (description?: string) =>
+          description || (
+            <EuiText size="s" color="subdued">
+              —
+            </EuiText>
+          ),
+      },
+      {
+        field: 'updatedAt',
+        name: i18nTexts.dashboardsColLastModified,
+        sortable: true,
+        render: (updatedAt?: string) =>
+          updatedAt ? formatDisplayTimestamp(updatedAt, uiSettingsService) : '—',
+      },
+    ];
+
+    return (
+      <>
+        <EuiText size="s" color="subdued">
+          {i18nTexts.dashboardsTableCaption}
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiInMemoryTable<ResolvedCorrelatedDashboard>
+          items={dashboards}
+          itemId="dashboardId"
+          columns={dashboardColumns}
+          tableLayout="auto"
+          allowNeutralSort={false}
+          sorting={{ sort: { field: 'title', direction: 'asc' } }}
+          pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+          search={{
+            box: {
+              incremental: true,
+              compressed: true,
+              placeholder: i18nTexts.dashboardsSearchPlaceholder,
+            },
+          }}
+        />
+      </>
+    );
+  }, [config, configLoading, timeRange]);
+
   // Build tabs - conditionally include Attributes tab based on filters.
-  // Built inline (not memoized): the tab content fragments reference render-scoped
-  // state that changes every render, so a useMemo here would recompute every render
-  // anyway while tripping the exhaustive-deps rule.
-  const tabs: EuiTabbedContentTab[] = (() => {
+  // Not memoized: the tab-content values it depends on (spans/logs/attributes)
+  // are recomputed each render, so a useMemo here would never hit its cache.
+  const tabs: EuiTabbedContentTab[] = ((): EuiTabbedContentTab[] => {
     const tabList: EuiTabbedContentTab[] = [];
 
     // Only include Attributes tab when no filters are set (service-level view)
@@ -1128,6 +1231,31 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
         </>
       ),
     });
+
+    // Correlated dashboards (optional, experimental) — service-level, so shown
+    // only when no operation filter is set (same as Attributes).
+    if (!hasFilters) {
+      tabList.push({
+        id: 'dashboards',
+        name: (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon
+                type="dashboardApp"
+                color={selectedTabId === 'dashboards' ? 'primary' : 'inherit'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{i18nTexts.tabDashboards}</EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        content: (
+          <>
+            <EuiSpacer size="m" />
+            {dashboardsTabContent}
+          </>
+        ),
+      });
+    }
 
     return tabList;
   })();

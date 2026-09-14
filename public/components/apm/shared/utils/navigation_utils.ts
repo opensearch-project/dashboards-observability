@@ -367,3 +367,66 @@ export function navigateToDatasetCorrelations(datasetId: string): void {
   // Navigate in same tab
   window.location.assign(fullUrl);
 }
+
+/**
+ * Correlated dashboards (optional, experimental).
+ *
+ * Opens a saved dashboard in the Dashboards app in a NEW browser tab, carrying
+ * the current APM time range via the global (_g) state. v0 passes the time
+ * range only (no per-service filter).
+ *
+ * The destination is always same-origin: the path is a fixed `/app/dashboards`
+ * route run through `basePath.prepend` (which prepends the OSD server base /
+ * workspace), so the host can never be influenced by the arguments. The `_g`
+ * rison is hand-built to match the existing trace/log deep links above, and the
+ * dashboard id is percent-encoded. `timeRange` comes from the internal APM
+ * time-picker state, not from raw URL input.
+ */
+export function openCorrelatedDashboard(dashboardId: string, timeRange?: TimeRange): void {
+  const query = timeRange
+    ? `?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${timeRange.from},to:${timeRange.to}))`
+    : '';
+  const path = `/app/dashboards#/view/${encodeURIComponent(dashboardId)}${query}`;
+  const url = coreRefs.http?.basePath.prepend(path) || path;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+/**
+ * Opens the APM settings modal by setting the `_apmSettings` URL marker that the
+ * APM pages listen for (useOpenOnUrlMarker). Preserves the current route/query.
+ *
+ * Existing query params are preserved VERBATIM (not rebuilt via
+ * URLSearchParams.toString()) so rison `_g`/`_a` values are not percent-encoded
+ * / churned — same care useOpenOnUrlMarker takes when it strips the marker. The
+ * path defaults to `/` when the hash is empty so we never emit `#?...`. A
+ * `hashchange` event is dispatched explicitly (matching navigateToSloSuggest)
+ * because assigning the same hash value does not fire one on its own; re-entry
+ * is safe since the hook removes the marker on open.
+ *
+ * When `focusCorrelatedDashboards` is set (the empty-state CTA), a
+ * `_apmSettingsFocus=correlatedDashboards` hint is added so the settings modal
+ * scrolls the correlated-dashboards picker into view on open.
+ */
+export const APM_SETTINGS_FOCUS_MARKER = '_apmSettingsFocus';
+
+export function openApmSettings(focusCorrelatedDashboards = false): void {
+  const hash = window.location.hash.replace(/^#/, ''); // e.g. "/services?tab=overview"
+  const qIndex = hash.indexOf('?');
+  const path = (qIndex === -1 ? hash : hash.slice(0, qIndex)) || '/';
+  const rawQuery = qIndex === -1 ? '' : hash.slice(qIndex + 1);
+  const pairs = rawQuery
+    ? rawQuery
+        .split('&')
+        .filter(
+          (pair) =>
+            pair.split('=')[0] !== '_apmSettings' &&
+            pair.split('=')[0] !== APM_SETTINGS_FOCUS_MARKER
+        )
+    : [];
+  if (focusCorrelatedDashboards) {
+    pairs.push(`${APM_SETTINGS_FOCUS_MARKER}=correlatedDashboards`);
+  }
+  pairs.push('_apmSettings=true');
+  window.location.hash = `#${path}?${pairs.join('&')}`;
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+}

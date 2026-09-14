@@ -54,6 +54,8 @@ export interface ServiceDetailsPanelProps {
   onViewDetails: (serviceName: string, environment: string) => void;
   onShowSpans?: (serviceName: string, environment: string) => void;
   onShowLogs?: (serviceName: string, environment: string) => void;
+  // Optional, experimental: open correlated dashboards for this node's service.
+  onShowDashboards?: (serviceName: string, environment: string) => void;
   refreshTrigger?: number;
 }
 
@@ -75,6 +77,7 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
   onViewDetails,
   onShowSpans,
   onShowLogs,
+  onShowDashboards,
   refreshTrigger,
 }) => {
   // Detect if this is the Application root node (aggregated view)
@@ -103,18 +106,18 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
   const requestsQuery = isGroupNode
     ? `sum(request{${groupLabelFilter}})`
     : isApplicationNode
-    ? getQueryApplicationRequests()
-    : getQueryServiceRequests(node.environment, node.serviceName, chartStepWindow);
+      ? getQueryApplicationRequests()
+      : getQueryServiceRequests(node.environment, node.serviceName, chartStepWindow);
   const faultsQuery = isGroupNode
     ? `sum(fault{${groupLabelFilter}})`
     : isApplicationNode
-    ? getQueryApplicationFaults()
-    : getQueryServiceFaults(node.environment, node.serviceName, chartStepWindow);
+      ? getQueryApplicationFaults()
+      : getQueryServiceFaults(node.environment, node.serviceName, chartStepWindow);
   const errorsQuery = isGroupNode
     ? `sum(error{${groupLabelFilter}})`
     : isApplicationNode
-    ? getQueryApplicationErrors()
-    : getQueryServiceErrors(node.environment, node.serviceName, chartStepWindow);
+      ? getQueryApplicationErrors()
+      : getQueryServiceErrors(node.environment, node.serviceName, chartStepWindow);
 
   // Latency query (P99, P90, P50 combined) - use application-level, group-level, or service-level
   const latencyQuery = isGroupNode
@@ -147,8 +150,8 @@ label_replace(
 )
 `
     : isApplicationNode
-    ? getQueryApplicationLatency()
-    : `
+      ? getQueryApplicationLatency()
+      : `
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
@@ -181,8 +184,8 @@ label_replace(
   const displayTitle = isApplicationNode
     ? i18nTexts.navigation.application
     : isGroupNode
-    ? node.serviceName // Group value (e.g., "nodejs")
-    : node.serviceName;
+      ? node.serviceName // Group value (e.g., "nodejs")
+      : node.serviceName;
 
   return (
     <EuiFlyout
@@ -229,6 +232,18 @@ label_replace(
                         iconType="discoverApp"
                         aria-label={i18nTexts.actions.viewLogs}
                         onClick={() => onShowLogs(node.serviceName, node.environment)}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                {onShowDashboards && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={i18nTexts.actions.viewDashboards}>
+                      <EuiButtonIcon
+                        iconType="dashboardApp"
+                        aria-label={i18nTexts.actions.viewDashboards}
+                        onClick={() => onShowDashboards(node.serviceName, node.environment)}
+                        data-test-subj="apmNodeViewCorrelatedDashboards"
                       />
                     </EuiToolTip>
                   </EuiFlexItem>

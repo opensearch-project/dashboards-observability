@@ -224,6 +224,9 @@ export const applicationMapI18nTexts = {
     viewLogs: i18n.translate('observability.apm.applicationMap.actions.viewLogs', {
       defaultMessage: 'View logs',
     }),
+    viewDashboards: i18n.translate('observability.apm.applicationMap.actions.viewDashboards', {
+      defaultMessage: 'View correlated dashboards',
+    }),
     viewServiceDetails: i18n.translate(
       'observability.apm.applicationMap.actions.viewServiceDetails',
       {

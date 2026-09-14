@@ -441,7 +441,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     serviceName: string;
     environment: string;
     language?: string;
-    initialTab: 'spans' | 'logs';
+    initialTab: 'spans' | 'logs' | 'dashboards';
   } | null>(null);
 
   const handleShowSpans = useCallback(
@@ -469,6 +469,21 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         environment,
         language: node?.GroupByAttributes?.['telemetry.sdk.language'],
         initialTab: 'logs',
+      });
+    },
+    [nodes]
+  );
+
+  const handleShowDashboards = useCallback(
+    (serviceName: string, environment: string) => {
+      const node = nodes.find(
+        (n) => n.KeyAttributes.Name === serviceName && n.KeyAttributes.Environment === environment
+      );
+      setCorrelationsFlyout({
+        serviceName,
+        environment,
+        language: node?.GroupByAttributes?.['telemetry.sdk.language'],
+        initialTab: 'dashboards',
       });
     },
     [nodes]
@@ -782,6 +797,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
           onViewDetails={handleViewServiceDetails}
           onShowSpans={handleShowSpans}
           onShowLogs={handleShowLogs}
+          onShowDashboards={handleShowDashboards}
           refreshTrigger={refreshTrigger}
         />
       )}

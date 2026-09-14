@@ -10,6 +10,8 @@ import {
   navigateToExploreLogs,
   navigateToDatasetCorrelations,
   navigateToSloSuggest,
+  openCorrelatedDashboard,
+  openApmSettings,
 } from '../navigation_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 
@@ -421,5 +423,119 @@ describe('navigation_utils', () => {
 
       expect(dispatchSpy).toHaveBeenCalledWith(expect.any(HashChangeEvent));
     });
+  });
+});
+
+describe('openCorrelatedDashboard (correlated dashboards, experimental)', () => {
+  let windowOpenSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+  });
+
+  afterEach(() => {
+    windowOpenSpy.mockRestore();
+  });
+
+  it('opens the dashboard in a new tab with the time range in _g', () => {
+    openCorrelatedDashboard('dash-1', { from: 'now-15m', to: 'now' });
+
+    expect(windowOpenSpy).toHaveBeenCalledTimes(1);
+    const [url, target, features] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('/app/dashboards#/view/dash-1');
+    expect(url).toContain('_g=(');
+    expect(url).toContain('time:(from:now-15m,to:now)');
+    expect(target).toBe('_blank');
+    expect(features).toBe('noopener,noreferrer');
+  });
+
+  it('uses basePath.prepend so workspace context is preserved', () => {
+    openCorrelatedDashboard('dash-1', { from: 'now-1h', to: 'now' });
+
+    // Mock prepends "/base" — the final URL must include it.
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url.startsWith('/base/app/dashboards#/view/dash-1')).toBe(true);
+  });
+
+  it('percent-encodes dashboard ids with special characters', () => {
+    openCorrelatedDashboard('with/slash and space', { from: 'now-15m', to: 'now' });
+
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('#/view/with%2Fslash%20and%20space');
+  });
+
+  it('omits _g when no time range is provided', () => {
+    openCorrelatedDashboard('dash-2');
+
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('#/view/dash-2');
+    expect(url).not.toContain('_g=');
+  });
+});
+
+describe('openApmSettings (correlated dashboards, experimental)', () => {
+  let dispatchSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    dispatchSpy = jest.spyOn(window, 'dispatchEvent');
+  });
+
+  afterEach(() => {
+    dispatchSpy.mockRestore();
+  });
+
+  it('sets the _apmSettings=true hash marker while preserving path + params', () => {
+    window.location.hash = '#/service-details/checkout/env-a?tab=overview';
+    openApmSettings();
+    expect(window.location.hash).toContain('/service-details/checkout/env-a');
+    expect(window.location.hash).toContain('tab=overview');
+    expect(window.location.hash).toContain('_apmSettings=true');
+  });
+
+  it('leaves other query params intact', () => {
+    window.location.hash = '#/services?searchQuery=foo';
+    openApmSettings();
+    expect(window.location.hash).toContain('searchQuery=foo');
+    expect(window.location.hash).toContain('_apmSettings=true');
+  });
+
+  it('does not percent-encode existing rison _g params', () => {
+    window.location.hash = '#/services?_g=(time:(from:now-15m,to:now))';
+    openApmSettings();
+    // The rison must survive verbatim (no %28/%29 churn).
+    expect(window.location.hash).toContain('_g=(time:(from:now-15m,to:now))');
+    expect(window.location.hash).toContain('_apmSettings=true');
+  });
+
+  it('does not duplicate the marker when already present', () => {
+    window.location.hash = '#/services?_apmSettings=true';
+    openApmSettings();
+    expect(window.location.hash.match(/_apmSettings=true/g)).toHaveLength(1);
+  });
+
+  it('adds the correlated-dashboards focus hint only when requested', () => {
+    window.location.hash = '#/services';
+    openApmSettings();
+    expect(window.location.hash).not.toContain('_apmSettingsFocus');
+
+    window.location.hash = '#/services';
+    openApmSettings(true);
+    expect(window.location.hash).toContain('_apmSettingsFocus=correlatedDashboards');
+    expect(window.location.hash).toContain('_apmSettings=true');
+  });
+
+  it('defaults the path to / when the hash is empty (never emits #?...)', () => {
+    window.location.hash = '';
+    openApmSettings();
+    expect(window.location.hash).toContain('#/?');
+    expect(window.location.hash).not.toContain('#?');
+    expect(window.location.hash).toContain('_apmSettings=true');
+  });
+
+  it('dispatches a hashchange event so the marker hook reacts even on a same-value hash', () => {
+    window.location.hash = '#/services';
+    openApmSettings();
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(HashChangeEvent));
   });
 });
