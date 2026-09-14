@@ -267,24 +267,45 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
             contentProps={{
               style: { justifyContent: 'flex-start', width: '100%', minWidth: 0 },
             }}
-            // The title text (plus the optional option-count suffix) has no
+            // The title (plus the optional option-count suffix) has no
             // truncation of its own, so a long facet label — or even a short
             // one once the badge + "Clear" link are showing — overflows this
             // narrow column instead of shrinking. `textProps` targets EUI's
             // internal `.euiButtonEmpty__text` span directly (there's no
             // approved-file entry for `.eui*` selectors in alerting.scss, so
             // this has to be inline style rather than CSS); `flex`/`minWidth`
-            // let it shrink inside the content span above, and the rest is a
-            // plain single-line ellipsis truncation.
+            // let it shrink inside the content span above.
+            //
+            // `display: flex` (NOT `block`) is load-bearing for two things:
+            //   1. Left alignment. EuiButtonEmpty defaults to
+            //      `text-align: center`; a `block` text span stretches full
+            //      width and centers the inline title inside it (the parent
+            //      `contentProps` justify only positions the span, not the
+            //      text within). A flex row with the `<strong>` as a
+            //      `flex: 1` child pins the title flush-left at every width.
+            //   2. Keeping the group `(N)` count (`showOptionCount`) on the
+            //      SAME line as the title. The title is wrapped in
+            //      `TruncatedLabel`, whose inner span is `display: block;
+            //      width: 100%` — inside a `block` text span that consumed the
+            //      whole line and wrapped the count underneath. A flex row lets
+            //      the truncating title (`flex: 1`) and the fixed-width count
+            //      (`flex-shrink: 0`, in `.altFacetGroupCount`) sit inline.
+            //
+            // `textAlign: 'start'` is also required, NOT just the flex row:
+            // EuiButtonEmpty's `text-align: center` is inherited into the
+            // `TruncatedLabel` inner span (`display: block; width: 100%`), so a
+            // short title (e.g. "Type", or a label key like "monitor_name"
+            // whose `<strong>` is widened by the flex row) renders its glyphs
+            // centered WITHIN that full-width span even though the span itself
+            // sits flush-left. `start` (not `left`) keeps it RTL-safe.
             textProps={{
               style: {
-                display: 'block',
+                display: 'flex',
+                alignItems: 'center',
+                textAlign: 'start',
                 flex: 1,
                 minWidth: 0,
                 maxWidth: '100%',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
               },
             }}
             iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
@@ -305,7 +326,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                 tooltip — matching the option rows. `minWidth: 0` lets the bold
                 wrapper shrink inside the button's flex content so truncation
                 kicks in instead of overflowing. */}
-            <strong style={{ minWidth: 0, overflow: 'hidden' }}>
+            <strong style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
               <TruncatedLabel text={label} />
             </strong>
             {showOptionCount && (
