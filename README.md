@@ -94,7 +94,7 @@ Additionally the fields can be sorted and filtered.
 
 ### Event Analytics
 
-Event Analytics allows user to monitor, correlate, analyze and visualize machine generated data through [Piped Processing Language](https://opensearch.org/docs/latest/observability-plugins/ppl/index/). It also enables the user to turn data-driven events into visualizations and save frequently used ones for quick access.
+Event Analytics allows user to monitor, correlate, analyze and visualize machine generated data through [Piped Processing Language](https://docs.opensearch.org/latest/search-plugins/sql/ppl/index/). It also enables the user to turn data-driven events into visualizations and save frequently used ones for quick access.
 
 ### Metrics Analytics
 
@@ -123,7 +123,7 @@ Integration usually consist of the following assets:
 
 [See Integration Tutorial](https://github.com/opensearch-project/dashboards-observability/wiki/Integration-Creation-Guide)
 
-Please See additional information [documentation](https://opensearch.org/docs/latest/integrations/index)
+Please See additional information [documentation](https://docs.opensearch.org/latest/integrations/index/)
 
 > Integration Spec [RFC](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3412#schema-support-for-observability)
 
@@ -135,10 +135,10 @@ The Observability dashboard vision of [telemetry Data Correlation](https://githu
 
 ---
 ## WIKI Home
-Please see our WIKI page for additional information [WIKI](https://opensearch.org/docs/latest/observability/index/) to learn more about our features.
+Please see our WIKI page for additional information [WIKI](https://docs.opensearch.org/latest/observing-your-data/index/) to learn more about our features.
 
 ## Documentation
-Please see our technical [documentation](https://opensearch.org/docs/latest/observability/index/) to learn more about its features.
+Please see our technical [documentation](https://docs.opensearch.org/latest/observing-your-data/index/) to learn more about its features.
 
 ## Contributing
 - See [developer guide](DEVELOPER_GUIDE.md) and [how to contribute to this project](CONTRIBUTING.md).
@@ -148,7 +148,7 @@ Please see our technical [documentation](https://opensearch.org/docs/latest/obse
 
 If you find a bug, or have a feature request, please don't hesitate to open an issue in this repository.
 
-For more information, see [project website](https://opensearch.org/) and [documentation](https://opensearch.org/docs). If you need help and are unsure where to open an issue, try the [Forum](https://forum.opensearch.org/c/plugins/observability/49).
+For more information, see [project website](https://opensearch.org/) and [documentation](https://docs.opensearch.org/latest/). If you need help and are unsure where to open an issue, try the [Forum](https://forum.opensearch.org/c/plugins/observability/49).
 
 ## Code of Conduct
 

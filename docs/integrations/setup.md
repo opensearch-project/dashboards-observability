@@ -499,6 +499,6 @@ Preparing for Publication
 
 ## Reference
 
-- Creating Dashboards in OpenSearch: https://opensearch.org/docs/latest/dashboards/dashboard/index/
+- Creating Dashboards in OpenSearch: https://docs.opensearch.org/latest/dashboards/dashboard/index/
 - Flint Assets in OpenSearch Spark: https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md
-- Documentation of Integrations in OpenSearch Dashboards: https://opensearch.org/docs/latest/integrations/
+- Documentation of Integrations in OpenSearch Dashboards: https://docs.opensearch.org/latest/integrations/

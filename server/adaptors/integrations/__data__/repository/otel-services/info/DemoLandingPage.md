@@ -2,7 +2,7 @@
 _![](https://raw.githubusercontent.com/opensearch-project/.github/main/profile/banner.jpg)
 # OpenSearch Observability OTEL Demo
 
-Welcome to the [OpenSearch](https://opensearch.org/docs/latest) OpenTelemetry [Demo](https://opentelemetry.io/docs/demo/) documentation, which covers how to install and run the demo, and some scenarios you can use to view OpenTelemetry in action.
+Welcome to the [OpenSearch](https://docs.opensearch.org/latest/) OpenTelemetry [Demo](https://opentelemetry.io/docs/demo/) documentation, which covers how to install and run the demo, and some scenarios you can use to view OpenTelemetry in action.
 
 ## Purpose
 The purpose of this demo is to demonstrate the different capabilities of OpenSearch Observability to investigate and reflect your system.
@@ -27,7 +27,7 @@ _**The load generator**_
 ### Ingestion
 The ingestion capabilities for OpenSearch is to be able to support multiple pipelines:
 - [Data-Prepper](https://github.com/opensearch-project/data-prepper/) is an OpenSearch ingestion project that allows ingestion of OTEL standard signals using Otel-Collector
-- [Jaeger](https://opensearch.org/docs/latest/observing-your-data/trace/trace-analytics-jaeger/) is an ingestion framework which has a build in capability for pushing OTEL signals into OpenSearch
+- [Jaeger](https://docs.opensearch.org/latest/observing-your-data/trace/trace-analytics-jaeger/) is an ingestion framework which has a build in capability for pushing OTEL signals into OpenSearch
 - [Fluent-Bit](https://docs.fluentbit.io/manual/pipeline/outputs/opensearch) is an ingestion framework which has a build in capability for pushing OTEL signals into OpenSearch
 
 ### Integrations 

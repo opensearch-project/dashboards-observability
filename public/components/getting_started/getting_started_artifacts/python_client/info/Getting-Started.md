@@ -12,7 +12,7 @@ Install the OpenSearch Python client to interact with OpenSearch:
 ```bash
 pip install opensearch-py
 ```
-See additional documentation [here](https://opensearch.org/docs/latest/clients/python-low-level/).
+See additional documentation [here](https://docs.opensearch.org/latest/clients/python-low-level/).
 
 ## Integrating OpenSearch with Your Python Project
 
