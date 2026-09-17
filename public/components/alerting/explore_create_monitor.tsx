@@ -147,6 +147,9 @@ export const ExploreCreateMonitor: React.FC<ExploreCreateMonitorProps> = ({
       datasourceId: initialDsId ?? '',
       indices,
       timeField: exploreContext.timeFieldName ?? '',
+      // Seed the look-back anchor from Explore's time field so the default-on
+      // window works immediately without a second manual pick.
+      lookbackTimestampField: exploreContext.timeFieldName ?? '',
       query: exploreContext.queryInEditor || '',
       pplTriggers: [createDefaultPplTrigger()],
     };
@@ -174,6 +177,10 @@ export const ExploreCreateMonitor: React.FC<ExploreCreateMonitorProps> = ({
         query: os.query,
         schedule: os.schedule,
         pplTriggers: os.pplTriggers,
+        useLookBackWindow: os.useLookBackWindow,
+        lookBackAmount: os.lookBackAmount,
+        lookBackUnit: os.lookBackUnit,
+        lookbackTimestampField: os.lookbackTimestampField,
       });
     }
     // Explore-launched flyout is OS-only; this branch is unreachable in
@@ -199,9 +206,13 @@ export const ExploreCreateMonitor: React.FC<ExploreCreateMonitorProps> = ({
       onClose();
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
-      // PPL parse errors come back as "PPL Query validation failed: ..."; surface
-      // them inline under the editor so the user can fix without losing context.
-      const match = message.match(/PPL Query validation failed:[^"}]+/i);
+      // PPL parse errors ("PPL Query validation failed: ...") and the backend's
+      // authoritative query-length error ("PPL Query length must be at most N
+      // but was M" — names the real configured cap) are surfaced inline under
+      // the editor so the user can fix without losing context.
+      const match =
+        message.match(/PPL Query validation failed:[^"}]+/i) ||
+        message.match(/PPL Query length must be at most \d+ but was \d+/i);
       if (match) setPplSubmitError(match[0]);
       // Prefer the server's classified error (specific cause + remediation +
       // safe details) when present; fall back to the raw message otherwise.

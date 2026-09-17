@@ -63,6 +63,10 @@ export interface PplActionForm {
   destinationId: string;
   subject: string;
   message: string;
+  /** When true, this action fires at most once per `throttleValue` minutes. */
+  throttleEnabled: boolean;
+  /** Throttle window in minutes (the alerting backend's throttle unit). */
+  throttleValue: number;
 }
 
 /** Form-state shape for one PPL trigger. Multiple per monitor are allowed. */
@@ -93,6 +97,17 @@ export interface OpenSearchFormState extends BaseMonitorForm {
   timeField: string;
   query: string;
   pplTriggers: PplTriggerForm[];
+  /**
+   * Look-back window — bounds each scheduled run to "the last N units" by
+   * injecting a sliding `where <lookbackTimestampField> > DATE_SUB(NOW(), …)`
+   * filter into the query at save time. Prevents a rule from re-firing forever
+   * on the same old rows. See `common/services/alerting/ppl_lookback.ts`.
+   */
+  useLookBackWindow: boolean;
+  lookBackAmount: number;
+  lookBackUnit: PplLookBackUnit;
+  /** Date field the sliding window filters on. Empty disables injection. */
+  lookbackTimestampField: string;
   /** Legacy threshold shape kept for the optimistic UnifiedRule projection. */
   threshold: ThresholdCondition;
   evaluationInterval: string;
@@ -101,6 +116,9 @@ export interface OpenSearchFormState extends BaseMonitorForm {
   annotations: AnnotationEntry[];
   schedule: { interval: number; unit: 'MINUTES' | 'HOURS' | 'DAYS' };
 }
+
+/** Units offered for the look-back window. */
+export type PplLookBackUnit = 'minutes' | 'hours' | 'days';
 
 export type MonitorFormState = PrometheusFormState | OpenSearchFormState;
 
@@ -153,6 +171,9 @@ export const createDefaultPplTrigger = (): PplTriggerForm => ({
   actions: [],
 });
 
+/** Default throttle window (minutes) when a user first enables throttling. */
+export const DEFAULT_THROTTLE_VALUE = 10;
+
 export const DEFAULT_OS_FORM: OpenSearchFormState = {
   name: '',
   datasourceId: '',
@@ -163,6 +184,14 @@ export const DEFAULT_OS_FORM: OpenSearchFormState = {
   // No `source = ...` default. The PPL editor pre-fills `source = <picked>`
   // when the user adds an index, so defaulting here would clash with that.
   query: '',
+  // Look-back window on by default (1 hour) so a scheduled rule only evaluates
+  // recent data instead of re-firing on the whole index every run. It only
+  // injects a filter once a timestamp field is resolved (from the time field or
+  // a detected date field), so with no date field it's a harmless no-op.
+  useLookBackWindow: true,
+  lookBackAmount: 1,
+  lookBackUnit: 'hours',
+  lookbackTimestampField: '',
   pplTriggers: [createDefaultPplTrigger()],
   threshold: { operator: '>', value: 100, unit: '', forDuration: '5m' },
   evaluationInterval: '1m',
@@ -363,6 +392,27 @@ export const SEVERITY_OPTIONS = [
     value: 'info',
     text: i18n.translate('observability.alerting.createMonitorTypes.severityInfo', {
       defaultMessage: 'Info',
+    }),
+  },
+];
+
+export const LOOKBACK_UNIT_OPTIONS = [
+  {
+    value: 'minutes',
+    text: i18n.translate('observability.alerting.createMonitorTypes.lookBackUnitMinutes', {
+      defaultMessage: 'minute(s)',
+    }),
+  },
+  {
+    value: 'hours',
+    text: i18n.translate('observability.alerting.createMonitorTypes.lookBackUnitHours', {
+      defaultMessage: 'hour(s)',
+    }),
+  },
+  {
+    value: 'days',
+    text: i18n.translate('observability.alerting.createMonitorTypes.lookBackUnitDays', {
+      defaultMessage: 'day(s)',
     }),
   },
 ];

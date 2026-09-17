@@ -27,8 +27,10 @@ import { unifiedRuleToOsForm } from '../../../../common/services/alerting/form_t
 import { CreateMonitor, MonitorFormState } from './index';
 import {
   DEFAULT_OS_FORM,
+  DEFAULT_THROTTLE_VALUE,
   OpenSearchFormState,
   PplActionForm,
+  PplLookBackUnit,
   PplTriggerForm,
 } from './create_monitor_types';
 import { normalizeDuration } from '../utils/duration';
@@ -92,6 +94,10 @@ function buildEditFormFromRule(rule: UnifiedRule, datasources: Datasource[]): Op
       const action: PplActionForm = {
         ...a,
         id: a.id || `ppl-action-${rule.id}-${idx}-${ai}`,
+        // Seed throttle from the persisted action; default off when absent so
+        // an older monitor without throttle round-trips cleanly.
+        throttleEnabled: a.throttleEnabled ?? false,
+        throttleValue: a.throttleValue ?? DEFAULT_THROTTLE_VALUE,
       };
       return action;
     }),
@@ -109,6 +115,11 @@ function buildEditFormFromRule(rule: UnifiedRule, datasources: Datasource[]): Op
     .filter(Boolean);
   const indices = parsedIndices.length > 0 ? parsedIndices : labelIndices;
 
+  // The seeder already strips the injected look-back filter out of `seed.query`
+  // and restores the window fields, so the editor shows the clean query with
+  // the look-back UI reflecting the persisted amount/unit/field.
+  const lookbackTimestampField = seed.lookbackTimestampField ?? '';
+
   return {
     ...DEFAULT_OS_FORM,
     name: seed.name,
@@ -117,7 +128,13 @@ function buildEditFormFromRule(rule: UnifiedRule, datasources: Datasource[]): Op
     schedule: seed.schedule,
     pplTriggers,
     indices,
-    timeField: '',
+    // Anchor the toolbar time field on the look-back field so re-saving keeps
+    // the same anchor without forcing the user to re-pick it.
+    timeField: lookbackTimestampField,
+    useLookBackWindow: seed.useLookBackWindow ?? false,
+    lookBackAmount: seed.lookBackAmount ?? 1,
+    lookBackUnit: (seed.lookBackUnit as PplLookBackUnit) ?? 'hours',
+    lookbackTimestampField,
     monitorType: 'ppl_monitor',
     severity: rule.severity,
     datasourceId,

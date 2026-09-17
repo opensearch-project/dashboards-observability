@@ -13,6 +13,7 @@ import {
   EuiAccordion,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCheckbox,
   EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
@@ -26,10 +27,12 @@ import {
   EuiText,
   EuiTextArea,
   EuiTitle,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
+  DEFAULT_THROTTLE_VALUE,
   PplActionForm,
   PplNumResultsOperator,
   PplTriggerForm,
@@ -46,6 +49,10 @@ const NUM_RESULTS_MIN = 1;
 const NUM_RESULTS_MAX = 10000;
 const SUBJECT_MAX = 1000;
 const MESSAGE_MAX = 5000;
+// Throttle window bounds (minutes). Backend unit is always MINUTES.
+const THROTTLE_MIN = 1;
+
+const throttleIdGen = htmlIdGenerator('pplActionThrottle');
 
 // OpenSearch alerting stores severity as '1'–'5' (1 = highest). We keep those
 // stored values for backend compatibility but label them with the standard
@@ -134,6 +141,8 @@ const createDefaultAction = (index: number): PplActionForm => ({
   destinationId: '',
   subject: '',
   message: '',
+  throttleEnabled: false,
+  throttleValue: DEFAULT_THROTTLE_VALUE,
 });
 
 const createDefaultTrigger = (index: number): PplTriggerForm => ({
@@ -264,6 +273,7 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                   }
                 >
                   <EuiFieldText
+                    isInvalid={nameInvalid}
                     value={trigger.name}
                     onChange={(e) => updateTrigger(trigger.id, { name: e.target.value })}
                     fullWidth
@@ -323,14 +333,6 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                     label={i18n.translate(
                       'observability.alerting.pplTriggers.triggerConditionLabel',
                       { defaultMessage: 'Trigger condition' }
-                    )}
-                    helpText={i18n.translate(
-                      'observability.alerting.pplTriggers.triggerConditionHelpText',
-                      {
-                        defaultMessage:
-                          'Threshold (1–{max}). Backend cap from plugins.alerting.ppl_query_results_max_datarows.',
-                        values: { max: NUM_RESULTS_MAX },
-                      }
                     )}
                     isInvalid={numResultsInvalid}
                     error={
@@ -419,6 +421,7 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                     fullWidth
                   >
                     <EuiTextArea
+                      isInvalid={customConditionInvalid}
                       value={trigger.customCondition}
                       onChange={(e) =>
                         updateTrigger(trigger.id, { customCondition: e.target.value })
@@ -463,6 +466,12 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                     hasSubmitted &&
                     (action.message.length === 0 || action.message.length > MESSAGE_MAX);
                   const destinationInvalid = hasSubmitted && action.destinationId === '';
+                  const throttleInvalid =
+                    hasSubmitted &&
+                    action.throttleEnabled &&
+                    (!Number.isFinite(action.throttleValue) ||
+                      !Number.isInteger(action.throttleValue) ||
+                      action.throttleValue < THROTTLE_MIN);
                   return (
                     <React.Fragment key={action.id}>
                       {actionIdx > 0 && <EuiSpacer size="xs" />}
@@ -564,6 +573,7 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                             }
                           >
                             <EuiFieldText
+                              isInvalid={subjectInvalid}
                               value={action.subject}
                               onChange={(e) =>
                                 updateAction(trigger.id, action.id, { subject: e.target.value })
@@ -609,6 +619,7 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                             }
                           >
                             <EuiTextArea
+                              isInvalid={messageInvalid}
                               value={action.message}
                               onChange={(e) =>
                                 updateAction(trigger.id, action.id, { message: e.target.value })
@@ -622,6 +633,84 @@ export const PplTriggersSection: React.FC<PplTriggersSectionProps> = ({
                               )}
                             />
                           </EuiFormRow>
+                          <EuiSpacer size="s" />
+                          {/* Throttling — cap how often this action notifies so
+                              a rule that stays triggered doesn't spam the
+                              channel every interval. Off by default. */}
+                          <EuiFormRow
+                            fullWidth
+                            helpText={i18n.translate(
+                              'observability.alerting.pplTriggers.throttleHelpText',
+                              {
+                                defaultMessage:
+                                  'Limit how often this action sends a notification while the trigger stays active.',
+                              }
+                            )}
+                          >
+                            <EuiCheckbox
+                              id={throttleIdGen(action.id)}
+                              data-test-subj="alertManagerPplActionThrottleEnabled"
+                              label={i18n.translate(
+                                'observability.alerting.pplTriggers.throttleEnabledLabel',
+                                { defaultMessage: 'Throttle notifications' }
+                              )}
+                              checked={!!action.throttleEnabled}
+                              onChange={(e) =>
+                                updateAction(trigger.id, action.id, {
+                                  throttleEnabled: e.target.checked,
+                                })
+                              }
+                            />
+                          </EuiFormRow>
+                          {action.throttleEnabled && (
+                            <EuiFormRow
+                              label={i18n.translate(
+                                'observability.alerting.pplTriggers.throttleValueLabel',
+                                { defaultMessage: 'Only send every' }
+                              )}
+                              display="rowCompressed"
+                              // Constrain the ROW (not the input): with an `append`,
+                              // EUI wraps input+addon in a full-width control layout
+                              // that ignores an inline maxWidth on the field, which
+                              // left the number stretched across the panel.
+                              style={{ maxWidth: 220 }}
+                              isInvalid={throttleInvalid}
+                              error={
+                                throttleInvalid
+                                  ? i18n.translate(
+                                      'observability.alerting.pplTriggers.throttleValueError',
+                                      { defaultMessage: 'Must be a whole number of minutes ≥ 1' }
+                                    )
+                                  : undefined
+                              }
+                            >
+                              {/* Field is the sole EuiFormRow child (unit as
+                                  `append`) so EUI natively wires the error id
+                                  into aria-describedby — the reason is announced,
+                                  not just shown red (WCAG 3.3.1). */}
+                              <EuiFieldNumber
+                                data-test-subj="alertManagerPplActionThrottleValue"
+                                value={action.throttleValue}
+                                min={THROTTLE_MIN}
+                                step={1}
+                                isInvalid={throttleInvalid}
+                                append={i18n.translate(
+                                  'observability.alerting.pplTriggers.throttleUnitMinutes',
+                                  { defaultMessage: 'minute(s)' }
+                                )}
+                                onChange={(e) =>
+                                  updateAction(trigger.id, action.id, {
+                                    throttleValue: parseInt(e.target.value, 10) || 0,
+                                  })
+                                }
+                                compressed
+                                aria-label={i18n.translate(
+                                  'observability.alerting.pplTriggers.throttleValueAriaLabel',
+                                  { defaultMessage: 'Throttle window in minutes' }
+                                )}
+                              />
+                            </EuiFormRow>
+                          )}
                         </EuiAccordion>
                       </EuiPanel>
                     </React.Fragment>
