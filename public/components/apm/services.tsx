@@ -24,7 +24,9 @@ import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_h
 import { useApmConfig } from './config/apm_config_context';
 import { ServicesHome } from './pages/services_home';
 import { ServiceDetails } from './pages/service_details';
+import { DependencyDetails } from './pages/service_details/dependency_details';
 import { navigateToServiceDetails } from './shared/utils/navigation_utils';
+import { isDependencyType } from './shared/utils/platform_utils';
 import { TimeRangePicker } from './shared/components/time_filter';
 import { LanguageIcon } from './shared/components/language_icon';
 import { LegacyBanner } from './shared/components/legacy_banner';
@@ -232,6 +234,7 @@ export const Services = (props: ApmServicesProps) => {
                   ? new URLSearchParams(window.location.hash.substring(hashQueryIndex + 1))
                   : new URLSearchParams();
               const language = hashParams.get('lang') || undefined;
+              const nodeType = hashParams.get('nodeType') || undefined;
 
               // Set service details route state and breadcrumbs
               if (!isServiceDetailsRoute) {
@@ -241,6 +244,20 @@ export const Services = (props: ApmServicesProps) => {
                 setCurrentServiceLanguage(language);
               }
               setServiceDetailsBreadcrumbs(serviceName, environment, language);
+
+              // Inferred dependencies (database / messaging / external) get a tailored
+              // page instead of the instrumented-service layout, which would be empty.
+              if (isDependencyType(nodeType)) {
+                return (
+                  <DependencyDetails
+                    dependencyName={decodedServiceName}
+                    environment={decodedEnvironment !== 'default' ? decodedEnvironment : undefined}
+                    nodeType={nodeType as string}
+                    timeRange={serviceDetailsTimeRange}
+                    refreshTrigger={serviceDetailsRefreshTrigger}
+                  />
+                );
+              }
 
               return (
                 <ServiceDetails
@@ -271,12 +288,16 @@ export const Services = (props: ApmServicesProps) => {
                 <ServicesHome
                   chrome={chrome}
                   parentBreadcrumb={props.parentBreadcrumb}
-                  onServiceClick={(serviceName, environment, language, timeRange) => {
+                  onServiceClick={(serviceName, environment, language, timeRange, nodeType) => {
                     // Sync parent's time state when navigating
                     if (timeRange) {
                       setServiceDetailsTimeRange(timeRange);
                     }
-                    navigateToServiceDetails(serviceName, environment, { language, timeRange });
+                    navigateToServiceDetails(serviceName, environment, {
+                      language,
+                      timeRange,
+                      nodeType,
+                    });
                   }}
                 />
               );

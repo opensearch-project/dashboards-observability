@@ -103,11 +103,13 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
           const serviceName = svc.KeyAttributes?.Name || svc.serviceName || svc.name || 'unknown';
           const environment = svc.KeyAttributes?.Environment || svc.environment || 'unknown';
           const groupByAttributes = svc.GroupByAttributes || {};
+          const type = svc.KeyAttributes?.Type || 'service';
 
           return {
             serviceName,
             environment,
             groupByAttributes,
+            type,
           };
         });
 

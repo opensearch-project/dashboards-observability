@@ -373,5 +373,7 @@ export {
   PLATFORM_TYPE_MAP,
   getPlatformDisplayName,
   getPlatformTypeFromEnvironment,
+  getNodeIconType,
+  getNodeSubtitle,
   toPrometheusLabel,
 } from '../shared/utils/platform_utils';

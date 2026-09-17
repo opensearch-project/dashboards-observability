@@ -84,7 +84,7 @@ export function getQueryListServices(
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
   query += ` | dedup nodeConnectionHash`;
-  query += ` | fields sourceNode.keyAttributes, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.groupByAttributes`;
+  query += ` | fields sourceNode.keyAttributes, sourceNode.type, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.type, targetNode.groupByAttributes`;
   query += ` | head ${DEFAULT_ROW_LIMIT}`;
   return query;
 }
@@ -286,7 +286,7 @@ export function getQueryGetServiceMap(
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
   query += ` | dedup nodeConnectionHash`;
-  query += ` | fields sourceNode.keyAttributes, targetNode.keyAttributes, sourceNode.groupByAttributes, targetNode.groupByAttributes`;
+  query += ` | fields sourceNode.keyAttributes, sourceNode.type, targetNode.keyAttributes, targetNode.type, sourceNode.groupByAttributes, targetNode.groupByAttributes`;
   query += ` | head ${DEFAULT_ROW_LIMIT}`;
   return query;
 }

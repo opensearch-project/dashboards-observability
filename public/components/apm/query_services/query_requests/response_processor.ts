@@ -353,7 +353,12 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
   const serviceMap = new Map<string, any>();
 
   // Helper to add a service to the map from keyAttributes and groupByAttributes
-  const addServiceToMap = (keyAttributes: any, groupByAttributes: any, fallbackName?: string) => {
+  const addServiceToMap = (
+    keyAttributes: any,
+    groupByAttributes: any,
+    fallbackName?: string,
+    nodeType?: string
+  ) => {
     // Parse JSON strings if needed
     let parsedKeyAttributes = keyAttributes;
     if (typeof parsedKeyAttributes === 'string') {
@@ -386,9 +391,17 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
       return;
     }
 
+    // Suppress unresolved dependency placeholders: these are CLIENT spans whose remote
+    // target could not be identified, and add only noise to the catalog.
+    if (serviceName === 'UnknownRemoteService' || serviceName === 'unknown') {
+      return;
+    }
+
     const key = `${serviceName}::${environmentType}`;
 
-    // Only add if not already present (deduplication)
+    // Only add if not already present (deduplication). Preserve the node type emitted by
+    // data-prepper (service / database / messaging / external) so the catalog can render
+    // and filter dependencies distinctly.
     if (!serviceMap.has(key)) {
       const envDetails = parseEnvironmentType(environmentType);
       const attributeMaps = buildAttributeMaps(platformType, envDetails, serviceName);
@@ -398,7 +411,7 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
         KeyAttributes: {
           Environment: environmentType,
           Name: serviceName,
-          Type: 'Service',
+          Type: nodeType || 'Service',
         },
         GroupByAttributes: parsedGroupByAttributes || {},
       });
@@ -410,14 +423,16 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
     addServiceToMap(
       row['sourceNode.keyAttributes'],
       row['sourceNode.groupByAttributes'],
-      row['sourceNode.name']
+      row['sourceNode.name'],
+      row['sourceNode.type']
     );
 
     // Add service from targetNode (may be null for leaf services)
     addServiceToMap(
       row['targetNode.keyAttributes'],
       row['targetNode.groupByAttributes'],
-      row['targetNode.name']
+      row['targetNode.name'],
+      row['targetNode.type']
     );
   });
 
@@ -761,7 +776,10 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
           KeyAttributes: {
             Environment: environmentType,
             Name: serviceName,
-            Type: 'Service',
+            // Preserve the node type emitted by data-prepper (service / database /
+            // messaging / external) so the map can render non-service dependencies.
+            // Note: type is a sibling of keyAttributes on the node, not inside it.
+            Type: row['sourceNode.type'] || 'Service',
           },
           AttributeMaps: attributeMaps,
           GroupByAttributes: flattenedGroupByAttributes,
@@ -828,7 +846,10 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
           KeyAttributes: {
             Environment: remoteEnvironment,
             Name: remoteServiceName,
-            Type: 'Service',
+            // Preserve the node type emitted by data-prepper (service / database /
+            // messaging / external) so the map can render non-service dependencies.
+            // Note: type is a sibling of keyAttributes on the node, not inside it.
+            Type: row['targetNode.type'] || 'Service',
           },
           AttributeMaps: depAttributeMaps,
           GroupByAttributes: flattenedRemoteGroupByAttributes,

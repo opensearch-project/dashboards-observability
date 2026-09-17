@@ -256,6 +256,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         serviceName,
         environment,
         platformType,
+        nodeType: matchingNode.KeyAttributes?.Type,
         groupByAttributes: matchingNode.GroupByAttributes,
       });
     }
@@ -400,6 +401,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         serviceName,
         environment,
         platformType,
+        nodeType: node?.KeyAttributes?.Type,
         groupByAttributes: node?.GroupByAttributes,
       });
     },
@@ -426,6 +428,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       openServiceDetailsInNewTab(serviceName, environment, {
         timeRange,
         language,
+        nodeType: node?.KeyAttributes?.Type,
       });
     },
     [nodes, timeRange]

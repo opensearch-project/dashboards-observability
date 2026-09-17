@@ -13,6 +13,9 @@ import {
   getQueryServiceMapThroughput,
   getQueryServiceMapFaults,
   getQueryServiceMapErrors,
+  getQueryServiceMapDependencyThroughput,
+  getQueryServiceMapDependencyFaults,
+  getQueryServiceMapDependencyErrors,
 } from '../../query_services/query_requests/promql_queries';
 
 export interface ServiceMapMetricParams {
@@ -111,34 +114,47 @@ export const useServiceMapMetrics = (
         throughput: getQueryServiceMapThroughput(serviceFilter, timeRange),
         faults: getQueryServiceMapFaults(serviceFilter, timeRange),
         errors: getQueryServiceMapErrors(serviceFilter, timeRange),
+        // Dependency-node (database / messaging / external) metrics come from the
+        // callers' CLIENT-span series, aggregated by the remote target.
+        depThroughput: getQueryServiceMapDependencyThroughput(timeRange),
+        depFaults: getQueryServiceMapDependencyFaults(timeRange),
+        depErrors: getQueryServiceMapDependencyErrors(timeRange),
       };
 
+      const runQuery = (query: string) =>
+        promqlService.executeInstantQuery({
+          query,
+          time: endTimeSec,
+          signal: abortController.signal,
+        });
+
       // Settle independently so one failed query doesn't blank the whole map.
-      const [throughputResult, faultsResult, errorsResult] = await Promise.allSettled([
-        promqlService.executeInstantQuery({
-          query: queries.throughput,
-          time: endTimeSec,
-          signal: abortController.signal,
-        }),
-        promqlService.executeInstantQuery({
-          query: queries.faults,
-          time: endTimeSec,
-          signal: abortController.signal,
-        }),
-        promqlService.executeInstantQuery({
-          query: queries.errors,
-          time: endTimeSec,
-          signal: abortController.signal,
-        }),
+      const [
+        throughputResult,
+        faultsResult,
+        errorsResult,
+        depThroughputResult,
+        depFaultsResult,
+        depErrorsResult,
+      ] = await Promise.allSettled([
+        runQuery(queries.throughput),
+        runQuery(queries.faults),
+        runQuery(queries.errors),
+        runQuery(queries.depThroughput),
+        runQuery(queries.depFaults),
+        runQuery(queries.depErrors),
       ]);
 
       // Drop stale results if params changed while this fetch was in flight.
       if (abortController.signal.aborted) return;
 
-      const throughputResp =
-        throughputResult.status === 'fulfilled' ? throughputResult.value : null;
-      const faultsResp = faultsResult.status === 'fulfilled' ? faultsResult.value : null;
-      const errorsResp = errorsResult.status === 'fulfilled' ? errorsResult.value : null;
+      const valueOf = (r: PromiseSettledResult<any>) => (r.status === 'fulfilled' ? r.value : null);
+      const throughputResp = valueOf(throughputResult);
+      const faultsResp = valueOf(faultsResult);
+      const errorsResp = valueOf(errorsResult);
+      const depThroughputResp = valueOf(depThroughputResult);
+      const depFaultsResp = valueOf(depFaultsResult);
+      const depErrorsResp = valueOf(depErrorsResult);
 
       // Build metrics map for each service
       const newMap = new Map<string, ServiceMapNodeMetrics>();
@@ -146,9 +162,20 @@ export const useServiceMapMetrics = (
       params.services.forEach(({ serviceName, environment }) => {
         const nodeId = `${serviceName}::${environment}`;
 
-        const throughputData = extractServiceData(throughputResp, serviceName, environment);
-        const faultsData = extractServiceData(faultsResp, serviceName, environment);
-        const errorsData = extractServiceData(errorsResp, serviceName, environment);
+        let throughputData = extractServiceData(throughputResp, serviceName, environment);
+        let faultsData = extractServiceData(faultsResp, serviceName, environment);
+        let errorsData = extractServiceData(errorsResp, serviceName, environment);
+
+        // Dependency nodes (database / messaging / external) have no SERVER-span
+        // metrics; fall back to their client-side series (relabeled to service/environment).
+        if (throughputData.length === 0) {
+          const depThroughput = extractServiceData(depThroughputResp, serviceName, environment);
+          if (depThroughput.length > 0) {
+            throughputData = depThroughput;
+            faultsData = extractServiceData(depFaultsResp, serviceName, environment);
+            errorsData = extractServiceData(depErrorsResp, serviceName, environment);
+          }
+        }
 
         // Calculate totals and failure ratio client-side
         const totalRequests = calculateSum(throughputData);
@@ -180,9 +207,14 @@ export const useServiceMapMetrics = (
 
       setMetricsMap(newMap);
 
-      const rejected = [throughputResult, faultsResult, errorsResult].find(
-        (r) => r.status === 'rejected'
-      ) as PromiseRejectedResult | undefined;
+      const rejected = [
+        throughputResult,
+        faultsResult,
+        errorsResult,
+        depThroughputResult,
+        depFaultsResult,
+        depErrorsResult,
+      ].find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined;
       if (rejected) {
         console.error('[useServiceMapMetrics] Partial failure fetching metrics:', rejected.reason);
         setError(rejected.reason instanceof Error ? rejected.reason : new Error('Unknown error'));

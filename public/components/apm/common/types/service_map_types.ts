@@ -269,6 +269,8 @@ export interface SelectedNodeState {
   serviceName: string;
   environment: string;
   platformType: string;
+  /** Node type: service / database / messaging / external. Drives dependency metric queries. */
+  nodeType?: string;
   groupByAttributes?: Record<string, string>;
 }
 
@@ -300,6 +302,7 @@ export type PlatformIconType =
   | 'AWS::EKS'
   | 'AWS::ECS'
   | 'AWS::EC2'
+  | 'Remote::Endpoint'
   | 'Generic';
 
 /**

@@ -26,6 +26,8 @@ export interface NavigateToServiceDetailsOptions {
   operation?: string;
   /** Dependency service name to pre-select in filters (for dependencies tab) */
   dependency?: string;
+  /** Node type (service / database / messaging / external) — routes dependencies to a tailored view */
+  nodeType?: string;
 }
 
 /**
@@ -76,6 +78,11 @@ export function navigateToServiceDetails(
     params.set('dependency', options.dependency);
   }
 
+  // Add node type so the detail route can render a tailored dependency view
+  if (options?.nodeType) {
+    params.set('nodeType', options.nodeType);
+  }
+
   // Build path for hash-based routing
   const queryString = params.toString();
   const path = `#/service-details/${encodedServiceName}/${encodedEnvironment}${
@@ -109,6 +116,7 @@ export function openServiceDetailsInNewTab(
     params.set('to', options.timeRange.to);
   }
   if (options?.language) params.set('lang', options.language);
+  if (options?.nodeType) params.set('nodeType', options.nodeType);
 
   const queryString = params.toString();
   const hash = `#/service-details/${encodedServiceName}/${encodedEnvironment}${

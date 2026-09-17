@@ -25,7 +25,8 @@ import {
   SelectedEdgeState,
 } from '../../../common/types/service_map_types';
 import {
-  getPlatformTypeFromEnvironment,
+  getNodeIconType,
+  getNodeSubtitle,
   getEnvironmentDisplayName,
   APPLICATION_MAP_CONSTANTS,
 } from '../../../common/constants';
@@ -758,7 +759,9 @@ function buildCelestialNodes(
     const nodeId = `${serviceName}::${environment}`;
     const metrics = metricsMap.get(nodeId);
 
-    const platformType = getPlatformTypeFromEnvironment(environment);
+    const nodeType = node.KeyAttributes.Type;
+    const iconType = getNodeIconType(nodeType, environment);
+    const subtitle = getNodeSubtitle(nodeType, environment);
     const failureRate = metrics
       ? ((metrics.totalFaults + metrics.totalErrors) / (metrics.totalRequests || 1)) * 100
       : 0;
@@ -771,8 +774,8 @@ function buildCelestialNodes(
       data: {
         id: node.NodeId,
         title: node.Name,
-        subtitle: platformType,
-        icon: getIcon(platformType),
+        subtitle,
+        icon: getIcon(iconType),
         isGroup: false,
         keyAttributes: node.KeyAttributes,
         groupByAttributes: node.GroupByAttributes,
