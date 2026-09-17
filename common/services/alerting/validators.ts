@@ -7,6 +7,11 @@
  * Core validation utilities for monitor forms and duration strings.
  */
 import { UnifiedAlertSeverity } from '../../types/alerting';
+import {
+  computeLookBackMinutes,
+  LookBackFields,
+  LOOKBACK_WINDOW_MAX_MINUTES,
+} from './ppl_lookback';
 
 // ============================================================================
 // Duration Parsing
@@ -168,6 +173,10 @@ export function validateMonitorForm(form: MonitorFormState): ValidationResult {
 // raising this from 30 → 100 in an upcoming PR; set to 100 pre-emptively
 // so the UI doesn't block valid names once the backend ships.
 export const PPL_MONITOR_NAME_MAX = 100;
+// The alerting backend's DEFAULT `ppl_monitor_max_query_length`. Advisory ONLY —
+// used for a soft "long query may be rejected" hint in the UI, never to block a
+// save. A cluster can raise the setting; the backend is authoritative and its
+// rejection names the real limit.
 export const PPL_QUERY_MAX_LENGTH = 2000;
 export const PPL_NUM_RESULTS_MIN = 1;
 export const PPL_NUM_RESULTS_MAX = 10000;
@@ -182,6 +191,8 @@ interface PplActionShape {
   destinationId: string;
   subject: string;
   message: string;
+  throttleEnabled?: boolean;
+  throttleValue?: number;
 }
 
 interface PplTriggerShape {
@@ -193,11 +204,14 @@ interface PplTriggerShape {
   actions: PplActionShape[];
 }
 
-export interface PplFormShape {
+export interface PplFormShape extends LookBackFields {
   name: string;
   query: string;
   pplTriggers: PplTriggerShape[];
 }
+
+/** Minimum throttle window the alerting backend accepts, in minutes. */
+export const PPL_THROTTLE_MIN_MINUTES = 1;
 
 export function validatePplForm(form: PplFormShape): ValidationResult {
   const errors: Record<string, string> = {};
@@ -212,8 +226,25 @@ export function validatePplForm(form: PplFormShape): ValidationResult {
 
   if (!form.query || !form.query.trim()) {
     errors.query = 'PPL query is required';
-  } else if (form.query.length > PPL_QUERY_MAX_LENGTH) {
-    errors.query = `PPL query must be ≤ ${PPL_QUERY_MAX_LENGTH} characters`;
+  }
+  // NOTE: no client-side query-length cap. The alerting backend enforces
+  // `plugins.alerting.ppl_monitor_max_query_length` (default 2000) and a cluster
+  // may raise it; blocking here on a hard-coded 2000 would lock out users who
+  // increased the setting — and we cannot read cluster settings (permissions).
+  // The backend rejects an over-limit query with a clear message that names the
+  // ACTUAL configured limit, which the UI surfaces inline (extractPplValidationError).
+  // `PPL_QUERY_MAX_LENGTH` remains only as the DEFAULT for an advisory hint.
+
+  // Look-back window bounds (only when enabled with an anchor field). The
+  // window is injected as a query filter, so an out-of-range value would either
+  // be a no-op or rejected by the backend — catch it here with a clear message.
+  if (form.useLookBackWindow && form.lookbackTimestampField) {
+    const minutes = computeLookBackMinutes(form);
+    if (minutes < 1) {
+      errors.lookBackWindow = 'Look back window must be at least 1 minute';
+    } else if (minutes > LOOKBACK_WINDOW_MAX_MINUTES) {
+      errors.lookBackWindow = 'Look back window must be at most 7 days (10,080 minutes)';
+    }
   }
 
   if (form.pplTriggers.length === 0) {
@@ -259,6 +290,16 @@ export function validatePplForm(form: PplFormShape): ValidationResult {
       } else if (a.message.length > PPL_NOTIFICATION_MESSAGE_MAX) {
         errors[`${aPrefix}.message`] =
           `Message must be ≤ ${PPL_NOTIFICATION_MESSAGE_MAX} characters`;
+      }
+      if (a.throttleEnabled) {
+        if (
+          !Number.isFinite(a.throttleValue) ||
+          !Number.isInteger(a.throttleValue) ||
+          (a.throttleValue as number) < PPL_THROTTLE_MIN_MINUTES
+        ) {
+          errors[`${aPrefix}.throttleValue`] =
+            `Throttle window must be a whole number of minutes ≥ ${PPL_THROTTLE_MIN_MINUTES}`;
+        }
       }
     });
   });

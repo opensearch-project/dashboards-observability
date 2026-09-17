@@ -15,6 +15,14 @@
 // PPL monitor transforms
 // ============================================================================
 
+import {
+  applyLookBackToQuery,
+  LookBackFields,
+  LookBackUnit,
+  parseLookBackFromQuery,
+  stripTimeFilterFromQuery,
+} from './ppl_lookback';
+
 // Mirror of the PPL form-state types in
 // `public/components/alerting/create_monitor/create_monitor_types.ts`.
 // Duplicated because `common/` cannot import from `public/`.
@@ -24,6 +32,10 @@ export interface PplActionForm {
   destinationId: string;
   subject: string;
   message: string;
+  /** When true, the action fires at most once per `throttleValue` minutes. */
+  throttleEnabled?: boolean;
+  /** Throttle window in minutes (backend unit is always MINUTES). */
+  throttleValue?: number;
 }
 
 export interface PplTriggerForm {
@@ -37,7 +49,7 @@ export interface PplTriggerForm {
   actions: PplActionForm[];
 }
 
-export interface PplMonitorForm {
+export interface PplMonitorForm extends LookBackFields {
   name: string;
   enabled: boolean;
   query: string;
@@ -47,6 +59,9 @@ export interface PplMonitorForm {
 
 const VALID_NUM_RESULTS_OPERATORS = new Set(['>', '>=', '<', '<=', '==', '!=']);
 
+/** Minimum throttle window the backend accepts, in minutes. */
+export const THROTTLE_MIN_MINUTES = 1;
+
 function buildPplActionPayload(action: PplActionForm): Record<string, unknown> {
   const out: Record<string, unknown> = {
     name: action.name,
@@ -55,6 +70,21 @@ function buildPplActionPayload(action: PplActionForm): Record<string, unknown> {
   };
   if (action.subject && action.subject.trim() !== '') {
     out.subject_template = { source: action.subject };
+  }
+  // Throttle is opt-in. When enabled we emit the wire shape the alerting
+  // backend expects (`throttle_enabled` + `throttle: { value, unit }`, unit is
+  // always MINUTES). When disabled we still emit `throttle_enabled: false` so
+  // toggling it off on edit clears any previously stored throttle rather than
+  // leaving a stale one on the persisted action.
+  if (action.throttleEnabled) {
+    const value = Number(action.throttleValue);
+    out.throttle_enabled = true;
+    out.throttle = {
+      value: Number.isFinite(value) && value >= THROTTLE_MIN_MINUTES ? Math.floor(value) : 10,
+      unit: 'MINUTES',
+    };
+  } else {
+    out.throttle_enabled = false;
   }
   return out;
 }
@@ -113,6 +143,16 @@ function buildPplTriggerPayload(trigger: PplTriggerForm): Record<string, unknown
 
 /** Build a `POST /_plugins/_alerting/monitors` payload for a PPL monitor. */
 export function transformPplFormToPayload(form: PplMonitorForm): Record<string, unknown> {
+  // The look-back window is realized as a sliding `where` filter injected into
+  // the query itself. This is the ONLY durable record of the window: the
+  // alerting `ppl_monitor` type persists neither custom top-level fields nor
+  // `ui_metadata` (both are dropped by its parser), so we cannot stash metadata
+  // alongside. We inject when enabled and strip when disabled so the persisted
+  // query never carries a filter the user just turned off; the edit flyout
+  // reconstructs the window by parsing this clause back out (see
+  // `unifiedRuleToOsForm` / `parseLookBackFromQuery`).
+  const query = applyLookBackToQuery(form.query, form);
+
   return {
     type: 'monitor',
     monitor_type: 'ppl_monitor',
@@ -124,7 +164,7 @@ export function transformPplFormToPayload(form: PplMonitorForm): Record<string, 
     inputs: [
       {
         ppl_input: {
-          query: form.query,
+          query,
           query_language: 'ppl',
         },
       },
@@ -134,7 +174,7 @@ export function transformPplFormToPayload(form: PplMonitorForm): Record<string, 
 }
 
 /** Inverse of {@link transformPplFormToPayload} — used to seed the edit flyout. */
-export interface OsPplFormSeed {
+export interface OsPplFormSeed extends LookBackFields {
   name: string;
   enabled: boolean;
   query: string;
@@ -156,6 +196,8 @@ interface UnifiedRuleRawPplLike {
         destination_id?: string;
         message_template?: { source?: string };
         subject_template?: { source?: string };
+        throttle_enabled?: boolean;
+        throttle?: { value?: number; unit?: string };
       }>;
       type?: string;
       num_results_condition?: string;
@@ -203,18 +245,37 @@ export function unifiedRuleToOsForm(rule: {
           destinationId: a.destination_id || '',
           subject: a.subject_template?.source || '',
           message: a.message_template?.source || '',
+          throttleEnabled: !!a.throttle_enabled,
+          throttleValue: Number.isFinite(a.throttle?.value) ? Number(a.throttle?.value) : 10,
         })),
       };
     });
 
+  // Restore the look-back window by parsing the injected `where` filter out of
+  // the persisted query — `ppl_monitor` keeps no metadata slot, so the clause
+  // itself is the only record. When found, strip it so the editor shows the
+  // user's clean query (it's re-injected on the next save); when absent, the
+  // window is simply off.
+  const rawQuery = pplInput?.query || '';
+  const parsed = parseLookBackFromQuery(rawQuery);
+  const useLookBackWindow = !!parsed;
+  const timestampField = parsed?.lookbackTimestampField || '';
+  const lookBackAmount = parsed?.lookBackAmount ?? 1;
+  const lookBackUnit: LookBackUnit = parsed?.lookBackUnit ?? 'hours';
+  const query = timestampField ? stripTimeFilterFromQuery(rawQuery, timestampField) : rawQuery;
+
   return {
     name: rule.name,
     enabled: rule.enabled,
-    query: pplInput?.query || '',
+    query,
     schedule: {
       interval: period?.interval ?? 1,
       unit: period?.unit ?? 'MINUTES',
     },
     pplTriggers: triggers.length > 0 ? triggers : [],
+    useLookBackWindow,
+    lookBackAmount,
+    lookBackUnit,
+    lookbackTimestampField: timestampField,
   };
 }

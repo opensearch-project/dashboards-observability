@@ -107,7 +107,7 @@ describe('alarms_page_helpers', () => {
     });
 
     it('skips non-string entries', () => {
-      expect(resolveDatasourceTokens((['ds-1', 5, null] as unknown) as string[], ds)).toEqual([
+      expect(resolveDatasourceTokens(['ds-1', 5, null] as unknown as string[], ds)).toEqual([
         'ds-1',
       ]);
     });
@@ -142,7 +142,7 @@ describe('alarms_page_helpers', () => {
 
   describe('formStateToRule', () => {
     function osForm(): MonitorFormState {
-      return ({
+      return {
         datasourceType: 'opensearch',
         datasourceId: 'ds-os',
         name: 'mon-1',
@@ -159,7 +159,7 @@ describe('alarms_page_helpers', () => {
         monitorType: 'ppl_monitor',
         pplTriggers: [],
         schedule: { interval: 1, unit: 'MINUTES' },
-      } as unknown) as MonitorFormState;
+      } as unknown as MonitorFormState;
     }
 
     it('writes the picked indices into a label and the description', () => {
@@ -172,12 +172,12 @@ describe('alarms_page_helpers', () => {
     it('falls back to fallbackDsId when the form omits datasourceId', () => {
       const f = osForm() as { datasourceId: string };
       f.datasourceId = '';
-      const rule = formStateToRule((f as unknown) as MonitorFormState, 'ds-fallback');
+      const rule = formStateToRule(f as unknown as MonitorFormState, 'ds-fallback');
       expect(rule.datasourceId).toBe('ds-fallback');
     });
 
     it('emits prometheus shape when datasourceType is prometheus', () => {
-      const promForm = ({
+      const promForm = {
         datasourceType: 'prometheus',
         datasourceId: 'ds-prom',
         name: 'cpu',
@@ -190,7 +190,7 @@ describe('alarms_page_helpers', () => {
         firingPeriod: '10m',
         labels: [{ key: 'env', value: 'prod' }],
         annotations: [{ key: 'description', value: 'cpu hot' }],
-      } as unknown) as MonitorFormState;
+      } as unknown as MonitorFormState;
       const rule = formStateToRule(promForm, 'ds-fallback');
       expect(rule.datasourceType).toBe('prometheus');
       expect(rule.monitorType).toBe('metric');
@@ -249,6 +249,14 @@ describe('alarms_page_helpers', () => {
       expect(extractPplValidationError(msg)).toBe(
         'PPL Query validation failed: [INVALID_KEYWORD] is not a valid term at this part of the query: ' +
           "'...e = logs-otel-v1* | INVALID_KEYWORD' <-- HERE. Expecting one of 56 possible tokens."
+      );
+    });
+
+    it('extracts the backend query-length error (names the real configured cap)', () => {
+      const msg =
+        'alerting_exception: [alerting_exception] Reason: PPL Query length must be at most 5000 but was 6123';
+      expect(extractPplValidationError(msg)).toBe(
+        'PPL Query length must be at most 5000 but was 6123'
       );
     });
 

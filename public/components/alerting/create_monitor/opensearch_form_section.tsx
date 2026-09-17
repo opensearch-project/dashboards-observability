@@ -27,8 +27,11 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { Datasource } from '../../../../common/types/alerting';
+import { applyLookBackToQuery } from '../../../../common/services/alerting/ppl_lookback';
+import { PPL_QUERY_MAX_LENGTH } from '../../../../common/services/alerting/validators';
 import { coreRefs } from '../../../framework/core_refs';
 import { OpenSearchFormState, OS_SCHEDULE_UNIT_OPTIONS } from './create_monitor_types';
+import { PplLookbackEditor } from './sections/ppl_lookback_editor';
 import { PplPreviewPanel } from './sections/ppl_preview_panel';
 import { PplQueryEditor } from './sections/ppl_query_editor';
 import { PplTriggersSection } from './sections/ppl_triggers';
@@ -109,10 +112,40 @@ export const OpenSearchFormSection: React.FC<{
   // Resolve the active datasource's MDS saved-object id once per render,
   // so the preview panel can scope its PPL call to the right cluster
   // without doing the lookup itself.
-  const activeMdsId = useMemo(() => datasources.find((d) => d.id === form.datasourceId)?.mdsId, [
-    datasources,
-    form.datasourceId,
-  ]);
+  const activeMdsId = useMemo(
+    () => datasources.find((d) => d.id === form.datasourceId)?.mdsId,
+    [datasources, form.datasourceId]
+  );
+
+  // Preview the effective query — with the look-back filter injected — so what
+  // the user validates matches what the scheduled monitor will actually run.
+  const previewQuery = useMemo(
+    () =>
+      applyLookBackToQuery(form.query, {
+        useLookBackWindow: form.useLookBackWindow,
+        lookBackAmount: form.lookBackAmount,
+        lookBackUnit: form.lookBackUnit,
+        lookbackTimestampField: form.lookbackTimestampField,
+      }),
+    [
+      form.query,
+      form.useLookBackWindow,
+      form.lookBackAmount,
+      form.lookBackUnit,
+      form.lookbackTimestampField,
+    ]
+  );
+
+  // Effective length = what actually persists after look-back injection. Shown
+  // live as a non-blocking ADVISORY: the alerting backend enforces the real
+  // query-length cap (a cluster may raise it beyond the 2000 default), so we
+  // never block save on it — we just warn when the effective query passes the
+  // default so long-query authors get a heads-up before the backend decides.
+  const effectiveQueryLength = previewQuery.length;
+  const overDefaultLimit = effectiveQueryLength > PPL_QUERY_MAX_LENGTH;
+  // The look-back filter adds ~40 chars; note it when it's what pushed the
+  // effective query past the default (the raw query fits on its own).
+  const lookbackAddedLength = overDefaultLimit && form.query.length <= PPL_QUERY_MAX_LENGTH;
 
   // Send the user to the Explore Logs app, where they can author and
   // validate a PPL query against live data, then come back via the
@@ -139,6 +172,36 @@ export const OpenSearchFormSection: React.FC<{
       }
     },
     [form.query, form.timeField, onUpdate]
+  );
+
+  // Keep the look-back anchor in step with the toolbar time field: when the
+  // user picks a time field and the look-back window has no anchor yet (or was
+  // anchored on the previous time field), adopt the new one. This lets the
+  // default-on look-back window "just work" without a second manual pick.
+  const handleTimeFieldChange = useCallback(
+    (v: string) => {
+      const wasTrackingTimeField =
+        !form.lookbackTimestampField || form.lookbackTimestampField === form.timeField;
+      onUpdate('timeField', v);
+      if (v && wasTrackingTimeField) {
+        onUpdate('lookbackTimestampField', v);
+      }
+    },
+    [form.lookbackTimestampField, form.timeField, onUpdate]
+  );
+
+  const handleLookbackUpdate = useCallback(
+    (patch: {
+      useLookBackWindow?: boolean;
+      lookBackAmount?: number;
+      lookBackUnit?: OpenSearchFormState['lookBackUnit'];
+      lookbackTimestampField?: string;
+    }) => {
+      (Object.keys(patch) as Array<keyof typeof patch>).forEach((k) => {
+        onUpdate(k as keyof OpenSearchFormState, patch[k] as never);
+      });
+    },
+    [onUpdate]
   );
 
   return (
@@ -194,7 +257,7 @@ export const OpenSearchFormSection: React.FC<{
           selectedIndices={form.indices}
           onIndicesChange={handleIndicesChange}
           selectedTimeField={form.timeField}
-          onTimeFieldChange={(v) => onUpdate('timeField', v)}
+          onTimeFieldChange={handleTimeFieldChange}
         />
 
         <EuiSpacer size="s" />
@@ -214,21 +277,64 @@ export const OpenSearchFormSection: React.FC<{
           serverError={pplServerError}
         />
         <EuiSpacer size="xs" />
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="observability.alerting.opensearchFormSection.pplExample"
-            defaultMessage="Example: {example}"
-            values={{
-              example: <code>source = my-index | where severityText = &apos;ERROR&apos;</code>,
-            }}
-          />
-        </EuiText>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline" gutterSize="s">
+          <EuiFlexItem grow={true}>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="observability.alerting.opensearchFormSection.pplExample"
+                defaultMessage="Example: {example}"
+                values={{
+                  example: <code>source = my-index | where severityText = &apos;ERROR&apos;</code>,
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+          {/* Live effective-length count (after look-back injection). Advisory
+              only — turns warning past the default cap but never blocks save;
+              the backend enforces the real, possibly-raised limit. */}
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="xs"
+              color={overDefaultLimit ? 'warning' : 'subdued'}
+              data-test-subj="alertManagerPplQueryCharCount"
+            >
+              {i18n.translate('observability.alerting.opensearchFormSection.queryCharCount', {
+                defaultMessage: '{len} characters',
+                values: { len: effectiveQueryLength.toLocaleString() },
+              })}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {overDefaultLimit && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="warning" data-test-subj="alertManagerPplQueryLengthAdvisory">
+              {lookbackAddedLength
+                ? i18n.translate('observability.alerting.opensearchFormSection.queryLongLookback', {
+                    defaultMessage:
+                      'With the look-back filter, the saved query is {len} characters. Clusters cap query length (default {max}); if yours rejects it, shorten the query or turn off the look-back window.',
+                    values: {
+                      len: effectiveQueryLength.toLocaleString(),
+                      max: PPL_QUERY_MAX_LENGTH.toLocaleString(),
+                    },
+                  })
+                : i18n.translate('observability.alerting.opensearchFormSection.queryLong', {
+                    defaultMessage:
+                      'This query is long ({len} characters). Clusters cap query length (default {max}); if yours rejects it on save, shorten the query.',
+                    values: {
+                      len: effectiveQueryLength.toLocaleString(),
+                      max: PPL_QUERY_MAX_LENGTH.toLocaleString(),
+                    },
+                  })}
+            </EuiText>
+          </>
+        )}
         <EuiSpacer size="s" />
         {/* Run-preview affordance — validates the query against the chosen
             datasource before save. Resets implicitly each click; we don't
             persist preview state with the form. */}
         <PplPreviewPanel
-          query={form.query}
+          query={previewQuery}
           mdsId={activeMdsId}
           hasDatasource={!!form.datasourceId}
         />
@@ -297,6 +403,21 @@ export const OpenSearchFormSection: React.FC<{
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        {/* Look-back window — bounds each run to recent data via an injected
+            `where` filter. See ppl_lookback.ts. */}
+        <PplLookbackEditor
+          dsId={form.datasourceId}
+          indices={form.indices}
+          useLookBackWindow={form.useLookBackWindow}
+          lookBackAmount={form.lookBackAmount}
+          lookBackUnit={form.lookBackUnit}
+          lookbackTimestampField={form.lookbackTimestampField}
+          timeField={form.timeField}
+          onUpdate={handleLookbackUpdate}
+        />
       </EuiPanel>
 
       <EuiSpacer size="m" />
