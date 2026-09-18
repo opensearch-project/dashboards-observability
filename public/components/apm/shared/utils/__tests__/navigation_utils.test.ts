@@ -10,6 +10,7 @@ import {
   navigateToExploreLogs,
   navigateToDatasetCorrelations,
   navigateToSloSuggest,
+  navigateToExploreMetrics,
   openCorrelatedDashboard,
   openApmSettings,
 } from '../navigation_utils';
@@ -116,6 +117,38 @@ describe('navigation_utils', () => {
       const url = windowOpenSpy.mock.calls[0][0];
       expect(url).toContain('from:now-1h');
       expect(url).toContain('to:now');
+    });
+
+    it('rison-quotes + encodes absolute ISO timestamps in _g (colons must not break rison)', () => {
+      navigateToExploreTraces(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        { from: '2026-09-18T18:11:01.655Z', to: '2026-09-18T20:00:00.000Z' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain(
+        "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+      );
+    });
+
+    it('encodes a relative-future to value so + does not decode to a space', () => {
+      navigateToExploreTraces(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        { from: 'now-1h', to: 'now+1h' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain('to:now%2B1h');
+      expect(url).not.toContain('to:now 1h');
+      expect(url).not.toContain('to:now+1h');
     });
 
     it('should handle datasetId with existing :: prefix', () => {
@@ -327,6 +360,39 @@ describe('navigation_utils', () => {
       expect(url).toContain('to:now');
     });
 
+    it('rison-quotes + encodes absolute ISO timestamps in _g', () => {
+      navigateToExploreLogs(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        defaultParams.serviceNameField,
+        { from: '2026-09-18T18:11:01.655Z', to: '2026-09-18T20:00:00.000Z' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain(
+        "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+      );
+    });
+
+    it('encodes a relative-future to value so + does not decode to a space', () => {
+      navigateToExploreLogs(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        defaultParams.serviceNameField,
+        { from: 'now-1h', to: 'now+1h' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain('to:now%2B1h');
+      expect(url).not.toContain('to:now 1h');
+    });
+
     it('should handle datasetId with existing :: prefix', () => {
       navigateToExploreLogs(
         'ds-123::existing-logs',
@@ -471,6 +537,81 @@ describe('openCorrelatedDashboard (correlated dashboards, experimental)', () => 
     const [url] = windowOpenSpy.mock.calls[0];
     expect(url).toContain('#/view/dash-2');
     expect(url).not.toContain('_g=');
+  });
+
+  it('rison-quotes + encodes absolute ISO timestamps so the redirect keeps its time range', () => {
+    openCorrelatedDashboard('dash-1', {
+      from: '2026-09-18T18:11:01.655Z',
+      to: '2026-09-18T20:00:00.000Z',
+    });
+
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('_g=(');
+    expect(url).toContain(
+      "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+    );
+  });
+
+  it('encodes a relative-future timestamp so + does not decode to a space', () => {
+    openCorrelatedDashboard('dash-1', { from: 'now-1h', to: 'now+1h' });
+
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('time:(from:now-1h,to:now%2B1h)');
+    expect(url).not.toContain('to:now 1h');
+    expect(url).not.toContain('to:now+1h');
+  });
+});
+
+describe('navigateToExploreMetrics (open in Discover metrics)', () => {
+  let windowOpenSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+  });
+
+  afterEach(() => {
+    windowOpenSpy.mockRestore();
+  });
+
+  it('opens the Explore metrics query view with the PromQL, datasource and time range', () => {
+    navigateToExploreMetrics('up', 'conn-1', { from: 'now-15m', to: 'now' });
+
+    expect(windowOpenSpy).toHaveBeenCalledTimes(1);
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain('/app/explore/metrics/#?');
+    expect(url).toContain('signalType:metrics');
+    expect(url).toContain('metricsPageMode:query');
+    expect(url).toContain('time:(from:now-15m,to:now)');
+  });
+
+  it('rison-quotes + encodes absolute ISO timestamps in _g', () => {
+    navigateToExploreMetrics('up', 'conn-1', {
+      from: '2026-09-18T18:11:01.655Z',
+      to: '2026-09-18T20:00:00.000Z',
+    });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain(
+      "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+    );
+  });
+
+  it('encodes a relative-future timestamp so + does not decode to a space', () => {
+    navigateToExploreMetrics('up', 'conn-1', { from: 'now-1h', to: 'now+1h' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain('to:now%2B1h');
+    expect(url).not.toContain('to:now 1h');
+  });
+
+  it('rison-escapes a PromQL matcher containing ! so the query is not dropped', () => {
+    navigateToExploreMetrics('sum(rate(x{a!="b"}[5m]))', 'conn-1', { from: 'now-15m', to: 'now' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    // `!` must be rison-escaped to `!!` (URL-encoding leaves `!` raw, and rison
+    // treats a lone `!` as an escape char → dropped query).
+    expect(url).toContain(encodeURIComponent('a!!='));
   });
 });
 
