@@ -222,6 +222,76 @@ describe('MonitorsTable', () => {
     ).toHaveClass('euiListGroupItem-isDisabled');
   });
 
+  // Regression (audit M8): rule-creation enablement must follow the
+  // datasources AVAILABLE to the user, not the current facet (browse)
+  // selection. A Prometheus datasource exists, so Metrics create stays enabled
+  // even with nothing selected in the facet.
+  it('keeps metrics creation enabled with a Prometheus datasource and no facet selection', () => {
+    const onCreateMonitor = jest.fn();
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        datasources={
+          [{ id: 'prom-1', name: 'prom1', type: 'prometheus' }] as unknown as Datasource[]
+        }
+        selectedDsIds={[]}
+        onCreateMonitor={onCreateMonitor}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    fireEvent.click(screen.getByText('Metrics alert rule'));
+    expect(onCreateMonitor).toHaveBeenCalledWith('metrics');
+  });
+
+  // Logs symmetric counterpart of the metrics test above, and the case that
+  // actually distinguishes the fix from the pre-fix behaviour: an OpenSearch
+  // datasource EXISTS but is not in the facet selection (only a Prometheus DS
+  // is selected). The old selection-keyed logic disabled Logs create here
+  // (every selected DS was Prometheus); the fix keeps it enabled because the
+  // capability follows the available datasources, not the browse filter.
+  it('keeps logs creation enabled when an OpenSearch datasource exists but is not selected', () => {
+    const onCreateMonitor = jest.fn();
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        datasources={
+          [
+            { id: 'os-1', name: 'cluster1', type: 'opensearch' },
+            { id: 'prom-1', name: 'prom1', type: 'prometheus' },
+          ] as unknown as Datasource[]
+        }
+        selectedDsIds={['prom-1']}
+        onCreateMonitor={onCreateMonitor}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    fireEvent.click(screen.getByText('Logs alert rule'));
+    expect(onCreateMonitor).toHaveBeenCalledWith('logs');
+  });
+
+  // Disable direction still holds: with no OpenSearch datasource available at
+  // all, Logs create is greyed out (the wizard would have no valid target).
+  it('disables logs creation when no OpenSearch datasource exists', () => {
+    const onCreateMonitor = jest.fn();
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        datasources={
+          [{ id: 'prom-1', name: 'prom1', type: 'prometheus' }] as unknown as Datasource[]
+        }
+        selectedDsIds={['prom-1']}
+        onCreateMonitor={onCreateMonitor}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('alertManagerCreateResourceButton'));
+    expect(screen.getByLabelText('Create logs rule').closest('.euiListGroupItem')).toHaveClass(
+      'euiListGroupItem-isDisabled'
+    );
+  });
+
   // Regression: deselecting all datasources must wipe both the dependent
   // facet selections AND the search box, mirroring the cascade-clear in
   // alerts_dashboard.tsx. Keep the two tabs aligned.
