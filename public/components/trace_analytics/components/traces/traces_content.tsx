@@ -24,7 +24,12 @@ import {
 } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { Filters, FilterType } from '../common/filters/filters';
-import { filtersToDsl, isUnderOneHourRange, processTimeStamp } from '../common/helper_functions';
+import {
+  filtersToDsl,
+  isUnderOneHourRange,
+  processTimeStamp,
+  shouldFetchTraceData,
+} from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { DashboardContent } from '../dashboard/dashboard_content';
@@ -185,7 +190,7 @@ export function TracesContent(props: TracesProps) {
     setFilteredService(newFilteredService);
     if (!redirect && (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)))
       props.setDataSourceMenuSelectable?.(true);
-    refresh();
+    if (shouldFetchTraceData(props.dataSourceEnabled, props.dataSourceMDSId[0].id)) refresh();
   }, [
     filters,
     appConfigs,
@@ -202,6 +207,7 @@ export function TracesContent(props: TracesProps) {
 
   useEffect(() => {
     if (tracesTableMode !== 'traces') return;
+    if (!shouldFetchTraceData(props.dataSourceEnabled, props.dataSourceMDSId[0].id)) return;
 
     const currentSort = sortingColumns[0];
 

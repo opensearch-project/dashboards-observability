@@ -15,7 +15,7 @@ import {
 } from '../../requests/services_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { Filters, FilterType } from '../common/filters/filters';
-import { filtersToDsl, processTimeStamp } from '../common/helper_functions';
+import { filtersToDsl, processTimeStamp, shouldFetchTraceData } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { DataSourcePicker } from '../dashboard/mode_picker';
@@ -84,7 +84,11 @@ export function ServicesContent(props: ServicesProps) {
       }
     }
     setFilteredService(newFilteredService);
-    if (!redirect && (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)))
+    if (
+      !redirect &&
+      (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)) &&
+      shouldFetchTraceData(props.dataSourceEnabled, dataSourceMDSId[0].id)
+    )
       refresh(newFilteredService);
   }, [
     filters,

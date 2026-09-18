@@ -121,6 +121,19 @@ export function processTimeStamp(time: string, mode: TraceAnalyticsMode, isEndTi
   return time;
 }
 
+// When MDS is enabled, the data source picker resolves and selects a default data source
+// asynchronously. Until it does, the data source id is undefined and the core HTTP client
+// strips the undefined `dataSourceMDSId` query param, causing the request to be routed to a
+// (possibly nonexistent) local cluster and fail with "No Living connections". This guard
+// defers the initial fetch until a data source id has been resolved. When MDS is disabled,
+// requests fire immediately against the local cluster (unchanged behavior).
+export function shouldFetchTraceData(
+  dataSourceEnabled: boolean,
+  dataSourceMDSId: string | undefined
+): boolean {
+  return dataSourceEnabled ? dataSourceMDSId !== undefined : true;
+}
+
 export function renderBenchmark(value: number) {
   if (typeof value !== 'number') return null;
   const benchmarkColor = value === 0 ? '#9ea8a9' : value > 0 ? '#c23f25' : '#3f7e23';
