@@ -613,7 +613,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
         <div className="promql-line-chart__open-metrics">
           <EuiToolTip content={openInMetricsLabel} position="top">
             <EuiButtonIcon
-              iconType="stats"
+              iconType="visAreaStacked"
               size="xs"
               aria-label={openInMetricsLabel}
               data-test-subj={`openInMetrics-${
