@@ -19,6 +19,13 @@
     margin: 0 0 8px 0;
   }
 
+  &__open-metrics {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 1;
+  }
+
   &__chart {
     width: 100%;
   }

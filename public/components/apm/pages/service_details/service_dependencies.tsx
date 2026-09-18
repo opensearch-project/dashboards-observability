@@ -146,6 +146,8 @@ export interface ServiceDependenciesProps {
   prometheusConnectionId: string;
   serviceMapDataset: string;
   refreshTrigger?: number;
+  /** Brush selection on any inline chart zooms the whole page range. */
+  onTimeRangeChange?: (from: string, to: string) => void;
 }
 
 /**
@@ -168,6 +170,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   prometheusConnectionId,
   serviceMapDataset: _serviceMapDataset,
   refreshTrigger,
+  onTimeRangeChange,
 }) => {
   // Expandable rows state
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -916,6 +919,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                   timeRange={timeRange}
                   height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
                   seriesLabel="Requests"
+                  onTimeRangeChange={onTimeRangeChange}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
@@ -930,6 +934,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                   prometheusConnectionId={prometheusConnectionId}
                   timeRange={timeRange}
                   height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
+                  onTimeRangeChange={onTimeRangeChange}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
@@ -944,6 +949,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                   prometheusConnectionId={prometheusConnectionId}
                   timeRange={timeRange}
                   height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
+                  onTimeRangeChange={onTimeRangeChange}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -961,6 +967,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     timeRange,
     prometheusConnectionId,
     chartStepWindow,
+    onTimeRangeChange,
   ]);
 
   if (error) {

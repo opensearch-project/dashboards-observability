@@ -4,7 +4,7 @@
  */
 
 import React, { useRef, useEffect, useMemo, useState } from 'react';
-import { EuiIcon, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import * as echarts from 'echarts';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
@@ -13,6 +13,8 @@ import { TimeRange, ChartSeriesData } from '../../common/types/service_details_t
 import { SERVICE_DETAILS_CONSTANTS, CHART_COLORS } from '../../common/constants';
 import { parseTimeRange, getTimeAxisConfig } from '../utils/time_utils';
 import { isResolutionExceededError } from '../hooks/use_promql_chart_data';
+import { useApmCursorBus } from '../hooks/apm_cursor_context';
+import { navigateToExploreMetrics } from '../utils/navigation_utils';
 import './promql_line_chart.scss';
 
 export interface PromQLLineChartProps {
@@ -34,6 +36,18 @@ export interface PromQLLineChartProps {
   seriesLabel?: string;
   /** Number of data points for the chart resolution (default: RESOLUTION_MEDIUM) */
   resolution?: number;
+  /**
+   * When provided, enables drag-to-select (brush) on the x-axis. The selected
+   * window is reported as ISO-8601 start/end strings. Wire this to the page's
+   * time-range setter so brushing zooms the whole page.
+   */
+  onTimeRangeChange?: (from: string, to: string) => void;
+  /**
+   * Show the "Open in Discover metrics" button (top-right) that deep-links to
+   * the Explore metrics query view with this chart's PromQL, data source, and
+   * time range pre-loaded. Default true.
+   */
+  showOpenInMetrics?: boolean;
 }
 
 /**
@@ -42,10 +56,10 @@ export interface PromQLLineChartProps {
  * Features:
  * - Multi-series line/area chart with ECharts
  * - Interactive tooltip with timestamp and all series values
- * - Legend showing series names with current values
- * - Y-axis with proper formatting
- * - X-axis with time labels
- * - Responsive sizing
+ * - Synced crosshair across sibling charts (via ApmCursorContext)
+ * - Drag-to-select time brushing (when onTimeRangeChange is provided)
+ * - Legend click to isolate a single series (multi-series only)
+ * - "Open in Discover metrics" deep link
  *
  * @param title - Optional chart title
  * @param promqlQuery - PromQL query to execute
@@ -73,10 +87,18 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
   color,
   seriesLabel,
   resolution,
+  onTimeRangeChange,
+  showOpenInMetrics = true,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
   const [showChart, setShowChart] = useState(false);
+
+  // Cross-chart cursor sync bus (null when this chart is not inside a provider).
+  const cursorBus = useApmCursorBus();
+  // True while THIS chart is the one being hovered — so its own bus-subscribe
+  // callback ignores the broadcast (the native tooltip/axisPointer handles it).
+  const isLocalHoverRef = useRef(false);
 
   // Calculate time axis configuration based on time range
   const timeAxisConfig = useMemo(() => {
@@ -217,8 +239,8 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
             const formattedValue = formatTooltipValue
               ? formatTooltipValue(value, param.seriesName)
               : formatValue
-              ? formatValue(value)
-              : defaultFormatValue(value);
+                ? formatValue(value)
+                : defaultFormatValue(value);
 
             tooltip += `
               <div style="display: flex; align-items: center; justify-content: space-between; margin: 4px 0; min-width: 200px;">
@@ -264,6 +286,8 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
           color: euiThemeVars.euiColorDarkShade,
           fontSize: 11,
           formatter: timeAxisConfig.labelFormat,
+          // Drop colliding labels on long ranges instead of overprinting them.
+          hideOverlap: true,
         },
         splitLine: {
           show: false,
@@ -289,6 +313,13 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
           },
         },
       },
+      // Drag-to-select time brushing. `lineX` = a vertical band across the x-axis.
+      ...(onTimeRangeChange
+        ? {
+            brush: { toolbox: ['lineX'], xAxisIndex: 0 },
+            toolbox: { show: false },
+          }
+        : {}),
       series: series.map((s, index) =>
         createSeriesConfig(
           seriesLabel && series.length === 1 ? { ...s, name: seriesLabel } : s,
@@ -300,6 +331,15 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     };
 
     chartInstance.current.setOption(option, true);
+
+    // Put the chart into brush mode immediately so a drag selects without a toolbar.
+    if (onTimeRangeChange) {
+      chartInstance.current.dispatchAction({
+        type: 'takeGlobalCursor',
+        key: 'brush',
+        brushOption: { brushType: 'lineX', brushMode: 'single' },
+      });
+    }
   }, [
     series,
     isLoading,
@@ -311,6 +351,219 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     timeAxisConfig,
     color,
     seriesLabel,
+    onTimeRangeChange,
+  ]);
+
+  // Interaction wiring: brush → onTimeRangeChange, legend isolate, and synced
+  // crosshair. Re-binds whenever the chart is (re)built. The zrender overlay
+  // shapes survive setOption but not dispose, so they are recreated here.
+  useEffect(() => {
+    const inst = chartInstance.current;
+    if (!inst || !showChart || isLoading || error || series.length === 0) {
+      return;
+    }
+    const zr = inst.getZr();
+
+    // ---- Brush → time range (#2) ----
+    const onBrushEnd = (params: any) => {
+      const range = params?.areas?.[0]?.coordRange;
+      if (
+        range &&
+        range.length === 2 &&
+        range[0] != null &&
+        range[1] != null &&
+        onTimeRangeChange
+      ) {
+        onTimeRangeChange(new Date(range[0]).toISOString(), new Date(range[1]).toISOString());
+      }
+    };
+    if (onTimeRangeChange) {
+      inst.off('brushEnd');
+      inst.on('brushEnd', onBrushEnd);
+    }
+
+    // ---- Legend isolate on click (#7): hide others; re-click restores all ----
+    let isolated: string | null = null;
+    let applyingLegend = false;
+    const seriesNames = series.map((s, i) =>
+      seriesLabel && series.length === 1 ? seriesLabel : s.name || `series-${i}`
+    );
+    const onLegendChange = (params: any) => {
+      if (applyingLegend) return;
+      const clicked = params?.name;
+      if (!clicked) return;
+      applyingLegend = true;
+      if (isolated === clicked) {
+        // Re-clicked the isolated series → restore all.
+        seriesNames.forEach((n) => inst.dispatchAction({ type: 'legendSelect', name: n }));
+        isolated = null;
+      } else {
+        // Isolate the clicked series (hide every other).
+        seriesNames.forEach((n) =>
+          inst.dispatchAction({ type: n === clicked ? 'legendSelect' : 'legendUnSelect', name: n })
+        );
+        isolated = clicked;
+      }
+      applyingLegend = false;
+    };
+    if (showLegend && series.length > 1) {
+      inst.off('legendselectchanged');
+      inst.on('legendselectchanged', onLegendChange);
+    }
+
+    // ---- Synced crosshair (#3) ----
+    let unsubscribe: (() => void) | undefined;
+    let vLine: any;
+    let hLine: any;
+    let dots: any[] = [];
+
+    if (cursorBus) {
+      const lineColor = euiThemeVars.euiColorMediumShade;
+      vLine = new echarts.graphic.Line({
+        z: 100,
+        silent: true,
+        invisible: true,
+        style: { stroke: lineColor, lineWidth: 1, lineDash: [3, 3] },
+      });
+      hLine = new echarts.graphic.Line({
+        z: 100,
+        silent: true,
+        invisible: true,
+        style: { stroke: lineColor, lineWidth: 1, lineDash: [3, 3] },
+      });
+      zr.add(vLine);
+      zr.add(hLine);
+      dots = series.map((s, i) => {
+        const dot = new echarts.graphic.Circle({
+          z: 101,
+          silent: true,
+          invisible: true,
+          shape: { r: 3 },
+          style: {
+            fill: color || s.color || CHART_COLORS[i % CHART_COLORS.length],
+            stroke: euiThemeVars.euiColorEmptyShade,
+            lineWidth: 1,
+          },
+        });
+        zr.add(dot);
+        return dot;
+      });
+
+      const getGridRect = () => {
+        try {
+          // Grid coordinate rect handles containLabel:true automatically.
+          return (inst.getModel() as any).getComponent('grid', 0)?.coordinateSystem?.getRect();
+        } catch {
+          return undefined;
+        }
+      };
+
+      const hideOverlay = () => {
+        vLine.attr({ invisible: true });
+        hLine.attr({ invisible: true });
+        dots.forEach((d) => d.attr({ invisible: true }));
+      };
+
+      const showOverlay = (time: number, yRatio: number) => {
+        const rect = getGridRect();
+        if (!rect) return;
+        const x = inst.convertToPixel({ xAxisIndex: 0 }, time);
+        if (x == null || isNaN(x as number)) {
+          hideOverlay();
+          return;
+        }
+        vLine.attr({
+          invisible: false,
+          shape: { x1: x, y1: rect.y, x2: x, y2: rect.y + rect.height },
+        });
+        const hy = rect.y + Math.max(0, Math.min(1, yRatio)) * rect.height;
+        hLine.attr({
+          invisible: false,
+          shape: { x1: rect.x, y1: hy, x2: rect.x + rect.width, y2: hy },
+        });
+        // Place each series' dot at its nearest data point to `time`.
+        series.forEach((s, i) => {
+          const pts = s.data;
+          if (!pts || pts.length === 0) {
+            dots[i].attr({ invisible: true });
+            return;
+          }
+          let nearest = pts[0];
+          let best = Math.abs(pts[0].timestamp - time);
+          for (let k = 1; k < pts.length; k++) {
+            const diff = Math.abs(pts[k].timestamp - time);
+            if (diff < best) {
+              best = diff;
+              nearest = pts[k];
+            }
+          }
+          const px = inst.convertToPixel({ gridIndex: 0 }, [nearest.timestamp, nearest.value]) as
+            number[] | null;
+          if (px && !isNaN(px[0]) && !isNaN(px[1])) {
+            dots[i].attr({ invisible: false, shape: { cx: px[0], cy: px[1], r: 3 } });
+          } else {
+            dots[i].attr({ invisible: true });
+          }
+        });
+      };
+
+      // Publish this chart's hovered position; the native tooltip/axisPointer
+      // renders locally, so remote charts get only the overlay.
+      const onZrMouseMove = (e: any) => {
+        const rect = getGridRect();
+        if (!rect) return;
+        const x = e.offsetX;
+        const y = e.offsetY;
+        if (x < rect.x || x > rect.x + rect.width || y < rect.y || y > rect.y + rect.height) {
+          return;
+        }
+        const time = inst.convertFromPixel({ xAxisIndex: 0 }, x) as number;
+        const yRatio = (y - rect.y) / rect.height;
+        isLocalHoverRef.current = true;
+        cursorBus.publish({ time, yRatio });
+      };
+      const onGlobalOut = () => {
+        isLocalHoverRef.current = false;
+        cursorBus.publish(null);
+      };
+      zr.on('mousemove', onZrMouseMove);
+      zr.on('globalout', onGlobalOut);
+
+      unsubscribe = cursorBus.subscribe((state) => {
+        if (isLocalHoverRef.current) return; // hovered chart: native tooltip handles it
+        if (!state) {
+          hideOverlay();
+          if (!inst.isDisposed()) inst.dispatchAction({ type: 'hideTip' });
+          return;
+        }
+        if (!inst.isDisposed()) inst.dispatchAction({ type: 'hideTip' });
+        showOverlay(state.time, state.yRatio);
+      });
+    }
+
+    return () => {
+      if (inst.isDisposed()) return;
+      if (onTimeRangeChange) inst.off('brushEnd');
+      if (showLegend && series.length > 1) inst.off('legendselectchanged');
+      if (cursorBus) {
+        unsubscribe?.();
+        zr.off('mousemove');
+        zr.off('globalout');
+        if (vLine) zr.remove(vLine);
+        if (hLine) zr.remove(hLine);
+        dots.forEach((d) => zr.remove(d));
+      }
+    };
+  }, [
+    series,
+    showChart,
+    isLoading,
+    error,
+    cursorBus,
+    onTimeRangeChange,
+    showLegend,
+    seriesLabel,
+    color,
   ]);
 
   // Resize chart after it becomes visible (display: none → block transition)
@@ -340,14 +593,39 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const canOpenInMetrics =
+    showOpenInMetrics && Boolean(promqlQuery) && Boolean(prometheusConnectionId);
+  const openInMetricsLabel = i18n.translate('observability.apm.promqlLineChart.openInMetrics', {
+    defaultMessage: 'Open in Discover metrics',
+  });
+
   // Always render the same DOM structure to avoid React/ECharts DOM reconciliation conflicts
   return (
     <div
       className="promql-line-chart"
-      style={{ height }}
+      style={{ height, position: 'relative' }}
       data-test-subj={`lineChart-${title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed'}`}
     >
       {title && <h4 className="promql-line-chart__title">{title}</h4>}
+      {canOpenInMetrics && (
+        // Position the wrapper (not the button) so EuiToolTip's anchor span stays
+        // co-located with the icon and the tooltip doesn't detach to the corner.
+        <div className="promql-line-chart__open-metrics">
+          <EuiToolTip content={openInMetricsLabel} position="top">
+            <EuiButtonIcon
+              iconType="visAreaStacked"
+              size="xs"
+              aria-label={openInMetricsLabel}
+              data-test-subj={`openInMetrics-${
+                title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed'
+              }`}
+              onClick={() =>
+                navigateToExploreMetrics(promqlQuery, prometheusConnectionId, timeRange)
+              }
+            />
+          </EuiToolTip>
+        </div>
+      )}
       <div
         ref={chartRef}
         className="promql-line-chart__chart"
