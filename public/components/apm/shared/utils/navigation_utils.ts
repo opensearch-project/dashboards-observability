@@ -29,6 +29,35 @@ export interface NavigateToServiceDetailsOptions {
 }
 
 /**
+ * Opens the Explore "metrics" flavor (Discover metrics) in a new tab, pre-loaded
+ * with a PromQL query against the given Prometheus data connection and time range.
+ *
+ * Mirrors navigateToExploreTraces/navigateToExploreLogs: the _g/_q/_a rison is
+ * hand-built on the hash (no rison lib — the OSS Code-Diff-Analyzer blocks new
+ * deps). Contract (src/plugins/explore/.../utils/state_management/utils/redux_persistence.ts):
+ *  - dataset.id === the Prometheus data-connection `connectionId` (what APM stores
+ *    as config.prometheusDataSource.name / the prometheusConnectionId prop);
+ *  - `signalType:metrics` is mandatory or the dataset is discarded by the flavor;
+ *  - `ui.metricsPageMode:query` opens the query/visualization view.
+ */
+export function navigateToExploreMetrics(
+  promqlQuery: string,
+  connectionId: string,
+  timeRange: ServiceDetailsTimeRange
+): void {
+  const g = `_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
+  const dataset = `dataset:(id:'${connectionId}',title:'${connectionId}',type:PROMETHEUS,language:PROMQL,timeFieldName:Time,signalType:metrics,dataSource:(meta:()))`;
+  const q = `_q=(${dataset},language:PROMQL,query:'${encodeURIComponent(promqlQuery)}')`;
+  const a = `_a=(ui:(metricsPageMode:query),tab:(),legacy:())`;
+  const path = `metrics/#?${g}&${q}&${a}`;
+
+  const fullUrl =
+    coreRefs.http?.basePath.prepend(`/app/${EXPLORE_APP_ID}/${path}`) ||
+    `/app/${EXPLORE_APP_ID}/${path}`;
+  window.open(fullUrl, '_blank');
+}
+
+/**
  * Navigates to the service details page
  * Uses navigateToApp for workspace-aware navigation
  *

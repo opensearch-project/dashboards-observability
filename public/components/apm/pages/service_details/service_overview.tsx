@@ -50,6 +50,8 @@ export interface ServiceOverviewProps {
   prometheusConnectionId: string;
   serviceMapDataset: string;
   refreshTrigger?: number;
+  /** Brush selection on any chart zooms the whole page range. */
+  onTimeRangeChange?: (from: string, to: string) => void;
 }
 
 /**
@@ -71,6 +73,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   prometheusConnectionId,
   serviceMapDataset: _serviceMapDataset,
   refreshTrigger,
+  onTimeRangeChange,
 }) => {
   // State for latency percentile selector
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
@@ -369,6 +372,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               refreshTrigger={refreshTrigger}
               labelField="remoteService"
               resolution={RESOLUTION_LOW}
+              onTimeRangeChange={onTimeRangeChange}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -440,6 +444,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               formatValue={formatCount}
               refreshTrigger={refreshTrigger}
               labelField="operation"
+              onTimeRangeChange={onTimeRangeChange}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -505,6 +510,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               formatTooltipValue={formatPercentageValue}
               refreshTrigger={refreshTrigger}
               labelField="operation"
+              onTimeRangeChange={onTimeRangeChange}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -572,6 +578,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               formatTooltipValue={formatPercentageValue}
               refreshTrigger={refreshTrigger}
               labelField="operation"
+              onTimeRangeChange={onTimeRangeChange}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -637,6 +644,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               formatTooltipValue={formatPercentageValue}
               refreshTrigger={refreshTrigger}
               labelField="operation"
+              onTimeRangeChange={onTimeRangeChange}
             />
           </EuiPanel>
         </EuiFlexItem>
