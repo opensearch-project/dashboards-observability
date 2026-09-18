@@ -6,7 +6,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { SloDocument, SloLiveStatus } from '../../../../../../common/slo/slo_types';
-import { buildBudgetRemainingOption, SloBudgetRemainingChart } from '../slo_budget_remaining_chart';
+import {
+  buildBudgetRemainingOption,
+  deriveWindowDuration,
+  SloBudgetRemainingChart,
+} from '../slo_budget_remaining_chart';
 
 // Keep the chart DOM inert so we can assert on the hook output without
 // initialising ECharts (jsdom has no canvas and no ResizeObserver). The
@@ -41,9 +45,7 @@ jest.mock('@osd/ui-shared-deps/theme', () => ({
   },
 }));
 
-function makeSlo(
-  overrides: Partial<SloDocument['spec']> = {}
-): SloDocument & {
+function makeSlo(overrides: Partial<SloDocument['spec']> = {}): SloDocument & {
   liveStatus: SloLiveStatus;
 } {
   return {
@@ -110,7 +112,79 @@ const baseProps = {
   refreshTrigger: 0,
 };
 
+describe('deriveWindowDuration (M1)', () => {
+  it('returns the configured duration for rolling windows', () => {
+    expect(deriveWindowDuration({ type: 'rolling', duration: '28d' })).toBe('28d');
+    expect(deriveWindowDuration({ type: 'rolling', duration: '7d' })).toBe('7d');
+  });
+
+  it('maps calendar periods to an equivalent rolling range — never a hardcoded 30d', () => {
+    expect(deriveWindowDuration({ type: 'calendar', period: 'week', timezone: 'UTC' })).toBe('7d');
+    expect(deriveWindowDuration({ type: 'calendar', period: 'month', timezone: 'UTC' })).toBe(
+      '30d'
+    );
+    expect(deriveWindowDuration({ type: 'calendar', period: 'quarter', timezone: 'UTC' })).toBe(
+      '90d'
+    );
+  });
+});
+
 describe('buildBudgetRemainingOption', () => {
+  it('draws the exhausted (zero) reference line dashed, not solid, so it reads as an annotation (m1)', () => {
+    const opt = buildBudgetRemainingOption({
+      seriesName: 'obj-1',
+      data: [[1, 0.9]],
+      warningThreshold: undefined,
+      atZero: false,
+      tz: 'UTC',
+    });
+    const series = (opt.series as Array<Record<string, unknown>>)[0];
+    const markLine = series.markLine as { data: Array<Record<string, unknown>> };
+    const exhausted = markLine.data[0].lineStyle as { type: string };
+    expect(exhausted.type).toBe('dashed');
+  });
+
+  it('adds a redundant non-color cue (dashed line + marker) for the breached series (m2)', () => {
+    const breached = buildBudgetRemainingOption({
+      seriesName: 'obj-1',
+      data: [[1, 0]],
+      atZero: true,
+      tz: 'UTC',
+    });
+    const series = (breached.series as Array<Record<string, unknown>>)[0];
+    expect((series.lineStyle as { type: string }).type).toBe('dashed');
+    expect(series.symbol).toBe('triangle');
+
+    const healthy = buildBudgetRemainingOption({
+      seriesName: 'obj-1',
+      data: [[1, 0.9]],
+      atZero: false,
+      tz: 'UTC',
+    });
+    const healthySeries = (healthy.series as Array<Record<string, unknown>>)[0];
+    expect((healthySeries.lineStyle as { type: string }).type).toBe('solid');
+    expect(healthySeries.symbol).toBe('none');
+  });
+
+  it('tooltip labels the timezone and shows the delta versus the warning threshold (m3)', () => {
+    const opt = buildBudgetRemainingOption({
+      seriesName: 'obj-1',
+      data: [[0, 0.6]],
+      warningThreshold: { threshold: 0.5, severity: 'warning' },
+      atZero: false,
+      tz: 'UTC',
+    });
+    const tooltip = opt.tooltip as { formatter: (p: unknown) => string };
+    const html = tooltip.formatter([{ axisValue: 0, value: [0, 0.6] }]);
+    expect(html).toContain('UTC');
+    expect(html).toContain('vs warning threshold');
+    // Budget surfaces render at SLO_PRECISION.budget (2 decimals), matching the
+    // budget panel — so 0.6 reads "60.00%", not "60.0%".
+    expect(html).toContain('60.00%');
+    // 0.6 remaining is 10 points above the 0.5 warning threshold.
+    expect(html).toContain('+10.00%');
+  });
+
   it('renders warning-threshold markLine with severity label', () => {
     const opt = buildBudgetRemainingOption({
       seriesName: 'obj-1',
@@ -130,7 +204,8 @@ describe('buildBudgetRemainingOption', () => {
     expect(markLine.data[1].yAxis).toBe(0.5);
     const secondLabel = markLine.data[1].label as { formatter: string };
     expect(secondLabel.formatter).toContain('warning');
-    expect(secondLabel.formatter).toContain('50.0%');
+    // Budget precision (2 decimals) — matches the budget panel.
+    expect(secondLabel.formatter).toContain('50.00%');
   });
 
   it('omits the warning-threshold line when the spec has no budget warnings', () => {
@@ -261,6 +336,21 @@ describe('SloBudgetRemainingChart', () => {
       />
     );
     expect(screen.getByTestId('slosBudgetRemainingExhausted')).toBeInTheDocument();
+  });
+
+  it('describes a calendar-aligned SLO as calendar, not as a rolling 30-day window (M1)', () => {
+    mockUsePromQLChartData.mockReturnValue({
+      series: [{ name: 'obj-1', data: [{ timestamp: 1, value: 0.9 }], color: '#000' }],
+      latestValue: 0.9,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    const slo = makeSlo({ window: { type: 'calendar', period: 'week', timezone: 'UTC' } });
+    render(<SloBudgetRemainingChart slo={slo} objective={slo.spec.objectives[0]} {...baseProps} />);
+    expect(screen.getByText(/calendar-week/i)).toBeInTheDocument();
+    // The equivalent rolling range for a week is 7d — the old code hardcoded 30d.
+    expect(screen.getByText(/7d/)).toBeInTheDocument();
   });
 
   it('shows the unavailable callout when the SLI cannot produce a PromQL query', () => {
