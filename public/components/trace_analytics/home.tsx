@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable react-hooks/exhaustive-deps */
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { Toast } from '@elastic/eui/src/components/toast/global_toast_list';
@@ -32,6 +33,7 @@ import {
   TraceSettings,
   getAttributeFieldNames,
   getSpanIndices,
+  shouldFetchTraceData,
 } from './components/common/helper_functions';
 import { SearchBarProps } from './components/common/search_bar';
 import { ServiceView, Services } from './components/services';
@@ -145,13 +147,11 @@ export const Home = (props: HomeProps) => {
   const { chrome } = props;
   const isNavGroupEnabled = chrome.navGroup.getNavGroupEnabled();
 
-  const DataSourceMenu = props.dataSourceManagement?.ui?.getDataSourceMenu<
-    DataSourceSelectableConfig
-  >();
+  const DataSourceMenu =
+    props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceSelectableConfig>();
 
-  const DataSourceMenuView = props.dataSourceManagement?.ui?.getDataSourceMenu<
-    DataSourceViewConfig
-  >();
+  const DataSourceMenuView =
+    props.dataSourceManagement?.ui?.getDataSourceMenu<DataSourceViewConfig>();
 
   const onSelectedDataSource = (e) => {
     const dataConnectionId = e[0] ? e[0].id : undefined;
@@ -217,12 +217,15 @@ export const Home = (props: HomeProps) => {
   };
 
   useEffect(() => {
+    // Defer initial requests until a data source id has been resolved when MDS is enabled,
+    // otherwise the request is routed to a nonexistent local cluster ("No Living connections").
+    if (!shouldFetchTraceData(props.dataSourceEnabled, dataSourceMDSId[0].id)) return;
     handleJaegerIndicesExistRequest(props.http, setJaegerIndicesExist, dataSourceMDSId[0].id);
     // When datasource is loaded form the URL, the label is set to undefined
     if (dataSourceMDSId[0].id && dataSourceMDSId[0].label === undefined) {
       getDatasourceAttributes();
     }
-  }, [dataSourceMDSId]);
+  }, [dataSourceMDSId, props.dataSourceEnabled]);
 
   const modes = [
     { id: 'jaeger', title: 'Jaeger', 'data-test-subj': 'jaeger-mode' },
@@ -286,8 +289,12 @@ export const Home = (props: HomeProps) => {
   }, []);
 
   useEffect(() => {
-    if (mode === 'data_prepper') fetchAttributesFields();
-  }, [mode, dataSourceMDSId]);
+    if (
+      mode === 'data_prepper' &&
+      shouldFetchTraceData(props.dataSourceEnabled, dataSourceMDSId[0].id)
+    )
+      fetchAttributesFields();
+  }, [mode, dataSourceMDSId, props.dataSourceEnabled]);
 
   const serviceBreadcrumbs = [
     ...(!isNavGroupEnabled
@@ -460,7 +467,7 @@ export const Home = (props: HomeProps) => {
                     tracesTableMode={tracesTableMode}
                     setTracesTableMode={setTracesTableMode}
                     {...commonProps}
-                    mode={((traceMode as unknown) as TraceAnalyticsMode) || mode}
+                    mode={(traceMode as unknown as TraceAnalyticsMode) || mode}
                   />
                 </SideBarComponent>
               );
@@ -471,7 +478,7 @@ export const Home = (props: HomeProps) => {
                   chrome={props.chrome}
                   http={props.http}
                   traceId={decodeURIComponent(traceId)}
-                  mode={((traceMode as unknown) as TraceAnalyticsMode) || mode}
+                  mode={(traceMode as unknown as TraceAnalyticsMode) || mode}
                   dataSourceMDSId={dataSourceMDSId}
                   dataSourceManagement={props.dataSourceManagement}
                   setActionMenu={props.setActionMenu}
@@ -506,7 +513,7 @@ export const Home = (props: HomeProps) => {
                     toasts={toasts}
                     dataSourceMDSId={dataSourceMDSId}
                     {...commonProps}
-                    mode={((serviceMode as unknown) as TraceAnalyticsMode) || mode}
+                    mode={(serviceMode as unknown as TraceAnalyticsMode) || mode}
                   />
                 </SideBarComponent>
               );
@@ -515,7 +522,7 @@ export const Home = (props: HomeProps) => {
                 <ServiceView
                   serviceName={decodeURIComponent(serviceId)}
                   {...commonProps}
-                  mode={((serviceMode as unknown) as TraceAnalyticsMode) || mode}
+                  mode={(serviceMode as unknown as TraceAnalyticsMode) || mode}
                   addFilter={(filter: FilterType) => {
                     for (const addedFilter of filters) {
                       if (
