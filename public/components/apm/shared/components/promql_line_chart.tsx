@@ -608,17 +608,23 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     >
       {title && <h4 className="promql-line-chart__title">{title}</h4>}
       {canOpenInMetrics && (
-        <EuiToolTip content={openInMetricsLabel} position="top">
-          <EuiButtonIcon
-            className="promql-line-chart__open-metrics"
-            style={{ position: 'absolute', top: 0, right: 0, zIndex: 1 }}
-            iconType="lineChart"
-            size="xs"
-            aria-label={openInMetricsLabel}
-            data-test-subj={`openInMetrics-${title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed'}`}
-            onClick={() => navigateToExploreMetrics(promqlQuery, prometheusConnectionId, timeRange)}
-          />
-        </EuiToolTip>
+        // Position the wrapper (not the button) so EuiToolTip's anchor span stays
+        // co-located with the icon and the tooltip doesn't detach to the corner.
+        <div className="promql-line-chart__open-metrics">
+          <EuiToolTip content={openInMetricsLabel} position="top">
+            <EuiButtonIcon
+              iconType="stats"
+              size="xs"
+              aria-label={openInMetricsLabel}
+              data-test-subj={`openInMetrics-${
+                title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed'
+              }`}
+              onClick={() =>
+                navigateToExploreMetrics(promqlQuery, prometheusConnectionId, timeRange)
+              }
+            />
+          </EuiToolTip>
+        </div>
       )}
       <div
         ref={chartRef}

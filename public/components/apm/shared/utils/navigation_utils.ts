@@ -47,7 +47,17 @@ export function navigateToExploreMetrics(
 ): void {
   const g = `_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
   const dataset = `dataset:(id:'${connectionId}',title:'${connectionId}',type:PROMETHEUS,language:PROMQL,timeFieldName:Time,signalType:metrics,dataSource:(meta:()))`;
-  const q = `_q=(${dataset},language:PROMQL,query:'${encodeURIComponent(promqlQuery)}')`;
+  // The query lives inside a rison single-quoted string. Rison treats `!` and `'`
+  // as special (escape + string terminator), and encodeURIComponent leaves both
+  // raw — so a PromQL matcher like `remoteService!=""` would corrupt the rison and
+  // Explore drops the query. Collapse whitespace (multi-line PromQL), rison-escape
+  // `!`→`!!` then `'`→`!'` (order matters), and finally URL-encode for the hash.
+  const risonSafeQuery = promqlQuery
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/!/g, '!!')
+    .replace(/'/g, "!'");
+  const q = `_q=(${dataset},language:PROMQL,query:'${encodeURIComponent(risonSafeQuery)}')`;
   const a = `_a=(ui:(metricsPageMode:query),tab:(),legacy:())`;
   const path = `metrics/#?${g}&${q}&${a}`;
 
