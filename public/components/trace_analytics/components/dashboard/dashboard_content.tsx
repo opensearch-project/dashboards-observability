@@ -92,7 +92,7 @@ export function DashboardContent(props: DashboardProps) {
     if (
       !redirect &&
       (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)) &&
-      shouldFetchTraceData(props.dataSourceEnabled, dataSourceMDSId[0].id)
+      shouldFetchTraceData(props.dataSourceEnabled, dataSourceMDSId[0]?.id)
     )
       refresh();
   }, [
@@ -103,7 +103,8 @@ export function DashboardContent(props: DashboardProps) {
     redirect,
     mode,
     jaegerIndicesExist,
-    dataSourceMDSId,
+    props.dataSourceEnabled,
+    dataSourceMDSId[0]?.id,
   ]);
 
   const refresh = async () => {

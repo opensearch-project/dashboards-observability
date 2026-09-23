@@ -87,7 +87,7 @@ export function ServicesContent(props: ServicesProps) {
     if (
       !redirect &&
       (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)) &&
-      shouldFetchTraceData(props.dataSourceEnabled, dataSourceMDSId[0].id)
+      shouldFetchTraceData(props.dataSourceEnabled, dataSourceMDSId[0]?.id)
     )
       refresh(newFilteredService);
   }, [
@@ -99,7 +99,8 @@ export function ServicesContent(props: ServicesProps) {
     isServiceTrendEnabled,
     startTime,
     endTime,
-    props.dataSourceMDSId,
+    props.dataSourceEnabled,
+    props.dataSourceMDSId[0]?.id,
   ]);
 
   const refresh = (currService?: string, overrideQuery?: string) => {

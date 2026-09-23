@@ -46,6 +46,7 @@ import {
   filtersToDsl,
   generateServiceUrl,
   processTimeStamp,
+  shouldFetchTraceData,
 } from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { redirectToServiceLogs, redirectToServiceTraces } from '../common/redirection_helpers';
@@ -255,8 +256,16 @@ export function ServiceView(props: ServiceViewProps) {
   };
 
   useEffect(() => {
-    if (!redirect) refresh();
-  }, [props.startTime, props.endTime, props.serviceName, props.mode]);
+    if (!redirect && shouldFetchTraceData(props.dataSourceEnabled, props.dataSourceMDSId[0]?.id))
+      refresh();
+  }, [
+    props.startTime,
+    props.endTime,
+    props.serviceName,
+    props.mode,
+    props.dataSourceEnabled,
+    props.dataSourceMDSId[0]?.id,
+  ]);
 
   const serviceHeader = (
     <EuiText size="s">
