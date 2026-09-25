@@ -395,6 +395,9 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
         range.length === 2 &&
         range[0] != null &&
         range[1] != null &&
+        // A plain click (no drag) yields a zero-width [t, t] range; applying it
+        // would collapse the page's time range to an instant with no data.
+        range[0] !== range[1] &&
         onTimeRangeChange
       ) {
         // ECharts reports coordRange in drag order, so a right-to-left drag yields
@@ -404,7 +407,6 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
       }
     };
     if (onTimeRangeChange) {
-      inst.off('brushEnd');
       inst.on('brushEnd', onBrushEnd);
     }
 
@@ -430,12 +432,13 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
       applyingLegend = false;
     };
     if (showLegend && series.length > 1) {
-      inst.off('legendselectchanged');
       inst.on('legendselectchanged', onLegendChange);
     }
 
     // ---- Synced crosshair (#3) ----
     let unsubscribe: (() => void) | undefined;
+    let onZrMouseMove: ((e: ZRenderMouseEvent) => void) | undefined;
+    let onGlobalOut: (() => void) | undefined;
     let vLine: any;
     let hLine: any;
     let dots: any[] = [];
@@ -511,15 +514,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
             dots[i].attr({ invisible: true });
             return;
           }
-          let nearest = pts[0];
-          let best = Math.abs(pts[0].timestamp - time);
-          for (let k = 1; k < pts.length; k++) {
-            const diff = Math.abs(pts[k].timestamp - time);
-            if (diff < best) {
-              best = diff;
-              nearest = pts[k];
-            }
-          }
+          const nearest = findNearestPoint(pts, time);
           const px = inst.convertToPixel({ gridIndex: 0 }, [nearest.timestamp, nearest.value]) as
             number[] | null;
           if (px && !isNaN(px[0]) && !isNaN(px[1])) {
@@ -532,7 +527,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
 
       // Publish this chart's hovered position; the native tooltip/axisPointer
       // renders locally, so remote charts get only the overlay.
-      const onZrMouseMove = (e: ZRenderMouseEvent) => {
+      onZrMouseMove = (e: ZRenderMouseEvent) => {
         const rect = getGridRect();
         if (!rect) return;
         const x = e.offsetX;
@@ -552,7 +547,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
         isLocalHoverRef.current = true;
         cursorBus.publish({ time, yRatio });
       };
-      const onGlobalOut = () => {
+      onGlobalOut = () => {
         isLocalHoverRef.current = false;
         cursorBus.publish(null);
       };
@@ -573,12 +568,16 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
 
     return () => {
       if (inst.isDisposed()) return;
-      if (onTimeRangeChange) inst.off('brushEnd');
-      if (showLegend && series.length > 1) inst.off('legendselectchanged');
+      // Always pass the handler to off(): a bare off(event) removes EVERY listener
+      // for that event — including ECharts' own zrender mouse dispatch, which is
+      // bound once at init and never re-added on setOption, killing the native
+      // tooltip/axisPointer after the first refresh.
+      if (onTimeRangeChange) inst.off('brushEnd', onBrushEnd);
+      if (showLegend && series.length > 1) inst.off('legendselectchanged', onLegendChange);
       if (cursorBus) {
         unsubscribe?.();
-        zr.off('mousemove');
-        zr.off('globalout');
+        if (onZrMouseMove) zr.off('mousemove', onZrMouseMove);
+        if (onGlobalOut) zr.off('globalout', onGlobalOut);
         if (vLine) zr.remove(vLine);
         if (hLine) zr.remove(hLine);
         dots.forEach((d) => zr.remove(d));
@@ -755,6 +754,28 @@ function createSeriesConfig(
       },
     },
   };
+}
+
+/**
+ * Binary-search the point nearest to `time`. Prometheus range results are sorted
+ * by timestamp, so this keeps the per-mousemove crosshair cost at O(log n).
+ */
+export function findNearestPoint<T extends { timestamp: number }>(pts: T[], time: number): T {
+  let lo = 0;
+  let hi = pts.length - 1;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (pts[mid].timestamp < time) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+  // `lo` is the first point at/after `time`; its predecessor may be closer.
+  if (lo > 0 && Math.abs(pts[lo - 1].timestamp - time) <= Math.abs(pts[lo].timestamp - time)) {
+    return pts[lo - 1];
+  }
+  return pts[lo];
 }
 
 /**

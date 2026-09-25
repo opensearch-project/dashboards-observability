@@ -91,8 +91,9 @@ export function navigateToExploreMetrics(
   )},to:${encodeTimeRangeValueForG(timeRange.to)}))`;
   // connectionId lands inside rison single-quoted strings; a connection whose id
   // contains `'`/`!` would corrupt the rison and Explore would drop the dataset,
-  // opening with no data source — so rison-escape it exactly like the query.
-  const safeConnectionId = escapeRisonString(connectionId);
+  // opening with no data source — so rison-escape it exactly like the query, then
+  // URL-encode so a space/&/#/% in the id can't break the hash.
+  const safeConnectionId = encodeURIComponent(escapeRisonString(connectionId));
   const dataset = `dataset:(id:'${safeConnectionId}',title:'${safeConnectionId}',type:PROMETHEUS,language:PROMQL,timeFieldName:Time,signalType:metrics,dataSource:(meta:()))`;
   // The query lives inside a rison single-quoted string. Rison treats `!` and `'`
   // as special (escape + string terminator), and encodeURIComponent leaves both

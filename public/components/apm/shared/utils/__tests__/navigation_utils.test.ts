@@ -623,6 +623,15 @@ describe('navigateToExploreMetrics (open in Discover metrics)', () => {
     expect(url).toContain("id:'conn!!!'1'");
     expect(url).toContain("title:'conn!!!'1'");
   });
+
+  it('URL-encodes a connectionId containing URL-significant characters', () => {
+    navigateToExploreMetrics('up', 'my conn&x#1%', { from: 'now-15m', to: 'now' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain("id:'my%20conn%26x%231%25'");
+    expect(url).toContain("title:'my%20conn%26x%231%25'");
+    expect(url).not.toContain('my conn');
+  });
 });
 
 describe('openApmSettings (correlated dashboards, experimental)', () => {

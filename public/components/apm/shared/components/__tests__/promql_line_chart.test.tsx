@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { PromQLLineChart, PromQLLineChartProps } from '../promql_line_chart';
+import { PromQLLineChart, PromQLLineChartProps, findNearestPoint } from '../promql_line_chart';
 import { ChartSeriesData } from '../../../common/types/service_details_types';
 import { ApmCursorContext, createApmCursorBus } from '../../hooks/apm_cursor_context';
 import { navigateToExploreMetrics } from '../../utils/navigation_utils';
@@ -458,6 +458,23 @@ describe('PromQLLineChart', () => {
         new Date(1704067320000).toISOString()
       );
     });
+
+    it('ignores a zero-width brush (plain click, no drag)', () => {
+      const onTimeRangeChange = jest.fn();
+      mockUsePromQLChartData.mockReturnValue({
+        series: mockSeriesData,
+        isLoading: false,
+        error: null,
+      });
+
+      render(<PromQLLineChart {...defaultProps} onTimeRangeChange={onTimeRangeChange} />);
+
+      const brushEndCalls = mockOn.mock.calls.filter((c) => c[0] === 'brushEnd');
+      const handler = brushEndCalls[brushEndCalls.length - 1][1];
+      handler({ areas: [{ coordRange: [1704067200000, 1704067200000] }] });
+
+      expect(onTimeRangeChange).not.toHaveBeenCalled();
+    });
   });
 
   describe('legend isolate (#7)', () => {
@@ -590,6 +607,63 @@ describe('PromQLLineChart', () => {
       expect(mockZr.add).toHaveBeenCalled();
       expect(mockZr.on).toHaveBeenCalledWith('mousemove', expect.any(Function));
       expect(mockZr.on).toHaveBeenCalledWith('globalout', expect.any(Function));
+    });
+
+    it('only removes its own zrender handlers on re-bind, never ECharts internals', () => {
+      mockUsePromQLChartData.mockReturnValue({
+        series: mockSeriesData,
+        isLoading: false,
+        error: null,
+      });
+
+      const bus = createApmCursorBus();
+      const { rerender } = render(
+        <ApmCursorContext.Provider value={bus}>
+          <PromQLLineChart {...defaultProps} />
+        </ApmCursorContext.Provider>
+      );
+      const moveHandler = mockZr.on.mock.calls.find((c) => c[0] === 'mousemove')?.[1];
+      const outHandler = mockZr.on.mock.calls.find((c) => c[0] === 'globalout')?.[1];
+
+      // New series identity (a data refresh) re-runs the interaction effect.
+      mockUsePromQLChartData.mockReturnValue({
+        series: [...mockSeriesData],
+        isLoading: false,
+        error: null,
+      });
+      rerender(
+        <ApmCursorContext.Provider value={bus}>
+          <PromQLLineChart {...defaultProps} />
+        </ApmCursorContext.Provider>
+      );
+
+      // A bare off(event) would strip ECharts' own tooltip dispatch; every off
+      // must name the specific handler this component registered.
+      expect(mockZr.off).toHaveBeenCalledWith('mousemove', moveHandler);
+      expect(mockZr.off).toHaveBeenCalledWith('globalout', outHandler);
+      mockZr.off.mock.calls.forEach((c) => expect(c[1]).toEqual(expect.any(Function)));
+      mockOff.mock.calls.forEach((c) => expect(c[1]).toEqual(expect.any(Function)));
+    });
+  });
+
+  describe('findNearestPoint', () => {
+    const pts = [0, 10, 20, 30].map((timestamp) => ({ timestamp, value: timestamp }));
+
+    it.each([
+      [-5, 0],
+      [0, 0],
+      [4, 0],
+      [5, 0],
+      [6, 10],
+      [24, 20],
+      [30, 30],
+      [99, 30],
+    ])('time %p -> nearest timestamp %p', (time, expected) => {
+      expect(findNearestPoint(pts, time).timestamp).toBe(expected);
+    });
+
+    it('handles a single point', () => {
+      expect(findNearestPoint([{ timestamp: 7 }], 100).timestamp).toBe(7);
     });
   });
 
