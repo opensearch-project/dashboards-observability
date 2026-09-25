@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Traces } from '..';
 import { coreRefs } from '../../../../../framework/core_refs';
@@ -62,17 +62,26 @@ describe('TracesContent initial-fetch deferral (MDS)', () => {
     jest.clearAllMocks();
   });
 
+  // Flush the mount effects: the initial commit's passive effects, the setRedirect(false)
+  // re-render it triggers, and the resulting fetch effect. This makes the negative
+  // assertions below actually bite — if the guard were removed, the request would fire
+  // during this tick and the "not.toHaveBeenCalled()" checks would fail.
+  const flushEffects = async () => {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+  };
+
   it('does not fetch on first load while the data source id is unresolved (MDS enabled)', async () => {
     renderTraces({
       dataSourceEnabled: true,
       dataSourceMDSId: [{ id: undefined, label: undefined }],
     });
 
-    // Allow mount effects (including setRedirect(false)) to flush.
-    await waitFor(() => {
-      expect(handleServiceMapRequest).not.toHaveBeenCalled();
-    });
+    await flushEffects();
+
     expect(handleTracesRequest).not.toHaveBeenCalled();
+    expect(handleServiceMapRequest).not.toHaveBeenCalled();
   });
 
   it('fetches once the data source id resolves (MDS enabled)', async () => {
@@ -81,9 +90,8 @@ describe('TracesContent initial-fetch deferral (MDS)', () => {
       dataSourceMDSId: [{ id: undefined, label: undefined }],
     });
 
-    await waitFor(() => {
-      expect(handleTracesRequest).not.toHaveBeenCalled();
-    });
+    await flushEffects();
+    expect(handleTracesRequest).not.toHaveBeenCalled();
 
     const { http, chrome } = coreRefs;
     rerender(

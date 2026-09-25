@@ -587,6 +587,7 @@ export function ServiceView(props: ServiceViewProps) {
             serviceName={props.serviceName}
             mode={mode}
             dataSourceMDSId={props.dataSourceMDSId}
+            dataSourceEnabled={props.dataSourceEnabled}
             setStartTime={props.setStartTime}
             setEndTime={props.setEndTime}
             page={props.page}
