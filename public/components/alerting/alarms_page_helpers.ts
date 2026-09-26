@@ -282,9 +282,16 @@ export function formStateToRule(
  */
 export function extractPplValidationError(message: string): string | null {
   if (!message) return null;
-  const match = message.match(/PPL Query validation failed:\s*(.*)$/);
-  if (!match) return null;
-  return `PPL Query validation failed: ${match[1].trim()}`;
+  const validation = message.match(/PPL Query validation failed:\s*(.*)$/);
+  if (validation) return `PPL Query validation failed: ${validation[1].trim()}`;
+  // The backend is authoritative for the query-length cap
+  // (`plugins.alerting.ppl_monitor_max_query_length`, default 2000; a cluster
+  // may set it higher). Its message names the ACTUAL configured limit, e.g.
+  // "PPL Query length must be at most 2000 but was 2923" — surface it verbatim
+  // inline so users who raised the setting aren't blocked by a stale client cap.
+  const length = message.match(/PPL Query length must be at most \d+ but was \d+/i);
+  if (length) return length[0];
+  return null;
 }
 
 /**

@@ -91,6 +91,8 @@ function buildEditFormFromRule(rule: UnifiedRule, datasources: Datasource[]): Op
     actions: t.actions.map((a, ai) => {
       const action: PplActionForm = {
         ...a,
+        // Throttle comes from the seed (defaulted off / 10 min when the stored
+        // action has none, so older monitors round-trip cleanly).
         id: a.id || `ppl-action-${rule.id}-${idx}-${ai}`,
       };
       return action;
@@ -117,7 +119,13 @@ function buildEditFormFromRule(rule: UnifiedRule, datasources: Datasource[]): Op
     schedule: seed.schedule,
     pplTriggers,
     indices,
-    timeField: '',
+    // The seeder removes the plugin's look-back clause from the query (so the
+    // editor shows what the user wrote); its field becomes the query's Time
+    // field — the single anchor the clause is re-added on at save.
+    timeField: seed.lookbackTimestampField,
+    useLookBackWindow: seed.useLookBackWindow,
+    lookBackAmount: seed.lookBackAmount,
+    lookBackUnit: seed.lookBackUnit,
     monitorType: 'ppl_monitor',
     severity: rule.severity,
     datasourceId,

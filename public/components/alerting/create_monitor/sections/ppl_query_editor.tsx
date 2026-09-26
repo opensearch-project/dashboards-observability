@@ -16,7 +16,7 @@
  * datasources don't use. This editor's completion list is narrower but its
  * data model matches the rest of the alerting UI.
  */
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { monaco, PPLLang } from '@osd/monaco';
@@ -138,8 +138,14 @@ export interface PplQueryEditorProps {
   indices: string[];
   value: string;
   onChange: (value: string) => void;
-  /** Visual height. Defaults to a comfortable 5-line area. */
-  height?: number | string;
+  /**
+   * Minimum visual height. The editor auto-expands beyond this to fit the full
+   * query (so a large pasted query is visible without scrolling), up to
+   * `maxHeight`. Defaults to a comfortable ~5-line area.
+   */
+  height?: number;
+  /** Cap on the auto-expanded height before the editor starts scrolling. */
+  maxHeight?: number;
   /**
    * Server-reported PPL parse / validation error to render below the editor
    * (e.g. "PPL Query validation failed: [INVALID_KEYWORD] is not a valid
@@ -156,9 +162,19 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
   value,
   onChange,
   height = 140,
+  maxHeight = 480,
   serverError,
 }) => {
   const { fieldsByType, error: mappingsError } = useIndexMappings({ dsId, indices });
+
+  // Auto-expand: drive the container height from Monaco's content height so the
+  // full query is visible up to `maxHeight`, then scroll. Clamped to `height`
+  // as the floor so a short query keeps the comfortable default size.
+  const [computedHeight, setComputedHeight] = useState<number>(height);
+  const clampHeight = useCallback(
+    (contentHeight: number) => Math.min(Math.max(contentHeight, height), maxHeight),
+    [height, maxHeight]
+  );
 
   // Flatten field paths once per mappings change. Keeping leaf type alongside
   // the path lets the suggestion list render `field — date` style detail.
@@ -254,9 +270,16 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
   // Ensure `editorDidMount` is stable so the harness doesn't tear down /
   // re-create the editor each render. Re-attach focus listeners only.
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const editorDidMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    editorRef.current = editor;
-  }, []);
+  const editorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      editorRef.current = editor;
+      // Size to the initial content (e.g. a query pre-filled from Explore or an
+      // edited monitor) and keep in sync as the user types / pastes.
+      setComputedHeight(clampHeight(editor.getContentHeight()));
+      editor.onDidContentSizeChange((e) => setComputedHeight(clampHeight(e.contentHeight)));
+    },
+    [clampHeight]
+  );
 
   useEffect(() => {
     return () => {
@@ -289,7 +312,7 @@ export const PplQueryEditor: React.FC<PplQueryEditorProps> = ({
           languageId={PPLLang.ID}
           value={value}
           onChange={onChange}
-          height={height}
+          height={computedHeight}
           suggestionProvider={suggestionProvider}
           languageConfiguration={LANGUAGE_CONFIGURATION}
           options={EDITOR_OPTIONS}

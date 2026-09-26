@@ -15,6 +15,14 @@
 // PPL monitor transforms
 // ============================================================================
 
+import {
+  applyLookBackToQuery,
+  LookBackFields,
+  LookBackUnit,
+  parseLookBackFromQuery,
+} from './ppl_lookback';
+import { PPL_THROTTLE_DEFAULT_MINUTES, PPL_THROTTLE_MIN_MINUTES } from './validators';
+
 // Mirror of the PPL form-state types in
 // `public/components/alerting/create_monitor/create_monitor_types.ts`.
 // Duplicated because `common/` cannot import from `public/`.
@@ -24,6 +32,10 @@ export interface PplActionForm {
   destinationId: string;
   subject: string;
   message: string;
+  /** When true, the action fires at most once per `throttleValue` minutes. */
+  throttleEnabled?: boolean;
+  /** Throttle window in minutes (backend unit is always MINUTES). */
+  throttleValue?: number;
 }
 
 export interface PplTriggerForm {
@@ -37,7 +49,7 @@ export interface PplTriggerForm {
   actions: PplActionForm[];
 }
 
-export interface PplMonitorForm {
+export interface PplMonitorForm extends LookBackFields {
   name: string;
   enabled: boolean;
   query: string;
@@ -55,6 +67,24 @@ function buildPplActionPayload(action: PplActionForm): Record<string, unknown> {
   };
   if (action.subject && action.subject.trim() !== '') {
     out.subject_template = { source: action.subject };
+  }
+  // Throttle is opt-in. When enabled we emit the wire shape the alerting
+  // backend expects (`throttle_enabled` + `throttle: { value, unit }`, unit is
+  // always MINUTES). When disabled we still emit `throttle_enabled: false` so
+  // toggling it off on edit clears any previously stored throttle rather than
+  // leaving a stale one on the persisted action.
+  if (action.throttleEnabled) {
+    const value = Number(action.throttleValue);
+    out.throttle_enabled = true;
+    out.throttle = {
+      value:
+        Number.isFinite(value) && value >= PPL_THROTTLE_MIN_MINUTES
+          ? Math.floor(value)
+          : PPL_THROTTLE_DEFAULT_MINUTES,
+      unit: 'MINUTES',
+    };
+  } else {
+    out.throttle_enabled = false;
   }
   return out;
 }
@@ -113,6 +143,16 @@ function buildPplTriggerPayload(trigger: PplTriggerForm): Record<string, unknown
 
 /** Build a `POST /_plugins/_alerting/monitors` payload for a PPL monitor. */
 export function transformPplFormToPayload(form: PplMonitorForm): Record<string, unknown> {
+  // The look-back window is realized as a sliding `where` filter injected into
+  // the query itself. This is the ONLY durable record of the window: the
+  // alerting `ppl_monitor` type persists neither custom top-level fields nor
+  // `ui_metadata` (both are dropped by its parser), so we cannot stash metadata
+  // alongside. The clause is inserted when the window is enabled and the user's
+  // query is otherwise saved verbatim; the edit flyout reconstructs the window
+  // by parsing this clause back out (see `unifiedRuleToOsForm` /
+  // `parseLookBackFromQuery`).
+  const query = applyLookBackToQuery(form.query, form);
+
   return {
     type: 'monitor',
     monitor_type: 'ppl_monitor',
@@ -124,7 +164,7 @@ export function transformPplFormToPayload(form: PplMonitorForm): Record<string, 
     inputs: [
       {
         ppl_input: {
-          query: form.query,
+          query,
           query_language: 'ppl',
         },
       },
@@ -134,12 +174,27 @@ export function transformPplFormToPayload(form: PplMonitorForm): Record<string, 
 }
 
 /** Inverse of {@link transformPplFormToPayload} — used to seed the edit flyout. */
+/** A seeded action always carries its throttle settings (defaulted when absent). */
+export interface PplActionSeed extends PplActionForm {
+  throttleEnabled: boolean;
+  throttleValue: number;
+}
+
+export interface PplTriggerSeed extends PplTriggerForm {
+  actions: PplActionSeed[];
+}
+
+/** Every look-back field is resolved (off / 1 hour / no field when absent). */
 export interface OsPplFormSeed {
   name: string;
   enabled: boolean;
   query: string;
   schedule: { interval: number; unit: 'MINUTES' | 'HOURS' | 'DAYS' };
-  pplTriggers: PplTriggerForm[];
+  pplTriggers: PplTriggerSeed[];
+  useLookBackWindow: boolean;
+  lookBackAmount: number;
+  lookBackUnit: LookBackUnit;
+  lookbackTimestampField: string;
 }
 
 interface UnifiedRuleRawPplLike {
@@ -156,6 +211,8 @@ interface UnifiedRuleRawPplLike {
         destination_id?: string;
         message_template?: { source?: string };
         subject_template?: { source?: string };
+        throttle_enabled?: boolean;
+        throttle?: { value?: number; unit?: string };
       }>;
       type?: string;
       num_results_condition?: string;
@@ -176,7 +233,7 @@ export function unifiedRuleToOsForm(rule: {
   const raw = (rule.raw as UnifiedRuleRawPplLike) || {};
   const pplInput = raw.inputs?.[0]?.ppl_input;
   const period = raw.schedule?.period;
-  const triggers: PplTriggerForm[] = (raw.triggers || [])
+  const triggers: PplTriggerSeed[] = (raw.triggers || [])
     .map((t) => t.ppl_trigger)
     .filter((b): b is NonNullable<typeof b> => !!b)
     .map((b) => {
@@ -203,18 +260,39 @@ export function unifiedRuleToOsForm(rule: {
           destinationId: a.destination_id || '',
           subject: a.subject_template?.source || '',
           message: a.message_template?.source || '',
+          throttleEnabled: !!a.throttle_enabled,
+          throttleValue: Number.isFinite(a.throttle?.value)
+            ? Number(a.throttle?.value)
+            : PPL_THROTTLE_DEFAULT_MINUTES,
         })),
       };
     });
 
+  // Restore the look-back window from the stored query — `ppl_monitor` keeps no
+  // metadata slot, so the clause is the only record. Only the clause the
+  // plugin writes (first pipe segment, exact shape) is recognised and removed,
+  // so the editor shows what the user wrote; any hand-written time filter stays
+  // in the query verbatim and the window is simply off.
+  const rawQuery = pplInput?.query || '';
+  const parsed = parseLookBackFromQuery(rawQuery);
+  const useLookBackWindow = !!parsed;
+  const timestampField = parsed?.lookbackTimestampField || '';
+  const lookBackAmount = parsed?.lookBackAmount ?? 1;
+  const lookBackUnit: LookBackUnit = parsed?.lookBackUnit ?? 'hours';
+  const query = parsed ? parsed.queryWithoutLookBack : rawQuery;
+
   return {
     name: rule.name,
     enabled: rule.enabled,
-    query: pplInput?.query || '',
+    query,
     schedule: {
       interval: period?.interval ?? 1,
       unit: period?.unit ?? 'MINUTES',
     },
     pplTriggers: triggers.length > 0 ? triggers : [],
+    useLookBackWindow,
+    lookBackAmount,
+    lookBackUnit,
+    lookbackTimestampField: timestampField,
   };
 }

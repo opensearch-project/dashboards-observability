@@ -365,6 +365,11 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
       />
     </EuiFormRow>
   );
+  // Don't gate Save on query length: the alerting backend enforces
+  // `ppl_monitor_max_query_length` (which a cluster may raise) and is
+  // authoritative — blocking here on a hard-coded default would lock out users
+  // who increased it. An over-limit save is rejected by the backend with a
+  // clear, limit-naming error surfaced inline.
   const isValid =
     trimmedName !== '' &&
     activeForm.datasourceId !== '' &&
@@ -394,6 +399,10 @@ export const CreateMonitor: React.FC<CreateMonitorProps> = ({
         name: osForm.name,
         query: osForm.query,
         pplTriggers: osForm.pplTriggers,
+        useLookBackWindow: osForm.useLookBackWindow,
+        lookBackAmount: osForm.lookBackAmount,
+        lookBackUnit: osForm.lookBackUnit,
+        lookbackTimestampField: osForm.timeField,
       });
       if (!result.valid) {
         setValidationErrors(result.errors);
