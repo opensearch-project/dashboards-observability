@@ -119,4 +119,84 @@ describe('useIndexMappings', () => {
     // Result should remain initial — the late resolution must not flip state.
     expect(result.current.fieldsByType).toEqual({});
   });
+
+  describe('isStale', () => {
+    it('is true until the current selection has loaded, then false', async () => {
+      let resolve: (v: Record<string, string[]>) => void = () => {};
+      mockGetFieldsByType.mockImplementationOnce(
+        () => new Promise((r) => (resolve = r as typeof resolve))
+      );
+      const { result } = renderHook(() => useIndexMappings({ dsId: 'ds-1', indices: ['logs'] }));
+      expect(result.current.isStale).toBe(true);
+      resolve({ date: ['@timestamp'] });
+      await waitFor(() => expect(result.current.isStale).toBe(false));
+      expect(result.current.fieldsByType).toEqual({ date: ['@timestamp'] });
+    });
+
+    it('is true while a changed selection is still loading (old fields are stale)', async () => {
+      mockGetFieldsByType.mockResolvedValueOnce({ date: ['a_time'] });
+      const { result, rerender } = renderHook(
+        ({ indices }: { indices: string[] }) => useIndexMappings({ dsId: 'ds-1', indices }),
+        { initialProps: { indices: ['a'] } }
+      );
+      await waitFor(() => expect(result.current.isStale).toBe(false));
+      let resolve: (v: Record<string, string[]>) => void = () => {};
+      mockGetFieldsByType.mockImplementationOnce(
+        () => new Promise((r) => (resolve = r as typeof resolve))
+      );
+      rerender({ indices: ['b'] });
+      expect(result.current.isStale).toBe(true);
+      expect(result.current.fieldsByType).toEqual({ date: ['a_time'] });
+      resolve({ date: ['b_time'] });
+      await waitFor(() => expect(result.current.isStale).toBe(false));
+      expect(result.current.fieldsByType).toEqual({ date: ['b_time'] });
+    });
+
+    it('settles (not stale) after an error, with empty fields', async () => {
+      mockGetFieldsByType.mockRejectedValueOnce(new Error('boom'));
+      const { result } = renderHook(() => useIndexMappings({ dsId: 'ds-1', indices: ['logs'] }));
+      await waitFor(() => expect(result.current.error?.message).toBe('boom'));
+      expect(result.current.isStale).toBe(false);
+      expect(result.current.fieldsByType).toEqual({});
+    });
+
+    it('settles when the selection is cleared', async () => {
+      const { result } = renderHook(() => useIndexMappings({ dsId: 'ds-1', indices: [] }));
+      await waitFor(() => expect(result.current.isStale).toBe(false));
+    });
+  });
+
+  it('refetches when the same indices are re-selected after being cleared', async () => {
+    mockGetFieldsByType.mockResolvedValue({ date: ['@timestamp'] });
+    const { result, rerender } = renderHook(
+      ({ indices }: { indices: string[] }) => useIndexMappings({ dsId: 'ds-1', indices }),
+      { initialProps: { indices: ['logs'] } }
+    );
+    await waitFor(() => expect(result.current.fieldsByType).toEqual({ date: ['@timestamp'] }));
+    rerender({ indices: [] });
+    await waitFor(() => expect(result.current.fieldsByType).toEqual({}));
+    rerender({ indices: ['logs'] });
+    await waitFor(() => expect(result.current.fieldsByType).toEqual({ date: ['@timestamp'] }));
+    expect(result.current.isStale).toBe(false);
+    expect(mockGetFieldsByType).toHaveBeenCalledTimes(2);
+  });
+
+  it('wraps non-Error rejections into an Error', async () => {
+    mockGetFieldsByType.mockRejectedValueOnce('plain string failure');
+    const { result } = renderHook(() => useIndexMappings({ dsId: 'ds-1', indices: ['logs'] }));
+    await waitFor(() => expect(result.current.error).toBeInstanceOf(Error));
+    expect(result.current.error?.message).toBe('plain string failure');
+  });
+
+  it('does not write an error into state after unmount', async () => {
+    let reject: (e: unknown) => void = () => {};
+    mockGetFieldsByType.mockImplementationOnce(() => new Promise((_, r) => (reject = r)));
+    const { result, unmount } = renderHook(() =>
+      useIndexMappings({ dsId: 'ds-1', indices: ['logs'] })
+    );
+    unmount();
+    reject(new Error('late'));
+    await Promise.resolve();
+    expect(result.current.error).toBeNull();
+  });
 });

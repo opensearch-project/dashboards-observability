@@ -16,12 +16,24 @@ jest.mock('../hooks/use_rule_detail', () => ({
 jest.mock('../create_monitor', () => ({
   CreateMonitor: (props: Record<string, unknown>) => {
     const init = props.initialForm as
-      { name?: string; indices?: string[]; timeField?: string } | undefined;
+      | {
+          name?: string;
+          indices?: string[];
+          timeField?: string;
+          query?: string;
+          useLookBackWindow?: boolean;
+          lookBackAmount?: number;
+          lookBackUnit?: string;
+        }
+      | undefined;
     return (
       <div
         data-test-subj="createMonitorMock"
         data-mode={String(props.mode)}
         data-indices={(init?.indices ?? []).join(',')}
+        data-time-field={init?.timeField ?? ''}
+        data-query={init?.query ?? ''}
+        data-lookback={`${init?.useLookBackWindow}:${init?.lookBackAmount}:${init?.lookBackUnit}`}
       >
         mode={String(props.mode)}; name={init?.name ?? ''}
       </div>
@@ -131,6 +143,66 @@ describe('EditMonitor', () => {
     // The seeder parses `source = logs-*` out of the PPL query so the picker
     // round-trips the index list on edit.
     expect(mock.getAttribute('data-indices')).toBe('logs-*');
+  });
+
+  it('seeds the query Time field from a stored look-back filter and strips it', () => {
+    const rule = pplRule();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (rule.raw as any).inputs[0].ppl_input.query =
+      'source = logs-* | where time > DATE_SUB(NOW(), INTERVAL 30 MINUTE) | head 5';
+    useRuleDetailMock.mockReturnValue({ data: rule, isLoading: false, error: null });
+    render(
+      <EditMonitor
+        dsId="ds-os"
+        ruleId="rule-1"
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasources={[osDs]}
+      />
+    );
+    const mock = screen.getByTestId('createMonitorMock');
+    // One time field per query: the look-back anchor becomes the toolbar Time field.
+    expect(mock.getAttribute('data-time-field')).toBe('time');
+    expect(mock.getAttribute('data-query')).toBe('source = logs-* | head 5');
+    expect(mock.getAttribute('data-lookback')).toBe('true:30:minutes');
+  });
+
+  it('keeps a hand-written time filter verbatim (not mistaken for the look-back)', () => {
+    const rule = pplRule();
+    const q =
+      "source = logs-* | where time > DATE_SUB(NOW(), INTERVAL 1 HOUR) and level = 'E' | head 5";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (rule.raw as any).inputs[0].ppl_input.query = q;
+    useRuleDetailMock.mockReturnValue({ data: rule, isLoading: false, error: null });
+    render(
+      <EditMonitor
+        dsId="ds-os"
+        ruleId="rule-1"
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasources={[osDs]}
+      />
+    );
+    const mock = screen.getByTestId('createMonitorMock');
+    expect(mock.getAttribute('data-query')).toBe(q);
+    expect(mock.getAttribute('data-time-field')).toBe('');
+    expect(mock.getAttribute('data-lookback')?.startsWith('false:')).toBe(true);
+  });
+
+  it('leaves the Time field empty and look-back off when no filter is stored', () => {
+    useRuleDetailMock.mockReturnValue({ data: pplRule(), isLoading: false, error: null });
+    render(
+      <EditMonitor
+        dsId="ds-os"
+        ruleId="rule-1"
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasources={[osDs]}
+      />
+    );
+    const mock = screen.getByTestId('createMonitorMock');
+    expect(mock.getAttribute('data-time-field')).toBe('');
+    expect(mock.getAttribute('data-lookback')?.startsWith('false:')).toBe(true);
   });
 
   it('renders edit form for Prometheus rules', () => {
