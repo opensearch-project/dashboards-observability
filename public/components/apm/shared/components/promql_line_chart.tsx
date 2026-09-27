@@ -64,6 +64,13 @@ export interface PromQLLineChartProps {
    * time range pre-loaded. Default true.
    */
   showOpenInMetrics?: boolean;
+  /**
+   * Custom header row content (e.g. a title with a help tip and a percentile
+   * toggle). Rendered left of the "Open in Discover metrics" button so the
+   * chart's actions sit on the title line. Takes precedence over `title` for
+   * the visible header; `height` then covers the chart area only.
+   */
+  header?: React.ReactNode;
 }
 
 /**
@@ -105,6 +112,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
   resolution,
   onTimeRangeChange,
   showOpenInMetrics = true,
+  header,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
@@ -163,7 +171,8 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     return value.toFixed(2);
   };
 
-  const chartHeight = title ? height - 24 : height;
+  // A built-in `title` shares the fixed `height`; a custom `header` sits on top of it.
+  const chartHeight = title && !header ? height - 24 : height;
 
   // Initialize chart and handle loading/data updates
   // The chartRef div is always in the DOM to avoid React/ECharts DOM reconciliation conflicts
@@ -622,47 +631,53 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Only surface the button once the chart is actually showing data — otherwise the
-  // absolutely-positioned control overlays the error/empty placeholder and can
-  // intercept clicks in that corner.
-  const canOpenInMetrics =
-    showOpenInMetrics &&
-    Boolean(promqlQuery) &&
-    Boolean(prometheusConnectionId) &&
-    showChart &&
-    !isLoading &&
-    !error &&
-    series.length > 0;
+  const hasData = showChart && !isLoading && !error && series.length > 0;
+  const hasOpenInMetrics =
+    showOpenInMetrics && Boolean(promqlQuery) && Boolean(prometheusConnectionId);
   const openInMetricsLabel = i18n.translate('observability.apm.promqlLineChart.openInMetrics', {
     defaultMessage: 'Open in Discover metrics',
   });
+  const testSubjSuffix = title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed';
+  const headerContent =
+    header ?? (title ? <h4 className="promql-line-chart__title">{title}</h4> : null);
+
+  const renderOpenInMetricsButton = (isDisabled: boolean) => (
+    <EuiToolTip content={openInMetricsLabel} position="top">
+      <EuiButtonIcon
+        iconType="visAreaStacked"
+        size="xs"
+        aria-label={openInMetricsLabel}
+        isDisabled={isDisabled}
+        data-test-subj={`openInMetrics-${testSubjSuffix}`}
+        onClick={() => navigateToExploreMetrics(promqlQuery, prometheusConnectionId, timeRange)}
+      />
+    </EuiToolTip>
+  );
 
   // Always render the same DOM structure to avoid React/ECharts DOM reconciliation conflicts
   return (
     <div
       className="promql-line-chart"
-      style={{ height, position: 'relative' }}
-      data-test-subj={`lineChart-${title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed'}`}
+      style={{ height: header ? undefined : height, position: 'relative' }}
+      data-test-subj={`lineChart-${testSubjSuffix}`}
     >
-      {title && <h4 className="promql-line-chart__title">{title}</h4>}
-      {canOpenInMetrics && (
-        // Position the wrapper (not the button) so EuiToolTip's anchor span stays
-        // co-located with the icon and the tooltip doesn't detach to the corner.
-        <div className="promql-line-chart__open-metrics">
-          <EuiToolTip content={openInMetricsLabel} position="top">
-            <EuiButtonIcon
-              iconType="visAreaStacked"
-              size="xs"
-              aria-label={openInMetricsLabel}
-              data-test-subj={`openInMetrics-${
-                title?.replace(/\s+/g, '-').toLowerCase() || 'unnamed'
-              }`}
-              onClick={() =>
-                navigateToExploreMetrics(promqlQuery, prometheusConnectionId, timeRange)
-              }
-            />
-          </EuiToolTip>
+      {headerContent && (
+        // Chart actions live on the title line. The button is disabled (not hidden)
+        // until data loads so sibling header controls don't shift when it appears.
+        <div className="promql-line-chart__header">
+          <div className="promql-line-chart__header-content">{headerContent}</div>
+          {hasOpenInMetrics && (
+            <div className="promql-line-chart__header-actions">
+              {renderOpenInMetricsButton(!hasData)}
+            </div>
+          )}
         </div>
+      )}
+      {!headerContent && hasOpenInMetrics && hasData && (
+        // No header row: overlay top-right, shown only with data so it never covers
+        // the error/empty placeholder. Position the wrapper (not the button) so
+        // EuiToolTip's anchor span stays co-located with the icon.
+        <div className="promql-line-chart__open-metrics">{renderOpenInMetricsButton(false)}</div>
       )}
       <div
         ref={chartRef}
@@ -670,7 +685,10 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
         style={{ display: showChart ? 'block' : 'none', height: chartHeight }}
       />
       {error && (
-        <div className="promql-line-chart__error">
+        <div
+          className="promql-line-chart__error"
+          style={header ? { height: chartHeight } : undefined}
+        >
           <EuiIcon
             type={isResolutionExceeded ? 'iInCircle' : 'alert'}
             size="l"
@@ -694,7 +712,10 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
         </div>
       )}
       {!isLoading && !error && series.length === 0 && (
-        <div className="promql-line-chart__empty">
+        <div
+          className="promql-line-chart__empty"
+          style={header ? { height: chartHeight } : undefined}
+        >
           <EuiIcon
             type="visLine"
             size="l"

@@ -19,6 +19,26 @@
     margin: 0 0 8px 0;
   }
 
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    .promql-line-chart__title {
+      margin: 0;
+    }
+  }
+
+  &__header-content {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &__header-actions {
+    flex: 0 0 auto;
+  }
+
   &__open-metrics {
     position: absolute;
     top: 4px;

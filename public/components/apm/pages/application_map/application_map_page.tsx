@@ -357,6 +357,15 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     [setTimeRange]
   );
 
+  // Chart brush in the insights flyout: zoom the whole map's time range (map +
+  // flyout charts re-query). Charts report ISO-8601 start/end.
+  const handleChartTimeRangeChange = useCallback(
+    (from: string, to: string) => {
+      setTimeRange({ from, to });
+    },
+    [setTimeRange]
+  );
+
   // Handle refresh
   const handleRefresh = useCallback(() => {
     // Map refetches via the refreshTrigger prop; the metrics hook only exposes
@@ -799,6 +808,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
           onShowLogs={handleShowLogs}
           onShowDashboards={handleShowDashboards}
           refreshTrigger={refreshTrigger}
+          onTimeRangeChange={handleChartTimeRangeChange}
         />
       )}
 

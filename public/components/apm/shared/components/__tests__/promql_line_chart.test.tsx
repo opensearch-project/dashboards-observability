@@ -556,7 +556,7 @@ describe('PromQLLineChart', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('does not render the deep-link button while an error is showing', () => {
+    it('disables (not hides) the title-line button while an error is showing', () => {
       mockUsePromQLChartData.mockReturnValue({
         series: [],
         isLoading: false,
@@ -565,14 +565,13 @@ describe('PromQLLineChart', () => {
 
       const { container } = render(<PromQLLineChart {...defaultProps} title="Request Rate" />);
 
-      // The button is absolutely positioned; gating it on the loaded-with-data
-      // state keeps it from overlaying / intercepting clicks on the error state.
-      expect(
-        container.querySelector('[data-test-subj="openInMetrics-request-rate"]')
-      ).not.toBeInTheDocument();
+      // Kept in place (disabled) so sibling header controls don't shift when data loads.
+      const button = container.querySelector('[data-test-subj="openInMetrics-request-rate"]');
+      expect(button).toBeInTheDocument();
+      expect(button).toBeDisabled();
     });
 
-    it('does not render the deep-link button on the empty state', () => {
+    it('disables the title-line button on the empty state', () => {
       mockUsePromQLChartData.mockReturnValue({
         series: [],
         isLoading: false,
@@ -583,6 +582,40 @@ describe('PromQLLineChart', () => {
 
       expect(
         container.querySelector('[data-test-subj="openInMetrics-request-rate"]')
+      ).toBeDisabled();
+    });
+
+    it('renders the button in the same row as a custom header', () => {
+      mockUsePromQLChartData.mockReturnValue({
+        series: mockSeriesData,
+        isLoading: false,
+        error: null,
+      });
+
+      const { container, getByText } = render(
+        <PromQLLineChart {...defaultProps} header={<span>Latency by dependencies</span>} />
+      );
+
+      const headerRow = container.querySelector('.promql-line-chart__header');
+      expect(headerRow).toContainElement(getByText('Latency by dependencies'));
+      expect(headerRow).toContainElement(
+        container.querySelector('[data-test-subj="openInMetrics-unnamed"]') as HTMLElement
+      );
+      expect(container.querySelector('.promql-line-chart__open-metrics')).not.toBeInTheDocument();
+    });
+
+    it('hides the overlay button (no header) until the chart has data', () => {
+      mockUsePromQLChartData.mockReturnValue({
+        series: [],
+        isLoading: false,
+        error: new Error('boom'),
+      });
+
+      const { container } = render(<PromQLLineChart {...defaultProps} />);
+
+      // No header row → the button would overlay the error placeholder, so it stays hidden.
+      expect(
+        container.querySelector('[data-test-subj="openInMetrics-unnamed"]')
       ).not.toBeInTheDocument();
     });
   });

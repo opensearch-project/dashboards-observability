@@ -58,6 +58,11 @@ export interface ServiceDetailsPanelProps {
   // Optional, experimental: open correlated dashboards for this node's service.
   onShowDashboards?: (serviceName: string, environment: string) => void;
   refreshTrigger?: number;
+  /**
+   * When provided, drag-selecting on a metric chart zooms the page time range
+   * (ISO-8601 start/end), same as the service-details tabs.
+   */
+  onTimeRangeChange?: (from: string, to: string) => void;
 }
 
 /**
@@ -80,6 +85,7 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
   onShowLogs,
   onShowDashboards,
   refreshTrigger,
+  onTimeRangeChange,
 }) => {
   // One cursor bus for this flyout → its charts share a synced crosshair.
   const cursorBus = useMemo(() => createApmCursorBus(), []);
@@ -362,10 +368,12 @@ label_replace(
               >
                 {/* Requests Chart */}
                 <EuiPanel paddingSize="s" hasBorder>
-                  <EuiText size="xs">
-                    <strong>{i18nTexts.detailsPanel.requests}</strong>
-                  </EuiText>
                   <PromQLLineChart
+                    header={
+                      <EuiText size="xs">
+                        <strong>{i18nTexts.detailsPanel.requests}</strong>
+                      </EuiText>
+                    }
                     promqlQuery={requestsQuery}
                     timeRange={timeRange}
                     prometheusConnectionId={prometheusConnectionId}
@@ -374,6 +382,7 @@ label_replace(
                     showLegend={false}
                     formatValue={formatCount}
                     refreshTrigger={refreshTrigger}
+                    onTimeRangeChange={onTimeRangeChange}
                     color={APM_CONSTANTS.COLORS.THROUGHPUT}
                     seriesLabel={i18nTexts.detailsPanel.requests}
                   />
@@ -383,10 +392,12 @@ label_replace(
 
                 {/* Latency Chart (P99, P90, P50) */}
                 <EuiPanel paddingSize="s" hasBorder>
-                  <EuiText size="xs">
-                    <strong>{i18nTexts.detailsPanel.latency}</strong>
-                  </EuiText>
                   <PromQLLineChart
+                    header={
+                      <EuiText size="xs">
+                        <strong>{i18nTexts.detailsPanel.latency}</strong>
+                      </EuiText>
+                    }
                     promqlQuery={latencyQuery}
                     timeRange={timeRange}
                     prometheusConnectionId={prometheusConnectionId}
@@ -395,6 +406,7 @@ label_replace(
                     showLegend={true}
                     formatValue={formatLatency}
                     refreshTrigger={refreshTrigger}
+                    onTimeRangeChange={onTimeRangeChange}
                     labelField="percentile"
                   />
                 </EuiPanel>
@@ -403,10 +415,12 @@ label_replace(
 
                 {/* Faults (5xx) Chart */}
                 <EuiPanel paddingSize="s" hasBorder>
-                  <EuiText size="xs">
-                    <strong>{i18nTexts.detailsPanel.faults5xx}</strong>
-                  </EuiText>
                   <PromQLLineChart
+                    header={
+                      <EuiText size="xs">
+                        <strong>{i18nTexts.detailsPanel.faults5xx}</strong>
+                      </EuiText>
+                    }
                     promqlQuery={faultsQuery}
                     timeRange={timeRange}
                     prometheusConnectionId={prometheusConnectionId}
@@ -415,6 +429,7 @@ label_replace(
                     showLegend={false}
                     formatValue={formatCount}
                     refreshTrigger={refreshTrigger}
+                    onTimeRangeChange={onTimeRangeChange}
                     color={APM_CONSTANTS.COLORS.FAULT}
                     seriesLabel={i18nTexts.detailsPanel.faults5xx}
                   />
@@ -424,10 +439,12 @@ label_replace(
 
                 {/* Errors (4xx) Chart */}
                 <EuiPanel paddingSize="s" hasBorder>
-                  <EuiText size="xs">
-                    <strong>{i18nTexts.detailsPanel.errors4xx}</strong>
-                  </EuiText>
                   <PromQLLineChart
+                    header={
+                      <EuiText size="xs">
+                        <strong>{i18nTexts.detailsPanel.errors4xx}</strong>
+                      </EuiText>
+                    }
                     promqlQuery={errorsQuery}
                     timeRange={timeRange}
                     prometheusConnectionId={prometheusConnectionId}
@@ -436,6 +453,7 @@ label_replace(
                     showLegend={false}
                     formatValue={formatCount}
                     refreshTrigger={refreshTrigger}
+                    onTimeRangeChange={onTimeRangeChange}
                     color={APM_CONSTANTS.COLORS.WARNING}
                     seriesLabel={i18nTexts.detailsPanel.errors4xx}
                   />
