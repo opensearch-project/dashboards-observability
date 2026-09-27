@@ -138,10 +138,12 @@ describe('validatePplForm', () => {
     expect(validatePplForm(f).errors.query).toMatch(/required/i);
   });
 
-  it('rejects query above the cap', () => {
+  it('does NOT reject a long query client-side (backend enforces the real cap)', () => {
     const f = validPplForm();
-    f.query = 'a'.repeat(PPL_QUERY_MAX_LENGTH + 1);
-    expect(validatePplForm(f).errors.query).toMatch(/2000/);
+    f.query = 'source = idx | where ' + 'a'.repeat(PPL_QUERY_MAX_LENGTH + 1);
+    // A cluster may raise `ppl_monitor_max_query_length`; blocking here would
+    // lock out those users. The backend rejects with a limit-naming message.
+    expect(validatePplForm(f).errors.query).toBeUndefined();
   });
 
   it('rejects empty triggers list', () => {

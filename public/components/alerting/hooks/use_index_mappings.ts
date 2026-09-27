@@ -24,6 +24,12 @@ export interface UseIndexMappingsResult {
   fieldsByType: Record<string, string[]>;
   isLoading: boolean;
   error: Error | null;
+  /**
+   * True while `fieldsByType` still belongs to a previous ds/index selection
+   * (the fetch for the current one hasn't resolved yet). Consumers that act on
+   * the fields — e.g. auto-picking a time field — should wait until false.
+   */
+  isStale: boolean;
 }
 
 export function useIndexMappings({
@@ -34,6 +40,8 @@ export function useIndexMappings({
   const [fieldsByType, setFieldsByType] = useState<Record<string, string[]>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  // The cache key `fieldsByType` was loaded for ('' = nothing loaded yet).
+  const [loadedKey, setLoadedKey] = useState<string>('');
 
   // Sort the indices into a stable cache key so re-orders don't trigger a
   // refetch but actual additions/removals do.
@@ -53,6 +61,10 @@ export function useIndexMappings({
   useEffect(() => {
     if (!dsId || indicesRef.current.length === 0) {
       setFieldsByType({});
+      setLoadedKey(cacheKey);
+      // Forget the last fetched key: the fields were just cleared, so
+      // re-selecting the same indices must fetch again, not short-circuit.
+      lastKeyRef.current = '';
       return;
     }
     if (lastKeyRef.current === cacheKey) return;
@@ -64,9 +76,16 @@ export function useIndexMappings({
     (async () => {
       try {
         const result = await service.getFieldsByType(dsId, indicesRef.current);
-        if (!cancelled) setFieldsByType(result);
+        if (!cancelled) {
+          setFieldsByType(result);
+          setLoadedKey(cacheKey);
+        }
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e : new Error(String(e)));
+        if (!cancelled) {
+          setError(e instanceof Error ? e : new Error(String(e)));
+          setFieldsByType({});
+          setLoadedKey(cacheKey);
+        }
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -76,5 +95,5 @@ export function useIndexMappings({
     };
   }, [service, dsId, cacheKey]);
 
-  return { fieldsByType, isLoading, error };
+  return { fieldsByType, isLoading, error, isStale: loadedKey !== cacheKey };
 }
