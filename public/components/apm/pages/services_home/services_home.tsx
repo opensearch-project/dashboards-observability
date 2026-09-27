@@ -639,6 +639,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     services: (services || []).map((s) => ({
       serviceName: s.serviceName,
       environment: s.environment,
+      type: s.type,
     })),
     sparklineServices: visibleServices,
     startTime: parsedTimeRange.startTime,

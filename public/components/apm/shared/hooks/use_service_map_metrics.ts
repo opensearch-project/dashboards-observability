@@ -17,10 +17,14 @@ import {
   getQueryServiceMapDependencyFaults,
   getQueryServiceMapDependencyErrors,
 } from '../../query_services/query_requests/promql_queries';
+import { isDependencyType } from '../utils/platform_utils';
 
 export interface ServiceMapMetricParams {
-  /** Array of services with name and environment */
-  services: Array<{ serviceName: string; environment: string }>;
+  /**
+   * Array of services with name and environment. `type` (service / database /
+   * messaging / external) routes inferred dependency nodes to caller-derived metrics.
+   */
+  services: Array<{ serviceName: string; environment: string; type?: string }>;
   startTime: Date;
   endTime: Date;
 }
@@ -83,7 +87,8 @@ export const useServiceMapMetrics = (
   // Keyed on name+environment so an environment-only change still refetches
   // (nodes are identified by serviceName::environment).
   const servicesKey = useMemo(
-    () => params.services.map((s) => `${s.serviceName}::${s.environment}`).join('|'),
+    () =>
+      params.services.map((s) => `${s.serviceName}::${s.environment}::${s.type || ''}`).join('|'),
     [params.services]
   );
 
@@ -120,6 +125,9 @@ export const useServiceMapMetrics = (
         depFaults: getQueryServiceMapDependencyFaults(timeRange),
         depErrors: getQueryServiceMapDependencyErrors(timeRange),
       };
+      // Only query caller-derived series when the map has dependency nodes, so a
+      // service-only map (feature off / older data) issues exactly the service queries.
+      const hasDependencyNodes = params.services.some((s) => isDependencyType(s.type));
 
       const runQuery = (query: string) =>
         promqlService.executeInstantQuery({
@@ -140,15 +148,20 @@ export const useServiceMapMetrics = (
         runQuery(queries.throughput),
         runQuery(queries.faults),
         runQuery(queries.errors),
-        runQuery(queries.depThroughput),
-        runQuery(queries.depFaults),
-        runQuery(queries.depErrors),
+        ...(hasDependencyNodes
+          ? [
+              runQuery(queries.depThroughput),
+              runQuery(queries.depFaults),
+              runQuery(queries.depErrors),
+            ]
+          : []),
       ]);
 
       // Drop stale results if params changed while this fetch was in flight.
       if (abortController.signal.aborted) return;
 
-      const valueOf = (r: PromiseSettledResult<any>) => (r.status === 'fulfilled' ? r.value : null);
+      const valueOf = (r: PromiseSettledResult<any> | undefined) =>
+        r?.status === 'fulfilled' ? r.value : null;
       const throughputResp = valueOf(throughputResult);
       const faultsResp = valueOf(faultsResult);
       const errorsResp = valueOf(errorsResult);
@@ -159,23 +172,28 @@ export const useServiceMapMetrics = (
       // Build metrics map for each service
       const newMap = new Map<string, ServiceMapNodeMetrics>();
 
-      params.services.forEach(({ serviceName, environment }) => {
+      params.services.forEach(({ serviceName, environment, type }) => {
         const nodeId = `${serviceName}::${environment}`;
 
-        let throughputData = extractServiceData(throughputResp, serviceName, environment);
-        let faultsData = extractServiceData(faultsResp, serviceName, environment);
-        let errorsData = extractServiceData(errorsResp, serviceName, environment);
-
         // Dependency nodes (database / messaging / external) have no SERVER-span
-        // metrics; fall back to their client-side series (relabeled to service/environment).
-        if (throughputData.length === 0) {
-          const depThroughput = extractServiceData(depThroughputResp, serviceName, environment);
-          if (depThroughput.length > 0) {
-            throughputData = depThroughput;
-            faultsData = extractServiceData(depFaultsResp, serviceName, environment);
-            errorsData = extractServiceData(depErrorsResp, serviceName, environment);
-          }
-        }
+        // metrics; they use their client-side series (relabeled to service/environment).
+        // Service nodes keep the SERVER-span series only.
+        const isDependency = isDependencyType(type);
+        const throughputData = extractServiceData(
+          isDependency ? depThroughputResp : throughputResp,
+          serviceName,
+          environment
+        );
+        const faultsData = extractServiceData(
+          isDependency ? depFaultsResp : faultsResp,
+          serviceName,
+          environment
+        );
+        const errorsData = extractServiceData(
+          isDependency ? depErrorsResp : errorsResp,
+          serviceName,
+          environment
+        );
 
         // Calculate totals and failure ratio client-side
         const totalRequests = calculateSum(throughputData);
@@ -214,7 +232,7 @@ export const useServiceMapMetrics = (
         depThroughputResult,
         depFaultsResult,
         depErrorsResult,
-      ].find((r) => r.status === 'rejected') as PromiseRejectedResult | undefined;
+      ].find((r) => r?.status === 'rejected') as PromiseRejectedResult | undefined;
       if (rejected) {
         console.error('[useServiceMapMetrics] Partial failure fetching metrics:', rejected.reason);
         setError(rejected.reason instanceof Error ? rejected.reason : new Error('Unknown error'));

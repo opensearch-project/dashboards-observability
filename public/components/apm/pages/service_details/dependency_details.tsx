@@ -24,6 +24,7 @@ import { RESOLUTION_LOW, formatPrometheusDuration } from '../../shared/utils/ste
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { PPLSearchService } from '../../query_services/ppl_search_service';
 import { getNodeTypeLabel } from '../../shared/utils/platform_utils';
+import { parseTimeRange } from '../../shared/utils/time_utils';
 import { APM_CONSTANTS } from '../../common/constants';
 import { formatCount, formatPercentageValue, formatLatency } from '../../common/format_utils';
 import {
@@ -36,6 +37,12 @@ import {
   getQueryDependencyLatencyP99Card,
   getQueryDependencyCallers,
 } from '../../query_services/query_requests/promql_queries';
+import {
+  buildDependencySpanCondition,
+  flattenDependencyAttributes,
+  getQueryDependencyAttributes,
+  getQueryDependencySpans,
+} from '../../query_services/query_requests/ppl_queries';
 
 export interface DependencyDetailsProps {
   dependencyName: string;
@@ -61,42 +68,6 @@ interface SpanRow {
 }
 
 const CHART_HEIGHT = 200;
-
-const escPpl = (s: string): string => s.replace(/'/g, "''");
-
-/**
- * Build the PPL `where` clause that selects the caller spans targeting this
- * dependency. A dependency emits no spans of its own, so these are the callers'
- * CLIENT/PRODUCER/CONSUMER spans identified by dependency attributes (mirrors how
- * the node was synthesized). Field names verified against the trace index.
- */
-function buildDependencySpanWhere(nodeType: string, name: string): string | null {
-  if (!name) return null;
-  const hostOf = (n: string): string => (n.includes(':') ? n.slice(0, n.lastIndexOf(':')) : n);
-
-  if (nodeType === 'messaging') {
-    // name = "{system}:{destination}"
-    const idx = name.indexOf(':');
-    const destination = idx >= 0 ? name.slice(idx + 1) : name;
-    return `where attributes.messaging.destination.name = '${escPpl(destination)}'`;
-  }
-  if (nodeType === 'database') {
-    if (name.includes(':')) {
-      const host = hostOf(name);
-      return `where attributes.server.address = '${escPpl(host)}' or attributes.net.peer.name = '${escPpl(
-        host
-      )}'`;
-    }
-    return `where attributes.db_system_name = '${escPpl(name)}' or attributes.db_system = '${escPpl(
-      name
-    )}' or attributes.db.system.name = '${escPpl(name)}'`;
-  }
-  // external
-  const host = hostOf(name);
-  return `where attributes.server.address = '${escPpl(host)}' or attributes.net.peer.name = '${escPpl(
-    host
-  )}' or attributes.peer.service = '${escPpl(name)}'`;
-}
 
 /**
  * DependencyDetails - tailored detail page for inferred dependency nodes
@@ -163,26 +134,73 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
   }, [promqlService, environment, dependencyName, timeRangeSeconds, refreshTrigger]);
 
   // Fetch the caller spans that target this dependency (it emits none of its own),
-  // filtered by the dependency's identifying attributes.
+  // matched on the node's dependencyAttributes from the service map (falling back to
+  // the node name for older documents) within the selected time range.
   useEffect(() => {
     const tracesDataset = config?.tracesDataset;
-    const where = buildDependencySpanWhere(nodeType, dependencyName);
-    if (!tracesDataset || !where) {
+    if (!tracesDataset || !dependencyName) {
       setSpans([]);
       return;
     }
+    const serviceMapDataset = config?.serviceMapDataset;
+    const toDataset = (ds: { id: string; title: string; datasourceId?: string }) => ({
+      id: ds.id,
+      title: ds.title,
+      ...(ds.datasourceId && { dataSource: { id: ds.datasourceId, type: 'DATA_SOURCE' } }),
+    });
     let cancelled = false;
     const fetchSpans = async () => {
       setSpansLoading(true);
       try {
         const pplService = new PPLSearchService();
-        const dataset = {
-          id: tracesDataset.id,
-          title: tracesDataset.title,
-          dataSource: tracesDataset.datasourceId ? { id: tracesDataset.datasourceId } : undefined,
+        const { startTime, endTime } = parseTimeRange(timeRange);
+
+        let attributes: Record<string, string> = {};
+        if (serviceMapDataset) {
+          try {
+            const attrResp = await pplService.executeQuery(
+              getQueryDependencyAttributes(
+                serviceMapDataset.title,
+                dependencyName,
+                environment,
+                startTime,
+                endTime
+              ),
+              toDataset(serviceMapDataset)
+            );
+            attributes = flattenDependencyAttributes(
+              attrResp.jsonData?.[0]?.['targetNode.dependencyAttributes']
+            );
+          } catch (_e) {
+            // Older service-map data has no dependencyAttributes; parse the name instead.
+            attributes = {};
+          }
+        }
+        if (cancelled) return;
+
+        const spansQuery = (includeLegacyDbSystem: boolean) => {
+          const condition = buildDependencySpanCondition(nodeType, dependencyName, attributes, {
+            includeLegacyDbSystem,
+          });
+          return condition
+            ? getQueryDependencySpans(tracesDataset.title, condition, startTime, endTime)
+            : null;
         };
-        const query = `source=${dataset.title} | ${where} | sort - startTime | head 50`;
-        const resp = await pplService.executeQuery(query, dataset);
+        const query = spansQuery(true);
+        if (!query) {
+          setSpans([]);
+          return;
+        }
+        let resp;
+        try {
+          resp = await pplService.executeQuery(query, toDataset(tracesDataset));
+        } catch (e) {
+          // Legacy `db.system` is an object where `db.system.name` is mapped, which PPL
+          // rejects; retry without it.
+          const fallback = spansQuery(false);
+          if (!fallback || fallback === query) throw e;
+          resp = await pplService.executeQuery(fallback, toDataset(tracesDataset));
+        }
         if (cancelled) return;
         const rows: SpanRow[] = (resp.jsonData || []).map((item: any, idx: number) => ({
           spanId: item.spanId || `span-${idx}`,
@@ -206,7 +224,9 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [config, nodeType, dependencyName, timeRangeSeconds, refreshTrigger]);
+    // timeRange is keyed on its from/to strings so a re-created object does not refetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config, nodeType, dependencyName, environment, timeRange.from, timeRange.to, refreshTrigger]);
 
   const requestsQuery = getQueryDependencyRequests(environment, dependencyName, chartStepWindow);
   const faultsQuery = getQueryDependencyFaults(environment, dependencyName, chartStepWindow);

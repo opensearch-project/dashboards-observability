@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPlatformTypeFromEnvironment } from '../../shared/utils/platform_utils';
+import {
+  getPlatformTypeFromEnvironment,
+  isDependencyType,
+} from '../../shared/utils/platform_utils';
 
 /**
  * Generic response processor for transforming query responses (PPL, PromQL)
@@ -392,8 +395,12 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
     }
 
     // Suppress unresolved dependency placeholders: these are CLIENT spans whose remote
-    // target could not be identified, and add only noise to the catalog.
-    if (serviceName === 'UnknownRemoteService' || serviceName === 'unknown') {
+    // target could not be identified, and add only noise to the catalog. Scoped to
+    // dependency nodes so a real service with such a name is still listed.
+    if (
+      isDependencyType(nodeType) &&
+      (serviceName === 'UnknownRemoteService' || serviceName === 'unknown')
+    ) {
       return;
     }
 

@@ -156,9 +156,13 @@ export const useServicesRedMetrics = (
   // Stable key over the service set, used only to retrigger fetches when the
   // set changes (the query itself no longer depends on the list).
   const servicesKey = useMemo(
-    () => params.services.map((s) => s.serviceName).join('|'),
+    () => params.services.map((s) => `${s.serviceName}::${s.type || ''}`).join('|'),
     [params.services]
   );
+  // Caller-derived (remoteService=) queries run only when the catalog has
+  // dependency rows, so a service-only catalog (feature off / older data)
+  // issues exactly the service queries.
+  const hasDependencyRows = params.services.some((s) => isDependencyType(s.type));
 
   // Unique service names on the visible page — used to build the bounded
   // `service=~"..."` range filter (grouped by (environment, service), so one
@@ -205,28 +209,19 @@ export const useServicesRedMetrics = (
       const depTotalQuery = getQueryServiceMapDependencyThroughput(timeRangeDuration);
       const depFailureRatioQuery = getQueryServiceMapDependencyFailureRatioTotal(timeRangeDuration);
 
+      const runInstant = (query: string) =>
+        promqlService.executeInstantQuery({
+          query,
+          time: endTimeSec,
+          signal: abortController.signal,
+        });
       const [totalResult, failureRatioTotalResult, depTotalResult, depFailureRatioResult] =
         await Promise.allSettled([
-          promqlService.executeInstantQuery({
-            query: totalQuery,
-            time: endTimeSec,
-            signal: abortController.signal,
-          }),
-          promqlService.executeInstantQuery({
-            query: failureRatioTotalQuery,
-            time: endTimeSec,
-            signal: abortController.signal,
-          }),
-          promqlService.executeInstantQuery({
-            query: depTotalQuery,
-            time: endTimeSec,
-            signal: abortController.signal,
-          }),
-          promqlService.executeInstantQuery({
-            query: depFailureRatioQuery,
-            time: endTimeSec,
-            signal: abortController.signal,
-          }),
+          runInstant(totalQuery),
+          runInstant(failureRatioTotalQuery),
+          ...(hasDependencyRows
+            ? [runInstant(depTotalQuery), runInstant(depFailureRatioQuery)]
+            : []),
         ]);
 
       // Drop stale results if params changed while this fetch was in flight.
@@ -235,38 +230,40 @@ export const useServicesRedMetrics = (
       const totalResp = totalResult.status === 'fulfilled' ? totalResult.value : null;
       const failureRatioTotalResp =
         failureRatioTotalResult.status === 'fulfilled' ? failureRatioTotalResult.value : null;
-      const depTotalResp = depTotalResult.status === 'fulfilled' ? depTotalResult.value : null;
+      const depTotalResp = depTotalResult?.status === 'fulfilled' ? depTotalResult.value : null;
       const depFailureRatioResp =
-        depFailureRatioResult.status === 'fulfilled' ? depFailureRatioResult.value : null;
+        depFailureRatioResult?.status === 'fulfilled' ? depFailureRatioResult.value : null;
 
       const newTotalMap = new Map<string, number>();
       const newFailureRatioInstantMap = new Map<string, number>();
-      params.services.forEach(({ serviceName, environment }) => {
+      params.services.forEach(({ serviceName, environment, type }) => {
         const key = serviceNodeKey(serviceName, environment);
-        const data = extractServiceData(totalResp, serviceName, environment);
-        let total = data.length > 0 ? data[0].value : 0;
-        let frValue = 0;
-        const frData = extractServiceData(failureRatioTotalResp, serviceName, environment);
-        if (frData.length > 0) frValue = frData[0].value;
-        // Fall back to caller-derived metrics for dependency nodes (no server data).
-        if (total === 0) {
-          const depData = extractServiceData(depTotalResp, serviceName, environment);
-          if (depData.length > 0) {
-            total = depData[0].value;
-            const depFr = extractServiceData(depFailureRatioResp, serviceName, environment);
-            frValue = depFr.length > 0 ? depFr[0].value : frValue;
-          }
-        }
-        newTotalMap.set(key, total);
-        newFailureRatioInstantMap.set(key, frValue);
+        // Dependency rows use caller-derived metrics (they have no server data);
+        // service rows keep the SERVER-span series only.
+        const isDependency = isDependencyType(type);
+        const data = extractServiceData(
+          isDependency ? depTotalResp : totalResp,
+          serviceName,
+          environment
+        );
+        newTotalMap.set(key, data.length > 0 ? data[0].value : 0);
+        const frData = extractServiceData(
+          isDependency ? depFailureRatioResp : failureRatioTotalResp,
+          serviceName,
+          environment
+        );
+        newFailureRatioInstantMap.set(key, frData.length > 0 ? frData[0].value : 0);
       });
 
       setTotalCountMap(newTotalMap);
       setFailureRatioInstantMap(newFailureRatioInstantMap);
 
-      const rejected = [totalResult, failureRatioTotalResult].find(
-        (r) => r.status === 'rejected'
-      ) as PromiseRejectedResult | undefined;
+      const rejected = [
+        totalResult,
+        failureRatioTotalResult,
+        depTotalResult,
+        depFailureRatioResult,
+      ].find((r) => r?.status === 'rejected') as PromiseRejectedResult | undefined;
       if (rejected) {
         console.error(
           '[useServicesRedMetrics] Partial failure fetching instant metrics:',
@@ -315,17 +312,15 @@ export const useServicesRedMetrics = (
         timeRangeDuration
       );
 
+      const runInstant = (query: string) =>
+        promqlService.executeInstantQuery({
+          query,
+          time: endTimeSec,
+          signal: abortController.signal,
+        });
       const [latencyInstantResult, depLatencyResult] = await Promise.allSettled([
-        promqlService.executeInstantQuery({
-          query: latencyInstantQuery,
-          time: endTimeSec,
-          signal: abortController.signal,
-        }),
-        promqlService.executeInstantQuery({
-          query: depLatencyQuery,
-          time: endTimeSec,
-          signal: abortController.signal,
-        }),
+        runInstant(latencyInstantQuery),
+        ...(hasDependencyRows ? [runInstant(depLatencyQuery)] : []),
       ]);
 
       if (abortController.signal.aborted) return;
@@ -333,30 +328,32 @@ export const useServicesRedMetrics = (
       const latencyInstantResp =
         latencyInstantResult.status === 'fulfilled' ? latencyInstantResult.value : null;
       const depLatencyResp =
-        depLatencyResult.status === 'fulfilled' ? depLatencyResult.value : null;
+        depLatencyResult?.status === 'fulfilled' ? depLatencyResult.value : null;
 
       const newInstantMap = new Map<string, number>();
-      params.services.forEach(({ serviceName, environment }) => {
+      params.services.forEach(({ serviceName, environment, type }) => {
         const key = serviceNodeKey(serviceName, environment);
-        const data = extractServiceData(latencyInstantResp, serviceName, environment);
-        let value = data.length > 0 ? data[0].value : 0;
-        if (value === 0) {
-          const depData = extractServiceData(depLatencyResp, serviceName, environment);
-          if (depData.length > 0) value = depData[0].value;
-        }
-        newInstantMap.set(key, value);
+        const data = extractServiceData(
+          isDependencyType(type) ? depLatencyResp : latencyInstantResp,
+          serviceName,
+          environment
+        );
+        newInstantMap.set(key, data.length > 0 ? data[0].value : 0);
       });
 
       setLatencyInstantMap(newInstantMap);
 
-      if (latencyInstantResult.status === 'rejected') {
+      const latencyRejected = [latencyInstantResult, depLatencyResult].find(
+        (r) => r?.status === 'rejected'
+      ) as PromiseRejectedResult | undefined;
+      if (latencyRejected) {
         console.error(
           '[useServicesRedMetrics] Partial failure fetching latency metrics:',
-          latencyInstantResult.reason
+          latencyRejected.reason
         );
         setLatencyError(
-          latencyInstantResult.reason instanceof Error
-            ? latencyInstantResult.reason
+          latencyRejected.reason instanceof Error
+            ? latencyRejected.reason
             : new Error('Unknown error')
         );
       }

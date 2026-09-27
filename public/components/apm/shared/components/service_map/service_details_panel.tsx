@@ -46,6 +46,7 @@ import {
   getQueryDependencyLatency,
 } from '../../../query_services/query_requests/promql_queries';
 import { formatCount, formatLatency } from '../../../common/format_utils';
+import { isDependencyType } from '../../utils/platform_utils';
 import { useChartStepWindow } from '../../hooks/use_chart_step_window';
 import { colorSwatchStyle } from './edge_metrics_flyout';
 
@@ -93,8 +94,7 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
 
   // Dependency nodes (database / messaging / external) have no SERVER-span metrics;
   // their charts are sourced from the callers' CLIENT-span series (remoteService=name).
-  const isDependencyNode =
-    node.nodeType === 'database' || node.nodeType === 'messaging' || node.nodeType === 'external';
+  const isDependencyNode = isDependencyType(node.nodeType);
   const groupByAttribute = isGroupNode ? Object.keys(node.groupByAttributes || {})[0] : null;
   const groupByValue = isGroupNode ? node.serviceName : null; // serviceName holds the group value
 

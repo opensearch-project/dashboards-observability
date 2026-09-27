@@ -270,6 +270,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     return nodes.map((node) => ({
       serviceName: node.KeyAttributes.Name,
       environment: node.KeyAttributes.Environment,
+      type: node.KeyAttributes.Type,
     }));
   }, [nodes]);
 

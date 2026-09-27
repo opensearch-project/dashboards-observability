@@ -166,6 +166,126 @@ describe('useServicesRedMetrics', () => {
     });
   });
 
+  describe('dependency rows (database / messaging / external)', () => {
+    const isDependencyQuery = (q: string) => q.includes('remoteService!=""');
+    const withDependency = {
+      ...defaultParams,
+      services: [
+        { serviceName: 'api-gateway', environment: 'prod', type: 'service' },
+        { serviceName: 'api.openai.com', environment: 'prod', type: 'external' },
+      ],
+    };
+
+    it('issues no caller-derived queries for a service-only catalog (older data)', async () => {
+      const { result } = renderHook(() =>
+        useServicesRedMetrics({
+          ...defaultParams,
+          services: defaultParams.services.map((s) => ({ ...s, type: 'service' })),
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const queries = mockExecuteInstantQuery.mock.calls.map((c) => c[0].query as string);
+      expect(queries).toHaveLength(3);
+      queries.forEach((q) => expect(isDependencyQuery(q)).toBe(false));
+    });
+
+    it('adds the caller-derived instant queries when a dependency row is present', async () => {
+      const { result } = renderHook(() => useServicesRedMetrics(withDependency));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const queries = mockExecuteInstantQuery.mock.calls.map((c) => c[0].query as string);
+      // 3 service queries + dependency throughput, failure ratio and latency.
+      expect(queries).toHaveLength(6);
+      expect(queries.filter(isDependencyQuery)).toHaveLength(3);
+    });
+
+    it('fills dependency rows from caller-derived series and never service rows', async () => {
+      // The caller-derived series carries both names; only the dependency row may use it.
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) =>
+        Promise.resolve(
+          isDependencyQuery(query)
+            ? {
+                type: 'data_frame',
+                fields: [
+                  { name: 'Time', values: [1704067200000, 1704067200000] },
+                  {
+                    name: 'Series',
+                    values: [
+                      '{environment="prod", service="api.openai.com"}',
+                      '{environment="prod", service="api-gateway"}',
+                    ],
+                  },
+                  { name: 'Value', values: [7, 9] },
+                ],
+              }
+            : { type: 'data_frame', fields: [] }
+        )
+      );
+
+      const { result } = renderHook(() => useServicesRedMetrics(withDependency));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const dep = result.current.metricsMap.get(serviceNodeKey('api.openai.com', 'prod'));
+      expect(dep!.avgLatency).toBe(7);
+      expect(dep!.avgFailureRatio).toBe(7);
+      expect(dep!.avgThroughput).toBeCloseTo(7 / 3600, 5);
+      const svc = result.current.metricsMap.get(serviceNodeKey('api-gateway', 'prod'));
+      expect(svc!.avgLatency).toBe(0);
+      expect(svc!.avgFailureRatio).toBe(0);
+      expect(svc!.avgThroughput).toBe(0);
+    });
+
+    it('surfaces a failed caller-derived latency query as an error', async () => {
+      const depError = new Error('dependency latency failed');
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) =>
+        isDependencyQuery(query) && query.includes('latency_seconds_bucket')
+          ? Promise.reject(depError)
+          : Promise.resolve({ type: 'data_frame', fields: [] })
+      );
+
+      const { result } = renderHook(() => useServicesRedMetrics(withDependency));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(result.current.error).toEqual(depError);
+    });
+
+    it('keeps dotted dependency names out of the sparkline service=~ filter', async () => {
+      renderHook(() =>
+        useServicesRedMetrics({
+          ...withDependency,
+          sparklineServices: withDependency.services,
+        })
+      );
+
+      // Service batch (3) + one ungrouped dependency batch (3).
+      await waitFor(() => expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(6), {
+        timeout: 2000,
+      });
+
+      const rangeQueries = mockExecuteMetricRequest.mock.calls.map((c) => c[0].query as string);
+      const serviceBatch = rangeQueries.filter((q) => q.includes('service=~'));
+      expect(serviceBatch).toHaveLength(3);
+      serviceBatch.forEach((q) => {
+        expect(q).toContain('service=~"api-gateway"');
+        expect(q).not.toContain('openai');
+      });
+      expect(rangeQueries.filter(isDependencyQuery)).toHaveLength(3);
+    });
+  });
+
   describe('error handling', () => {
     it('surfaces an error but still returns zeroed entries on total failure', async () => {
       const mockError = new Error('Prometheus query failed');
