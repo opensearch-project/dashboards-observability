@@ -110,12 +110,14 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
     const fetchCallers = async () => {
       setCallersLoading(true);
       try {
-        // Aggregate caller request counts over the selected range.
+        // Aggregate caller request counts over the selected range, evaluated at its end
+        // (not "now") so a historical range shows that range's callers.
         const range = formatPrometheusDuration(timeRangeSeconds || 900);
         const query = getQueryDependencyCallers(environment, dependencyName, range);
+        const { endTime } = parseTimeRange(timeRange);
         const resp = await promqlService.executeInstantQuery({
           query,
-          time: Math.floor(Date.now() / 1000),
+          time: Math.floor(endTime.getTime() / 1000),
           signal: abortController.signal,
         });
         if (abortController.signal.aborted) return;
@@ -131,7 +133,17 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
     };
     fetchCallers();
     return () => abortController.abort();
-  }, [promqlService, environment, dependencyName, timeRangeSeconds, refreshTrigger]);
+    // timeRange is keyed on its from/to strings so a re-created object does not refetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    promqlService,
+    environment,
+    dependencyName,
+    timeRangeSeconds,
+    timeRange.from,
+    timeRange.to,
+    refreshTrigger,
+  ]);
 
   // Fetch the caller spans that target this dependency (it emits none of its own),
   // matched on the node's dependencyAttributes from the service map (falling back to
@@ -178,28 +190,30 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
         }
         if (cancelled) return;
 
-        const spansQuery = (includeLegacyDbSystem: boolean) => {
+        const spansQuery = (includeLegacyKeys: boolean) => {
           const condition = buildDependencySpanCondition(nodeType, dependencyName, attributes, {
-            includeLegacyDbSystem,
+            includeLegacyKeys,
           });
           return condition
             ? getQueryDependencySpans(tracesDataset.title, condition, startTime, endTime)
             : null;
         };
-        const query = spansQuery(true);
+        const query = spansQuery(false);
         if (!query) {
           setSpans([]);
           return;
         }
-        let resp;
-        try {
-          resp = await pplService.executeQuery(query, toDataset(tracesDataset));
-        } catch (e) {
-          // Legacy `db.system` is an object where `db.system.name` is mapped, which PPL
-          // rejects; retry without it.
-          const fallback = spansQuery(false);
-          if (!fallback || fallback === query) throw e;
-          resp = await pplService.executeQuery(fallback, toDataset(tracesDataset));
+        let resp = await pplService.executeQuery(query, toDataset(tracesDataset));
+        // Only if nothing matched, also try the legacy keys (`db.system`,
+        // `messaging.destination`). They are objects wherever their `.name` keys are
+        // mapped, and PPL rejects that comparison, so this attempt may fail harmlessly.
+        const legacyQuery = spansQuery(true);
+        if (!cancelled && !(resp.jsonData || []).length && legacyQuery && legacyQuery !== query) {
+          try {
+            resp = await pplService.executeQuery(legacyQuery, toDataset(tracesDataset));
+          } catch (_e) {
+            // Keep the (empty) result of the query without legacy keys.
+          }
         }
         if (cancelled) return;
         const rows: SpanRow[] = (resp.jsonData || []).map((item: any, idx: number) => ({
@@ -233,12 +247,19 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
   const errorsQuery = getQueryDependencyErrors(environment, dependencyName, chartStepWindow);
   const latencyQuery = getQueryDependencyLatency(environment, dependencyName);
 
+  // A broker's series come from both producers and consumers, so "calling" would mislabel them.
+  const isMessaging = (nodeType || '').toLowerCase() === 'messaging';
+
   const callerColumns = [
     {
       field: 'service',
-      name: i18n.translate('observability.apm.dependencyDetails.callers.service', {
-        defaultMessage: 'Calling service',
-      }),
+      name: isMessaging
+        ? i18n.translate('observability.apm.dependencyDetails.callers.messagingService', {
+            defaultMessage: 'Producing or consuming service',
+          })
+        : i18n.translate('observability.apm.dependencyDetails.callers.service', {
+            defaultMessage: 'Calling service',
+          }),
     },
     {
       field: 'operation',
@@ -483,9 +504,14 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
           </h3>
         </EuiTitle>
         <EuiText size="xs" color="subdued">
-          {i18n.translate('observability.apm.dependencyDetails.callers.description', {
-            defaultMessage: 'Services calling this dependency and the operations they invoke.',
-          })}
+          {isMessaging
+            ? i18n.translate('observability.apm.dependencyDetails.callers.messagingDescription', {
+                defaultMessage:
+                  'Services publishing to or consuming from this destination. A message counts once when published and once when consumed.',
+              })
+            : i18n.translate('observability.apm.dependencyDetails.callers.description', {
+                defaultMessage: 'Services calling this dependency and the operations they invoke.',
+              })}
         </EuiText>
         <EuiSpacer size="s" />
         <EuiBasicTable
@@ -541,12 +567,21 @@ function parseCallers(response: any): CallerRow[] {
   // data_frame shape
   if (response?.type === 'data_frame' && Array.isArray(response.fields)) {
     const seriesField = response.fields.find((f: any) => f.name === 'Series');
+    const labelsField = response.fields.find((f: any) => f.name === 'Labels');
     const valueField = response.fields.find((f: any) => f.name === 'Value');
-    if (seriesField && valueField) {
-      for (let i = 0; i < seriesField.values.length; i++) {
-        const label = String(seriesField.values[i]);
-        const svc = label.match(/service="([^"]*)"/)?.[1] || '';
-        const op = label.match(/remoteOperation="([^"]*)"/)?.[1] || '';
+    if (valueField && (labelsField || seriesField)) {
+      for (let i = 0; i < valueField.values.length; i++) {
+        // Prefer the structured Labels object; fall back to parsing the Series string.
+        const labels = labelsField?.values?.[i];
+        const series = String(seriesField?.values?.[i] ?? '');
+        const svc =
+          labels && typeof labels === 'object'
+            ? labels.service || ''
+            : series.match(/service="([^"]*)"/)?.[1] || '';
+        const op =
+          labels && typeof labels === 'object'
+            ? labels.remoteOperation || ''
+            : series.match(/remoteOperation="([^"]*)"/)?.[1] || '';
         rows.push({ service: svc, operation: op, requests: parseFloat(valueField.values[i]) || 0 });
       }
     }

@@ -75,7 +75,7 @@ import {
 } from '../../shared/components/filters';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../common/constants';
-import { isDependencyType, getNodeTypeLabel } from '../../shared/utils/platform_utils';
+import { isDependencyType, getNodeTypeLabel, NODE_TYPES } from '../../shared/utils/platform_utils';
 import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
 import { formatThroughput } from '../../common/format_utils';
 import { TruncatedLabel } from '../../../common/truncated_label';
@@ -391,6 +391,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     refreshTrigger,
   });
 
+  // The Type column, filter and badge only appear when the data has dependency nodes.
+  // Service-only data (data-prepper without dependency nodes, or with them disabled)
+  // renders exactly as before, and a stale type selection is ignored.
+  const hasDependencyRows = useMemo(
+    () => (services || []).some((s) => isDependencyType(s.type)),
+    [services]
+  );
+
   // --- SLO health rollup ---------------------------------------------------
   // We want the hook to fetch once per service-set change, *not* on every
   // `useServices` refresh (which fires on time-picker changes). Deriving the
@@ -591,7 +599,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Filter by node type (service / database / messaging / external)
     const hasSelectedTypes = Object.values(selectedTypes).some((v) => v);
-    if (hasSelectedTypes) {
+    if (hasDependencyRows && hasSelectedTypes) {
       filtered = filtered.filter((service) => {
         const t = (service.type || 'service').toLowerCase();
         return selectedTypes[t] === true;
@@ -627,7 +635,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     }
 
     return filtered;
-  }, [services, searchQuery, selectedEnvironments, selectedTypes, selectedGroupByAttributes]);
+  }, [
+    services,
+    searchQuery,
+    selectedEnvironments,
+    selectedTypes,
+    hasDependencyRows,
+    selectedGroupByAttributes,
+  ]);
 
   // Fetch RED (Request rate, Error rate, Duration) metrics for ALL services
   // Fetched separately and before filtering to avoid re-fetching on filter changes
@@ -852,6 +867,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           return m?.avgFailureRatio || 0;
         case 'environment':
           return item.environment ?? '';
+        case 'type':
+          return item.type ?? '';
         default:
           return item.serviceName ?? '';
       }
@@ -894,6 +911,19 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         category: i18nTexts.filters.environment,
         values: selectedEnvValues,
         onRemove: () => setSelectedEnvironments({}),
+      });
+    }
+
+    // Node type filter badge
+    const selectedTypeValues = Object.entries(selectedTypes)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([type]) => getNodeTypeLabel(type));
+    if (hasDependencyRows && selectedTypeValues.length > 0) {
+      badges.push({
+        key: 'type',
+        category: i18nTexts.table.type,
+        values: selectedTypeValues,
+        onRemove: () => setSelectedTypes({}),
       });
     }
 
@@ -966,6 +996,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return badges;
   }, [
     selectedEnvironments,
+    selectedTypes,
+    hasDependencyRows,
     latencyUserModified,
     throughputUserModified,
     latencyRange,
@@ -1263,20 +1295,24 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           return <EuiText size="s">{getEnvironmentDisplayName(environment)}</EuiText>;
         },
       },
-      {
-        field: 'type',
-        name: (
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{i18nTexts.table.type}</EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-        sortable: true,
-        align: 'center',
-        width: '10%',
-        render: (_type: string, item: ServiceTableItem) => {
-          return <EuiText size="s">{getNodeTypeLabel(item.type)}</EuiText>;
-        },
-      },
+      ...(hasDependencyRows
+        ? [
+            {
+              field: 'type',
+              name: (
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>{i18nTexts.table.type}</EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              sortable: true,
+              align: 'center' as const,
+              width: '10%',
+              render: (_type: string, item: ServiceTableItem) => {
+                return <EuiText size="s">{getNodeTypeLabel(item.type)}</EuiText>;
+              },
+            },
+          ]
+        : []),
       ...(sloFeatureEnabled
         ? [
             {
@@ -1333,6 +1369,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       latencyPercentile,
       getSloHealth,
       sloFeatureEnabled,
+      hasDependencyRows,
     ]
   );
 
@@ -1417,36 +1454,38 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
                           <EuiHorizontalRule margin="xs" />
 
-                          {/* Node Type Filter - Accordion */}
-                          <EuiAccordion
-                            id="typeAccordion"
-                            buttonContent={
-                              <EuiText size="xs">
-                                <strong>{i18nTexts.table.type}</strong>
-                              </EuiText>
-                            }
-                            initialIsOpen={true}
-                            data-test-subj="typeAccordion"
-                          >
-                            <EuiSpacer size="xs" />
-                            <EuiCheckboxGroup
-                              className="apmFilterCheckboxGroup"
-                              options={[
-                                { id: 'service', label: 'Service' },
-                                { id: 'database', label: 'Database' },
-                                { id: 'messaging', label: 'Messaging' },
-                                { id: 'external', label: 'External' },
-                              ]}
-                              idToSelectedMap={selectedTypes}
-                              onChange={(id) =>
-                                setSelectedTypes((prev) => ({ ...prev, [id]: !prev[id] }))
-                              }
-                              compressed
-                              data-test-subj="typeCheckboxGroup"
-                            />
-                          </EuiAccordion>
+                          {/* Node Type Filter - Accordion (only when dependency nodes exist) */}
+                          {hasDependencyRows && (
+                            <>
+                              <EuiAccordion
+                                id="typeAccordion"
+                                buttonContent={
+                                  <EuiText size="xs">
+                                    <strong>{i18nTexts.table.type}</strong>
+                                  </EuiText>
+                                }
+                                initialIsOpen={true}
+                                data-test-subj="typeAccordion"
+                              >
+                                <EuiSpacer size="xs" />
+                                <EuiCheckboxGroup
+                                  className="apmFilterCheckboxGroup"
+                                  options={NODE_TYPES.map((id) => ({
+                                    id,
+                                    label: getNodeTypeLabel(id),
+                                  }))}
+                                  idToSelectedMap={selectedTypes}
+                                  onChange={(id) =>
+                                    setSelectedTypes((prev) => ({ ...prev, [id]: !prev[id] }))
+                                  }
+                                  compressed
+                                  data-test-subj="typeCheckboxGroup"
+                                />
+                              </EuiAccordion>
 
-                          <EuiHorizontalRule margin="xs" />
+                              <EuiHorizontalRule margin="xs" />
+                            </>
+                          )}
 
                           {/* Environment Filter - Accordion */}
                           <EuiAccordion

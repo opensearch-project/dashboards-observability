@@ -106,23 +106,25 @@ describe('ppl_queries', () => {
       expect(conditions).not.toMatch(/attributes\.messaging\.destination =/);
     });
 
-    it('adds legacy db.system only when asked (callers retry without it)', () => {
+    it('adds the legacy keys only when asked (callers try them only if nothing matched)', () => {
       expect(
         buildDependencySpanCondition(
           'database',
           'redis:valkey-cart',
           {},
-          { includeLegacyDbSystem: true }
+          { includeLegacyKeys: true }
         )
       ).toContain("attributes.db.system = 'redis'");
-      expect(
-        buildDependencySpanCondition(
-          'messaging',
-          'kafka:orders',
-          {},
-          { includeLegacyDbSystem: true }
-        )
-      ).not.toContain('db.system');
+      const messaging = buildDependencySpanCondition(
+        'messaging',
+        'kafka:orders',
+        {},
+        { includeLegacyKeys: true }
+      );
+      expect(messaging).toBe(
+        "(attributes.messaging.destination.name = 'orders' or attributes.messaging.destination = 'orders') and (attributes.messaging.system = 'kafka')"
+      );
+      expect(messaging).not.toContain('db.system');
     });
 
     it('database {system}:{host} matches system and host from dependencyAttributes', () => {
@@ -214,16 +216,26 @@ describe('ppl_queries', () => {
   });
 
   describe('getQueryDependencySpans', () => {
-    it('bounds the span query by startTime and caps rows', () => {
+    const KINDS =
+      " | where (kind = 'SPAN_KIND_CLIENT' or kind = 'SPAN_KIND_PRODUCER' or kind = 'SPAN_KIND_CONSUMER')";
+
+    it('bounds the span query by startTime, keeps outbound spans only, and caps rows', () => {
       expect(getQueryDependencySpans('spans', "(attributes.x = 'y')", start, end, 10)).toBe(
         "source=spans | where startTime >= '2026-09-27 20:00:00.000' and startTime <= '2026-09-27 20:15:00.000'" +
+          KINDS +
           " | where (attributes.x = 'y') | sort - startTime | head 10"
       );
     });
 
     it('omits the time filter when no range is given', () => {
       expect(getQueryDependencySpans('spans', "(attributes.x = 'y')")).toBe(
-        "source=spans | where (attributes.x = 'y') | sort - startTime | head 50"
+        'source=spans' + KINDS + " | where (attributes.x = 'y') | sort - startTime | head 50"
+      );
+    });
+
+    it('never matches SERVER spans, whose server.address is their own listener', () => {
+      expect(getQueryDependencySpans('spans', "(attributes.x = 'y')")).not.toContain(
+        'SPAN_KIND_SERVER'
       );
     });
   });

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+
 /**
  * Platform type mapping for service map nodes
  */
@@ -65,10 +67,23 @@ const NODE_TYPE_ICON_MAP: Record<string, string> = {
  * Human-readable subtitle for a dependency node type.
  */
 const NODE_TYPE_LABEL_MAP: Record<string, string> = {
-  database: 'Database',
-  messaging: 'Messaging',
-  external: 'External',
+  database: i18n.translate('observability.apm.nodeType.database', {
+    defaultMessage: 'Database',
+  }),
+  messaging: i18n.translate('observability.apm.nodeType.messaging', {
+    defaultMessage: 'Messaging',
+  }),
+  external: i18n.translate('observability.apm.nodeType.external', {
+    defaultMessage: 'External',
+  }),
 };
+
+const SERVICE_TYPE_LABEL = i18n.translate('observability.apm.nodeType.service', {
+  defaultMessage: 'Service',
+});
+
+/** Node types, in the order the catalog Type filter lists them. */
+export const NODE_TYPES = ['service', 'database', 'messaging', 'external'];
 
 /**
  * True when the node type is an inferred dependency (database / messaging / external)
@@ -86,7 +101,7 @@ export function isDependencyType(nodeType: string | undefined): boolean {
  * @param nodeType - The node's type
  */
 export function getNodeTypeLabel(nodeType: string | undefined): string {
-  return NODE_TYPE_LABEL_MAP[(nodeType || '').toLowerCase()] || 'Service';
+  return NODE_TYPE_LABEL_MAP[(nodeType || '').toLowerCase()] || SERVICE_TYPE_LABEL;
 }
 
 /**

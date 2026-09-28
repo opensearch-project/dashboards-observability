@@ -359,10 +359,16 @@ const spanFieldsNull = (fields: string[]): string =>
 
 // Span attribute keys (semconv plus the flattened variants seen in OTel data) that
 // data-prepper reads when it names a dependency node. PPL rejects the whole query when it
-// compares an object path to a string, so legacy `db.system` (an object wherever
-// `db.system.name` is mapped) is only added on request; see includeLegacyDbSystem.
+// compares an object path to a string, so the legacy keys `db.system` and
+// `messaging.destination` (objects wherever `db.system.name` / `messaging.destination.name`
+// are mapped) are only added on request; see includeLegacyKeys.
 const DB_SYSTEM_FIELDS = ['db.system.name', 'db_system_name', 'db_system'];
 const LEGACY_DB_SYSTEM_FIELD = 'db.system';
+const MESSAGING_DESTINATION_FIELDS = ['messaging.destination.name'];
+const LEGACY_MESSAGING_DESTINATION_FIELD = 'messaging.destination';
+// Only the callers' outbound spans target a dependency; a SERVER span's server.address is
+// its own listener, so it must not match an external dependency's host.
+const DEPENDENCY_SPAN_KINDS = ['SPAN_KIND_CLIENT', 'SPAN_KIND_PRODUCER', 'SPAN_KIND_CONSUMER'];
 const HOST_FIELDS = ['server.address', 'net.peer.name'];
 const DB_NAMESPACE_FIELDS = ['db.namespace', 'db.name'];
 
@@ -375,8 +381,6 @@ const DB_NAMESPACE_FIELDS = ['db.namespace', 'db.name'];
  * The node's `dependencyAttributes` are preferred; the name is parsed only when they are
  * absent (older documents).
  *
- * @param nodeType - database / messaging / external (case-insensitive)
- * @param dependencyName - Dependency node name
  * Database spans whose host is not nameable (IP, loopback, denylisted) are not matched for
  * `{system}` / `{system}:{namespace}` nodes: data-prepper ignores such hosts when naming,
  * which PPL cannot express cheaply.
@@ -384,15 +388,16 @@ const DB_NAMESPACE_FIELDS = ['db.namespace', 'db.name'];
  * @param nodeType - database / messaging / external (case-insensitive)
  * @param dependencyName - Dependency node name
  * @param attributes - Flattened `dependencyAttributes` of the node, if known
- * @param options.includeLegacyDbSystem - Also match legacy `db.system`; the query fails
- *   where that path is an object, so callers retry without it
+ * @param options.includeLegacyKeys - Also match the legacy keys `db.system` and
+ *   `messaging.destination`; the query fails where those paths are objects, so callers
+ *   retry without them
  * @returns PPL boolean expression, or null when nothing identifies the dependency
  */
 export function buildDependencySpanCondition(
   nodeType: string,
   dependencyName: string,
   attributes: Record<string, string> = {},
-  options: { includeLegacyDbSystem?: boolean } = {}
+  options: { includeLegacyKeys?: boolean } = {}
 ): string | null {
   if (!dependencyName) return null;
   const type = (nodeType || '').toLowerCase();
@@ -404,14 +409,17 @@ export function buildDependencySpanCondition(
   if (type === 'messaging') {
     const destination = attributes['messaging.destination.name'] || nameSuffix || dependencyName;
     const system = attributes['messaging.system'] || (nameSuffix ? namePrefix : '');
-    const destinationCondition = spanFieldIn(['messaging.destination.name'], destination);
+    const destinationFields = options.includeLegacyKeys
+      ? [...MESSAGING_DESTINATION_FIELDS, LEGACY_MESSAGING_DESTINATION_FIELD]
+      : MESSAGING_DESTINATION_FIELDS;
+    const destinationCondition = spanFieldIn(destinationFields, destination);
     return system
       ? `${destinationCondition} and ${spanFieldIn(['messaging.system'], system)}`
       : destinationCondition;
   }
 
   if (type === 'database') {
-    const systemFields = options.includeLegacyDbSystem
+    const systemFields = options.includeLegacyKeys
       ? [...DB_SYSTEM_FIELDS, LEGACY_DB_SYSTEM_FIELD]
       : DB_SYSTEM_FIELDS;
     let system = attributes['db.system.name'];
@@ -446,6 +454,7 @@ export function buildDependencySpanCondition(
 
 /**
  * Query for the most recent caller spans targeting a dependency node within the time range.
+ * Restricted to outbound (CLIENT / PRODUCER / CONSUMER) spans.
  *
  * @param tracesIndex - Traces (span) index name
  * @param condition - Condition from buildDependencySpanCondition
@@ -463,6 +472,7 @@ export function getQueryDependencySpans(
 ): string {
   let query = `source=${tracesIndex}`;
   query += buildTimeFilterClause(startTime, endTime, 'startTime');
+  query += ` | where (${DEPENDENCY_SPAN_KINDS.map((k) => `kind = '${k}'`).join(' or ')})`;
   query += ` | where ${condition} | sort - startTime | head ${limit}`;
   return query;
 }

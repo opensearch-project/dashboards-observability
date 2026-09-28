@@ -302,7 +302,6 @@ export type PlatformIconType =
   | 'AWS::EKS'
   | 'AWS::ECS'
   | 'AWS::EC2'
-  | 'Remote::Endpoint'
   | 'Generic';
 
 /**
