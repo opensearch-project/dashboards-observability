@@ -502,8 +502,26 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
       const showOverlay = (time: number, yRatio: number) => {
         const rect = getGridRect();
         if (!rect) return;
-        const x = inst.convertToPixel({ xAxisIndex: 0 }, time);
-        if (x == null || isNaN(x as number)) {
+        const x = inst.convertToPixel({ xAxisIndex: 0 }, time) as number;
+        // The time axis extent comes from each chart's own data, so a sibling's
+        // hovered time can fall outside this chart's range — convertToPixel then
+        // lands in the axis gutter. Hide rather than draw into the margin.
+        let minT = Infinity;
+        let maxT = -Infinity;
+        series.forEach((s) => {
+          if (s.data && s.data.length > 0) {
+            minT = Math.min(minT, s.data[0].timestamp);
+            maxT = Math.max(maxT, s.data[s.data.length - 1].timestamp);
+          }
+        });
+        if (
+          x == null ||
+          isNaN(x) ||
+          time < minT ||
+          time > maxT ||
+          x < rect.x ||
+          x > rect.x + rect.width
+        ) {
           hideOverlay();
           return;
         }
@@ -516,14 +534,27 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
           invisible: false,
           shape: { x1: rect.x, y1: hy, x2: rect.x + rect.width, y2: hy },
         });
-        // Place each series' dot at its nearest data point to `time`.
+        // Place each series' dot at its nearest data point to `time`, skipping
+        // series hidden via the legend and points too far from the guide line.
+        const selected: Record<string, boolean> =
+          (inst.getOption() as any)?.legend?.[0]?.selected ?? {};
         series.forEach((s, i) => {
           const pts = s.data;
-          if (!pts || pts.length === 0) {
+          if (!pts || pts.length === 0 || selected[seriesNames[i]] === false) {
             dots[i].attr({ invisible: true });
             return;
           }
           const nearest = findNearestPoint(pts, time);
+          // Tolerance of one average step: a series with a gap (or one that starts
+          // late / ends early) shouldn't snap a dot away from the guide line.
+          const stepMs =
+            pts.length > 1
+              ? (pts[pts.length - 1].timestamp - pts[0].timestamp) / (pts.length - 1)
+              : 0;
+          if (pts.length > 1 && Math.abs(nearest.timestamp - time) > stepMs) {
+            dots[i].attr({ invisible: true });
+            return;
+          }
           const px = inst.convertToPixel({ gridIndex: 0 }, [nearest.timestamp, nearest.value]) as
             number[] | null;
           if (px && !isNaN(px[0]) && !isNaN(px[1])) {
