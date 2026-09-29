@@ -9,6 +9,7 @@ import { DataSourceOption } from '../../../../../../../src/plugins/data_source_m
 import { ServiceTrends, TraceAnalyticsMode } from '../../../../../common/types/trace_analytics';
 import { coreRefs } from '../../../../framework/core_refs';
 import { handleServiceTrendsRequest } from '../../requests/services_request_handler';
+import { shouldFetchTraceData } from '../common/helper_functions';
 import { ErrorRatePlt } from '../common/plots/error_rate_plt';
 import { LatencyPltPanel } from '../common/plots/latency_trend_plt';
 import { ThroughputPlt } from '../common/plots/throughput_plt';
@@ -18,6 +19,7 @@ interface ServiceMetricsProps {
   fixedInterval: string;
   mode: TraceAnalyticsMode;
   dataSourceMDSId: DataSourceOption[];
+  dataSourceEnabled: boolean;
   startTime: string;
   endTime: string;
   setStartTime: (startTime: string) => void;
@@ -28,6 +30,7 @@ interface ServiceMetricsProps {
 export const ServiceMetrics = ({
   mode,
   dataSourceMDSId,
+  dataSourceEnabled,
   setStartTime,
   setEndTime,
   page,
@@ -53,13 +56,17 @@ export const ServiceMetrics = ({
       setTrends,
       mode,
       serviceFilter,
-      dataSourceMDSId[0].id
+      dataSourceMDSId[0]?.id
     ).finally(() => setIsTrendsDataLoading(false));
   };
 
   useEffect(() => {
-    fetchMetrics();
-  }, [serviceName]);
+    // Defer until a data source id has resolved (MDS enabled), so the deep-linked service
+    // trends request is not fired against a nonexistent local cluster and re-fires once the
+    // id resolves. When MDS is disabled, behavior is unchanged.
+    if (shouldFetchTraceData(dataSourceEnabled, dataSourceMDSId[0]?.id)) fetchMetrics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serviceName, dataSourceEnabled, dataSourceMDSId[0]?.id]);
 
   const metricsView = page === 'serviceFlyout' ? 'column' : 'row';
 
