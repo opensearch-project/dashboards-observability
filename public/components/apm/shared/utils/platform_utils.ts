@@ -96,6 +96,14 @@ export function isDependencyType(nodeType: string | undefined): boolean {
 }
 
 /**
+ * True when the node type is a message broker (messaging).
+ * @param nodeType - The node's type
+ */
+export function isMessagingType(nodeType: string | undefined): boolean {
+  return (nodeType || '').toLowerCase() === 'messaging';
+}
+
+/**
  * Node kind label for the catalog "Type" column: "Database" / "Messaging" /
  * "External" for dependencies, otherwise "Service".
  * @param nodeType - The node's type

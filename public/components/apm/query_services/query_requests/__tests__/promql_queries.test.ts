@@ -10,6 +10,19 @@ import {
   getQueryServicesThroughput,
   getQueryServicesThroughputTotal,
   getQueryServicesFailureRatio,
+  getQueryDependencyRequests,
+  getQueryDependencyLatency,
+  getQueryDependencyFaultRateCard,
+  getQueryDependencyCallers,
+  getQueryServiceMapDependencyThroughput,
+  getQueryServiceMapDependencyFailureRatioTotal,
+  getQueryServiceMapDependencyLatencyInstant,
+  getQueryServiceMapDependencyThroughputRange,
+  getQueryServiceMapDependencyFailureRatioRange,
+  getQueryServiceMapDependencyLatencyRange,
+  getQueryEdgeRequests,
+  getQueryEdgeLatencyP99,
+  DEPENDENCY_CALLS_FILTER,
 } from '../promql_queries';
 
 // Regression guard: when the service filter is empty (the default now that the
@@ -55,5 +68,57 @@ describe('promql_queries selectors', () => {
         expect(q).not.toContain('{ ,');
       });
     });
+  });
+});
+
+// data-prepper tags messaging series with spanKind="PRODUCER"|"CONSUMER". Dependency views keep
+// the calls INTO a dependency (spanKind!="CONSUMER"), so a broker counts each message once; the
+// filter still matches database / external series and series without the label (older data).
+describe('dependency queries and the spanKind label', () => {
+  it('uses a negative filter so series without spanKind still match', () => {
+    expect(DEPENDENCY_CALLS_FILTER).toBe('spanKind!="CONSUMER"');
+  });
+
+  it('dependency node metrics exclude consumer series', () => {
+    [
+      getQueryDependencyRequests('generic:default', 'kafka:orders', '1m'),
+      getQueryDependencyLatency('generic:default', 'kafka:orders'),
+      getQueryDependencyFaultRateCard('generic:default', 'kafka:orders'),
+      getQueryServiceMapDependencyThroughput('15m'),
+      getQueryServiceMapDependencyFailureRatioTotal('15m'),
+      getQueryServiceMapDependencyLatencyInstant(0.99, '15m'),
+      getQueryServiceMapDependencyThroughputRange(),
+      getQueryServiceMapDependencyFailureRatioRange(),
+      getQueryServiceMapDependencyLatencyRange(0.99),
+    ].forEach((q) => {
+      expect(q).toContain('spanKind!="CONSUMER"');
+      expect(q).not.toContain('spanKind="PRODUCER"');
+    });
+  });
+
+  it('every request/error/fault/latency selector in the map builders carries the filter', () => {
+    const q = getQueryServiceMapDependencyFailureRatioTotal('15m');
+    const selectors = q.match(/\{remoteService!=""[^}]*\}/g) || [];
+    expect(selectors.length).toBe(3);
+    selectors.forEach((sel) => expect(sel).toContain('spanKind!="CONSUMER"'));
+  });
+
+  it('callers keep both directions and group by spanKind', () => {
+    const q = getQueryDependencyCallers('generic:default', 'kafka:orders', '15m');
+    expect(q).toContain('sum by (service, remoteOperation, spanKind)');
+    expect(q).not.toContain('spanKind!=');
+  });
+
+  it('edge queries only add a direction filter for broker -> consumer edges', () => {
+    expect(getQueryEdgeRequests('checkout', 'prod', 'cart', '15m')).not.toContain('spanKind');
+    const consumer = getQueryEdgeRequests('shipping', 'prod', 'kafka:orders', '15m', {
+      consumerEdge: true,
+    });
+    expect(consumer).toContain('service="shipping"');
+    expect(consumer).toContain('remoteService="kafka:orders"');
+    expect(consumer).toContain('spanKind!="PRODUCER"');
+    expect(
+      getQueryEdgeLatencyP99('shipping', 'prod', 'kafka:orders', '15m', { consumerEdge: true })
+    ).toContain('spanKind!="PRODUCER"');
   });
 });

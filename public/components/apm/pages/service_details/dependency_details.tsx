@@ -23,7 +23,7 @@ import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 import { RESOLUTION_LOW, formatPrometheusDuration } from '../../shared/utils/step_utils';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { PPLSearchService } from '../../query_services/ppl_search_service';
-import { getNodeTypeLabel } from '../../shared/utils/platform_utils';
+import { getNodeTypeLabel, isMessagingType } from '../../shared/utils/platform_utils';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { APM_CONSTANTS } from '../../common/constants';
 import { formatCount, formatPercentageValue, formatLatency } from '../../common/format_utils';
@@ -56,6 +56,8 @@ interface CallerRow {
   service: string;
   operation: string;
   requests: number;
+  /** Messaging direction from the `spanKind` label (PRODUCER / CONSUMER); empty otherwise. */
+  role: string;
 }
 
 interface SpanRow {
@@ -248,7 +250,7 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
   const latencyQuery = getQueryDependencyLatency(environment, dependencyName);
 
   // A broker's series come from both producers and consumers, so "calling" would mislabel them.
-  const isMessaging = (nodeType || '').toLowerCase() === 'messaging';
+  const isMessaging = isMessagingType(nodeType);
 
   const callerColumns = [
     {
@@ -261,6 +263,26 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
             defaultMessage: 'Calling service',
           }),
     },
+    ...(isMessaging
+      ? [
+          {
+            field: 'role',
+            name: i18n.translate('observability.apm.dependencyDetails.callers.role', {
+              defaultMessage: 'Role',
+            }),
+            render: (role: string) =>
+              role === 'PRODUCER'
+                ? i18n.translate('observability.apm.dependencyDetails.callers.producer', {
+                    defaultMessage: 'Producer',
+                  })
+                : role === 'CONSUMER'
+                  ? i18n.translate('observability.apm.dependencyDetails.callers.consumer', {
+                      defaultMessage: 'Consumer',
+                    })
+                  : '—',
+          },
+        ]
+      : []),
     {
       field: 'operation',
       name: i18n.translate('observability.apm.dependencyDetails.callers.operation', {
@@ -324,10 +346,15 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {i18n.translate('observability.apm.dependencyDetails.subtitle', {
-              defaultMessage:
-                'Inferred dependency — metrics are derived from the calling services’ client spans.',
-            })}
+            {isMessaging
+              ? i18n.translate('observability.apm.dependencyDetails.messagingSubtitle', {
+                  defaultMessage:
+                    'Inferred message broker — throughput, latency and failures are measured on publishes, so each message counts once.',
+                })
+              : i18n.translate('observability.apm.dependencyDetails.subtitle', {
+                  defaultMessage:
+                    'Inferred dependency — metrics are derived from the calling services’ client spans.',
+                })}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -507,7 +534,7 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
           {isMessaging
             ? i18n.translate('observability.apm.dependencyDetails.callers.messagingDescription', {
                 defaultMessage:
-                  'Services publishing to or consuming from this destination. A message counts once when published and once when consumed.',
+                  'Services publishing to or consuming from this destination, with the requests each made.',
               })
             : i18n.translate('observability.apm.dependencyDetails.callers.description', {
                 defaultMessage: 'Services calling this dependency and the operations they invoke.',
@@ -582,7 +609,16 @@ function parseCallers(response: any): CallerRow[] {
           labels && typeof labels === 'object'
             ? labels.remoteOperation || ''
             : series.match(/remoteOperation="([^"]*)"/)?.[1] || '';
-        rows.push({ service: svc, operation: op, requests: parseFloat(valueField.values[i]) || 0 });
+        const role =
+          labels && typeof labels === 'object'
+            ? labels.spanKind || ''
+            : series.match(/spanKind="([^"]*)"/)?.[1] || '';
+        rows.push({
+          service: svc,
+          operation: op,
+          role,
+          requests: parseFloat(valueField.values[i]) || 0,
+        });
       }
     }
   }
@@ -594,6 +630,7 @@ function parseCallers(response: any): CallerRow[] {
       rows.push({
         service: r.metric?.service || '',
         operation: r.metric?.remoteOperation || '',
+        role: r.metric?.spanKind || '',
         requests: parseFloat(r.value?.[1]) || 0,
       });
     });

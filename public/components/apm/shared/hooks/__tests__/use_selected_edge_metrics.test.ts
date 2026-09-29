@@ -526,4 +526,44 @@ describe('useSelectedEdgeMetrics', () => {
       expect(latencyCall.query).toContain('1h');
     });
   });
+
+  describe('broker -> consumer edges', () => {
+    it('queries the consumer side of the pair, excluding producer series', async () => {
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
+      renderHook(() =>
+        useSelectedEdgeMetrics({
+          ...defaultParams,
+          selectedEdge: {
+            edgeId: 'kafka:orders::generic:default->shipping::eks:prod',
+            sourceService: 'kafka:orders',
+            sourceEnvironment: 'generic:default',
+            targetService: 'shipping',
+            sourceNodeId: 'kafka:orders::generic:default',
+            targetNodeId: 'shipping::eks:prod',
+            sourceNodeType: 'messaging',
+            targetEnvironment: 'eks:prod',
+          },
+        })
+      );
+
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(4));
+      mockExecuteInstantQuery.mock.calls.forEach(([call]) => {
+        expect(call.query).toContain('service="shipping"');
+        expect(call.query).toContain('environment="eks:prod"');
+        expect(call.query).toContain('remoteService="kafka:orders"');
+        expect(call.query).toContain('spanKind!="PRODUCER"');
+      });
+    });
+
+    it('keeps service -> dependency edges unchanged', async () => {
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
+      renderHook(() => useSelectedEdgeMetrics(defaultParams));
+
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(4));
+      mockExecuteInstantQuery.mock.calls.forEach(([call]) => {
+        expect(call.query).toContain('service="frontend"');
+        expect(call.query).not.toContain('spanKind');
+      });
+    });
+  });
 });

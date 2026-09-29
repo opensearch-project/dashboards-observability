@@ -171,6 +171,32 @@ describe('DependencyDetails', () => {
     );
   });
 
+  it('lists a broker producers and consumers with their role', async () => {
+    mockExecuteInstantQuery.mockResolvedValue({
+      type: 'data_frame',
+      fields: [
+        {
+          name: 'Labels',
+          values: [
+            { service: 'checkout', remoteOperation: 'publish', spanKind: 'PRODUCER' },
+            { service: 'shipping', remoteOperation: 'receive', spanKind: 'CONSUMER' },
+          ],
+        },
+        { name: 'Value', values: [10, 10] },
+      ],
+    });
+
+    renderPage('kafka:orders', 'messaging');
+
+    expect(await screen.findByText('checkout')).toBeInTheDocument();
+    expect(screen.getAllByText('Producer').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Consumer').length).toBeGreaterThan(0);
+    // Cards and charts measure publishes only; callers keep both directions.
+    expect(mockExecuteInstantQuery.mock.calls[0][0].query).toContain(
+      'sum by (service, remoteOperation, spanKind)'
+    );
+  });
+
   it('reads caller labels from the structured Labels field', async () => {
     mockExecuteInstantQuery.mockResolvedValue({
       type: 'data_frame',

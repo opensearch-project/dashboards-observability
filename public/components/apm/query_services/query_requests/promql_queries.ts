@@ -331,10 +331,21 @@ export const getQueryServiceErrors = (
  * getQueryService* builders but filter by the remote target instead.
  * @page App Map Node Flyout — Requests/Faults/Errors charts (dependency nodes)
  */
-const dependencySelector = (environment: string, remoteService: string): string =>
+/**
+ * Label filter that keeps the calls INTO a dependency. data-prepper tags messaging series with
+ * `spanKind="PRODUCER"|"CONSUMER"`; excluding consumers makes a broker's throughput, latency and
+ * failures reflect publishes, so each message counts once. Database / external series and series
+ * from a data-prepper without the label have no `spanKind`, so they still match.
+ */
+export const DEPENDENCY_CALLS_FILTER = 'spanKind!="CONSUMER"';
+
+const remoteTargetSelector = (environment: string, remoteService: string): string =>
   `remoteService="${escapePromQLLabel(remoteService)}",remoteEnvironment="${escapePromQLLabel(
     environment
   )}",namespace="span_derived"`;
+
+const dependencySelector = (environment: string, remoteService: string): string =>
+  `${remoteTargetSelector(environment, remoteService)},${DEPENDENCY_CALLS_FILTER}`;
 
 export const getQueryDependencyRequests = (
   environment: string,
@@ -419,14 +430,16 @@ export const getQueryDependencyLatencyP99Card = (
 /**
  * Dependency callers — services (and their operations) that call this dependency,
  * with total request counts over the range. Powers the dependency page "Callers" table.
+ * Keeps both messaging directions and groups by `spanKind`, so a broker's producers and
+ * consumers are listed separately (the label is absent for non-messaging series).
  */
 export const getQueryDependencyCallers = (
   environment: string,
   remoteService: string,
   timeRange: string
 ): string => {
-  const sel = dependencySelector(environment, remoteService);
-  return `sum by (service, remoteOperation) (sum_over_time(request{${sel}}[${timeRange}]))`;
+  const sel = remoteTargetSelector(environment, remoteService);
+  return `sum by (service, remoteOperation, spanKind) (sum_over_time(request{${sel}}[${timeRange}]))`;
 };
 
 /**
@@ -938,6 +951,20 @@ label_replace(
 // ============================================================================
 
 /**
+ * Options for edge queries.
+ * `consumerEdge`: the edge runs broker -> consumer. Its series belong to the consumer
+ * (`service=<consumer>, remoteService=<broker>`), so callers pass the consumer as `service`
+ * and the broker as `remoteService`; producer series of that pair are excluded. Series from a
+ * data-prepper without the `spanKind` label still match.
+ */
+export interface EdgeQueryOptions {
+  consumerEdge?: boolean;
+}
+
+const edgeDirectionFilter = (options: EdgeQueryOptions): string =>
+  options.consumerEdge ? ',spanKind!="PRODUCER"' : '';
+
+/**
  * Get request count for a specific edge (service-to-service connection)
  * Uses sum_over_time to aggregate over the selected time range
  * @param service - Source service name
@@ -950,9 +977,10 @@ export const getQueryEdgeRequests = (
   service: string,
   environment: string,
   remoteService: string,
-  timeRange: string
+  timeRange: string,
+  options: EdgeQueryOptions = {}
 ): string => `
-sum(sum_over_time(request{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}]))
+sum(sum_over_time(request{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"${edgeDirectionFilter(options)}}[${timeRange}]))
 `;
 
 /**
@@ -969,11 +997,12 @@ export const getQueryEdgeLatencyP99 = (
   service: string,
   environment: string,
   remoteService: string,
-  timeRange: string
+  timeRange: string,
+  options: EdgeQueryOptions = {}
 ): string => `
 histogram_quantile(0.99,
   sum by (le) (
-    sum_over_time(latency_seconds_bucket{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}])
+    sum_over_time(latency_seconds_bucket{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"${edgeDirectionFilter(options)}}[${timeRange}])
   )
 ) * 1000
 `;
@@ -991,9 +1020,10 @@ export const getQueryEdgeFaults = (
   service: string,
   environment: string,
   remoteService: string,
-  timeRange: string
+  timeRange: string,
+  options: EdgeQueryOptions = {}
 ): string => `
-sum(sum_over_time(fault{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}]))
+sum(sum_over_time(fault{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"${edgeDirectionFilter(options)}}[${timeRange}]))
 `;
 
 /**
@@ -1009,9 +1039,10 @@ export const getQueryEdgeErrors = (
   service: string,
   environment: string,
   remoteService: string,
-  timeRange: string
+  timeRange: string,
+  options: EdgeQueryOptions = {}
 ): string => `
-sum(sum_over_time(error{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}]))
+sum(sum_over_time(error{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"${edgeDirectionFilter(options)}}[${timeRange}]))
 `;
 
 // ============================================================================
@@ -1177,7 +1208,7 @@ label_replace(
  */
 export const getQueryServiceMapDependencyThroughput = (timeRange: string): string =>
   relabelRemoteToService(
-    `sum by (remoteEnvironment, remoteService) (sum_over_time(request{remoteService!="",namespace="span_derived"}[${timeRange}]))`
+    `sum by (remoteEnvironment, remoteService) (sum_over_time(request{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"}[${timeRange}]))`
   );
 
 /**
@@ -1185,7 +1216,7 @@ export const getQueryServiceMapDependencyThroughput = (timeRange: string): strin
  */
 export const getQueryServiceMapDependencyFaults = (timeRange: string): string =>
   relabelRemoteToService(
-    `sum by (remoteEnvironment, remoteService) (sum_over_time(fault{remoteService!="",namespace="span_derived"}[${timeRange}]))`
+    `sum by (remoteEnvironment, remoteService) (sum_over_time(fault{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"}[${timeRange}]))`
   );
 
 /**
@@ -1193,7 +1224,7 @@ export const getQueryServiceMapDependencyFaults = (timeRange: string): string =>
  */
 export const getQueryServiceMapDependencyErrors = (timeRange: string): string =>
   relabelRemoteToService(
-    `sum by (remoteEnvironment, remoteService) (sum_over_time(error{remoteService!="",namespace="span_derived"}[${timeRange}]))`
+    `sum by (remoteEnvironment, remoteService) (sum_over_time(error{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"}[${timeRange}]))`
   );
 
 /**
@@ -1204,12 +1235,12 @@ export const getQueryServiceMapDependencyErrors = (timeRange: string): string =>
 export const getQueryServiceMapDependencyFailureRatioTotal = (timeRange: string): string =>
   relabelRemoteToService(
     `(
-      sum by (remoteEnvironment, remoteService) (sum_over_time(error{remoteService!="",namespace="span_derived"}[${timeRange}]))
+      sum by (remoteEnvironment, remoteService) (sum_over_time(error{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"}[${timeRange}]))
       +
-      sum by (remoteEnvironment, remoteService) (sum_over_time(fault{remoteService!="",namespace="span_derived"}[${timeRange}]))
+      sum by (remoteEnvironment, remoteService) (sum_over_time(fault{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"}[${timeRange}]))
     )
     /
-    clamp_min(sum by (remoteEnvironment, remoteService) (sum_over_time(request{remoteService!="",namespace="span_derived"}[${timeRange}])), 1)
+    clamp_min(sum by (remoteEnvironment, remoteService) (sum_over_time(request{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"}[${timeRange}])), 1)
     * 100`
   );
 
@@ -1224,7 +1255,7 @@ export const getQueryServiceMapDependencyLatencyInstant = (
   relabelRemoteToService(
     `histogram_quantile(${percentile},
       sum by (remoteEnvironment, remoteService, le) (
-        sum_over_time(latency_seconds_bucket{remoteService!="",namespace="span_derived"}[${timeRange}])
+        sum_over_time(latency_seconds_bucket{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"}[${timeRange}])
       )
     ) * 1000`
   );
@@ -1246,7 +1277,7 @@ export const getQueryServiceMapDependencyLatencyInstant = (
  */
 export const getQueryServiceMapDependencyThroughputRange = (): string =>
   relabelRemoteToService(
-    `sum by (remoteEnvironment, remoteService) (request{remoteService!="",namespace="span_derived"})`
+    `sum by (remoteEnvironment, remoteService) (request{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"})`
   );
 
 /**
@@ -1257,12 +1288,12 @@ export const getQueryServiceMapDependencyThroughputRange = (): string =>
 export const getQueryServiceMapDependencyFailureRatioRange = (): string =>
   relabelRemoteToService(
     `(
-      sum by (remoteEnvironment, remoteService) (error{remoteService!="",namespace="span_derived"})
+      sum by (remoteEnvironment, remoteService) (error{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"})
       +
-      sum by (remoteEnvironment, remoteService) (fault{remoteService!="",namespace="span_derived"})
+      sum by (remoteEnvironment, remoteService) (fault{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"})
     )
     /
-    clamp_min(sum by (remoteEnvironment, remoteService) (request{remoteService!="",namespace="span_derived"}), 1)
+    clamp_min(sum by (remoteEnvironment, remoteService) (request{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"}), 1)
     * 100`
   );
 
@@ -1275,7 +1306,7 @@ export const getQueryServiceMapDependencyLatencyRange = (percentile: number): st
   relabelRemoteToService(
     `histogram_quantile(${percentile},
       sum by (remoteEnvironment, remoteService, le) (
-        latency_seconds_bucket{remoteService!="",namespace="span_derived"}
+        latency_seconds_bucket{remoteService!="",spanKind!="CONSUMER",namespace="span_derived"}
       )
     ) * 1000`
   );

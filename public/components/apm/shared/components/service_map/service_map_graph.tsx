@@ -80,11 +80,12 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
 }) => {
   // Build a map from NodeId to service info for edge click handling
   const nodeIdToServiceInfo = useMemo(() => {
-    const map = new Map<string, { serviceName: string; environment: string }>();
+    const map = new Map<string, { serviceName: string; environment: string; type?: string }>();
     nodes.forEach((node) => {
       map.set(node.NodeId, {
         serviceName: node.KeyAttributes.Name,
         environment: node.KeyAttributes.Environment,
+        type: node.KeyAttributes.Type,
       });
     });
     return map;
@@ -421,6 +422,8 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
           targetService: targetInfo.serviceName,
           sourceNodeId: edge.source,
           targetNodeId: edge.target,
+          sourceNodeType: sourceInfo.type,
+          targetEnvironment: targetInfo.environment,
         });
       }
     },
