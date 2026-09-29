@@ -17,6 +17,9 @@ import { useApmCursorBus } from '../hooks/apm_cursor_context';
 import { navigateToExploreMetrics } from '../utils/navigation_utils';
 import './promql_line_chart.scss';
 
+/** Brushes narrower than this are ignored (plain clicks, sub-second slivers). */
+const MIN_BRUSH_MS = 1000;
+
 /** Payload of the ECharts `brushEnd` event (only the fields we read). */
 interface BrushEndParams {
   areas?: Array<{ coordRange?: number[] }>;
@@ -171,6 +174,30 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     return value.toFixed(2);
   };
 
+  // Pin the time axis to the page time range so every chart shares one x extent
+  // (keeps brush and synced crosshair aligned). Without this, a chart with a single
+  // point gets ECharts' ~1 day auto-padding and a brush lands hours away. Union with
+  // the data extent so points just past a relative `now` are never clipped.
+  // Re-derived on each fetch (`series` dep) so relative ranges track `now`.
+  const xExtent = useMemo(() => {
+    let min = Infinity;
+    let max = -Infinity;
+    try {
+      const { startTime, endTime } = parseTimeRange(timeRange);
+      min = startTime.getTime();
+      max = endTime.getTime();
+    } catch {
+      // Invalid range: fall back to the data extent below.
+    }
+    series.forEach((s) => {
+      if (s.data && s.data.length > 0) {
+        min = Math.min(min, s.data[0].timestamp);
+        max = Math.max(max, s.data[s.data.length - 1].timestamp);
+      }
+    });
+    return isFinite(min) && isFinite(max) && min < max ? { min, max } : undefined;
+  }, [timeRange, series]);
+
   // A built-in `title` shares the fixed `height`; a custom `header` sits on top of it.
   const chartHeight = title && !header ? height - 24 : height;
 
@@ -308,6 +335,8 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
       },
       xAxis: {
         type: 'time',
+        min: xExtent?.min,
+        max: xExtent?.max,
         minInterval: timeAxisConfig.minInterval,
         axisLine: {
           lineStyle: {
@@ -384,6 +413,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     color,
     seriesNames,
     onTimeRangeChange,
+    xExtent,
   ]);
 
   // Interaction wiring: brush → onTimeRangeChange, legend isolate, and synced
@@ -411,7 +441,13 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
       ) {
         // ECharts reports coordRange in drag order, so a right-to-left drag yields
         // range[0] > range[1]. Sort before converting so `from` is always <= `to`.
-        const [start, end] = range[0] <= range[1] ? range : [range[1], range[0]];
+        let [start, end] = range[0] <= range[1] ? range : [range[1], range[0]];
+        // Clamp to the axis extent so a brush can never escape the visible window.
+        if (xExtent) {
+          start = Math.max(start, xExtent.min);
+          end = Math.min(end, xExtent.max);
+        }
+        if (end - start < MIN_BRUSH_MS) return;
         onTimeRangeChange(new Date(start).toISOString(), new Date(end).toISOString());
       }
     };
@@ -503,22 +539,13 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
         const rect = getGridRect();
         if (!rect) return;
         const x = inst.convertToPixel({ xAxisIndex: 0 }, time) as number;
-        // The time axis extent comes from each chart's own data, so a sibling's
-        // hovered time can fall outside this chart's range — convertToPixel then
-        // lands in the axis gutter. Hide rather than draw into the margin.
-        let minT = Infinity;
-        let maxT = -Infinity;
-        series.forEach((s) => {
-          if (s.data && s.data.length > 0) {
-            minT = Math.min(minT, s.data[0].timestamp);
-            maxT = Math.max(maxT, s.data[s.data.length - 1].timestamp);
-          }
-        });
+        // Each chart's axis is pinned to the page range, but a sibling's hovered time
+        // can still fall outside it (e.g. relative `now` parsed at a different
+        // instant). Hide rather than draw into the axis gutter.
         if (
           x == null ||
           isNaN(x) ||
-          time < minT ||
-          time > maxT ||
+          (xExtent && (time < xExtent.min || time > xExtent.max)) ||
           x < rect.x ||
           x > rect.x + rect.width
         ) {
@@ -633,6 +660,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
     showLegend,
     seriesNames,
     color,
+    xExtent,
   ]);
 
   // Resize chart after it becomes visible (display: none → block transition)
