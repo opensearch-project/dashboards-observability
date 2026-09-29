@@ -25,6 +25,7 @@ import {
   milliToNanoSec,
   minFixedInterval,
   processTimeStamp,
+  shouldFetchTraceData,
 } from '../common/helper_functions';
 import { ErrorRatePlt } from '../common/plots/error_rate_plt';
 import { ThroughputPlt } from '../common/plots/throughput_plt';
@@ -88,9 +89,23 @@ export function DashboardContent(props: DashboardProps) {
   }, []);
 
   useEffect(() => {
-    if (!redirect && (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)))
+    if (
+      !redirect &&
+      (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)) &&
+      shouldFetchTraceData(props.dataSourceEnabled, dataSourceMDSId[0]?.id)
+    )
       refresh();
-  }, [filters, startTime, endTime, appConfigs, redirect, mode, jaegerIndicesExist]);
+  }, [
+    filters,
+    startTime,
+    endTime,
+    appConfigs,
+    redirect,
+    mode,
+    jaegerIndicesExist,
+    props.dataSourceEnabled,
+    dataSourceMDSId[0]?.id,
+  ]);
 
   const refresh = async () => {
     const DSL = filtersToDsl(
