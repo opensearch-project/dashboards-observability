@@ -7,6 +7,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { usePromQLChartData } from '../use_promql_chart_data';
 import { PromQLSearchService } from '../../../query_services/promql_search_service';
 import { useApmConfig } from '../../../config/apm_config_context';
+import { parseTimeRange } from '../../utils/time_utils';
 
 // Mock the PromQLSearchService
 const mockExecuteMetricRequest = jest.fn();
@@ -378,6 +379,31 @@ describe('usePromQLChartData', () => {
       });
 
       expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
+    });
+
+    it('should re-resolve a relative time range against now on refresh', async () => {
+      mockExecuteMetricRequest.mockResolvedValue({ data: { result: [] } });
+      const { result, rerender } = renderHook(({ params }) => usePromQLChartData(params), {
+        initialProps: { params: { ...defaultParams, refreshTrigger: 0 } },
+      });
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      // Same relative strings, but "now" has moved on by the time Refresh is clicked.
+      (parseTimeRange as jest.Mock).mockReturnValueOnce({
+        startTime: new Date('2024-01-01T00:05:00Z'),
+        endTime: new Date('2024-01-01T01:05:00Z'),
+      });
+      rerender({ params: { ...defaultParams, refreshTrigger: 1 } });
+      await waitFor(() => {
+        expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(2);
+      });
+
+      const first = mockExecuteMetricRequest.mock.calls[0][0];
+      const second = mockExecuteMetricRequest.mock.calls[1][0];
+      expect(second.endTime).toBe(first.endTime + 300);
+      expect(second.startTime).toBe(first.startTime + 300);
     });
   });
 

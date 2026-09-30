@@ -262,7 +262,9 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         endTime: new Date(),
       };
     }
-  }, [timeRange]);
+    // Recalculate when refreshTrigger changes so relative ranges advance to `now`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, refreshTrigger]);
 
   // Fetch dependencies list from PPL
   const {

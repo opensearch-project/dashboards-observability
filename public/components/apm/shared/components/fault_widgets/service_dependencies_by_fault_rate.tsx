@@ -76,11 +76,17 @@ export const ServiceDependenciesByFaultRate: React.FC<ServiceDependenciesByFault
   onDependencyClick,
 }) => {
   // Parse time range using datemath for proper handling of relative dates
+  // Recalculate when refreshTrigger changes to get fresh timestamps
   const { startTime, endTime } = useMemo(() => {
     return parseTimeRange(timeRange);
-  }, [timeRange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, refreshTrigger]);
 
-  const { data: dependencies, isLoading, error } = useServiceDependenciesByFaultRate({
+  const {
+    data: dependencies,
+    isLoading,
+    error,
+  } = useServiceDependenciesByFaultRate({
     serviceName,
     environment,
     startTime,

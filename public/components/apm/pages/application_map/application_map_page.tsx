@@ -220,7 +220,12 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   }, [configError, notifications]);
 
   // Parse time range
-  const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
+  const parsedTimeRange = useMemo(
+    () => parseTimeRange(timeRange),
+    // Recalculate when refreshTrigger changes so relative ranges advance to `now`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeRange, refreshTrigger]
+  );
 
   // Fetch service map topology data
   const {
@@ -348,6 +353,23 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
 
   // Combined loading state
   const isLoading = mapLoading || metricsLoading;
+
+  // Keep URL `from`/`to` in sync with the time range (picker or flyout brush) so a
+  // picked range survives reload and can be shared. Other hash params are kept.
+  // Skip the first run: on mount the URL is the source of truth (effect above).
+  const isFirstTimeSyncRef = useRef(true);
+  useEffect(() => {
+    if (isFirstTimeSyncRef.current) {
+      isFirstTimeSyncRef.current = false;
+      return;
+    }
+    const [path, query = ''] = window.location.hash.split('?');
+    const params = new URLSearchParams(query);
+    if (params.get('from') === timeRange.from && params.get('to') === timeRange.to) return;
+    params.set('from', timeRange.from);
+    params.set('to', timeRange.to);
+    window.history.replaceState(null, '', `${path || '#/application-map'}?${params.toString()}`);
+  }, [timeRange]);
 
   // Handle time range change
   const handleTimeChange = useCallback(

@@ -98,7 +98,8 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
     return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
   }, [prometheusConnectionId, prometheusConnectionMeta]);
 
-  // Parse time range
+  // Parse time range. Re-resolve on refresh/refetch so relative ranges like
+  // `now-15m` advance to the current time instead of re-querying the stale window.
   const parsedTimeRange = useMemo(() => {
     try {
       return parseTimeRange(timeRange);
@@ -106,7 +107,8 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
       console.error('[usePromQLChartData] Failed to parse time range:', err);
       return null;
     }
-  }, [timeRange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, refreshTrigger, refetchTrigger]);
 
   useEffect(() => {
     if (!enabled || !promqlQuery || !parsedTimeRange || !prometheusConnectionId) {

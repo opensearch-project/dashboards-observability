@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   EuiTabbedContent,
   EuiTabbedContentTab,
@@ -109,18 +109,27 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceName, environment, initialTab, onTimeChange, parseUrlParams]);
 
-  // Listen for URL hash changes and update tab
+  // Listen for URL hash changes and update tab and time range. A deep link to the
+  // same service with a different `from`/`to` only changes the hash, so without
+  // this the charts would stay on the previous range while the URL shows the new one.
   useEffect(() => {
     const handleHashChange = () => {
       const urlParams = parseUrlParams();
       if (urlParams.tab && urlParams.tab !== activeTab) {
         setActiveTab(urlParams.tab);
       }
+      if (
+        urlParams.from &&
+        urlParams.to &&
+        (urlParams.from !== timeRange.from || urlParams.to !== timeRange.to)
+      ) {
+        onTimeChange({ from: urlParams.from, to: urlParams.to });
+      }
     };
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [parseUrlParams, activeTab]);
+  }, [parseUrlParams, activeTab, timeRange, onTimeChange]);
 
   // Update URL when state changes
   const updateUrl = useCallback(
@@ -128,7 +137,13 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
       const tab = newTab || activeTab;
       const time = newTimeRange || timeRange;
 
-      const params = new URLSearchParams();
+      // Start from the current hash params so unrelated ones (e.g. `lang`, used for
+      // the breadcrumb icon) survive the rewrite.
+      const hash = window.location.hash;
+      const hashQueryIndex = hash.indexOf('?');
+      const params = new URLSearchParams(
+        hashQueryIndex >= 0 ? hash.substring(hashQueryIndex + 1) : ''
+      );
       params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TAB, tab);
       params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.FROM, time.from);
       params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TO, time.to);
@@ -142,6 +157,22 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
     },
     [serviceName, environment, activeTab, timeRange]
   );
+
+  // Keep URL `from`/`to` in sync with the page time range, whatever changed it
+  // (header picker, brush, hash change). Skip the first run: on mount the URL is
+  // the source of truth and the effect above pushes it into `timeRange`.
+  const isFirstTimeSyncRef = useRef(true);
+  useEffect(() => {
+    if (isFirstTimeSyncRef.current) {
+      isFirstTimeSyncRef.current = false;
+      return;
+    }
+    const urlParams = parseUrlParams();
+    if (urlParams.from !== timeRange.from || urlParams.to !== timeRange.to) {
+      updateUrl(undefined, timeRange);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange]);
 
   // Handle tab change
   const handleTabChange = useCallback(

@@ -372,7 +372,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     ]);
   }, [chrome]);
 
-  const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
+  const parsedTimeRange = useMemo(
+    () => parseTimeRange(timeRange),
+    // Recalculate when refreshTrigger changes so relative ranges advance to `now`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeRange, refreshTrigger]
+  );
 
   const {
     data: services,
