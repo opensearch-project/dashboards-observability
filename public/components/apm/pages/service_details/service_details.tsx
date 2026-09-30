@@ -31,6 +31,7 @@ import {
   ServiceDetailsUrlParams,
 } from '../../common/types/service_details_types';
 import { SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
+import { ApmCursorContext, createApmCursorBus } from '../../shared/hooks/apm_cursor_context';
 import '../../shared/styles/apm_common.scss';
 
 export interface ServiceDetailsProps {
@@ -66,6 +67,10 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
 
   // State for active tab
   const [activeTab, setActiveTab] = useState<ServiceDetailsTabId>(initialTab);
+
+  // One cursor bus for the whole page. EuiTabbedContent mounts only the active
+  // tab, so a single bus scopes the synced crosshair to that tab's charts.
+  const cursorBus = useMemo(() => createApmCursorBus(), []);
 
   // Helper to parse URL params from hash
   const parseUrlParams = useCallback((): ServiceDetailsUrlParams => {
@@ -148,6 +153,17 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
     [updateUrl]
   );
 
+  // Handle a chart brush selection: zoom the whole page time range (all charts
+  // re-query) and persist it to the URL. Charts report ISO-8601 start/end.
+  const handleTimeRangeChange = useCallback(
+    (from: string, to: string) => {
+      const newRange = { from, to };
+      onTimeChange(newRange);
+      updateUrl(undefined, newRange);
+    },
+    [onTimeChange, updateUrl]
+  );
+
   // Get Prometheus connection ID from config
   // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
   const prometheusConnectionId = useMemo(() => {
@@ -167,7 +183,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   }, []);
   const sloApiClientStub = useMemo(
     () =>
-      (({
+      ({
         list: () =>
           Promise.resolve({
             results: [],
@@ -177,7 +193,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             nextCursor: null,
             prevCursor: null,
           }),
-      } as unknown) as SloApiClient),
+      }) as unknown as SloApiClient,
     []
   );
   // Feature flag: when `observability.slo.enabled` is false the SLOs tab is
@@ -192,9 +208,10 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   });
   const sloBucket = tabSloHealth.bySvc.get(serviceName);
   const breachedCount = sloBucket?.breached ?? 0;
-  const sloAccessError = useMemo(() => toSloHealthAccessError(tabSloHealth.error), [
-    tabSloHealth.error,
-  ]);
+  const sloAccessError = useMemo(
+    () => toSloHealthAccessError(tabSloHealth.error),
+    [tabSloHealth.error]
+  );
 
   // Define tabs
   const tabs: EuiTabbedContentTab[] = useMemo(
@@ -212,6 +229,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             prometheusConnectionId={prometheusConnectionId}
             serviceMapDataset={serviceMapDataset}
             refreshTrigger={refreshTrigger}
+            onTimeRangeChange={handleTimeRangeChange}
           />
         ),
       },
@@ -228,6 +246,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             prometheusConnectionId={prometheusConnectionId}
             serviceMapDataset={serviceMapDataset}
             refreshTrigger={refreshTrigger}
+            onTimeRangeChange={handleTimeRangeChange}
           />
         ),
       },
@@ -244,6 +263,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             prometheusConnectionId={prometheusConnectionId}
             serviceMapDataset={serviceMapDataset}
             refreshTrigger={refreshTrigger}
+            onTimeRangeChange={handleTimeRangeChange}
           />
         ),
       },
@@ -279,6 +299,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
       prometheusConnectionId,
       serviceMapDataset,
       refreshTrigger,
+      handleTimeRangeChange,
       breachedCount,
       sloBucket,
       sloAccessError,
@@ -344,12 +365,14 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
         <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
           <EuiPageContentBody>
             {/* Tabbed Content - time picker is now in header area */}
-            <EuiTabbedContent
-              tabs={tabs}
-              selectedTab={selectedTab}
-              onTabClick={handleTabChange}
-              autoFocus="initial"
-            />
+            <ApmCursorContext.Provider value={cursorBus}>
+              <EuiTabbedContent
+                tabs={tabs}
+                selectedTab={selectedTab}
+                onTabClick={handleTabChange}
+                autoFocus="initial"
+              />
+            </ApmCursorContext.Provider>
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>

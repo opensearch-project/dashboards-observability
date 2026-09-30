@@ -10,6 +10,7 @@ import {
   EuiPanel,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
+  EuiProgress,
 } from '@elastic/eui';
 import { CelestialMap, getIcon } from '@osd/apm-topology';
 import type { CelestialCardProps, CelestialEdge, Breadcrumb } from '@osd/apm-topology';
@@ -558,8 +559,11 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
     [onNavigationStateChange, filters, navigationState]
   );
 
-  // Loading state
-  if (isLoading) {
+  // Initial load only: show the full spinner while there is nothing to draw yet.
+  // On a refetch (time-range change, chart brush, refresh) keep the current map
+  // mounted and show a progress bar instead — swapping in the spinner unmounts
+  // CelestialMap, which flashes the page and re-runs layout from scratch.
+  if (isLoading && celestialNodes.length === 0) {
     return (
       <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 400 }}>
         <EuiFlexItem grow={false}>
@@ -598,6 +602,14 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
 
   return (
     <EuiPanel paddingSize="s" style={{ height: '100%', position: 'relative' }}>
+      {isLoading && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          position="absolute"
+          data-test-subj="serviceMapRefetchProgress"
+        />
+      )}
       {/* CelestialMap - click/keyboard handlers for deselecting edges */}
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div

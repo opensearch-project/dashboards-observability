@@ -15,6 +15,47 @@ import { coreRefs } from '../../../../framework/core_refs';
 import { buildSuggestSearch } from '../../pages/slos/slo_suggest_scope';
 
 /**
+ * Serialize a single datemath time value (from/to) for a hand-built rison `_g`
+ * on a URL hash. Two hazards, both verified against rison-node + the OSD read
+ * path (URL-decode → rison-decode → datemath):
+ *  1) rison parse: a value starting with `-`/a digit, or containing a rison
+ *     structural char (the `:` in an absolute ISO timestamp), must be rison
+ *     single-quoted or rison treats `:` as a delimiter and drops `_g` entirely.
+ *     Relative values like `now` / `now-1h` stay bare.
+ *  2) URL decode runs BEFORE rison on read and turns a literal `+` into a space
+ *     (`now+1h` → "now 1h", which datemath rejects → blank time). encodeURIComponent
+ *     makes it `%2B`, which the read path decodes back to `+`.
+ * So: rison-string-encode, THEN encodeURIComponent — mirrors OSD's canonical
+ * rison→URL write path (encodeURIComponent is a stricter superset: it also
+ * percent-encodes `:`/`/`, which the read path decodes back before rison, so
+ * every value round-trips).
+ */
+const RISON_NOT_IDCHAR = " '!:(),*@$";
+function encodeTimeRangeValueForG(value: string): string {
+  let bare = value !== '' && '-0123456789'.indexOf(value[0]) === -1;
+  if (bare) {
+    for (const ch of value) {
+      if (RISON_NOT_IDCHAR.indexOf(ch) !== -1) {
+        bare = false;
+        break;
+      }
+    }
+  }
+  const risonValue = bare ? value : `'${escapeRisonString(value)}'`;
+  return encodeURIComponent(risonValue);
+}
+
+/**
+ * Escape a value for embedding inside a rison single-quoted string. Rison treats
+ * `!` as its escape char and `'` as the string terminator, so both must be
+ * escaped (`!`→`!!` FIRST, then `'`→`!'`) or the surrounding rison is corrupted
+ * and the OSD read path silently drops the enclosing object.
+ */
+function escapeRisonString(value: string): string {
+  return value.replace(/!/g, '!!').replace(/'/g, "!'");
+}
+
+/**
  * Options for navigating to service details
  */
 export interface NavigateToServiceDetailsOptions {
@@ -28,6 +69,48 @@ export interface NavigateToServiceDetailsOptions {
   dependency?: string;
   /** Node type (service / database / messaging / external) — routes dependencies to a tailored view */
   nodeType?: string;
+}
+
+/**
+ * Opens the Explore "metrics" flavor (Discover metrics) in a new tab, pre-loaded
+ * with a PromQL query against the given Prometheus data connection and time range.
+ *
+ * Mirrors navigateToExploreTraces/navigateToExploreLogs: the _g/_q/_a rison is
+ * hand-built on the hash (no rison lib — the OSS Code-Diff-Analyzer blocks new
+ * deps). Contract (src/plugins/explore/.../utils/state_management/utils/redux_persistence.ts):
+ *  - dataset.id === the Prometheus data-connection `connectionId` (what APM stores
+ *    as config.prometheusDataSource.name / the prometheusConnectionId prop);
+ *  - `signalType:metrics` is mandatory or the dataset is discarded by the flavor;
+ *  - `ui.metricsPageMode:query` opens the query/visualization view.
+ */
+export function navigateToExploreMetrics(
+  promqlQuery: string,
+  connectionId: string,
+  timeRange: ServiceDetailsTimeRange
+): void {
+  const g = `_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
+    timeRange.from
+  )},to:${encodeTimeRangeValueForG(timeRange.to)}))`;
+  // connectionId lands inside rison single-quoted strings; a connection whose id
+  // contains `'`/`!` would corrupt the rison and Explore would drop the dataset,
+  // opening with no data source — so rison-escape it exactly like the query, then
+  // URL-encode so a space/&/#/% in the id can't break the hash.
+  const safeConnectionId = encodeURIComponent(escapeRisonString(connectionId));
+  const dataset = `dataset:(id:'${safeConnectionId}',title:'${safeConnectionId}',type:PROMETHEUS,language:PROMQL,timeFieldName:Time,signalType:metrics,dataSource:(meta:()))`;
+  // The query lives inside a rison single-quoted string. Rison treats `!` and `'`
+  // as special (escape + string terminator), and encodeURIComponent leaves both
+  // raw — so a PromQL matcher like `remoteService!=""` would corrupt the rison and
+  // Explore drops the query. Collapse whitespace (multi-line PromQL), rison-escape
+  // (order matters, handled by escapeRisonString), and finally URL-encode for the hash.
+  const risonSafeQuery = escapeRisonString(promqlQuery.replace(/\s+/g, ' ').trim());
+  const q = `_q=(${dataset},language:PROMQL,query:'${encodeURIComponent(risonSafeQuery)}')`;
+  const a = `_a=(ui:(metricsPageMode:query),tab:(),legacy:())`;
+  const path = `metrics/#?${g}&${q}&${a}`;
+
+  const fullUrl =
+    coreRefs.http?.basePath.prepend(`/app/${EXPLORE_APP_ID}/${path}`) ||
+    `/app/${EXPLORE_APP_ID}/${path}`;
+  window.open(fullUrl, '_blank');
 }
 
 /**
@@ -252,9 +335,9 @@ export function navigateToExploreTraces(
   // Note: Empty strings in RISON must be quoted as ''
   // Note: datasetId is already in correct format from APM config, use as-is
   const dsTitle = dataSourceTitle ? dataSourceTitle : "''";
-  const path = `traces/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+  const path = `traces/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
     timeRange.from
-  },to:${timeRange.to}))&_q=(dataset:(dataSource:(id:'${
+  )},to:${encodeTimeRangeValueForG(timeRange.to)}))&_q=(dataset:(dataSource:(id:'${
     dataSourceId || ''
   }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',schemaMappings:(),signalType:traces,timeFieldName:startTime,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     pplQuery
@@ -342,9 +425,9 @@ export function navigateToExploreLogs(
   // Note: datasetId is already in correct format from APM config, use as-is
   const dsTitle = dataSourceTitle ? dataSourceTitle : "''";
 
-  const path = `logs/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+  const path = `logs/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
     timeRange.from
-  },to:${timeRange.to}))&_q=(dataset:(dataSource:(id:'${
+  )},to:${encodeTimeRangeValueForG(timeRange.to)}))&_q=(dataset:(dataSource:(id:'${
     dataSourceId || ''
   }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',timeFieldName:time,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     pplQuery
@@ -392,7 +475,9 @@ export function navigateToDatasetCorrelations(datasetId: string): void {
  */
 export function openCorrelatedDashboard(dashboardId: string, timeRange?: TimeRange): void {
   const query = timeRange
-    ? `?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${timeRange.from},to:${timeRange.to}))`
+    ? `?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
+        timeRange.from
+      )},to:${encodeTimeRangeValueForG(timeRange.to)}))`
     : '';
   const path = `/app/dashboards#/view/${encodeURIComponent(dashboardId)}${query}`;
   const url = coreRefs.http?.basePath.prepend(path) || path;
