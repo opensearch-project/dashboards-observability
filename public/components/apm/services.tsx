@@ -255,6 +255,7 @@ export const Services = (props: ApmServicesProps) => {
                     nodeType={nodeType as string}
                     timeRange={serviceDetailsTimeRange}
                     refreshTrigger={serviceDetailsRefreshTrigger}
+                    onTimeRangeChange={(from, to) => setServiceDetailsTimeRange({ from, to })}
                   />
                 );
               }

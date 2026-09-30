@@ -36,8 +36,12 @@ jest.mock('../../../shared/components/promql_metric_card', () => ({
     <div data-test-subj="metricCard">{title}</div>
   ),
 }));
+const mockLineChart = jest.fn();
 jest.mock('../../../shared/components/promql_line_chart', () => ({
-  PromQLLineChart: () => <div data-test-subj="promqlChart" />,
+  PromQLLineChart: (props: any) => {
+    mockLineChart(props);
+    return <div data-test-subj="promqlChart" />;
+  },
 }));
 
 import { DependencyDetails } from '../dependency_details';
@@ -213,6 +217,35 @@ describe('DependencyDetails', () => {
     expect(screen.getByText('publish')).toBeInTheDocument();
     // Brokers are reached by producers and consumers, not just callers.
     expect(screen.getAllByText('Producing or consuming service').length).toBeGreaterThan(0);
+  });
+
+  it('explains an overflow node instead of querying spans for it', async () => {
+    renderPage('OtherDatabase', 'database');
+
+    expect(
+      await screen.findByText(/groups dependencies over the data-prepper cardinality cap/)
+    ).toBeInTheDocument();
+    expect(mockExecuteQuery).not.toHaveBeenCalled();
+    // Callers still come from the metrics.
+    expect(await screen.findByText('440')).toBeInTheDocument();
+  });
+
+  it('wires chart brushing to onTimeRangeChange', () => {
+    const onTimeRangeChange = jest.fn();
+    render(
+      <DependencyDetails
+        dependencyName="redis:valkey-cart"
+        environment="generic:default"
+        nodeType="database"
+        timeRange={timeRange}
+        refreshTrigger={0}
+        onTimeRangeChange={onTimeRangeChange}
+      />
+    );
+
+    expect(screen.getAllByTestId('promqlChart')).toHaveLength(4);
+    const charts = mockLineChart.mock.calls.map(([props]) => props);
+    expect(charts.every((p) => p.onTimeRangeChange === onTimeRangeChange)).toBe(true);
   });
 
   it('falls back to the node name when the attribute lookup fails (older data)', async () => {

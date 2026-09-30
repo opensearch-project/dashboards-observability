@@ -555,6 +555,33 @@ describe('useSelectedEdgeMetrics', () => {
       });
     });
 
+    it('excludes consumer series on a producer -> broker edge', async () => {
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
+      renderHook(() =>
+        useSelectedEdgeMetrics({
+          ...defaultParams,
+          selectedEdge: {
+            edgeId: 'checkout::generic:default->kafka:orders::generic:default',
+            sourceService: 'checkout',
+            sourceEnvironment: 'generic:default',
+            targetService: 'kafka:orders',
+            sourceNodeId: 'checkout::generic:default',
+            targetNodeId: 'kafka:orders::generic:default',
+            sourceNodeType: 'service',
+            targetNodeType: 'messaging',
+          },
+        })
+      );
+
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(4));
+      mockExecuteInstantQuery.mock.calls.forEach(([call]) => {
+        expect(call.query).toContain('service="checkout"');
+        expect(call.query).toContain('remoteService="kafka:orders"');
+        expect(call.query).toContain('spanKind!="CONSUMER"');
+        expect(call.query).not.toContain('spanKind!="PRODUCER"');
+      });
+    });
+
     it('keeps service -> dependency edges unchanged', async () => {
       mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
       renderHook(() => useSelectedEdgeMetrics(defaultParams));

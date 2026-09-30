@@ -369,7 +369,8 @@ const LEGACY_MESSAGING_DESTINATION_FIELD = 'messaging.destination';
 // Only the callers' outbound spans target a dependency; a SERVER span's server.address is
 // its own listener, so it must not match an external dependency's host.
 const DEPENDENCY_SPAN_KINDS = ['SPAN_KIND_CLIENT', 'SPAN_KIND_PRODUCER', 'SPAN_KIND_CONSUMER'];
-const HOST_FIELDS = ['server.address', 'net.peer.name'];
+// Same keys and order data-prepper reads the dependency host from.
+const HOST_FIELDS = ['server.address', 'net.peer.name', 'network.peer.address'];
 const DB_NAMESPACE_FIELDS = ['db.namespace', 'db.name'];
 
 /**

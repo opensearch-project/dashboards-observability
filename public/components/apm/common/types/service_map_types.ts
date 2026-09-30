@@ -127,6 +127,8 @@ export interface SelectedEdgeState {
   targetNodeId: string;
   /** Source node type (service / database / messaging / external); messaging marks a broker -> consumer edge */
   sourceNodeType?: string;
+  /** Target node type; messaging marks a producer -> broker edge */
+  targetNodeType?: string;
   /** Target environment (the consumer's environment on a broker -> consumer edge) */
   targetEnvironment?: string;
 }

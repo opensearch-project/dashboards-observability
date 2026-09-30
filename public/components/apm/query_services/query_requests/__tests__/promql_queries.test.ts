@@ -121,4 +121,13 @@ describe('dependency queries and the spanKind label', () => {
       getQueryEdgeLatencyP99('shipping', 'prod', 'kafka:orders', '15m', { consumerEdge: true })
     ).toContain('spanKind!="PRODUCER"');
   });
+
+  it('excludes consumer series on a producer -> broker edge', () => {
+    const producer = getQueryEdgeRequests('checkout', 'prod', 'kafka:orders', '15m', {
+      producerEdge: true,
+    });
+    expect(producer).toContain('service="checkout"');
+    expect(producer).toContain('spanKind!="CONSUMER"');
+    expect(producer).not.toContain('spanKind!="PRODUCER"');
+  });
 });

@@ -93,7 +93,9 @@ export const useSelectedEdgeMetrics = (
     const [qService, qEnvironment, qRemote] = consumerEdge
       ? [targetService, params.selectedEdge.targetEnvironment || sourceEnvironment, sourceService]
       : [sourceService, sourceEnvironment, targetService];
-    const edgeOptions = { consumerEdge };
+    // A producer -> broker edge counts publishes only, even if the producer also consumes.
+    const producerEdge = !consumerEdge && isMessagingType(params.selectedEdge.targetNodeType);
+    const edgeOptions = { consumerEdge, producerEdge };
     const abortController = new AbortController();
     setIsLoading(true);
     setError(null);
@@ -159,6 +161,7 @@ export const useSelectedEdgeMetrics = (
     params.selectedEdge?.sourceEnvironment,
     params.selectedEdge?.targetService,
     params.selectedEdge?.sourceNodeType,
+    params.selectedEdge?.targetNodeType,
     params.selectedEdge?.targetEnvironment,
     promqlService,
     endTimeSec,

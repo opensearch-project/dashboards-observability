@@ -86,8 +86,9 @@ describe('ppl_queries', () => {
     const SYSTEM = (s: string) =>
       `(attributes.db.system.name = '${s}' or attributes.db_system_name = '${s}' or attributes.db_system = '${s}')`;
     const HOST = (h: string) =>
-      `(attributes.server.address = '${h}' or attributes.net.peer.name = '${h}')`;
-    const NO_HOST = 'isnull(attributes.server.address) and isnull(attributes.net.peer.name)';
+      `(attributes.server.address = '${h}' or attributes.net.peer.name = '${h}' or attributes.network.peer.address = '${h}')`;
+    const NO_HOST =
+      'isnull(attributes.server.address) and isnull(attributes.net.peer.name) and isnull(attributes.network.peer.address)';
     const NO_NAMESPACE = 'isnull(attributes.db.namespace) and isnull(attributes.db.name)';
 
     it('returns null without a name', () => {
@@ -160,7 +161,7 @@ describe('ppl_queries', () => {
       expect(buildDependencySpanCondition('Database', 'redis:valkey-cart')).toBe(
         `${SYSTEM(
           'redis'
-        )} and (attributes.server.address = 'valkey-cart' or attributes.net.peer.name = 'valkey-cart' or attributes.db.namespace = 'valkey-cart' or attributes.db.name = 'valkey-cart')`
+        )} and (attributes.server.address = 'valkey-cart' or attributes.net.peer.name = 'valkey-cart' or attributes.network.peer.address = 'valkey-cart' or attributes.db.namespace = 'valkey-cart' or attributes.db.name = 'valkey-cart')`
       );
       expect(buildDependencySpanCondition('database', 'postgresql')).toBe(
         `${SYSTEM('postgresql')} and ${NO_HOST} and ${NO_NAMESPACE}`

@@ -954,15 +954,22 @@ label_replace(
  * Options for edge queries.
  * `consumerEdge`: the edge runs broker -> consumer. Its series belong to the consumer
  * (`service=<consumer>, remoteService=<broker>`), so callers pass the consumer as `service`
- * and the broker as `remoteService`; producer series of that pair are excluded. Series from a
- * data-prepper without the `spanKind` label still match.
+ * and the broker as `remoteService`; producer series of that pair are excluded.
+ * `producerEdge`: the edge runs producer -> broker, so consumer series of that pair (a service
+ * that also consumes the destination it publishes to) are excluded.
+ * Series from a data-prepper without the `spanKind` label still match.
  */
 export interface EdgeQueryOptions {
   consumerEdge?: boolean;
+  producerEdge?: boolean;
 }
 
 const edgeDirectionFilter = (options: EdgeQueryOptions): string =>
-  options.consumerEdge ? ',spanKind!="PRODUCER"' : '';
+  options.consumerEdge
+    ? ',spanKind!="PRODUCER"'
+    : options.producerEdge
+      ? ',spanKind!="CONSUMER"'
+      : '';
 
 /**
  * Get request count for a specific edge (service-to-service connection)

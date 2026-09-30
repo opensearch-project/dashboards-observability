@@ -20,6 +20,7 @@ import { PromQLMetricCard } from '../../shared/components/promql_metric_card';
 import { PromQLLineChart } from '../../shared/components/promql_line_chart';
 import { useApmConfig } from '../../config/apm_config_context';
 import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
+import { ApmCursorContext, createApmCursorBus } from '../../shared/hooks/apm_cursor_context';
 import { RESOLUTION_LOW, formatPrometheusDuration } from '../../shared/utils/step_utils';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { PPLSearchService } from '../../query_services/ppl_search_service';
@@ -50,7 +51,18 @@ export interface DependencyDetailsProps {
   nodeType: string;
   timeRange: TimeRange;
   refreshTrigger: number;
+  /** Called with ISO-8601 start/end when a chart is brushed, to zoom the page time range. */
+  onTimeRangeChange?: (from: string, to: string) => void;
 }
+
+// data-prepper folds dependencies over its cardinality cap into these nodes (one per type,
+// plus the pre-typed fallback), so they match no single dependency's spans.
+const OVERFLOW_DEPENDENCY_NAMES = new Set([
+  'OtherDatabase',
+  'OtherExternal',
+  'OtherMessaging',
+  'OtherRemoteService',
+]);
 
 interface CallerRow {
   service: string;
@@ -84,8 +96,12 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
   nodeType,
   timeRange,
   refreshTrigger,
+  onTimeRangeChange,
 }) => {
   const { config } = useApmConfig();
+  // Syncs the crosshair across this page's charts.
+  const cursorBus = useMemo(() => createApmCursorBus(), []);
+  const isOverflow = OVERFLOW_DEPENDENCY_NAMES.has(dependencyName);
   const prometheusConnectionId = config?.prometheusDataSource?.name || '';
   const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
@@ -152,7 +168,7 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
   // the node name for older documents) within the selected time range.
   useEffect(() => {
     const tracesDataset = config?.tracesDataset;
-    if (!tracesDataset || !dependencyName) {
+    if (!tracesDataset || !dependencyName || isOverflow) {
       setSpans([]);
       return;
     }
@@ -242,7 +258,16 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
     };
     // timeRange is keyed on its from/to strings so a re-created object does not refetch.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config, nodeType, dependencyName, environment, timeRange.from, timeRange.to, refreshTrigger]);
+  }, [
+    config,
+    nodeType,
+    dependencyName,
+    isOverflow,
+    environment,
+    timeRange.from,
+    timeRange.to,
+    refreshTrigger,
+  ]);
 
   const requestsQuery = getQueryDependencyRequests(environment, dependencyName, chartStepWindow);
   const faultsQuery = getQueryDependencyFaults(environment, dependencyName, chartStepWindow);
@@ -423,101 +448,107 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
       <EuiSpacer size="m" />
 
       {/* Charts */}
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
-          <EuiPanel paddingSize="s" hasBorder>
-            <EuiText size="xs">
-              <strong>
-                {i18n.translate('observability.apm.dependencyDetails.requests', {
-                  defaultMessage: 'Requests',
-                })}
-              </strong>
-            </EuiText>
-            <PromQLLineChart
-              promqlQuery={requestsQuery}
-              timeRange={timeRange}
-              prometheusConnectionId={prometheusConnectionId}
-              chartType="area"
-              height={CHART_HEIGHT}
-              showLegend={false}
-              formatValue={formatCount}
-              refreshTrigger={refreshTrigger}
-              color={APM_CONSTANTS.COLORS.THROUGHPUT}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel paddingSize="s" hasBorder>
-            <EuiText size="xs">
-              <strong>
-                {i18n.translate('observability.apm.dependencyDetails.latency', {
-                  defaultMessage: 'Latency',
-                })}
-              </strong>
-            </EuiText>
-            <PromQLLineChart
-              promqlQuery={latencyQuery}
-              timeRange={timeRange}
-              prometheusConnectionId={prometheusConnectionId}
-              chartType="line"
-              height={CHART_HEIGHT}
-              showLegend={true}
-              formatValue={formatLatency}
-              refreshTrigger={refreshTrigger}
-              labelField="percentile"
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ApmCursorContext.Provider value={cursorBus}>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <EuiPanel paddingSize="s" hasBorder>
+              <EuiText size="xs">
+                <strong>
+                  {i18n.translate('observability.apm.dependencyDetails.requests', {
+                    defaultMessage: 'Requests',
+                  })}
+                </strong>
+              </EuiText>
+              <PromQLLineChart
+                promqlQuery={requestsQuery}
+                timeRange={timeRange}
+                prometheusConnectionId={prometheusConnectionId}
+                chartType="area"
+                height={CHART_HEIGHT}
+                showLegend={false}
+                formatValue={formatCount}
+                refreshTrigger={refreshTrigger}
+                onTimeRangeChange={onTimeRangeChange}
+                color={APM_CONSTANTS.COLORS.THROUGHPUT}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel paddingSize="s" hasBorder>
+              <EuiText size="xs">
+                <strong>
+                  {i18n.translate('observability.apm.dependencyDetails.latency', {
+                    defaultMessage: 'Latency',
+                  })}
+                </strong>
+              </EuiText>
+              <PromQLLineChart
+                promqlQuery={latencyQuery}
+                timeRange={timeRange}
+                prometheusConnectionId={prometheusConnectionId}
+                chartType="line"
+                height={CHART_HEIGHT}
+                showLegend={true}
+                formatValue={formatLatency}
+                refreshTrigger={refreshTrigger}
+                onTimeRangeChange={onTimeRangeChange}
+                labelField="percentile"
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
 
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
-          <EuiPanel paddingSize="s" hasBorder>
-            <EuiText size="xs">
-              <strong>
-                {i18n.translate('observability.apm.dependencyDetails.faults5xx', {
-                  defaultMessage: 'Faults (5xx)',
-                })}
-              </strong>
-            </EuiText>
-            <PromQLLineChart
-              promqlQuery={faultsQuery}
-              timeRange={timeRange}
-              prometheusConnectionId={prometheusConnectionId}
-              chartType="area"
-              height={CHART_HEIGHT}
-              showLegend={false}
-              formatValue={formatCount}
-              refreshTrigger={refreshTrigger}
-              color={APM_CONSTANTS.COLORS.FAULT}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel paddingSize="s" hasBorder>
-            <EuiText size="xs">
-              <strong>
-                {i18n.translate('observability.apm.dependencyDetails.errors4xx', {
-                  defaultMessage: 'Errors (4xx)',
-                })}
-              </strong>
-            </EuiText>
-            <PromQLLineChart
-              promqlQuery={errorsQuery}
-              timeRange={timeRange}
-              prometheusConnectionId={prometheusConnectionId}
-              chartType="area"
-              height={CHART_HEIGHT}
-              showLegend={false}
-              formatValue={formatCount}
-              refreshTrigger={refreshTrigger}
-              color={APM_CONSTANTS.COLORS.WARNING}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            <EuiPanel paddingSize="s" hasBorder>
+              <EuiText size="xs">
+                <strong>
+                  {i18n.translate('observability.apm.dependencyDetails.faults5xx', {
+                    defaultMessage: 'Faults (5xx)',
+                  })}
+                </strong>
+              </EuiText>
+              <PromQLLineChart
+                promqlQuery={faultsQuery}
+                timeRange={timeRange}
+                prometheusConnectionId={prometheusConnectionId}
+                chartType="area"
+                height={CHART_HEIGHT}
+                showLegend={false}
+                formatValue={formatCount}
+                refreshTrigger={refreshTrigger}
+                onTimeRangeChange={onTimeRangeChange}
+                color={APM_CONSTANTS.COLORS.FAULT}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel paddingSize="s" hasBorder>
+              <EuiText size="xs">
+                <strong>
+                  {i18n.translate('observability.apm.dependencyDetails.errors4xx', {
+                    defaultMessage: 'Errors (4xx)',
+                  })}
+                </strong>
+              </EuiText>
+              <PromQLLineChart
+                promqlQuery={errorsQuery}
+                timeRange={timeRange}
+                prometheusConnectionId={prometheusConnectionId}
+                chartType="area"
+                height={CHART_HEIGHT}
+                showLegend={false}
+                formatValue={formatCount}
+                refreshTrigger={refreshTrigger}
+                onTimeRangeChange={onTimeRangeChange}
+                color={APM_CONSTANTS.COLORS.WARNING}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </ApmCursorContext.Provider>
 
       <EuiSpacer size="m" />
 
@@ -573,9 +604,16 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
           items={spans}
           columns={spanColumns}
           loading={spansLoading}
-          noItemsMessage={i18n.translate('observability.apm.dependencyDetails.spans.empty', {
-            defaultMessage: 'No spans found for this dependency in the selected time range.',
-          })}
+          noItemsMessage={
+            isOverflow
+              ? i18n.translate('observability.apm.dependencyDetails.spans.overflow', {
+                  defaultMessage:
+                    'This node groups dependencies over the data-prepper cardinality cap, so its spans cannot be matched to a single dependency.',
+                })
+              : i18n.translate('observability.apm.dependencyDetails.spans.empty', {
+                  defaultMessage: 'No spans found for this dependency in the selected time range.',
+                })
+          }
         />
       </EuiPanel>
     </div>

@@ -424,6 +424,7 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
           sourceNodeId: edge.source,
           targetNodeId: edge.target,
           sourceNodeType: sourceInfo.type,
+          targetNodeType: targetInfo.type,
           targetEnvironment: targetInfo.environment,
         });
       }
