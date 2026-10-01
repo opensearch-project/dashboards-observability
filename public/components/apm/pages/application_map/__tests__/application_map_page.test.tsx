@@ -90,6 +90,17 @@ describe('ApplicationMapPage time range URL sync', () => {
     expect(params.get('to')).toBe('now');
   });
 
+  it('backfills from/to on mount when the URL has no range', () => {
+    window.history.replaceState(null, '', '#/application-map?service=checkout');
+    render(<ApplicationMapPage {...props} />);
+
+    const params = hashParams();
+    // The map's default/persisted range, written so the link is shareable.
+    expect(params.get('from')).toBeTruthy();
+    expect(params.get('to')).toBeTruthy();
+    expect(params.get('service')).toBe('checkout');
+  });
+
   it('keeps the deep-linked range in the URL on mount', () => {
     window.history.replaceState(null, '', '#/application-map?from=now-7d&to=now');
     render(<ApplicationMapPage {...props} />);

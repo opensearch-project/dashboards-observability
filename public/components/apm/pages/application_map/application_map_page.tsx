@@ -355,17 +355,25 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   const isLoading = mapLoading || metricsLoading;
 
   // Keep URL `from`/`to` in sync with the time range (picker or flyout brush) so a
-  // picked range survives reload and can be shared. Other hash params are kept.
-  // Skip the first run: on mount the URL is the source of truth (effect above).
+  // picked range survives reload and can be shared, and backfill a URL that carries
+  // no range at all. Other hash params are kept.
   const isFirstTimeSyncRef = useRef(true);
   useEffect(() => {
-    if (isFirstTimeSyncRef.current) {
-      isFirstTimeSyncRef.current = false;
-      return;
-    }
     const [path, query = ''] = window.location.hash.split('?');
     const params = new URLSearchParams(query);
-    if (params.get('from') === timeRange.from && params.get('to') === timeRange.to) return;
+    const isFirstRun = isFirstTimeSyncRef.current;
+    isFirstTimeSyncRef.current = false;
+    const isRangeMissing = !params.get('from') || !params.get('to');
+    // On the first run a deep-linked range is the source of truth (the URL-param
+    // effect above pushes it into state), so only write when the URL has no range.
+    if (isFirstRun && !isRangeMissing) return;
+    if (
+      !isRangeMissing &&
+      params.get('from') === timeRange.from &&
+      params.get('to') === timeRange.to
+    ) {
+      return;
+    }
     params.set('from', timeRange.from);
     params.set('to', timeRange.to);
     window.history.replaceState(null, '', `${path || '#/application-map'}?${params.toString()}`);

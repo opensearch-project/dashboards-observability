@@ -109,28 +109,6 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceName, environment, initialTab, onTimeChange, parseUrlParams]);
 
-  // Listen for URL hash changes and update tab and time range. A deep link to the
-  // same service with a different `from`/`to` only changes the hash, so without
-  // this the charts would stay on the previous range while the URL shows the new one.
-  useEffect(() => {
-    const handleHashChange = () => {
-      const urlParams = parseUrlParams();
-      if (urlParams.tab && urlParams.tab !== activeTab) {
-        setActiveTab(urlParams.tab);
-      }
-      if (
-        urlParams.from &&
-        urlParams.to &&
-        (urlParams.from !== timeRange.from || urlParams.to !== timeRange.to)
-      ) {
-        onTimeChange({ from: urlParams.from, to: urlParams.to });
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [parseUrlParams, activeTab, timeRange, onTimeChange]);
-
   // Update URL when state changes
   const updateUrl = useCallback(
     (newTab?: ServiceDetailsTabId, newTimeRange?: TimeRange) => {
@@ -158,18 +136,47 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
     [serviceName, environment, activeTab, timeRange]
   );
 
+  // Listen for URL hash changes and update tab and time range. A deep link to the
+  // same service with a different `from`/`to` only changes the hash, so without
+  // this the charts would stay on the previous range while the URL shows the new one.
+  useEffect(() => {
+    const handleHashChange = () => {
+      const urlParams = parseUrlParams();
+      if (urlParams.tab && urlParams.tab !== activeTab) {
+        setActiveTab(urlParams.tab);
+      }
+      if (!urlParams.from || !urlParams.to) {
+        // An in-page navigation can push a URL with no range (e.g. a dependency
+        // link). `timeRange` does not change, so the sync effect below never runs —
+        // backfill here or the URL stays unshareable. Pass the URL's tab: `activeTab`
+        // is still the pre-navigation one in this closure.
+        updateUrl(urlParams.tab, timeRange);
+      } else if (urlParams.from !== timeRange.from || urlParams.to !== timeRange.to) {
+        onTimeChange({ from: urlParams.from, to: urlParams.to });
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parseUrlParams, activeTab, timeRange, onTimeChange]);
+
   // Keep URL `from`/`to` in sync with the page time range, whatever changed it
-  // (header picker, brush, hash change). Skip the first run: on mount the URL is
-  // the source of truth and the effect above pushes it into `timeRange`.
+  // (header picker, brush, hash change), and backfill a URL that carries no range at
+  // all so every link is shareable.
   const isFirstTimeSyncRef = useRef(true);
   useEffect(() => {
-    if (isFirstTimeSyncRef.current) {
-      isFirstTimeSyncRef.current = false;
+    const urlParams = parseUrlParams();
+    const isFirstRun = isFirstTimeSyncRef.current;
+    isFirstTimeSyncRef.current = false;
+    const isRangeMissing = !urlParams.from || !urlParams.to;
+    // On the first run a deep-linked range is the source of truth (the mount effect
+    // above pushes it into `timeRange`), so only write when the URL has no range.
+    if (isFirstRun && !isRangeMissing) {
       return;
     }
-    const urlParams = parseUrlParams();
-    if (urlParams.from !== timeRange.from || urlParams.to !== timeRange.to) {
-      updateUrl(undefined, timeRange);
+    if (isRangeMissing || urlParams.from !== timeRange.from || urlParams.to !== timeRange.to) {
+      updateUrl(urlParams.tab, timeRange);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRange]);

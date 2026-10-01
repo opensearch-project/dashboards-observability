@@ -100,6 +100,49 @@ describe('ServiceDetails time range URL sync', () => {
     expect(onTimeChange).not.toHaveBeenCalled();
   });
 
+  it('backfills from/to on a hash change that pushed a URL with no range', () => {
+    setHash('#/service-details/checkout/prod?tab=overview&from=now%2Fd&to=now%2Fd');
+    render(
+      <ServiceDetails
+        {...baseProps}
+        timeRange={{ from: 'now/d', to: 'now/d' }}
+        onTimeChange={jest.fn()}
+      />
+    );
+
+    // An in-page dependency link pushes a URL with no from/to (the range is unchanged,
+    // so the time-range sync effect never re-runs).
+    act(() => {
+      setHash('#/service-details/checkout/prod?tab=dependencies&dependency=svc-009-feed');
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    });
+
+    const params = hashParams();
+    expect(params.get('from')).toBe('now/d');
+    expect(params.get('to')).toBe('now/d');
+    // The navigation target must survive the backfill.
+    expect(params.get('tab')).toBe('dependencies');
+    expect(params.get('dependency')).toBe('svc-009-feed');
+  });
+
+  it('backfills from/to on mount when the entry URL has no range', () => {
+    setHash('#/service-details/checkout/prod?tab=overview');
+    const onTimeChange = jest.fn();
+    render(
+      <ServiceDetails
+        {...baseProps}
+        timeRange={{ from: 'now-15m', to: 'now' }}
+        onTimeChange={onTimeChange}
+      />
+    );
+
+    const params = hashParams();
+    expect(params.get('from')).toBe('now-15m');
+    expect(params.get('to')).toBe('now');
+    expect(params.get('tab')).toBe('overview');
+    expect(onTimeChange).not.toHaveBeenCalled();
+  });
+
   it('writes a picker time change to the URL and keeps other params', () => {
     setHash('#/service-details/checkout/prod?tab=overview&from=now-15m&to=now&lang=java');
     const { rerender } = render(
