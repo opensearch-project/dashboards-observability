@@ -115,6 +115,9 @@ describe('ServiceCorrelationsFlyout Agent Traces routing', () => {
     });
     render(<ServiceCorrelationsFlyout {...props} />);
     await waitFor(() => expect(screen.getByText('View in Agent Traces')).toBeInTheDocument());
+    // The description names the button it sits next to.
+    expect(screen.getByText(/Click "View in Agent Traces"/)).toBeInTheDocument();
+    expect(screen.queryByText(/Click "Explore Traces"/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByText('genai'));
     expect(navigateToAgentTraceDetails).toHaveBeenCalledWith(
@@ -147,6 +150,7 @@ describe('ServiceCorrelationsFlyout Agent Traces routing', () => {
     await waitFor(() => expect(screen.getByText('http')).toBeInTheDocument());
 
     expect(screen.getByText('Explore Traces')).toBeInTheDocument();
+    expect(screen.getByText(/Click "Explore Traces"/)).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('apmCorrelationsExploreTraces'));
     expect(navigateToExploreTraces).toHaveBeenCalled();
     expect(navigateToAgentTraces).not.toHaveBeenCalled();

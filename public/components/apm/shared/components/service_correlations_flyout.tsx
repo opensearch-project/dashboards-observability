@@ -809,7 +809,9 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
-        {i18nTexts.spansDescription}
+        {agentTracesAvailable && isGenAiService
+          ? i18nTexts.spansDescriptionAgentTraces
+          : i18nTexts.spansDescription}
       </EuiText>
       {spanFilterFallback && (
         <>

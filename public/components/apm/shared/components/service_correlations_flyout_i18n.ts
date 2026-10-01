@@ -115,6 +115,13 @@ export const correlationsFlyoutI18nTexts = {
     defaultMessage:
       'Showing the most recent spans correlated with this service, sorted by start time. Filtering by status or HTTP code searches all matching spans in the selected time range and returns the most recent. Click "Explore Traces" to view all spans in detail.',
   }),
+  spansDescriptionAgentTraces: i18n.translate(
+    'observability.apm.correlationsFlyout.spansDescriptionAgentTraces',
+    {
+      defaultMessage:
+        'Showing the most recent spans correlated with this service, sorted by start time. Filtering by status or HTTP code searches all matching spans in the selected time range and returns the most recent. Click "View in Agent Traces" to view the GenAI spans, traces and sessions.',
+    }
+  ),
   logsDescription: i18n.translate('observability.apm.correlationsFlyout.logsDescription', {
     defaultMessage:
       'Showing the most recent logs from each correlated dataset. Filtering by log level searches all matching logs in the selected time range and returns the most recent.',
