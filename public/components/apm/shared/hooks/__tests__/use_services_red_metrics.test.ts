@@ -167,7 +167,7 @@ describe('useServicesRedMetrics', () => {
   });
 
   describe('dependency rows (database / messaging / external)', () => {
-    const isDependencyQuery = (q: string) => q.includes('remoteService!=""');
+    const isDependencyQuery = (q: string) => /remoteService(!=""|=~)/.test(q);
     const withDependency = {
       ...defaultParams,
       services: [
@@ -262,7 +262,7 @@ describe('useServicesRedMetrics', () => {
       expect(result.current.error).toEqual(depError);
     });
 
-    it('keeps dotted dependency names out of the sparkline service=~ filter', async () => {
+    it('bounds the dependency sparklines to the page dependencies, escaped for the literal', async () => {
       renderHook(() =>
         useServicesRedMetrics({
           ...withDependency,
@@ -270,19 +270,25 @@ describe('useServicesRedMetrics', () => {
         })
       );
 
-      // Service batch (3) + one ungrouped dependency batch (3).
+      // Service batch (3) + dependency batch (3).
       await waitFor(() => expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(6), {
         timeout: 2000,
       });
 
       const rangeQueries = mockExecuteMetricRequest.mock.calls.map((c) => c[0].query as string);
-      const serviceBatch = rangeQueries.filter((q) => q.includes('service=~'));
+      const serviceBatch = rangeQueries.filter((q) => /[{,]service=~/.test(q));
       expect(serviceBatch).toHaveLength(3);
       serviceBatch.forEach((q) => {
         expect(q).toContain('service=~"api-gateway"');
         expect(q).not.toContain('openai');
       });
-      expect(rangeQueries.filter(isDependencyQuery)).toHaveLength(3);
+      const depBatch = rangeQueries.filter(isDependencyQuery);
+      expect(depBatch).toHaveLength(3);
+      depBatch.forEach((q) => {
+        // Only this page's dependency, not every remote target (`remoteService!=""`).
+        expect(q).toContain('remoteService=~"api\\\\.openai\\\\.com"');
+        expect(q).not.toContain('remoteService!=""');
+      });
     });
   });
 

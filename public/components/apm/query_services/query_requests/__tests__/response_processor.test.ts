@@ -266,6 +266,44 @@ describe('response_processor', () => {
     });
   });
 
+  describe('transformGetServiceMapResponse dependency placeholders', () => {
+    it('drops unresolved dependency placeholders and their edges, as the catalog does', () => {
+      const result = transformGetServiceMapResponse({
+        jsonData: [
+          {
+            'sourceNode.keyAttributes': { name: 'cart', environment: 'prod' },
+            'sourceNode.type': 'service',
+            'targetNode.keyAttributes': { name: 'redis:valkey-cart', environment: 'prod' },
+            'targetNode.type': 'database',
+          },
+          {
+            'sourceNode.keyAttributes': { name: 'cart', environment: 'prod' },
+            'sourceNode.type': 'service',
+            'targetNode.keyAttributes': { name: 'UnknownRemoteService', environment: 'prod' },
+            'targetNode.type': 'external',
+          },
+          {
+            'sourceNode.keyAttributes': { name: 'cart', environment: 'prod' },
+            'sourceNode.type': 'service',
+            'targetNode.keyAttributes': { name: 'unknown', environment: 'prod' },
+            'targetNode.type': 'service',
+          },
+        ],
+        size: 3,
+      } as unknown);
+
+      expect(result.Nodes.map((n: any) => n.Name).sort()).toEqual([
+        'cart',
+        'redis:valkey-cart',
+        'unknown',
+      ]);
+      expect(result.Edges).toHaveLength(2);
+      expect(result.Edges.map((e: any) => e.DestinationNodeId).join(' ')).not.toContain(
+        'UnknownRemoteService'
+      );
+    });
+  });
+
   describe('transformGetServiceResponse', () => {
     it('should transform valid service detail', () => {
       const pplResponse = {

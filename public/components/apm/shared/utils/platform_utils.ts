@@ -82,17 +82,39 @@ const SERVICE_TYPE_LABEL = i18n.translate('observability.apm.nodeType.service', 
   defaultMessage: 'Service',
 });
 
+const OTHER_DEPENDENCY_TYPE_LABEL = i18n.translate('observability.apm.nodeType.otherDependency', {
+  defaultMessage: 'Other dependency',
+});
+
 /** Node types, in the order the catalog Type filter lists them. */
 export const NODE_TYPES = ['service', 'database', 'messaging', 'external'];
 
 /**
- * True when the node type is an inferred dependency (database / messaging / external)
- * rather than an instrumented service.
+ * The node type in its canonical form: lower case, with a missing type (data from a
+ * data-prepper without typed nodes) treated as `service`.
+ * @param nodeType - The node's type
+ */
+export function normalizeNodeType(nodeType: string | undefined): string {
+  return (nodeType || '').toLowerCase() || 'service';
+}
+
+/**
+ * True when the node is an inferred dependency rather than an instrumented service: any
+ * type other than `service`, including types this version does not know yet, which get the
+ * dependency views with a generic label.
  * @param nodeType - The node's type
  */
 export function isDependencyType(nodeType: string | undefined): boolean {
-  const key = (nodeType || '').toLowerCase();
-  return key === 'database' || key === 'messaging' || key === 'external';
+  return normalizeNodeType(nodeType) !== 'service';
+}
+
+/**
+ * True for the placeholders data-prepper uses for a remote target it could not identify
+ * (`UnknownRemoteService` / `unknown`). Only dependency nodes count, so a real service with
+ * such a name is still shown.
+ */
+export function isDependencyPlaceholder(name: string | undefined, nodeType: string | undefined) {
+  return isDependencyType(nodeType) && (name === 'UnknownRemoteService' || name === 'unknown');
 }
 
 /**
@@ -109,7 +131,9 @@ export function isMessagingType(nodeType: string | undefined): boolean {
  * @param nodeType - The node's type
  */
 export function getNodeTypeLabel(nodeType: string | undefined): string {
-  return NODE_TYPE_LABEL_MAP[(nodeType || '').toLowerCase()] || SERVICE_TYPE_LABEL;
+  const key = normalizeNodeType(nodeType);
+  if (key === 'service') return SERVICE_TYPE_LABEL;
+  return NODE_TYPE_LABEL_MAP[key] || OTHER_DEPENDENCY_TYPE_LABEL;
 }
 
 /**

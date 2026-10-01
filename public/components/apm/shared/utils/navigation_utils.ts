@@ -13,6 +13,7 @@ import {
 } from '../../../../../common/constants/apm';
 import { coreRefs } from '../../../../framework/core_refs';
 import { buildSuggestSearch } from '../../pages/slos/slo_suggest_scope';
+import { isDependencyType, normalizeNodeType } from './platform_utils';
 
 /**
  * Serialize a single datemath time value (from/to) for a hand-built rison `_g`
@@ -161,9 +162,10 @@ export function navigateToServiceDetails(
     params.set('dependency', options.dependency);
   }
 
-  // Add node type so the detail route can render a tailored dependency view
-  if (options?.nodeType) {
-    params.set('nodeType', options.nodeType);
+  // Add the node type for dependencies so the detail route renders the dependency view;
+  // service links stay as before.
+  if (isDependencyType(options?.nodeType)) {
+    params.set('nodeType', normalizeNodeType(options?.nodeType));
   }
 
   // Build path for hash-based routing
@@ -199,7 +201,9 @@ export function openServiceDetailsInNewTab(
     params.set('to', options.timeRange.to);
   }
   if (options?.language) params.set('lang', options.language);
-  if (options?.nodeType) params.set('nodeType', options.nodeType);
+  if (isDependencyType(options?.nodeType)) {
+    params.set('nodeType', normalizeNodeType(options?.nodeType));
+  }
 
   const queryString = params.toString();
   const hash = `#/service-details/${encodedServiceName}/${encodedEnvironment}${

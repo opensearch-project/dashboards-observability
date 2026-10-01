@@ -91,9 +91,13 @@ jest.mock('../../../shared/components/active_filter_badges', () => ({
   ),
   FilterBadge: () => null,
 }));
+const mockSloHealthPanel = jest.fn();
 jest.mock('../slo_health_panel', () => ({
   SloHealthCell: () => <div />,
-  SloHealthPanel: () => <div />,
+  SloHealthPanel: (props: unknown) => {
+    mockSloHealthPanel(props);
+    return <div />;
+  },
   SLO_HEALTH_COLUMN_HEADER: 'SLO',
   SLO_HEALTH_COLUMN_HEADER_TIP: '',
   SLO_HEALTH_COLUMN_WIDTH: '100px',
@@ -278,6 +282,38 @@ describe('ServicesHome — Node type column and filter', () => {
     expect(screen.getByTestId('stub-ActiveFilterBadges')).toHaveTextContent(
       `${servicesI18nTexts.table.type}: Database`
     );
+  });
+
+  it('lists unknown types in the filter and keeps them out of "Service"', () => {
+    renderTyped([
+      { serviceName: 'cart', type: 'service' },
+      { serviceName: 'memcached:sessions', type: 'cache' },
+    ]);
+
+    const group = within(screen.getByTestId('typeCheckboxGroup'));
+    fireEvent.click(group.getByLabelText('Service'));
+    expect(rowNames()).toEqual(['cart']);
+    fireEvent.click(group.getByLabelText('Service'));
+    fireEvent.click(group.getByLabelText('Other dependency'));
+    expect(rowNames()).toEqual(['memcached:sessions']);
+  });
+
+  it('offers only instrumented services to the SLO rollup', () => {
+    const refs = jest.requireMock('../../../../../framework/core_refs').coreRefs;
+    refs.sloEnabled = true;
+    try {
+      renderTyped([
+        { serviceName: 'cart', type: 'service' },
+        { serviceName: 'kafka:orders', type: 'messaging' },
+        { serviceName: 'checkout' },
+      ]);
+
+      const panelCalls = mockSloHealthPanel.mock.calls;
+      expect(panelCalls.length).toBeGreaterThan(0);
+      expect(panelCalls[panelCalls.length - 1][0].allServices).toEqual(['cart', 'checkout']);
+    } finally {
+      refs.sloEnabled = false;
+    }
   });
 
   it('sorting by Type fetches sparklines for the rows actually shown', () => {

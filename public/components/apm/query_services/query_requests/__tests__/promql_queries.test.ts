@@ -14,6 +14,10 @@ import {
   getQueryDependencyLatency,
   getQueryDependencyFaultRateCard,
   getQueryDependencyCallers,
+  getQueryDependencyFaults,
+  getQueryDependencyErrorRateCard,
+  getQueryDependencyLatencyP99Card,
+  dependencyNamesFilter,
   getQueryServiceMapDependencyThroughput,
   getQueryServiceMapDependencyFailureRatioTotal,
   getQueryServiceMapDependencyLatencyInstant,
@@ -96,11 +100,57 @@ describe('dependency queries and the spanKind label', () => {
     });
   });
 
-  it('every request/error/fault/latency selector in the map builders carries the filter', () => {
+  it('every selector is publish-side, or consumer-side only in the fallback', () => {
     const q = getQueryServiceMapDependencyFailureRatioTotal('15m');
-    const selectors = q.match(/\{remoteService!=""[^}]*\}/g) || [];
-    expect(selectors.length).toBe(3);
-    selectors.forEach((sel) => expect(sel).toContain('spanKind!="CONSUMER"'));
+    const [publish, consumer] = q.split(') or (');
+    const publishSelectors = publish.match(/\{remoteService!=""[^}]*\}/g) || [];
+    const consumerSelectors = consumer.match(/\{remoteService!=""[^}]*\}/g) || [];
+    expect(publishSelectors.length).toBe(3);
+    publishSelectors.forEach((sel) => expect(sel).toContain('spanKind!="CONSUMER"'));
+    expect(consumerSelectors.length).toBe(3);
+    consumerSelectors.forEach((sel) => expect(sel).toContain('spanKind="CONSUMER"'));
+  });
+
+  // A broker whose producers are not instrumented has only consumer series; the publish-side
+  // expression is empty for it, so `or` takes the consumer side. Elsewhere the publish side wins.
+  it('falls back to consumer series for brokers with no publish-side series', () => {
+    [
+      getQueryDependencyRequests('generic:default', 'kafka:orders', '1m'),
+      getQueryDependencyFaults('generic:default', 'kafka:orders'),
+      getQueryDependencyErrorRateCard('generic:default', 'kafka:orders'),
+      getQueryDependencyLatencyP99Card('generic:default', 'kafka:orders', '1m'),
+      getQueryServiceMapDependencyThroughput('15m'),
+      getQueryServiceMapDependencyLatencyInstant(0.99, '15m'),
+      getQueryServiceMapDependencyThroughputRange(),
+    ].forEach((q) => {
+      const [publish, consumer] = q.split(') or (');
+      expect(publish).toContain('spanKind!="CONSUMER"');
+      expect(consumer).toContain('spanKind="CONSUMER"');
+    });
+    expect(getQueryDependencyRequests('generic:default', 'kafka:orders', '1m')).toBe(
+      '(sum(sum_over_time(request{remoteService="kafka:orders",remoteEnvironment="generic:default",namespace="span_derived",spanKind!="CONSUMER"}[1m]))) or ' +
+        '(sum(sum_over_time(request{remoteService="kafka:orders",remoteEnvironment="generic:default",namespace="span_derived",spanKind="CONSUMER"}[1m])))'
+    );
+  });
+
+  it('scales every latency percentile after the fallback', () => {
+    const q = getQueryDependencyLatency('generic:default', 'kafka:orders');
+    // `((publish) or (consumer)) * 1000`: the scale applies to whichever side is used.
+    expect(q.match(/\)\) \* 1000/g)?.length).toBe(3);
+  });
+
+  it('bounds the dependency sparklines to the given targets', () => {
+    const filter = dependencyNamesFilter(['api.openai.com:443', 'kafka:orders']);
+    expect(filter).toBe('remoteService=~"api\\\\.openai\\\\.com:443|kafka:orders"');
+    const q = getQueryServiceMapDependencyThroughputRange(filter);
+    expect(q).toContain(`{${filter},spanKind!="CONSUMER",namespace="span_derived"}`);
+    expect(q).not.toContain('remoteService!=""');
+  });
+
+  it('caps the callers table', () => {
+    expect(getQueryDependencyCallers('generic:default', 'kafka:orders', '15m')).toMatch(
+      /^topk\(100, sum by \(service, remoteOperation, spanKind\)/
+    );
   });
 
   it('callers keep both directions and group by spanKind', () => {

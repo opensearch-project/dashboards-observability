@@ -13,6 +13,7 @@ import {
   navigateToExploreMetrics,
   openCorrelatedDashboard,
   openApmSettings,
+  navigateToServiceDetails,
 } from '../navigation_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 
@@ -697,5 +698,29 @@ describe('openApmSettings (correlated dashboards, experimental)', () => {
     window.location.hash = '#/services';
     openApmSettings();
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(HashChangeEvent));
+  });
+});
+
+describe('navigateToServiceDetails nodeType param', () => {
+  const navigateToApp = jest.fn();
+
+  beforeEach(() => {
+    navigateToApp.mockReset();
+    (coreRefs as any).application = { navigateToApp };
+  });
+
+  const pathFor = (nodeType?: string) => {
+    navigateToServiceDetails('svc', 'generic:default', { nodeType });
+    return navigateToApp.mock.calls[0][1].path as string;
+  };
+
+  it('adds the node type for dependencies', () => {
+    expect(pathFor('Database')).toContain('nodeType=database');
+  });
+
+  it('leaves service links without a node type', () => {
+    expect(pathFor('service')).not.toContain('nodeType');
+    expect(pathFor('Service')).not.toContain('nodeType');
+    expect(pathFor(undefined)).not.toContain('nodeType');
   });
 });

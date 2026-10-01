@@ -5,7 +5,7 @@
 
 import {
   getPlatformTypeFromEnvironment,
-  isDependencyType,
+  isDependencyPlaceholder,
 } from '../../shared/utils/platform_utils';
 
 /**
@@ -395,12 +395,9 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
     }
 
     // Suppress unresolved dependency placeholders: these are CLIENT spans whose remote
-    // target could not be identified, and add only noise to the catalog. Scoped to
-    // dependency nodes so a real service with such a name is still listed.
-    if (
-      isDependencyType(nodeType) &&
-      (serviceName === 'UnknownRemoteService' || serviceName === 'unknown')
-    ) {
+    // target could not be identified, and add only noise to the catalog. The map drops
+    // them the same way (transformGetServiceMapResponse).
+    if (isDependencyPlaceholder(serviceName, nodeType)) {
       return;
     }
 
@@ -818,7 +815,12 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
     const remoteEnvironment = remoteServiceKeyAttributes?.environment;
     const remoteServiceGroupByAttributes = row['targetNode.groupByAttributes'] || {};
 
-    if (remoteServiceName && remoteEnvironment) {
+    // Unresolved dependency placeholders are hidden, as in the catalog.
+    if (
+      remoteServiceName &&
+      remoteEnvironment &&
+      !isDependencyPlaceholder(remoteServiceName, row['targetNode.type'])
+    ) {
       const depNodeKey = `${remoteServiceName}::${remoteEnvironment}`;
 
       if (!nodeMap.has(depNodeKey)) {
@@ -924,7 +926,13 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
       const remoteEnvironment =
         remoteServiceKeyAttributes?.environment || row['targetNode.environment'];
 
-      if (!serviceName || !environmentType || !remoteServiceName || !remoteEnvironment) {
+      if (
+        !serviceName ||
+        !environmentType ||
+        !remoteServiceName ||
+        !remoteEnvironment ||
+        isDependencyPlaceholder(remoteServiceName, row['targetNode.type'])
+      ) {
         return null;
       }
 

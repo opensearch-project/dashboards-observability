@@ -7,6 +7,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
+  EuiCallOut,
+  EuiInMemoryTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -37,6 +39,7 @@ import {
   getQueryDependencyErrorRateCard,
   getQueryDependencyLatencyP99Card,
   getQueryDependencyCallers,
+  DEPENDENCY_CALLERS_LIMIT,
 } from '../../query_services/query_requests/promql_queries';
 import {
   buildDependencySpanCondition,
@@ -44,6 +47,7 @@ import {
   getQueryDependencyAttributes,
   getQueryDependencySpans,
 } from '../../query_services/query_requests/ppl_queries';
+import { getMappedFieldNames } from '../../query_services/field_mapping_service';
 
 export interface DependencyDetailsProps {
   dependencyName: string;
@@ -83,6 +87,10 @@ interface SpanRow {
 
 const CHART_HEIGHT = 200;
 
+const errorMessage = (e: unknown): string =>
+  (e as { body?: { message?: string } })?.body?.message ||
+  (e instanceof Error ? e.message : String(e));
+
 /**
  * DependencyDetails - tailored detail page for inferred dependency nodes
  * (database / messaging / external). These do not emit their own spans, so all
@@ -113,8 +121,10 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
 
   const [callers, setCallers] = useState<CallerRow[]>([]);
   const [callersLoading, setCallersLoading] = useState(false);
+  const [callersError, setCallersError] = useState<string | null>(null);
   const [spans, setSpans] = useState<SpanRow[]>([]);
   const [spansLoading, setSpansLoading] = useState(false);
+  const [spansError, setSpansError] = useState<string | null>(null);
 
   const promqlService = useMemo(() => {
     if (!prometheusConnectionId) return null;
@@ -127,6 +137,7 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
     const abortController = new AbortController();
     const fetchCallers = async () => {
       setCallersLoading(true);
+      setCallersError(null);
       try {
         // Aggregate caller request counts over the selected range, evaluated at its end
         // (not "now") so a historical range shows that range's callers.
@@ -144,6 +155,7 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
         if (!abortController.signal.aborted) {
           console.error('[DependencyDetails] Failed to fetch callers:', e);
           setCallers([]);
+          setCallersError(errorMessage(e));
         }
       } finally {
         if (!abortController.signal.aborted) setCallersLoading(false);
@@ -165,11 +177,14 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
 
   // Fetch the caller spans that target this dependency (it emits none of its own),
   // matched on the node's dependencyAttributes from the service map (falling back to
-  // the node name for older documents) within the selected time range.
+  // the node name for older documents) within the selected time range. Only the span
+  // keys mapped in the traces index are queried.
   useEffect(() => {
     const tracesDataset = config?.tracesDataset;
+    setSpansError(null);
     if (!tracesDataset || !dependencyName || isOverflow) {
       setSpans([]);
+      setSpansLoading(false);
       return;
     }
     const serviceMapDataset = config?.serviceMapDataset;
@@ -178,62 +193,59 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
       title: ds.title,
       ...(ds.datasourceId && { dataSource: { id: ds.datasourceId, type: 'DATA_SOURCE' } }),
     });
-    let cancelled = false;
+    const abortController = new AbortController();
+    const { signal } = abortController;
     const fetchSpans = async () => {
       setSpansLoading(true);
       try {
         const pplService = new PPLSearchService();
         const { startTime, endTime } = parseTimeRange(timeRange);
+        const [spanFields, serviceMapFields] = await Promise.all([
+          getMappedFieldNames(tracesDataset.title, tracesDataset.datasourceId),
+          serviceMapDataset
+            ? getMappedFieldNames(serviceMapDataset.title, serviceMapDataset.datasourceId)
+            : Promise.resolve(new Set<string>()),
+        ]);
+        if (signal.aborted) return;
 
+        // Service-map documents written before dependencyAttributes existed have none
+        // mapped; the node name is parsed instead, without querying for them.
         let attributes: Record<string, string> = {};
-        if (serviceMapDataset) {
-          try {
-            const attrResp = await pplService.executeQuery(
-              getQueryDependencyAttributes(
-                serviceMapDataset.title,
-                dependencyName,
-                environment,
-                startTime,
-                endTime
-              ),
-              toDataset(serviceMapDataset)
-            );
-            attributes = flattenDependencyAttributes(
-              attrResp.jsonData?.[0]?.['targetNode.dependencyAttributes']
-            );
-          } catch (_e) {
-            // Older service-map data has no dependencyAttributes; parse the name instead.
-            attributes = {};
-          }
+        const hasDependencyAttributes = Array.from(serviceMapFields).some((f) =>
+          f.startsWith('targetNode.dependencyAttributes.')
+        );
+        if (serviceMapDataset && hasDependencyAttributes) {
+          const attrResp = await pplService.executeQuery(
+            getQueryDependencyAttributes(
+              serviceMapDataset.title,
+              dependencyName,
+              environment,
+              startTime,
+              endTime
+            ),
+            toDataset(serviceMapDataset),
+            signal
+          );
+          if (signal.aborted) return;
+          attributes = flattenDependencyAttributes(
+            attrResp.jsonData?.[0]?.['targetNode.dependencyAttributes']
+          );
         }
-        if (cancelled) return;
 
-        const spansQuery = (includeLegacyKeys: boolean) => {
-          const condition = buildDependencySpanCondition(nodeType, dependencyName, attributes, {
-            includeLegacyKeys,
-          });
-          return condition
-            ? getQueryDependencySpans(tracesDataset.title, condition, startTime, endTime)
-            : null;
-        };
-        const query = spansQuery(false);
-        if (!query) {
+        const condition = buildDependencySpanCondition(nodeType, dependencyName, attributes, {
+          mappedFields: spanFields,
+        });
+        if (!condition) {
+          // None of the keys that identify this dependency is mapped in the span index.
           setSpans([]);
           return;
         }
-        let resp = await pplService.executeQuery(query, toDataset(tracesDataset));
-        // Only if nothing matched, also try the legacy keys (`db.system`,
-        // `messaging.destination`). They are objects wherever their `.name` keys are
-        // mapped, and PPL rejects that comparison, so this attempt may fail harmlessly.
-        const legacyQuery = spansQuery(true);
-        if (!cancelled && !(resp.jsonData || []).length && legacyQuery && legacyQuery !== query) {
-          try {
-            resp = await pplService.executeQuery(legacyQuery, toDataset(tracesDataset));
-          } catch (_e) {
-            // Keep the (empty) result of the query without legacy keys.
-          }
-        }
-        if (cancelled) return;
+        const resp = await pplService.executeQuery(
+          getQueryDependencySpans(tracesDataset.title, condition, startTime, endTime),
+          toDataset(tracesDataset),
+          signal
+        );
+        if (signal.aborted) return;
         const rows: SpanRow[] = (resp.jsonData || []).map((item: any, idx: number) => ({
           spanId: item.spanId || `span-${idx}`,
           serviceName: item.serviceName || '-',
@@ -244,18 +256,17 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
         }));
         setSpans(rows);
       } catch (e) {
-        if (!cancelled) {
+        if (!signal.aborted) {
           console.error('[DependencyDetails] Failed to fetch dependency spans:', e);
           setSpans([]);
+          setSpansError(errorMessage(e));
         }
       } finally {
-        if (!cancelled) setSpansLoading(false);
+        if (!signal.aborted) setSpansLoading(false);
       }
     };
     fetchSpans();
-    return () => {
-      cancelled = true;
-    };
+    return () => abortController.abort();
     // timeRange is keyed on its from/to strings so a re-created object does not refetch.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -280,6 +291,7 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
   const callerColumns = [
     {
       field: 'service',
+      sortable: true,
       name: isMessaging
         ? i18n.translate('observability.apm.dependencyDetails.callers.messagingService', {
             defaultMessage: 'Producing or consuming service',
@@ -319,6 +331,7 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
       name: i18n.translate('observability.apm.dependencyDetails.callers.requests', {
         defaultMessage: 'Requests',
       }),
+      sortable: true,
       align: 'right' as const,
       render: (v: number) => formatCount(v),
     },
@@ -350,7 +363,14 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
       name: i18n.translate('observability.apm.dependencyDetails.spans.status', {
         defaultMessage: 'Status',
       }),
-      render: (code: number) => (code === 2 ? 'Error' : 'OK'),
+      render: (code: number) =>
+        code === 2
+          ? i18n.translate('observability.apm.dependencyDetails.spans.statusError', {
+              defaultMessage: 'Error',
+            })
+          : i18n.translate('observability.apm.dependencyDetails.spans.statusOk', {
+              defaultMessage: 'OK',
+            }),
     },
     {
       field: 'startTime',
@@ -374,7 +394,7 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
             {isMessaging
               ? i18n.translate('observability.apm.dependencyDetails.messagingSubtitle', {
                   defaultMessage:
-                    'Inferred message broker — throughput, latency and failures are measured on publishes, so each message counts once.',
+                    'Inferred message broker — throughput, latency and failures are measured on publishes, so each message counts once (on consumes when no producer is instrumented).',
                 })
               : i18n.translate('observability.apm.dependencyDetails.subtitle', {
                   defaultMessage:
@@ -572,13 +592,46 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
               })}
         </EuiText>
         <EuiSpacer size="s" />
-        <EuiBasicTable
+        {callersError && (
+          <>
+            <EuiCallOut
+              size="s"
+              color="danger"
+              iconType="alert"
+              data-test-subj="dependencyCallersError"
+              title={i18n.translate('observability.apm.dependencyDetails.callers.error', {
+                defaultMessage: 'Could not load callers',
+              })}
+            >
+              <p>{callersError}</p>
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {callers.length >= DEPENDENCY_CALLERS_LIMIT && (
+          <>
+            <EuiText size="xs" color="subdued" data-test-subj="dependencyCallersLimited">
+              {i18n.translate('observability.apm.dependencyDetails.callers.limited', {
+                defaultMessage: 'Showing the {limit} busiest callers.',
+                values: { limit: DEPENDENCY_CALLERS_LIMIT },
+              })}
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <EuiInMemoryTable
           items={callers}
           columns={callerColumns}
           loading={callersLoading}
-          noItemsMessage={i18n.translate('observability.apm.dependencyDetails.callers.empty', {
-            defaultMessage: 'No callers found in the selected time range.',
-          })}
+          pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50, 100] }}
+          sorting={{ sort: { field: 'requests', direction: 'desc' as const } }}
+          message={
+            callersError
+              ? ' '
+              : i18n.translate('observability.apm.dependencyDetails.callers.empty', {
+                  defaultMessage: 'No callers found in the selected time range.',
+                })
+          }
         />
       </EuiPanel>
 
@@ -600,19 +653,38 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
           })}
         </EuiText>
         <EuiSpacer size="s" />
+        {spansError && (
+          <>
+            <EuiCallOut
+              size="s"
+              color="danger"
+              iconType="alert"
+              data-test-subj="dependencySpansError"
+              title={i18n.translate('observability.apm.dependencyDetails.spans.error', {
+                defaultMessage: 'Could not load spans',
+              })}
+            >
+              <p>{spansError}</p>
+            </EuiCallOut>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <EuiBasicTable
           items={spans}
           columns={spanColumns}
           loading={spansLoading}
           noItemsMessage={
-            isOverflow
-              ? i18n.translate('observability.apm.dependencyDetails.spans.overflow', {
-                  defaultMessage:
-                    'This node groups dependencies over the data-prepper cardinality cap, so its spans cannot be matched to a single dependency.',
-                })
-              : i18n.translate('observability.apm.dependencyDetails.spans.empty', {
-                  defaultMessage: 'No spans found for this dependency in the selected time range.',
-                })
+            spansError
+              ? ' '
+              : isOverflow
+                ? i18n.translate('observability.apm.dependencyDetails.spans.overflow', {
+                    defaultMessage:
+                      'This node groups dependencies over the data-prepper cardinality cap, so its spans cannot be matched to a single dependency.',
+                  })
+                : i18n.translate('observability.apm.dependencyDetails.spans.empty', {
+                    defaultMessage:
+                      'No spans found for this dependency in the selected time range.',
+                  })
           }
         />
       </EuiPanel>

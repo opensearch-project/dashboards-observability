@@ -27,11 +27,105 @@ import { ServiceDetails } from './pages/service_details';
 import { DependencyDetails } from './pages/service_details/dependency_details';
 import { navigateToServiceDetails } from './shared/utils/navigation_utils';
 import { isDependencyType } from './shared/utils/platform_utils';
+import { useResolvedNodeType } from './shared/hooks/use_resolved_node_type';
+import { TimeRange as ServiceDetailsTimeRange } from './common/types/service_details_types';
 import { TimeRangePicker } from './shared/components/time_filter';
 import { LanguageIcon } from './shared/components/language_icon';
 import { LegacyBanner } from './shared/components/legacy_banner';
 import { usePersistentTimeRange } from './shared/hooks/use_persistent_time_range';
 import './shared/styles/apm_common.scss';
+
+interface ServiceDetailsRouteProps {
+  serviceName: string;
+  environment?: string;
+  /** `nodeType` from the URL; a hint only, the service map decides. */
+  hintedNodeType?: string;
+  timeRange: ServiceDetailsTimeRange;
+  onTimeChange: (timeRange: ServiceDetailsTimeRange) => void;
+  onRefresh: () => void;
+  refreshTrigger: number;
+}
+
+/** Replace `from` / `to` in the current hash's query, keeping its other params. */
+const writeTimeRangeToUrl = (from: string, to: string) => {
+  const [path, query = ''] = window.location.hash.split('?');
+  const params = new URLSearchParams(query);
+  params.set('from', from);
+  params.set('to', to);
+  window.history.replaceState(null, '', `${path}?${params.toString()}`);
+};
+
+/**
+ * Service details route: the dependency view for inferred dependencies, otherwise the
+ * instrumented-service view (which would be empty for a dependency). The page type comes from
+ * the service map, so a missing or wrong `nodeType` in the URL still opens the right view.
+ */
+export const ServiceDetailsRoute: React.FC<ServiceDetailsRouteProps> = ({
+  serviceName,
+  environment,
+  hintedNodeType,
+  timeRange,
+  onTimeChange,
+  onRefresh,
+  refreshTrigger,
+}) => {
+  const { nodeType, resolving } = useResolvedNodeType(serviceName, environment, hintedNodeType);
+  const isDependency = !resolving && isDependencyType(nodeType);
+
+  // A shared dependency link carries its time range (the service view reads it itself).
+  useEffect(() => {
+    if (!isDependency) return;
+    const query = window.location.hash.split('?')[1] || '';
+    const params = new URLSearchParams(query);
+    const from = params.get('from');
+    const to = params.get('to');
+    if (from && to) onTimeChange({ from, to });
+    // Only when the dependency view opens for this node.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDependency, serviceName, environment]);
+
+  const handleDependencyBrush = useCallback(
+    (from: string, to: string) => {
+      onTimeChange({ from, to });
+      writeTimeRangeToUrl(from, to);
+    },
+    [onTimeChange]
+  );
+
+  if (resolving) {
+    return (
+      <EuiFlexGroup justifyContent="center" style={{ padding: 40 }}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="l" data-test-subj="serviceDetailsResolvingType" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (isDependency) {
+    return (
+      <DependencyDetails
+        dependencyName={serviceName}
+        environment={environment}
+        nodeType={nodeType}
+        timeRange={timeRange}
+        refreshTrigger={refreshTrigger}
+        onTimeRangeChange={handleDependencyBrush}
+      />
+    );
+  }
+
+  return (
+    <ServiceDetails
+      serviceName={serviceName}
+      environment={environment}
+      timeRange={timeRange}
+      onTimeChange={onTimeChange}
+      onRefresh={onRefresh}
+      refreshTrigger={refreshTrigger}
+    />
+  );
+};
 
 export interface ApmServicesProps {
   chrome: any;
@@ -185,7 +279,8 @@ export const Services = (props: ApmServicesProps) => {
   const setServiceDetailsBreadcrumbs = (
     serviceName: string,
     environment?: string,
-    language?: string
+    language?: string,
+    nodeType?: string
   ) => {
     chrome.setBreadcrumbs([
       {
@@ -205,7 +300,9 @@ export const Services = (props: ApmServicesProps) => {
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        href: `#/service-details/${serviceName}/${environment || 'default'}`,
+        href: `#/service-details/${serviceName}/${environment || 'default'}${
+          isDependencyType(nodeType) ? `?nodeType=${encodeURIComponent(nodeType as string)}` : ''
+        }`,
       },
     ]);
   };
@@ -243,27 +340,13 @@ export const Services = (props: ApmServicesProps) => {
               if (language !== currentServiceLanguage) {
                 setCurrentServiceLanguage(language);
               }
-              setServiceDetailsBreadcrumbs(serviceName, environment, language);
-
-              // Inferred dependencies (database / messaging / external) get a tailored
-              // page instead of the instrumented-service layout, which would be empty.
-              if (isDependencyType(nodeType)) {
-                return (
-                  <DependencyDetails
-                    dependencyName={decodedServiceName}
-                    environment={decodedEnvironment !== 'default' ? decodedEnvironment : undefined}
-                    nodeType={nodeType as string}
-                    timeRange={serviceDetailsTimeRange}
-                    refreshTrigger={serviceDetailsRefreshTrigger}
-                    onTimeRangeChange={(from, to) => setServiceDetailsTimeRange({ from, to })}
-                  />
-                );
-              }
+              setServiceDetailsBreadcrumbs(serviceName, environment, language, nodeType);
 
               return (
-                <ServiceDetails
+                <ServiceDetailsRoute
                   serviceName={decodedServiceName}
                   environment={decodedEnvironment !== 'default' ? decodedEnvironment : undefined}
+                  hintedNodeType={nodeType}
                   timeRange={serviceDetailsTimeRange}
                   onTimeChange={setServiceDetailsTimeRange}
                   onRefresh={handleServiceDetailsRefresh}

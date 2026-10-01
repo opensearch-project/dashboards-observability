@@ -8,6 +8,10 @@ import {
   getPlatformTypeFromEnvironment,
   toPrometheusLabel,
   PLATFORM_TYPE_MAP,
+  isDependencyType,
+  isDependencyPlaceholder,
+  getNodeTypeLabel,
+  normalizeNodeType,
 } from '../platform_utils';
 
 describe('platform_utils', () => {
@@ -106,6 +110,32 @@ describe('platform_utils', () => {
 
     it('should handle paths with multiple consecutive dots', () => {
       expect(toPrometheusLabel('a..b')).toBe('a__b');
+    });
+  });
+
+  describe('node types', () => {
+    it('treats a missing type as a service', () => {
+      expect(normalizeNodeType(undefined)).toBe('service');
+      expect(normalizeNodeType('')).toBe('service');
+      expect(normalizeNodeType('Service')).toBe('service');
+      expect(isDependencyType(undefined)).toBe(false);
+      expect(getNodeTypeLabel(undefined)).toBe('Service');
+    });
+
+    it('treats every other type, including unknown future ones, as a dependency', () => {
+      ['database', 'Messaging', 'external', 'cache'].forEach((t) =>
+        expect(isDependencyType(t)).toBe(true)
+      );
+      expect(getNodeTypeLabel('Database')).toBe('Database');
+      // Unknown types get a generic dependency label, not "Service".
+      expect(getNodeTypeLabel('cache')).toBe('Other dependency');
+    });
+
+    it('recognizes dependency placeholders only on dependency nodes', () => {
+      expect(isDependencyPlaceholder('UnknownRemoteService', 'external')).toBe(true);
+      expect(isDependencyPlaceholder('unknown', 'database')).toBe(true);
+      expect(isDependencyPlaceholder('unknown', 'service')).toBe(false);
+      expect(isDependencyPlaceholder('redis:valkey-cart', 'database')).toBe(false);
     });
   });
 });

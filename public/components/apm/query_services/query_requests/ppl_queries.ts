@@ -325,6 +325,22 @@ export function getQueryDependencyAttributes(
 }
 
 /**
+ * Query for the type of the node with this name (and environment, when given), read from a
+ * service-map document where it is the target: dependencies only ever appear as targets,
+ * and a service that is never a target is a root service. Not time-bounded, so an old link
+ * still resolves.
+ */
+export function getQueryNodeType(queryIndex: string, name: string, environment?: string): string {
+  let query = `source=${queryIndex}`;
+  query += ` | where targetNode.keyAttributes.name = '${escapePPLString(name)}'`;
+  if (environment) {
+    query += ` and targetNode.keyAttributes.environment = '${escapePPLString(environment)}'`;
+  }
+  query += ` | head 1 | fields targetNode.type`;
+  return query;
+}
+
+/**
  * Flatten a (possibly nested) `dependencyAttributes` value into dotted keys. PPL returns
  * the dynamic object as a nested struct (`{ server: { address: 'x' } }`); `_source` may
  * already use dotted keys, and some response shapes serialize it as a JSON string.
@@ -352,29 +368,52 @@ export function flattenDependencyAttributes(value: unknown, prefix = ''): Record
   return out;
 }
 
-const spanFieldIn = (fields: string[], value: string): string =>
-  `(${fields.map((f) => `attributes.${f} = '${escapePPLString(value)}'`).join(' or ')})`;
-const spanFieldsNull = (fields: string[]): string =>
-  fields.map((f) => `isnull(attributes.${f})`).join(' and ');
-
 // Span attribute keys (semconv plus the flattened variants seen in OTel data) that
-// data-prepper reads when it names a dependency node. PPL rejects the whole query when it
-// compares an object path to a string, so the legacy keys `db.system` and
-// `messaging.destination` (objects wherever `db.system.name` / `messaging.destination.name`
-// are mapped) are only added on request; see includeLegacyKeys.
-const DB_SYSTEM_FIELDS = ['db.system.name', 'db_system_name', 'db_system'];
-const LEGACY_DB_SYSTEM_FIELD = 'db.system';
-const MESSAGING_DESTINATION_FIELDS = ['messaging.destination.name'];
-const LEGACY_MESSAGING_DESTINATION_FIELD = 'messaging.destination';
+// data-prepper reads when it names a dependency node, including the legacy keys
+// `db.system` and `messaging.destination`. Only the keys mapped in the span index are
+// queried (see buildDependencySpanCondition): PPL rejects a path below a mapped
+// keyword (`db.system.name` where `db.system` is a keyword), and an unmapped key below a
+// mapped object turns the whole filter, time range included, into a script.
+const DB_SYSTEM_FIELDS = ['db.system.name', 'db_system_name', 'db_system', 'db.system'];
+const MESSAGING_DESTINATION_FIELDS = ['messaging.destination.name', 'messaging.destination'];
+// Keys queried when the span mapping is unknown: the current semconv keys only, since
+// the legacy keys fail the query wherever their `.name` children are mapped.
+const LEGACY_FIELDS = new Set(['db.system', 'messaging.destination']);
 // Only the callers' outbound spans target a dependency; a SERVER span's server.address is
 // its own listener, so it must not match an external dependency's host.
 const DEPENDENCY_SPAN_KINDS = ['SPAN_KIND_CLIENT', 'SPAN_KIND_PRODUCER', 'SPAN_KIND_CONSUMER'];
 // Same keys and order data-prepper reads the dependency host from.
 const HOST_FIELDS = ['server.address', 'net.peer.name', 'network.peer.address'];
 const DB_NAMESPACE_FIELDS = ['db.namespace', 'db.name'];
+// Columns the Spans table reads; projecting them avoids returning every span's attributes,
+// resource, events and links.
+const DEPENDENCY_SPAN_COLUMNS = [
+  'spanId',
+  'serviceName',
+  'name',
+  'durationInNanos',
+  'status.code',
+  'startTime',
+];
+
+// A condition is built as `where` stages, each a flat expression: an OR of comparisons, or
+// an AND of isnull checks. Stages are ANDed by chaining. Parentheses are avoided because
+// the OpenSearch 2.x PPL grammar cannot parse a parenthesized comparison
+// (`where (a = 'x' or b = 'x')`). A stage is NEVER when no span can match (none of its
+// keys is mapped) and ALWAYS when it constrains nothing (isnull over unmapped keys).
+const NEVER = Symbol('never');
+const ALWAYS = Symbol('always');
+type Stage = string | typeof NEVER | typeof ALWAYS;
+
+const whereStages = (...stages: Stage[]): string[] | null => {
+  if (stages.includes(NEVER)) return null;
+  const exprs = stages.filter((p): p is string => typeof p === 'string');
+  // A condition that would match every outbound span never identifies one dependency.
+  return exprs.length ? exprs : null;
+};
 
 /**
- * Build the PPL condition selecting the callers' spans that target a dependency node.
+ * Build the PPL `where` stages selecting the callers' spans that target a dependency node.
  * A dependency emits no spans of its own, so these are the callers' CLIENT / PRODUCER /
  * CONSUMER spans, matched the way data-prepper names the node:
  * database `{system}:{host}` > `{system}:{namespace}` > `{system}`; messaging
@@ -389,18 +428,38 @@ const DB_NAMESPACE_FIELDS = ['db.namespace', 'db.name'];
  * @param nodeType - database / messaging / external (case-insensitive)
  * @param dependencyName - Dependency node name
  * @param attributes - Flattened `dependencyAttributes` of the node, if known
- * @param options.includeLegacyKeys - Also match the legacy keys `db.system` and
- *   `messaging.destination`; the query fails where those paths are objects, so callers
- *   retry without them
- * @returns PPL boolean expression, or null when nothing identifies the dependency
+ * @param options.mappedFields - Field names mapped in the span index (see
+ *   getMappedFieldNames). Only these keys are queried, so the condition never references
+ *   an unmapped or invalid path; a key that is not mapped holds no value. When omitted,
+ *   the current semconv keys are queried and the legacy ones skipped.
+ * @returns Conditions to apply as successive `where` stages, or null when no span can match
  */
 export function buildDependencySpanCondition(
   nodeType: string,
   dependencyName: string,
   attributes: Record<string, string> = {},
-  options: { includeLegacyKeys?: boolean } = {}
-): string | null {
+  options: { mappedFields?: ReadonlySet<string> } = {}
+): string[] | null {
   if (!dependencyName) return null;
+  const { mappedFields } = options;
+  const usable = (fields: string[]) =>
+    fields.filter((f) =>
+      mappedFields ? mappedFields.has(`attributes.${f}`) : !LEGACY_FIELDS.has(f)
+    );
+  const comparisons = (fields: string[], value: string) =>
+    usable(fields).map((f) => `attributes.${f} = '${escapePPLString(value)}'`);
+  // Any of the comparisons (an empty list cannot match).
+  const anyOf = (...lists: string[][]): Stage => {
+    const all = lists.flat();
+    return all.length ? all.join(' or ') : NEVER;
+  };
+  const fieldIn = (fields: string[], value: string): Stage => anyOf(comparisons(fields, value));
+  // None of the keys holds a value (unmapped keys hold none).
+  const fieldsNull = (fields: string[]): Stage => {
+    const keys = usable(fields);
+    return keys.length ? keys.map((f) => `isnull(attributes.${f})`).join(' and ') : ALWAYS;
+  };
+
   const type = (nodeType || '').toLowerCase();
   const sep = dependencyName.indexOf(':');
   const namePrefix = sep >= 0 ? dependencyName.slice(0, sep) : dependencyName;
@@ -410,19 +469,13 @@ export function buildDependencySpanCondition(
   if (type === 'messaging') {
     const destination = attributes['messaging.destination.name'] || nameSuffix || dependencyName;
     const system = attributes['messaging.system'] || (nameSuffix ? namePrefix : '');
-    const destinationFields = options.includeLegacyKeys
-      ? [...MESSAGING_DESTINATION_FIELDS, LEGACY_MESSAGING_DESTINATION_FIELD]
-      : MESSAGING_DESTINATION_FIELDS;
-    const destinationCondition = spanFieldIn(destinationFields, destination);
-    return system
-      ? `${destinationCondition} and ${spanFieldIn(['messaging.system'], system)}`
-      : destinationCondition;
+    return whereStages(
+      fieldIn(MESSAGING_DESTINATION_FIELDS, destination),
+      system ? fieldIn(['messaging.system'], system) : ALWAYS
+    );
   }
 
   if (type === 'database') {
-    const systemFields = options.includeLegacyKeys
-      ? [...DB_SYSTEM_FIELDS, LEGACY_DB_SYSTEM_FIELD]
-      : DB_SYSTEM_FIELDS;
     let system = attributes['db.system.name'];
     let host = attributes['server.address'];
     const namespace = attributes['db.namespace'];
@@ -435,22 +488,30 @@ export function buildDependencySpanCondition(
       else if (nameSuffix) [system, hostOrNamespace] = [namePrefix, nameSuffix];
       else system = dependencyName;
     }
-    const withSystem = (condition: string) =>
-      system ? `${spanFieldIn(systemFields, system)} and ${condition}` : condition;
-    const noHost = spanFieldsNull(HOST_FIELDS);
-    if (host) return withSystem(spanFieldIn(HOST_FIELDS, host));
+    const systemStage = system ? fieldIn(DB_SYSTEM_FIELDS, system) : ALWAYS;
+    if (host) return whereStages(systemStage, fieldIn(HOST_FIELDS, host));
     if (hostOrNamespace) {
-      return withSystem(spanFieldIn([...HOST_FIELDS, ...DB_NAMESPACE_FIELDS], hostOrNamespace));
+      return whereStages(
+        systemStage,
+        fieldIn([...HOST_FIELDS, ...DB_NAMESPACE_FIELDS], hostOrNamespace)
+      );
     }
-    if (namespace)
-      return withSystem(`${noHost} and ${spanFieldIn(DB_NAMESPACE_FIELDS, namespace)}`);
-    return withSystem(`${noHost} and ${spanFieldsNull(DB_NAMESPACE_FIELDS)}`);
+    if (namespace) {
+      return whereStages(
+        systemStage,
+        fieldsNull(HOST_FIELDS),
+        fieldIn(DB_NAMESPACE_FIELDS, namespace)
+      );
+    }
+    return whereStages(systemStage, fieldsNull(HOST_FIELDS), fieldsNull(DB_NAMESPACE_FIELDS));
   }
 
   // external
   const host = attributes['server.address'] || (hasPortSuffix ? namePrefix : dependencyName);
   const peerService = attributes['peer.service'] || dependencyName;
-  return `(${spanFieldIn(HOST_FIELDS, host)} or ${spanFieldIn(['peer.service'], peerService)})`;
+  return whereStages(
+    anyOf(comparisons(HOST_FIELDS, host), comparisons(['peer.service'], peerService))
+  );
 }
 
 /**
@@ -458,7 +519,7 @@ export function buildDependencySpanCondition(
  * Restricted to outbound (CLIENT / PRODUCER / CONSUMER) spans.
  *
  * @param tracesIndex - Traces (span) index name
- * @param condition - Condition from buildDependencySpanCondition
+ * @param conditions - `where` stages from buildDependencySpanCondition
  * @param startTime - Start time for filtering (Date or ISO string)
  * @param endTime - End time for filtering (Date or ISO string)
  * @param limit - Maximum rows
@@ -466,14 +527,18 @@ export function buildDependencySpanCondition(
  */
 export function getQueryDependencySpans(
   tracesIndex: string,
-  condition: string,
+  conditions: string[],
   startTime?: string | Date,
   endTime?: string | Date,
   limit = 50
 ): string {
   let query = `source=${tracesIndex}`;
   query += buildTimeFilterClause(startTime, endTime, 'startTime');
-  query += ` | where (${DEPENDENCY_SPAN_KINDS.map((k) => `kind = '${k}'`).join(' or ')})`;
-  query += ` | where ${condition} | sort - startTime | head ${limit}`;
+  query += ` | where ${DEPENDENCY_SPAN_KINDS.map((k) => `kind = '${k}'`).join(' or ')}`;
+  conditions.forEach((condition) => {
+    query += ` | where ${condition}`;
+  });
+  query += ` | sort - startTime | head ${limit}`;
+  query += ` | fields ${DEPENDENCY_SPAN_COLUMNS.join(', ')}`;
   return query;
 }

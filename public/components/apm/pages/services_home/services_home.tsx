@@ -75,7 +75,12 @@ import {
 } from '../../shared/components/filters';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../common/constants';
-import { isDependencyType, getNodeTypeLabel, NODE_TYPES } from '../../shared/utils/platform_utils';
+import {
+  isDependencyType,
+  getNodeTypeLabel,
+  normalizeNodeType,
+  NODE_TYPES,
+} from '../../shared/utils/platform_utils';
 import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
 import { formatThroughput } from '../../common/format_utils';
 import { TruncatedLabel } from '../../../common/truncated_label';
@@ -398,6 +403,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     () => (services || []).some((s) => isDependencyType(s.type)),
     [services]
   );
+  // The known types, plus any type in the data this version has no label for.
+  const typeFilterOptions = useMemo(() => {
+    const extra = new Set<string>();
+    (services || []).forEach((s) => {
+      const t = normalizeNodeType(s.type);
+      if (!NODE_TYPES.includes(t)) extra.add(t);
+    });
+    return [...NODE_TYPES, ...Array.from(extra).sort()];
+  }, [services]);
 
   // --- SLO health rollup ---------------------------------------------------
   // We want the hook to fetch once per service-set change, *not* on every
@@ -431,8 +445,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     []
   );
 
+  // SLOs are defined on instrumented services, so dependency rows are not offered for them
+  // and do not count against the rollup's name cap.
   const serviceNamesKey = useMemo(() => {
-    const names = (services || []).map((s) => s.serviceName);
+    const names = (services || [])
+      .filter((s) => !isDependencyType(s.type))
+      .map((s) => s.serviceName);
     names.sort();
     return names.join('\n');
   }, [services]);
@@ -601,8 +619,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     const hasSelectedTypes = Object.values(selectedTypes).some((v) => v);
     if (hasDependencyRows && hasSelectedTypes) {
       filtered = filtered.filter((service) => {
-        const t = (service.type || 'service').toLowerCase();
-        return selectedTypes[t] === true;
+        return selectedTypes[normalizeNodeType(service.type)] === true;
       });
     }
 
@@ -1470,7 +1487,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                 <EuiSpacer size="xs" />
                                 <EuiCheckboxGroup
                                   className="apmFilterCheckboxGroup"
-                                  options={NODE_TYPES.map((id) => ({
+                                  options={typeFilterOptions.map((id) => ({
                                     id,
                                     label: getNodeTypeLabel(id),
                                   }))}
