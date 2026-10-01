@@ -10,10 +10,13 @@ import { TimeRange } from '../../../common/types/service_types';
 
 // Expose the page's time range setter so tests can simulate a picker change.
 let mockSetPageTimeRange: (range: TimeRange) => void = () => {};
+let mockCurrentRange: TimeRange | undefined;
+const mockLatestTimeRange = () => mockCurrentRange;
 jest.mock('../../../shared/hooks/use_persistent_time_range', () => ({
   usePersistentTimeRange: (fallback: TimeRange) => {
     const [range, setRange] = jest.requireActual('react').useState(fallback);
     mockSetPageTimeRange = setRange;
+    mockCurrentRange = range;
     return [range, setRange];
   },
 }));
@@ -108,5 +111,32 @@ describe('ApplicationMapPage time range URL sync', () => {
     const params = hashParams();
     expect(params.get('from')).toBe('now-7d');
     expect(params.get('to')).toBe('now');
+  });
+
+  it.each([
+    ['Today quick select', { from: 'now/d', to: 'now/d' }],
+    ['This week quick select', { from: 'now/w', to: 'now/w' }],
+    ['absolute ISO', { from: '2026-09-29T20:00:00.000Z', to: '2026-09-29T21:00:00.000Z' }],
+    ['relative future', { from: 'now', to: 'now+1h' }],
+  ])('writes a %s range that reads back on reload', (_label, range) => {
+    window.history.replaceState(null, '', '#/application-map?from=now-15m&to=now');
+    const first = render(<ApplicationMapPage {...props} />);
+    act(() => mockSetPageTimeRange(range));
+    const written = window.location.hash;
+    first.unmount();
+
+    // Reload: a fresh mount must read the written range back and leave the URL as is.
+    window.history.replaceState(null, '', written);
+    render(<ApplicationMapPage {...props} />);
+    expect(mockLatestTimeRange()).toEqual(range);
+    expect(window.location.hash).toBe(written);
+  });
+
+  it('backfills a deep-linked range the mount reader rejects', () => {
+    window.history.replaceState(null, '', '#/application-map?from=%3Cscript%3E&to=now');
+    render(<ApplicationMapPage {...props} />);
+    const params = hashParams();
+    expect(params.get('from')).not.toBe('<script>');
+    expect(params.get('from')).toBeTruthy();
   });
 });

@@ -167,4 +167,94 @@ describe('ServiceDetails time range URL sync', () => {
     expect(params.get('lang')).toBe('java');
     expect(params.get('tab')).toBe('overview');
   });
+
+  describe('navigating away by a hash link (no rewrite back to this service)', () => {
+    it('leaves the Services breadcrumb URL alone', () => {
+      setHash('#/service-details/checkout/prod?tab=overview&from=now-15m&to=now');
+      render(
+        <ServiceDetails
+          {...baseProps}
+          timeRange={{ from: 'now-15m', to: 'now' }}
+          onTimeChange={jest.fn()}
+        />
+      );
+
+      act(() => {
+        setHash('#/services');
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      });
+
+      expect(window.location.hash).toBe('#/services');
+    });
+
+    it('leaves another service’s URL alone, then backfills it for the new service', () => {
+      setHash('#/service-details/checkout/prod?tab=overview&from=now-15m&to=now');
+      const onTimeChange = jest.fn();
+      const { rerender } = render(
+        <ServiceDetails
+          {...baseProps}
+          timeRange={{ from: 'now-15m', to: 'now' }}
+          onTimeChange={onTimeChange}
+        />
+      );
+
+      // The hashchange fires while this instance still renders `checkout`.
+      act(() => {
+        setHash('#/service-details/payments/prod?tab=dependencies&dependency=db');
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
+      });
+      expect(window.location.hash).toBe(
+        '#/service-details/payments/prod?tab=dependencies&dependency=db'
+      );
+
+      // The router then re-renders the page for `payments`, which backfills its own URL.
+      rerender(
+        <ServiceDetails
+          {...baseProps}
+          serviceName="payments"
+          timeRange={{ from: 'now-15m', to: 'now' }}
+          onTimeChange={onTimeChange}
+        />
+      );
+      const [path] = window.location.hash.split('?');
+      expect(path).toBe('#/service-details/payments/prod');
+      const params = hashParams();
+      expect(params.get('from')).toBe('now-15m');
+      expect(params.get('to')).toBe('now');
+      expect(params.get('tab')).toBe('dependencies');
+      expect(params.get('dependency')).toBe('db');
+    });
+  });
+
+  it('round-trips a relative-future range (now+1h) through the URL', () => {
+    setHash('#/service-details/checkout/prod?tab=overview&from=now-15m&to=now');
+    const { rerender } = render(
+      <ServiceDetails
+        {...baseProps}
+        timeRange={{ from: 'now-15m', to: 'now' }}
+        onTimeChange={jest.fn()}
+      />
+    );
+    rerender(
+      <ServiceDetails
+        {...baseProps}
+        timeRange={{ from: 'now', to: 'now+1h' }}
+        onTimeChange={jest.fn()}
+      />
+    );
+    expect(window.location.hash).toContain('to=now%2B1h');
+    expect(hashParams().get('to')).toBe('now+1h');
+
+    // And a deep link carrying it is applied on mount.
+    const onTimeChange = jest.fn();
+    render(
+      <ServiceDetails
+        {...baseProps}
+        serviceName="checkout"
+        timeRange={{ from: 'now-15m', to: 'now' }}
+        onTimeChange={onTimeChange}
+      />
+    );
+    expect(onTimeChange).toHaveBeenCalledWith({ from: 'now', to: 'now+1h' });
+  });
 });
