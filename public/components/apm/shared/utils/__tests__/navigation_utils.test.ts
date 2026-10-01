@@ -14,6 +14,9 @@ import {
   openCorrelatedDashboard,
   openApmSettings,
   navigateToServiceDetails,
+  navigateToAgentTraces,
+  navigateToAgentTraceDetails,
+  subscribeAgentTracesAvailable,
 } from '../navigation_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 
@@ -722,5 +725,76 @@ describe('navigateToServiceDetails nodeType param', () => {
     expect(pathFor('service')).not.toContain('nodeType');
     expect(pathFor('Service')).not.toContain('nodeType');
     expect(pathFor(undefined)).not.toContain('nodeType');
+  });
+});
+
+describe('Agent Traces navigation', () => {
+  let windowOpenSpy: jest.SpyInstance;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+  });
+  afterEach(() => windowOpenSpy.mockRestore());
+
+  const decodedUrl = () => decodeURIComponent(windowOpenSpy.mock.calls[0][0]);
+
+  it('opens the service in the Agent Traces spans tab', () => {
+    navigateToAgentTraces('ds::traces', 'otel-v1-apm-span*', 'travel-planner', {
+      from: 'now-1h',
+      to: 'now',
+    });
+    const url = decodedUrl();
+    expect(windowOpenSpy).toHaveBeenCalledWith(expect.any(String), '_blank');
+    expect(url).toContain('/base/app/agentTraces/spans#?_g=');
+    expect(url).toContain('query:\'| where serviceName = "travel-planner"\'');
+    expect(url).toContain('activeTabId:spans');
+    expect(url).toContain("id:'ds::traces'");
+    expect(url).toContain('signalType:traces');
+  });
+
+  it('opens an operation in the spans tab and escapes values', () => {
+    navigateToAgentTraces(
+      'ds::traces',
+      'spans',
+      'o\'brien "svc"',
+      { from: 'now-1h', to: 'now' },
+      'ds',
+      "Bob's cluster",
+      'chat gpt-4o'
+    );
+    const url = decodedUrl();
+    expect(url).toContain('/base/app/agentTraces/spans#');
+    expect(url).toContain('activeTabId:spans');
+    // PPL escapes the double quotes; rison escapes the single quotes.
+    expect(url).toContain(
+      'query:\'| where serviceName = "o!\'brien \\"svc\\"" | where name = "chat gpt-4o"\''
+    );
+    expect(url).toContain("title:'Bob!'s cluster'");
+  });
+
+  it('opens a trace by id', () => {
+    navigateToAgentTraceDetails('ds::traces', 'spans', 'abc123', { from: 'now-1h', to: 'now' });
+    expect(decodedUrl()).toContain('/base/app/agentTraces/spans#');
+    expect(decodedUrl()).toContain('query:\'| where traceId = "abc123"\'');
+  });
+
+  it('reports whether Agent Traces is accessible', () => {
+    const apps = (status?: number) => ({
+      subscribe: (next: (m: Map<string, { status: number }>) => void) => {
+        next(new Map(status === undefined ? [] : [['agentTraces', { status }]]));
+        return { unsubscribe: jest.fn() };
+      },
+    });
+    const refs = coreRefs as { application?: unknown };
+    const callback = jest.fn();
+    refs.application = { applications$: apps(0) };
+    subscribeAgentTracesAvailable(callback);
+    refs.application = { applications$: apps(1) };
+    subscribeAgentTracesAvailable(callback);
+    refs.application = { applications$: apps() };
+    subscribeAgentTracesAvailable(callback);
+    refs.application = undefined;
+    subscribeAgentTracesAvailable(callback);
+    expect(callback.mock.calls.map((c) => c[0])).toEqual([true, false, false, false]);
   });
 });

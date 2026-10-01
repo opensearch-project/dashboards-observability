@@ -590,6 +590,11 @@ The plugin uses `application.navigateToApp()` for navigation to comply with Open
 | `navigateToExploreLogs(...)` | Open logs in Explore (new tab) |
 | `navigateToSpanDetails(...)` | Open span details in Explore (new tab) |
 | `navigateToDatasetCorrelations(datasetId)` | Navigate to dataset correlations setup |
+| `navigateToAgentTraces(...)` | Open a GenAI service's spans in Agent Traces (new tab) |
+| `navigateToAgentTraceDetails(...)` | Open a GenAI span's trace in Agent Traces (new tab) |
+| `subscribeAgentTracesAvailable(callback)` | Whether the Agent Traces app is registered and accessible |
+
+**GenAI correlations:** the correlations flyout (Services, service details, Topology Map) sends GenAI spans (spans with `gen_ai.operation.name`) to Agent Traces when it is available (`explore.agentTraces.enabled`): span links open the span's trace, and "Explore Traces" becomes "View in Agent Traces" for services that emit GenAI spans. Other spans and services keep Explore traces.
 
 **URL Parameters for Service Details:**
 

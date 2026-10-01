@@ -60,6 +60,13 @@ export const correlationsFlyoutI18nTexts = {
   exploreTraces: i18n.translate('observability.apm.correlationsFlyout.exploreTraces', {
     defaultMessage: 'Explore Traces',
   }),
+  viewInAgentTraces: i18n.translate('observability.apm.correlationsFlyout.viewInAgentTraces', {
+    defaultMessage: 'View in Agent Traces',
+  }),
+  openSpanInAgentTraces: i18n.translate(
+    'observability.apm.correlationsFlyout.openSpanInAgentTraces',
+    { defaultMessage: 'GenAI span: opens its trace in Agent Traces' }
+  ),
   exploreLogs: i18n.translate('observability.apm.correlationsFlyout.exploreLogs', {
     defaultMessage: 'Explore Logs',
   }),

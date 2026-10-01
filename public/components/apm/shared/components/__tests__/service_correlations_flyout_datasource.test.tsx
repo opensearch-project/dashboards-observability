@@ -50,6 +50,9 @@ jest.mock('../../utils/navigation_utils', () => ({
   navigateToSpanDetails: jest.fn(),
   navigateToExploreLogs: jest.fn(),
   navigateToDatasetCorrelations: jest.fn(),
+  navigateToAgentTraces: jest.fn(),
+  navigateToAgentTraceDetails: jest.fn(),
+  subscribeAgentTracesAvailable: jest.fn(() => () => {}),
 }));
 
 import { useApmConfig } from '../../../config/apm_config_context';

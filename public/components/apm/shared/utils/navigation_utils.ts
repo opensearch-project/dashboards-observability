@@ -5,7 +5,7 @@
 
 import { TimeRange } from '../../common/types/service_types';
 import { TimeRange as ServiceDetailsTimeRange } from '../../common/types/service_details_types';
-import { EXPLORE_APP_ID } from '../../common/constants';
+import { AGENT_TRACES_APP_ID, EXPLORE_APP_ID } from '../../common/constants';
 import {
   observabilityApmApplicationMapID,
   observabilityApmServicesID,
@@ -390,6 +390,110 @@ export function navigateToSpanDetails(
 
   // Open in new tab
   window.open(fullUrl, '_blank');
+}
+
+/** Escape a value for a PPL double-quoted string literal. */
+function escapePplString(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/** Agent Traces tab to open: the trace list or the span list. */
+export type AgentTracesTab = 'traces' | 'spans';
+
+/**
+ * Opens Agent Traces in a new tab with a PPL filter, the given time range and the APM
+ * traces dataset. Agent Traces understands GenAI spans (agent, LLM and tool views,
+ * sessions), so APM sends GenAI correlations there instead of Explore traces.
+ */
+function openAgentTraces(
+  tab: AgentTracesTab,
+  pplQuery: string,
+  timeRange: TimeRange,
+  datasetId: string,
+  datasetTitle: string,
+  dataSourceId?: string,
+  dataSourceTitle?: string
+): void {
+  const dsTitle = dataSourceTitle ? `'${escapeRisonString(dataSourceTitle)}'` : "''";
+  const path = `${tab}#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
+    timeRange.from
+  )},to:${encodeTimeRangeValueForG(timeRange.to)}))&_q=(dataset:(dataSource:(id:'${
+    dataSourceId || ''
+  }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',signalType:traces,timeFieldName:startTime,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+    escapeRisonString(pplQuery)
+  )}')&_a=(ui:(activeTabId:${tab}))`;
+
+  const fullUrl =
+    coreRefs.http?.basePath.prepend(`/app/${AGENT_TRACES_APP_ID}/${path}`) ||
+    `/app/${AGENT_TRACES_APP_ID}/${path}`;
+  window.open(fullUrl, '_blank');
+}
+
+/**
+ * Opens a service's spans in Agent Traces (the counterpart of navigateToExploreTraces for
+ * GenAI services), filtered to the service and optional operation. Uses the Spans tab: the
+ * Traces tab lists traces by their root span, and a GenAI service behind a plain HTTP
+ * server span (no gen_ai attributes on the root) would not appear there.
+ */
+export function navigateToAgentTraces(
+  datasetId: string,
+  datasetTitle: string,
+  serviceName: string,
+  timeRange: TimeRange,
+  dataSourceId?: string,
+  dataSourceTitle?: string,
+  operationFilter?: string
+): void {
+  let pplQuery = `| where serviceName = "${escapePplString(serviceName)}"`;
+  if (operationFilter) {
+    pplQuery += ` | where name = "${escapePplString(operationFilter)}"`;
+  }
+  openAgentTraces(
+    'spans',
+    pplQuery,
+    timeRange,
+    datasetId,
+    datasetTitle,
+    dataSourceId,
+    dataSourceTitle
+  );
+}
+
+/**
+ * Opens the trace of a GenAI span in Agent Traces (the counterpart of navigateToSpanDetails).
+ * Agent Traces has no span deep link yet, so it lists the trace's GenAI spans (Spans tab, see
+ * navigateToAgentTraces); one click opens the trace tree.
+ */
+export function navigateToAgentTraceDetails(
+  datasetId: string,
+  datasetTitle: string,
+  traceId: string,
+  timeRange: TimeRange,
+  dataSourceId?: string,
+  dataSourceTitle?: string
+): void {
+  openAgentTraces(
+    'spans',
+    `| where traceId = "${escapePplString(traceId)}"`,
+    timeRange,
+    datasetId,
+    datasetTitle,
+    dataSourceId,
+    dataSourceTitle
+  );
+}
+
+/**
+ * Calls back with whether Agent Traces is registered and accessible (it is behind the
+ * `explore.agentTraces.enabled` flag). Returns an unsubscribe function.
+ */
+export function subscribeAgentTracesAvailable(callback: (available: boolean) => void): () => void {
+  const subscription = coreRefs.application?.applications$?.subscribe((apps) => {
+    // AppStatus.accessible is 0; compared by value to keep core enums out of this module.
+    callback(apps.get(AGENT_TRACES_APP_ID)?.status === 0);
+  });
+  if (!subscription) callback(false);
+  return () => subscription?.unsubscribe();
 }
 
 /**
