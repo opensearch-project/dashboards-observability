@@ -32,6 +32,11 @@ import {
 } from '../../common/types/service_details_types';
 import { SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
 import { ApmCursorContext, createApmCursorBus } from '../../shared/hooks/apm_cursor_context';
+import {
+  readUrlTimeRange,
+  splitHash,
+  useTimeRangeUrlSync,
+} from '../../shared/hooks/use_time_range_url_sync';
 import '../../shared/styles/apm_common.scss';
 
 export interface ServiceDetailsProps {
@@ -72,15 +77,32 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   // tab, so a single bus scopes the synced crosshair to that tab's charts.
   const cursorBus = useMemo(() => createApmCursorBus(), []);
 
-  // Helper to parse URL params from hash
-  const parseUrlParams = useCallback((): ServiceDetailsUrlParams => {
-    const params = new URLSearchParams(window.location.search);
-    const hash = window.location.hash;
+  // Whether a hash path is this page (`#/service-details/<service>/<env>`). URL writes are
+  // skipped otherwise, so leaving by a hash link (breadcrumb, another service) is never
+  // rewritten back to this service.
+  const isThisPagePath = useCallback(
+    (hashPath: string) => {
+      const match = /^#\/service-details\/([^/]+)\/([^/]+)\/?$/.exec(hashPath);
+      if (!match) return false;
+      try {
+        const pathService = decodeURIComponent(match[1]);
+        const pathEnvironment = decodeURIComponent(match[2]);
+        // services.tsx maps the `default` path segment to an undefined environment.
+        return (
+          pathService === serviceName &&
+          (pathEnvironment === 'default' ? '' : pathEnvironment) === (environment || '')
+        );
+      } catch {
+        return false;
+      }
+    },
+    [serviceName, environment]
+  );
 
-    // Parse query params from hash
-    const hashQueryIndex = hash.indexOf('?');
-    const hashParams =
-      hashQueryIndex >= 0 ? new URLSearchParams(hash.substring(hashQueryIndex + 1)) : params;
+  // Helper to parse URL params from hash. `from`/`to` are only returned when both are valid.
+  const parseUrlParams = useCallback((): ServiceDetailsUrlParams => {
+    const { params: hashParams } = splitHash();
+    const urlRange = readUrlTimeRange(hashParams);
 
     return {
       serviceName,
@@ -88,13 +110,14 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
       tab:
         (hashParams.get(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TAB) as ServiceDetailsTabId) ||
         initialTab,
-      from: hashParams.get(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.FROM) || undefined,
-      to: hashParams.get(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TO) || undefined,
+      from: urlRange?.from,
+      to: urlRange?.to,
     };
   }, [serviceName, environment, initialTab]);
 
   // Parse URL params on mount
   useEffect(() => {
+    if (!isThisPagePath(splitHash().path)) return;
     const urlParams = parseUrlParams();
 
     // Set tab from URL
@@ -109,39 +132,51 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceName, environment, initialTab, onTimeChange, parseUrlParams]);
 
-  // Listen for URL hash changes and update tab
+  // Update URL when state changes. Keeps the current hash path and every other param
+  // (e.g. `lang`, used for the breadcrumb icon); a no-op once the URL is another page's.
+  const updateUrl = useCallback(
+    (newTab?: ServiceDetailsTabId, newTimeRange?: TimeRange) => {
+      const { path, params } = splitHash();
+      if (!isThisPagePath(path)) return;
+      const time = newTimeRange || timeRange;
+      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TAB, newTab || activeTab);
+      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.FROM, time.from);
+      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TO, time.to);
+      window.history.replaceState(null, '', `${path}?${params.toString()}`);
+    },
+    [isThisPagePath, activeTab, timeRange]
+  );
+
+  // Listen for URL hash changes and update tab and time range. A deep link to the
+  // same service with a different `from`/`to` only changes the hash, so without
+  // this the charts would stay on the previous range while the URL shows the new one.
+  // Backfilling a hash with no range is handled by useTimeRangeUrlSync.
   useEffect(() => {
     const handleHashChange = () => {
+      if (!isThisPagePath(splitHash().path)) return;
       const urlParams = parseUrlParams();
       if (urlParams.tab && urlParams.tab !== activeTab) {
         setActiveTab(urlParams.tab);
+      }
+      if (
+        urlParams.from &&
+        urlParams.to &&
+        (urlParams.from !== timeRange.from || urlParams.to !== timeRange.to)
+      ) {
+        onTimeChange({ from: urlParams.from, to: urlParams.to });
       }
     };
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [parseUrlParams, activeTab]);
+  }, [isThisPagePath, parseUrlParams, activeTab, timeRange, onTimeChange]);
 
-  // Update URL when state changes
-  const updateUrl = useCallback(
-    (newTab?: ServiceDetailsTabId, newTimeRange?: TimeRange) => {
-      const tab = newTab || activeTab;
-      const time = newTimeRange || timeRange;
-
-      const params = new URLSearchParams();
-      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TAB, tab);
-      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.FROM, time.from);
-      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TO, time.to);
-
-      const encodedServiceName = encodeURIComponent(serviceName);
-      const encodedEnvironment = encodeURIComponent(environment || 'default');
-
-      // Update hash with params
-      const newHash = `#/service-details/${encodedServiceName}/${encodedEnvironment}?${params.toString()}`;
-      window.history.replaceState(null, '', newHash);
-    },
-    [serviceName, environment, activeTab, timeRange]
-  );
+  // Keep URL `from`/`to` in sync with the page time range and backfill a URL without one.
+  useTimeRangeUrlSync({
+    timeRange,
+    isCurrentPage: isThisPagePath,
+    pageKey: `${serviceName}/${environment || ''}`,
+  });
 
   // Handle tab change
   const handleTabChange = useCallback(

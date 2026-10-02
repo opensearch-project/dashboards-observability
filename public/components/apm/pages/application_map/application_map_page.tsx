@@ -31,6 +31,7 @@ import { useSelectedEdgeMetrics } from '../../shared/hooks/use_selected_edge_met
 import { useGroupMetrics } from '../../shared/hooks/use_group_metrics';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { usePersistentTimeRange } from '../../shared/hooks/use_persistent_time_range';
+import { readUrlTimeRange, useTimeRangeUrlSync } from '../../shared/hooks/use_time_range_url_sync';
 import { openServiceDetailsInNewTab } from '../../shared/utils/navigation_utils';
 import {
   ServiceMapSidebar,
@@ -67,20 +68,15 @@ const URL_PARAM_VALIDATION = {
   MAX_PARAM_LENGTH: 256,
   /** Allowed characters for service names (alphanumeric, dashes, underscores, dots, colons, slashes) */
   SERVICE_NAME_REGEX: /^[a-zA-Z0-9_\-:./ ]+$/,
-  /** Allowed characters for time range values (e.g., "now-15m", "2024-01-01T00:00:00Z") */
-  TIME_RANGE_REGEX: /^[a-zA-Z0-9_\-:+.TZ]+$/,
 };
 
 /**
- * Sanitize URL parameter to prevent XSS attacks
+ * Sanitize a service/environment URL parameter to prevent XSS attacks. Time bounds are
+ * validated by `readUrlTimeRange` (shared with the URL writer).
  * @param value - Raw URL parameter value
- * @param type - Type of parameter for appropriate validation
  * @returns Sanitized value or null if invalid
  */
-function sanitizeUrlParam(
-  value: string | null,
-  type: 'service' | 'environment' | 'time'
-): string | null {
+function sanitizeUrlParam(value: string | null): string | null {
   if (!value) return null;
 
   // Check length limit
@@ -88,18 +84,22 @@ function sanitizeUrlParam(
     return null;
   }
 
-  // Apply appropriate regex validation based on type
-  const regex =
-    type === 'time'
-      ? URL_PARAM_VALIDATION.TIME_RANGE_REGEX
-      : URL_PARAM_VALIDATION.SERVICE_NAME_REGEX;
-
-  if (!regex.test(value)) {
+  if (!URL_PARAM_VALIDATION.SERVICE_NAME_REGEX.test(value)) {
     return null;
   }
 
   return value;
 }
+
+const APPLICATION_MAP_HASH_PATH = '#/application-map';
+
+/** The map app has no router: an empty hash (app root) or `#/application-map` is the map. */
+const isApplicationMapPath = (hashPath: string) =>
+  hashPath === '' ||
+  hashPath === '#' ||
+  hashPath === '#/' ||
+  hashPath === APPLICATION_MAP_HASH_PATH ||
+  hashPath.startsWith(`${APPLICATION_MAP_HASH_PATH}/`);
 
 export interface ApplicationMapPageProps {
   chrome: ChromeStart;
@@ -161,7 +161,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
 
   // Set page-level breadcrumb
   useEffect(() => {
-    chrome?.setBreadcrumbs([{ text: i18nTexts.breadcrumb, href: '#/application-map' }]);
+    chrome?.setBreadcrumbs([{ text: i18nTexts.breadcrumb, href: APPLICATION_MAP_HASH_PATH }]);
   }, [chrome]);
 
   // The side-nav "APM settings" popover action navigates here with an
@@ -177,10 +177,11 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     if (hashParts.length < 2) return;
 
     const params = new URLSearchParams(hashParts[1]);
-    const serviceParam = sanitizeUrlParam(params.get('service'), 'service');
-    const environmentParam = sanitizeUrlParam(params.get('environment'), 'environment');
-    const fromParam = sanitizeUrlParam(params.get('from'), 'time');
-    const toParam = sanitizeUrlParam(params.get('to'), 'time');
+    const serviceParam = sanitizeUrlParam(params.get('service'));
+    const environmentParam = sanitizeUrlParam(params.get('environment'));
+    // Time bounds share one validator with the URL writer, so every value the map writes
+    // (including `now/d` from the "Today" quick select) reads back on reload.
+    const urlTimeRange = readUrlTimeRange(params);
 
     // If service parameter exists and is valid, navigate to services level and queue node selection
     if (serviceParam) {
@@ -202,8 +203,8 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     }
 
     // Apply time range from URL if provided
-    if (fromParam && toParam) {
-      setTimeRange({ from: fromParam, to: toParam });
+    if (urlTimeRange) {
+      setTimeRange(urlTimeRange);
     }
     // `setTimeRange` is stable (useCallback); listed to satisfy exhaustive-deps
     // without changing the mount-only intent.
@@ -220,7 +221,12 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   }, [configError, notifications]);
 
   // Parse time range
-  const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
+  const parsedTimeRange = useMemo(
+    () => parseTimeRange(timeRange),
+    // Recalculate when refreshTrigger changes so relative ranges advance to `now`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeRange, refreshTrigger]
+  );
 
   // Fetch service map topology data
   const {
@@ -348,6 +354,15 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
 
   // Combined loading state
   const isLoading = mapLoading || metricsLoading;
+
+  // Keep URL `from`/`to` in sync with the time range (picker or flyout brush) so a
+  // picked range survives reload and can be shared; a missing or invalid range is
+  // backfilled. The map is its own app, so any hash in it is this page.
+  useTimeRangeUrlSync({
+    timeRange,
+    isCurrentPage: isApplicationMapPath,
+    fallbackPath: APPLICATION_MAP_HASH_PATH,
+  });
 
   // Handle time range change
   const handleTimeChange = useCallback(
