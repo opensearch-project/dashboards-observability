@@ -214,7 +214,10 @@ describe('validateSloSpec', () => {
 // at Prometheus when the rule group is upserted.
 describe('validateSloSpec — forDuration messages', () => {
   const tiersWith = (forDuration: string) =>
-    DEFAULT_MWMBR_TIERS.map((t, i) => ({ ...t, forDuration: i === 0 ? forDuration : t.forDuration }));
+    DEFAULT_MWMBR_TIERS.map((t, i) => ({
+      ...t,
+      forDuration: i === 0 ? forDuration : t.forDuration,
+    }));
 
   it('says "required" only when the burn-rate forDuration is actually missing', () => {
     const result = validateSloSpec(
@@ -236,14 +239,14 @@ describe('validateSloSpec — forDuration messages', () => {
   it('distinguishes a missing from a zero noData.forDuration', () => {
     const missing = validateSloSpec(
       minimalSpec({
-        alarms: { ...(minimalSpec().alarms as any), noData: { enabled: true, forDuration: '' } },
+        alarms: { ...minimalSpec().alarms, noData: { enabled: true, forDuration: '' } },
       })
     );
     expect(missing.errors['spec.alarms.noData.forDuration']).toMatch(/required/);
 
     const zero = validateSloSpec(
       minimalSpec({
-        alarms: { ...(minimalSpec().alarms as any), noData: { enabled: true, forDuration: '0m' } },
+        alarms: { ...minimalSpec().alarms, noData: { enabled: true, forDuration: '0m' } },
       })
     );
     expect(zero.errors['spec.alarms.noData.forDuration']).toMatch(/positive duration/);

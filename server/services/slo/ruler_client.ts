@@ -168,7 +168,8 @@ function rulesPath(ds: Datasource, suffix: string): string {
  */
 const AUTH_FAILURE_BODY =
   /\b(AccessDenied(Exception)?|UnauthorizedException|not authorized to perform|is not authorized|Forbidden)\b/i;
-const CONFLICT_BODY = /\b(ConflictException|already exists|is currently (creating|updating|deleting))\b/i;
+const CONFLICT_BODY =
+  /\b(ConflictException|already exists|is currently (creating|updating|deleting))\b/i;
 
 export type RulerErrorCode = 'RULER_VALIDATION_FAILED' | 'RULER_AUTH_FAILED' | 'RULER_UNREACHABLE';
 

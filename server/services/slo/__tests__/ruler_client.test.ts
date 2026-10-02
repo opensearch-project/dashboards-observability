@@ -288,7 +288,10 @@ describe('DirectQueryRulerClient error classification', () => {
       code: 'RULER_VALIDATION_FAILED',
       httpStatus: 400,
     });
-    expect(classifyRulerFailure(401, 'Forbidden')).toEqual({ code: 'RULER_AUTH_FAILED', httpStatus: 401 });
+    expect(classifyRulerFailure(401, 'Forbidden')).toEqual({
+      code: 'RULER_AUTH_FAILED',
+      httpStatus: 401,
+    });
   });
 
   it('5xx and network errors without a recognisable body stay RULER_UNREACHABLE', () => {
@@ -296,7 +299,10 @@ describe('DirectQueryRulerClient error classification', () => {
       code: 'RULER_UNREACHABLE',
       httpStatus: 503,
     });
-    expect(classifyRulerFailure(0, 'ECONNREFUSED')).toEqual({ code: 'RULER_UNREACHABLE', httpStatus: 0 });
+    expect(classifyRulerFailure(0, 'ECONNREFUSED')).toEqual({
+      code: 'RULER_UNREACHABLE',
+      httpStatus: 0,
+    });
   });
 
   it('extracts status from error.meta.statusCode when top-level absent', async () => {
