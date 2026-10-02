@@ -62,7 +62,7 @@ export interface ServiceMapGraphProps {
  * - Transforming PPL nodes/edges to CelestialMap format
  * - Hierarchical navigation (Application -> Services)
  * - Client-side filtering
- * - Node click/double-click interactions
+ * - Node click and keyboard interactions
  */
 export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
   nodes,
@@ -360,7 +360,7 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
     [onNodeClick]
   );
 
-  // Handle breadcrumb addition (triggered by double-clicking group nodes in CelestialMap)
+  // Handle breadcrumb addition (triggered by clicking or pressing Enter on a group node in CelestialMap)
   const handleAddBreadcrumb = useCallback(
     (title: string, node?: CelestialCardProps) => {
       // GUARD: If groupBy filter is active but navigation state hasn't synced yet,
