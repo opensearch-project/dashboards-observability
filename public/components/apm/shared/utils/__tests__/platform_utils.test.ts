@@ -167,24 +167,41 @@ describe('platform_utils', () => {
       expect(getDependencySystemFromName('service', 'checkout')).toBeUndefined();
     });
 
-    it('uses the system icon on the map, and the generic glyph without one', () => {
-      expect(getNodeIconType('database', 'generic:default', 'postgresql:pg')).toBe(
-        'Dependency::postgresql'
+    it('asks @osd/apm-topology for the icon of the system read from the node name', () => {
+      // CI builds against OpenSearch-Dashboards main, whose @osd/apm-topology may predate
+      // getDependencyIconKey (OpenSearch-Dashboards#12771); stub it so this test covers
+      // platform_utils' part: reading the system and delegating.
+      const getDependencyIconKey = jest.fn((type: string, system?: string) =>
+        system && ['postgresql', 'rabbitmq'].includes(system)
+          ? `Dependency::${system}`
+          : `Dependency::${type}`
       );
-      // A broker is no longer shown with the Kafka logo unless it is Kafka.
-      expect(getNodeIconType('messaging', 'generic:default', 'rabbitmq:jobs')).toBe(
-        'Dependency::rabbitmq'
-      );
-      expect(getNodeIconType('messaging', 'generic:default', 'servicebus:jobs')).toBe(
-        'Dependency::messaging'
-      );
-      expect(getNodeIconType('external', 'generic:default', 'api.openai.com')).toBe(
-        'Dependency::external'
-      );
-      // Services keep the platform icon.
-      expect(getNodeIconType('service', 'eks:prod', 'checkout')).toBe(
-        getPlatformTypeFromEnvironment('eks:prod')
-      );
+      jest.isolateModules(() => {
+        jest.doMock('@osd/apm-topology', () => ({ getDependencyIconKey }));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const withSystemIcons = require('../platform_utils');
+        expect(
+          withSystemIcons.getNodeIconType('database', 'generic:default', 'postgresql:pg')
+        ).toBe('Dependency::postgresql');
+        expect(getDependencyIconKey).toHaveBeenLastCalledWith('database', 'postgresql');
+        // A broker is no longer shown with the Kafka logo unless it is Kafka.
+        expect(
+          withSystemIcons.getNodeIconType('messaging', 'generic:default', 'rabbitmq:jobs')
+        ).toBe('Dependency::rabbitmq');
+        expect(
+          withSystemIcons.getNodeIconType('messaging', 'generic:default', 'servicebus:jobs')
+        ).toBe('Dependency::messaging');
+        // External names carry no system.
+        withSystemIcons.getNodeIconType('external', 'generic:default', 'api.openai.com');
+        expect(getDependencyIconKey).toHaveBeenLastCalledWith('external', undefined);
+        // Services keep the platform icon and never ask for a dependency icon.
+        getDependencyIconKey.mockClear();
+        expect(withSystemIcons.getNodeIconType('service', 'eks:prod', 'checkout')).toBe(
+          getPlatformTypeFromEnvironment('eks:prod')
+        );
+        expect(getDependencyIconKey).not.toHaveBeenCalled();
+      });
+      jest.dontMock('@osd/apm-topology');
     });
   });
 });
