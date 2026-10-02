@@ -12,6 +12,8 @@ import {
   isDependencyPlaceholder,
   getNodeTypeLabel,
   normalizeNodeType,
+  getDependencySystemFromName,
+  getNodeIconType,
 } from '../platform_utils';
 
 describe('platform_utils', () => {
@@ -136,6 +138,53 @@ describe('platform_utils', () => {
       expect(isDependencyPlaceholder('unknown', 'database')).toBe(true);
       expect(isDependencyPlaceholder('unknown', 'service')).toBe(false);
       expect(isDependencyPlaceholder('redis:valkey-cart', 'database')).toBe(false);
+    });
+  });
+
+  describe('dependency icons', () => {
+    it('keeps the per-type icons with an @osd/apm-topology that predates system icons', () => {
+      jest.isolateModules(() => {
+        jest.doMock('@osd/apm-topology', () => ({}));
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const legacy = require('../platform_utils');
+        expect(legacy.getNodeIconType('database', 'generic:default', 'postgresql:pg')).toBe(
+          'AWS::RDS'
+        );
+        expect(legacy.getNodeIconType('messaging', 'generic:default', 'kafka:orders')).toBe(
+          'Kafka'
+        );
+      });
+      jest.dontMock('@osd/apm-topology');
+    });
+
+    it('reads the system from a data-prepper dependency name', () => {
+      expect(getDependencySystemFromName('database', 'redis:valkey-cart')).toBe('redis');
+      expect(getDependencySystemFromName('Database', 'postgresql')).toBe('postgresql');
+      expect(getDependencySystemFromName('messaging', 'kafka:orders')).toBe('kafka');
+      expect(getDependencySystemFromName('database', 'AWS::DynamoDB')).toBe('aws.dynamodb');
+      // External names carry no system; neither do services.
+      expect(getDependencySystemFromName('external', 'api.openai.com')).toBeUndefined();
+      expect(getDependencySystemFromName('service', 'checkout')).toBeUndefined();
+    });
+
+    it('uses the system icon on the map, and the generic glyph without one', () => {
+      expect(getNodeIconType('database', 'generic:default', 'postgresql:pg')).toBe(
+        'Dependency::postgresql'
+      );
+      // A broker is no longer shown with the Kafka logo unless it is Kafka.
+      expect(getNodeIconType('messaging', 'generic:default', 'rabbitmq:jobs')).toBe(
+        'Dependency::rabbitmq'
+      );
+      expect(getNodeIconType('messaging', 'generic:default', 'servicebus:jobs')).toBe(
+        'Dependency::messaging'
+      );
+      expect(getNodeIconType('external', 'generic:default', 'api.openai.com')).toBe(
+        'Dependency::external'
+      );
+      // Services keep the platform icon.
+      expect(getNodeIconType('service', 'eks:prod', 'checkout')).toBe(
+        getPlatformTypeFromEnvironment('eks:prod')
+      );
     });
   });
 });

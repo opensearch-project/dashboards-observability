@@ -776,7 +776,7 @@ function buildCelestialNodes(
     const metrics = metricsMap.get(nodeId);
 
     const nodeType = node.KeyAttributes.Type;
-    const iconType = getNodeIconType(nodeType, environment);
+    const iconType = getNodeIconType(nodeType, environment, serviceName);
     const subtitle = getNodeSubtitle(nodeType, environment);
     const failureRate = metrics
       ? ((metrics.totalFaults + metrics.totalErrors) / (metrics.totalRequests || 1)) * 100

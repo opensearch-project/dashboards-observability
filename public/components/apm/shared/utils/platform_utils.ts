@@ -4,6 +4,45 @@
  */
 
 import { i18n } from '@osd/i18n';
+import * as apmTopology from '@osd/apm-topology';
+
+/**
+ * Icon key for a dependency's system, from @osd/apm-topology (OpenSearch-Dashboards#12771):
+ * the system's open-source brand mark (e.g. PostgreSQL, Kafka) or its type's generic glyph.
+ * Absent in older OpenSearch-Dashboards builds, which keep the per-type icons below.
+ */
+const getDependencyIconKey: ((type?: string, system?: string) => string) | undefined = (
+  apmTopology as { getDependencyIconKey?: (type?: string, system?: string) => string }
+).getDependencyIconKey;
+
+// data-prepper names AWS SDK dependencies `AWS::{service}`; these have AWS icons.
+const AWS_SERVICE_SYSTEMS: Record<string, string> = {
+  'AWS::DynamoDB': 'aws.dynamodb',
+  'AWS::Redshift': 'aws.redshift',
+  'AWS::SNS': 'aws.sns',
+  'AWS::SQS': 'aws_sqs',
+};
+
+/**
+ * The OTel system of a dependency node, read from its name as data-prepper builds it:
+ * `{system}:{host}`, `{system}:{namespace}` or `{system}` for databases, and
+ * `{system}:{destination}` for brokers. Undefined for external endpoints and unknown shapes;
+ * a name that is not system-prefixed (e.g. a host) simply matches no system icon.
+ * @param nodeType - The node's type
+ * @param name - The node's name
+ */
+export function getDependencySystemFromName(
+  nodeType: string | undefined,
+  name: string | undefined
+): string | undefined {
+  if (!name) return undefined;
+  if (AWS_SERVICE_SYSTEMS[name]) return AWS_SERVICE_SYSTEMS[name];
+  const type = (nodeType || '').toLowerCase();
+  if (type !== 'database' && type !== 'messaging') return undefined;
+  if (name.startsWith('AWS::')) return undefined;
+  const sep = name.indexOf(':');
+  return sep > 0 ? name.slice(0, sep) : name;
+}
 
 /**
  * Platform type mapping for service map nodes
@@ -52,8 +91,8 @@ export function getPlatformTypeFromEnvironment(environment: string): string {
 }
 
 /**
- * Icon keys (from the @osd/apm-topology ICONS map) used to represent non-service
- * dependency nodes synthesized by the service-map processor.
+ * Per-type icon keys (from the @osd/apm-topology ICONS map) for dependency nodes, used only
+ * with OpenSearch-Dashboards builds whose @osd/apm-topology has no getDependencyIconKey.
  */
 const NODE_TYPE_ICON_MAP: Record<string, string> = {
   database: 'AWS::RDS',
@@ -142,10 +181,19 @@ export function getNodeTypeLabel(nodeType: string | undefined): string {
  * falls back to the environment-derived platform type.
  * @param nodeType - The node's KeyAttributes.Type (service / database / messaging / external)
  * @param environment - Environment string, used for the service fallback
+ * @param name - The node's name, which carries a dependency's system (see
+ *   getDependencySystemFromName)
  * @returns Icon key understood by getIcon()
  */
-export function getNodeIconType(nodeType: string | undefined, environment: string): string {
+export function getNodeIconType(
+  nodeType: string | undefined,
+  environment: string,
+  name?: string
+): string {
   const key = (nodeType || '').toLowerCase();
+  if (getDependencyIconKey && isDependencyType(key)) {
+    return getDependencyIconKey(key, getDependencySystemFromName(key, name));
+  }
   return NODE_TYPE_ICON_MAP[key] || getPlatformTypeFromEnvironment(environment);
 }
 
