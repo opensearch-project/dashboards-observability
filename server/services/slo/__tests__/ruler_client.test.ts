@@ -294,6 +294,16 @@ describe('DirectQueryRulerClient error classification', () => {
     });
   });
 
+  it('500 wrapping an in-progress conflict stays RULER_UNREACHABLE, not a validation error', () => {
+    expect(
+      classifyRulerFailure(500, 'ConflictException: Rule groups namespace is currently creating')
+    ).toEqual({ code: 'RULER_UNREACHABLE', httpStatus: 500 });
+    expect(classifyRulerFailure(500, 'ConflictException')).toEqual({
+      code: 'RULER_UNREACHABLE',
+      httpStatus: 500,
+    });
+  });
+
   it('5xx and network errors without a recognisable body stay RULER_UNREACHABLE', () => {
     expect(classifyRulerFailure(503, 'upstream timeout')).toEqual({
       code: 'RULER_UNREACHABLE',

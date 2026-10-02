@@ -168,8 +168,11 @@ function rulesPath(ds: Datasource, suffix: string): string {
  */
 const AUTH_FAILURE_BODY =
   /\b(AccessDenied(Exception)?|UnauthorizedException|not authorized to perform|is not authorized|Forbidden)\b/i;
-const CONFLICT_BODY =
-  /\b(ConflictException|already exists|is currently (creating|updating|deleting))\b/i;
+// Only a definitive "already exists" is a validation-class conflict. A bare ConflictException or
+// an "is currently creating|updating|deleting" body describes an operation still in progress on
+// the backend: that is temporary and a retry succeeds, so it must stay RULER_UNREACHABLE
+// (retryable) rather than be reported as an invalid rule config.
+const CONFLICT_BODY = /\balready exists\b/i;
 
 export type RulerErrorCode = 'RULER_VALIDATION_FAILED' | 'RULER_AUTH_FAILED' | 'RULER_UNREACHABLE';
 
@@ -183,8 +186,9 @@ export type RulerErrorCode = 'RULER_VALIDATION_FAILED' | 'RULER_AUTH_FAILED' | '
  * would then be told the backend is down. When the status is uninformative, read the body for
  * those two classes:
  *   - authorization failure -> RULER_AUTH_FAILED reported as 403 (PERMISSION_DENIED downstream)
- *   - conflict              -> RULER_VALIDATION_FAILED reported as 409 (not a retryable outage)
- * Everything else keeps the previous behaviour.
+ *   - "already exists"      -> RULER_VALIDATION_FAILED reported as 409 (not a retryable outage)
+ * An in-progress conflict ("is currently creating") is a temporary state, so it keeps the
+ * retryable RULER_UNREACHABLE class. Everything else keeps the previous behaviour.
  */
 export function classifyRulerFailure(
   httpStatus: number,
