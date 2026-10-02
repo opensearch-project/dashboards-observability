@@ -390,12 +390,14 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
   if (!input.alarms) {
     errors['spec.alarms'] = 'Alarm configuration is required';
   } else {
-    if (
-      input.alarms.noData?.enabled &&
-      (!input.alarms.noData.forDuration || parseDurationToMs(input.alarms.noData.forDuration) === 0)
-    ) {
-      errors['spec.alarms.noData.forDuration'] =
-        'noData.forDuration is required when noData is enabled';
+    if (input.alarms.noData?.enabled) {
+      if (!input.alarms.noData.forDuration) {
+        errors['spec.alarms.noData.forDuration'] =
+          'noData.forDuration is required when noData is enabled';
+      } else if (parseDurationToMs(input.alarms.noData.forDuration) === 0) {
+        errors['spec.alarms.noData.forDuration'] =
+          'noData.forDuration must be a positive duration such as 5m or 1h';
+      }
     }
   }
 
@@ -575,8 +577,15 @@ function validateBurnRate(
 
   if (!tier.severity || !tier.severity.trim())
     errors[`${prefix}.severity`] = 'severity is required';
-  if (!tier.forDuration || parseDurationToMs(tier.forDuration) === 0)
+  if (!tier.forDuration) {
     errors[`${prefix}.forDuration`] = 'forDuration is required';
+  } else if (parseDurationToMs(tier.forDuration) === 0) {
+    // parseDurationToMs returns 0 both for an unparseable string and for a literal zero
+    // ("0m"); neither is a usable pending window, and "required" misleads a user who did
+    // fill the field in.
+    errors[`${prefix}.forDuration`] =
+      'forDuration must be a positive duration such as 1m, 5m or 1h';
+  }
 
   return { errors, warnings };
 }
