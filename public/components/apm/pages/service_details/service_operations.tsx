@@ -256,7 +256,9 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
         endTime: new Date(),
       };
     }
-  }, [timeRange]);
+    // Recalculate when refreshTrigger changes so relative ranges advance to `now`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, refreshTrigger]);
 
   // The operations list (PPL) and the metrics (PromQL) must query the same
   // environment, otherwise rows and metrics line up under different env values.
