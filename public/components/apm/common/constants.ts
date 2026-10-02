@@ -105,6 +105,8 @@ export const LEGACY_BANNER_DISMISSED_KEY = 'apm.legacyBannerDismissed';
  * Trace Analytics convention (see trace_analytics/home.tsx).
  */
 export const APM_TIME_RANGE_STORAGE_KEY = 'apm.timeRange';
+/** sessionStorage key for the Topology Map's "Include external dependencies" checkbox. */
+export const APM_INCLUDE_DEPENDENCIES_STORAGE_KEY = 'apm.includeDependencies';
 
 /**
  * Default APM time range used when nothing has been persisted yet.
@@ -366,6 +368,13 @@ export const APPLICATION_MAP_CONSTANTS = {
    * (a few hundred services) still render.
    */
   MAX_RENDERED_NODES: 500,
+  /**
+   * Above this many nodes in the map view, dependencies (databases, brokers, external
+   * endpoints) that connect to the same nodes are folded into expandable stacks. Measured on
+   * the map with synthetic topologies (~20% dependencies): at 100 nodes it stays responsive on
+   * a mid-range laptop (4x CPU slowdown), at 200 it takes ~12 s to lay out with ~2 s freezes.
+   */
+  DEPENDENCY_STACK_THRESHOLD: 150,
 } as const;
 
 // Platform utility functions moved to shared/utils/platform_utils.ts
