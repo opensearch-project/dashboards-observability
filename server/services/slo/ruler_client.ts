@@ -160,6 +160,56 @@ function rulesPath(ds: Datasource, suffix: string): string {
   return `/_plugins/_directquery/_resources/${encodeURIComponent(dqName)}${suffix}`;
 }
 
+/**
+ * Error-body patterns the DirectQuery proxy forwards from the upstream rules backend when the
+ * transport status it hands us does not describe the real failure (typically a 5xx or 0 that
+ * wraps the backend's own error). Consulted only when the status is not already a 4xx, so a
+ * real 4xx keeps its status-based classification.
+ */
+const AUTH_FAILURE_BODY =
+  /\b(AccessDenied(Exception)?|UnauthorizedException|not authorized to perform|is not authorized|Forbidden)\b/i;
+// Only a definitive "already exists" is a validation-class conflict. A bare ConflictException or
+// an "is currently creating|updating|deleting" body describes an operation still in progress on
+// the backend: that is temporary and a retry succeeds, so it must stay RULER_UNREACHABLE
+// (retryable) rather than be reported as an invalid rule config.
+const CONFLICT_BODY = /\balready exists\b/i;
+
+export type RulerErrorCode = 'RULER_VALIDATION_FAILED' | 'RULER_AUTH_FAILED' | 'RULER_UNREACHABLE';
+
+/**
+ * Pick the SloRulerError code (and the status to report) for a failed ruler call.
+ *
+ * Status alone is not enough: the proxy that fronts the rules backend can wrap an upstream
+ * authorization failure or a namespace conflict in a 5xx, which the status-only rule reads as
+ * "ruler unreachable, retry shortly" and the UI renders as a backend-health problem. A user whose
+ * datasource role lacks a permission, or who edited a rule group that is still being created,
+ * would then be told the backend is down. When the status is uninformative, read the body for
+ * those two classes:
+ *   - authorization failure -> RULER_AUTH_FAILED reported as 403 (PERMISSION_DENIED downstream)
+ *   - "already exists"      -> RULER_VALIDATION_FAILED reported as 409 (not a retryable outage)
+ * An in-progress conflict ("is currently creating") is a temporary state, so it keeps the
+ * retryable RULER_UNREACHABLE class. Everything else keeps the previous behaviour.
+ */
+export function classifyRulerFailure(
+  httpStatus: number,
+  rawBody: string
+): { code: RulerErrorCode; httpStatus: number } {
+  if (httpStatus === 401 || httpStatus === 403) {
+    return { code: 'RULER_AUTH_FAILED', httpStatus };
+  }
+  if (httpStatus >= 400 && httpStatus < 500) {
+    return { code: 'RULER_VALIDATION_FAILED', httpStatus };
+  }
+  // 5xx or 0 (network / timeout / no response): look at what the backend actually said.
+  if (AUTH_FAILURE_BODY.test(rawBody)) {
+    return { code: 'RULER_AUTH_FAILED', httpStatus: 403 };
+  }
+  if (CONFLICT_BODY.test(rawBody)) {
+    return { code: 'RULER_VALIDATION_FAILED', httpStatus: 409 };
+  }
+  return { code: 'RULER_UNREACHABLE', httpStatus };
+}
+
 export class DirectQueryRulerClient implements RulerClient {
   constructor(private readonly logger: Logger) {
     this.logger.info('DirectQuery ruler client configured: writes via OSD scoped cluster client');
@@ -296,18 +346,8 @@ export class DirectQueryRulerClient implements RulerClient {
           ? raw.meta.statusCode
           : 0;
     const rawBody = stringifyBody(raw?.body ?? raw?.meta?.body ?? raw?.message ?? String(err));
-
-    let code: 'RULER_VALIDATION_FAILED' | 'RULER_AUTH_FAILED' | 'RULER_UNREACHABLE';
-    if (httpStatus === 401 || httpStatus === 403) {
-      code = 'RULER_AUTH_FAILED';
-    } else if (httpStatus >= 400 && httpStatus < 500) {
-      code = 'RULER_VALIDATION_FAILED';
-    } else {
-      // 5xx, 0 (network / timeout / no response) — all unreachable for our purposes.
-      code = 'RULER_UNREACHABLE';
-    }
-
-    return new SloRulerError(code, httpStatus, rawBody);
+    const classified = classifyRulerFailure(httpStatus, rawBody);
+    return new SloRulerError(classified.code, classified.httpStatus, rawBody);
   }
 }
 
