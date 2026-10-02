@@ -25,7 +25,15 @@ import { useApmConfig } from './config/apm_config_context';
 import { ServicesHome } from './pages/services_home';
 import { ServiceDetails } from './pages/service_details';
 import { DependencyDetails } from './pages/service_details/dependency_details';
-import { navigateToServiceDetails } from './shared/utils/navigation_utils';
+import {
+  isServiceDetailsHashPath,
+  navigateToServiceDetails,
+} from './shared/utils/navigation_utils';
+import {
+  readUrlTimeRange,
+  splitHash,
+  useTimeRangeUrlSync,
+} from './shared/hooks/use_time_range_url_sync';
 import { isDependencyType } from './shared/utils/platform_utils';
 import { useResolvedNodeType } from './shared/hooks/use_resolved_node_type';
 import { TimeRange as ServiceDetailsTimeRange } from './common/types/service_details_types';
@@ -46,13 +54,54 @@ interface ServiceDetailsRouteProps {
   refreshTrigger: number;
 }
 
-/** Replace `from` / `to` in the current hash's query, keeping its other params. */
-const writeTimeRangeToUrl = (from: string, to: string) => {
-  const [path, query = ''] = window.location.hash.split('?');
-  const params = new URLSearchParams(query);
-  params.set('from', from);
-  params.set('to', to);
-  window.history.replaceState(null, '', `${path}?${params.toString()}`);
+/**
+ * Dependency details route: keeps the URL's `from`/`to` in sync like the service view
+ * (useTimeRangeUrlSync), so a dependency link is shareable and a brushed range is kept.
+ */
+const DependencyDetailsRoute: React.FC<{
+  dependencyName: string;
+  environment?: string;
+  nodeType: string;
+  timeRange: ServiceDetailsTimeRange;
+  onTimeChange: (timeRange: ServiceDetailsTimeRange) => void;
+  refreshTrigger: number;
+}> = ({ dependencyName, environment, nodeType, timeRange, onTimeChange, refreshTrigger }) => {
+  const isThisPagePath = useCallback(
+    (hashPath: string) => isServiceDetailsHashPath(hashPath, dependencyName, environment),
+    [dependencyName, environment]
+  );
+
+  // A valid range in a shared link wins when the page opens.
+  useEffect(() => {
+    const { path, params } = splitHash();
+    if (!isThisPagePath(path)) return;
+    const urlRange = readUrlTimeRange(params);
+    if (urlRange) onTimeChange(urlRange);
+    // Only when the page opens for this dependency.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dependencyName, environment]);
+
+  useTimeRangeUrlSync({
+    timeRange,
+    isCurrentPage: isThisPagePath,
+    pageKey: `${dependencyName}/${environment || ''}`,
+  });
+
+  const handleBrush = useCallback(
+    (from: string, to: string) => onTimeChange({ from, to }),
+    [onTimeChange]
+  );
+
+  return (
+    <DependencyDetails
+      dependencyName={dependencyName}
+      environment={environment}
+      nodeType={nodeType}
+      timeRange={timeRange}
+      refreshTrigger={refreshTrigger}
+      onTimeRangeChange={handleBrush}
+    />
+  );
 };
 
 /**
@@ -72,26 +121,6 @@ export const ServiceDetailsRoute: React.FC<ServiceDetailsRouteProps> = ({
   const { nodeType, resolving } = useResolvedNodeType(serviceName, environment, hintedNodeType);
   const isDependency = !resolving && isDependencyType(nodeType);
 
-  // A shared dependency link carries its time range (the service view reads it itself).
-  useEffect(() => {
-    if (!isDependency) return;
-    const query = window.location.hash.split('?')[1] || '';
-    const params = new URLSearchParams(query);
-    const from = params.get('from');
-    const to = params.get('to');
-    if (from && to) onTimeChange({ from, to });
-    // Only when the dependency view opens for this node.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDependency, serviceName, environment]);
-
-  const handleDependencyBrush = useCallback(
-    (from: string, to: string) => {
-      onTimeChange({ from, to });
-      writeTimeRangeToUrl(from, to);
-    },
-    [onTimeChange]
-  );
-
   if (resolving) {
     return (
       <EuiFlexGroup justifyContent="center" style={{ padding: 40 }}>
@@ -104,13 +133,13 @@ export const ServiceDetailsRoute: React.FC<ServiceDetailsRouteProps> = ({
 
   if (isDependency) {
     return (
-      <DependencyDetails
+      <DependencyDetailsRoute
         dependencyName={serviceName}
         environment={environment}
         nodeType={nodeType}
         timeRange={timeRange}
+        onTimeChange={onTimeChange}
         refreshTrigger={refreshTrigger}
-        onTimeRangeChange={handleDependencyBrush}
       />
     );
   }

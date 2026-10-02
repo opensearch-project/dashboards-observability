@@ -17,6 +17,7 @@ import {
   EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { isServiceDetailsHashPath } from '../../shared/utils/navigation_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 import { ServiceOverview } from './service_overview';
 import { ServiceOperations } from './service_operations';
@@ -81,21 +82,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   // skipped otherwise, so leaving by a hash link (breadcrumb, another service) is never
   // rewritten back to this service.
   const isThisPagePath = useCallback(
-    (hashPath: string) => {
-      const match = /^#\/service-details\/([^/]+)\/([^/]+)\/?$/.exec(hashPath);
-      if (!match) return false;
-      try {
-        const pathService = decodeURIComponent(match[1]);
-        const pathEnvironment = decodeURIComponent(match[2]);
-        // services.tsx maps the `default` path segment to an undefined environment.
-        return (
-          pathService === serviceName &&
-          (pathEnvironment === 'default' ? '' : pathEnvironment) === (environment || '')
-        );
-      } catch {
-        return false;
-      }
-    },
+    (hashPath: string) => isServiceDetailsHashPath(hashPath, serviceName, environment),
     [serviceName, environment]
   );
 

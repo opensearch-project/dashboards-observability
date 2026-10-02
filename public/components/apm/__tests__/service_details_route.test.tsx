@@ -75,16 +75,32 @@ describe('ServiceDetailsRoute', () => {
     expect(mockDependencyDetails.mock.calls[0][0].nodeType).toBe('messaging');
   });
 
-  it('applies a shared link time range and writes a brushed range to the URL', () => {
+  it('applies a valid shared link time range, ignoring an invalid one', () => {
+    mockResolved.mockReturnValue({ nodeType: 'messaging', resolving: false });
+    const path = '/app/apm#/service-details/kafka%3Aorders/generic%3Adefault';
+    window.history.replaceState(null, '', `${path}?nodeType=messaging&from=now-1h&to=now`);
+    const onTimeChange = jest.fn();
+    const first = renderRoute('messaging', onTimeChange);
+    expect(onTimeChange).toHaveBeenCalledWith({ from: 'now-1h', to: 'now' });
+    first.unmount();
+
+    window.history.replaceState(null, '', `${path}?from=<script>&to=now`);
+    const ignored = jest.fn();
+    renderRoute('messaging', ignored);
+    expect(ignored).not.toHaveBeenCalled();
+  });
+
+  it('keeps the URL in sync with the time range, and a brush zooms through onTimeChange', () => {
     mockResolved.mockReturnValue({ nodeType: 'messaging', resolving: false });
     window.history.replaceState(
       null,
       '',
-      '/app/apm#/service-details/kafka%3Aorders/x?nodeType=messaging&from=now-1h&to=now'
+      '/app/apm#/service-details/kafka%3Aorders/generic%3Adefault?nodeType=messaging'
     );
     const onTimeChange = jest.fn();
     const { rerender } = renderRoute('messaging', onTimeChange);
-    expect(onTimeChange).toHaveBeenCalledWith({ from: 'now-1h', to: 'now' });
+    // A link without a range is backfilled with the page's range.
+    expect(new URLSearchParams(window.location.hash.split('?')[1]).get('from')).toBe('now-15m');
 
     const brush = mockDependencyDetails.mock.calls[0][0].onTimeRangeChange;
     brush('2026-10-01T08:00:00.000Z', '2026-10-01T08:05:00.000Z');
@@ -92,22 +108,22 @@ describe('ServiceDetailsRoute', () => {
       from: '2026-10-01T08:00:00.000Z',
       to: '2026-10-01T08:05:00.000Z',
     });
-    const params = new URLSearchParams(window.location.hash.split('?')[1]);
-    expect(params.get('from')).toBe('2026-10-01T08:00:00.000Z');
-    expect(params.get('nodeType')).toBe('messaging');
 
-    // A stable handler: re-rendering does not hand the charts a new callback.
     rerender(
       <ServiceDetailsRoute
         serviceName="kafka:orders"
         environment="generic:default"
         hintedNodeType="messaging"
-        timeRange={timeRange}
+        timeRange={{ from: '2026-10-01T08:00:00.000Z', to: '2026-10-01T08:05:00.000Z' }}
         onTimeChange={onTimeChange}
         onRefresh={jest.fn()}
         refreshTrigger={0}
       />
     );
+    const params = new URLSearchParams(window.location.hash.split('?')[1]);
+    expect(params.get('from')).toBe('2026-10-01T08:00:00.000Z');
+    expect(params.get('nodeType')).toBe('messaging');
+    // A stable handler: re-rendering does not hand the charts a new callback.
     const calls = mockDependencyDetails.mock.calls;
     expect(calls[calls.length - 1][0].onTimeRangeChange).toBe(brush);
   });

@@ -527,3 +527,27 @@ export function openApmSettings(focusCorrelatedDashboards = false): void {
   window.location.hash = `#${path}?${pairs.join('&')}`;
   window.dispatchEvent(new HashChangeEvent('hashchange'));
 }
+
+/**
+ * Whether a hash path (`#/service-details/{name}/{environment}`, without the query) is the
+ * details page of this service or dependency. The `default` environment segment stands for
+ * no environment, as in services.tsx.
+ */
+export function isServiceDetailsHashPath(
+  hashPath: string,
+  serviceName: string,
+  environment?: string
+): boolean {
+  const match = /^#\/service-details\/([^/]+)\/([^/]+)\/?$/.exec(hashPath);
+  if (!match) return false;
+  try {
+    const pathService = decodeURIComponent(match[1]);
+    const pathEnvironment = decodeURIComponent(match[2]);
+    return (
+      pathService === serviceName &&
+      (pathEnvironment === 'default' ? '' : pathEnvironment) === (environment || '')
+    );
+  } catch {
+    return false;
+  }
+}
