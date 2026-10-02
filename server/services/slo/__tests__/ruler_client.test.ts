@@ -13,7 +13,7 @@
  */
 
 import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
-import { DirectQueryRulerClient, ruleGroupToYaml } from '../ruler_client';
+import { DirectQueryRulerClient, classifyRulerFailure, ruleGroupToYaml } from '../ruler_client';
 import { SloRulerError } from '../../../../common/slo/slo_errors';
 import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { GeneratedRuleGroup } from '../../../../common/slo/slo_types';
@@ -251,6 +251,68 @@ describe('DirectQueryRulerClient error classification', () => {
       rawBody: 'ECONNREFUSED',
     });
     expect(requestMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('500 wrapping an upstream authorization failure → RULER_AUTH_FAILED reported as 403', async () => {
+    const { client, requestMock } = rejectWith({
+      statusCode: 500,
+      body: {
+        error:
+          'User: arn:aws:sts::123456789012:assumed-role/dq-role/session is not authorized to perform: aps:CreateRuleGroupsNamespace on resource: ...',
+      },
+    });
+    const svc = new DirectQueryRulerClient(noopLogger());
+    await expect(
+      svc.upsertRuleGroup(client, promDatasource(), 'ns', sampleGroup())
+    ).rejects.toMatchObject({
+      code: 'RULER_AUTH_FAILED',
+      httpStatus: 403,
+      rawBody: expect.stringContaining('not authorized to perform'),
+    });
+    expect(requestMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('500 wrapping a namespace conflict → RULER_VALIDATION_FAILED reported as 409, not unreachable', async () => {
+    const { client } = rejectWith({
+      statusCode: 500,
+      body: { error: 'ConflictException: A rule groups namespace with this name already exists' },
+    });
+    const svc = new DirectQueryRulerClient(noopLogger());
+    await expect(
+      svc.upsertRuleGroup(client, promDatasource(), 'ns', sampleGroup())
+    ).rejects.toMatchObject({ code: 'RULER_VALIDATION_FAILED', httpStatus: 409 });
+  });
+
+  it('a real 4xx keeps its status-based class even if the body mentions a conflict', () => {
+    expect(classifyRulerFailure(400, 'already exists')).toEqual({
+      code: 'RULER_VALIDATION_FAILED',
+      httpStatus: 400,
+    });
+    expect(classifyRulerFailure(401, 'Forbidden')).toEqual({
+      code: 'RULER_AUTH_FAILED',
+      httpStatus: 401,
+    });
+  });
+
+  it('500 wrapping an in-progress conflict stays RULER_UNREACHABLE, not a validation error', () => {
+    expect(
+      classifyRulerFailure(500, 'ConflictException: Rule groups namespace is currently creating')
+    ).toEqual({ code: 'RULER_UNREACHABLE', httpStatus: 500 });
+    expect(classifyRulerFailure(500, 'ConflictException')).toEqual({
+      code: 'RULER_UNREACHABLE',
+      httpStatus: 500,
+    });
+  });
+
+  it('5xx and network errors without a recognisable body stay RULER_UNREACHABLE', () => {
+    expect(classifyRulerFailure(503, 'upstream timeout')).toEqual({
+      code: 'RULER_UNREACHABLE',
+      httpStatus: 503,
+    });
+    expect(classifyRulerFailure(0, 'ECONNREFUSED')).toEqual({
+      code: 'RULER_UNREACHABLE',
+      httpStatus: 0,
+    });
   });
 
   it('extracts status from error.meta.statusCode when top-level absent', async () => {
