@@ -169,4 +169,59 @@ describe('ServiceCorrelationsFlyout Agent Traces routing', () => {
     expect(navigateToAgentTraceDetails).not.toHaveBeenCalled();
     expect(screen.getByText('Explore Traces')).toBeInTheDocument();
   });
+
+  it('routes a log span link by that span, not by the service', async () => {
+    (useCorrelatedLogs as jest.Mock).mockReturnValue({
+      data: [
+        {
+          id: 'logs-id',
+          displayName: 'logs-otel-v1*',
+          title: 'logs-otel-v1*',
+          schemaMappings: { serviceName: 'serviceName', timestamp: 'time', traceId: 'traceId' },
+        },
+      ],
+      loading: false,
+    });
+    mockExecuteQuery.mockImplementation(async (query: string) =>
+      query.startsWith('source=logs')
+        ? {
+            jsonData: [
+              {
+                time: '2026-10-01T10:00:01',
+                body: 'tool call',
+                spanId: 'genai',
+                traceId: 'trace-genai',
+              },
+              {
+                time: '2026-10-01T10:00:02',
+                body: 'http call',
+                spanId: 'http',
+                traceId: 'trace-http',
+              },
+              {
+                time: '2026-10-01T10:00:03',
+                body: 'other',
+                spanId: 'unloaded',
+                traceId: 'trace-x',
+              },
+            ],
+          }
+        : {
+            jsonData: [
+              span('genai', { 'gen_ai.operation.name': 'execute_tool' }),
+              span('http', { 'http.method': 'POST' }),
+            ],
+          }
+    );
+    render(<ServiceCorrelationsFlyout {...props} initialTab="logs" />);
+    await waitFor(() => expect(screen.getByText('unloaded')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByText('genai'));
+    expect(navigateToAgentTraceDetails).toHaveBeenCalledTimes(1);
+    // A plain span of the GenAI service, and a span not among the loaded spans: Explore.
+    fireEvent.click(screen.getByText('http'));
+    fireEvent.click(screen.getByText('unloaded'));
+    expect(navigateToSpanDetails).toHaveBeenCalledTimes(2);
+    expect(navigateToAgentTraceDetails).toHaveBeenCalledTimes(1);
+  });
 });

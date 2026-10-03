@@ -132,6 +132,12 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
   const [agentTracesAvailable, setAgentTracesAvailable] = useState(false);
   useEffect(() => subscribeAgentTracesAvailable(setAgentTracesAvailable), []);
   const isGenAiService = useMemo(() => spans.some((span) => isGenAiSpan(span.raw)), [spans]);
+  // GenAI spans among the loaded spans, by span id. A log row only has the span id, so a
+  // log's span link uses this; spans not loaded here keep the Explore span view.
+  const genAiSpanIds = useMemo(
+    () => new Set(spans.filter((span) => isGenAiSpan(span.raw)).map((span) => span.spanId)),
+    [spans]
+  );
   const [spansLoading, setSpansLoading] = useState(false);
   const [spansError, setSpansError] = useState<Error | null>(null);
   const [expandedSpanRows, setExpandedSpanRows] = useState<Record<string, React.ReactNode>>({});
@@ -743,7 +749,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       render: (spanId: string, item: LogData) =>
         spanId ? (
           <EuiLink
-            onClick={() => openSpan(spanId, item.raw.traceId || '', isGenAiService)}
+            onClick={() => openSpan(spanId, item.raw.traceId || '', genAiSpanIds.has(spanId))}
             style={{ fontFamily: 'monospace', fontSize: '12px' }}
           >
             {spanId} <EuiIcon type="popout" size="s" />
