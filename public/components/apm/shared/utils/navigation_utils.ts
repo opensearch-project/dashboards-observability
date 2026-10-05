@@ -13,6 +13,7 @@ import {
 } from '../../../../../common/constants/apm';
 import { coreRefs } from '../../../../framework/core_refs';
 import { buildSuggestSearch } from '../../pages/slos/slo_suggest_scope';
+import { isDependencyType, normalizeNodeType } from './platform_utils';
 
 /**
  * Serialize a single datemath time value (from/to) for a hand-built rison `_g`
@@ -67,6 +68,8 @@ export interface NavigateToServiceDetailsOptions {
   operation?: string;
   /** Dependency service name to pre-select in filters (for dependencies tab) */
   dependency?: string;
+  /** Node type (service / database / messaging / external) — routes dependencies to a tailored view */
+  nodeType?: string;
 }
 
 /**
@@ -159,6 +162,12 @@ export function navigateToServiceDetails(
     params.set('dependency', options.dependency);
   }
 
+  // Add the node type for dependencies so the detail route renders the dependency view;
+  // service links stay as before.
+  if (isDependencyType(options?.nodeType)) {
+    params.set('nodeType', normalizeNodeType(options?.nodeType));
+  }
+
   // Build path for hash-based routing
   const queryString = params.toString();
   const path = `#/service-details/${encodedServiceName}/${encodedEnvironment}${
@@ -192,6 +201,9 @@ export function openServiceDetailsInNewTab(
     params.set('to', options.timeRange.to);
   }
   if (options?.language) params.set('lang', options.language);
+  if (isDependencyType(options?.nodeType)) {
+    params.set('nodeType', normalizeNodeType(options?.nodeType));
+  }
 
   const queryString = params.toString();
   const hash = `#/service-details/${encodedServiceName}/${encodedEnvironment}${
@@ -514,4 +526,28 @@ export function openApmSettings(focusCorrelatedDashboards = false): void {
   pairs.push('_apmSettings=true');
   window.location.hash = `#${path}?${pairs.join('&')}`;
   window.dispatchEvent(new HashChangeEvent('hashchange'));
+}
+
+/**
+ * Whether a hash path (`#/service-details/{name}/{environment}`, without the query) is the
+ * details page of this service or dependency. The `default` environment segment stands for
+ * no environment, as in services.tsx.
+ */
+export function isServiceDetailsHashPath(
+  hashPath: string,
+  serviceName: string,
+  environment?: string
+): boolean {
+  const match = /^#\/service-details\/([^/]+)\/([^/]+)\/?$/.exec(hashPath);
+  if (!match) return false;
+  try {
+    const pathService = decodeURIComponent(match[1]);
+    const pathEnvironment = decodeURIComponent(match[2]);
+    return (
+      pathService === serviceName &&
+      (pathEnvironment === 'default' ? '' : pathEnvironment) === (environment || '')
+    );
+  } catch {
+    return false;
+  }
 }

@@ -12,11 +12,19 @@ import {
   getQueryServicesFailureRatioTotal,
   getQueryServicesLatency,
   getQueryServicesLatencyInstant,
+  getQueryServiceMapDependencyThroughput,
+  getQueryServiceMapDependencyFailureRatioTotal,
+  getQueryServiceMapDependencyLatencyInstant,
+  getQueryServiceMapDependencyThroughputRange,
+  getQueryServiceMapDependencyFailureRatioRange,
+  getQueryServiceMapDependencyLatencyRange,
+  dependencyNamesFilter,
 } from '../../query_services/query_requests/promql_queries';
 import { escapePromQLRegex } from '../../query_services/query_requests/escape_utils';
 import { getTimeInSeconds, calculateTimeRangeDuration } from '../utils/time_utils';
 import { calculateStep, RESOLUTION_LOW } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
+import { isDependencyType } from '../utils/platform_utils';
 
 // Debounce for the visible-page sparkline fetch: skimming past pages within
 // this window will not fire a request for each intermediate page.
@@ -50,12 +58,20 @@ export interface UseServicesRedMetricsParams {
    * per-series match. If omitted, a series is matched by name alone, which can
    * blend or pick an arbitrary environment for a name that spans several.
    */
-  services: Array<{ serviceName: string; environment?: string }>;
+  services: Array<{ serviceName: string; environment?: string; type?: string }>;
   /**
    * Services on the currently visible table page. Sparklines (per-step range
    * queries) are fetched only for these; omit/empty to fetch none.
+   *
+   * `type` distinguishes instrumented services from inferred dependency nodes
+   * (database / messaging / external). Dependency nodes are excluded from the
+   * sparkline `service=~"..."` filter: they have no `service="<name>"` series
+   * (their metrics are caller-derived via `remoteService=`), and their names
+   * often contain regex metacharacters (e.g. `api.openai.com:443`) which the
+   * direct-query connector rejects in a range query — one such name empties the
+   * whole batch, blanking every row's sparkline on the page.
    */
-  sparklineServices?: Array<{ serviceName: string; environment?: string }>;
+  sparklineServices?: Array<{ serviceName: string; environment?: string; type?: string }>;
   startTime: Date;
   endTime: Date;
   latencyPercentile?: 'p99' | 'p90' | 'p50';
@@ -141,9 +157,13 @@ export const useServicesRedMetrics = (
   // Stable key over the service set, used only to retrigger fetches when the
   // set changes (the query itself no longer depends on the list).
   const servicesKey = useMemo(
-    () => params.services.map((s) => s.serviceName).join('|'),
+    () => params.services.map((s) => `${s.serviceName}::${s.type || ''}`).join('|'),
     [params.services]
   );
+  // Caller-derived (remoteService=) queries run only when the catalog has
+  // dependency rows, so a service-only catalog (feature off / older data)
+  // issues exactly the service queries.
+  const hasDependencyRows = params.services.some((s) => isDependencyType(s.type));
 
   // Unique service names on the visible page — used to build the bounded
   // `service=~"..."` range filter (grouped by (environment, service), so one
@@ -185,19 +205,25 @@ export const useServicesRedMetrics = (
         serviceFilter,
         timeRangeDuration
       );
+      // Dependency (database / messaging / external) rows have no SERVER-span
+      // series; these caller-derived (remoteService=) queries fill them in.
+      const depTotalQuery = getQueryServiceMapDependencyThroughput(timeRangeDuration);
+      const depFailureRatioQuery = getQueryServiceMapDependencyFailureRatioTotal(timeRangeDuration);
 
-      const [totalResult, failureRatioTotalResult] = await Promise.allSettled([
+      const runInstant = (query: string) =>
         promqlService.executeInstantQuery({
-          query: totalQuery,
+          query,
           time: endTimeSec,
           signal: abortController.signal,
-        }),
-        promqlService.executeInstantQuery({
-          query: failureRatioTotalQuery,
-          time: endTimeSec,
-          signal: abortController.signal,
-        }),
-      ]);
+        });
+      const [totalResult, failureRatioTotalResult, depTotalResult, depFailureRatioResult] =
+        await Promise.allSettled([
+          runInstant(totalQuery),
+          runInstant(failureRatioTotalQuery),
+          ...(hasDependencyRows
+            ? [runInstant(depTotalQuery), runInstant(depFailureRatioQuery)]
+            : []),
+        ]);
 
       // Drop stale results if params changed while this fetch was in flight.
       if (abortController.signal.aborted) return;
@@ -205,23 +231,40 @@ export const useServicesRedMetrics = (
       const totalResp = totalResult.status === 'fulfilled' ? totalResult.value : null;
       const failureRatioTotalResp =
         failureRatioTotalResult.status === 'fulfilled' ? failureRatioTotalResult.value : null;
+      const depTotalResp = depTotalResult?.status === 'fulfilled' ? depTotalResult.value : null;
+      const depFailureRatioResp =
+        depFailureRatioResult?.status === 'fulfilled' ? depFailureRatioResult.value : null;
 
       const newTotalMap = new Map<string, number>();
       const newFailureRatioInstantMap = new Map<string, number>();
-      params.services.forEach(({ serviceName, environment }) => {
+      params.services.forEach(({ serviceName, environment, type }) => {
         const key = serviceNodeKey(serviceName, environment);
-        const data = extractServiceData(totalResp, serviceName, environment);
+        // Dependency rows use caller-derived metrics (they have no server data);
+        // service rows keep the SERVER-span series only.
+        const isDependency = isDependencyType(type);
+        const data = extractServiceData(
+          isDependency ? depTotalResp : totalResp,
+          serviceName,
+          environment
+        );
         newTotalMap.set(key, data.length > 0 ? data[0].value : 0);
-        const frData = extractServiceData(failureRatioTotalResp, serviceName, environment);
+        const frData = extractServiceData(
+          isDependency ? depFailureRatioResp : failureRatioTotalResp,
+          serviceName,
+          environment
+        );
         newFailureRatioInstantMap.set(key, frData.length > 0 ? frData[0].value : 0);
       });
 
       setTotalCountMap(newTotalMap);
       setFailureRatioInstantMap(newFailureRatioInstantMap);
 
-      const rejected = [totalResult, failureRatioTotalResult].find(
-        (r) => r.status === 'rejected'
-      ) as PromiseRejectedResult | undefined;
+      const rejected = [
+        totalResult,
+        failureRatioTotalResult,
+        depTotalResult,
+        depFailureRatioResult,
+      ].find((r) => r?.status === 'rejected') as PromiseRejectedResult | undefined;
       if (rejected) {
         console.error(
           '[useServicesRedMetrics] Partial failure fetching instant metrics:',
@@ -264,37 +307,54 @@ export const useServicesRedMetrics = (
         percentileValue,
         timeRangeDuration
       );
+      // Caller-derived latency for dependency nodes (no server-span buckets).
+      const depLatencyQuery = getQueryServiceMapDependencyLatencyInstant(
+        percentileValue,
+        timeRangeDuration
+      );
 
-      const [latencyInstantResult] = await Promise.allSettled([
+      const runInstant = (query: string) =>
         promqlService.executeInstantQuery({
-          query: latencyInstantQuery,
+          query,
           time: endTimeSec,
           signal: abortController.signal,
-        }),
+        });
+      const [latencyInstantResult, depLatencyResult] = await Promise.allSettled([
+        runInstant(latencyInstantQuery),
+        ...(hasDependencyRows ? [runInstant(depLatencyQuery)] : []),
       ]);
 
       if (abortController.signal.aborted) return;
 
       const latencyInstantResp =
         latencyInstantResult.status === 'fulfilled' ? latencyInstantResult.value : null;
+      const depLatencyResp =
+        depLatencyResult?.status === 'fulfilled' ? depLatencyResult.value : null;
 
       const newInstantMap = new Map<string, number>();
-      params.services.forEach(({ serviceName, environment }) => {
+      params.services.forEach(({ serviceName, environment, type }) => {
         const key = serviceNodeKey(serviceName, environment);
-        const data = extractServiceData(latencyInstantResp, serviceName, environment);
+        const data = extractServiceData(
+          isDependencyType(type) ? depLatencyResp : latencyInstantResp,
+          serviceName,
+          environment
+        );
         newInstantMap.set(key, data.length > 0 ? data[0].value : 0);
       });
 
       setLatencyInstantMap(newInstantMap);
 
-      if (latencyInstantResult.status === 'rejected') {
+      const latencyRejected = [latencyInstantResult, depLatencyResult].find(
+        (r) => r?.status === 'rejected'
+      ) as PromiseRejectedResult | undefined;
+      if (latencyRejected) {
         console.error(
           '[useServicesRedMetrics] Partial failure fetching latency metrics:',
-          latencyInstantResult.reason
+          latencyRejected.reason
         );
         setLatencyError(
-          latencyInstantResult.reason instanceof Error
-            ? latencyInstantResult.reason
+          latencyRejected.reason instanceof Error
+            ? latencyRejected.reason
             : new Error('Unknown error')
         );
       }
@@ -331,11 +391,16 @@ export const useServicesRedMetrics = (
   useEffect(() => {
     if (!promqlService || sparklineNames.length === 0) return;
 
-    const visible = params.sparklineServices ?? [];
-    const missing = visible.filter(
-      (s) => !throughputFailureMap.has(serviceNodeKey(s.serviceName, s.environment))
-    );
-    if (missing.length === 0) return; // whole page already cached -> no request
+    // Instrumented services use the bounded `service=~` filter. Dependency nodes
+    // (database / messaging / external) are fetched separately: they have no
+    // `service="<name>"` series; their sparkline is caller-derived, aggregated by
+    // `remoteService` and bounded by `remoteService=~` to the page's dependencies.
+    const all = params.sparklineServices ?? [];
+    const isCached = (s: { serviceName: string; environment?: string }) =>
+      throughputFailureMap.has(serviceNodeKey(s.serviceName, s.environment));
+    const missing = all.filter((s) => !isDependencyType(s.type) && !isCached(s));
+    const missingDeps = all.filter((s) => isDependencyType(s.type) && !isCached(s));
+    if (missing.length === 0 && missingDeps.length === 0) return; // page cached
 
     const abortController = new AbortController();
     const timer = setTimeout(() => {
@@ -346,62 +411,98 @@ export const useServicesRedMetrics = (
             : params.latencyPercentile === 'p90'
               ? 0.9
               : 0.99;
-        const missingNames = Array.from(new Set(missing.map((s) => s.serviceName)));
-        const filter = `service=~"${missingNames.map(escapePromQLRegex).join('|')}"`;
-        const throughputQuery = getQueryServicesThroughput(filter);
-        const failureRatioQuery = getQueryServicesFailureRatio(filter);
-        const latencyQuery = getQueryServicesLatency(filter, percentileValue);
         const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
+        const runRange = (query: string) =>
+          promqlService.executeMetricRequest({
+            query,
+            startTime: startTimeSec,
+            endTime: endTimeSec,
+            step,
+            signal: abortController.signal,
+          });
 
-        const [throughputResult, failureRatioResult, latencyResult] = await Promise.allSettled([
-          promqlService.executeMetricRequest({
-            query: throughputQuery,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
-            step,
-            signal: abortController.signal,
-          }),
-          promqlService.executeMetricRequest({
-            query: failureRatioQuery,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
-            step,
-            signal: abortController.signal,
-          }),
-          promqlService.executeMetricRequest({
-            query: latencyQuery,
-            startTime: startTimeSec,
-            endTime: endTimeSec,
-            step,
-            signal: abortController.signal,
-          }),
-        ]);
+        // Service batch — bounded `service=~` filter; skipped when none missing.
+        const serviceBatch =
+          missing.length > 0
+            ? (() => {
+                const missingNames = Array.from(new Set(missing.map((s) => s.serviceName)));
+                const filter = `service=~"${missingNames.map(escapePromQLRegex).join('|')}"`;
+                return Promise.allSettled([
+                  runRange(getQueryServicesThroughput(filter)),
+                  runRange(getQueryServicesFailureRatio(filter)),
+                  runRange(getQueryServicesLatency(filter, percentileValue)),
+                ]);
+              })()
+            : Promise.resolve(null);
+
+        // Dependency batch — caller-derived, aggregated by target and relabeled
+        // to service/environment, bounded to the page's missing dependencies.
+        // Skipped when no dependency rows are missing.
+        const depBatch =
+          missingDeps.length > 0
+            ? (() => {
+                const depFilter = dependencyNamesFilter(
+                  Array.from(new Set(missingDeps.map((s) => s.serviceName)))
+                );
+                return Promise.allSettled([
+                  runRange(getQueryServiceMapDependencyThroughputRange(depFilter)),
+                  runRange(getQueryServiceMapDependencyFailureRatioRange(depFilter)),
+                  runRange(getQueryServiceMapDependencyLatencyRange(percentileValue, depFilter)),
+                ]);
+              })()
+            : Promise.resolve(null);
+
+        const [serviceResults, depResults] = await Promise.all([serviceBatch, depBatch]);
 
         if (abortController.signal.aborted) return;
 
-        const throughputResp =
-          throughputResult.status === 'fulfilled' ? throughputResult.value : null;
-        const failureRatioResp =
-          failureRatioResult.status === 'fulfilled' ? failureRatioResult.value : null;
-        const latencyResp = latencyResult.status === 'fulfilled' ? latencyResult.value : null;
+        const unwrap = <T>(results: Array<PromiseSettledResult<T>> | null, i: number): T | null => {
+          const r = results?.[i];
+          return r && r.status === 'fulfilled' ? r.value : null;
+        };
+        const svcThroughput = unwrap(serviceResults, 0);
+        const svcFailureRatio = unwrap(serviceResults, 1);
+        const svcLatency = unwrap(serviceResults, 2);
+        const depThroughput = unwrap(depResults, 0);
+        const depFailureRatio = unwrap(depResults, 1);
+        const depLatency = unwrap(depResults, 2);
+        // A rejected query is not cached as an empty sparkline: its rows stay uncached, so the
+        // next page change, refresh or time change fetches them again.
+        const fulfilled = <T>(results: Array<PromiseSettledResult<T>> | null) =>
+          !!results && results.every((r) => r.status === 'fulfilled');
+        const cacheServices = fulfilled(serviceResults) ? missing : [];
+        const cacheDeps = fulfilled(depResults) ? missingDeps : [];
+        if (cacheServices.length === 0 && cacheDeps.length === 0) return;
 
         // Merge into the caches, preserving previously fetched pages.
         setThroughputFailureMap((prev) => {
           const next = new Map(prev);
-          missing.forEach(({ serviceName, environment }) => {
+          cacheServices.forEach(({ serviceName, environment }) => {
             next.set(serviceNodeKey(serviceName, environment), {
-              throughput: extractServiceData(throughputResp, serviceName, environment),
-              failureRatio: extractServiceData(failureRatioResp, serviceName, environment),
+              throughput: extractServiceData(svcThroughput, serviceName, environment),
+              failureRatio: extractServiceData(svcFailureRatio, serviceName, environment),
+            });
+          });
+          cacheDeps.forEach(({ serviceName, environment }) => {
+            next.set(serviceNodeKey(serviceName, environment), {
+              throughput: extractServiceData(depThroughput, serviceName, environment),
+              failureRatio: extractServiceData(depFailureRatio, serviceName, environment),
             });
           });
           return next;
         });
         setLatencyMap((prev) => {
           const next = new Map(prev);
-          missing.forEach(({ serviceName, environment }) => {
+          cacheServices.forEach(({ serviceName, environment }) => {
             next.set(
               serviceNodeKey(serviceName, environment),
-              extractServiceData(latencyResp, serviceName, environment)
+              extractServiceData(svcLatency, serviceName, environment)
+            );
+          });
+          cacheDeps.forEach(({ serviceName, environment }) => {
+            next.set(
+              serviceNodeKey(serviceName, environment),
+              extractServiceData(depLatency, serviceName, environment)
             );
           });
           return next;

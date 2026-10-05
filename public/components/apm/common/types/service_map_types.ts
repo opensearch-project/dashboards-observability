@@ -125,6 +125,12 @@ export interface SelectedEdgeState {
   sourceNodeId: string;
   /** Target node ID (for map focusing) */
   targetNodeId: string;
+  /** Source node type (service / database / messaging / external); messaging marks a broker -> consumer edge */
+  sourceNodeType?: string;
+  /** Target node type; messaging marks a producer -> broker edge */
+  targetNodeType?: string;
+  /** Target environment (the consumer's environment on a broker -> consumer edge) */
+  targetEnvironment?: string;
 }
 
 /**
@@ -269,6 +275,8 @@ export interface SelectedNodeState {
   serviceName: string;
   environment: string;
   platformType: string;
+  /** Node type: service / database / messaging / external. Drives dependency metric queries. */
+  nodeType?: string;
   groupByAttributes?: Record<string, string>;
 }
 

@@ -103,11 +103,14 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
           const serviceName = svc.KeyAttributes?.Name || svc.serviceName || svc.name || 'unknown';
           const environment = svc.KeyAttributes?.Environment || svc.environment || 'unknown';
           const groupByAttributes = svc.GroupByAttributes || {};
+          // Lower-cased so sorting and filtering compare one form ('Service' is the legacy default).
+          const type = String(svc.KeyAttributes?.Type || 'service').toLowerCase();
 
           return {
             serviceName,
             environment,
             groupByAttributes,
+            type,
           };
         });
 

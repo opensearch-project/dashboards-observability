@@ -75,6 +75,12 @@ import {
 } from '../../shared/components/filters';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../common/constants';
+import {
+  isDependencyType,
+  getNodeTypeLabel,
+  normalizeNodeType,
+  NODE_TYPES,
+} from '../../shared/utils/platform_utils';
 import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
 import { formatThroughput } from '../../common/format_utils';
 import { TruncatedLabel } from '../../../common/truncated_label';
@@ -109,7 +115,8 @@ interface ServicesTablePanelProps {
     serviceName: string,
     environment: string,
     language?: string,
-    timeRange?: TimeRange
+    timeRange?: TimeRange,
+    nodeType?: string
   ) => void;
   sloAggregate: SloHealthBucket;
   sloBySvc: Map<string, SloHealthBucket>;
@@ -276,7 +283,8 @@ export interface ServicesHomeProps {
     serviceName: string,
     environment: string,
     language?: string,
-    timeRange?: TimeRange
+    timeRange?: TimeRange,
+    nodeType?: string
   ) => void;
 }
 
@@ -308,6 +316,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   const [flyoutState, setFlyoutState] = useState<FlyoutState | null>(null);
 
   const [selectedEnvironments, setSelectedEnvironments] = useState<Record<string, boolean>>({});
+  // Node-type filter (service / database / messaging / external).
+  const [selectedTypes, setSelectedTypes] = useState<Record<string, boolean>>({});
   const [selectedGroupByAttributes, setSelectedGroupByAttributes] = useState<
     Record<string, Record<string, boolean>>
   >({});
@@ -335,7 +345,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
   // Visible-page tracking: sparklines are fetched only for the shown rows.
   const [visibleServices, setVisibleServices] = useState<
-    Array<{ serviceName: string; environment?: string }>
+    Array<{ serviceName: string; environment?: string; type?: string }>
   >([]);
   // Sort is mirrored so the visible-page slice matches the table's order; the
   // page index/size come from useControlledPagination (declared after
@@ -391,6 +401,23 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     refreshTrigger,
   });
 
+  // The Type column, filter and badge only appear when the data has dependency nodes.
+  // Service-only data (data-prepper without dependency nodes, or with them disabled)
+  // renders exactly as before, and a stale type selection is ignored.
+  const hasDependencyRows = useMemo(
+    () => (services || []).some((s) => isDependencyType(s.type)),
+    [services]
+  );
+  // The known types, plus any type in the data this version has no label for.
+  const typeFilterOptions = useMemo(() => {
+    const extra = new Set<string>();
+    (services || []).forEach((s) => {
+      const t = normalizeNodeType(s.type);
+      if (!NODE_TYPES.includes(t)) extra.add(t);
+    });
+    return [...NODE_TYPES, ...Array.from(extra).sort()];
+  }, [services]);
+
   // --- SLO health rollup ---------------------------------------------------
   // We want the hook to fetch once per service-set change, *not* on every
   // `useServices` refresh (which fires on time-picker changes). Deriving the
@@ -423,8 +450,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     []
   );
 
+  // SLOs are defined on instrumented services, so dependency rows are not offered for them
+  // and do not count against the rollup's name cap.
   const serviceNamesKey = useMemo(() => {
-    const names = (services || []).map((s) => s.serviceName);
+    const names = (services || [])
+      .filter((s) => !isDependencyType(s.type))
+      .map((s) => s.serviceName);
     names.sort();
     return names.join('\n');
   }, [services]);
@@ -589,6 +620,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       });
     }
 
+    // Filter by node type (service / database / messaging / external)
+    const hasSelectedTypes = Object.values(selectedTypes).some((v) => v);
+    if (hasDependencyRows && hasSelectedTypes) {
+      filtered = filtered.filter((service) => {
+        return selectedTypes[normalizeNodeType(service.type)] === true;
+      });
+    }
+
     // Filter by groupByAttributes
     const hasGroupByAttributeFilters = Object.keys(selectedGroupByAttributes).some((attrPath) =>
       Object.values(selectedGroupByAttributes[attrPath]).some((v) => v)
@@ -618,7 +657,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     }
 
     return filtered;
-  }, [services, searchQuery, selectedEnvironments, selectedGroupByAttributes]);
+  }, [
+    services,
+    searchQuery,
+    selectedEnvironments,
+    selectedTypes,
+    hasDependencyRows,
+    selectedGroupByAttributes,
+  ]);
 
   // Fetch RED (Request rate, Error rate, Duration) metrics for ALL services
   // Fetched separately and before filtering to avoid re-fetching on filter changes
@@ -630,6 +676,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     services: (services || []).map((s) => ({
       serviceName: s.serviceName,
       environment: s.environment,
+      type: s.type,
     })),
     sparklineServices: visibleServices,
     startTime: parsedTimeRange.startTime,
@@ -842,6 +889,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           return m?.avgFailureRatio || 0;
         case 'environment':
           return item.environment ?? '';
+        case 'type':
+          return item.type ?? '';
         default:
           return item.serviceName ?? '';
       }
@@ -862,7 +911,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         );
       return sameKeys
         ? prev
-        : slice.map((s) => ({ serviceName: s.serviceName, environment: s.environment }));
+        : slice.map((s) => ({
+            serviceName: s.serviceName,
+            environment: s.environment,
+            type: s.type,
+          }));
     });
   }, [displayedServices, metricsMap, tableSortField, tableSortDirection, pageIndex, pageSize]);
 
@@ -880,6 +933,19 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         category: i18nTexts.filters.environment,
         values: selectedEnvValues,
         onRemove: () => setSelectedEnvironments({}),
+      });
+    }
+
+    // Node type filter badge
+    const selectedTypeValues = Object.entries(selectedTypes)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([type]) => getNodeTypeLabel(type));
+    if (hasDependencyRows && selectedTypeValues.length > 0) {
+      badges.push({
+        key: 'type',
+        category: i18nTexts.table.type,
+        values: selectedTypeValues,
+        onRemove: () => setSelectedTypes({}),
       });
     }
 
@@ -952,6 +1018,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return badges;
   }, [
     selectedEnvironments,
+    selectedTypes,
+    hasDependencyRows,
     latencyUserModified,
     throughputUserModified,
     latencyRange,
@@ -964,6 +1032,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   // Clear all filters handler
   const handleClearAllFilters = useCallback(() => {
     setSelectedEnvironments({});
+    setSelectedTypes({});
     setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
     setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
     setSelectedFailureRateThresholds([]);
@@ -999,7 +1068,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                 <EuiLink
                   onClick={() => {
                     if (onServiceClick) {
-                      onServiceClick(serviceName, item.environment, language, timeRange);
+                      onServiceClick(serviceName, item.environment, language, timeRange, item.type);
                     }
                   }}
                   data-test-subj={`serviceLink-${serviceName}`}
@@ -1026,41 +1095,47 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             alignItems="center"
             justifyContent="center"
           >
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewSpans}>
-                <EuiButtonIcon
-                  iconType="apmTrace"
-                  aria-label={i18nTexts.actions.viewSpans}
-                  onClick={() =>
-                    setFlyoutState({
-                      serviceName: item.serviceName,
-                      environment: item.environment,
-                      language: item.groupByAttributes?.telemetry?.sdk?.language,
-                      tab: 'spans',
-                    })
-                  }
-                  data-test-subj={`serviceSpansButton-${item.serviceName}`}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewLogs}>
-                <EuiButtonIcon
-                  iconType="discoverApp"
-                  autoFocus={false}
-                  aria-label={i18nTexts.actions.viewLogs}
-                  onClick={() =>
-                    setFlyoutState({
-                      serviceName: item.serviceName,
-                      environment: item.environment,
-                      language: item.groupByAttributes?.telemetry?.sdk?.language,
-                      tab: 'logs',
-                    })
-                  }
-                  data-test-subj={`serviceLogsButton-${item.serviceName}`}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
+            {/* Spans/logs are keyed by serviceName; inferred dependencies emit no
+                spans/logs under their own name, so these are hidden for them. */}
+            {!isDependencyType(item.type) && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18nTexts.actions.viewSpans}>
+                  <EuiButtonIcon
+                    iconType="apmTrace"
+                    aria-label={i18nTexts.actions.viewSpans}
+                    onClick={() =>
+                      setFlyoutState({
+                        serviceName: item.serviceName,
+                        environment: item.environment,
+                        language: item.groupByAttributes?.telemetry?.sdk?.language,
+                        tab: 'spans',
+                      })
+                    }
+                    data-test-subj={`serviceSpansButton-${item.serviceName}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {!isDependencyType(item.type) && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18nTexts.actions.viewLogs}>
+                  <EuiButtonIcon
+                    iconType="discoverApp"
+                    autoFocus={false}
+                    aria-label={i18nTexts.actions.viewLogs}
+                    onClick={() =>
+                      setFlyoutState({
+                        serviceName: item.serviceName,
+                        environment: item.environment,
+                        language: item.groupByAttributes?.telemetry?.sdk?.language,
+                        tab: 'logs',
+                      })
+                    }
+                    data-test-subj={`serviceLogsButton-${item.serviceName}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.actions.viewServiceMap}>
                 <EuiButtonIcon
@@ -1242,6 +1317,24 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           return <EuiText size="s">{getEnvironmentDisplayName(environment)}</EuiText>;
         },
       },
+      ...(hasDependencyRows
+        ? [
+            {
+              field: 'type',
+              name: (
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>{i18nTexts.table.type}</EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              sortable: true,
+              align: 'center' as const,
+              width: '10%',
+              render: (_type: string, item: ServiceTableItem) => {
+                return <EuiText size="s">{getNodeTypeLabel(item.type)}</EuiText>;
+              },
+            },
+          ]
+        : []),
       ...(sloFeatureEnabled
         ? [
             {
@@ -1267,6 +1360,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               // stable accessor so the cell re-renders only when the hook's Map
               // actually changes, not on every EuiResizableContainer mousemove.
               render: (_value: unknown, item: ServiceTableItem) => {
+                // SLOs apply to owned services, not inferred dependency nodes.
+                if (isDependencyType(item.type)) {
+                  return (
+                    <EuiText size="s" color="subdued">
+                      —
+                    </EuiText>
+                  );
+                }
                 const accessed = getSloHealth(item.serviceName);
                 return (
                   <SloHealthCell
@@ -1290,6 +1391,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       latencyPercentile,
       getSloHealth,
       sloFeatureEnabled,
+      hasDependencyRows,
     ]
   );
 
@@ -1373,6 +1475,39 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           </EuiFlexGroup>
 
                           <EuiHorizontalRule margin="xs" />
+
+                          {/* Node Type Filter - Accordion (only when dependency nodes exist) */}
+                          {hasDependencyRows && (
+                            <>
+                              <EuiAccordion
+                                id="typeAccordion"
+                                buttonContent={
+                                  <EuiText size="xs">
+                                    <strong>{i18nTexts.table.type}</strong>
+                                  </EuiText>
+                                }
+                                initialIsOpen={true}
+                                data-test-subj="typeAccordion"
+                              >
+                                <EuiSpacer size="xs" />
+                                <EuiCheckboxGroup
+                                  className="apmFilterCheckboxGroup"
+                                  options={typeFilterOptions.map((id) => ({
+                                    id,
+                                    label: getNodeTypeLabel(id),
+                                  }))}
+                                  idToSelectedMap={selectedTypes}
+                                  onChange={(id) =>
+                                    setSelectedTypes((prev) => ({ ...prev, [id]: !prev[id] }))
+                                  }
+                                  compressed
+                                  data-test-subj="typeCheckboxGroup"
+                                />
+                              </EuiAccordion>
+
+                              <EuiHorizontalRule margin="xs" />
+                            </>
+                          )}
 
                           {/* Environment Filter - Accordion */}
                           <EuiAccordion

@@ -23,8 +23,12 @@ const mockMetricsReturn = {
   error: null,
   refetch: jest.fn(),
 };
+const mockRedMetricsArgs = jest.fn();
 jest.mock('../../../shared/hooks/use_services_red_metrics', () => ({
-  useServicesRedMetrics: () => mockMetricsReturn,
+  useServicesRedMetrics: (args: unknown) => {
+    mockRedMetricsArgs(args);
+    return mockMetricsReturn;
+  },
   // `services_home.tsx` keys the metrics map with `serviceNodeKey`. Mirror the
   // real implementation (`${serviceName}::${environment ?? ''}`) so the table
   // cell renderers don't throw "serviceNodeKey is not a function".
@@ -80,12 +84,20 @@ jest.mock('../../../shared/components/service_correlations_flyout', () =>
   stub('ServiceCorrelationsFlyout')
 );
 jest.mock('../../../shared/components/active_filter_badges', () => ({
-  ActiveFilterBadges: () => <div data-test-subj="stub-ActiveFilterBadges" />,
+  ActiveFilterBadges: ({ filters }: { filters: Array<{ category: string; values: string[] }> }) => (
+    <div data-test-subj="stub-ActiveFilterBadges">
+      {filters.map((f) => `${f.category}: ${f.values.join(', ')}`).join(' | ')}
+    </div>
+  ),
   FilterBadge: () => null,
 }));
+const mockSloHealthPanel = jest.fn();
 jest.mock('../slo_health_panel', () => ({
   SloHealthCell: () => <div />,
-  SloHealthPanel: () => <div />,
+  SloHealthPanel: (props: unknown) => {
+    mockSloHealthPanel(props);
+    return <div />;
+  },
   SLO_HEALTH_COLUMN_HEADER: 'SLO',
   SLO_HEALTH_COLUMN_HEADER_TIP: '',
   SLO_HEALTH_COLUMN_WIDTH: '100px',
@@ -216,5 +228,110 @@ describe('ServicesHome — Environment filter', () => {
     // Clear all wipes the map.
     fireEvent.click(screen.getByTestId('environmentClearAll'));
     expect(checkedIds()).toEqual([]);
+  });
+});
+
+describe('ServicesHome — Node type column and filter', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  const renderTyped = (rows: Array<{ serviceName: string; type?: string }>) => {
+    mockUseServices.mockReturnValue({
+      data: rows.map((r) => ({ ...r, environment: 'generic:default', groupByAttributes: {} })),
+      isLoading: false,
+      error: null,
+      availableGroupByAttributes: {},
+      refetch: jest.fn(),
+    });
+    return render(
+      <ServicesHome
+        chrome={{ setBreadcrumbs: jest.fn() }}
+        parentBreadcrumb={{ text: 'APM', href: '#/' }}
+        onServiceClick={jest.fn()}
+      />
+    );
+  };
+  const typeHeader = () =>
+    screen
+      .queryAllByRole('columnheader')
+      .find((th) => th.textContent?.trim() === servicesI18nTexts.table.type);
+  const rowNames = () =>
+    screen.queryAllByTestId(/^serviceLink-/).map((el) => el.textContent?.trim());
+
+  it('service-only data (no dependency nodes) renders no Type column or filter', () => {
+    renderTyped([
+      { serviceName: 'cart', type: 'service' },
+      { serviceName: 'checkout', type: 'service' },
+    ]);
+
+    expect(typeHeader()).toBeUndefined();
+    expect(screen.queryByTestId('typeCheckboxGroup')).not.toBeInTheDocument();
+    expect(rowNames()).toEqual(['cart', 'checkout']);
+  });
+
+  it('with dependency nodes, filters by type and shows a Type badge', () => {
+    renderTyped([
+      { serviceName: 'cart', type: 'service' },
+      { serviceName: 'postgresql:orders-db', type: 'database' },
+      { serviceName: 'kafka:orders', type: 'messaging' },
+    ]);
+
+    expect(typeHeader()).toBeDefined();
+    fireEvent.click(within(screen.getByTestId('typeCheckboxGroup')).getByLabelText('Database'));
+
+    expect(rowNames()).toEqual(['postgresql:orders-db']);
+    expect(screen.getByTestId('stub-ActiveFilterBadges')).toHaveTextContent(
+      `${servicesI18nTexts.table.type}: Database`
+    );
+  });
+
+  it('lists unknown types in the filter and keeps them out of "Service"', () => {
+    renderTyped([
+      { serviceName: 'cart', type: 'service' },
+      { serviceName: 'memcached:sessions', type: 'cache' },
+    ]);
+
+    const group = within(screen.getByTestId('typeCheckboxGroup'));
+    fireEvent.click(group.getByLabelText('Service'));
+    expect(rowNames()).toEqual(['cart']);
+    fireEvent.click(group.getByLabelText('Service'));
+    fireEvent.click(group.getByLabelText('Other dependency'));
+    expect(rowNames()).toEqual(['memcached:sessions']);
+  });
+
+  it('offers only instrumented services to the SLO rollup', () => {
+    const refs = jest.requireMock('../../../../../framework/core_refs').coreRefs;
+    refs.sloEnabled = true;
+    try {
+      renderTyped([
+        { serviceName: 'cart', type: 'service' },
+        { serviceName: 'kafka:orders', type: 'messaging' },
+        { serviceName: 'checkout' },
+      ]);
+
+      const panelCalls = mockSloHealthPanel.mock.calls;
+      expect(panelCalls.length).toBeGreaterThan(0);
+      expect(panelCalls[panelCalls.length - 1][0].allServices).toEqual(['cart', 'checkout']);
+    } finally {
+      refs.sloEnabled = false;
+    }
+  });
+
+  it('sorting by Type fetches sparklines for the rows actually shown', () => {
+    renderTyped([
+      { serviceName: 'a-service', type: 'service' },
+      { serviceName: 'b-broker', type: 'messaging' },
+      { serviceName: 'c-db', type: 'database' },
+    ]);
+
+    const header = typeHeader();
+    expect(header).toBeDefined();
+    fireEvent.click(within(header as HTMLElement).getByRole('button'));
+
+    const shown = rowNames();
+    const sparkline = mockRedMetricsArgs.mock.calls
+      .slice(-1)[0][0]
+      .sparklineServices.map((s: { serviceName: string }) => s.serviceName);
+    expect(shown).toEqual(['c-db', 'b-broker', 'a-service']);
+    expect(sparkline).toEqual(shown);
   });
 });

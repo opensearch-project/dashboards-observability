@@ -49,11 +49,24 @@ import {
 } from '../../common/types/service_map_types';
 import { TimeRange } from '../../common/types/service_types';
 import {
+  APM_INCLUDE_DEPENDENCIES_STORAGE_KEY,
   APPLICATION_MAP_CONSTANTS,
   THRESHOLD_LABELS,
   getEnvironmentDisplayName,
   getPlatformTypeFromEnvironment,
 } from '../../common/constants';
+import { removeDependencies } from '../../shared/utils/dependency_stacking';
+import { isDependencyType } from '../../shared/utils/platform_utils';
+
+/** Whether the map shows dependency nodes; kept per tab (sessionStorage), default on. */
+const readIncludeDependencies = (): boolean => {
+  try {
+    return sessionStorage.getItem(APM_INCLUDE_DEPENDENCIES_STORAGE_KEY) !== 'false';
+  } catch {
+    // sessionStorage unavailable (e.g. privacy mode): default on.
+    return true;
+  }
+};
 import { applicationMapI18nTexts as i18nTexts } from './application_map_i18n';
 import { LegacyBanner } from '../../shared/components/legacy_banner';
 import { ServiceCorrelationsFlyout } from '../../shared/components/service_correlations_flyout';
@@ -136,6 +149,19 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
 
   // Filter state
   const [filters, setFilters] = useState<ApplicationMapFilters>(DEFAULT_FILTERS);
+
+  // "Include external dependencies" (sessionStorage, like the time range) and, on a large map,
+  // whether the user chose to see stacked dependencies individually (this page view only).
+  const [includeDependencies, setIncludeDependenciesState] = useState(readIncludeDependencies);
+  const setIncludeDependencies = useCallback((included: boolean) => {
+    setIncludeDependenciesState(included);
+    try {
+      sessionStorage.setItem(APM_INCLUDE_DEPENDENCIES_STORAGE_KEY, String(included));
+    } catch {
+      // Not persisted when sessionStorage is unavailable.
+    }
+  }, []);
+  const [showDependenciesIndividually, setShowDependenciesIndividually] = useState(false);
 
   // Navigation state for hierarchical view
   const [navigationState, setNavigationState] =
@@ -242,6 +268,17 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     refreshTrigger,
   });
 
+  // Dependency nodes exist only with a data-prepper that synthesizes them; without them the
+  // checkbox is not shown and the map renders as before.
+  const hasDependencyNodes = useMemo(
+    () => nodes.some((n) => isDependencyType(n.KeyAttributes.Type)),
+    [nodes]
+  );
+  const mapGraph = useMemo(
+    () => (includeDependencies ? { nodes, edges } : removeDependencies(nodes, edges)),
+    [includeDependencies, nodes, edges]
+  );
+
   // Auto-select node from URL params once nodes are loaded
   useEffect(() => {
     if (!pendingNodeSelection || nodes.length === 0) return;
@@ -262,6 +299,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         serviceName,
         environment,
         platformType,
+        nodeType: matchingNode.KeyAttributes?.Type,
         groupByAttributes: matchingNode.GroupByAttributes,
       });
     }
@@ -275,6 +313,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     return nodes.map((node) => ({
       serviceName: node.KeyAttributes.Name,
       environment: node.KeyAttributes.Environment,
+      type: node.KeyAttributes.Type,
     }));
   }, [nodes]);
 
@@ -424,6 +463,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         serviceName,
         environment,
         platformType,
+        nodeType: node?.KeyAttributes?.Type,
         groupByAttributes: node?.GroupByAttributes,
       });
     },
@@ -450,6 +490,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       openServiceDetailsInNewTab(serviceName, environment, {
         timeRange,
         language,
+        nodeType: node?.KeyAttributes?.Type,
       });
     },
     [nodes, timeRange]
@@ -621,6 +662,16 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       });
     }
 
+    // Dependencies hidden badge
+    if (hasDependencyNodes && !includeDependencies) {
+      badges.push({
+        key: 'dependencies',
+        category: i18nTexts.filters.dependencies,
+        values: [i18nTexts.filters.dependenciesHidden],
+        onRemove: () => setIncludeDependencies(true),
+      });
+    }
+
     // Group by badge
     if (filters.groupBy) {
       badges.push({
@@ -632,12 +683,13 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     }
 
     return badges;
-  }, [filters]);
+  }, [filters, hasDependencyNodes, includeDependencies, setIncludeDependencies]);
 
   // Clear all filters
   const handleClearAllFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS);
-  }, []);
+    setIncludeDependencies(true);
+  }, [setIncludeDependencies]);
 
   // APM Settings button for header area
   const settingsButton = (
@@ -772,6 +824,11 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                       availableEnvironments={availableEnvironments}
                       isLoading={isLoading}
                       onToggle={() => togglePanel('filter-sidebar', { direction: 'left' })}
+                      dependencies={
+                        hasDependencyNodes
+                          ? { included: includeDependencies, onChange: setIncludeDependencies }
+                          : undefined
+                      }
                     />
                   </EuiResizablePanel>
 
@@ -787,8 +844,10 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                     style={{ padding: '8px 0px 0px 8px' }}
                   >
                     <ServiceMapGraph
-                      nodes={nodes}
-                      edges={edges}
+                      nodes={mapGraph.nodes}
+                      edges={mapGraph.edges}
+                      stackDependencies={!showDependenciesIndividually}
+                      onShowDependenciesIndividually={() => setShowDependenciesIndividually(true)}
                       metricsMap={metricsMap}
                       filters={filters}
                       navigationState={navigationState}

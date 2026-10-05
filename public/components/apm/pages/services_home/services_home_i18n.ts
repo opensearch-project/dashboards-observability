@@ -19,6 +19,9 @@ export const servicesI18nTexts = {
     environment: i18n.translate('observability.apm.services.table.environment', {
       defaultMessage: 'Environment',
     }),
+    type: i18n.translate('observability.apm.services.table.type', {
+      defaultMessage: 'Type',
+    }),
     latencyP99: i18n.translate('observability.apm.services.table.latencyP99', {
       defaultMessage: 'Avg. latency',
     }),
