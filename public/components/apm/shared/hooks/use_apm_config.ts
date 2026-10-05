@@ -6,7 +6,6 @@
 import { useEffect, useState } from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { coreRefs } from '../../../../framework/core_refs';
-import { getUnsupportedEngineDataSourceIds } from '../../../../../common/utils/shared';
 
 interface DatasetOptionData {
   id: string;
@@ -74,7 +73,7 @@ export const useDatasets = () => {
                 label: displayName,
                 value: { id, displayName, title, datasourceId, fieldNames },
               };
-              return { option, datasourceId, signalType: dataView.signalType };
+              return { option, signalType: dataView.signalType };
             } catch (err) {
               console.error(`Failed to fetch dataset ${id}:`, err);
               return null;
@@ -84,38 +83,22 @@ export const useDatasets = () => {
 
         const tracesOptions: Array<EuiComboBoxOptionOption<DatasetOptionData>> = [];
         const allOptions: Array<EuiComboBoxOptionOption<DatasetOptionData>> = [];
-        // Backing data-source id per option, used to drop AnalyticEngine-backed
-        // datasets below (single bulkGet rather than one lookup per dataset).
-        const dataSourceIdByOption = new Map<
-          EuiComboBoxOptionOption<DatasetOptionData>,
-          string | undefined
-        >();
 
-        // Preserves getIdsWithTitle order (Promise.all keeps array order).
+        // Preserves getIdsWithTitle order (Promise.all keeps array order). Datasets on
+        // every data source engine are listed, including AnalyticEngine: APM queries go
+        // through PPL and PromQL only.
         for (const entry of resolved) {
           if (!entry) continue;
           allOptions.push(entry.option);
-          dataSourceIdByOption.set(entry.option, entry.datasourceId);
           if (entry.signalType === 'traces') {
             tracesOptions.push(entry.option);
           }
         }
 
-        // Drop datasets backed by an AnalyticEngine data source: AnalyticEngine serves
-        // PPL/SQL but not the DSL aggregations the APM traces / service-map views run, so
-        // selecting one here would 5xx. Fails open if the data-source lookup fails.
-        const unsupportedDataSourceIds = await getUnsupportedEngineDataSourceIds(
-          Array.from(dataSourceIdByOption.values()).filter((dsId): dsId is string => Boolean(dsId))
-        );
-        const isSupported = (option: EuiComboBoxOptionOption<DatasetOptionData>) => {
-          const dsId = dataSourceIdByOption.get(option);
-          return !(dsId && unsupportedDataSourceIds.has(dsId));
-        };
-
         if (!abortController.signal.aborted) {
           setState({
-            tracesDatasets: tracesOptions.filter(isSupported),
-            allDatasets: allOptions.filter(isSupported),
+            tracesDatasets: tracesOptions,
+            allDatasets: allOptions,
             loading: false,
           });
         }
