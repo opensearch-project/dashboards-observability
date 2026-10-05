@@ -21,6 +21,19 @@ jest.mock('../config/apm_settings_modal', () => ({
   )),
 }));
 
+jest.mock('../setup_wizard/apm_setup_wizard_modal', () => ({
+  ApmSetupWizardModal: jest.fn(({ onClose }) => (
+    <div data-test-subj="apm-setup-wizard-modal">
+      <button data-test-subj="wizard-close" onClick={() => onClose(false)}>
+        Close
+      </button>
+      <button data-test-subj="wizard-save" onClick={() => onClose(true)}>
+        Save
+      </button>
+    </div>
+  )),
+}));
+
 jest.mock('../common/apm_empty_state', () => ({
   ApmEmptyState: jest.fn(({ onGetStartedClick }) => (
     <div data-test-subj="apm-empty-state">
@@ -165,14 +178,14 @@ describe('Services', () => {
       expect(screen.getByText('APM Settings')).toBeInTheDocument();
     });
 
-    it('should open modal when Get Started is clicked', () => {
+    it('should open the setup wizard when Get Started is clicked', () => {
       render(<Services {...defaultProps} />);
 
-      expect(screen.queryByTestId('apm-settings-modal')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('apm-setup-wizard-modal')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByRole('button', { name: 'Get Started' }));
 
-      expect(screen.getByTestId('apm-settings-modal')).toBeInTheDocument();
+      expect(screen.getByTestId('apm-setup-wizard-modal')).toBeInTheDocument();
     });
 
     it('should open modal when APM Settings button is clicked', () => {

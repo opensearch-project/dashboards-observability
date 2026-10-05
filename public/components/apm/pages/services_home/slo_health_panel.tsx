@@ -620,5 +620,7 @@ export const SLO_HEALTH_COLUMN_HEADER = t.columnHeader;
 export const SLO_HEALTH_COLUMN_HEADER_TIP = t.columnHeaderTip;
 // Percentage so the services-home table's column widths sum to 100% — a
 // fixed-pixel cell mixed in with the other percentage columns added up to
-// >100% at typical viewports and forced columns to overlap.
-export const SLO_HEALTH_COLUMN_WIDTH = '18%';
+// >100% at typical viewports and forced columns to overlap. The cell only
+// holds a compact health indicator (or "— Suggest"), so it stays narrow; the
+// freed width goes to the latency/throughput sparkline columns.
+export const SLO_HEALTH_COLUMN_WIDTH = '10%';

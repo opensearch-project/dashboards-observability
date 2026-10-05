@@ -17,7 +17,7 @@
  *     but never fires (`expr: vector(0) > 1`), so the provenance surface
  *     exists regardless of the user's alerting choices.
  *
- * Recording groups are NOT annotated. Cortex/Prometheus forbid `annotations`
+ * Recording groups are NOT annotated. Prometheus forbids `annotations`
  * on recording rules (only alerting rules may carry them), so any attempt to
  * upsert a recording group with an annotation fails ruler-side with
  * `RULER_VALIDATION_FAILED`. The alert-group provenance carries enough

@@ -63,6 +63,15 @@ jest.mock('../notification_routing_panel', () => ({
   NotificationRoutingPanel: () => <div data-test-subj="routingPanel" />,
 }));
 jest.mock('../create_monitor', () => ({ CreateMonitor: () => null }));
+// The Alert Manager "Create metrics rule" path renders CreateMetricsMonitor;
+// capture its props so we can assert the group-scoped duplicate-name checker.
+const mockMetricsFlyout = jest.fn();
+jest.mock('../create_metrics_monitor', () => ({
+  CreateMetricsMonitor: (props: unknown) => {
+    mockMetricsFlyout(props);
+    return null;
+  },
+}));
 jest.mock('../create_monitor/edit_monitor', () => ({ EditMonitor: () => null }));
 jest.mock('../alert_detail_flyout', () => ({ AlertDetailFlyout: () => null }));
 
@@ -169,6 +178,57 @@ describe('AlarmsPage', () => {
     });
     fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
     expect(screen.getByTestId('monitorsTable')).toBeInTheDocument();
+  });
+
+  it('scopes the duplicate-name check to the rule group', async () => {
+    mockMetricsFlyout.mockClear();
+    mockUseRulesData.mockReturnValue({
+      ...emptyRulesHookResult,
+      rules: [
+        { id: 'r1', name: 'HighLatency', datasourceId: 'prom-1', group: 'payments' },
+        { id: 'r2', name: 'OtherRule', datasourceId: 'prom-1', group: 'payments' },
+      ] as unknown as never,
+    });
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    // MonitorsTable only renders on the Rules tab — switch to it first.
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    });
+    // Open the metrics create flyout via the MonitorsTable's onCreateMonitor callback.
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0];
+    await act(async () => {
+      tableProps.onCreateMonitor('metrics');
+    });
+    const flyoutProps = mockMetricsFlyout.mock.calls[mockMetricsFlyout.mock.calls.length - 1][0];
+    const isNameTaken = flyoutProps.isNameTaken as (n: string, d: string, g?: string) => boolean;
+
+    // Same name in the SAME group → duplicate.
+    expect(isNameTaken('HighLatency', 'prom-1', 'payments')).toBe(true);
+    // Same name in a DIFFERENT group → allowed (valid distinct rule).
+    expect(isNameTaken('HighLatency', 'prom-1', 'checkout')).toBe(false);
+    // No group supplied → datasource-wide (back-compat for PPL monitors).
+    expect(isNameTaken('HighLatency', 'prom-1')).toBe(true);
+  });
+
+  it('refetches rules when switching into the Rules tab and forwards a Refresh handler', async () => {
+    // Fresh spy so we count only calls made after mount (the mount fetch is
+    // owned by useRulesData, which is mocked out here).
+    (emptyRulesHookResult.refetch as jest.Mock).mockClear();
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    });
+    // Switching INTO the Rules tab triggers a refetch so a rule created
+    // elsewhere (e.g. the Metrics page flyout) appears without a manual reload.
+    expect(emptyRulesHookResult.refetch).toHaveBeenCalled();
+    // MonitorsTable receives a manual Refresh handler + spinner flag.
+    const last = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0];
+    expect(typeof last.onRefresh).toBe('function');
+    expect('refreshing' in last).toBe(true);
   });
 
   it('forwards picker state + handlers to the AlertsDashboard (picker now lives in the timeline panel)', async () => {
@@ -467,6 +527,323 @@ describe('AlarmsPage', () => {
     expect(mockGetRuleDetail).toHaveBeenCalledWith('ds-1', 'mon-1', 'monitor');
     expect(mockCreateMonitor).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Test Monitor (Copy)' }),
+      'ds-1'
+    );
+  });
+
+  it('clones a cluster-metrics monitor with a valid cluster_metrics_monitor type', async () => {
+    // `detail.raw` is now the faithful upstream document (getOSRuleDetail no
+    // longer returns the lossy `mapMonitor` projection), so it carries the real
+    // `cluster_metrics_monitor` type. Re-POSTing the normalized
+    // `query_level_monitor` used to store the clone as a query-level monitor
+    // with a `uri` input, and the classic editor then crashed on edit (read
+    // `inputs[0].search.indices`) → blank page. The clone must preserve the
+    // real type verbatim.
+    const fakeRaw = {
+      id: 'mon-cm',
+      name: 'Cluster Health',
+      type: 'monitor',
+      monitor_type: 'cluster_metrics_monitor',
+      last_update_time: 123,
+      schema_version: 1,
+      inputs: [{ uri: { api_type: 'CLUSTER_HEALTH', path: '/_cluster/health' } }],
+      triggers: [{ query_level_trigger: { id: 'trig-1', name: 'Red', actions: [] } }],
+    };
+    mockGetRuleDetail.mockResolvedValue({ raw: fakeRaw });
+    mockCreateMonitor.mockResolvedValue({ id: 'new-mon-cm' });
+
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0] as {
+      onClone: (monitor: unknown) => Promise<void>;
+    };
+    await act(async () => {
+      await tableProps.onClone({
+        id: 'mon-cm',
+        name: 'Cluster Health',
+        datasourceId: 'ds-1',
+        definitionType: 'monitor',
+      });
+    });
+
+    expect(mockCreateMonitor).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Cluster Health (Copy)',
+        monitor_type: 'cluster_metrics_monitor',
+      }),
+      'ds-1'
+    );
+  });
+
+  it('clones a bucket-level monitor preserving its wrapped trigger + type', async () => {
+    // Regression: `mapMonitor` used to FLATTEN the `bucket_level_trigger`
+    // wrapper (dropping `parent_bucket_path` / `buckets_path`) and expose that
+    // in `raw`, so the clone re-POSTed a bare trigger → the backend rejected it
+    // with "Incompatible trigger for monitor type [bucket_level_monitor]".
+    // Now `raw` is faithful: the wrapper + its condition survive, and the clone
+    // only strips the trigger id (and any nested action ids).
+    const fakeRaw = {
+      id: 'mon-bkt',
+      name: 'Bucket Mon',
+      type: 'monitor',
+      monitor_type: 'bucket_level_monitor',
+      inputs: [{ search: { indices: ['logs-*'], query: {} } }],
+      triggers: [
+        {
+          bucket_level_trigger: {
+            id: 'trig-bkt',
+            name: 'b1',
+            severity: '1',
+            condition: {
+              parent_bucket_path: 'composite_agg',
+              buckets_path: { _count: '_count' },
+              script: { source: 'params._count > 0', lang: 'painless' },
+            },
+            actions: [{ id: 'act-bkt', name: 'notify' }],
+          },
+        },
+      ],
+    };
+    mockGetRuleDetail.mockResolvedValue({ raw: fakeRaw });
+    mockCreateMonitor.mockResolvedValue({ id: 'new-mon-bkt' });
+
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0] as {
+      onClone: (monitor: unknown) => Promise<void>;
+    };
+    await act(async () => {
+      await tableProps.onClone({
+        id: 'mon-bkt',
+        name: 'Bucket Mon',
+        datasourceId: 'ds-1',
+        definitionType: 'monitor',
+      });
+    });
+
+    const payload = mockCreateMonitor.mock.calls[0][0] as Record<string, unknown>;
+    expect(payload.monitor_type).toBe('bucket_level_monitor');
+    expect(payload.name).toBe('Bucket Mon (Copy)');
+    const trigger = (payload.triggers as Array<Record<string, unknown>>)[0];
+    const inner = trigger.bucket_level_trigger as Record<string, unknown>;
+    // Wrapper + bucket-specific condition preserved; ids stripped.
+    expect(inner).toBeDefined();
+    expect(inner.id).toBeUndefined();
+    expect((inner.condition as Record<string, unknown>).parent_bucket_path).toBe('composite_agg');
+    expect((inner.actions as Array<Record<string, unknown>>)[0].id).toBeUndefined();
+  });
+
+  it('strips server-owned / response-derived fields from the clone payload', async () => {
+    // The faithful upstream doc carries identity/audit/ownership/principal
+    // fields and GET-only enrichments that must NOT be re-POSTed on create.
+    const fakeRaw = {
+      id: 'mon-strip',
+      name: 'Strip Mon',
+      type: 'monitor',
+      monitor_type: 'query_level_monitor',
+      inputs: [{ search: { indices: ['logs-*'], query: {} } }],
+      triggers: [{ query_level_trigger: { id: 't', name: 't', actions: [] } }],
+      // fields that must be dropped:
+      version: 7,
+      last_update_time: 123,
+      enabled_time: 456,
+      schema_version: 5,
+      owner: 'alerting',
+      user: { name: 'creator', backend_roles: ['admin'], roles: ['all_access'] },
+      data_sources: { tenant: 't1' },
+      item_type: 'query_level_monitor',
+      associated_workflows: [{ id: 'wf1' }],
+      associatedCompositeMonitorCnt: 2,
+      last_run_context: { lastFired: 0 },
+    };
+    mockGetRuleDetail.mockResolvedValue({ raw: fakeRaw });
+    mockCreateMonitor.mockResolvedValue({ id: 'new-strip' });
+
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0] as {
+      onClone: (monitor: unknown) => Promise<void>;
+    };
+    await act(async () => {
+      await tableProps.onClone({
+        id: 'mon-strip',
+        name: 'Strip Mon',
+        datasourceId: 'ds-1',
+        definitionType: 'monitor',
+      });
+    });
+
+    const payload = mockCreateMonitor.mock.calls[0][0] as Record<string, unknown>;
+    for (const stripped of [
+      'id',
+      'version',
+      'last_update_time',
+      'enabled_time',
+      'schema_version',
+      'owner',
+      'user',
+      'data_sources',
+      'item_type',
+      'associated_workflows',
+      'associatedCompositeMonitorCnt',
+      'last_run_context',
+    ]) {
+      expect(payload[stripped]).toBeUndefined();
+    }
+    // …while legitimate create fields still round-trip.
+    expect(payload.monitor_type).toBe('query_level_monitor');
+    expect(payload.type).toBe('monitor');
+    // Clones start disabled regardless of the source's enabled state.
+    expect(payload.enabled).toBe(false);
+  });
+
+  it('clones a doc-level monitor preserving the document_level_trigger + doc-only fields', async () => {
+    const fakeRaw = {
+      id: 'mon-doc',
+      name: 'Doc Mon',
+      type: 'monitor',
+      monitor_type: 'doc_level_monitor',
+      // doc-level create-time fields that MUST survive in ...rest:
+      delete_query_index_in_every_run: true,
+      should_create_single_alert_for_findings: false,
+      inputs: [
+        {
+          doc_level_input: {
+            description: '',
+            indices: ['logs-*'],
+            queries: [{ id: 'q1', name: 'q1', query: 'x:1' }],
+          },
+        },
+      ],
+      triggers: [
+        {
+          document_level_trigger: {
+            id: 'trig-doc',
+            name: 'd1',
+            severity: '2',
+            condition: { script: { source: 'true', lang: 'painless' } },
+            actions: [{ id: 'act-doc', name: 'notify' }],
+          },
+        },
+      ],
+    };
+    mockGetRuleDetail.mockResolvedValue({ raw: fakeRaw });
+    mockCreateMonitor.mockResolvedValue({ id: 'new-doc' });
+
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0] as {
+      onClone: (monitor: unknown) => Promise<void>;
+    };
+    await act(async () => {
+      await tableProps.onClone({
+        id: 'mon-doc',
+        name: 'Doc Mon',
+        datasourceId: 'ds-1',
+        definitionType: 'monitor',
+      });
+    });
+
+    const payload = mockCreateMonitor.mock.calls[0][0] as Record<string, unknown>;
+    expect(payload.monitor_type).toBe('doc_level_monitor');
+    // doc-only create fields preserved
+    expect(payload.delete_query_index_in_every_run).toBe(true);
+    expect(payload.should_create_single_alert_for_findings).toBe(false);
+    const inner = (payload.triggers as Array<Record<string, unknown>>)[0]
+      .document_level_trigger as Record<string, unknown>;
+    expect(inner).toBeDefined();
+    expect(inner.id).toBeUndefined();
+    expect((inner.actions as Array<Record<string, unknown>>)[0].id).toBeUndefined();
+  });
+
+  it('gives distinct names to two clones fired before the list refetches (in-flight dedup)', async () => {
+    // Regression for the double-clone race: the first clone is not yet in
+    // `rules` (no refetch has landed), so the dedup must remember the name it
+    // just issued and hand the second clone `(Copy 2)`.
+    const fakeRaw = {
+      id: 'mon-race',
+      name: 'Race Mon',
+      type: 'monitor',
+      monitor_type: 'query_level_monitor',
+      inputs: [{ search: { indices: ['logs-*'], query: {} } }],
+      triggers: [{ query_level_trigger: { id: 't', name: 't', actions: [] } }],
+    };
+    mockGetRuleDetail.mockResolvedValue({ raw: fakeRaw });
+    mockCreateMonitor.mockResolvedValue({ id: 'new-race' });
+
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0] as {
+      onClone: (monitor: unknown) => Promise<void>;
+    };
+    const rule = {
+      id: 'mon-race',
+      name: 'Race Mon',
+      datasourceId: 'ds-1',
+      definitionType: 'monitor',
+    };
+    await act(async () => {
+      await tableProps.onClone(rule);
+      await tableProps.onClone(rule);
+    });
+
+    const names = mockCreateMonitor.mock.calls.map((c) => (c[0] as Record<string, unknown>).name);
+    expect(names).toEqual(['Race Mon (Copy)', 'Race Mon (Copy 2)']);
+  });
+
+  it('gives an OpenSearch clone a unique name when the copy already exists', async () => {
+    // A prior clone of the same monitor already sits in the list, so the bare
+    // ` (Copy)` name is taken — the next clone must fall through to ` (Copy 2)`
+    // instead of producing a second identical name.
+    mockUseRulesData.mockReturnValue({
+      ...emptyRulesHookResult,
+      rules: [
+        { id: 'mon-1', name: 'Test Monitor', datasourceId: 'ds-1' },
+        { id: 'mon-1-copy', name: 'Test Monitor (Copy)', datasourceId: 'ds-1' },
+      ],
+    });
+    const fakeRaw = {
+      id: 'mon-1',
+      name: 'Test Monitor',
+      type: 'monitor',
+      monitor_type: 'query_level_monitor',
+      inputs: [{ search: { indices: ['logs-*'], query: {} } }],
+      triggers: [],
+    };
+    mockGetRuleDetail.mockResolvedValue({ raw: fakeRaw });
+    mockCreateMonitor.mockResolvedValue({ id: 'new-mon-2' });
+
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+
+    const tableProps = mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0] as {
+      onClone: (monitor: unknown) => Promise<void>;
+    };
+    await act(async () => {
+      await tableProps.onClone({
+        id: 'mon-1',
+        name: 'Test Monitor',
+        datasourceId: 'ds-1',
+        definitionType: 'monitor',
+      });
+    });
+
+    expect(mockCreateMonitor).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Test Monitor (Copy 2)' }),
       'ds-1'
     );
   });

@@ -171,4 +171,31 @@ describe('Panels View SO Component', () => {
     fireEvent.click(utils.getByTestId('reloadPanelContextMenuItem'));
     expect(document.body).toMatchSnapshot();
   });
+
+  it('writes the panel once when applying a date range', async () => {
+    // Applying a date range refreshes the panel via onRefreshFilters, which
+    // performs the single saved-object write that persists both the time range
+    // and the filter. The date picker must not also persist the time range
+    // itself: a second concurrent write to the same document can 409 and abort
+    // the refresh, leaving charts stale.
+    store.dispatch(setPanelList([sampleSavedObjectPanelWithVisualization]));
+
+    const utils = renderPanelView(sampleSavedObjectPanelWithVisualization);
+    // Flush the initial panel load before counting writes from the interaction.
+    await act(async () => {});
+
+    const soUpdate = jest.fn().mockResolvedValue({});
+    const httpPost = jest.fn().mockResolvedValue({});
+    coreRefs.savedObjectsClient.update = soUpdate;
+    coreRefs.http.post = httpPost;
+
+    await act(async () => {
+      fireEvent.click(utils.getByTestId('superDatePickerApplyTimeButton'));
+    });
+
+    // Only onRefreshFilters writes the panel; the redundant time-range write
+    // (updatePanel, which for this legacy-id fixture would post to http) is gone.
+    await waitFor(() => expect(soUpdate).toHaveBeenCalledTimes(1));
+    expect(httpPost).not.toHaveBeenCalled();
+  });
 });

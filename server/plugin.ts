@@ -388,7 +388,7 @@ export class ObservabilityPlugin implements Plugin<
       // SLO documents and slo-rule-ref refcount registry are partitioned
       // per OSD workspace via the saved-objects workspace wrapper. The
       // ruler recording-rule namespace (`slo-generated-<datasourceId>`)
-      // is shared across workspaces that target the same Cortex tenant —
+      // is shared across workspaces that target the same ruler tenant —
       // two workspaces creating SLOs over the same SLI fingerprint share
       // one rule group on the ruler, with refcount tracked separately
       // per workspace. The grace-GC pass owns recording-group cleanup
@@ -430,7 +430,7 @@ export class ObservabilityPlugin implements Plugin<
     sloService.setDedupEnabled(ruleDedupEnabled);
     sloService.setPluginVersion(this.initializerContext.env.packageInfo.version);
     // Wire the DirectQuery status aggregator so SLO list/detail responses
-    // surface real Cortex-derived state (healthy/breaching/warning) instead
+    // surface real Prometheus-derived state (healthy/breaching/warning) instead
     // of the no-op stub that always returns no_data.
     // Per-server datasource health tracker. One instance per plugin
     // start; failure counts and cooldown are in-memory and reset on

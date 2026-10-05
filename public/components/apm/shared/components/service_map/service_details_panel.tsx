@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -24,9 +24,11 @@ import {
 import { HealthDonut, HEALTH_DONUT_COLORS } from '@osd/apm-topology';
 import { LanguageIcon } from '../language_icon';
 import { PromQLLineChart } from '../promql_line_chart';
+import { ApmCursorContext, createApmCursorBus } from '../../hooks/apm_cursor_context';
 import { SelectedNodeState, ServiceMapNodeMetrics } from '../../../common/types/service_map_types';
 import {
   getPlatformDisplayName,
+  getNodeSubtitle,
   APPLICATION_MAP_CONSTANTS,
   APM_CONSTANTS,
 } from '../../../common/constants';
@@ -39,8 +41,13 @@ import {
   getQueryApplicationFaults,
   getQueryApplicationErrors,
   getQueryApplicationLatency,
+  getQueryDependencyRequests,
+  getQueryDependencyFaults,
+  getQueryDependencyErrors,
+  getQueryDependencyLatency,
 } from '../../../query_services/query_requests/promql_queries';
 import { formatCount, formatLatency } from '../../../common/format_utils';
+import { isDependencyType } from '../../utils/platform_utils';
 import { useChartStepWindow } from '../../hooks/use_chart_step_window';
 import { colorSwatchStyle } from './edge_metrics_flyout';
 
@@ -54,7 +61,14 @@ export interface ServiceDetailsPanelProps {
   onViewDetails: (serviceName: string, environment: string) => void;
   onShowSpans?: (serviceName: string, environment: string) => void;
   onShowLogs?: (serviceName: string, environment: string) => void;
+  // Optional, experimental: open correlated dashboards for this node's service.
+  onShowDashboards?: (serviceName: string, environment: string) => void;
   refreshTrigger?: number;
+  /**
+   * When provided, drag-selecting on a metric chart zooms the page time range
+   * (ISO-8601 start/end), same as the service-details tabs.
+   */
+  onTimeRangeChange?: (from: string, to: string) => void;
 }
 
 /**
@@ -75,19 +89,30 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
   onViewDetails,
   onShowSpans,
   onShowLogs,
+  onShowDashboards,
   refreshTrigger,
+  onTimeRangeChange,
 }) => {
+  // One cursor bus for this flyout → its charts share a synced crosshair.
+  const cursorBus = useMemo(() => createApmCursorBus(), []);
+
   // Detect if this is the Application root node (aggregated view)
   const isApplicationNode = node.nodeId === 'application-root';
 
   // Detect if this is a group node (from Group By feature)
   const isGroupNode = node.nodeId.startsWith('group-') || node.platformType === 'Group';
+
+  // Dependency nodes (database / messaging / external) have no SERVER-span metrics;
+  // their charts are sourced from the callers' CLIENT-span series (remoteService=name).
+  const isDependencyNode = isDependencyType(node.nodeType);
   const groupByAttribute = isGroupNode ? Object.keys(node.groupByAttributes || {})[0] : null;
   const groupByValue = isGroupNode ? node.serviceName : null; // serviceName holds the group value
 
   const platformDisplay = isApplicationNode
     ? 'Application'
-    : getPlatformDisplayName(node.platformType);
+    : isDependencyNode
+      ? getNodeSubtitle(node.nodeType, node.environment)
+      : getPlatformDisplayName(node.platformType);
   const language = node.groupByAttributes?.['telemetry.sdk.language'];
 
   // For group nodes, build queries that filter by the group attribute
@@ -103,18 +128,24 @@ export const ServiceDetailsPanel: React.FC<ServiceDetailsPanelProps> = ({
   const requestsQuery = isGroupNode
     ? `sum(request{${groupLabelFilter}})`
     : isApplicationNode
-    ? getQueryApplicationRequests()
-    : getQueryServiceRequests(node.environment, node.serviceName, chartStepWindow);
+      ? getQueryApplicationRequests()
+      : isDependencyNode
+        ? getQueryDependencyRequests(node.environment, node.serviceName, chartStepWindow)
+        : getQueryServiceRequests(node.environment, node.serviceName, chartStepWindow);
   const faultsQuery = isGroupNode
     ? `sum(fault{${groupLabelFilter}})`
     : isApplicationNode
-    ? getQueryApplicationFaults()
-    : getQueryServiceFaults(node.environment, node.serviceName, chartStepWindow);
+      ? getQueryApplicationFaults()
+      : isDependencyNode
+        ? getQueryDependencyFaults(node.environment, node.serviceName, chartStepWindow)
+        : getQueryServiceFaults(node.environment, node.serviceName, chartStepWindow);
   const errorsQuery = isGroupNode
     ? `sum(error{${groupLabelFilter}})`
     : isApplicationNode
-    ? getQueryApplicationErrors()
-    : getQueryServiceErrors(node.environment, node.serviceName, chartStepWindow);
+      ? getQueryApplicationErrors()
+      : isDependencyNode
+        ? getQueryDependencyErrors(node.environment, node.serviceName, chartStepWindow)
+        : getQueryServiceErrors(node.environment, node.serviceName, chartStepWindow);
 
   // Latency query (P99, P90, P50 combined) - use application-level, group-level, or service-level
   const latencyQuery = isGroupNode
@@ -147,8 +178,10 @@ label_replace(
 )
 `
     : isApplicationNode
-    ? getQueryApplicationLatency()
-    : `
+      ? getQueryApplicationLatency()
+      : isDependencyNode
+        ? getQueryDependencyLatency(node.environment, node.serviceName)
+        : `
 label_replace(
   histogram_quantile(0.99,
     sum by (le) (
@@ -181,8 +214,8 @@ label_replace(
   const displayTitle = isApplicationNode
     ? i18nTexts.navigation.application
     : isGroupNode
-    ? node.serviceName // Group value (e.g., "nodejs")
-    : node.serviceName;
+      ? node.serviceName // Group value (e.g., "nodejs")
+      : node.serviceName;
 
   return (
     <EuiFlyout
@@ -211,7 +244,9 @@ label_replace(
           {!isApplicationNode && !isGroupNode && (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                {onShowSpans && (
+                {/* Spans/logs are keyed by serviceName; inferred dependencies emit no
+                    spans under their own name, so these are hidden for dependency nodes. */}
+                {onShowSpans && !isDependencyNode && (
                   <EuiFlexItem grow={false}>
                     <EuiToolTip content={i18nTexts.actions.viewSpans}>
                       <EuiButtonIcon
@@ -222,13 +257,25 @@ label_replace(
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                {onShowLogs && (
+                {onShowLogs && !isDependencyNode && (
                   <EuiFlexItem grow={false}>
                     <EuiToolTip content={i18nTexts.actions.viewLogs}>
                       <EuiButtonIcon
                         iconType="discoverApp"
                         aria-label={i18nTexts.actions.viewLogs}
                         onClick={() => onShowLogs(node.serviceName, node.environment)}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+                {onShowDashboards && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip content={i18nTexts.actions.viewDashboards}>
+                      <EuiButtonIcon
+                        iconType="dashboardApp"
+                        aria-label={i18nTexts.actions.viewDashboards}
+                        onClick={() => onShowDashboards(node.serviceName, node.environment)}
+                        data-test-subj="apmNodeViewCorrelatedDashboards"
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
@@ -330,97 +377,111 @@ label_replace(
             <EuiHorizontalRule margin="s" />
 
             {/* Metrics Section */}
-            <EuiAccordion
-              id="metricsAccordion"
-              buttonContent={
-                <EuiText size="s">
-                  <strong>{i18nTexts.detailsPanel.metrics}</strong>
-                </EuiText>
-              }
-              initialIsOpen={true}
-              paddingSize="s"
-            >
-              {/* Requests Chart */}
-              <EuiPanel paddingSize="s" hasBorder>
-                <EuiText size="xs">
-                  <strong>{i18nTexts.detailsPanel.requests}</strong>
-                </EuiText>
-                <PromQLLineChart
-                  promqlQuery={requestsQuery}
-                  timeRange={timeRange}
-                  prometheusConnectionId={prometheusConnectionId}
-                  chartType="area"
-                  height={APPLICATION_MAP_CONSTANTS.CHART_HEIGHT}
-                  showLegend={false}
-                  formatValue={formatCount}
-                  refreshTrigger={refreshTrigger}
-                  color={APM_CONSTANTS.COLORS.THROUGHPUT}
-                  seriesLabel={i18nTexts.detailsPanel.requests}
-                />
-              </EuiPanel>
+            <ApmCursorContext.Provider value={cursorBus}>
+              <EuiAccordion
+                id="metricsAccordion"
+                buttonContent={
+                  <EuiText size="s">
+                    <strong>{i18nTexts.detailsPanel.metrics}</strong>
+                  </EuiText>
+                }
+                initialIsOpen={true}
+                paddingSize="s"
+              >
+                {/* Requests Chart */}
+                <EuiPanel paddingSize="s" hasBorder>
+                  <PromQLLineChart
+                    header={
+                      <EuiText size="xs">
+                        <strong>{i18nTexts.detailsPanel.requests}</strong>
+                      </EuiText>
+                    }
+                    promqlQuery={requestsQuery}
+                    timeRange={timeRange}
+                    prometheusConnectionId={prometheusConnectionId}
+                    chartType="area"
+                    height={APPLICATION_MAP_CONSTANTS.CHART_HEIGHT}
+                    showLegend={false}
+                    formatValue={formatCount}
+                    refreshTrigger={refreshTrigger}
+                    onTimeRangeChange={onTimeRangeChange}
+                    color={APM_CONSTANTS.COLORS.THROUGHPUT}
+                    seriesLabel={i18nTexts.detailsPanel.requests}
+                  />
+                </EuiPanel>
 
-              <EuiSpacer size="s" />
+                <EuiSpacer size="s" />
 
-              {/* Latency Chart (P99, P90, P50) */}
-              <EuiPanel paddingSize="s" hasBorder>
-                <EuiText size="xs">
-                  <strong>{i18nTexts.detailsPanel.latency}</strong>
-                </EuiText>
-                <PromQLLineChart
-                  promqlQuery={latencyQuery}
-                  timeRange={timeRange}
-                  prometheusConnectionId={prometheusConnectionId}
-                  chartType="line"
-                  height={APPLICATION_MAP_CONSTANTS.CHART_HEIGHT}
-                  showLegend={true}
-                  formatValue={formatLatency}
-                  refreshTrigger={refreshTrigger}
-                  labelField="percentile"
-                />
-              </EuiPanel>
+                {/* Latency Chart (P99, P90, P50) */}
+                <EuiPanel paddingSize="s" hasBorder>
+                  <PromQLLineChart
+                    header={
+                      <EuiText size="xs">
+                        <strong>{i18nTexts.detailsPanel.latency}</strong>
+                      </EuiText>
+                    }
+                    promqlQuery={latencyQuery}
+                    timeRange={timeRange}
+                    prometheusConnectionId={prometheusConnectionId}
+                    chartType="line"
+                    height={APPLICATION_MAP_CONSTANTS.CHART_HEIGHT}
+                    showLegend={true}
+                    formatValue={formatLatency}
+                    refreshTrigger={refreshTrigger}
+                    onTimeRangeChange={onTimeRangeChange}
+                    labelField="percentile"
+                  />
+                </EuiPanel>
 
-              <EuiSpacer size="s" />
+                <EuiSpacer size="s" />
 
-              {/* Faults (5xx) Chart */}
-              <EuiPanel paddingSize="s" hasBorder>
-                <EuiText size="xs">
-                  <strong>{i18nTexts.detailsPanel.faults5xx}</strong>
-                </EuiText>
-                <PromQLLineChart
-                  promqlQuery={faultsQuery}
-                  timeRange={timeRange}
-                  prometheusConnectionId={prometheusConnectionId}
-                  chartType="area"
-                  height={APPLICATION_MAP_CONSTANTS.CHART_HEIGHT}
-                  showLegend={false}
-                  formatValue={formatCount}
-                  refreshTrigger={refreshTrigger}
-                  color={APM_CONSTANTS.COLORS.FAULT}
-                  seriesLabel={i18nTexts.detailsPanel.faults5xx}
-                />
-              </EuiPanel>
+                {/* Faults (5xx) Chart */}
+                <EuiPanel paddingSize="s" hasBorder>
+                  <PromQLLineChart
+                    header={
+                      <EuiText size="xs">
+                        <strong>{i18nTexts.detailsPanel.faults5xx}</strong>
+                      </EuiText>
+                    }
+                    promqlQuery={faultsQuery}
+                    timeRange={timeRange}
+                    prometheusConnectionId={prometheusConnectionId}
+                    chartType="area"
+                    height={APPLICATION_MAP_CONSTANTS.CHART_HEIGHT}
+                    showLegend={false}
+                    formatValue={formatCount}
+                    refreshTrigger={refreshTrigger}
+                    onTimeRangeChange={onTimeRangeChange}
+                    color={APM_CONSTANTS.COLORS.FAULT}
+                    seriesLabel={i18nTexts.detailsPanel.faults5xx}
+                  />
+                </EuiPanel>
 
-              <EuiSpacer size="s" />
+                <EuiSpacer size="s" />
 
-              {/* Errors (4xx) Chart */}
-              <EuiPanel paddingSize="s" hasBorder>
-                <EuiText size="xs">
-                  <strong>{i18nTexts.detailsPanel.errors4xx}</strong>
-                </EuiText>
-                <PromQLLineChart
-                  promqlQuery={errorsQuery}
-                  timeRange={timeRange}
-                  prometheusConnectionId={prometheusConnectionId}
-                  chartType="area"
-                  height={APPLICATION_MAP_CONSTANTS.CHART_HEIGHT}
-                  showLegend={false}
-                  formatValue={formatCount}
-                  refreshTrigger={refreshTrigger}
-                  color={APM_CONSTANTS.COLORS.WARNING}
-                  seriesLabel={i18nTexts.detailsPanel.errors4xx}
-                />
-              </EuiPanel>
-            </EuiAccordion>
+                {/* Errors (4xx) Chart */}
+                <EuiPanel paddingSize="s" hasBorder>
+                  <PromQLLineChart
+                    header={
+                      <EuiText size="xs">
+                        <strong>{i18nTexts.detailsPanel.errors4xx}</strong>
+                      </EuiText>
+                    }
+                    promqlQuery={errorsQuery}
+                    timeRange={timeRange}
+                    prometheusConnectionId={prometheusConnectionId}
+                    chartType="area"
+                    height={APPLICATION_MAP_CONSTANTS.CHART_HEIGHT}
+                    showLegend={false}
+                    formatValue={formatCount}
+                    refreshTrigger={refreshTrigger}
+                    onTimeRangeChange={onTimeRangeChange}
+                    color={APM_CONSTANTS.COLORS.WARNING}
+                    seriesLabel={i18nTexts.detailsPanel.errors4xx}
+                  />
+                </EuiPanel>
+              </EuiAccordion>
+            </ApmCursorContext.Provider>
           </>
         )}
       </EuiFlyoutBody>

@@ -30,6 +30,7 @@ import {
   PanelTitle,
   processTimeStamp,
   renderBenchmark,
+  shouldFetchTraceData,
 } from '../helper_functions';
 
 describe('Trace analytics helper functions', () => {
@@ -203,7 +204,7 @@ describe('Trace analytics helper functions', () => {
     });
 
     it('returns "millis" for invalid or missing timestamps', () => {
-      expect(getTimestampPrecision((undefined as unknown) as number)).toEqual('millis');
+      expect(getTimestampPrecision(undefined as unknown as number)).toEqual('millis');
       expect(getTimestampPrecision(123)).toEqual('millis');
     });
   });
@@ -262,6 +263,25 @@ describe('Trace analytics helper functions', () => {
         const end = processTimeStamp(format, 'jaeger', true);
         expect(end).not.toEqual(start);
       });
+    });
+  });
+
+  describe('shouldFetchTraceData', () => {
+    it('fetches immediately when MDS is disabled, regardless of data source id', () => {
+      expect(shouldFetchTraceData(false, undefined)).toBe(true);
+      expect(shouldFetchTraceData(false, '')).toBe(true);
+      expect(shouldFetchTraceData(false, 'some-id')).toBe(true);
+    });
+
+    it('defers when MDS is enabled and the data source id has not resolved yet', () => {
+      expect(shouldFetchTraceData(true, undefined)).toBe(false);
+    });
+
+    it('fetches when MDS is enabled and a data source id has resolved', () => {
+      // Local cluster resolves to an empty string id
+      expect(shouldFetchTraceData(true, '')).toBe(true);
+      // Remote data source resolves to a concrete id
+      expect(shouldFetchTraceData(true, 'remote-cluster-id')).toBe(true);
     });
   });
 });

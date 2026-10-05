@@ -46,6 +46,7 @@ const mockDsSvc = {
 const mockOsBackend = {
   getMonitors: jest.fn(async () => []),
   getMonitor: jest.fn(),
+  getMonitorWithSource: jest.fn(),
   createMonitor: jest.fn(),
   updateMonitor: jest.fn(),
   deleteMonitor: jest.fn(),
@@ -127,7 +128,10 @@ describe('MultiBackendAlertService — mutations + detail', () => {
   });
 
   it('getRuleDetail returns enriched OS rule with alertHistory', async () => {
-    mockOsBackend.getMonitor.mockResolvedValueOnce(sampleOSMonitor);
+    mockOsBackend.getMonitorWithSource.mockResolvedValueOnce({
+      monitor: sampleOSMonitor,
+      source: { ...sampleOSMonitor },
+    });
     mockOsBackend.getAlerts.mockResolvedValueOnce({ alerts: [sampleOSAlert], totalAlerts: 1 });
     mockOsBackend.getDestinations.mockResolvedValueOnce({
       destinations: [sampleOSDestination],
@@ -145,7 +149,10 @@ describe('MultiBackendAlertService — mutations + detail', () => {
   });
 
   it('getRuleDetail bounds the alert history with limit + start_time desc sort', async () => {
-    mockOsBackend.getMonitor.mockResolvedValueOnce(sampleOSMonitor);
+    mockOsBackend.getMonitorWithSource.mockResolvedValueOnce({
+      monitor: sampleOSMonitor,
+      source: { ...sampleOSMonitor },
+    });
     mockOsBackend.getAlerts.mockResolvedValueOnce({ alerts: [], totalAlerts: 0, truncated: false });
     mockOsBackend.searchQuery.mockResolvedValueOnce({
       aggregations: { time_buckets: { buckets: [] } },

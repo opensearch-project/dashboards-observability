@@ -89,12 +89,18 @@ export const useDependencies = (params: UseDependenciesParams): UseDependenciesR
       return;
     }
 
+    const abortController = new AbortController();
+
     const fetchDependencies = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await pplSearchService.listServiceDependencies(fetchParams);
+        const response = await pplSearchService.listServiceDependencies(
+          fetchParams,
+          abortController.signal
+        );
+        if (abortController.signal.aborted) return;
 
         // Response structure: { Dependencies: [...], StartTime, EndTime, NextToken }
         const responseDeps = response.Dependencies || [];
@@ -110,15 +116,18 @@ export const useDependencies = (params: UseDependenciesParams): UseDependenciesR
 
         setData(dependencies);
       } catch (err) {
+        if (abortController.signal.aborted) return;
         console.error('[useDependencies] Error fetching dependencies:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setData([]);
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) setIsLoading(false);
       }
     };
 
     fetchDependencies();
+
+    return () => abortController.abort();
   }, [pplSearchService, fetchParams, refetchTrigger, params.refreshTrigger, queryIndex, dataset]);
 
   // Group dependencies by (serviceName + remoteOperation) for table display

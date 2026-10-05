@@ -4,34 +4,28 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 
 jest.mock('echarts', () => ({
   init: jest.fn(() => ({ setOption: jest.fn(), resize: jest.fn(), dispose: jest.fn() })),
 }));
 
-jest.mock('../promql_monaco_editor', () => ({
-  PromQLMonacoEditor: ({ value }: { value: string }) => (
-    <textarea data-test-subj="promqlMock" defaultValue={value} />
-  ),
-}));
-jest.mock('../promql_editor', () => ({
-  PromQLEditor: ({ value }: { value: string }) => (
-    <textarea data-test-subj="promqlMock" defaultValue={value} />
-  ),
-}));
-
-jest.mock('../metric_browser', () => ({
-  MetricBrowser: () => <div data-test-subj="metricBrowserMock" />,
-}));
-// Stub the shared builder with a button that emits a query, so tests can
-// simulate an explicit builder selection (the form seeds query: '' and the
-// Create button stays disabled until the builder produces one)
-jest.mock('../create_monitor/prom_query_builder', () => ({
-  PromQueryBuilder: ({ onQueryChange }: { onQueryChange: (q: string) => void }) => (
-    <button data-test-subj="mockBuilderSetQuery" onClick={() => onQueryChange('up{job="api"}')} />
-  ),
-}));
+// Stub the shared builder *component* with a button that emits a query, but keep
+// the REAL parse/compose core (from prom_condition) so representability decisions
+// in these tests match what the component actually does. Using a hand-rolled
+// stand-in `parseExpr` here previously diverged from the real one (it only
+// recognised bare selectors), which made "non-representable" fixtures pass for
+// the wrong reason. `up{job="api"}` (a bare selector) is builder-representable.
+jest.mock('../create_monitor/prom_query_builder', () => {
+  const realCore = jest.requireActual('../create_monitor/prom_condition');
+  return {
+    PromQueryBuilder: ({ onQueryChange }: { onQueryChange: (q: string) => void }) => (
+      <button data-test-subj="mockBuilderSetQuery" onClick={() => onQueryChange('up{job="api"}')} />
+    ),
+    parseExpr: realCore.parseExpr,
+    buildExpr: realCore.buildExpr,
+  };
+});
 
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
@@ -39,7 +33,47 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
 }));
 
-import { CreateMetricsMonitor } from '../create_metrics_monitor';
+import {
+  CreateMetricsMonitor,
+  materializeLabels,
+  materializeAnnotations,
+  startsWithComparison,
+} from '../create_metrics_monitor';
+
+describe('CreateMetricsMonitor materialize/validate helpers', () => {
+  it('materializeLabels drops empty-key/value entries and trims keys', () => {
+    expect(
+      materializeLabels([
+        { key: 'severity', value: 'warning', isDynamic: false },
+        { key: 'team', value: '', isDynamic: false }, // empty value → dropped
+        { key: '', value: 'x', isDynamic: false }, // empty key → dropped
+        { key: '  region  ', value: 'us', isDynamic: false }, // key trimmed
+      ])
+    ).toEqual([
+      { key: 'severity', value: 'warning', isDynamic: false },
+      { key: 'region', value: 'us', isDynamic: false },
+    ]);
+  });
+
+  it('materializeAnnotations drops empties and folds the description field (description wins)', () => {
+    const annotations = [
+      { key: 'summary', value: 'high' },
+      { key: 'runbook', value: '' }, // dropped
+      { key: 'description', value: 'manual' }, // overridden by the field
+    ];
+    expect(materializeAnnotations(annotations, 'from field')).toEqual([
+      { key: 'summary', value: 'high' },
+      { key: 'description', value: 'from field' },
+    ]);
+  });
+
+  it('startsWithComparison flags a leading comparison (invalid alert expression)', () => {
+    expect(startsWithComparison('> 0.5')).toBe(true);
+    expect(startsWithComparison('  >= 1')).toBe(true);
+    expect(startsWithComparison('rate(x[5m]) > 0.5')).toBe(false);
+    expect(startsWithComparison('up')).toBe(false);
+  });
+});
 
 describe('CreateMetricsMonitor', () => {
   it('renders flyout with form title', () => {
@@ -104,6 +138,187 @@ describe('CreateMetricsMonitor', () => {
     expect(createBtn.disabled).toBe(true);
   });
 
+  it('seeds the query from initialQuery copied off the Explore Metrics page', () => {
+    // A copied expression the builder cannot represent (histogram_quantile) opens
+    // in Code mode, pre-filled, visible/editable — never hidden-yet-submittable.
+    render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        initialQuery="histogram_quantile(0.9, rate(http_requests_total[5m]))"
+      />
+    );
+
+    const expr = document.querySelector(
+      '[data-test-subj="metricsMonitorPromQlExpression"]'
+    ) as HTMLTextAreaElement;
+    expect(expr).not.toBeNull();
+    expect(expr.value).toBe('histogram_quantile(0.9, rate(http_requests_total[5m]))');
+
+    // With the query seeded, Create enables as soon as a name is entered — no
+    // separate builder selection required.
+    const nameInput = document.querySelector('input[aria-label="Rule name"]') as HTMLInputElement;
+    fireEvent.change(nameInput, { target: { value: 'r' } });
+    const createBtn = document.querySelector(
+      'button[class*="euiButton--fill"]'
+    ) as HTMLButtonElement;
+    expect(createBtn.disabled).toBe(false);
+  });
+
+  it('defaults to Builder mode, but Code mode for a copied query the builder cannot represent', () => {
+    // Copied query the real parser can't represent (histogram_quantile) -> Code
+    // mode so it shows as-is and is never clobbered.
+    const { unmount } = render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        initialQuery="histogram_quantile(0.9, rate(http_requests_total[5m]))"
+      />
+    );
+    expect(
+      document.querySelector('[data-test-subj="metricsMonitorPromQlExpression"]')
+    ).not.toBeNull();
+    expect(document.querySelector('[data-test-subj="mockBuilderSetQuery"]')).toBeNull();
+    unmount();
+
+    // A copied query the builder CAN represent (rate + comparison) opens in
+    // Builder mode — the real parseExpr recognises it, so it isn't stuck in Code.
+    const rep = render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        initialQuery="rate(http_requests_total[5m]) > 0.5"
+      />
+    );
+    expect(document.querySelector('[data-test-subj="mockBuilderSetQuery"]')).not.toBeNull();
+    rep.unmount();
+
+    // Empty flyout opens in Builder mode (the default point-and-click experience).
+    render(<CreateMetricsMonitor onCancel={jest.fn()} onSave={jest.fn()} datasourceId="prom-1" />);
+    expect(document.querySelector('[data-test-subj="mockBuilderSetQuery"]')).not.toBeNull();
+    expect(document.querySelector('[data-test-subj="metricsMonitorPromQlExpression"]')).toBeNull();
+  });
+
+  it('warns before the builder overwrites a copied complex expression (finding #7)', () => {
+    render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        initialQuery="histogram_quantile(0.9, rate(http_requests_total[5m]))"
+      />
+    );
+    // Starts in Code mode — no overwrite warning yet.
+    expect(
+      document.querySelector('[data-test-subj="metricsMonitorBuilderOverwriteWarning"]')
+    ).toBeNull();
+    // Switch to Builder — the copied expression isn't builder-representable, so
+    // the warning appears instead of silently clobbering it.
+    fireEvent.click(screen.getByText('Builder'));
+    expect(
+      document.querySelector('[data-test-subj="metricsMonitorBuilderOverwriteWarning"]')
+    ).not.toBeNull();
+  });
+
+  it('keeps Create disabled for a comparison-only expression', () => {
+    render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        initialQuery="> 0.5"
+      />
+    );
+    const nameInput = document.querySelector('input[aria-label="Rule name"]') as HTMLInputElement;
+    fireEvent.change(nameInput, { target: { value: 'bad-rule' } });
+    const createBtn = document.querySelector(
+      'button[class*="euiButton--fill"]'
+    ) as HTMLButtonElement;
+    // Name + query present, but the expression is only a comparison → blocked.
+    expect(createBtn.disabled).toBe(true);
+  });
+
+  it('trims the rule name and group name in the save payload', async () => {
+    const mockPost = jest.fn().mockResolvedValue({});
+    render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="test-ds-123"
+        initialQuery="up"
+        http={{ post: mockPost }}
+        addToast={jest.fn()}
+      />
+    );
+    const nameInput = document.querySelector('input[aria-label="Rule name"]') as HTMLInputElement;
+    fireEvent.change(nameInput, { target: { value: '  spaced-rule  ' } });
+    fireEvent.click(document.querySelector('button[class*="euiButton--fill"]')!);
+
+    await waitFor(() => expect(mockPost).toHaveBeenCalled());
+    const body = JSON.parse(mockPost.mock.calls[0][1].body);
+    expect(body.name).toBe('spaced-rule');
+    expect(body.groupName).toBe('spaced-rule');
+  });
+
+  it('shows namespace, rule group, and evaluation interval in the YAML preview (finding #10)', () => {
+    render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        initialQuery="up"
+      />
+    );
+    const nameInput = document.querySelector('input[aria-label="Rule name"]') as HTMLInputElement;
+    fireEvent.change(nameInput, { target: { value: 'my-rule' } });
+
+    // The Rule Preview (YAML) block renders its content even while collapsed.
+    const body = document.body.textContent || '';
+    // Namespace comment + the rule-group wrapper (group name defaults to the
+    // rule name) + the group-level evaluation interval — all part of what the
+    // save payload actually writes, so the preview now reflects it.
+    expect(body).toContain('# namespace: observability-alerting');
+    expect(body).toContain('name: "my-rule"');
+    expect(body).toContain('interval: 1m');
+    expect(body).toContain('rules:');
+    expect(body).toContain('- alert: "my-rule"');
+  });
+
+  it('disables Run preview until there is an expression and a datasource', () => {
+    // Empty flyout (no initialQuery) → no expression yet → Run preview disabled.
+    const { unmount } = render(
+      <CreateMetricsMonitor onCancel={jest.fn()} onSave={jest.fn()} datasourceId="prom-1" />
+    );
+    expect(
+      (
+        document.querySelector(
+          '[data-test-subj="metricsMonitorRunPreviewButton"]'
+        ) as HTMLButtonElement
+      ).disabled
+    ).toBe(true);
+    unmount();
+
+    // With a copied expression it enables.
+    render(
+      <CreateMetricsMonitor
+        onCancel={jest.fn()}
+        onSave={jest.fn()}
+        datasourceId="prom-1"
+        initialQuery="up > 0"
+      />
+    );
+    expect(
+      (
+        document.querySelector(
+          '[data-test-subj="metricsMonitorRunPreviewButton"]'
+        ) as HTMLButtonElement
+      ).disabled
+    ).toBe(false);
+  });
+
   it('shows the "Build query in metrics" link only when requested (Alert Manager)', () => {
     const { unmount } = render(
       <CreateMetricsMonitor
@@ -140,9 +355,12 @@ describe('CreateMetricsMonitor', () => {
     );
 
     // Fill in required fields: monitorName + an explicit builder selection
-    // (the form seeds query: '' — no invisible default expression)
+    // (the form seeds query: '' — no invisible default expression). An empty
+    // flyout already defaults to Builder mode; the Builder click below is
+    // defensive (a no-op if already selected) before the mock builder emits.
     const nameInput = document.querySelector('input[aria-label="Rule name"]') as HTMLInputElement;
     fireEvent.change(nameInput, { target: { value: 'my-test-rule' } });
+    fireEvent.click(screen.getByText('Builder'));
     fireEvent.click(document.querySelector('[data-test-subj="mockBuilderSetQuery"]')!);
 
     // Click Create button
@@ -175,8 +393,13 @@ describe('CreateMetricsMonitor', () => {
     expect(body).not.toHaveProperty('operator');
     expect(body).not.toHaveProperty('threshold');
 
-    // Should call onSave and show success toast
+    // Should call onSave and show success toast, including the querier-lag
+    // note as the toast body (Prometheus creates take ~a minute to appear).
     expect(onSave).toHaveBeenCalled();
-    expect(addToast).toHaveBeenCalledWith(expect.any(String), 'success');
+    expect(addToast).toHaveBeenCalledWith(
+      expect.any(String),
+      'success',
+      expect.stringContaining('take up to a minute')
+    );
   });
 });

@@ -5,16 +5,16 @@
 
 /**
  * Ruler client — writes SLO rule groups to a Prometheus-compatible ruler
- * (Cortex / Mimir) via the OpenSearch SQL plugin's DirectQuery resource proxy.
+ * (e.g. Cortex or Mimir) via the OpenSearch SQL plugin's DirectQuery resource proxy.
  *
  * Path: plugin → OSD scoped cluster client → /_plugins/_directquery/_resources/
  *       {dqName}/api/v1/rules/{namespace}[/{groupName}] → SQL plugin's
- *       Prometheus connector → Cortex ruler.
+ *       Prometheus connector → the ruler.
  *
  * Contract (verified upstream, 2026-04-23 pre-check):
  *   - Create/update: POST .../api/v1/rules/{namespace} with body = rule-group YAML
  *   - Delete:        DELETE .../api/v1/rules/{namespace}/{groupName}
- *   Bodies are forwarded verbatim to Cortex with Content-Type: application/yaml
+ *   Bodies are forwarded verbatim to the ruler with Content-Type: application/yaml
  *   (the SQL plugin's PrometheusClientImpl sets that header on the upstream call;
  *    the OSD transport does not expose per-request headers so we rely on that).
  *
@@ -41,7 +41,7 @@ import { SloRulerError } from '../../../common/slo/slo_errors';
  */
 export interface RulerClient {
   /**
-   * Upsert a rule group into the given namespace. Cortex's POST semantics are
+   * Upsert a rule group into the given namespace. The ruler's POST semantics are
    * create-or-replace within `(namespace, group.name)`, so replaying the same
    * body is idempotent — useful for the compensation retry path.
    */
@@ -88,11 +88,11 @@ export interface RulerClient {
 }
 
 // ============================================================================
-// YAML serialization — Cortex / Prometheus rule-group format
+// YAML serialization — Prometheus rule-group format
 // ============================================================================
 
 /**
- * Serialize a GeneratedRuleGroup to the YAML shape Cortex accepts:
+ * Serialize a GeneratedRuleGroup to the YAML shape Prometheus accepts:
  *
  *   name: <groupName>
  *   interval: <Ns|Nm|Nh>
@@ -160,6 +160,56 @@ function rulesPath(ds: Datasource, suffix: string): string {
   return `/_plugins/_directquery/_resources/${encodeURIComponent(dqName)}${suffix}`;
 }
 
+/**
+ * Error-body patterns the DirectQuery proxy forwards from the upstream rules backend when the
+ * transport status it hands us does not describe the real failure (typically a 5xx or 0 that
+ * wraps the backend's own error). Consulted only when the status is not already a 4xx, so a
+ * real 4xx keeps its status-based classification.
+ */
+const AUTH_FAILURE_BODY =
+  /\b(AccessDenied(Exception)?|UnauthorizedException|not authorized to perform|is not authorized|Forbidden)\b/i;
+// Only a definitive "already exists" is a validation-class conflict. A bare ConflictException or
+// an "is currently creating|updating|deleting" body describes an operation still in progress on
+// the backend: that is temporary and a retry succeeds, so it must stay RULER_UNREACHABLE
+// (retryable) rather than be reported as an invalid rule config.
+const CONFLICT_BODY = /\balready exists\b/i;
+
+export type RulerErrorCode = 'RULER_VALIDATION_FAILED' | 'RULER_AUTH_FAILED' | 'RULER_UNREACHABLE';
+
+/**
+ * Pick the SloRulerError code (and the status to report) for a failed ruler call.
+ *
+ * Status alone is not enough: the proxy that fronts the rules backend can wrap an upstream
+ * authorization failure or a namespace conflict in a 5xx, which the status-only rule reads as
+ * "ruler unreachable, retry shortly" and the UI renders as a backend-health problem. A user whose
+ * datasource role lacks a permission, or who edited a rule group that is still being created,
+ * would then be told the backend is down. When the status is uninformative, read the body for
+ * those two classes:
+ *   - authorization failure -> RULER_AUTH_FAILED reported as 403 (PERMISSION_DENIED downstream)
+ *   - "already exists"      -> RULER_VALIDATION_FAILED reported as 409 (not a retryable outage)
+ * An in-progress conflict ("is currently creating") is a temporary state, so it keeps the
+ * retryable RULER_UNREACHABLE class. Everything else keeps the previous behaviour.
+ */
+export function classifyRulerFailure(
+  httpStatus: number,
+  rawBody: string
+): { code: RulerErrorCode; httpStatus: number } {
+  if (httpStatus === 401 || httpStatus === 403) {
+    return { code: 'RULER_AUTH_FAILED', httpStatus };
+  }
+  if (httpStatus >= 400 && httpStatus < 500) {
+    return { code: 'RULER_VALIDATION_FAILED', httpStatus };
+  }
+  // 5xx or 0 (network / timeout / no response): look at what the backend actually said.
+  if (AUTH_FAILURE_BODY.test(rawBody)) {
+    return { code: 'RULER_AUTH_FAILED', httpStatus: 403 };
+  }
+  if (CONFLICT_BODY.test(rawBody)) {
+    return { code: 'RULER_VALIDATION_FAILED', httpStatus: 409 };
+  }
+  return { code: 'RULER_UNREACHABLE', httpStatus };
+}
+
 export class DirectQueryRulerClient implements RulerClient {
   constructor(private readonly logger: Logger) {
     this.logger.info('DirectQuery ruler client configured: writes via OSD scoped cluster client');
@@ -180,7 +230,7 @@ export class DirectQueryRulerClient implements RulerClient {
     try {
       // The OSD transport doesn't let us set Content-Type per request, but the
       // SQL plugin's PrometheusClientImpl forces Content-Type: application/yaml
-      // on the upstream Cortex call — bodies are forwarded verbatim.
+      // on the upstream ruler call — bodies are forwarded verbatim.
       await client.transport.request({
         method: 'POST',
         path,
@@ -260,7 +310,7 @@ export class DirectQueryRulerClient implements RulerClient {
       if (extractHttpStatus(err) === 404) {
         return [];
       }
-      // The SQL plugin wraps Cortex's "no rule groups found" 404 as HTTP 400
+      // The SQL plugin wraps the ruler's "no rule groups found" 404 as HTTP 400
       // with a `DataSourceClientException` / `PrometheusClientException`
       // envelope whose `details` contains `"Ruler request failed with code:
       // 404. Error details: no rule groups found"`. Treat that as an empty
@@ -293,21 +343,11 @@ export class DirectQueryRulerClient implements RulerClient {
       typeof raw?.statusCode === 'number'
         ? raw.statusCode
         : typeof raw?.meta?.statusCode === 'number'
-        ? raw.meta.statusCode
-        : 0;
+          ? raw.meta.statusCode
+          : 0;
     const rawBody = stringifyBody(raw?.body ?? raw?.meta?.body ?? raw?.message ?? String(err));
-
-    let code: 'RULER_VALIDATION_FAILED' | 'RULER_AUTH_FAILED' | 'RULER_UNREACHABLE';
-    if (httpStatus === 401 || httpStatus === 403) {
-      code = 'RULER_AUTH_FAILED';
-    } else if (httpStatus >= 400 && httpStatus < 500) {
-      code = 'RULER_VALIDATION_FAILED';
-    } else {
-      // 5xx, 0 (network / timeout / no response) — all unreachable for our purposes.
-      code = 'RULER_UNREACHABLE';
-    }
-
-    return new SloRulerError(code, httpStatus, rawBody);
+    const classified = classifyRulerFailure(httpStatus, rawBody);
+    return new SloRulerError(classified.code, classified.httpStatus, rawBody);
   }
 }
 
@@ -327,7 +367,7 @@ function stringifyBody(body: unknown): string {
  * probe paths can branch on 404 without building a full SloRulerError.
  */
 /**
- * Cortex's ruler returns HTTP 404 with body `no rule groups found` when a
+ * The ruler returns HTTP 404 with body `no rule groups found` when a
  * namespace exists but holds nothing (or hasn't yet been created). The
  * OpenSearch SQL plugin's DirectQuery proxy does not forward that status —
  * it wraps the response as HTTP 400 with a structured envelope:
@@ -345,18 +385,43 @@ function isWrappedEmptyNamespaceError(err: unknown): boolean {
   if (extractHttpStatus(err) !== 400) return false;
   const raw = err as { body?: unknown; meta?: { body?: unknown } };
   const candidates: unknown[] = [raw?.body, raw?.meta?.body];
-  for (const candidate of candidates) {
+  for (const rawCandidate of candidates) {
+    // The SQL plugin serves this error as `text/plain`, so the OpenSearch JS
+    // client leaves the body as an unparsed JSON string rather than an object.
+    // Coerce strings back into objects before the structured checks below —
+    // otherwise the (namespace-empty) 404 is misclassified as a validation
+    // failure and the first-rule / brand-new-group create is wrongly rejected.
+    const candidate = coerceErrorEnvelope(rawCandidate);
     if (!candidate || typeof candidate !== 'object') continue;
     const error = (candidate as { error?: unknown }).error;
     if (!error || typeof error !== 'object') continue;
     const { type, details } = error as { type?: unknown; details?: unknown };
     if (typeof type !== 'string' || !/ClientException$/.test(type)) continue;
     if (typeof details !== 'string') continue;
-    // Upstream Cortex status is embedded as `code: <N>` inside details.
+    // Upstream ruler status is embedded as `code: <N>` inside details.
     const match = /\bcode:\s*(\d{3})\b/.exec(details);
     if (match && match[1] === '404') return true;
   }
   return false;
+}
+
+/**
+ * Normalize a transport error body into an object for structured inspection.
+ * The SQL plugin's DirectQuery proxy returns the wrapped ruler error with
+ * `Content-Type: text/plain`, so the OpenSearch JS client does not JSON-parse
+ * it — `err.body` / `err.meta.body` arrives as a raw string. Objects pass
+ * through; strings are parsed as JSON (returning `null` on non-JSON so callers
+ * fall through to their normal error handling).
+ */
+function coerceErrorEnvelope(candidate: unknown): unknown {
+  if (typeof candidate === 'string') {
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      return null;
+    }
+  }
+  return candidate;
 }
 
 function extractHttpStatus(err: unknown): number {
@@ -430,7 +495,7 @@ function isGeneratedRule(rule: GeneratedRule | null): rule is GeneratedRule {
 /**
  * Coerce the list-namespace response. The ruler's HTTP API answers with the
  * Prometheus envelope `{ status: "success", data: { groups: [ { name, file,
- * interval, rules, ... }, ... ] } }`. Cortex's ruler CRUD admin surface also
+ * interval, rules, ... }, ... ] } }`. The ruler's CRUD admin surface also
  * accepts `{ "<ns>": [ { name, interval, rules }, ... ] }`; some tests feed a
  * top-level array or a single group. Accept all four shapes.
  */
@@ -462,7 +527,7 @@ function coerceRuleGroupList(doc: unknown): GeneratedRuleGroup[] {
         return groups.map(coerceRuleGroup).filter(isGeneratedRuleGroup);
       }
     }
-    // Cortex namespace-keyed envelope: take every array-valued field and
+    // Ruler namespace-keyed CRUD envelope: take every array-valued field and
     // flatten — namespaces are already filtered server-side by the URL, so
     // this is safe even if multiple keys appear.
     const fromEnvelope: GeneratedRuleGroup[] = [];

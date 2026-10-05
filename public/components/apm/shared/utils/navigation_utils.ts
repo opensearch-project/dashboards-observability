@@ -13,6 +13,48 @@ import {
 } from '../../../../../common/constants/apm';
 import { coreRefs } from '../../../../framework/core_refs';
 import { buildSuggestSearch } from '../../pages/slos/slo_suggest_scope';
+import { isDependencyType, normalizeNodeType } from './platform_utils';
+
+/**
+ * Serialize a single datemath time value (from/to) for a hand-built rison `_g`
+ * on a URL hash. Two hazards, both verified against rison-node + the OSD read
+ * path (URL-decode → rison-decode → datemath):
+ *  1) rison parse: a value starting with `-`/a digit, or containing a rison
+ *     structural char (the `:` in an absolute ISO timestamp), must be rison
+ *     single-quoted or rison treats `:` as a delimiter and drops `_g` entirely.
+ *     Relative values like `now` / `now-1h` stay bare.
+ *  2) URL decode runs BEFORE rison on read and turns a literal `+` into a space
+ *     (`now+1h` → "now 1h", which datemath rejects → blank time). encodeURIComponent
+ *     makes it `%2B`, which the read path decodes back to `+`.
+ * So: rison-string-encode, THEN encodeURIComponent — mirrors OSD's canonical
+ * rison→URL write path (encodeURIComponent is a stricter superset: it also
+ * percent-encodes `:`/`/`, which the read path decodes back before rison, so
+ * every value round-trips).
+ */
+const RISON_NOT_IDCHAR = " '!:(),*@$";
+function encodeTimeRangeValueForG(value: string): string {
+  let bare = value !== '' && '-0123456789'.indexOf(value[0]) === -1;
+  if (bare) {
+    for (const ch of value) {
+      if (RISON_NOT_IDCHAR.indexOf(ch) !== -1) {
+        bare = false;
+        break;
+      }
+    }
+  }
+  const risonValue = bare ? value : `'${escapeRisonString(value)}'`;
+  return encodeURIComponent(risonValue);
+}
+
+/**
+ * Escape a value for embedding inside a rison single-quoted string. Rison treats
+ * `!` as its escape char and `'` as the string terminator, so both must be
+ * escaped (`!`→`!!` FIRST, then `'`→`!'`) or the surrounding rison is corrupted
+ * and the OSD read path silently drops the enclosing object.
+ */
+function escapeRisonString(value: string): string {
+  return value.replace(/!/g, '!!').replace(/'/g, "!'");
+}
 
 /**
  * Options for navigating to service details
@@ -26,6 +68,50 @@ export interface NavigateToServiceDetailsOptions {
   operation?: string;
   /** Dependency service name to pre-select in filters (for dependencies tab) */
   dependency?: string;
+  /** Node type (service / database / messaging / external) — routes dependencies to a tailored view */
+  nodeType?: string;
+}
+
+/**
+ * Opens the Explore "metrics" flavor (Discover metrics) in a new tab, pre-loaded
+ * with a PromQL query against the given Prometheus data connection and time range.
+ *
+ * Mirrors navigateToExploreTraces/navigateToExploreLogs: the _g/_q/_a rison is
+ * hand-built on the hash (no rison lib — the OSS Code-Diff-Analyzer blocks new
+ * deps). Contract (src/plugins/explore/.../utils/state_management/utils/redux_persistence.ts):
+ *  - dataset.id === the Prometheus data-connection `connectionId` (what APM stores
+ *    as config.prometheusDataSource.name / the prometheusConnectionId prop);
+ *  - `signalType:metrics` is mandatory or the dataset is discarded by the flavor;
+ *  - `ui.metricsPageMode:query` opens the query/visualization view.
+ */
+export function navigateToExploreMetrics(
+  promqlQuery: string,
+  connectionId: string,
+  timeRange: ServiceDetailsTimeRange
+): void {
+  const g = `_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
+    timeRange.from
+  )},to:${encodeTimeRangeValueForG(timeRange.to)}))`;
+  // connectionId lands inside rison single-quoted strings; a connection whose id
+  // contains `'`/`!` would corrupt the rison and Explore would drop the dataset,
+  // opening with no data source — so rison-escape it exactly like the query, then
+  // URL-encode so a space/&/#/% in the id can't break the hash.
+  const safeConnectionId = encodeURIComponent(escapeRisonString(connectionId));
+  const dataset = `dataset:(id:'${safeConnectionId}',title:'${safeConnectionId}',type:PROMETHEUS,language:PROMQL,timeFieldName:Time,signalType:metrics,dataSource:(meta:()))`;
+  // The query lives inside a rison single-quoted string. Rison treats `!` and `'`
+  // as special (escape + string terminator), and encodeURIComponent leaves both
+  // raw — so a PromQL matcher like `remoteService!=""` would corrupt the rison and
+  // Explore drops the query. Collapse whitespace (multi-line PromQL), rison-escape
+  // (order matters, handled by escapeRisonString), and finally URL-encode for the hash.
+  const risonSafeQuery = escapeRisonString(promqlQuery.replace(/\s+/g, ' ').trim());
+  const q = `_q=(${dataset},language:PROMQL,query:'${encodeURIComponent(risonSafeQuery)}')`;
+  const a = `_a=(ui:(metricsPageMode:query),tab:(),legacy:())`;
+  const path = `metrics/#?${g}&${q}&${a}`;
+
+  const fullUrl =
+    coreRefs.http?.basePath.prepend(`/app/${EXPLORE_APP_ID}/${path}`) ||
+    `/app/${EXPLORE_APP_ID}/${path}`;
+  window.open(fullUrl, '_blank');
 }
 
 /**
@@ -76,6 +162,12 @@ export function navigateToServiceDetails(
     params.set('dependency', options.dependency);
   }
 
+  // Add the node type for dependencies so the detail route renders the dependency view;
+  // service links stay as before.
+  if (isDependencyType(options?.nodeType)) {
+    params.set('nodeType', normalizeNodeType(options?.nodeType));
+  }
+
   // Build path for hash-based routing
   const queryString = params.toString();
   const path = `#/service-details/${encodedServiceName}/${encodedEnvironment}${
@@ -109,6 +201,9 @@ export function openServiceDetailsInNewTab(
     params.set('to', options.timeRange.to);
   }
   if (options?.language) params.set('lang', options.language);
+  if (isDependencyType(options?.nodeType)) {
+    params.set('nodeType', normalizeNodeType(options?.nodeType));
+  }
 
   const queryString = params.toString();
   const hash = `#/service-details/${encodedServiceName}/${encodedEnvironment}${
@@ -244,9 +339,9 @@ export function navigateToExploreTraces(
   // Note: Empty strings in RISON must be quoted as ''
   // Note: datasetId is already in correct format from APM config, use as-is
   const dsTitle = dataSourceTitle ? dataSourceTitle : "''";
-  const path = `traces/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+  const path = `traces/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
     timeRange.from
-  },to:${timeRange.to}))&_q=(dataset:(dataSource:(id:'${
+  )},to:${encodeTimeRangeValueForG(timeRange.to)}))&_q=(dataset:(dataSource:(id:'${
     dataSourceId || ''
   }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',schemaMappings:(),signalType:traces,timeFieldName:startTime,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     pplQuery
@@ -334,9 +429,9 @@ export function navigateToExploreLogs(
   // Note: datasetId is already in correct format from APM config, use as-is
   const dsTitle = dataSourceTitle ? dataSourceTitle : "''";
 
-  const path = `logs/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${
+  const path = `logs/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
     timeRange.from
-  },to:${timeRange.to}))&_q=(dataset:(dataSource:(id:'${
+  )},to:${encodeTimeRangeValueForG(timeRange.to)}))&_q=(dataset:(dataSource:(id:'${
     dataSourceId || ''
   }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',timeFieldName:time,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     pplQuery
@@ -366,4 +461,93 @@ export function navigateToDatasetCorrelations(datasetId: string): void {
 
   // Navigate in same tab
   window.location.assign(fullUrl);
+}
+
+/**
+ * Correlated dashboards (optional, experimental).
+ *
+ * Opens a saved dashboard in the Dashboards app in a NEW browser tab, carrying
+ * the current APM time range via the global (_g) state. v0 passes the time
+ * range only (no per-service filter).
+ *
+ * The destination is always same-origin: the path is a fixed `/app/dashboards`
+ * route run through `basePath.prepend` (which prepends the OSD server base /
+ * workspace), so the host can never be influenced by the arguments. The `_g`
+ * rison is hand-built to match the existing trace/log deep links above, and the
+ * dashboard id is percent-encoded. `timeRange` comes from the internal APM
+ * time-picker state, not from raw URL input.
+ */
+export function openCorrelatedDashboard(dashboardId: string, timeRange?: TimeRange): void {
+  const query = timeRange
+    ? `?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
+        timeRange.from
+      )},to:${encodeTimeRangeValueForG(timeRange.to)}))`
+    : '';
+  const path = `/app/dashboards#/view/${encodeURIComponent(dashboardId)}${query}`;
+  const url = coreRefs.http?.basePath.prepend(path) || path;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+/**
+ * Opens the APM settings modal by setting the `_apmSettings` URL marker that the
+ * APM pages listen for (useOpenOnUrlMarker). Preserves the current route/query.
+ *
+ * Existing query params are preserved VERBATIM (not rebuilt via
+ * URLSearchParams.toString()) so rison `_g`/`_a` values are not percent-encoded
+ * / churned — same care useOpenOnUrlMarker takes when it strips the marker. The
+ * path defaults to `/` when the hash is empty so we never emit `#?...`. A
+ * `hashchange` event is dispatched explicitly (matching navigateToSloSuggest)
+ * because assigning the same hash value does not fire one on its own; re-entry
+ * is safe since the hook removes the marker on open.
+ *
+ * When `focusCorrelatedDashboards` is set (the empty-state CTA), a
+ * `_apmSettingsFocus=correlatedDashboards` hint is added so the settings modal
+ * scrolls the correlated-dashboards picker into view on open.
+ */
+export const APM_SETTINGS_FOCUS_MARKER = '_apmSettingsFocus';
+
+export function openApmSettings(focusCorrelatedDashboards = false): void {
+  const hash = window.location.hash.replace(/^#/, ''); // e.g. "/services?tab=overview"
+  const qIndex = hash.indexOf('?');
+  const path = (qIndex === -1 ? hash : hash.slice(0, qIndex)) || '/';
+  const rawQuery = qIndex === -1 ? '' : hash.slice(qIndex + 1);
+  const pairs = rawQuery
+    ? rawQuery
+        .split('&')
+        .filter(
+          (pair) =>
+            pair.split('=')[0] !== '_apmSettings' &&
+            pair.split('=')[0] !== APM_SETTINGS_FOCUS_MARKER
+        )
+    : [];
+  if (focusCorrelatedDashboards) {
+    pairs.push(`${APM_SETTINGS_FOCUS_MARKER}=correlatedDashboards`);
+  }
+  pairs.push('_apmSettings=true');
+  window.location.hash = `#${path}?${pairs.join('&')}`;
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
+}
+
+/**
+ * Whether a hash path (`#/service-details/{name}/{environment}`, without the query) is the
+ * details page of this service or dependency. The `default` environment segment stands for
+ * no environment, as in services.tsx.
+ */
+export function isServiceDetailsHashPath(
+  hashPath: string,
+  serviceName: string,
+  environment?: string
+): boolean {
+  const match = /^#\/service-details\/([^/]+)\/([^/]+)\/?$/.exec(hashPath);
+  if (!match) return false;
+  try {
+    const pathService = decodeURIComponent(match[1]);
+    const pathEnvironment = decodeURIComponent(match[2]);
+    return (
+      pathService === serviceName &&
+      (pathEnvironment === 'default' ? '' : pathEnvironment) === (environment || '')
+    );
+  } catch {
+    return false;
+  }
 }

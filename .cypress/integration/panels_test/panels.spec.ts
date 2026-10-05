@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/// <reference types="cypress" />
+// / <reference types="cypress" />
 
 import { suppressResizeObserverIssue } from '../../utils/constants';
 import {
@@ -17,7 +17,7 @@ import {
 } from '../../utils/panel_constants';
 
 describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, () => {
-  suppressResizeObserverIssue(); //needs to be in file once
+  suppressResizeObserverIssue(); // needs to be in file once
 
   before(() => {
     cy.visit(`${Cypress.env('opensearchDashboards')}/app/home#/tutorial_directory/sampleData`, {
@@ -72,7 +72,9 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
     it('Create first visualization in event analytics', () => {
       visitExplorerFresh();
-      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible').focus()
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 })
+        .should('be.visible')
+        .focus()
         .type(PPL_VISUALIZATIONS[0], { delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('button[id="main-content-vis"]')
@@ -92,7 +94,9 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
     it('Create second visualization in event analytics', () => {
       visitExplorerFresh();
-      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 }).should('be.visible').focus()
+      cy.get('[id^=autocomplete-textarea]', { timeout: 30000 })
+        .should('be.visible')
+        .focus()
         .type(PPL_VISUALIZATIONS[1], { delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
@@ -147,7 +151,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
           .should('not.be.disabled')
           .click();
         cy.get('button[data-test-subj="runModalButton"]').click();
-        cy.get('[data-test-subj="breadcrumb"]').click({ force: true }); //Duplicate opens the panel, need to return
+        cy.get('[data-test-subj="breadcrumb"]').click({ force: true }); // Duplicate opens the panel, need to return
         cy.get('.euiTableRow').should('have.length', 2);
         const duplicateName = TEST_PANEL + ' (copy)';
         cy.contains(duplicateName).should('exist');
@@ -209,9 +213,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
         cy.get('.euiCheckbox__input[title="Select this row"]').check({ force: true });
         cy.get('.euiCheckbox__input[title="Select this row"]').should('be.checked');
         openActionsDropdown();
-        cy.get('button[data-test-subj="deleteContextMenuItem"]')
-          .should('not.be.disabled')
-          .click();
+        cy.get('button[data-test-subj="deleteContextMenuItem"]').should('not.be.disabled').click();
 
         cy.get('button[data-test-subj="popoverModal__deleteButton"]').should('be.disabled');
         cy.get('input.euiFieldText[placeholder="delete"]').focus().type('delete');
@@ -255,7 +257,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
           .click();
         cy.get('button[data-test-subj="runModalButton"]').click();
         const duplicateName = TEST_PANEL + ' (copy)';
-        cy.get('[data-test-subj="breadcrumb"]').click({ force: true }); //reload page
+        cy.get('[data-test-subj="breadcrumb"]').click({ force: true }); // reload page
         cy.get('.euiTableRow').should('have.length', 2);
         cy.contains(duplicateName).should('exist');
         cy.get('.euiLink')
@@ -267,7 +269,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       });
 
       it('Renames a saved-objects panel', () => {
-        cy.get('[data-test-subj="tableHeaderSortButton"]').first().click();// Page needs click before checking box
+        cy.get('[data-test-subj="tableHeaderSortButton"]').first().click(); // Page needs click before checking box
         selectThePanel();
         openActionsDropdown();
         cy.get('button[data-test-subj="renameContextMenuItem"]').click();
@@ -277,7 +279,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
 
       it('Deletes the panel', () => {
         createSavedObjectPanel();
-        cy.get('a[data-test-subj="breadcrumb last"]').click(); //refresh so panel appears
+        cy.get('a[data-test-subj="breadcrumb last"]').click(); // refresh so panel appears
         cy.get('input[data-test-subj="checkboxSelectAll"]').click();
         openActionsDropdown();
         cy.get('button[data-test-subj="deleteContextMenuItem"]').click({ force: true });
@@ -298,9 +300,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       it('Redirects to observability dashboard from OSD dashboards with edit', () => {
         moveToOsdDashboards();
         cy.location('pathname').should('eq', '/app/dashboards');
-        cy.get('[data-test-subj="dashboardEditBtn"]')
-          .eq(0)
-          .click();
+        cy.get('[data-test-subj="dashboardEditBtn"]').eq(0).click();
         cy.get('[data-test-subj="dashboardEditDashboard"]').click();
         cy.location('pathname').should('eq', '/app/observability-dashboards');
         cy.location('hash').should('include', '/edit');
@@ -321,10 +321,10 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
   });
 
   describe('Testing a panel', () => {
-    const test_name = `test_${new Date().getTime()}`;
+    const testName = `test_${new Date().getTime()}`;
 
     beforeEach(() => {
-      createSavedObjectPanel(test_name).as('thePanel');
+      createSavedObjectPanel(testName).as('thePanel');
       cy.then(function () {
         moveToThePanel(this.thePanel.id);
       });
@@ -340,9 +340,7 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       cy.get('a[data-test-subj="breadcrumb last"]').click();
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.then(function () {
-        cy.get('h1[data-test-subj="panelNameHeader"]')
-          .contains(test_name)
-          .should('exist');
+        cy.get('h1[data-test-subj="panelNameHeader"]').contains(testName).should('exist');
       });
     });
 
@@ -461,28 +459,37 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       // Wait for the unfiltered chart to render
       cy.get('.xtick', { timeout: 60000 }).should('exist');
 
-      // Type the PPL filter
-      cy.get('[data-test-subj="searchAutocompleteTextArea"]')
-        .click({ force: true })
-        .type(PPL_FILTER, { force: true, delay: 50 })
-        .blur();
-
-      // Ensure autocomplete dropdown is closed (confirms React state is committed)
-      cy.get('.aa-Panel').should('not.exist');
+      // Type the PPL filter into the panel search bar. The autocomplete recreates
+      // its input on every keystroke, so under load a character can be dropped;
+      // retype until the committed value matches before applying.
+      const typeFilter = (attempt = 0) => {
+        cy.get('[data-test-subj="searchAutocompleteTextArea"]')
+          .click({ force: true })
+          .clear({ force: true })
+          .type(PPL_FILTER, { force: true, delay: 50 })
+          .blur();
+        // Autocomplete dropdown closed confirms React state is committed
+        cy.get('.aa-Panel').should('not.exist');
+        cy.get('[data-test-subj="searchAutocompleteTextArea"]').then(($input) => {
+          if ($input.val() !== PPL_FILTER && attempt < 3) {
+            typeFilter(attempt + 1);
+          }
+        });
+      };
+      typeFilter();
 
       // Verify the filter text is in the input before triggering refresh
       cy.get('[data-test-subj="searchAutocompleteTextArea"]').should('have.value', PPL_FILTER);
 
-      // Trigger refresh via the date picker update button
+      // Apply the filter via the date picker refresh
       cy.get('button[data-test-subj="superDatePickerApplyTimeButton"]').click({ force: true });
 
-      // Wait for chart to update with filtered data — only Munich Airport should remain
+      // The filter narrows the chart to a single OpenSearch-Air/Munich bar.
+      // Asserting the exact tick count guards against passing on the unfiltered
+      // chart, where Munich Airport is one label among many.
       cy.get('.xtick', { timeout: 40000 })
-        .should('contain', 'Munich Airport')
-        .and('not.contain', 'Zurich Airport')
-        .and('not.contain', 'BeatsWest')
-        .and('not.contain', 'Logstash Airways')
-        .and('not.contain', 'OpenSearch Dashboards Airlines');
+        .should('have.length', 1)
+        .and('contain', 'Munich Airport');
     });
 
     it('Drag and drop a visualization', () => {
@@ -716,15 +723,15 @@ describe('Panels testing with Sample Data', { defaultCommandTimeout: 10000 }, ()
       cy.clearLocalStorage();
       cy.window().then((win) => win.sessionStorage.clear());
       cy.reload();
-      
+
       cy.get('button[data-test-subj="addVisualizationButton"]').eq(0).click();
       cy.get('button[data-test-subj="createNewVizContextMenuItem"]').click();
 
       cy.url().should('match', new RegExp('(.*)#/explorer'));
       cy.get('[id^=autocomplete-textarea]')
-      .focus()
-      .clear()
-      .type(PPL_VISUALIZATIONS[0], { force: true, delay: 50 });
+        .focus()
+        .clear()
+        .type(PPL_VISUALIZATIONS[0], { force: true, delay: 50 });
       cy.get('.euiButton__text').contains('Run').trigger('mouseover').click();
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
@@ -908,7 +915,8 @@ const eraseTestPanels = () => {
   eraseSavedObjectPanels();
 };
 
-const uuidRx = /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
+const uuidRx =
+  /[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}/;
 
 const clickCreatePanelButton = () =>
   cy.get('a[data-test-subj="customPanels__createNewPanels"]').click();
@@ -992,7 +1000,7 @@ const createVisualization = (newName, query, vizConfig) => {
           version: 1,
           createdTimeMs: new Date().getTime(),
           savedVisualization: {
-            query: query,
+            query,
             selected_date_range: {
               start: 'now-2y',
               end: 'now',

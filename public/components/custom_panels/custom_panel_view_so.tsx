@@ -180,11 +180,11 @@ export const CustomPanelViewSO = (props: CustomPanelViewProps) => {
       timeProps.end,
       recentlyUsedRanges
     );
-    dispatch(
-      updatePanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }, '', '')
-    );
-
     setRecentlyUsedRanges(updatedRanges.slice(0, 9));
+    // Update the time range in local state only. onRefreshFilters does the single
+    // saved-object write that persists the range and filter, so writing it here
+    // too would race a second write to the same document and can 409.
+    dispatch(setPanel({ ...panel, timeRange: { from: timeProps.start, to: timeProps.end } }));
     onRefreshFilters(timeProps.start, timeProps.end);
   };
 

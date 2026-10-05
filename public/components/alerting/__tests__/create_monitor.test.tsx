@@ -6,20 +6,8 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
-jest.mock('../promql_monaco_editor', () => ({
-  PromQLMonacoEditor: ({ value }: { value: string }) => (
-    <textarea data-test-subj="promqlMock" defaultValue={value} />
-  ),
-}));
-jest.mock('../promql_editor', () => ({
-  PromQLEditor: ({ value }: { value: string }) => (
-    <textarea data-test-subj="promqlMock" defaultValue={value} />
-  ),
+jest.mock('../promql_validation', () => ({
   validatePromQL: () => [],
-}));
-
-jest.mock('../metric_browser', () => ({
-  MetricBrowser: () => <div data-test-subj="metricBrowserMock" />,
 }));
 
 jest.mock('../monitor_form_components', () => ({
@@ -30,10 +18,6 @@ jest.mock('../monitor_form_components', () => ({
       Select DS
     </button>
   ),
-}));
-
-jest.mock('../monitor_template_wizard', () => ({
-  MonitorTemplateWizard: () => <div />,
 }));
 
 jest.mock('../create_monitor/sections/destination_picker', () => ({

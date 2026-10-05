@@ -213,8 +213,6 @@ export function formStateToRule(
       },
       alertHistory: [],
       conditionPreviewData: [],
-      notificationRouting: [],
-      suppressionRules: [],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw field is empty for new monitors
       raw: {} as any,
     };
@@ -263,8 +261,6 @@ export function formStateToRule(
     },
     alertHistory: [],
     conditionPreviewData: [],
-    notificationRouting: [],
-    suppressionRules: [],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw field is empty for new monitors
     raw: {} as any,
   };
@@ -286,9 +282,16 @@ export function formStateToRule(
  */
 export function extractPplValidationError(message: string): string | null {
   if (!message) return null;
-  const match = message.match(/PPL Query validation failed:\s*(.*)$/);
-  if (!match) return null;
-  return `PPL Query validation failed: ${match[1].trim()}`;
+  const validation = message.match(/PPL Query validation failed:\s*(.*)$/);
+  if (validation) return `PPL Query validation failed: ${validation[1].trim()}`;
+  // The backend is authoritative for the query-length cap
+  // (`plugins.alerting.ppl_monitor_max_query_length`, default 2000; a cluster
+  // may set it higher). Its message names the ACTUAL configured limit, e.g.
+  // "PPL Query length must be at most 2000 but was 2923" — surface it verbatim
+  // inline so users who raised the setting aren't blocked by a stale client cap.
+  const length = message.match(/PPL Query length must be at most \d+ but was \d+/i);
+  if (length) return length[0];
+  return null;
 }
 
 /**
@@ -302,6 +305,18 @@ export function extractPplValidationError(message: string): string | null {
  * one level deeper. Prefer `body.message` and fall back through a few
  * other shapes before settling on the bare message.
  */
+/**
+ * The HTTP status of a failed request, when the error carries one. OSD's
+ * `HttpFetchError` exposes `response.status`; some paths surface
+ * `body.statusCode`. Returns `undefined` when neither is present.
+ */
+export function extractServerErrorStatus(e: unknown): number | undefined {
+  if (e == null || typeof e !== 'object') return undefined;
+  const errorish = e as { response?: { status?: unknown }; body?: { statusCode?: unknown } };
+  const status = errorish.response?.status ?? errorish.body?.statusCode;
+  return typeof status === 'number' ? status : undefined;
+}
+
 export function extractServerErrorMessage(e: unknown): string {
   if (e == null) return 'Unknown error';
   if (typeof e === 'string') return e;

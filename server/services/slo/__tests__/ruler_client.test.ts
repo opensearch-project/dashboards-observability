@@ -13,7 +13,7 @@
  */
 
 import { dump as yamlDump, load as yamlLoad } from 'js-yaml';
-import { DirectQueryRulerClient, ruleGroupToYaml } from '../ruler_client';
+import { DirectQueryRulerClient, classifyRulerFailure, ruleGroupToYaml } from '../ruler_client';
 import { SloRulerError } from '../../../../common/slo/slo_errors';
 import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
 import type { GeneratedRuleGroup } from '../../../../common/slo/slo_types';
@@ -27,9 +27,7 @@ function noopLogger(): Logger {
   };
 }
 
-function mockClient(
-  handler?: (params: unknown) => Promise<unknown>
-): {
+function mockClient(handler?: (params: unknown) => Promise<unknown>): {
   client: AlertingOSClient;
   requestMock: jest.Mock;
 } {
@@ -38,7 +36,7 @@ function mockClient(
     return { statusCode: 200, body: {} };
   });
   return {
-    client: ({ transport: { request: requestMock } } as unknown) as AlertingOSClient,
+    client: { transport: { request: requestMock } } as unknown as AlertingOSClient,
     requestMock,
   };
 }
@@ -46,11 +44,11 @@ function mockClient(
 function promDatasource(overrides: Partial<Datasource> = {}): Datasource {
   return {
     id: 'ds-1',
-    name: 'my Cortex',
+    name: 'my Prometheus',
     type: 'prometheus',
     url: '',
     enabled: true,
-    directQueryName: 'my-cortex-connection',
+    directQueryName: 'my-prometheus-connection',
     ...overrides,
   };
 }
@@ -133,7 +131,7 @@ describe('DirectQueryRulerClient.upsertRuleGroup', () => {
     const svc = new DirectQueryRulerClient(noopLogger());
     await svc.upsertRuleGroup(
       client,
-      promDatasource({ directQueryName: 'my cortex' }), // space to force encoding
+      promDatasource({ directQueryName: 'my prometheus' }), // space to force encoding
       'slo-generated-ws1',
       sampleGroup()
     );
@@ -146,7 +144,7 @@ describe('DirectQueryRulerClient.upsertRuleGroup', () => {
     };
     expect(call.method).toBe('POST');
     expect(call.path).toBe(
-      '/_plugins/_directquery/_resources/my%20cortex/api/v1/rules/slo-generated-ws1'
+      '/_plugins/_directquery/_resources/my%20prometheus/api/v1/rules/slo-generated-ws1'
     );
     expect(typeof call.body).toBe('string');
     const parsed = yamlLoad(call.body) as { name: string; rules: unknown[] };
@@ -178,7 +176,7 @@ describe('DirectQueryRulerClient.deleteRuleGroup', () => {
     const call = requestMock.mock.calls[0][0] as { method: string; path: string };
     expect(call.method).toBe('DELETE');
     expect(call.path).toBe(
-      '/_plugins/_directquery/_resources/my-cortex-connection/api/v1/rules/slo-generated-ws1/slo%3Agroup_abcd'
+      '/_plugins/_directquery/_resources/my-prometheus-connection/api/v1/rules/slo-generated-ws1/slo%3Agroup_abcd'
     );
   });
 });
@@ -253,6 +251,68 @@ describe('DirectQueryRulerClient error classification', () => {
       rawBody: 'ECONNREFUSED',
     });
     expect(requestMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('500 wrapping an upstream authorization failure → RULER_AUTH_FAILED reported as 403', async () => {
+    const { client, requestMock } = rejectWith({
+      statusCode: 500,
+      body: {
+        error:
+          'User: arn:aws:sts::123456789012:assumed-role/dq-role/session is not authorized to perform: aps:CreateRuleGroupsNamespace on resource: ...',
+      },
+    });
+    const svc = new DirectQueryRulerClient(noopLogger());
+    await expect(
+      svc.upsertRuleGroup(client, promDatasource(), 'ns', sampleGroup())
+    ).rejects.toMatchObject({
+      code: 'RULER_AUTH_FAILED',
+      httpStatus: 403,
+      rawBody: expect.stringContaining('not authorized to perform'),
+    });
+    expect(requestMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('500 wrapping a namespace conflict → RULER_VALIDATION_FAILED reported as 409, not unreachable', async () => {
+    const { client } = rejectWith({
+      statusCode: 500,
+      body: { error: 'ConflictException: A rule groups namespace with this name already exists' },
+    });
+    const svc = new DirectQueryRulerClient(noopLogger());
+    await expect(
+      svc.upsertRuleGroup(client, promDatasource(), 'ns', sampleGroup())
+    ).rejects.toMatchObject({ code: 'RULER_VALIDATION_FAILED', httpStatus: 409 });
+  });
+
+  it('a real 4xx keeps its status-based class even if the body mentions a conflict', () => {
+    expect(classifyRulerFailure(400, 'already exists')).toEqual({
+      code: 'RULER_VALIDATION_FAILED',
+      httpStatus: 400,
+    });
+    expect(classifyRulerFailure(401, 'Forbidden')).toEqual({
+      code: 'RULER_AUTH_FAILED',
+      httpStatus: 401,
+    });
+  });
+
+  it('500 wrapping an in-progress conflict stays RULER_UNREACHABLE, not a validation error', () => {
+    expect(
+      classifyRulerFailure(500, 'ConflictException: Rule groups namespace is currently creating')
+    ).toEqual({ code: 'RULER_UNREACHABLE', httpStatus: 500 });
+    expect(classifyRulerFailure(500, 'ConflictException')).toEqual({
+      code: 'RULER_UNREACHABLE',
+      httpStatus: 500,
+    });
+  });
+
+  it('5xx and network errors without a recognisable body stay RULER_UNREACHABLE', () => {
+    expect(classifyRulerFailure(503, 'upstream timeout')).toEqual({
+      code: 'RULER_UNREACHABLE',
+      httpStatus: 503,
+    });
+    expect(classifyRulerFailure(0, 'ECONNREFUSED')).toEqual({
+      code: 'RULER_UNREACHABLE',
+      httpStatus: 0,
+    });
   });
 
   it('extracts status from error.meta.statusCode when top-level absent', async () => {
@@ -341,7 +401,7 @@ describe('DirectQueryRulerClient.getRuleGroup', () => {
     expect(call.method).toBe('GET');
     // Hit the namespace-list path, not the single-group path.
     expect(call.path).toBe(
-      '/_plugins/_directquery/_resources/my-cortex-connection/api/v1/rules/slo-generated-ws1'
+      '/_plugins/_directquery/_resources/my-prometheus-connection/api/v1/rules/slo-generated-ws1'
     );
     expect(parsed).not.toBeNull();
     expect(parsed!.groupName).toBe('slo:group_bbb');
@@ -405,18 +465,18 @@ describe('DirectQueryRulerClient.getRuleGroup', () => {
     );
     const svc = new DirectQueryRulerClient(noopLogger());
 
-    await expect(
-      svc.getRuleGroup(client, promDatasource(), 'ns', 'group-1')
-    ).rejects.toMatchObject({ name: 'SloRulerError', code: 'RULER_UNREACHABLE', httpStatus: 500 });
+    await expect(svc.getRuleGroup(client, promDatasource(), 'ns', 'group-1')).rejects.toMatchObject(
+      { name: 'SloRulerError', code: 'RULER_UNREACHABLE', httpStatus: 500 }
+    );
   });
 
   it('401 → throws SloRulerError with RULER_AUTH_FAILED', async () => {
     const { client } = mockClient(() => Promise.reject(rejectWithStatus(401, 'no org id')));
     const svc = new DirectQueryRulerClient(noopLogger());
 
-    await expect(
-      svc.getRuleGroup(client, promDatasource(), 'ns', 'group-1')
-    ).rejects.toMatchObject({ name: 'SloRulerError', code: 'RULER_AUTH_FAILED', httpStatus: 401 });
+    await expect(svc.getRuleGroup(client, promDatasource(), 'ns', 'group-1')).rejects.toMatchObject(
+      { name: 'SloRulerError', code: 'RULER_AUTH_FAILED', httpStatus: 401 }
+    );
   });
 });
 
@@ -431,11 +491,11 @@ describe('DirectQueryRulerClient.listRuleGroups', () => {
     const call = requestMock.mock.calls[0][0] as { method: string; path: string };
     expect(call.method).toBe('GET');
     expect(call.path).toBe(
-      '/_plugins/_directquery/_resources/my-cortex-connection/api/v1/rules/slo-generated-ws1'
+      '/_plugins/_directquery/_resources/my-prometheus-connection/api/v1/rules/slo-generated-ws1'
     );
   });
 
-  it('Cortex namespace-keyed envelope → returns all groups parsed', async () => {
+  it('ruler namespace-keyed CRUD envelope → returns all groups parsed', async () => {
     const yamlEnvelope = yamlDump({
       'slo-generated-ws1': [
         {
@@ -558,6 +618,41 @@ describe('DirectQueryRulerClient.listRuleGroups', () => {
     expect(groups).toEqual([]);
   });
 
+  // Regression (brand-new rule group / first rule create failing): the SQL
+  // plugin serves the wrapped-404 with `Content-Type: text/plain`, so the
+  // OpenSearch JS client leaves the body as an unparsed JSON *string* rather
+  // than an object. The empty-namespace classifier must parse the string
+  // envelope, not skip it — otherwise the first create in a namespace is
+  // wrongly rejected as a validation failure.
+  it('SQL plugin wrapped-404 delivered as a text/plain JSON string body → []', async () => {
+    const { client } = mockClient(() =>
+      Promise.reject(
+        rejectWithStatus(
+          400,
+          // Pretty-printed JSON string, exactly as the text/plain response
+          // reaches the transport (note the leading/inner whitespace).
+          JSON.stringify(
+            {
+              status: 400,
+              error: {
+                type: 'PrometheusClientException',
+                reason: 'Invalid Request',
+                details:
+                  'Ruler request failed with code: 404. Error details: no rule groups found\n',
+              },
+            },
+            null,
+            2
+          )
+        )
+      )
+    );
+    const svc = new DirectQueryRulerClient(noopLogger());
+
+    const groups = await svc.listRuleGroups(client, promDatasource(), 'slo-generated-ws-empty');
+    expect(groups).toEqual([]);
+  });
+
   it('HTTP 400 without the wrapped-404 marker → still throws RULER_VALIDATION_FAILED', async () => {
     const { client } = mockClient(() =>
       Promise.reject(rejectWithStatus(400, { error: { details: 'malformed namespace' } }))
@@ -623,7 +718,7 @@ describe('DirectQueryRulerClient.deleteRuleGroup — 404 tolerance', () => {
     const call = requestMock.mock.calls[0][0] as { method: string; path: string };
     expect(call.method).toBe('DELETE');
     expect(call.path).toBe(
-      '/_plugins/_directquery/_resources/my-cortex-connection/api/v1/rules/ns/group-already-gone'
+      '/_plugins/_directquery/_resources/my-prometheus-connection/api/v1/rules/ns/group-already-gone'
     );
   });
 

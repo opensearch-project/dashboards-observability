@@ -29,7 +29,7 @@ function makeDatasource(overrides: Partial<Datasource> = {}): Datasource {
     type: 'prometheus',
     url: 'http://prometheus:9090/prometheus',
     enabled: true,
-    directQueryName: 'observability_stack_cortex',
+    directQueryName: 'observability_stack_prometheus',
     ...overrides,
   };
 }
@@ -49,11 +49,11 @@ describe('resolveDatasourceRef', () => {
     expect(ref).not.toBeNull();
     expect(ref!.id).toBe('ds-4');
     expect(ref!.name).toBe('ObservabilityStack_Prometheus');
-    expect(ref!.connectionId).toBe('observability_stack_cortex');
+    expect(ref!.connectionId).toBe('observability_stack_prometheus');
     expect(ref!.forms).toEqual([
       'ds-4',
       'ObservabilityStack_Prometheus',
-      'observability_stack_cortex',
+      'observability_stack_prometheus',
     ]);
     expect(ref!.datasource).toBe(ds);
   });
@@ -66,10 +66,10 @@ describe('resolveDatasourceRef', () => {
   });
 
   it('resolves against the SQL-plugin connectionId (directQueryName)', async () => {
-    const ref = await resolveDatasourceRef('observability_stack_cortex', resolver);
+    const ref = await resolveDatasourceRef('observability_stack_prometheus', resolver);
     expect(ref).not.toBeNull();
-    expect(ref!.connectionId).toBe('observability_stack_cortex');
-    expect(ref!.forms).toContain('observability_stack_cortex');
+    expect(ref!.connectionId).toBe('observability_stack_prometheus');
+    expect(ref!.forms).toContain('observability_stack_prometheus');
   });
 
   it('returns null for unknown input (no throw)', async () => {
@@ -108,7 +108,7 @@ describe('resolveDatasourceRef', () => {
     const identicallyNamed = makeDatasource({ id: 'same', name: 'same' });
     const ref = await resolveDatasourceRef('same', buildResolver([identicallyNamed]));
     expect(ref).not.toBeNull();
-    expect(ref!.forms).toEqual(['same', 'observability_stack_cortex']);
+    expect(ref!.forms).toEqual(['same', 'observability_stack_prometheus']);
   });
 });
 
@@ -117,11 +117,11 @@ describe('refFromDatasource', () => {
     const ref = refFromDatasource(makeDatasource());
     expect(ref.id).toBe('ds-4');
     expect(ref.name).toBe('ObservabilityStack_Prometheus');
-    expect(ref.connectionId).toBe('observability_stack_cortex');
+    expect(ref.connectionId).toBe('observability_stack_prometheus');
     expect(ref.forms).toEqual([
       'ds-4',
       'ObservabilityStack_Prometheus',
-      'observability_stack_cortex',
+      'observability_stack_prometheus',
     ]);
   });
 
@@ -141,7 +141,7 @@ describe('resolveDatasourceRefs (batch)', () => {
   const ds2 = makeDatasource({
     id: 'ds-5',
     name: 'Secondary_Prometheus',
-    directQueryName: 'secondary_cortex',
+    directQueryName: 'secondary_prometheus',
   });
   const resolver = buildResolver([ds1, ds2]);
 

@@ -89,7 +89,7 @@ export function setupRoutes({
   // MonitorMutationService delegates to HttpOpenSearchBackend — shared
   // stateless backend + thin write-path wrapper.
   const mutationSvc = new MonitorMutationService(osBackend, logger);
-  // RulerClient for Prometheus rule CRUD via Cortex ruler API.
+  // RulerClient for Prometheus rule CRUD via Prometheus ruler API.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { DirectQueryRulerClient } = require('../services/slo/ruler_client');
   const rulerClient = new DirectQueryRulerClient(logger);

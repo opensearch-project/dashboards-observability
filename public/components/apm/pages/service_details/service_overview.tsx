@@ -39,9 +39,8 @@ import {
   formatPercentageValue,
   formatLatency,
 } from '../../common/format_utils';
-import { useApmConfig } from '../../config/apm_config_context';
 import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
-import { RESOLUTION_LOW } from '../../shared/utils/step_utils';
+import { RESOLUTION_LOW, formatPrometheusDuration } from '../../shared/utils/step_utils';
 import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 
 export interface ServiceOverviewProps {
@@ -51,6 +50,8 @@ export interface ServiceOverviewProps {
   prometheusConnectionId: string;
   serviceMapDataset: string;
   refreshTrigger?: number;
+  /** Brush selection on any chart zooms the whole page range. */
+  onTimeRangeChange?: (from: string, to: string) => void;
 }
 
 /**
@@ -72,9 +73,8 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
   prometheusConnectionId,
   serviceMapDataset: _serviceMapDataset,
   refreshTrigger,
+  onTimeRangeChange,
 }) => {
-  const { _config } = useApmConfig();
-
   // State for latency percentile selector
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
@@ -94,12 +94,12 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
 
   // Flyout state
   const [flyoutOpen, setFlyoutOpen] = useState(false);
-  const [flyoutInitialTab, setFlyoutInitialTab] = useState<'spans' | 'logs' | 'attributes'>(
-    'spans'
-  );
+  const [flyoutInitialTab, setFlyoutInitialTab] = useState<
+    'spans' | 'logs' | 'attributes' | 'dashboards'
+  >('spans');
 
   // Open flyout with specific tab
-  const openFlyout = (tab: 'spans' | 'logs' | 'attributes') => {
+  const openFlyout = (tab: 'spans' | 'logs' | 'attributes' | 'dashboards') => {
     setFlyoutInitialTab(tab);
     setFlyoutOpen(true);
   };
@@ -206,6 +206,20 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                   })}
                 </EuiButtonEmpty>
               </EuiFlexItem>
+              {/* Correlated dashboards (optional, experimental). 4th row —
+                  opens the flyout Dashboards tab (no count, matching spans/logs). */}
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  iconType="dashboardApp"
+                  size="s"
+                  onClick={() => openFlyout('dashboards')}
+                  data-test-subj="apmViewCorrelatedDashboards"
+                >
+                  {i18n.translate('observability.apm.serviceOverview.viewDashboards', {
+                    defaultMessage: 'View correlated dashboards',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
@@ -286,16 +300,16 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
             title={i18n.translate('observability.apm.serviceOverview.latencyP99', {
               defaultMessage: 'Latency (P99)',
             })}
-            subtitle={i18n.translate('observability.apm.serviceOverview.avg', {
-              defaultMessage: 'Avg',
-            })}
-            promqlQuery={getQueryServiceLatencyP99Card(environment, serviceName)}
+            promqlQuery={getQueryServiceLatencyP99Card(
+              environment,
+              serviceName,
+              formatPrometheusDuration(timeRangeSeconds)
+            )}
             timeRange={timeRange}
             prometheusConnectionId={prometheusConnectionId}
             formatValue={formatLatency}
             invertColor
             refreshTrigger={refreshTrigger}
-            showTotal
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -307,46 +321,47 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
           <EuiPanel>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <PromQLLineChart
+              header={
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <h4 style={{ margin: 0 }}>
-                        {i18n.translate('observability.apm.serviceOverview.latencyByDeps', {
-                          defaultMessage: 'Latency by dependencies',
-                        })}
-                      </h4>
-                    </EuiText>
+                    <EuiFlexGroup alignItems="center" gutterSize="xs">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <h4 style={{ margin: 0 }}>
+                            {i18n.translate('observability.apm.serviceOverview.latencyByDeps', {
+                              defaultMessage: 'Latency by dependencies',
+                            })}
+                          </h4>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'observability.apm.serviceOverview.latencyByDepsTooltip',
+                            {
+                              defaultMessage:
+                                'Latency percentile calculated using histogram_quantile() over latency_seconds_bucket metric for top 5 dependencies, grouped by remoteService label',
+                            }
+                          )}
+                          position="right"
+                          type="questionInCircle"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      content={i18n.translate(
-                        'observability.apm.serviceOverview.latencyByDepsTooltip',
-                        {
-                          defaultMessage:
-                            'Latency percentile calculated using histogram_quantile() over latency_seconds_bucket metric for top 5 dependencies, grouped by remoteService label',
-                        }
-                      )}
-                      position="right"
-                      type="questionInCircle"
+                    <EuiButtonGroup
+                      legend="Latency percentile"
+                      options={latencyPercentileOptions}
+                      idSelected={latencyPercentile}
+                      onChange={(id) => setLatencyPercentile(id as 'p99' | 'p90' | 'p50')}
+                      buttonSize="compressed"
+                      isFullWidth={false}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  legend="Latency percentile"
-                  options={latencyPercentileOptions}
-                  idSelected={latencyPercentile}
-                  onChange={(id) => setLatencyPercentile(id as 'p99' | 'p90' | 'p50')}
-                  buttonSize="compressed"
-                  isFullWidth={false}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <PromQLLineChart
+              }
               promqlQuery={getQueryTopDependenciesByLatency(
                 environment,
                 serviceName,
@@ -358,6 +373,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               refreshTrigger={refreshTrigger}
               labelField="remoteService"
               resolution={RESOLUTION_LOW}
+              onTimeRangeChange={onTimeRangeChange}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -369,55 +385,56 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
           <EuiPanel>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <h4 style={{ margin: 0 }}>
-                        {i18n.translate('observability.apm.serviceOverview.requestsByOps', {
-                          defaultMessage: 'Requests by operations',
-                        })}
-                      </h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      content={i18n.translate(
-                        'observability.apm.serviceOverview.requestsByOpsTooltip',
-                        {
-                          defaultMessage:
-                            'Total request count from request gauge metric, aggregated using sum() and ranked with topk() by operation label',
-                        }
-                      )}
-                      position="right"
-                      type="questionInCircle"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <strong>Top</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend="Top K operations"
-                      options={limitOptions}
-                      idSelected={String(requestsTopK)}
-                      onChange={(id) => setRequestsTopK(Number(id))}
-                      buttonSize="compressed"
-                      isFullWidth={false}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
             <PromQLLineChart
+              header={
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="xs">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <h4 style={{ margin: 0 }}>
+                            {i18n.translate('observability.apm.serviceOverview.requestsByOps', {
+                              defaultMessage: 'Requests by operations',
+                            })}
+                          </h4>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'observability.apm.serviceOverview.requestsByOpsTooltip',
+                            {
+                              defaultMessage:
+                                'Total request count from request gauge metric, aggregated using sum() and ranked with topk() by operation label',
+                            }
+                          )}
+                          position="right"
+                          type="questionInCircle"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <strong>Top</strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonGroup
+                          legend="Top K operations"
+                          options={limitOptions}
+                          idSelected={String(requestsTopK)}
+                          onChange={(id) => setRequestsTopK(Number(id))}
+                          buttonSize="compressed"
+                          isFullWidth={false}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
               promqlQuery={getQueryTopOperationsByVolume(
                 environment,
                 serviceName,
@@ -429,60 +446,62 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               formatValue={formatCount}
               refreshTrigger={refreshTrigger}
               labelField="operation"
+              onTimeRangeChange={onTimeRangeChange}
             />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiPanel>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <h4 style={{ margin: 0 }}>
-                        {i18n.translate('observability.apm.serviceOverview.availabilityByOps', {
-                          defaultMessage: 'Availability by operations',
-                        })}
-                      </h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      content={i18n.translate(
-                        'observability.apm.serviceOverview.availabilityByOpsTooltip',
-                        {
-                          defaultMessage:
-                            'Availability calculated as (1 - fault/request) * 100, using bottomk() to show operations with lowest availability',
-                        }
-                      )}
-                      position="right"
-                      type="questionInCircle"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <strong>Bottom</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend="Bottom K operations"
-                      options={limitOptions}
-                      idSelected={String(availabilityBottomK)}
-                      onChange={(id) => setAvailabilityBottomK(Number(id))}
-                      buttonSize="compressed"
-                      isFullWidth={false}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
             <PromQLLineChart
+              header={
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="xs">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <h4 style={{ margin: 0 }}>
+                            {i18n.translate('observability.apm.serviceOverview.availabilityByOps', {
+                              defaultMessage: 'Availability by operations',
+                            })}
+                          </h4>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'observability.apm.serviceOverview.availabilityByOpsTooltip',
+                            {
+                              defaultMessage:
+                                'Availability calculated as (1 - fault/request) * 100, using bottomk() to show operations with lowest availability',
+                            }
+                          )}
+                          position="right"
+                          type="questionInCircle"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <strong>Bottom</strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonGroup
+                          legend="Bottom K operations"
+                          options={limitOptions}
+                          idSelected={String(availabilityBottomK)}
+                          onChange={(id) => setAvailabilityBottomK(Number(id))}
+                          buttonSize="compressed"
+                          isFullWidth={false}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
               promqlQuery={getQueryServiceAvailabilityByOperations(
                 environment,
                 serviceName,
@@ -494,6 +513,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               formatTooltipValue={formatPercentageValue}
               refreshTrigger={refreshTrigger}
               labelField="operation"
+              onTimeRangeChange={onTimeRangeChange}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -505,55 +525,56 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
           <EuiPanel>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <h4 style={{ margin: 0 }}>
-                        {i18n.translate('observability.apm.serviceOverview.faultRateByOps', {
-                          defaultMessage: 'Fault rate by operations',
-                        })}
-                      </h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      content={i18n.translate(
-                        'observability.apm.serviceOverview.faultRateByOpsTooltip',
-                        {
-                          defaultMessage:
-                            'Fault rate calculated as (fault/request) * 100 from gauge metrics, ranked with topk() by operation label',
-                        }
-                      )}
-                      position="right"
-                      type="questionInCircle"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <strong>Top</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend="Top K operations"
-                      options={limitOptions}
-                      idSelected={String(faultRateTopK)}
-                      onChange={(id) => setFaultRateTopK(Number(id))}
-                      buttonSize="compressed"
-                      isFullWidth={false}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
             <PromQLLineChart
+              header={
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="xs">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <h4 style={{ margin: 0 }}>
+                            {i18n.translate('observability.apm.serviceOverview.faultRateByOps', {
+                              defaultMessage: 'Fault rate by operations',
+                            })}
+                          </h4>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'observability.apm.serviceOverview.faultRateByOpsTooltip',
+                            {
+                              defaultMessage:
+                                'Fault rate calculated as (fault/request) * 100 from gauge metrics, ranked with topk() by operation label',
+                            }
+                          )}
+                          position="right"
+                          type="questionInCircle"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <strong>Top</strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonGroup
+                          legend="Top K operations"
+                          options={limitOptions}
+                          idSelected={String(faultRateTopK)}
+                          onChange={(id) => setFaultRateTopK(Number(id))}
+                          buttonSize="compressed"
+                          isFullWidth={false}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
               promqlQuery={getQueryServiceFaultRate(environment, serviceName, faultRateTopK)}
               timeRange={timeRange}
               prometheusConnectionId={prometheusConnectionId}
@@ -561,60 +582,62 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               formatTooltipValue={formatPercentageValue}
               refreshTrigger={refreshTrigger}
               labelField="operation"
+              onTimeRangeChange={onTimeRangeChange}
             />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiPanel>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <h4 style={{ margin: 0 }}>
-                        {i18n.translate('observability.apm.serviceOverview.errorRateByOps', {
-                          defaultMessage: 'Error rate by operations',
-                        })}
-                      </h4>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      content={i18n.translate(
-                        'observability.apm.serviceOverview.errorRateByOpsTooltip',
-                        {
-                          defaultMessage:
-                            'Error rate calculated as (error/request) * 100 from gauge metrics, ranked with topk() by operation label',
-                        }
-                      )}
-                      position="right"
-                      type="questionInCircle"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs">
-                      <strong>Top</strong>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend="Top K operations"
-                      options={limitOptions}
-                      idSelected={String(errorRateTopK)}
-                      onChange={(id) => setErrorRateTopK(Number(id))}
-                      buttonSize="compressed"
-                      isFullWidth={false}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
             <PromQLLineChart
+              header={
+                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="xs">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <h4 style={{ margin: 0 }}>
+                            {i18n.translate('observability.apm.serviceOverview.errorRateByOps', {
+                              defaultMessage: 'Error rate by operations',
+                            })}
+                          </h4>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          content={i18n.translate(
+                            'observability.apm.serviceOverview.errorRateByOpsTooltip',
+                            {
+                              defaultMessage:
+                                'Error rate calculated as (error/request) * 100 from gauge metrics, ranked with topk() by operation label',
+                            }
+                          )}
+                          position="right"
+                          type="questionInCircle"
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <strong>Top</strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonGroup
+                          legend="Top K operations"
+                          options={limitOptions}
+                          idSelected={String(errorRateTopK)}
+                          onChange={(id) => setErrorRateTopK(Number(id))}
+                          buttonSize="compressed"
+                          isFullWidth={false}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
               promqlQuery={getQueryServiceErrorRateOverTime(
                 environment,
                 serviceName,
@@ -626,6 +649,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
               formatTooltipValue={formatPercentageValue}
               refreshTrigger={refreshTrigger}
               labelField="operation"
+              onTimeRangeChange={onTimeRangeChange}
             />
           </EuiPanel>
         </EuiFlexItem>

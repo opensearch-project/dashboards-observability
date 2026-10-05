@@ -152,6 +152,61 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     }
   }
 
+  /**
+   * Like {@link getMonitor}, but also returns the FAITHFUL upstream monitor
+   * document alongside the narrowed {@link OSMonitor} projection.
+   *
+   * `mapMonitor` is lossy by design — it coerces `monitor_type` to a small
+   * union (so `cluster_metrics_monitor` becomes `query_level_monitor`) and
+   * FLATTENS each type-specific trigger wrapper (`bucket_level_trigger`,
+   * `document_level_trigger`, …) into a bare trigger, dropping wrapper-only
+   * fields like a bucket trigger's `parent_bucket_path` / `buckets_path`. That
+   * projection is right for list/summary rendering, but callers that need to
+   * faithfully RE-CREATE the monitor (clone) must have the untouched document
+   * — otherwise the re-POST is rejected ("Incompatible trigger for monitor
+   * type …") or silently mistyped. `source` is that document with the
+   * OpenSearch `_id` attached for parity with the projection.
+   *
+   * SECURITY: the upstream document also carries the RBAC/tenant principal
+   * (`user.name` / `user.backend_roles` / `user.roles`, `owner`, and
+   * `data_sources.tenant`). `source` is surfaced to the browser as
+   * `UnifiedRule.raw`, and the clone flow does NOT need those fields (it
+   * re-creates the monitor under the caller's own auth context). Strip them
+   * HERE so RBAC role assignments are never transmitted to the frontend —
+   * closing the information-disclosure surface that shipping the full document
+   * would otherwise open. (The client also drops them before the clone re-POST;
+   * this server-side removal is the authoritative guard.)
+   */
+  async getMonitorWithSource(
+    client: AlertingOSClient,
+    monitorId: string
+  ): Promise<{ monitor: OSMonitor; source: Record<string, unknown> } | null> {
+    try {
+      const resp = await this.req<OSGetMonitorResponse>(
+        client,
+        'GET',
+        `/_plugins/_alerting/monitors/${encodeURIComponent(monitorId)}`
+      );
+      const {
+        user: _user,
+        owner: _owner,
+        data_sources: _dataSources,
+        ...safeMonitor
+      } = resp.body.monitor as Record<string, unknown>;
+      const source: Record<string, unknown> = { ...safeMonitor, id: resp.body._id };
+      // Build BOTH returned values from the sanitized body so neither can carry
+      // the principal fields. `mapMonitor` is a fixed-field projection today
+      // (it doesn't read user/owner/data_sources), so this is defensive — it
+      // keeps the "server-side removal is authoritative" guarantee true even if
+      // `mapMonitor` ever starts spreading unknown keys.
+      const monitor = this.mapMonitor(resp.body._id, safeMonitor as unknown as OSMonitorSource);
+      return { monitor, source };
+    } catch (err) {
+      if (this.is404(err)) return null;
+      throw err;
+    }
+  }
+
   async createMonitor(
     client: AlertingOSClient,
     monitor: Omit<OSMonitor, 'id'>
@@ -214,7 +269,7 @@ export class HttpOpenSearchBackend implements OpenSearchBackend {
     // `...input` spread. Re-spreading the originals from `rawUpstream`
     // after `input` makes the precedence explicit: client cannot edit
     // these fields through this route.
-    const rawUpstream = (getResp.body.monitor as unknown) as Record<string, unknown>;
+    const rawUpstream = getResp.body.monitor as unknown as Record<string, unknown>;
     const preserved: Record<string, unknown> = {};
     for (const key of PLUGIN_OWNED_KEYS) {
       if (key in rawUpstream) preserved[key] = rawUpstream[key];

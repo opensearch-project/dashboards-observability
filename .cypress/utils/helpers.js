@@ -45,12 +45,7 @@ export const createObservabilityWorkspace = (
  * @param {Array} [config.fields] - Optional field definitions
  * @param {string} [config.schemaMappings] - Optional schema mappings for correlations
  */
-export const createObservabilityDataset = (
-  datasourceName,
-  workspaceName,
-  datasetId,
-  config
-) => {
+export const createObservabilityDataset = (datasourceName, workspaceName, datasetId, config) => {
   // Create or get the data source (handles case where it doesn't exist yet)
   cy.osd.createOrGetLocalDataSource(datasourceName);
 
@@ -183,13 +178,8 @@ export const addPrometheusToWorkspace = (
  * @returns {Cypress.Chainable} Promise that resolves when setup is complete
  */
 export const setupAPMTestEnvironment = (config) => {
-  const {
-    datasourceName,
-    workspaceName,
-    prometheusConnectionName,
-    prometheusUrl,
-    datasets,
-  } = config;
+  const { datasourceName, workspaceName, prometheusConnectionName, prometheusUrl, datasets } =
+    config;
 
   // Step 1: Create workspace with observability features
   createObservabilityWorkspace(datasourceName, workspaceName);
@@ -226,15 +216,51 @@ export const setupAPMTestEnvironment = (config) => {
   }
 
   if (datasets.log) {
-    createObservabilityDataset(
-      datasourceName,
-      workspaceName,
-      datasets.log.id,
-      datasets.log.config
-    );
+    createObservabilityDataset(datasourceName, workspaceName, datasets.log.id, datasets.log.config);
   }
 
   return cy.get(`@${workspaceName}:WORKSPACE_ID`);
+};
+
+/**
+ * Deletes the APM configuration for a workspace so the Services page falls back
+ * to its empty state and the setup wizard becomes reachable again.
+ *
+ * APM config is not its own saved-object type: it is stored as a `correlations`
+ * saved object whose `correlationType` is `APM-Config-<workspaceId>` (see
+ * OSDSavedApmConfigClient). The Services page shows the setup wizard only when
+ * no such object resolves, so tests that (re)drive the wizard delete it first.
+ *
+ * @param {string} workspaceId - The workspace whose APM config should be removed
+ */
+export const deleteApmConfig = (workspaceId) => {
+  return cy
+    .request({
+      method: 'GET',
+      url: `${endpoint}/w/${workspaceId}/api/saved_objects/_find`,
+      headers: { 'osd-xsrf': true },
+      qs: { type: 'correlations', per_page: 10000 },
+      failOnStatusCode: false,
+    })
+    .then((resp) => {
+      const savedObjects = (resp.body && resp.body.saved_objects) || [];
+      const apmConfigs = savedObjects.filter((so) =>
+        (so.attributes && so.attributes.correlationType
+          ? so.attributes.correlationType
+          : ''
+        ).startsWith('APM-Config-')
+      );
+      apmConfigs.forEach((so) => {
+        cy.request({
+          method: 'DELETE',
+          url: `${endpoint}/w/${workspaceId}/api/saved_objects/correlations/${so.id}`,
+          headers: { 'osd-xsrf': true },
+          qs: { force: true },
+          failOnStatusCode: false,
+        });
+      });
+      cy.log(`Deleted ${apmConfigs.length} APM config object(s) for workspace ${workspaceId}`);
+    });
 };
 
 /**

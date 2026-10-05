@@ -52,10 +52,12 @@ export interface ExecuteMetricRequestParams {
   startTime: number;
   endTime: number;
   step?: number; // Step interval in seconds; if omitted, OSD core calculates it
+  signal?: AbortSignal; // Optional: cancels the in-flight request when aborted
 }
 
 // ExecuteInstantQuery params - for point-in-time evaluation
 export interface ExecuteInstantQueryParams {
   query: string;
   time: number; // Unix epoch in seconds
+  signal?: AbortSignal; // Optional: cancels the in-flight request when aborted
 }

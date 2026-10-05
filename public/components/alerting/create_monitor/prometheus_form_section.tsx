@@ -9,8 +9,10 @@
  *
  * Section layout mirrors the Metrics page "Create alert rule" flyout:
  *   - Rule details (namespace, rule group, description)
- *   - Query (point-and-click builder — the PromQL expression is the
- *     complete alert condition — plus per-rule `for:` duration)
+ *   - Query — a Builder ⇄ Code toggle: the point-and-click builder OR a raw
+ *     PromQL expression (the complete alert condition), plus per-rule `for:`
+ *     duration. An existing rule the builder can't represent opens in Code so
+ *     it is never silently clobbered.
  *   - Labels
  *   - Annotations
  *   - Rule Preview (YAML)
@@ -18,7 +20,6 @@
  * Removed (not applicable to managed Prometheus):
  *   - "Unit" field / Trigger condition (the query defines the condition)
  *   - "Evaluation Settings" (managed at rule group level in AMP)
- *   - Code mode / freeform PromQL editor
  *   - Matched notification actions (routing is Alertmanager's job)
  */
 import React, { useCallback, useMemo, useRef, useState } from 'react';
@@ -27,9 +28,12 @@ import {
   EuiBadge,
   EuiBetaBadge,
   EuiButton,
+  EuiButtonGroup,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormLabel,
   EuiFormRow,
   EuiLink,
   EuiPanel,
@@ -45,7 +49,11 @@ import { AnnotationEditor, LabelEditor } from '../monitor_form_components';
 import { RuleGroupSelector } from './rule_group_selector';
 import { QueryPreviewResults } from '../query_preview_results';
 import { PromQueryBuilder } from './prom_query_builder';
+import { isAlwaysFiring, parseExpr } from './prom_condition';
 import { DURATION_OPTIONS, PrometheusFormState } from './create_monitor_types';
+
+/** Which query editor the Query section shows. */
+type QueryMode = 'code' | 'builder';
 
 /** The namespace all rules created from this form are stored under. */
 const USER_RULES_NAMESPACE = 'observability-alerting';
@@ -84,6 +92,23 @@ export const PrometheusFormSection: React.FC<{
     () => form.labels.find((l) => l.key === '_ruleGroup')?.value || ''
   );
   const [showPreview, setShowPreview] = useState(false);
+  // Bumped on each "Run preview" click so QueryPreviewResults re-runs the query.
+  const [previewToken, setPreviewToken] = useState(0);
+
+  // Default to Builder (point-and-click), matching the Metrics-page create
+  // flyout. Exception: an existing rule whose expression the builder can't
+  // represent (any non-trivial PromQL: `or`/`and`, arithmetic, multi-comparison)
+  // opens in Code so the expression is shown as-is and never silently clobbered
+  // when the flyout mounts. Users can toggle either way.
+  const [queryMode, setQueryMode] = useState<QueryMode>(() => {
+    const seeded = (form.query ?? '').trim();
+    return seeded && parseExpr(seeded) === null ? 'code' : 'builder';
+  });
+  // A non-empty expression the builder cannot represent. Selecting a metric in
+  // the builder would overwrite it, so warn (and offer Code) rather than
+  // silently replacing what the user has.
+  const builderWouldOverwrite =
+    (form.query ?? '').trim() !== '' && parseExpr(form.query ?? '') === null;
 
   // Use a ref for form.labels to avoid circular dependency:
   // handleRuleGroupChange → onUpdate('labels') → parent re-renders → new form.labels → new callback
@@ -328,7 +353,13 @@ export const PrometheusFormSection: React.FC<{
               <EuiFlexItem grow={false}>
                 <EuiButton
                   size="s"
-                  onClick={() => setShowPreview(true)}
+                  onClick={() => {
+                    setShowPreview(true);
+                    setPreviewToken((t) => t + 1);
+                  }}
+                  // Needs an expression and a datasource; disabling avoids an
+                  // empty run surfacing a misleading "returned no data" message.
+                  isDisabled={form.query.trim() === '' || !datasourceId}
                   data-test-subj="prometheusRunPreviewButton"
                   aria-label={i18n.translate(
                     'observability.alerting.prometheusFormSection.runPreviewAriaLabel',
@@ -372,15 +403,135 @@ export const PrometheusFormSection: React.FC<{
                 )}
               />
             </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
+              <EuiFormLabel>
+                {i18n.translate(
+                  'observability.alerting.prometheusFormSection.queryModeEditorLabel',
+                  {
+                    defaultMessage: 'Editor',
+                  }
+                )}
+              </EuiFormLabel>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* Builder ⇄ Code toggle. Only one editor shows at a time, so an
+                expression the builder can't represent (Code) is never silently
+                overwritten by the builder's output. */}
+              <EuiButtonGroup
+                legend={i18n.translate(
+                  'observability.alerting.prometheusFormSection.queryModeLegend',
+                  { defaultMessage: 'Query editor mode' }
+                )}
+                buttonSize="compressed"
+                options={[
+                  {
+                    id: 'builder',
+                    label: i18n.translate(
+                      'observability.alerting.prometheusFormSection.queryModeBuilder',
+                      { defaultMessage: 'Builder' }
+                    ),
+                  },
+                  {
+                    id: 'code',
+                    label: i18n.translate(
+                      'observability.alerting.prometheusFormSection.queryModeCode',
+                      { defaultMessage: 'Code' }
+                    ),
+                  },
+                ]}
+                idSelected={queryMode}
+                onChange={(id) => setQueryMode(id as QueryMode)}
+                data-test-subj="prometheusQueryModeToggle"
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
 
-          <PromQueryBuilder
-            datasourceId={datasourceId}
-            query={form.query}
-            onQueryChange={(q) => onUpdate('query', q)}
-          />
+          {queryMode === 'code' ? (
+            /* Code mode: raw PromQL expression — the complete alert condition.
+              A rule the builder can't represent lands here as-is, editable
+              directly, instead of opening a blank builder. */
+            <>
+              <EuiFormRow
+                label={i18n.translate(
+                  'observability.alerting.prometheusFormSection.expressionLabel',
+                  { defaultMessage: 'PromQL expression' }
+                )}
+                helpText={i18n.translate(
+                  'observability.alerting.prometheusFormSection.expressionHelpText',
+                  {
+                    defaultMessage:
+                      'The complete PromQL alert condition — it fires for every series the expression returns.',
+                  }
+                )}
+                fullWidth
+              >
+                <EuiTextArea
+                  value={form.query}
+                  onChange={(e) => onUpdate('query', e.target.value)}
+                  placeholder={i18n.translate(
+                    'observability.alerting.prometheusFormSection.expressionPlaceholder',
+                    { defaultMessage: 'e.g. rate(http_requests_total[5m]) > 0.5' }
+                  )}
+                  rows={2}
+                  fullWidth
+                  compressed
+                  style={{ fontFamily: 'var(--euiCodeFontFamily)' }}
+                  aria-label={i18n.translate(
+                    'observability.alerting.prometheusFormSection.expressionAriaLabel',
+                    { defaultMessage: 'PromQL expression' }
+                  )}
+                  data-test-subj="prometheusPromQlExpression"
+                />
+              </EuiFormRow>
+              {isAlwaysFiring(form.query) && (
+                <>
+                  <EuiSpacer size="s" />
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    iconType="alert"
+                    title={i18n.translate(
+                      'observability.alerting.prometheusFormSection.alwaysFiringWarning',
+                      {
+                        defaultMessage:
+                          'This expression has no condition, so the alert fires whenever the series exists. Add a comparison (e.g. “> 0.5”) — or a Condition in the builder — for a conditional alert.',
+                      }
+                    )}
+                    data-test-subj="prometheusAlwaysFiringWarning"
+                  />
+                </>
+              )}
+            </>
+          ) : (
+            /* Builder mode: point-and-click metric/label picker. */
+            <>
+              {builderWouldOverwrite && (
+                <>
+                  <EuiCallOut
+                    size="s"
+                    color="warning"
+                    iconType="alert"
+                    title={i18n.translate(
+                      'observability.alerting.prometheusFormSection.builderOverwriteWarning',
+                      {
+                        defaultMessage:
+                          'Your current PromQL expression can’t be represented by the builder. Selecting a metric here will replace it — switch to Code to keep editing it directly.',
+                      }
+                    )}
+                    data-test-subj="prometheusBuilderOverwriteWarning"
+                  />
+                  <EuiSpacer size="s" />
+                </>
+              )}
+              <PromQueryBuilder
+                datasourceId={datasourceId}
+                query={form.query}
+                onQueryChange={(q) => onUpdate('query', q)}
+              />
+            </>
+          )}
 
           <EuiSpacer size="m" />
 
@@ -415,7 +566,11 @@ export const PrometheusFormSection: React.FC<{
           {showPreview && (
             <>
               <EuiSpacer size="m" />
-              <QueryPreviewResults query={form.query} />
+              <QueryPreviewResults
+                query={form.query}
+                datasourceId={datasourceId}
+                runToken={previewToken}
+              />
             </>
           )}
         </EuiAccordion>

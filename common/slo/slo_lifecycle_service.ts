@@ -468,8 +468,8 @@ export class SloLifecycleService {
       existing.status.provisioning.rulerNamespace
         ? existing.status.provisioning.rulerNamespace
         : deploy
-        ? sloRulerNamespaceFor(deploy.workspaceId)
-        : SLO_RULER_NAMESPACE;
+          ? sloRulerNamespaceFor(deploy.workspaceId)
+          : SLO_RULER_NAMESPACE;
 
     const updated: SloDocument = {
       id: existing.id,
@@ -549,7 +549,7 @@ export class SloLifecycleService {
     const newFingerprints = this.computeObjectiveFingerprints(merged);
     const oldFingerprints =
       existing.status.provisioning.backend === 'prometheus'
-        ? existing.status.provisioning.recordingFingerprints ?? {}
+        ? (existing.status.provisioning.recordingFingerprints ?? {})
         : {};
     const newUnique = new Set(uniqueValues(newFingerprints));
     const oldUnique = new Set(uniqueValues(oldFingerprints));
@@ -711,7 +711,7 @@ export class SloLifecycleService {
    * Tear down an SLO.
    *
    * The ruler-side `deleteRuleGroup` is 404-tolerant — if the rule group was
-   * already removed out-of-band (someone DELETE'd it in Cortex directly, or
+   * already removed out-of-band (someone DELETE'd it in the ruler directly, or
    * the reconciler swept an orphan), the ruler call resolves successfully
    * and we proceed to remove the SO. This keeps a live out-of-band delete
    * from wedging the SO in an un-deletable state. Any other ruler failure
@@ -742,7 +742,7 @@ export class SloLifecycleService {
     const needsRulerTeardown =
       provisioning.backend === 'prometheus' && !!provisioning.alertGroupName;
 
-    // Ruler-first, SO-second. If the ruler delete fails (network, auth, Cortex
+    // Ruler-first, SO-second. If the ruler delete fails (network, auth, Prometheus
     // 5xx), the SO stays so the user can retry — better than silently leaking
     // a rule group that keeps evaluating dead alerts. The caller is required
     // to supply `deploy` whenever the SLO has a rule group; the route adapter
@@ -942,7 +942,7 @@ export class SloLifecycleService {
    * not creating or dropping an SLO; the ref store already reflects this
    * SLO's claim and the repair upsert is effectively a byte-equal replay.
    *
-   * Recording groups deliberately get NO annotation — Cortex rejects
+   * Recording groups deliberately get NO annotation — Prometheus rejects
    * annotations on recording rules (commit e25376c2).
    */
   private async repairDedup(doc: SloDocument, ctx: SloRepairContext): Promise<SloRepairResult> {
@@ -978,7 +978,7 @@ export class SloLifecycleService {
     // Step 1: re-upsert each unique fingerprint's shared recording group.
     // Recording-rule generation is pure in the fingerprint + representative
     // SLI, so the bytes match whatever the original create/update wrote;
-    // Cortex replaces-in-place, which is correct whether the group was
+    // Prometheus replaces-in-place, which is correct whether the group was
     // missing entirely or present with stale contents.
     const recordingFingerprints = provisioning.recordingFingerprints ?? {};
     const uniqueFps = uniqueValues(recordingFingerprints);

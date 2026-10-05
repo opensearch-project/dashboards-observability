@@ -15,7 +15,11 @@ import type {
   CustomPromQLExpr,
   Dimension,
   ExclusionWindow,
+  PrometheusSli,
   SloAlarmConfig,
+  SloDocument,
+  SloSpec,
+  Window,
 } from '../../../../../common/slo/slo_types';
 import {
   DEFAULT_MWMBR_TIERS,
@@ -53,6 +57,14 @@ export interface FormState {
   description: string;
   service: string;
   ownerTeam: string;
+  /**
+   * Secondary owner teams (`owner.teams[1..]`) carried through edit but not
+   * shown/edited in the wizard, which only authors the primary team. The saved
+   * object already supports up to 5 teams; without carrying these, editing a
+   * multi-team SLO (creatable via the API) would drop them on save because the
+   * server does a shallow top-level merge of `owner`. Always `[]` in create mode.
+   */
+  ownerTeamsSecondary: string[];
   ownerPrimaryUser: string;
   tier: string;
   windowDuration: '7d' | '14d' | '28d' | '30d';
@@ -68,6 +80,17 @@ export interface FormState {
   latencyThresholdUnit: 'seconds' | 'milliseconds';
   customPromql: CustomPromqlState;
   labels: KeyValueEntry[];
+  /**
+   * Array-valued labels (`Record<string, string[]>`) carried through edit but
+   * NOT shown in the key/value editor, which only authors scalar string values.
+   * `SloSpec.labels` is `Record<string, string | string[]>`; the wizard can only
+   * create scalar labels, so array labels only exist on API-created SLOs. Without
+   * carrying them out-of-band, hydration would flatten `{region: ['us','eu']}` to
+   * the scalar `'us,eu'` and — because the server shallow-merges the whole
+   * `labels` object on save — permanently rewrite the array to a CSV string.
+   * Re-emitted verbatim by `buildCreateInput`. Always `{}` in create mode.
+   */
+  preservedArrayLabels: Record<string, string[]>;
   annotations: KeyValueEntry[];
   shadow: boolean;
 
@@ -87,6 +110,9 @@ export interface FormState {
 
 export type Action =
   | { kind: 'setTemplate'; templateId: string | null }
+  // Replace the entire form state in one shot. Used by the edit flow to
+  // hydrate the wizard from an existing SLO document (see `hydrateFromDoc`).
+  | { kind: 'hydrate'; state: FormState }
   | { kind: 'setField'; field: ScalarField; value: string | boolean }
   | { kind: 'setObjectiveField'; index: number; field: keyof ObjectiveRow; value: string }
   | { kind: 'addObjective' }
@@ -160,11 +186,7 @@ type ScalarField =
   | 'shadow';
 
 export type ToggleableAlarm =
-  | 'sliHealth'
-  | 'attainmentBreach'
-  | 'budgetWarning'
-  | 'noData'
-  | 'resolved';
+  'sliHealth' | 'attainmentBreach' | 'budgetWarning' | 'noData' | 'resolved';
 
 /**
  * Fields that can be edited on a single ExclusionWindow row regardless of
@@ -226,6 +248,7 @@ export function initialState(): FormState {
     description: '',
     service: '',
     ownerTeam: '',
+    ownerTeamsSecondary: [],
     ownerPrimaryUser: '',
     tier: '',
     windowDuration: '28d',
@@ -236,6 +259,7 @@ export function initialState(): FormState {
     latencyThresholdUnit: 'seconds',
     customPromql: { mode: 'events', goodQuery: '', totalQuery: '', errorRatioQuery: '' },
     labels: [],
+    preservedArrayLabels: {},
     annotations: [],
     shadow: false,
     burnRates: defaultBurnRates(),
@@ -394,6 +418,8 @@ export function reducer(state: FormState, action: Action): FormState {
       const t = SLO_TEMPLATES.find((x) => x.id === action.templateId) ?? null;
       return applyTemplate(state, t);
     }
+    case 'hydrate':
+      return action.state;
     case 'setField': {
       const next = { ...state, [action.field]: action.value } as FormState;
       // When the Service field changes, re-derive the template's SLI query for
@@ -584,6 +610,239 @@ export function reducer(state: FormState, action: Action): FormState {
       return { ...state, annotations: next };
     }
   }
+}
+
+// ============================================================================
+// Edit-mode hydration — reverse of wizard_builders.buildCreateInput
+//
+// The create flow seeds the form from a picker template; the edit flow seeds it
+// from an already-persisted SloDocument. `hydrateFromDoc` walks the saved spec
+// back into a FormState and synthesizes a matching template so the same
+// section components + `buildCreateInput` round-trip the doc faithfully.
+// ============================================================================
+
+/** Result of hydrating the wizard from an existing SLO document. */
+export interface EditHydration {
+  state: FormState;
+  /**
+   * Template synthesized from the saved spec. Its id is NOT one of
+   * `SLO_TEMPLATES` — the edit flow holds it directly rather than looking it
+   * up, so the wizard renders the correct SLI editor (custom vs structured)
+   * and objective shape (availability vs latency) for the persisted SLI.
+   */
+  template: SloTemplate;
+  /** `status.version` of the loaded doc — required for the update's optimistic-concurrency check. */
+  version: number;
+}
+
+/** Synthetic template id prefix — never collides with a real picker template. */
+export const EDIT_TEMPLATE_ID_PREFIX = '__edit__:';
+
+/** Format a decimal target (0..1) back into the percent string the form edits. */
+function formatTargetPercent(target: number): string {
+  if (!Number.isFinite(target)) return '';
+  // toFixed(6) then Number() strips float artifacts (0.999 → "99.9", not
+  // "99.90000000000001"); buildObjective divides by 100 on the way back.
+  return String(Number((target * 100).toFixed(6)));
+}
+
+/**
+ * Map a persisted window to the wizard's editable set — the four rolling
+ * durations it offers. Returns `null` for anything the wizard cannot represent
+ * (a calendar window, or a rolling duration like `21d` the server accepts but
+ * the wizard doesn't). Callers MUST treat `null` as "unsupported" rather than
+ * substituting a default: `buildCreateInput` always re-emits `window`, and the
+ * server update does a shallow top-level merge, so coercing here would silently
+ * rewrite the stored window (and its alert/error-budget math) on any save —
+ * even when the user only edited an unrelated field.
+ */
+function toEditableWindowDuration(window: Window): FormState['windowDuration'] | null {
+  if (window.type === 'rolling') {
+    if (
+      window.duration === '7d' ||
+      window.duration === '14d' ||
+      window.duration === '28d' ||
+      window.duration === '30d'
+    ) {
+      return window.duration;
+    }
+  }
+  return null;
+}
+
+/** Flatten a labels/annotations record back into ordered key/value rows. */
+function recordToEntries(record: Record<string, string | string[]>): KeyValueEntry[] {
+  return Object.keys(record).map((key) => {
+    const value = record[key];
+    return { key, value: Array.isArray(value) ? value.join(',') : value };
+  });
+}
+
+/**
+ * Split a labels record into scalar rows the key/value editor can author and
+ * array-valued labels it can't. Array labels are carried out-of-band (see
+ * {@link FormState.preservedArrayLabels}) and re-emitted verbatim on save, so
+ * editing an API-created SLO with an array label like `{region: ['us','eu']}`
+ * no longer flattens it to the scalar `'us,eu'` (which the server's shallow
+ * `labels` merge would then persist).
+ */
+function splitLabels(record: Record<string, string | string[]>): {
+  entries: KeyValueEntry[];
+  arrays: Record<string, string[]>;
+} {
+  const entries: KeyValueEntry[] = [];
+  const arrays: Record<string, string[]> = {};
+  Object.keys(record).forEach((key) => {
+    const value = record[key];
+    if (Array.isArray(value)) arrays[key] = value.slice();
+    else entries.push({ key, value });
+  });
+  return { entries, arrays };
+}
+
+/** Rebuild the custom-PromQL editor state from a persisted custom SLI. */
+function deriveCustomPromqlState(def: PrometheusSli, base: CustomPromqlState): CustomPromqlState {
+  if (def.type !== 'custom' || !def.customExpr) return base;
+  if (def.customExpr.mode === 'events') {
+    return {
+      ...base,
+      mode: 'events',
+      goodQuery: def.customExpr.goodQuery,
+      totalQuery: def.customExpr.totalQuery,
+    };
+  }
+  return { ...base, mode: 'raw', errorRatioQuery: def.customExpr.errorRatioQuery };
+}
+
+/** Defensive merge so legacy docs missing `alarms.*` keys carry canonical defaults. */
+function mergeAlarms(alarms: SloAlarmConfig | undefined): SloAlarmConfig {
+  const d = defaultAlarms();
+  if (!alarms) return d;
+  return {
+    sliHealth: { ...d.sliHealth, ...alarms.sliHealth },
+    attainmentBreach: { ...d.attainmentBreach, ...alarms.attainmentBreach },
+    budgetWarning: { ...d.budgetWarning, ...alarms.budgetWarning },
+    noData: { ...d.noData, ...alarms.noData },
+    resolved: { ...d.resolved, ...alarms.resolved },
+  };
+}
+
+/**
+ * Synthesize a template from a persisted SLI so `buildCreateInput` reproduces
+ * the same spec. Carries the SLI's `type` / `calcMethod` / metric fields
+ * verbatim — those are what the builders read.
+ */
+function deriveEditTemplate(
+  spec: SloSpec,
+  def: PrometheusSli,
+  dimensions: Dimension[]
+): SloTemplate {
+  const serviceLabel = dimensions[0]?.name || 'service';
+  return {
+    id: `${EDIT_TEMPLATE_ID_PREFIX}${spec.name}`,
+    name: spec.name,
+    description: '',
+    icon: def.type === 'custom' ? 'wrench' : 'visLine',
+    category: 'custom',
+    sli: {
+      type: def.type,
+      calcMethod: def.calcMethod,
+      metric: def.metric,
+      goodEventsFilter: def.goodEventsFilter,
+      latencyThresholdUnit: def.latencyThresholdUnit,
+    },
+    dimensionHints: { serviceLabel, operationLabel: 'operation' },
+    defaultLatencyThreshold: spec.objectives[0]?.latencyThreshold,
+    expectedMetricType: def.type === 'latency_threshold' ? 'histogram' : 'counter',
+    detectionPattern: null,
+  };
+}
+
+/**
+ * Hydrate the wizard from an existing SLO document.
+ *
+ * Returns `null` when the SLO cannot be round-tripped through the wizard —
+ * i.e. a composite SLI (P2) or any non-Prometheus backend. Callers surface an
+ * "unsupported" state instead of a half-populated form.
+ */
+/**
+ * Whether the wizard can edit this SLO in place. Mirrors the guards in
+ * {@link hydrateFromDoc} (single Prometheus SLI + a representable rolling
+ * window) without building the full form, so callers — e.g. the detail page's
+ * Edit button — can avoid offering a dead-end "Edit" that only lands on the
+ * wizard's "This SLO can't be edited here" message.
+ */
+export function isSloEditable(doc: SloDocument): boolean {
+  const { sli, window } = doc.spec;
+  if (sli.type !== 'single') return false;
+  if (sli.definition.backend !== 'prometheus') return false;
+  return toEditableWindowDuration(window) !== null;
+}
+
+export function hydrateFromDoc(doc: SloDocument): EditHydration | null {
+  const spec = doc.spec;
+  const sli = spec.sli;
+  if (sli.type !== 'single') return null;
+  const def = sli.definition;
+  if (def.backend !== 'prometheus') return null;
+
+  // The wizard only models the four rolling windows. A calendar window or a
+  // non-standard rolling duration cannot be edited without silently rewriting
+  // it on save, so treat it as unsupported (same contract as composite/
+  // non-Prometheus above) rather than coercing to a default.
+  const windowDuration = toEditableWindowDuration(spec.window);
+  if (windowDuration === null) return null;
+
+  const fresh = initialState();
+  const template = deriveEditTemplate(spec, def, sli.dimensions);
+  // Keep array-valued labels out of the editable rows and carry them verbatim.
+  const { entries: labelEntries, arrays: preservedArrayLabels } = splitLabels(spec.labels ?? {});
+
+  const state: FormState = {
+    ...fresh,
+    templateId: template.id,
+    datasourceId: spec.datasourceId,
+    name: spec.name,
+    description: spec.description ?? '',
+    service: spec.service,
+    ownerTeam: spec.owner.teams[0] ?? '',
+    // Carry teams[1..] so a multi-team SLO isn't truncated to its primary on
+    // save (the wizard UI only edits the primary team).
+    ownerTeamsSecondary: spec.owner.teams.slice(1),
+    ownerPrimaryUser: spec.owner.primaryUser ?? '',
+    tier: spec.tier ?? '',
+    windowDuration,
+    objectives:
+      spec.objectives.length > 0
+        ? spec.objectives.map((o) => ({
+            name: o.name,
+            target: formatTargetPercent(o.target),
+            latencyThreshold:
+              o.latencyThreshold !== undefined
+                ? String(o.latencyThreshold)
+                : fresh.objectives[0].latencyThreshold,
+          }))
+        : fresh.objectives,
+    dimensions:
+      sli.dimensions.length > 0
+        ? sli.dimensions.map((dim) => ({ ...dim }))
+        : [{ name: template.dimensionHints.serviceLabel, value: '' }],
+    metric: def.metric ?? '',
+    goodEventsFilter: def.goodEventsFilter ?? '',
+    latencyThresholdUnit: def.latencyThresholdUnit ?? 'seconds',
+    customPromql: deriveCustomPromqlState(def, fresh.customPromql),
+    labels: labelEntries,
+    preservedArrayLabels,
+    annotations: recordToEntries(spec.annotations ?? {}),
+    shadow: spec.mode === 'shadow',
+    burnRates: spec.alerting.burnRates.map((b) => ({ ...b })),
+    budgetWarnings: spec.budgetWarningThresholds.map((b) => ({ ...b })),
+    alarms: mergeAlarms(spec.alarms),
+    exclusionWindows: spec.exclusionWindows.map((ew) => ({ ...ew, schedule: { ...ew.schedule } })),
+    submitAttempted: false,
+  };
+
+  return { state, template, version: doc.status.version };
 }
 
 // Re-export for wizard consumers who want the union type without a separate import.

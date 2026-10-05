@@ -27,7 +27,7 @@ export class PromQLSearchService {
    * Execute a metric request (range query)
    */
   async executeMetricRequest(params: ExecuteMetricRequestParams): Promise<any> {
-    const { query, startTime, endTime, step } = params;
+    const { query, startTime, endTime, step, signal } = params;
 
     // Build request body matching query enhancements API format
     const requestBody = {
@@ -52,6 +52,7 @@ export class PromQLSearchService {
       // Call query enhancements API directly - includes auth from browser session
       const response = await coreRefs.http!.post('/api/enhancements/search/promql', {
         body: JSON.stringify(requestBody),
+        ...(signal && { signal }),
       });
 
       // Unwrap the body - API returns { type: 'data_frame', body: { ...actual data } }
@@ -67,7 +68,7 @@ export class PromQLSearchService {
    * More efficient than range queries when only a single aggregated value is needed
    */
   async executeInstantQuery(params: ExecuteInstantQueryParams): Promise<any> {
-    const { query, time } = params;
+    const { query, time, signal } = params;
 
     const requestBody = {
       query: {
@@ -89,6 +90,7 @@ export class PromQLSearchService {
     try {
       const response = await coreRefs.http!.post('/api/enhancements/search/promql', {
         body: JSON.stringify(requestBody),
+        ...(signal && { signal }),
       });
 
       return response.body;

@@ -27,11 +27,13 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiResizableContainer,
+  Criteria,
 } from '@elastic/eui';
 import get from 'lodash/get';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { useServices } from '../../shared/hooks/use_services';
-import { useServicesRedMetrics } from '../../shared/hooks/use_services_red_metrics';
+import { useServicesRedMetrics, serviceNodeKey } from '../../shared/hooks/use_services_red_metrics';
+import { useControlledPagination } from '../../shared/hooks/use_controlled_pagination';
 import { useApmConfig } from '../../config/apm_config_context';
 import { SloApiClient } from '../slos/slo_api_client';
 import {
@@ -73,8 +75,15 @@ import {
 } from '../../shared/components/filters';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../common/constants';
+import {
+  isDependencyType,
+  getNodeTypeLabel,
+  normalizeNodeType,
+  NODE_TYPES,
+} from '../../shared/utils/platform_utils';
 import { servicesI18nTexts as i18nTexts } from './services_home_i18n';
 import { formatThroughput } from '../../common/format_utils';
+import { TruncatedLabel } from '../../../common/truncated_label';
 import '../../shared/styles/apm_common.scss';
 
 const LATENCY_PERCENTILE_OPTIONS = [
@@ -91,6 +100,13 @@ interface ServicesTablePanelProps {
   displayedServices: ServiceTableItem[];
   columns: Array<EuiBasicTableColumn<ServiceTableItem>>;
   isTableLoading: boolean;
+  onTableChange: (criteria: Criteria<ServiceTableItem>) => void;
+  // Controlled pagination + sort, so the metrics hook's visible-page slice
+  // stays in step with what the table renders (and page clamps on filter).
+  pageIndex: number;
+  pageSize: number;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
   refreshTrigger: number;
   searchQuery: string;
   latencyPercentile: string;
@@ -99,7 +115,8 @@ interface ServicesTablePanelProps {
     serviceName: string,
     environment: string,
     language?: string,
-    timeRange?: TimeRange
+    timeRange?: TimeRange,
+    nodeType?: string
   ) => void;
   sloAggregate: SloHealthBucket;
   sloBySvc: Map<string, SloHealthBucket>;
@@ -130,6 +147,11 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
   displayedServices,
   columns,
   isTableLoading,
+  onTableChange,
+  pageIndex,
+  pageSize,
+  sortField,
+  sortDirection,
   refreshTrigger,
   searchQuery,
   latencyPercentile,
@@ -233,16 +255,18 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
           items={displayedServices}
           columns={columns}
           pagination={{
-            initialPageSize: APM_CONSTANTS.DEFAULT_PAGE_SIZE,
+            pageIndex,
+            pageSize,
             pageSizeOptions: [...APM_CONSTANTS.PAGE_SIZE_OPTIONS],
           }}
           sorting={{
             sort: {
-              field: 'serviceName',
-              direction: 'asc',
+              field: sortField as keyof ServiceTableItem,
+              direction: sortDirection,
             },
           }}
           loading={isTableLoading}
+          onTableChange={onTableChange}
           data-test-subj="servicesTable"
         />
       )}
@@ -259,7 +283,8 @@ export interface ServicesHomeProps {
     serviceName: string,
     environment: string,
     language?: string,
-    timeRange?: TimeRange
+    timeRange?: TimeRange,
+    nodeType?: string
   ) => void;
 }
 
@@ -291,11 +316,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   const [flyoutState, setFlyoutState] = useState<FlyoutState | null>(null);
 
   const [selectedEnvironments, setSelectedEnvironments] = useState<Record<string, boolean>>({});
+  // Node-type filter (service / database / messaging / external).
+  const [selectedTypes, setSelectedTypes] = useState<Record<string, boolean>>({});
   const [selectedGroupByAttributes, setSelectedGroupByAttributes] = useState<
     Record<string, Record<string, boolean>>
   >({});
   const [attributeSearchQueries, setAttributeSearchQueries] = useState<Record<string, string>>({});
   const [expandedAttributes, setExpandedAttributes] = useState<Record<string, boolean>>({});
+  const [environmentSearchQuery, setEnvironmentSearchQuery] = useState('');
+  const [environmentExpanded, setEnvironmentExpanded] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -309,9 +338,20 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   // Latency percentile selector state
   const [latencyPercentile, setLatencyPercentile] = useState<'p99' | 'p90' | 'p50'>('p99');
 
-  // Track whether user has explicitly interacted with range filters (prevents badge flicker on hydration)
-  const latencyUserModified = useRef(false);
-  const throughputUserModified = useRef(false);
+  // Track whether the user has explicitly interacted with range filters.
+  // Use as state, so the activeFilters memo re-runs when a flag flips.
+  const [latencyUserModified, setLatencyUserModified] = useState(false);
+  const [throughputUserModified, setThroughputUserModified] = useState(false);
+
+  // Visible-page tracking: sparklines are fetched only for the shown rows.
+  const [visibleServices, setVisibleServices] = useState<
+    Array<{ serviceName: string; environment?: string; type?: string }>
+  >([]);
+  // Sort is mirrored so the visible-page slice matches the table's order; the
+  // page index/size come from useControlledPagination (declared after
+  // displayedServices, since it needs the post-filter row count to clamp).
+  const [tableSortField, setTableSortField] = useState<string>('serviceName');
+  const [tableSortDirection, setTableSortDirection] = useState<'asc' | 'desc'>('asc');
 
   // EuiResizableContainer togglePanel ref — captured inside render-prop, never passed as a prop
   const togglePanelRef = useRef<((id: string, options: { direction: string }) => void) | null>(
@@ -323,12 +363,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
   // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer
   const onLatencyRangeChange = useCallback((val: [number, number]) => {
-    latencyUserModified.current = true;
+    setLatencyUserModified(true);
     setLatencyRange(val);
   }, []);
 
   const onThroughputRangeChange = useCallback((val: [number, number]) => {
-    throughputUserModified.current = true;
+    setThroughputUserModified(true);
     setThroughputRange(val);
   }, []);
 
@@ -342,7 +382,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     ]);
   }, [chrome]);
 
-  const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
+  const parsedTimeRange = useMemo(
+    () => parseTimeRange(timeRange),
+    // Recalculate when refreshTrigger changes so relative ranges advance to `now`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeRange, refreshTrigger]
+  );
 
   const {
     data: services,
@@ -355,6 +400,23 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     endTime: parsedTimeRange.endTime,
     refreshTrigger,
   });
+
+  // The Type column, filter and badge only appear when the data has dependency nodes.
+  // Service-only data (data-prepper without dependency nodes, or with them disabled)
+  // renders exactly as before, and a stale type selection is ignored.
+  const hasDependencyRows = useMemo(
+    () => (services || []).some((s) => isDependencyType(s.type)),
+    [services]
+  );
+  // The known types, plus any type in the data this version has no label for.
+  const typeFilterOptions = useMemo(() => {
+    const extra = new Set<string>();
+    (services || []).forEach((s) => {
+      const t = normalizeNodeType(s.type);
+      if (!NODE_TYPES.includes(t)) extra.add(t);
+    });
+    return [...NODE_TYPES, ...Array.from(extra).sort()];
+  }, [services]);
 
   // --- SLO health rollup ---------------------------------------------------
   // We want the hook to fetch once per service-set change, *not* on every
@@ -388,8 +450,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     []
   );
 
+  // SLOs are defined on instrumented services, so dependency rows are not offered for them
+  // and do not count against the rollup's name cap.
   const serviceNamesKey = useMemo(() => {
-    const names = (services || []).map((s) => s.serviceName);
+    const names = (services || [])
+      .filter((s) => !isDependencyType(s.type))
+      .map((s) => s.serviceName);
     names.sort();
     return names.join('\n');
   }, [services]);
@@ -468,13 +534,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return Array.from(envSet).sort((a, b) => a.localeCompare(b));
   }, [services]);
 
-  // Create checkbox options from available environments
-  const environmentCheckboxes = useMemo(() => {
-    return availableEnvironments.map((env) => ({
-      id: env,
-      label: env,
-    }));
-  }, [availableEnvironments]);
+  const filteredEnvironments = useMemo(() => {
+    if (!environmentSearchQuery) return availableEnvironments;
+    const searchLower = environmentSearchQuery.toLowerCase();
+    return availableEnvironments.filter((env) => env.toLowerCase().includes(searchLower));
+  }, [availableEnvironments, environmentSearchQuery]);
 
   // Handle environment filter changes
   const onEnvironmentChange = useCallback((id: string) => {
@@ -484,19 +548,34 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     }));
   }, []);
 
-  // Handle select all for a specific attribute
+  const handleSelectAllEnvironments = useCallback(() => {
+    setSelectedEnvironments((prev) => {
+      const next = { ...prev };
+      filteredEnvironments.forEach((env) => {
+        next[env] = true;
+      });
+      return next;
+    });
+  }, [filteredEnvironments]);
+
+  const handleClearAllEnvironments = useCallback(() => {
+    setSelectedEnvironments({});
+  }, []);
+
+  // Handle select all for a specific attribute. Merges the currently-filtered
+  // values into the existing selection (rather than replacing it) so values
+  // selected under a previous search term survive — matching the Environment
+  // filter's handleSelectAllEnvironments semantics.
   const handleSelectAllForAttribute = useCallback(
     (attrPath: string) => {
       const allValues = filteredAttributeValues[attrPath] || [];
-      const newSelections: Record<string, boolean> = {};
-      allValues.forEach((value) => {
-        newSelections[value] = true;
+      setSelectedGroupByAttributes((prev) => {
+        const next = { ...(prev[attrPath] || {}) };
+        allValues.forEach((value) => {
+          next[value] = true;
+        });
+        return { ...prev, [attrPath]: next };
       });
-
-      setSelectedGroupByAttributes((prev) => ({
-        ...prev,
-        [attrPath]: newSelections,
-      }));
     },
     [filteredAttributeValues]
   );
@@ -541,6 +620,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       });
     }
 
+    // Filter by node type (service / database / messaging / external)
+    const hasSelectedTypes = Object.values(selectedTypes).some((v) => v);
+    if (hasDependencyRows && hasSelectedTypes) {
+      filtered = filtered.filter((service) => {
+        return selectedTypes[normalizeNodeType(service.type)] === true;
+      });
+    }
+
     // Filter by groupByAttributes
     const hasGroupByAttributeFilters = Object.keys(selectedGroupByAttributes).some((attrPath) =>
       Object.values(selectedGroupByAttributes[attrPath]).some((v) => v)
@@ -570,7 +657,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     }
 
     return filtered;
-  }, [services, searchQuery, selectedEnvironments, selectedGroupByAttributes]);
+  }, [
+    services,
+    searchQuery,
+    selectedEnvironments,
+    selectedTypes,
+    hasDependencyRows,
+    selectedGroupByAttributes,
+  ]);
 
   // Fetch RED (Request rate, Error rate, Duration) metrics for ALL services
   // Fetched separately and before filtering to avoid re-fetching on filter changes
@@ -582,7 +676,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     services: (services || []).map((s) => ({
       serviceName: s.serviceName,
       environment: s.environment,
+      type: s.type,
     })),
+    sparklineServices: visibleServices,
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     latencyPercentile,
@@ -615,7 +711,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Iterate only over filtered services' metrics
     fullyFilteredItems.forEach((service) => {
-      const metrics = metricsMap.get(service.serviceName);
+      const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
       if (!metrics) return;
 
       // Get average latency value over the time period (already in ms from PromQL)
@@ -648,13 +744,30 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return { latencyMin, latencyMax, throughputMin, throughputMax };
   }, [metricsMap, fullyFilteredItems]);
 
-  // Sync selected ranges to metricRanges whenever they change
+  // Track the sliders to the metric bounds only while the user has NOT touched
+  // them, and never clear the user-modified flags here. Two reasons:
+  //  - Depend on the primitive bounds, not the metricRanges object: that object
+  //    gets a fresh identity whenever metricsMap changes (e.g. a page's
+  //    sparklines loading), and firing on identity churn would reset an active
+  //    filter mid-browse.
+  //  - Instant metrics arrive in several waves, so a bound can jump from 0 to a
+  //    real value in a later wave. Clearing the flags on that change would wipe
+  //    a filter the user set during the load; gating on the flag (and not
+  //    resetting it) keeps their selection.
   useEffect(() => {
-    setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
-    setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
-    latencyUserModified.current = false;
-    throughputUserModified.current = false;
-  }, [metricRanges]);
+    if (!latencyUserModified) {
+      setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
+    }
+    if (!throughputUserModified) {
+      setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    metricRanges.latencyMin,
+    metricRanges.latencyMax,
+    metricRanges.throughputMin,
+    metricRanges.throughputMax,
+  ]);
 
   // Apply metric filters for display (on top of already filtered items)
   const displayedServices = useMemo(() => {
@@ -667,10 +780,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Filter by latency range (only if range has been adjusted from full range)
     const isLatencyFilterActive =
-      latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax;
+      latencyUserModified &&
+      (latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax);
     if (isLatencyFilterActive) {
       filtered = filtered.filter((service) => {
-        const metrics = metricsMap.get(service.serviceName);
+        const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
         if (!metrics) return false;
         // Use average latency for filtering
         const avgLatency = metrics.avgLatency || 0;
@@ -680,11 +794,12 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Filter by throughput range (only if range has been adjusted from full range)
     const isThroughputFilterActive =
-      throughputRange[0] > metricRanges.throughputMin ||
-      throughputRange[1] < metricRanges.throughputMax;
+      throughputUserModified &&
+      (throughputRange[0] > metricRanges.throughputMin ||
+        throughputRange[1] < metricRanges.throughputMax);
     if (isThroughputFilterActive) {
       filtered = filtered.filter((service) => {
-        const metrics = metricsMap.get(service.serviceName);
+        const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
         if (!metrics) return false;
         // Filter by total throughput over the time period
         const avgThroughput = metrics.avgThroughput || 0;
@@ -695,7 +810,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     // Filter by failure rate threshold (OR logic - match ANY selected threshold)
     if (selectedFailureRateThresholds.length > 0) {
       filtered = filtered.filter((service) => {
-        const metrics = metricsMap.get(service.serviceName);
+        const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
         if (!metrics) return false;
         // Use average failure ratio for filtering
         const avgFailureRatio = metrics.avgFailureRatio || 0;
@@ -710,10 +825,99 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     fullyFilteredItems,
     metricsMap,
     metricRanges,
+    latencyUserModified,
+    throughputUserModified,
     latencyRange,
     throughputRange,
     selectedFailureRateThresholds,
   ]);
+
+  // Controlled pagination: clamps the page index to the post-filter row count,
+  // so shrinking the result set (via a filter) can never strand the user on an
+  // empty page with no sparklines. Sort is captured alongside so the slice below
+  // mirrors the table's actual order.
+  const {
+    pageIndex,
+    pageSize,
+    onTableChange: onPaginationChange,
+    resetPage,
+  } = useControlledPagination<ServiceTableItem>(displayedServices.length);
+
+  const handleTableChange = useCallback(
+    (criteria: Criteria<ServiceTableItem>) => {
+      onPaginationChange(criteria);
+      if (criteria.sort) {
+        setTableSortField(criteria.sort.field as string);
+        setTableSortDirection(criteria.sort.direction);
+      }
+    },
+    [onPaginationChange]
+  );
+
+  // Return to the first page when the user changes a filter, matching the
+  // service-details tables. (The clamp above already prevents an empty page;
+  // this just lands the user on page 1 rather than a mid-range page.)
+  const filterSignature = [
+    searchQuery,
+    latencyUserModified ? latencyRange.join(',') : '',
+    throughputUserModified ? throughputRange.join(',') : '',
+    selectedFailureRateThresholds.join(','),
+  ].join('|');
+  const prevFilterSignature = useRef(filterSignature);
+  useEffect(() => {
+    if (prevFilterSignature.current !== filterSignature) {
+      prevFilterSignature.current = filterSignature;
+      resetPage();
+    }
+  }, [filterSignature, resetPage]);
+
+  // Mirror the table's current sort + page to derive the visible rows, so the
+  // metrics hook fetches sparklines only for those. Sorting uses the same
+  // instant metric values the columns sort by. The name guard prevents a
+  // refetch loop when only sparkline data (not order) changes.
+  useEffect(() => {
+    const getSortVal = (item: ServiceTableItem): string | number => {
+      const m = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
+      switch (tableSortField) {
+        // Missing metrics fall back to 0 to match the column sort comparators,
+        // so this derived visible slice stays in step with the rendered rows.
+        case 'latency':
+          return m?.avgLatency || 0;
+        case 'throughput':
+          return m?.avgThroughput || 0;
+        case 'failureRatio':
+          return m?.avgFailureRatio || 0;
+        case 'environment':
+          return item.environment ?? '';
+        case 'type':
+          return item.type ?? '';
+        default:
+          return item.serviceName ?? '';
+      }
+    };
+    const sorted = [...displayedServices].sort((a, b) => {
+      const va = getSortVal(a);
+      const vb = getSortVal(b);
+      const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+      return tableSortDirection === 'desc' ? -cmp : cmp;
+    });
+    const start = pageIndex * pageSize;
+    const slice = sorted.slice(start, start + pageSize);
+    setVisibleServices((prev) => {
+      const sameKeys =
+        prev.length === slice.length &&
+        prev.every(
+          (p, i) => p.serviceName === slice[i].serviceName && p.environment === slice[i].environment
+        );
+      return sameKeys
+        ? prev
+        : slice.map((s) => ({
+            serviceName: s.serviceName,
+            environment: s.environment,
+            type: s.type,
+          }));
+    });
+  }, [displayedServices, metricsMap, tableSortField, tableSortDirection, pageIndex, pageSize]);
 
   // Build active filter badges from current filter state
   const activeFilters: FilterBadge[] = useMemo(() => {
@@ -732,9 +936,22 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       });
     }
 
+    // Node type filter badge
+    const selectedTypeValues = Object.entries(selectedTypes)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([type]) => getNodeTypeLabel(type));
+    if (hasDependencyRows && selectedTypeValues.length > 0) {
+      badges.push({
+        key: 'type',
+        category: i18nTexts.table.type,
+        values: selectedTypeValues,
+        onRemove: () => setSelectedTypes({}),
+      });
+    }
+
     // Latency range filter badge (only if user explicitly modified)
     const isLatencyModified =
-      latencyUserModified.current &&
+      latencyUserModified &&
       (latencyRange[0] > metricRanges.latencyMin || latencyRange[1] < metricRanges.latencyMax);
     if (isLatencyModified) {
       badges.push({
@@ -742,7 +959,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         category: i18nTexts.filters.latency,
         values: [`${latencyRange[0].toFixed(0)}-${latencyRange[1].toFixed(0)}ms`],
         onRemove: () => {
-          latencyUserModified.current = false;
+          setLatencyUserModified(false);
           setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
         },
       });
@@ -750,7 +967,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
     // Throughput range filter badge (only if user explicitly modified)
     const isThroughputModified =
-      throughputUserModified.current &&
+      throughputUserModified &&
       (throughputRange[0] > metricRanges.throughputMin ||
         throughputRange[1] < metricRanges.throughputMax);
     if (isThroughputModified) {
@@ -761,7 +978,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           `${formatThroughput(throughputRange[0])} - ${formatThroughput(throughputRange[1])}`,
         ],
         onRemove: () => {
-          throughputUserModified.current = false;
+          setThroughputUserModified(false);
           setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
         },
       });
@@ -801,6 +1018,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return badges;
   }, [
     selectedEnvironments,
+    selectedTypes,
+    hasDependencyRows,
+    latencyUserModified,
+    throughputUserModified,
     latencyRange,
     throughputRange,
     selectedFailureRateThresholds,
@@ -811,12 +1032,13 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   // Clear all filters handler
   const handleClearAllFilters = useCallback(() => {
     setSelectedEnvironments({});
+    setSelectedTypes({});
     setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
     setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
     setSelectedFailureRateThresholds([]);
     setSelectedGroupByAttributes({});
-    latencyUserModified.current = false;
-    throughputUserModified.current = false;
+    setLatencyUserModified(false);
+    setThroughputUserModified(false);
   }, [metricRanges]);
 
   const columns: Array<EuiBasicTableColumn<ServiceTableItem>> = useMemo(
@@ -846,7 +1068,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                 <EuiLink
                   onClick={() => {
                     if (onServiceClick) {
-                      onServiceClick(serviceName, item.environment, language, timeRange);
+                      onServiceClick(serviceName, item.environment, language, timeRange, item.type);
                     }
                   }}
                   data-test-subj={`serviceLink-${serviceName}`}
@@ -873,41 +1095,47 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             alignItems="center"
             justifyContent="center"
           >
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewSpans}>
-                <EuiButtonIcon
-                  iconType="apmTrace"
-                  aria-label={i18nTexts.actions.viewSpans}
-                  onClick={() =>
-                    setFlyoutState({
-                      serviceName: item.serviceName,
-                      environment: item.environment,
-                      language: item.groupByAttributes?.telemetry?.sdk?.language,
-                      tab: 'spans',
-                    })
-                  }
-                  data-test-subj={`serviceSpansButton-${item.serviceName}`}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18nTexts.actions.viewLogs}>
-                <EuiButtonIcon
-                  iconType="discoverApp"
-                  autoFocus={false}
-                  aria-label={i18nTexts.actions.viewLogs}
-                  onClick={() =>
-                    setFlyoutState({
-                      serviceName: item.serviceName,
-                      environment: item.environment,
-                      language: item.groupByAttributes?.telemetry?.sdk?.language,
-                      tab: 'logs',
-                    })
-                  }
-                  data-test-subj={`serviceLogsButton-${item.serviceName}`}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
+            {/* Spans/logs are keyed by serviceName; inferred dependencies emit no
+                spans/logs under their own name, so these are hidden for them. */}
+            {!isDependencyType(item.type) && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18nTexts.actions.viewSpans}>
+                  <EuiButtonIcon
+                    iconType="apmTrace"
+                    aria-label={i18nTexts.actions.viewSpans}
+                    onClick={() =>
+                      setFlyoutState({
+                        serviceName: item.serviceName,
+                        environment: item.environment,
+                        language: item.groupByAttributes?.telemetry?.sdk?.language,
+                        tab: 'spans',
+                      })
+                    }
+                    data-test-subj={`serviceSpansButton-${item.serviceName}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
+            {!isDependencyType(item.type) && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={i18nTexts.actions.viewLogs}>
+                  <EuiButtonIcon
+                    iconType="discoverApp"
+                    autoFocus={false}
+                    aria-label={i18nTexts.actions.viewLogs}
+                    onClick={() =>
+                      setFlyoutState({
+                        serviceName: item.serviceName,
+                        environment: item.environment,
+                        language: item.groupByAttributes?.telemetry?.sdk?.language,
+                        tab: 'logs',
+                      })
+                    }
+                    data-test-subj={`serviceLogsButton-${item.serviceName}`}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiToolTip content={i18nTexts.actions.viewServiceMap}>
                 <EuiButtonIcon
@@ -935,15 +1163,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '19%',
+        width: '23%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           return metrics?.avgLatency || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const latencyData = metrics?.latency || [];
           // Use average latency over the time period
           const avgLatency = metrics?.avgLatency || 0;
@@ -987,16 +1215,16 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '19%',
+        width: '23%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           // Sort by average throughput over the time period
           return metrics?.avgThroughput || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const throughputData = metrics?.throughput || [];
           // Display average throughput over the time period
           const avgThroughput = metrics?.avgThroughput || 0;
@@ -1040,11 +1268,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           return metrics?.avgFailureRatio || 0;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
-          const metrics = metricsMap.get(item.serviceName);
+          const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const failureData = metrics?.failureRatio || [];
           // Use average failure ratio over the time period
           const avgFailureRatio = metrics?.avgFailureRatio || 0;
@@ -1089,6 +1317,24 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           return <EuiText size="s">{getEnvironmentDisplayName(environment)}</EuiText>;
         },
       },
+      ...(hasDependencyRows
+        ? [
+            {
+              field: 'type',
+              name: (
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>{i18nTexts.table.type}</EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              sortable: true,
+              align: 'center' as const,
+              width: '10%',
+              render: (_type: string, item: ServiceTableItem) => {
+                return <EuiText size="s">{getNodeTypeLabel(item.type)}</EuiText>;
+              },
+            },
+          ]
+        : []),
       ...(sloFeatureEnabled
         ? [
             {
@@ -1114,6 +1360,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               // stable accessor so the cell re-renders only when the hook's Map
               // actually changes, not on every EuiResizableContainer mousemove.
               render: (_value: unknown, item: ServiceTableItem) => {
+                // SLOs apply to owned services, not inferred dependency nodes.
+                if (isDependencyType(item.type)) {
+                  return (
+                    <EuiText size="s" color="subdued">
+                      —
+                    </EuiText>
+                  );
+                }
                 const accessed = getSloHealth(item.serviceName);
                 return (
                   <SloHealthCell
@@ -1137,6 +1391,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       latencyPercentile,
       getSloHealth,
       sloFeatureEnabled,
+      hasDependencyRows,
     ]
   );
 
@@ -1221,6 +1476,39 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
 
                           <EuiHorizontalRule margin="xs" />
 
+                          {/* Node Type Filter - Accordion (only when dependency nodes exist) */}
+                          {hasDependencyRows && (
+                            <>
+                              <EuiAccordion
+                                id="typeAccordion"
+                                buttonContent={
+                                  <EuiText size="xs">
+                                    <strong>{i18nTexts.table.type}</strong>
+                                  </EuiText>
+                                }
+                                initialIsOpen={true}
+                                data-test-subj="typeAccordion"
+                              >
+                                <EuiSpacer size="xs" />
+                                <EuiCheckboxGroup
+                                  className="apmFilterCheckboxGroup"
+                                  options={typeFilterOptions.map((id) => ({
+                                    id,
+                                    label: getNodeTypeLabel(id),
+                                  }))}
+                                  idToSelectedMap={selectedTypes}
+                                  onChange={(id) =>
+                                    setSelectedTypes((prev) => ({ ...prev, [id]: !prev[id] }))
+                                  }
+                                  compressed
+                                  data-test-subj="typeCheckboxGroup"
+                                />
+                              </EuiAccordion>
+
+                              <EuiHorizontalRule margin="xs" />
+                            </>
+                          )}
+
                           {/* Environment Filter - Accordion */}
                           <EuiAccordion
                             id="environmentAccordion"
@@ -1234,15 +1522,107 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           >
                             <EuiSpacer size="xs" />
 
-                            {/* Checkbox group */}
-                            {environmentCheckboxes.length > 0 ? (
-                              <EuiCheckboxGroup
-                                options={environmentCheckboxes}
-                                idToSelectedMap={selectedEnvironments}
-                                onChange={onEnvironmentChange}
-                                compressed
-                                data-test-subj="environmentCheckboxGroup"
-                              />
+                            {availableEnvironments.length > 0 ? (
+                              <>
+                                {/* Search box */}
+                                <EuiFieldSearch
+                                  placeholder=""
+                                  value={environmentSearchQuery}
+                                  onChange={(e) => setEnvironmentSearchQuery(e.target.value)}
+                                  isClearable
+                                  fullWidth
+                                  compressed
+                                  data-test-subj="environmentSearch"
+                                />
+
+                                <EuiSpacer size="s" />
+
+                                {/* Select all / Clear all links */}
+                                {filteredEnvironments.length > 0 && (
+                                  <>
+                                    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+                                      <EuiFlexItem grow={false}>
+                                        <EuiLink
+                                          onClick={handleSelectAllEnvironments}
+                                          data-test-subj="environmentSelectAll"
+                                          color="primary"
+                                        >
+                                          <EuiText size="xs">{i18nTexts.filters.selectAll}</EuiText>
+                                        </EuiLink>
+                                      </EuiFlexItem>
+                                      <EuiFlexItem grow={false}>
+                                        <EuiLink
+                                          onClick={handleClearAllEnvironments}
+                                          data-test-subj="environmentClearAll"
+                                          color="primary"
+                                        >
+                                          <EuiText size="xs">{i18nTexts.filters.clearAll}</EuiText>
+                                        </EuiLink>
+                                      </EuiFlexItem>
+                                    </EuiFlexGroup>
+                                    <EuiSpacer size="s" />
+                                  </>
+                                )}
+
+                                {/* Checkbox list */}
+                                {filteredEnvironments.length > 0 ? (
+                                  <>
+                                    <div
+                                      style={
+                                        environmentExpanded
+                                          ? {
+                                              maxBlockSize:
+                                                APM_CONSTANTS.FILTER_VALUES_EXPANDED_MAX_HEIGHT,
+                                              overflowY: 'auto',
+                                            }
+                                          : undefined
+                                      }
+                                    >
+                                      <EuiCheckboxGroup
+                                        className="apmFilterCheckboxGroup"
+                                        options={(environmentExpanded
+                                          ? filteredEnvironments
+                                          : filteredEnvironments.slice(
+                                              0,
+                                              APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT
+                                            )
+                                        ).map((env) => ({
+                                          id: env,
+                                          label: <TruncatedLabel text={env} />,
+                                        }))}
+                                        idToSelectedMap={selectedEnvironments}
+                                        onChange={onEnvironmentChange}
+                                        compressed
+                                        data-test-subj="environmentCheckboxGroup"
+                                      />
+                                    </div>
+                                    {/* Show more / Show less link */}
+                                    {filteredEnvironments.length >
+                                      APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT && (
+                                      <>
+                                        <EuiSpacer size="xs" />
+                                        <EuiLink
+                                          onClick={() => setEnvironmentExpanded((prev) => !prev)}
+                                          data-test-subj="environmentShowMore"
+                                        >
+                                          <EuiText size="xs">
+                                            {environmentExpanded
+                                              ? i18nTexts.filters.showLess
+                                              : i18nTexts.filters.showMore(
+                                                  filteredEnvironments.length -
+                                                    APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT
+                                                )}
+                                          </EuiText>
+                                        </EuiLink>
+                                      </>
+                                    )}
+                                  </>
+                                ) : (
+                                  <EuiText size="s" color="subdued">
+                                    {i18nTexts.filters.noMatchingValues}
+                                  </EuiText>
+                                )}
+                              </>
                             ) : (
                               <EuiText size="s" color="subdued">
                                 {i18nTexts.filters.noEnvironments}
@@ -1350,10 +1730,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                         {index > 0 && <EuiHorizontalRule margin="xs" />}
 
                                         <EuiAccordion
+                                          className="apmAttributeAccordion"
                                           id={`attribute-${attrPath}-accordion`}
                                           buttonContent={
-                                            <EuiText size="xs">
-                                              <strong>{attrPath}</strong>
+                                            <EuiText size="xs" className="apmAttributeTitleText">
+                                              <TruncatedLabel text={attrPath} />
                                             </EuiText>
                                           }
                                           initialIsOpen={index === 0}
@@ -1417,26 +1798,39 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                           {/* Checkbox list */}
                                           {filteredValues.length > 0 ? (
                                             <>
-                                              <EuiCheckboxGroup
-                                                options={displayedValues.map((value) => ({
-                                                  id: value,
-                                                  label: value,
-                                                }))}
-                                                idToSelectedMap={
-                                                  selectedGroupByAttributes[attrPath] || {}
+                                              <div
+                                                style={
+                                                  isExpanded
+                                                    ? {
+                                                        maxBlockSize:
+                                                          APM_CONSTANTS.FILTER_VALUES_EXPANDED_MAX_HEIGHT,
+                                                        overflowY: 'auto',
+                                                      }
+                                                    : undefined
                                                 }
-                                                onChange={(id) => {
-                                                  setSelectedGroupByAttributes((prev) => ({
-                                                    ...prev,
-                                                    [attrPath]: {
-                                                      ...(prev[attrPath] || {}),
-                                                      [id]: !prev[attrPath]?.[id],
-                                                    },
-                                                  }));
-                                                }}
-                                                compressed
-                                                data-test-subj={`attribute-${attrPath}-checkboxGroup`}
-                                              />
+                                              >
+                                                <EuiCheckboxGroup
+                                                  className="apmFilterCheckboxGroup"
+                                                  options={displayedValues.map((value) => ({
+                                                    id: value,
+                                                    label: <TruncatedLabel text={value} />,
+                                                  }))}
+                                                  idToSelectedMap={
+                                                    selectedGroupByAttributes[attrPath] || {}
+                                                  }
+                                                  onChange={(id) => {
+                                                    setSelectedGroupByAttributes((prev) => ({
+                                                      ...prev,
+                                                      [attrPath]: {
+                                                        ...(prev[attrPath] || {}),
+                                                        [id]: !prev[attrPath]?.[id],
+                                                      },
+                                                    }));
+                                                  }}
+                                                  compressed
+                                                  data-test-subj={`attribute-${attrPath}-checkboxGroup`}
+                                                />
+                                              </div>
                                               {/* Show more / Show less link */}
                                               {filteredValues.length >
                                                 APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT && (
@@ -1454,7 +1848,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                                     <EuiText size="xs">
                                                       {isExpanded
                                                         ? i18nTexts.filters.showLess
-                                                        : `+${remainingCount} more`}
+                                                        : i18nTexts.filters.showMore(
+                                                            remainingCount
+                                                          )}
                                                     </EuiText>
                                                   </EuiLink>
                                                 </>
@@ -1490,6 +1886,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           displayedServices={displayedServices}
                           columns={columns}
                           isTableLoading={isTableLoading}
+                          onTableChange={handleTableChange}
+                          pageIndex={pageIndex}
+                          pageSize={pageSize}
+                          sortField={tableSortField}
+                          sortDirection={tableSortDirection}
                           refreshTrigger={refreshTrigger}
                           searchQuery={searchQuery}
                           latencyPercentile={latencyPercentile}

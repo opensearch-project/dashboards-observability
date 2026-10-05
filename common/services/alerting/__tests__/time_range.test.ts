@@ -26,9 +26,7 @@ process.env.TZ = 'UTC';
 
 import moment from 'moment';
 import {
-  parseDateMath,
   parseDateMathMs,
-  dateMathToDSLString,
   computeStep,
   validateDateMath,
   validateTimeRangeQuery,
@@ -49,21 +47,21 @@ describe('time_range helpers', () => {
   });
 
   // =========================================================================
-  // parseDateMath / parseDateMathMs
+  // parseDateMathMs
   // =========================================================================
 
-  describe('parseDateMath', () => {
-    it('parses "now" at the fixed system time (epoch seconds)', () => {
-      expect(parseDateMath('now', false)).toBe(Math.floor(FIXED_NOW_MS / 1000));
+  describe('parseDateMathMs', () => {
+    it('parses "now" at the fixed system time (epoch ms)', () => {
+      expect(parseDateMathMs('now', false)).toBe(FIXED_NOW_MS);
     });
 
     it('parses "now-1h" to one hour before now', () => {
-      expect(parseDateMath('now-1h', false)).toBe(Math.floor((FIXED_NOW_MS - 3600_000) / 1000));
+      expect(parseDateMathMs('now-1h', false)).toBe(FIXED_NOW_MS - 3600_000);
     });
 
     it('parses an absolute ISO timestamp', () => {
       const iso = '2024-06-01T00:00:00.000Z';
-      expect(parseDateMath(iso, false)).toBe(Math.floor(new Date(iso).getTime() / 1000));
+      expect(parseDateMathMs(iso, false)).toBe(new Date(iso).getTime());
     });
 
     it('roundUp=false floors "now/d" to start-of-day (isEndTime=false)', () => {
@@ -80,19 +78,8 @@ describe('time_range helpers', () => {
     });
 
     it('throws on a malformed expression', () => {
-      expect(() => parseDateMath('not-a-date', false)).toThrow(/Invalid date-math/);
+      expect(() => parseDateMathMs('not-a-date', false)).toThrow(/Invalid date-math/);
       expect(() => parseDateMathMs('', true)).toThrow();
-    });
-  });
-
-  // =========================================================================
-  // dateMathToDSLString
-  // =========================================================================
-
-  describe('dateMathToDSLString', () => {
-    it('is a pass-through for valid expressions', () => {
-      expect(dateMathToDSLString('now-1h')).toBe('now-1h');
-      expect(dateMathToDSLString('2024-06-01T00:00:00Z')).toBe('2024-06-01T00:00:00Z');
     });
   });
 
@@ -163,8 +150,8 @@ describe('time_range helpers', () => {
 
     it('rejects non-string input', () => {
       // Route-layer validators may get garbage; guard explicitly.
-      expect(validateDateMath((null as unknown) as string)).toBe(false);
-      expect(validateDateMath((123 as unknown) as string)).toBe(false);
+      expect(validateDateMath(null as unknown as string)).toBe(false);
+      expect(validateDateMath(123 as unknown as string)).toBe(false);
     });
   });
 

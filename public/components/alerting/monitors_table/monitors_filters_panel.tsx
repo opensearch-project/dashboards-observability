@@ -38,6 +38,7 @@ import {
 } from '../../../../common/types/alerting';
 import { FacetFilterGroup } from '../facet_filter_panel';
 import { HEALTH_COLORS, SEVERITY_COLORS, STATUS_COLORS, TYPE_LABELS } from '../shared_constants';
+import { getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
 import { collectLabelValues, FilterState } from './monitors_table_filters';
 import { INTERNAL_LABEL_KEYS, SavedSearch } from './monitors_table_helpers';
 
@@ -141,6 +142,25 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
     }
     return map;
   }, [datasources]);
+
+  // Display maps so the Status / Severity / Health facet labels read the same
+  // as the table cells (e.g. "Active", "Medium", "No data") instead of the raw
+  // backend tokens. Only the *label* is mapped — the facet still filters on the
+  // raw value (FacetFilterGroup's onChange keeps the original option), so this
+  // is display-only and cannot change which rows match. Mirrors how the Type
+  // facet already uses TYPE_LABELS.
+  const statusDisplayMap = useMemo(
+    () => Object.fromEntries(uniqueStatuses.map((s) => [s, getMonitorStateLabel(s)])),
+    [uniqueStatuses]
+  );
+  const severityDisplayMap = useMemo(
+    () => Object.fromEntries(uniqueSeverities.map((s) => [s, getSeverityLabel(s)])),
+    [uniqueSeverities]
+  );
+  const healthDisplayMap = useMemo(
+    () => Object.fromEntries(uniqueHealth.map((h) => [h, getMonitorStateLabel(h)])),
+    [uniqueHealth]
+  );
 
   // Render a single facet group (delegates to shared component)
   const renderFacetGroup = (
@@ -253,7 +273,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           filters.status,
           (v) => updateFilter('status', v as MonitorStatus[]),
           facetCounts.counts.status,
-          undefined,
+          statusDisplayMap,
           STATUS_COLORS
         )}
         {renderFacetGroup(
@@ -265,7 +285,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           filters.severity,
           (v) => updateFilter('severity', v as UnifiedAlertSeverity[]),
           facetCounts.counts.severity,
-          undefined,
+          severityDisplayMap,
           SEVERITY_COLORS
         )}
         {renderFacetGroup(
@@ -288,7 +308,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           filters.healthStatus,
           (v) => updateFilter('healthStatus', v as MonitorHealthStatus[]),
           facetCounts.counts.healthStatus,
-          undefined,
+          healthDisplayMap,
           HEALTH_COLORS
         )}
         {renderFacetGroup(

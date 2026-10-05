@@ -29,7 +29,7 @@
  * `min-width: 0`); this component fills its parent and truncates within it.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './truncated_label.scss';
 
@@ -51,17 +51,68 @@ export const TruncatedLabel: React.FC<TruncatedLabelProps> = ({ text, fontSize, 
   if (fontSize !== undefined) labelStyle.fontSize = fontSize;
   if (lineHeight !== undefined) labelStyle.lineHeight = `${lineHeight}px`;
 
-  const onEnter = () => {
+  const reveal = useCallback(() => {
     const el = ref.current;
     // Only show the tooltip when the text is actually clipped right now.
     if (!el || el.scrollWidth <= el.clientWidth) return;
     const rect = el.getBoundingClientRect();
     setTooltipPos({ top: rect.top - 28, left: rect.left });
-  };
-  const onLeave = () => setTooltipPos(null);
+  }, []);
+  const hide = useCallback(() => setTooltipPos(null), []);
+
+  // Reveal on keyboard focus too, not just mouse hover (WCAG 1.4.13): when this
+  // label sits inside a focusable control (e.g. a collapsible facet-group
+  // button, or a checkbox facet-option row), a keyboard-only or screen-magnifier
+  // user must be able to read the clipped full text. Focus/blur/keydown land on
+  // the focusable CONTROL, not this span, and native focus/blur don't bubble —
+  // so wiring the handlers onto the wrap span wouldn't fire. Resolve the real
+  // control and attach there:
+  //   - nearest focusable ANCESTOR, but only a genuine tab stop. We must EXCLUDE
+  //     `tabindex="-1"` wrappers: OUI's `EuiAccordion` gives its content a
+  //     `tabIndex=-1` childWrapper and auto-`.focus()`es it on expand, which
+  //     would otherwise fire `reveal` on every truncated row at once.
+  //   - else the control ASSOCIATED with an enclosing `<label>` (the checkbox
+  //     `<input>` is a SIBLING, not an ancestor, of an option-row label).
+  // Esc dismisses (WCAG 1.4.13 "dismissable"); the listener lives on the same
+  // control so it actually receives the keydown. A plain table cell has no
+  // focusable control → no-op (hover still works).
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    // Resolve the focusable control once into a `const` so the cleanup closure
+    // provably detaches from the same node (no reassignment, no null-narrowing
+    // ambiguity): the nearest genuine tab stop, else the enclosing label's
+    // associated control.
+    const control =
+      el.closest('button, a, [role="button"], [tabindex]:not([tabindex="-1"])') ??
+      (el.closest('label') as HTMLLabelElement | null)?.control ??
+      null;
+    if (!control) return undefined;
+    // A single focusable control can enclose more than one TruncatedLabel.
+    // Focus lands on the shared control (not a specific label), so every
+    // label wiring its own `reveal` here would pop all their tooltips at once
+    // on focus. Guard so at most one label per control drives the focus reveal
+    // (first mounted wins); the rest keep hover-only reveal, which is
+    // per-label and unaffected. Today there's ≤1 label per control, so this is
+    // defensive against future markup changes.
+    if (control.hasAttribute('data-obs-truncated-focus-owner')) return undefined;
+    control.setAttribute('data-obs-truncated-focus-owner', 'true');
+    const onKeyDown = (e: Event) => {
+      if ((e as KeyboardEvent).key === 'Escape') hide();
+    };
+    control.addEventListener('focus', reveal);
+    control.addEventListener('blur', hide);
+    control.addEventListener('keydown', onKeyDown);
+    return () => {
+      control.removeEventListener('focus', reveal);
+      control.removeEventListener('blur', hide);
+      control.removeEventListener('keydown', onKeyDown);
+      control.removeAttribute('data-obs-truncated-focus-owner');
+    };
+  }, [reveal, hide, text]);
 
   return (
-    <span className="obsTruncatedLabelWrap" onMouseEnter={onEnter} onMouseLeave={onLeave}>
+    <span className="obsTruncatedLabelWrap" onMouseEnter={reveal} onMouseLeave={hide}>
       <span ref={ref} className="obsTruncatedLabel" style={labelStyle}>
         {text}
       </span>

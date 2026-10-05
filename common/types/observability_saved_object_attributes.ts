@@ -40,6 +40,19 @@ export interface ApmConfigEntity {
   serviceMapDataset?: { id: string };
   prometheusDataSource?: { id: string };
   windowDuration?: number; // Data Prepper window_duration in seconds
+  // Optional, experimental: dashboards to open (link out) from a service.
+  // Each item holds a reference placeholder, e.g. { id: 'references[3].id' },
+  // resolved against SO references of type 'dashboard'.
+  correlatedDashboards?: Array<{ id: string }>;
+}
+
+// A correlated dashboard after its reference id + attributes are resolved.
+export interface ResolvedCorrelatedDashboard {
+  dashboardId: string;
+  title: string;
+  description?: string; // dashboard SO description, if any
+  updatedAt?: string; // dashboard SO updated_at (ISO), for the "Last modified" column
+  missing?: boolean; // dashboard SO could not be resolved (deleted / no access)
 }
 
 export interface ApmConfigAttributes extends SavedObjectAttributes {
@@ -71,4 +84,6 @@ export interface ResolvedApmConfig extends Omit<ApmConfigAttributes, 'entities'>
     meta?: Record<string, unknown>;
   } | null;
   windowDuration: number; // Data Prepper window_duration in seconds (default 60)
+  // Optional, experimental. [] when none configured — feature stays inert.
+  correlatedDashboards: ResolvedCorrelatedDashboard[];
 }

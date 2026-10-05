@@ -38,7 +38,6 @@ import {
   PromAlert,
   PromRuleGroup,
   ProgressiveResponse,
-  PaginatedResponse,
   UnifiedAlertSummary,
   UnifiedFetchOptions,
   UnifiedAlert,
@@ -535,124 +534,6 @@ export class MultiBackendAlertService {
       totalDatasources: datasources.length,
       completedDatasources: statusList.filter((s) => s.status === 'success').length,
       fetchedAt,
-    };
-  }
-
-  // =========================================================================
-  // Paginated unified views — for single-datasource selection with pagination
-  // =========================================================================
-
-  async getPaginatedRules(
-    client: AlertingOSClient,
-    options?: UnifiedFetchOptions
-  ): Promise<PaginatedResponse<UnifiedRuleSummary>> {
-    const page = options?.page ?? 1;
-    const pageSize = Math.min(options?.pageSize ?? 20, 100);
-    const datasources = await this.resolveDatasources(options?.dsIds);
-
-    const allRules: UnifiedRuleSummary[] = [];
-    const warnings: DatasourceWarning[] = [];
-
-    // Fetch from all datasources in batches (FANOUT_CONCURRENCY)
-    const dsResults = await runWithConcurrencyLimit(
-      datasources.map((ds) => () => this.fetchRulesRaw(client, ds))
-    );
-
-    for (let i = 0; i < datasources.length; i++) {
-      const settled = dsResults[i];
-      if (settled.status === 'fulfilled') {
-        allRules.push(...settled.value);
-      } else {
-        this.logger.error(
-          `Failed to fetch rules from ${datasources[i].name} (${
-            datasources[i].id
-          }): ${extractErrorMessage(settled.reason)}`
-        );
-        warnings.push({
-          datasourceId: datasources[i].id,
-          datasourceName: datasources[i].name,
-          datasourceType: datasources[i].type,
-          error: extractErrorMessage(settled.reason),
-        });
-      }
-    }
-
-    if (allRules.length === 0 && warnings.length === datasources.length && datasources.length > 0) {
-      throw new Error(
-        `All datasources failed: ${warnings.map((w) => `${w.datasourceName}: ${w.error}`).join('; ')}`
-      );
-    }
-
-    const total = allRules.length;
-    const start = (page - 1) * pageSize;
-    const results = allRules.slice(start, start + pageSize);
-
-    return {
-      results,
-      total,
-      page,
-      pageSize,
-      hasMore: start + pageSize < total,
-      ...(warnings.length > 0 ? { warnings } : {}),
-    };
-  }
-
-  async getPaginatedAlerts(
-    client: AlertingOSClient,
-    options?: UnifiedFetchOptions
-  ): Promise<PaginatedResponse<UnifiedAlertSummary>> {
-    const page = options?.page ?? 1;
-    const pageSize = Math.min(options?.pageSize ?? 20, 100);
-    const datasources = await this.resolveDatasources(options?.dsIds);
-
-    const allAlerts: UnifiedAlertSummary[] = [];
-    const warnings: DatasourceWarning[] = [];
-
-    // Fetch from all datasources in batches (FANOUT_CONCURRENCY)
-    const dsResults = await runWithConcurrencyLimit(
-      datasources.map((ds) => () => this.fetchAlertsRaw(client, ds))
-    );
-
-    for (let i = 0; i < datasources.length; i++) {
-      const settled = dsResults[i];
-      if (settled.status === 'fulfilled') {
-        allAlerts.push(...settled.value.alerts);
-      } else {
-        this.logger.error(
-          `Failed to fetch alerts from ${datasources[i].name} (${
-            datasources[i].id
-          }): ${extractErrorMessage(settled.reason)}`
-        );
-        warnings.push({
-          datasourceId: datasources[i].id,
-          datasourceName: datasources[i].name,
-          datasourceType: datasources[i].type,
-          error: extractErrorMessage(settled.reason),
-        });
-      }
-    }
-
-    if (
-      allAlerts.length === 0 &&
-      warnings.length === datasources.length &&
-      datasources.length > 0
-    ) {
-      throw new Error(
-        `All datasources failed: ${warnings.map((w) => `${w.datasourceName}: ${w.error}`).join('; ')}`
-      );
-    }
-
-    const total = allAlerts.length;
-    const start = (page - 1) * pageSize;
-    const results = allAlerts.slice(start, start + pageSize);
-
-    return {
-      results,
-      total,
-      page,
-      pageSize,
-      hasMore: start + pageSize < total,
-      ...(warnings.length > 0 ? { warnings } : {}),
     };
   }
 

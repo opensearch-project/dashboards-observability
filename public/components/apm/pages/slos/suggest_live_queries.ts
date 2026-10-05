@@ -189,7 +189,7 @@ function buildGenAiAvailabilityQueries(
     `/ sum(rate(${metric}{${selector}}[${win}]))`;
   const samples = `sum(increase(${metric}{${selector}}[${win}]))`;
   // GenAI instrumentation often omits the bucket — emit the query anyway; if
-  // the metric isn't present Cortex returns no samples and the UI shows "—".
+  // the metric isn't present Prometheus returns no samples and the UI shows "—".
   const p99 = `histogram_quantile(0.99, sum by (le)(rate(${bucketMetric}{${selector}}[${win}]))) * 1000`;
   return [ratio, samples, p99];
 }

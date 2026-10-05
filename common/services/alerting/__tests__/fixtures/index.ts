@@ -11,8 +11,6 @@ import type {
   PromAlert,
   PrometheusWorkspace,
   AlertHistoryEntry,
-  NotificationRouting,
-  SuppressionRule,
 } from '../../../../types/alerting';
 
 /** Shared labels — dedup across Prom fixtures. `_workspace` scopes to a workspace. */
@@ -153,22 +151,6 @@ export const sampleAlertHistoryEntry: AlertHistoryEntry = {
   state: 'active',
   value: '87.4',
   message: 'Threshold exceeded',
-};
-
-/** `channel`: 'Slack' | 'Email' | 'Webhook' | 'None'. */
-export const sampleNotificationRouting: NotificationRouting = {
-  channel: 'Slack',
-  destination: '#ops-alerts',
-  severity: ['critical', 'high'],
-  throttle: '10 minutes',
-};
-
-export const sampleSuppressionRule: SuppressionRule = {
-  id: 'sup-1',
-  name: 'Staging quiet hours',
-  reason: 'Reduce noise from staging environment',
-  schedule: 'Daily 22:00-06:00 UTC',
-  active: true,
 };
 
 // ---------- Prometheus metadata (trimmed from 44/30/17) ----------

@@ -10,7 +10,7 @@
  * touching state wiring.
  *
  * Contents:
- *   - `ColumnId` — string union of known columns plus dynamic `label:<key>`
+ *   - `ColumnId` — union of the rendered columns
  *   - `DEFAULT_VISIBLE` — columns shown on first render
  *   - `buildTableColumns` — factory that returns the EuiInMemoryTable column
  *     array, taking the bits of component state the cell renderers need as
@@ -23,7 +23,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiTextColor,
+  EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -41,27 +42,17 @@ import {
   STATUS_COLORS,
   TYPE_LABELS,
 } from '../shared_constants';
+import { TruncatedLabel } from '../../common/truncated_label';
+import { getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
 import { DEFAULT_WIDTHS } from './resizable_columns';
+import { isPending } from './pending_rules';
 
 // ============================================================================
 // Column Definitions
 // ============================================================================
 
 export type ColumnId =
-  | 'name'
-  | 'status'
-  | 'severity'
-  | 'monitorType'
-  | 'healthStatus'
-  | 'datasource'
-  | 'query'
-  | 'group'
-  | 'createdBy'
-  | 'createdAt'
-  | 'lastModified'
-  | 'lastTriggered'
-  | 'destinations'
-  | string; // string for label columns
+  'name' | 'status' | 'severity' | 'monitorType' | 'healthStatus' | 'datasource';
 
 export const DEFAULT_VISIBLE: ColumnId[] = [
   'name',
@@ -105,7 +96,9 @@ export function buildTableColumns({
   setSelectedMonitor,
 }: BuildTableColumnsParams): Array<Record<string, unknown>> {
   const w = (id: string) => `${columnWidths[id] || DEFAULT_WIDTHS[id] || 120}px`;
-  const selectable = filtered;
+  // Pending optimistic rows aren't selectable (their synthetic id would 404),
+  // so exclude them when deciding the header's "all selected" state.
+  const selectable = filtered.filter((item) => !isPending(item));
   const allSelectableSelected =
     selectable.length > 0 && selectable.every((item) => selectedIds.has(item.id));
 
@@ -132,6 +125,7 @@ export function buildTableColumns({
           <input
             type="checkbox"
             checked={selectedIds.has(item.id)}
+            disabled={isPending(item)}
             onChange={() => toggleSelect(item.id)}
             aria-label={i18n.translate(
               'observability.alerting.monitorsTable.columns.selectRowAriaLabel',
@@ -159,9 +153,7 @@ export function buildTableColumns({
         render: (name: string, item: UnifiedRuleSummary) => {
           const iconType =
             item.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
-          // Avoid duplicating the group when the dedicated Rule Group column is visible
-          const showGroupBadge =
-            item.datasourceType === 'prometheus' && !!item.group && !visibleColumns.has('group');
+          const showGroupBadge = item.datasourceType === 'prometheus' && !!item.group;
           return (
             <div>
               <EuiButtonEmpty
@@ -199,9 +191,37 @@ export function buildTableColumns({
         }),
         sortable: true,
         width: w('status'),
-        render: (s: MonitorStatus) => (
-          <EuiHealth color={STATUS_COLORS[s] || 'subdued'}>{s}</EuiHealth>
-        ),
+        render: (s: MonitorStatus, item: UnifiedRuleSummary) => {
+          // Optimistic rows we injected while the querier catches up render a
+          // distinct spinner badge so it's clear the rule is submitted but not
+          // yet confirmed (its actions are disabled — the id would 404).
+          if (isPending(item)) {
+            return (
+              <EuiToolTip
+                content={i18n.translate(
+                  'observability.alerting.monitorsTable.columns.pendingTooltip',
+                  { defaultMessage: 'Waiting for the querier to confirm this rule' }
+                )}
+              >
+                <EuiBadge color="hollow" data-test-subj="pendingRuleBadge">
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="s" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {i18n.translate('observability.alerting.monitorsTable.columns.pending', {
+                        defaultMessage: 'Pending',
+                      })}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiBadge>
+              </EuiToolTip>
+            );
+          }
+          return (
+            <EuiHealth color={STATUS_COLORS[s] || 'subdued'}>{getMonitorStateLabel(s)}</EuiHealth>
+          );
+        },
       });
     } else if (colId === 'severity') {
       cols.push({
@@ -212,7 +232,7 @@ export function buildTableColumns({
         sortable: true,
         width: w('severity'),
         render: (s: UnifiedAlertSeverity) => (
-          <EuiBadge color={SEVERITY_COLORS[s] || 'default'}>{s}</EuiBadge>
+          <EuiBadge color={SEVERITY_COLORS[s] || 'default'}>{getSeverityLabel(s)}</EuiBadge>
         ),
       });
     } else if (colId === 'monitorType') {
@@ -234,31 +254,8 @@ export function buildTableColumns({
         sortable: true,
         width: w('healthStatus'),
         render: (h: MonitorHealthStatus) => (
-          <EuiHealth color={HEALTH_COLORS[h] || 'subdued'}>{h}</EuiHealth>
+          <EuiHealth color={HEALTH_COLORS[h] || 'subdued'}>{getMonitorStateLabel(h)}</EuiHealth>
         ),
-      });
-    } else if (colId === 'labels') {
-      cols.push({
-        field: 'labels',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.labels', {
-          defaultMessage: 'Labels',
-        }),
-        width: w('labels'),
-        render: (labels: Record<string, string>) => {
-          const entries = Object.entries(labels);
-          if (entries.length === 0) return <EuiTextColor color="subdued">—</EuiTextColor>;
-          return (
-            <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-              {entries.map(([k, v]) => (
-                <EuiFlexItem grow={false} key={k}>
-                  <EuiBadge color="hollow" title={`${k}: ${v}`}>
-                    {k}:{v}
-                  </EuiBadge>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          );
-        },
       });
     } else if (colId === 'datasource') {
       cols.push({
@@ -269,107 +266,12 @@ export function buildTableColumns({
         sortable: (r: UnifiedRuleSummary) =>
           (dsNameMap.get(r.datasourceId) || r.datasourceId).toLowerCase(),
         width: w('datasource'),
-        render: (id: string) => dsNameMap.get(id) || id,
-      });
-    } else if (colId === 'createdBy') {
-      cols.push({
-        field: 'createdBy',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.createdBy', {
-          defaultMessage: 'Created By',
-        }),
-        sortable: true,
-        width: w('createdBy'),
-      });
-    } else if (colId === 'createdAt') {
-      cols.push({
-        field: 'createdAt',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.created', {
-          defaultMessage: 'Created',
-        }),
-        sortable: true,
-        width: w('createdAt'),
-        render: (ts: string) => (ts ? new Date(ts).toLocaleDateString() : '-'),
-      });
-    } else if (colId === 'lastModified') {
-      cols.push({
-        field: 'lastModified',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.lastModified', {
-          defaultMessage: 'Last Modified',
-        }),
-        sortable: true,
-        width: w('lastModified'),
-        render: (ts: string) => (ts ? new Date(ts).toLocaleString() : '-'),
-      });
-    } else if (colId === 'lastTriggered') {
-      cols.push({
-        field: 'lastTriggered',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.lastTriggered', {
-          defaultMessage: 'Last Triggered',
-        }),
-        sortable: true,
-        width: w('lastTriggered'),
-        render: (ts: string) =>
-          ts
-            ? new Date(ts).toLocaleString()
-            : i18n.translate('observability.alerting.monitorsTable.columns.lastTriggered.never', {
-                defaultMessage: 'Never',
-              }),
-      });
-    } else if (colId === 'destinations') {
-      cols.push({
-        field: 'notificationDestinations',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.destinations', {
-          defaultMessage: 'Notification channels',
-        }),
-        width: w('destinations'),
-        render: (dests: string[]) =>
-          dests.length > 0 ? (
-            dests.map((d, i) => (
-              <EuiBadge key={i} color="hollow">
-                {d}
-              </EuiBadge>
-            ))
-          ) : (
-            <EuiTextColor color="subdued">
-              {i18n.translate('observability.alerting.monitorsTable.columns.destinations.none', {
-                defaultMessage: 'None',
-              })}
-            </EuiTextColor>
-          ),
-      });
-    } else if (colId === 'query') {
-      cols.push({
-        field: 'query',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.query', {
-          defaultMessage: 'Query',
-        }),
-        truncateText: true,
-        width: w('query'),
-      });
-    } else if (colId === 'group') {
-      cols.push({
-        field: 'group',
-        name: i18n.translate('observability.alerting.monitorsTable.columns.group', {
-          defaultMessage: 'Rule Group',
-        }),
-        width: w('group'),
-        render: (g: string) => g || '-',
-      });
-    } else if (colId.startsWith('label:')) {
-      const key = colId.replace('label:', '');
-      cols.push({
-        field: 'labels',
-        name: key,
-        sortable: false,
-        width: w(colId),
-        render: (labels: Record<string, string>) => {
-          const val = labels[key];
-          return val ? (
-            <EuiBadge color="hollow">{val}</EuiBadge>
-          ) : (
-            <EuiTextColor color="subdued">—</EuiTextColor>
-          );
-        },
+        // A bare string cell wraps mid-word for long datasource names (e.g.
+        // "ObservabilityStack_Prometheus"). EUI's `truncateText` doesn't
+        // single-line a plain-text render in this table, so use the shared
+        // `TruncatedLabel` (single-line ellipsis + instant full-text tooltip),
+        // matching the datasource facet in the filter panel.
+        render: (id: string) => <TruncatedLabel text={dsNameMap.get(id) || id} />,
       });
     }
   }

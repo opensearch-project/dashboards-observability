@@ -7,6 +7,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
+  Criteria,
   EuiPanel,
   EuiSpacer,
   EuiCallOut,
@@ -43,6 +44,7 @@ import {
 } from '../../query_services/query_requests/promql_queries';
 import { useDependencies } from '../../shared/hooks/use_dependencies';
 import { useDependencyMetrics } from '../../shared/hooks/use_dependency_metrics';
+import { useControlledPagination } from '../../shared/hooks/use_controlled_pagination';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { useChartStepWindow } from '../../shared/hooks/use_chart_step_window';
 import { DependencyFilterSidebar } from '../../shared/components/dependency_filter_sidebar';
@@ -80,22 +82,26 @@ interface DependenciesTablePanelProps {
   filteredDependencies: GroupedDependency[];
   columns: Array<EuiBasicTableColumn<GroupedDependency>>;
   isLoading: boolean;
-  latencyPercentile: string;
   itemIdToExpandedRowMap: Record<string, React.ReactNode>;
   noDataMessage: string;
   noFilteredDataMessage: string;
   dependenciesCount: number;
+  pageIndex: number;
+  pageSize: number;
+  onTableChange: (criteria: Criteria<GroupedDependency>) => void;
 }
 
 const DependenciesTablePanelUI: React.FC<DependenciesTablePanelProps> = ({
   filteredDependencies,
   columns,
   isLoading,
-  latencyPercentile,
   itemIdToExpandedRowMap,
   noDataMessage,
   noFilteredDataMessage,
   dependenciesCount,
+  pageIndex,
+  pageSize,
+  onTableChange,
 }) => (
   <EuiPanel>
     {!isLoading && filteredDependencies.length === 0 ? (
@@ -103,8 +109,10 @@ const DependenciesTablePanelUI: React.FC<DependenciesTablePanelProps> = ({
         <p>{dependenciesCount === 0 ? noDataMessage : noFilteredDataMessage}</p>
       </EuiText>
     ) : (
+      // Switching percentile rebuilds the items array (new reference). Keying the table on it
+      // would remount and reload the row charts; leaving pagination uncontrolled would reset
+      // pageIndex to 0. So the table is not keyed and pagination is controlled.
       <EuiInMemoryTable
-        key={`dependencies-table-${latencyPercentile}`}
         items={filteredDependencies}
         columns={columns}
         loading={isLoading}
@@ -115,9 +123,11 @@ const DependenciesTablePanelUI: React.FC<DependenciesTablePanelProps> = ({
           },
         }}
         pagination={{
-          initialPageSize: SERVICE_DETAILS_CONSTANTS.DEFAULT_PAGE_SIZE,
+          pageIndex,
+          pageSize,
           pageSizeOptions: SERVICE_DETAILS_CONSTANTS.PAGE_SIZE_OPTIONS,
         }}
+        onTableChange={onTableChange}
         itemId={(item: GroupedDependency) => `${item.serviceName}:${item.remoteOperation}`}
         isExpandable={true}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
@@ -136,6 +146,8 @@ export interface ServiceDependenciesProps {
   prometheusConnectionId: string;
   serviceMapDataset: string;
   refreshTrigger?: number;
+  /** Brush selection on any inline chart zooms the whole page range. */
+  onTimeRangeChange?: (from: string, to: string) => void;
 }
 
 /**
@@ -158,6 +170,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   prometheusConnectionId,
   serviceMapDataset: _serviceMapDataset,
   refreshTrigger,
+  onTimeRangeChange,
 }) => {
   // Expandable rows state
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -217,17 +230,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     togglePanelRef.current?.('dependencies-filter-sidebar', { direction: 'left' });
   }, []);
 
-  // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer
-  const onLatencyRangeChange = useCallback((val: [number, number]) => {
-    latencyUserModified.current = true;
-    setLatencyRange(val);
-  }, []);
-
-  const onRequestsRangeChange = useCallback((val: [number, number]) => {
-    requestsUserModified.current = true;
-    setRequestsRange(val);
-  }, []);
-
   // Threshold filter states (using semantic enum keys)
   const [selectedAvailabilityThresholds, setSelectedAvailabilityThresholds] = useState<
     AvailabilityThreshold[]
@@ -244,8 +246,10 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   // Range filter states
   const [latencyRange, setLatencyRange] = useState<[number, number]>([0, 0]);
   const [requestsRange, setRequestsRange] = useState<[number, number]>([0, 0]);
-  const latencyUserModified = useRef(false);
-  const requestsUserModified = useRef(false);
+  // Track whether the user has explicitly interacted with range filters.
+  // Use as state, so the memos that read them re-run when a flag flips.
+  const [latencyUserModified, setLatencyUserModified] = useState(false);
+  const [requestsUserModified, setRequestsUserModified] = useState(false);
 
   // Parse time range
   const parsedTimeRange = useMemo(() => {
@@ -258,7 +262,9 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         endTime: new Date(),
       };
     }
-  }, [timeRange]);
+    // Recalculate when refreshTrigger changes so relative ranges advance to `now`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, refreshTrigger]);
 
   // Fetch dependencies list from PPL
   const {
@@ -422,7 +428,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   // Step 3: Reset slider ranges when bounds change
   // Use functional update to prevent unnecessary re-renders when values haven't changed
   useEffect(() => {
-    latencyUserModified.current = false;
+    setLatencyUserModified(false);
     setLatencyRange((prev) => {
       if (prev[0] === latencyBounds.min && prev[1] === latencyBounds.max) {
         return prev; // Return same reference to avoid re-render
@@ -432,7 +438,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
   }, [latencyBounds.min, latencyBounds.max]);
 
   useEffect(() => {
-    requestsUserModified.current = false;
+    setRequestsUserModified(false);
     setRequestsRange((prev) => {
       if (prev[0] === requestsBounds.min && prev[1] === requestsBounds.max) {
         return prev; // Return same reference to avoid re-render
@@ -458,15 +464,17 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     return textFilteredDependencies.filter((dep) => {
       // Latency range filter (only if range has been adjusted)
       const isLatencyFilterActive =
-        latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max;
+        // Gating on latencyUserModified avoids a false positive after a percentile switch
+        latencyUserModified &&
+        (latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max);
       if (isLatencyFilterActive) {
         // Use the selected percentile's duration for filtering
         const depLatency =
           latencyPercentile === 'p99'
             ? dep.p99Duration
             : latencyPercentile === 'p90'
-            ? dep.p90Duration
-            : dep.p50Duration;
+              ? dep.p90Duration
+              : dep.p50Duration;
         if (
           depLatency === undefined ||
           depLatency < latencyRange[0] ||
@@ -478,7 +486,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
 
       // Requests range filter (only if range has been adjusted)
       const isRequestsFilterActive =
-        requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max;
+        requestsUserModified &&
+        (requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max);
       if (isRequestsFilterActive) {
         const depRequestCount = dep.requestCount ?? 0;
         if (depRequestCount < requestsRange[0] || depRequestCount > requestsRange[1]) {
@@ -490,11 +499,53 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     });
   }, [
     textFilteredDependencies,
+    latencyUserModified,
+    requestsUserModified,
     latencyRange,
     requestsRange,
     latencyBounds,
     requestsBounds,
     latencyPercentile,
+  ]);
+
+  // Controlled pagination (clamped against the current row count). Declared after
+  // filteredDependencies because the hook needs the row count to clamp.
+  const { pageIndex, pageSize, onTableChange, resetPage } =
+    useControlledPagination<GroupedDependency>(filteredDependencies.length);
+
+  // Stabilized callbacks for sidebar to prevent re-renders through EuiResizableContainer.
+  // Range-slider changes reset the page to 1 (a filter change), unlike a percentile switch.
+  const onLatencyRangeChange = useCallback(
+    (val: [number, number]) => {
+      setLatencyUserModified(true);
+      setLatencyRange(val);
+      resetPage();
+    },
+    [resetPage]
+  );
+
+  const onRequestsRangeChange = useCallback(
+    (val: [number, number]) => {
+      setRequestsUserModified(true);
+      setRequestsRange(val);
+      resetPage();
+    },
+    [resetPage]
+  );
+
+  // Reset to page 1 on filter changes. Excludes latencyRange/requestsRange on purpose: a
+  // percentile switch resets latencyRange, so watching the ranges here would reset the page on
+  // a percentile switch too and defeat the fix (#2849). The sliders reset in their own handlers.
+  useEffect(() => {
+    resetPage();
+  }, [
+    debouncedSearchQuery,
+    selectedDependencies,
+    selectedServiceOperations,
+    selectedRemoteOperations,
+    selectedAvailabilityThresholds,
+    selectedErrorRateThresholds,
+    resetPage,
   ]);
 
   const isLoading = depsLoading || metricsLoading;
@@ -570,7 +621,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
 
     // Latency range filter badge (only if user has interacted and modified from default bounds)
     const isLatencyModified =
-      latencyUserModified.current &&
+      latencyUserModified &&
       (latencyRange[0] > latencyBounds.min || latencyRange[1] < latencyBounds.max);
     if (isLatencyModified) {
       badges.push({
@@ -580,15 +631,16 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         }),
         values: [`${latencyRange[0].toFixed(0)}-${latencyRange[1].toFixed(0)}ms`],
         onRemove: () => {
-          latencyUserModified.current = false;
+          setLatencyUserModified(false);
           setLatencyRange([latencyBounds.min, latencyBounds.max]);
+          resetPage();
         },
       });
     }
 
     // Requests range filter badge (only if user has interacted and modified from default bounds)
     const isRequestsModified =
-      requestsUserModified.current &&
+      requestsUserModified &&
       (requestsRange[0] > requestsBounds.min || requestsRange[1] < requestsBounds.max);
     if (isRequestsModified) {
       badges.push({
@@ -598,8 +650,9 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         }),
         values: [`${requestsRange[0].toFixed(0)}-${requestsRange[1].toFixed(0)}`],
         onRemove: () => {
-          requestsUserModified.current = false;
+          setRequestsUserModified(false);
           setRequestsRange([requestsBounds.min, requestsBounds.max]);
+          resetPage();
         },
       });
     }
@@ -611,10 +664,13 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     selectedRemoteOperations,
     selectedAvailabilityThresholds,
     selectedErrorRateThresholds,
+    latencyUserModified,
+    requestsUserModified,
     latencyRange,
     requestsRange,
     latencyBounds,
     requestsBounds,
+    resetPage,
   ]);
 
   // Clear all filters handler
@@ -624,11 +680,12 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     setSelectedRemoteOperations([]);
     setSelectedAvailabilityThresholds([]);
     setSelectedErrorRateThresholds([]);
-    latencyUserModified.current = false;
-    requestsUserModified.current = false;
+    setLatencyUserModified(false);
+    setRequestsUserModified(false);
     setLatencyRange([latencyBounds.min, latencyBounds.max]);
     setRequestsRange([requestsBounds.min, requestsBounds.max]);
-  }, [latencyBounds, requestsBounds]);
+    resetPage();
+  }, [latencyBounds, requestsBounds, resetPage]);
 
   // Auto-expand the first row (lowest availability) on initial page load
   useEffect(() => {
@@ -752,8 +809,8 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           latencyPercentile === 'p99'
             ? 'p99Duration'
             : latencyPercentile === 'p90'
-            ? 'p90Duration'
-            : 'p50Duration',
+              ? 'p90Duration'
+              : 'p50Duration',
         name: (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -864,6 +921,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                   timeRange={timeRange}
                   height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
                   seriesLabel="Requests"
+                  onTimeRangeChange={onTimeRangeChange}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
@@ -878,6 +936,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                   prometheusConnectionId={prometheusConnectionId}
                   timeRange={timeRange}
                   height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
+                  onTimeRangeChange={onTimeRangeChange}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
@@ -892,6 +951,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                   prometheusConnectionId={prometheusConnectionId}
                   timeRange={timeRange}
                   height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
+                  onTimeRangeChange={onTimeRangeChange}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -909,6 +969,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
     timeRange,
     prometheusConnectionId,
     chartStepWindow,
+    onTimeRangeChange,
   ]);
 
   if (error) {
@@ -947,9 +1008,15 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
           <EuiSuperSelect
             options={LATENCY_OPTIONS}
             valueOfSelected={latencyPercentile}
-            onChange={(value) => setLatencyPercentile(value as 'p99' | 'p90' | 'p50')}
+            onChange={(value) => {
+              // Reset the range: the bounds effect will not fire if the bounds round the same.
+              setLatencyUserModified(false);
+              setLatencyRange([latencyBounds.min, latencyBounds.max]);
+              setLatencyPercentile(value as 'p99' | 'p90' | 'p50');
+            }}
             compressed
             prepend="Latency"
+            data-test-subj="dependencyLatencyPercentileSelector"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -979,15 +1046,15 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                 style={{ paddingTop: '8px', paddingRight: '8px' }}
               >
                 <DependencyFilterSidebar
-                  availabilityThresholds={(AVAILABILITY_THRESHOLD_OPTIONS as unknown) as string[]}
+                  availabilityThresholds={AVAILABILITY_THRESHOLD_OPTIONS as unknown as string[]}
                   selectedAvailabilityThresholds={
-                    (selectedAvailabilityThresholds as unknown) as string[]
+                    selectedAvailabilityThresholds as unknown as string[]
                   }
                   onAvailabilityThresholdsChange={
                     setSelectedAvailabilityThresholds as (selected: string[]) => void
                   }
-                  errorRateThresholds={(ERROR_RATE_THRESHOLD_OPTIONS as unknown) as string[]}
-                  selectedErrorRateThresholds={(selectedErrorRateThresholds as unknown) as string[]}
+                  errorRateThresholds={ERROR_RATE_THRESHOLD_OPTIONS as unknown as string[]}
+                  selectedErrorRateThresholds={selectedErrorRateThresholds as unknown as string[]}
                   onErrorRateThresholdsChange={
                     setSelectedErrorRateThresholds as (selected: string[]) => void
                   }
@@ -1026,7 +1093,6 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                   filteredDependencies={filteredDependencies}
                   columns={columns}
                   isLoading={isLoading}
-                  latencyPercentile={latencyPercentile}
                   itemIdToExpandedRowMap={itemIdToExpandedRowMap}
                   noDataMessage={i18n.translate('observability.apm.dependencies.noData', {
                     defaultMessage:
@@ -1040,6 +1106,9 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
                     }
                   )}
                   dependenciesCount={dependencies.length}
+                  pageIndex={pageIndex}
+                  pageSize={pageSize}
+                  onTableChange={onTableChange}
                 />
               </EuiResizablePanel>
             </>

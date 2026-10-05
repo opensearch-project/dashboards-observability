@@ -110,9 +110,9 @@ function makeHarness() {
     enabled: true,
     directQueryName: 'prom-connection',
   };
-  const client = ({
+  const client = {
     transport: { request: () => Promise.resolve({}) },
-  } as unknown) as AlertingOSClient;
+  } as unknown as AlertingOSClient;
 
   const deploy: SloDeployContext = {
     ruler,
@@ -149,7 +149,7 @@ describe('SloService.repair — integration', () => {
     const originalRuleNames = ruler.groupByName(namespace, groupName)!.rules.map((r) => r.name);
 
     // Out-of-band delete: somebody ran `DELETE /api/v1/rules/{ns}/{group}` directly
-    // on Cortex. The SO still thinks the group is there; repair should notice.
+    // on Prometheus. The SO still thinks the group is there; repair should notice.
     ruler.dropGroup(namespace, groupName);
     expect(ruler.hasGroup(namespace, groupName)).toBe(false);
 
@@ -350,9 +350,9 @@ function makeDedupHarness() {
     enabled: true,
     directQueryName: 'prom-connection',
   };
-  const client = ({
+  const client = {
     transport: { request: () => Promise.resolve({}) },
-  } as unknown) as AlertingOSClient;
+  } as unknown as AlertingOSClient;
   const deploy: SloDeployContext = {
     ruler,
     client,
@@ -403,7 +403,7 @@ describe('SloService.repair — dedup integration', () => {
       expect(rule.type).toBe('recording');
       expect(rule.labels?.slo_id).toBeUndefined();
       expect(rule.labels?.slo_name).toBeUndefined();
-      // Annotations on a recording rule are a Cortex 400 (the fake ruler
+      // Annotations on a recording rule are a Prometheus 400 (the fake ruler
       // also enforces this now).
       expect(rule.annotations ? Object.keys(rule.annotations).length : 0).toBe(0);
     }

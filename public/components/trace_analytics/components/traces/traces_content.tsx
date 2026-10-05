@@ -24,7 +24,12 @@ import {
 } from '../../requests/traces_request_handler';
 import { getValidFilterFields } from '../common/filters/filter_helpers';
 import { Filters, FilterType } from '../common/filters/filters';
-import { filtersToDsl, isUnderOneHourRange, processTimeStamp } from '../common/helper_functions';
+import {
+  filtersToDsl,
+  isUnderOneHourRange,
+  processTimeStamp,
+  shouldFetchTraceData,
+} from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { SearchBar } from '../common/search_bar';
 import { DashboardContent } from '../dashboard/dashboard_content';
@@ -183,9 +188,13 @@ export function TracesContent(props: TracesProps) {
       }
     }
     setFilteredService(newFilteredService);
-    if (!redirect && (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist)))
+    if (!redirect && (mode === 'data_prepper' || (mode === 'jaeger' && jaegerIndicesExist))) {
       props.setDataSourceMenuSelectable?.(true);
-    refresh();
+      // Only fetch once a data source id has resolved (when MDS is enabled), and only outside
+      // the redirect phase / when jaeger indices exist — matching services_content and
+      // dashboard_content so we don't fire against a nonexistent local cluster or index.
+      if (shouldFetchTraceData(props.dataSourceEnabled, props.dataSourceMDSId[0]?.id)) refresh();
+    }
   }, [
     filters,
     appConfigs,
@@ -197,11 +206,13 @@ export function TracesContent(props: TracesProps) {
     props.setDataSourceMenuSelectable,
     startTime,
     endTime,
-    props.dataSourceMDSId,
+    props.dataSourceEnabled,
+    props.dataSourceMDSId[0]?.id,
   ]);
 
   useEffect(() => {
     if (tracesTableMode !== 'traces') return;
+    if (!shouldFetchTraceData(props.dataSourceEnabled, props.dataSourceMDSId[0]?.id)) return;
 
     const currentSort = sortingColumns[0];
 
@@ -210,7 +221,7 @@ export function TracesContent(props: TracesProps) {
       : undefined;
 
     refreshTracesTableData(sort, pageIndex, pageSize);
-  }, [maxTraces]);
+  }, [maxTraces, props.dataSourceEnabled, props.dataSourceMDSId[0]?.id]);
 
   const onToggle = (isOpen: boolean) => {
     const newState = isOpen ? 'open' : 'closed';

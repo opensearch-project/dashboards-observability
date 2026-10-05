@@ -41,8 +41,12 @@ export interface UseRulesDataResult {
   /** Imperatively set the rules array — used for optimistic insert / clear-on-delete. */
   setRules: React.Dispatch<React.SetStateAction<UnifiedRuleSummary[]>>;
   setRulesTotal: React.Dispatch<React.SetStateAction<number>>;
-  /** Imperative refetch; equivalent to bumping `refreshToken`. */
+  /** Imperative refetch; equivalent to bumping `refreshToken`. Shows the
+   * loading state (spinner) — use for explicit user actions. */
   refetch: () => void;
+  /** Silent refetch that does NOT toggle the loading state — use for periodic
+   * background polling so the table doesn't flash while it re-syncs. */
+  backgroundRefetch: () => void;
 }
 
 export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDataResult {
@@ -57,15 +61,19 @@ export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDat
   const refetch = useCallback(() => setInternalRefresh((t) => t + 1), []);
 
   const fetchRules = useCallback(
-    async (dsIds: string[]) => {
+    async (dsIds: string[], background = false) => {
       if (dsIds.length === 0) {
         setRules([]);
         setRulesTotal(0);
         return;
       }
-      setIsLoading(true);
-      setError(null);
-      setWarnings([]);
+      // A background poll re-syncs silently: no spinner, and it leaves the
+      // current error/warning surface in place until it has a fresh answer.
+      if (!background) {
+        setIsLoading(true);
+        setError(null);
+        setWarnings([]);
+      }
       try {
         const res = await osService.listRules({ dsIds });
         setRules(res.results || []);
@@ -86,19 +94,28 @@ export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDat
           );
         }
       } catch (e: unknown) {
-        setError(
-          e instanceof Error
-            ? e.message
-            : i18n.translate('observability.alerting.alarmsPage.fetchRulesError', {
-                defaultMessage: 'Failed to fetch rules',
-              })
-        );
+        // A failed background poll must not blow away the currently-displayed
+        // rules with an error banner — keep the last good state and try again
+        // on the next tick. Foreground fetches still surface the error.
+        if (!background) {
+          setError(
+            e instanceof Error
+              ? e.message
+              : i18n.translate('observability.alerting.alarmsPage.fetchRulesError', {
+                  defaultMessage: 'Failed to fetch rules',
+                })
+          );
+        }
       } finally {
-        setIsLoading(false);
+        if (!background) setIsLoading(false);
       }
     },
     [osService]
   );
+
+  const backgroundRefetch = useCallback(() => {
+    if (selectedDsIds.length > 0) fetchRules(selectedDsIds, true);
+  }, [selectedDsIds, fetchRules]);
 
   useEffect(() => {
     if (selectedDsIds.length === 0) {
@@ -110,5 +127,15 @@ export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDat
     // Imperative refetch via `refetch()` bumps `internalRefresh`.
   }, [selectedDsIds, internalRefresh, fetchRules]);
 
-  return { rules, rulesTotal, isLoading, error, warnings, setRules, setRulesTotal, refetch };
+  return {
+    rules,
+    rulesTotal,
+    isLoading,
+    error,
+    warnings,
+    setRules,
+    setRulesTotal,
+    refetch,
+    backgroundRefetch,
+  };
 }

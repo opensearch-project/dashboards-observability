@@ -21,6 +21,8 @@ interface CreateApmConfigParams {
   serviceMapDatasetId: string;
   prometheusDataSourceId: string;
   windowDuration?: number;
+  // Optional, experimental: saved dashboard ids to link out from a service.
+  correlatedDashboardIds?: string[];
 }
 
 interface UpdateApmConfigParams extends Partial<Omit<CreateApmConfigParams, 'workspaceId'>> {
@@ -38,7 +40,7 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
    * Creates references array following correlations pattern
    */
   private createReferences(params: Omit<CreateApmConfigParams, 'workspaceId'>) {
-    return [
+    const references = [
       {
         name: 'entities[0].index',
         type: 'index-pattern',
@@ -55,22 +57,57 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
         id: params.prometheusDataSourceId,
       },
     ];
+    // Append correlated dashboards (optional, experimental) at references[3..].
+    (params.correlatedDashboardIds ?? []).forEach((id, i) => {
+      references.push({ name: `entities.correlatedDashboards[${i}]`, type: 'dashboard', id });
+    });
+    return references;
   }
 
   /**
    * Creates entities array with reference placeholders
    */
-  private createEntities(windowDuration?: number) {
-    return [
+  private createEntities(
+    windowDuration: number | undefined,
+    correlatedDashboardIds: string[],
+    references: Array<{ name: string; type: string; id: string }>
+  ) {
+    const entities: ApmConfigEntity[] = [
       { tracesDataset: { id: 'references[0].id' } },
       { serviceMapDataset: { id: 'references[1].id' } },
       { prometheusDataSource: { id: 'references[2].id' } },
       { windowDuration: windowDuration ?? 60 },
     ];
+    if (correlatedDashboardIds.length > 0) {
+      // Derive the dashboard slots from the actual references array that
+      // createReferences produced (dashboards are appended after the fixed
+      // dataset/datasource refs), so the entity placeholders stay in lock-step
+      // with the reference positions — no hard-coded offset to drift.
+      const dashboardRefStart = references.length - correlatedDashboardIds.length;
+      entities.push({
+        correlatedDashboards: correlatedDashboardIds.map((_, i) => ({
+          id: `references[${dashboardRefStart + i}].id`,
+        })),
+      });
+    }
+    return entities;
   }
 
   /**
-   * Parses an entity to extract its type and reference index
+   * Parses a reference-placeholder string ('references[N].id') to its index N,
+   * or null if it is not a valid placeholder. Single source of truth for the
+   * placeholder contract, shared by the 1:1 entity resolution
+   * (parseEntityReference) and the correlatedDashboards list resolution — the
+   * latter being an ARRAY of placeholders (a service can link many dashboards),
+   * which is why it is resolved separately rather than through the 1:1 path.
+   */
+  private static parseReferenceIndex(placeholder: string | undefined): number | null {
+    const match = placeholder?.match(/^references\[(\d+)\]\.id$/);
+    return match ? parseInt(match[1], 10) : null;
+  }
+
+  /**
+   * Parses a single-value entity to extract its type and reference index
    * Entity format: { tracesDataset: { id: 'references[0].id' } }
    * Returns: { entityType: 'tracesDataset', referenceIndex: 0 }
    */
@@ -84,14 +121,10 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
     const entityValue = entity[entityType as keyof ApmConfigEntity];
     if (!entityValue?.id) return null;
 
-    // Parse 'references[0].id' to extract index 0
-    const match = entityValue.id.match(/references\[(\d+)\]\.id/);
-    if (!match) return null;
+    const referenceIndex = OSDSavedApmConfigClient.parseReferenceIndex(entityValue.id);
+    if (referenceIndex === null) return null;
 
-    return {
-      entityType,
-      referenceIndex: parseInt(match[1], 10),
-    };
+    return { entityType, referenceIndex };
   }
 
   /**
@@ -156,7 +189,11 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
 
   async create(params: CreateApmConfigParams) {
     const references = this.createReferences(params);
-    const entities = this.createEntities(params.windowDuration);
+    const entities = this.createEntities(
+      params.windowDuration,
+      params.correlatedDashboardIds ?? [],
+      references
+    );
     const correlationType = `${APM_CONFIG_PREFIX}${params.workspaceId}`;
     const title = 'apm-config';
 
@@ -202,10 +239,19 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
       throw new Error('Cannot update config: missing required reference IDs');
     }
 
+    // Preserve existing correlated dashboards unless the caller passes a new
+    // list (an explicit [] clears them). Existing ids come from the SO
+    // references of type 'dashboard', which keeps their order.
+    const existingDashboardIds = existing.references
+      .filter((r) => r.type === 'dashboard')
+      .map((r) => r.id);
+    const correlatedDashboardIds = params.correlatedDashboardIds ?? existingDashboardIds;
+
     const references = this.createReferences({
       tracesDatasetId: tracesId,
       serviceMapDatasetId: serviceMapId,
       prometheusDataSourceId: prometheusId,
+      correlatedDashboardIds,
     });
 
     // Preserve existing windowDuration if not provided in update
@@ -214,7 +260,7 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
         ?.windowDuration ?? 60;
     const windowDuration = params.windowDuration ?? existingWindowDuration;
 
-    const entities = this.createEntities(windowDuration);
+    const entities = this.createEntities(windowDuration, correlatedDashboardIds, references);
 
     const response = await this.client.update<ApmConfigAttributes>(
       CORRELATIONS_SAVED_OBJECT,
@@ -280,10 +326,47 @@ export class OSDSavedApmConfigClient extends OSDSavedObjectClient {
         );
         const windowDuration = windowDurationEntity?.windowDuration ?? 60;
 
+        // Resolve correlated dashboards (optional, experimental). Map each
+        // placeholder ('references[N].id') to its reference id, then best-effort
+        // fetch the title. No dashboards -> no extra fetches (feature inert).
+        const dashboardEntity = obj.attributes.entities.find(
+          (e: ApmConfigEntity) => 'correlatedDashboards' in e
+        );
+        const dashboardRefIds = (dashboardEntity?.correlatedDashboards ?? [])
+          .map((d) => {
+            // Same placeholder contract as the 1:1 entities, via the shared parser.
+            const refIndex = OSDSavedApmConfigClient.parseReferenceIndex(d.id);
+            return refIndex === null ? undefined : obj.references[refIndex]?.id;
+          })
+          .filter((id): id is string => Boolean(id));
+        const correlatedDashboards = dashboardRefIds.length
+          ? await Promise.all(
+              dashboardRefIds.map(async (id) => {
+                const dash = await this.client.get('dashboard', id).catch(() => null);
+                const attrs = dash?.attributes as
+                  { title?: string; description?: string } | undefined;
+                // A deleted / inaccessible dashboard doesn't necessarily reject:
+                // savedObjectsClient.get can resolve a stub carrying an `error`
+                // (e.g. 404) with empty attributes. Treat any of those — no
+                // object, an error stub, or a missing title — as unavailable so
+                // it renders greyed instead of a broken link.
+                const missing = !dash || Boolean(dash.error) || !attrs?.title;
+                return {
+                  dashboardId: id,
+                  title: attrs?.title || id,
+                  description: missing ? undefined : attrs?.description || undefined,
+                  updatedAt: missing ? undefined : dash?.updated_at,
+                  missing,
+                };
+              })
+            )
+          : [];
+
         return {
           ...obj.attributes,
           objectId: this.prependTypeToId(obj.id),
           windowDuration,
+          correlatedDashboards,
           tracesDataset: tracesRef
             ? {
                 id: tracesRef.id,

@@ -112,7 +112,7 @@ describe('InMemoryDatasourceService.get', () => {
   it('does NOT fall back on display name (collidable, can shadow another datasource)', async () => {
     const svc = new InMemoryDatasourceService(noopLogger());
     await svc.create({
-      name: 'My Cortex',
+      name: 'My Prometheus',
       type: 'opensearch',
       url: 'local',
       enabled: true,
@@ -121,21 +121,21 @@ describe('InMemoryDatasourceService.get', () => {
     // Display name lookup must miss. `name` is user-controlled and can
     // collide; resolving by it would let a freshly-created datasource shadow
     // an older one's lookups.
-    const ds = await svc.get('My Cortex');
+    const ds = await svc.get('My Prometheus');
     expect(ds).toBeNull();
   });
 
   it('returns null when directQueryName matches more than one entry (ambiguous)', async () => {
     const svc = new InMemoryDatasourceService(noopLogger());
     await svc.create({
-      name: 'Cortex A',
+      name: 'Prometheus A',
       type: 'prometheus',
       url: 'so-1',
       enabled: true,
       directQueryName: 'shared-conn',
     });
     await svc.create({
-      name: 'Cortex B',
+      name: 'Prometheus B',
       type: 'prometheus',
       url: 'so-2',
       enabled: true,

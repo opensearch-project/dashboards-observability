@@ -330,7 +330,7 @@ export function ensureBucketMetric(metric: string): string {
  * output stays in fixed decimal notation regardless of magnitude — using
  * `parseFloat(toPrecision)` would emit scientific notation (e.g. `"1e-7"`)
  * for very small bounds and silently miss the bucket. We pick `toFixed(9)`
- * (the smallest histogram bucket Cortex emits is `1ns = 1e-9 s`) and trim
+ * (the smallest histogram bucket Prometheus emits is `1ns = 1e-9 s`) and trim
  * trailing zeros so common bounds like `0.5`, `1`, `30` stay terse.
  */
 export function formatLatencyBoundLe(bound: number, unit: 'seconds' | 'milliseconds'): string {
@@ -589,7 +589,7 @@ function formatInterval(seconds: number): string {
 /**
  * Serialize a Prometheus rule group via `js-yaml` so the same library both
  * the wizard preview AND the ruler dual-write share — the YAML the user
- * sees in preview is the YAML Cortex receives.
+ * sees in preview is the YAML Prometheus receives.
  *
  * The homemade emitter previously open-coded escapeYaml() to handle
  * backslash and double-quote, but a literal LF/CR/TAB in `rule.labels.*`
@@ -625,7 +625,7 @@ function rulesToYaml(groupName: string, interval: number, rules: GeneratedRule[]
  * `js-yaml`. Defensive against callers passing through `undefined` or
  * non-string values via the caller-controlled provenance JSON-string
  * (`buildAlertProvenance`); without this the emitter passes the raw object
- * to js-yaml, which serializes `undefined` as YAML `null` and Cortex
+ * to js-yaml, which serializes `undefined` as YAML `null` and Prometheus
  * rejects the rule.
  */
 function stringifyMap(map: Record<string, unknown>): Record<string, string> {

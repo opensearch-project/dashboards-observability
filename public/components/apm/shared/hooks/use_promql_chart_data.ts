@@ -98,7 +98,8 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
     return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
   }, [prometheusConnectionId, prometheusConnectionMeta]);
 
-  // Parse time range
+  // Parse time range. Re-resolve on refresh/refetch so relative ranges like
+  // `now-15m` advance to the current time instead of re-querying the stale window.
   const parsedTimeRange = useMemo(() => {
     try {
       return parseTimeRange(timeRange);
@@ -106,12 +107,15 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
       console.error('[usePromQLChartData] Failed to parse time range:', err);
       return null;
     }
-  }, [timeRange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, refreshTrigger, refetchTrigger]);
 
   useEffect(() => {
     if (!enabled || !promqlQuery || !parsedTimeRange || !prometheusConnectionId) {
       return;
     }
+
+    const abortController = new AbortController();
 
     const fetchData = async () => {
       setIsLoading(true);
@@ -127,7 +131,10 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
           startTime: startSec,
           endTime: endSec,
           step: calculateStep(startSec, endSec, resolution),
+          signal: abortController.signal,
         });
+
+        if (abortController.signal.aborted) return;
 
         // Transform response to chart series
         const transformedSeries = transformPromQLResponse(response, labelField);
@@ -141,6 +148,7 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
           setLatestValue(null);
         }
       } catch (err) {
+        if (abortController.signal.aborted) return;
         console.error('[usePromQLChartData] Error fetching data:', err);
         const message = err instanceof Error ? err.message : String(err);
         // Detect Prometheus "exceeded maximum resolution" errors
@@ -153,11 +161,16 @@ export const usePromQLChartData = (params: UsePromQLChartDataParams): UsePromQLC
         setSeries([]);
         setLatestValue(null);
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchData();
+
+    return () => abortController.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     promqlQuery,
     parsedTimeRange,

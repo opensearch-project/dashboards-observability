@@ -18,9 +18,7 @@ const mockLogger: Logger = {
  * sequence. Each call in `responses` is either the body object (wrapped as
  * `{ body }`) or a rejected Error.
  */
-function makeClient(
-  responses: Array<{ body: unknown } | Error>
-): {
+function makeClient(responses: Array<{ body: unknown } | Error>): {
   client: AlertingOSClient;
   request: jest.Mock;
 } {
@@ -30,7 +28,7 @@ function makeClient(
     else request.mockResolvedValueOnce(r);
   });
   return {
-    client: ({ transport: { request } } as unknown) as AlertingOSClient,
+    client: { transport: { request } } as unknown as AlertingOSClient,
     request,
   };
 }
@@ -161,6 +159,60 @@ describe('HttpOpenSearchBackend', () => {
       await expect(backend.getMonitor(client, 'mon-1')).rejects.toMatchObject({
         statusCode: 500,
       });
+    });
+  });
+
+  describe('getMonitorWithSource', () => {
+    it('returns the mapped projection AND the faithful upstream source', async () => {
+      // A bucket-level monitor: the mapped projection flattens the trigger
+      // wrapper (dropping `parent_bucket_path`), but the clone flow needs the
+      // untouched document. `source` must keep the wrapper + its fields.
+      const bucketSource = {
+        type: 'monitor',
+        monitor_type: 'bucket_level_monitor',
+        name: 'Bucket',
+        enabled: true,
+        schedule: { period: { interval: 1, unit: 'MINUTES' } },
+        inputs: [{ search: { indices: ['logs-*'], query: {} } }],
+        triggers: [
+          {
+            bucket_level_trigger: {
+              id: 't-bkt',
+              name: 'b',
+              severity: 1,
+              condition: { parent_bucket_path: 'agg', buckets_path: { _count: '_count' } },
+              actions: [],
+            },
+          },
+        ],
+        owner: 'alerting',
+        user: { name: 'creator', backend_roles: ['admin'], roles: ['all_access'] },
+        data_sources: { tenant: 'tenant-a' },
+      };
+      const { client } = makeClient([{ body: { _id: 'mon-bkt', monitor: bucketSource } }]);
+
+      const result = await backend.getMonitorWithSource(client, 'mon-bkt');
+      expect(result).not.toBeNull();
+      // Mapped projection: narrowed type, id attached.
+      expect(result!.monitor.id).toBe('mon-bkt');
+      // Faithful source: real type + wrapped trigger with bucket-only fields.
+      expect(result!.source.monitor_type).toBe('bucket_level_monitor');
+      expect(result!.source.id).toBe('mon-bkt');
+      const trig = (result!.source.triggers as Array<Record<string, unknown>>)[0];
+      const inner = trig.bucket_level_trigger as Record<string, unknown>;
+      expect(inner).toBeDefined();
+      expect((inner.condition as Record<string, unknown>).parent_bucket_path).toBe('agg');
+      // SECURITY: RBAC/tenant principal fields must be stripped from the source
+      // (never transmitted to the browser as UnifiedRule.raw).
+      expect(result!.source.user).toBeUndefined();
+      expect(result!.source.owner).toBeUndefined();
+      expect(result!.source.data_sources).toBeUndefined();
+    });
+
+    it('returns null when the monitor is missing (statusCode 404)', async () => {
+      const err = Object.assign(new Error('not found'), { statusCode: 404 });
+      const { client } = makeClient([err]);
+      expect(await backend.getMonitorWithSource(client, 'missing')).toBeNull();
     });
   });
 
@@ -824,14 +876,14 @@ describe('HttpOpenSearchBackend — updateMonitor round-trip', () => {
       { body: { _id: 'mon-1', monitor: upstreamSource } },
     ]);
 
-    await backend.updateMonitor(client, 'mon-1', ({
+    await backend.updateMonitor(client, 'mon-1', {
       name: 'renamed',
       // Hostile input: try to clobber tenant scoping + ownership + state.
       data_sources: { tenant: 'evil-tenant' },
       last_run_context: { lastFiredAt: 0 },
       owner: 'attacker',
       enabled_time: 0,
-    } as unknown) as Parameters<typeof backend.updateMonitor>[2]);
+    } as unknown as Parameters<typeof backend.updateMonitor>[2]);
 
     const putBody = captureBody(request, 1);
     expect(putBody.data_sources).toEqual({ tenant: 'tenant-a' });

@@ -319,6 +319,13 @@ export interface OpenSearchBackend {
   // Monitors — read-only methods.
   getMonitors(client: AlertingOSClient): Promise<OSMonitor[]>;
   getMonitor(client: AlertingOSClient, monitorId: string): Promise<OSMonitor | null>;
+  // Returns the narrowed `monitor` projection AND the faithful upstream `source`
+  // document (real monitor_type + wrapped triggers) — used by the clone flow so
+  // it can re-create a monitor without the lossy `mapMonitor` projection.
+  getMonitorWithSource(
+    client: AlertingOSClient,
+    monitorId: string
+  ): Promise<{ monitor: OSMonitor; source: Record<string, unknown> } | null>;
   runMonitor(client: AlertingOSClient, monitorId: string, dryRun?: boolean): Promise<unknown>;
   searchQuery(
     client: AlertingOSClient,

@@ -9,6 +9,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import {
+  EuiBadge,
   EuiBasicTableColumn,
   EuiButton,
   EuiCard,
@@ -40,46 +41,32 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
-import { filterAlerts } from '../../../common/services/alerting/filter';
+import { alertMatchesSearch, filterAlerts } from '../../../common/services/alerting/filter';
 import { AlertTimeline } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
-import { countBy, isStandardOpenSearchDatasource } from './shared_constants';
+import {
+  countBy,
+  isStandardOpenSearchDatasource,
+  SEVERITY_COLORS,
+  STATE_COLORS,
+} from './shared_constants';
+import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
+import { formatTimestamp } from './time_format';
+import { ALERT_KIND_HEX, getStateHex } from './alert_colors';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
 import './alerting.scss';
 
 // ============================================================================
-// Color maps (used by table columns and filter panel)
+// Color / label maps
+//
+// Severity and state colors now come from the shared, theme-derived helpers
+// (`shared_constants.ts` for OUI semantic color *names* consumed by
+// `EuiBadge` / `EuiHealth`, `alert_colors.ts` for raw theme hex where a CSS
+// color is unavoidable). The former light-theme-only literal hex maps were
+// removed — they drifted from the shared source and rendered near-invisible
+// swatches in dark mode.
 // ============================================================================
 
-const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#BD271E',
-  high: '#F5A700',
-  medium: '#006BB4',
-  low: '#98A2B3',
-  info: '#D3DAE6',
-};
-const STATE_COLORS: Record<string, string> = {
-  active: '#BD271E',
-  anomaly: '#B8821C',
-  pending: '#F5A700',
-  acknowledged: '#006BB4',
-  resolved: '#017D73',
-  error: '#BD271E',
-  silenced: '#98A2B3',
-};
-const STATE_HEALTH: Record<string, string> = {
-  active: 'danger',
-  anomaly: '#B8821C',
-  pending: 'warning',
-  acknowledged: 'primary',
-  resolved: 'success',
-  error: 'danger',
-  silenced: 'default',
-};
-const ALERT_TYPE_COLORS: Record<string, string> = {
-  alert: '#006BB4',
-  anomaly: '#B8821C',
-};
 const ALERTS_HIDDEN_LABEL_KEYS = new Set([
   ...Array.from(INTERNAL_LABEL_KEYS),
   'anomaly_result_id',
@@ -456,7 +443,7 @@ function formatAlertDuration(alert: UnifiedAlertSummary): string {
   if (getAlertKind(alert) === 'anomaly' && Number.isFinite(start) && Number.isFinite(end)) {
     return formatDurationBetween(start, end);
   }
-  return alert.startTime ? formatDuration(alert.startTime) : '—';
+  return alert.startTime ? formatDuration(alert.startTime) : EMPTY_VALUE;
 }
 
 function parseAnomalyNumber(value?: string): number | undefined {
@@ -466,7 +453,7 @@ function parseAnomalyNumber(value?: string): number | undefined {
 }
 
 function formatAnomalyMetric(value?: number): string {
-  return value === undefined ? '—' : value.toFixed(2);
+  return value === undefined ? EMPTY_VALUE : value.toFixed(2);
 }
 
 function formatEntityLabel(entity?: string): string {
@@ -513,7 +500,7 @@ function buildGroupedAnomalyRow(group: UnifiedAlertSummary[]): AlertTableRow {
       values: {
         count,
         maxGrade: formatAnomalyMetric(maxGrade),
-        latestTime: new Date(latest.lastUpdated || latest.startTime).toLocaleString(),
+        latestTime: formatTimestamp(latest.lastUpdated || latest.startTime),
       },
     }),
     groupedOccurrences: sorted,
@@ -636,9 +623,7 @@ function renderGroupedAnomalyOccurrences(
         <EuiFlexGroup direction="column" gutterSize="s">
           {occurrences.map((occurrence, index) => {
             const occurrenceNumber = total - index;
-            const timestamp = new Date(
-              occurrence.lastUpdated || occurrence.startTime
-            ).toLocaleString();
+            const timestamp = formatTimestamp(occurrence.lastUpdated || occurrence.startTime);
 
             return (
               <EuiFlexItem key={occurrence.id}>
@@ -674,7 +659,7 @@ function renderGroupedAnomalyOccurrences(
                     </div>
                     <div className="altGroupedOccurrenceCell">
                       <EuiToolTip content={timestamp}>
-                        <span style={{ fontSize: 12 }}>
+                        <span style={{ fontSize: 12 }} tabIndex={0} aria-label={timestamp}>
                           <FormattedMessage
                             id="observability.alerting.alertsDashboard.groupedAnomalyStartedAgo"
                             defaultMessage="{duration} ago"
@@ -756,6 +741,12 @@ export interface AlertsDashboardProps {
    * details.
    */
   datasourceErrorMap?: Record<string, string>;
+  /**
+   * Seeds the alerts search box on first render — used by deep links such as
+   * `#/alerts?q=slo_id:<id>` that expect the list to arrive pre-filtered. Applied
+   * as the initial value ONLY; it does not override the user's subsequent typing.
+   */
+  initialSearchQuery?: string;
 }
 
 export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
@@ -782,8 +773,12 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   onTimeChange,
   onRefresh,
   datasourceErrorMap,
+  initialSearchQuery,
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
+  // Lazy initializer so the deep-link query seeds the box exactly once; later
+  // renders (e.g. under the resizable container's mouse-move re-renders) must
+  // not clobber what the user has typed.
+  const [searchQuery, setSearchQuery] = useState(() => initialSearchQuery ?? '');
   const [filters, setFilters] = useState<AlertFilterState>(emptyAlertFilters());
   const { toggleFacetCollapse, isCollapsed: isFacetCollapsed } = useFacetCollapse();
   const [labelSearch, setLabelSearch] = useState('');
@@ -822,17 +817,19 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const uniqueAlertKinds = useMemo(() => collectAlertUniqueValues(alerts, getAlertKind), [alerts]);
   const labelKeys = useMemo(() => collectAlertLabelKeys(alerts), [alerts]);
 
+  // The State facet includes the synthetic `anomaly` row kind, which has no
+  // semantic OUI color name in `STATE_COLORS`. Resolve every option through the
+  // theme-hex getter (which also covers `anomaly`) so `EuiHealth` renders a
+  // correct, dark-mode-safe swatch for each.
+  const stateFacetColorMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const state of uniqueStates) map[state] = getStateHex(state);
+    return map;
+  }, [uniqueStates]);
+
   // Facet counts (against search-matched but not filter-matched alerts)
   const facetCounts = useMemo(() => {
-    const searchMatched = alerts.filter((a) => {
-      if (!searchQuery) return true;
-      const q = searchQuery.toLowerCase();
-      return (
-        a.name.toLowerCase().includes(q) ||
-        (a.message || '').toLowerCase().includes(q) ||
-        Object.values(a.labels).some((v) => v.toLowerCase().includes(q))
-      );
-    });
+    const searchMatched = alerts.filter((a) => alertMatchesSearch(a, searchQuery));
     const counts: Record<string, Record<string, number>> = {
       alertKind: {},
       severity: {},
@@ -941,23 +938,19 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     () => [
       {
         field: 'severity',
-        name: i18n.translate('observability.alerting.alertsDashboard.column.sev', {
-          defaultMessage: 'Sev',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.severity', {
+          defaultMessage: 'Severity',
         }),
-        width: '60px',
+        width: '10%',
         sortable: (a: AlertTableRow) => SEVERITY_SORT_ORDER[a.severity] ?? 5,
+        // A labeled badge (not a bare color dot) so severity is conveyed by text
+        // and shape, not color alone — reachable by screen readers and legible
+        // to colorblind users. Mirrors the severity column in
+        // monitors_table/monitors_table_columns.tsx.
         render: (s: string) => (
-          <EuiToolTip content={s}>
-            <span
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: '50%',
-                background: SEVERITY_COLORS[s],
-                display: 'inline-block',
-              }}
-            />
-          </EuiToolTip>
+          <EuiBadge color={SEVERITY_COLORS[s] || 'default'} data-test-subj="alertSeverityBadge">
+            {getSeverityLabel(s)}
+          </EuiBadge>
         ),
       },
       {
@@ -1017,6 +1010,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     flush="left"
                     color="text"
                     iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                    aria-expanded={isExpanded}
                     onClick={(event) => {
                       event.stopPropagation();
                       toggleExpandedGroup();
@@ -1045,11 +1039,19 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         name: i18n.translate('observability.alerting.alertsDashboard.column.state', {
           defaultMessage: 'State',
         }),
-        width: '140px',
+        width: '12%',
         sortable: (alert: AlertTableRow) => getAlertDisplayState(alert),
+        // Route the raw lowercase wire enum through `getStateLabel` so the UI
+        // shows "Active" / "Acknowledged" rather than `active`. `anomaly` is a
+        // row kind (not an alert state) so it isn't in the semantic name map —
+        // fall back to its theme hex, which `EuiHealth` also accepts.
         render: (_state: string, alert: AlertTableRow) => {
           const state = getAlertDisplayState(alert);
-          return <EuiHealth color={STATE_HEALTH[state] || 'subdued'}>{state}</EuiHealth>;
+          return (
+            <EuiHealth color={STATE_COLORS[state] || getStateHex(state)}>
+              {getStateLabel(state)}
+            </EuiHealth>
+          );
         },
       },
       {
@@ -1058,25 +1060,44 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           defaultMessage: 'Message',
         }),
         truncateText: true,
-        render: (msg: string) => (
-          <EuiText size="xs" color="subdued">
-            {msg || '—'}
-          </EuiText>
-        ),
+        // The cell truncates, so wrap it in a tooltip that exposes the full
+        // message on hover / focus. The span is focusable (tabIndex) so
+        // keyboard users can reach the tooltip too. The row's "View details"
+        // action still opens the flyout for the complete record.
+        render: (msg: string) => {
+          if (!msg) {
+            return (
+              <EuiText size="xs" color="subdued">
+                {EMPTY_VALUE}
+              </EuiText>
+            );
+          }
+          return (
+            <EuiToolTip content={msg}>
+              <EuiText size="xs" color="subdued" tabIndex={0} className="altAlertMessageText">
+                {msg}
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'startTime',
         name: i18n.translate('observability.alerting.alertsDashboard.column.started', {
           defaultMessage: 'Started',
         }),
-        width: '120px',
+        width: '14%',
         sortable: true,
+        // The absolute, timezone-labeled timestamp used to live only in a hover
+        // tooltip on a non-focusable span (A11Y6). It is now also exposed via
+        // `aria-label` and the span is keyboard-focusable, so screen-reader and
+        // keyboard users get the exact time, not just the relative "x ago".
         render: (ts: string) => {
-          if (!ts) return <EuiText size="xs">---</EuiText>;
-          const abs = new Date(ts).toLocaleString();
+          if (!ts) return <EuiText size="xs">{EMPTY_VALUE}</EuiText>;
+          const abs = formatTimestamp(ts);
           return (
             <EuiToolTip content={abs}>
-              <span style={{ fontSize: 12 }}>
+              <span style={{ fontSize: 12 }} tabIndex={0} aria-label={abs}>
                 <FormattedMessage
                   id="observability.alerting.alertsDashboard.startedAgo"
                   defaultMessage="{duration} ago"
@@ -1092,7 +1113,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         name: i18n.translate('observability.alerting.alertsDashboard.column.duration', {
           defaultMessage: 'Duration',
         }),
-        width: '90px',
+        width: '9%',
         render: (_ts: string, alert: AlertTableRow) => (
           <EuiText size="xs">{formatAlertDuration(getRepresentativeAlert(alert))}</EuiText>
         ),
@@ -1101,7 +1122,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         name: i18n.translate('observability.alerting.alertsDashboard.column.actions', {
           defaultMessage: 'Actions',
         }),
-        width: '150px',
+        width: '13%',
         render: (alert: AlertTableRow) => {
           const representative = getRepresentativeAlert(alert);
           return (
@@ -1133,6 +1154,15 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                       }
                     )}
                     size="s"
+                    // Guarantee a >=24x24 pointer target (WCAG 2.5.8). Inline
+                    // styles win over OUI's compressed button stylesheet.
+                    style={{
+                      minWidth: 24,
+                      minHeight: 24,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
                     onClick={() => onViewDetail(representative)}
                   />
                 </EuiToolTip>
@@ -1145,6 +1175,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                       iconType="check"
                       size="xs"
                       color="primary"
+                      style={{ minWidth: 24, minHeight: 24 }}
                       onClick={() => onAcknowledge(alert.id)}
                     >
                       <FormattedMessage
@@ -1296,7 +1327,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   filters.alertKind,
                   (v) => updateFilter('alertKind', v),
                   facetCounts.counts.alertKind,
-                  ALERT_TYPE_COLORS
+                  ALERT_KIND_HEX
                 )}
                 {renderFacetGroup(
                   'severity',
@@ -1318,7 +1349,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   filters.state,
                   (v) => updateFilter('state', v),
                   facetCounts.counts.state,
-                  STATE_COLORS
+                  stateFacetColorMap
                 )}
                 {(() => {
                   const visibleLabelKeys = labelKeys.filter(

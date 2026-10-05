@@ -154,7 +154,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       body: body || undefined,
     });
     const respBody = resp.body as { data?: T } & Record<string, unknown>;
-    return respBody?.data !== undefined ? (respBody.data as T) : ((respBody as unknown) as T);
+    return respBody?.data !== undefined ? (respBody.data as T) : (respBody as unknown as T);
   }
 
   private get<T = unknown>(client: AlertingOSClient, ds: Datasource, path: string): Promise<T> {
@@ -183,7 +183,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
 
     let rawGroups: PromRawRuleGroup[];
     if (Array.isArray(data)) {
-      rawGroups = (data as unknown) as PromRawRuleGroup[];
+      rawGroups = data as unknown as PromRawRuleGroup[];
     } else if (data?.groups) {
       rawGroups = data.groups;
     } else if (data?.data?.groups) {
@@ -223,7 +223,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       const data = await this.get<PromAlertsApiResponse>(client, ds, '/api/v1/alerts');
       let rawAlerts: PromRawAlert[];
       if (Array.isArray(data)) {
-        rawAlerts = (data as unknown) as PromRawAlert[];
+        rawAlerts = data as unknown as PromRawAlert[];
       } else if (data?.alerts) {
         rawAlerts = data.alerts as PromRawAlert[];
       } else if (data?.data) {
@@ -596,7 +596,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
         timeoutSeconds: timeoutSeconds(opts.requestTimeoutMs),
         sourceRequest: opts.sourceRequest,
       });
-      return this.parseRangeQueryResponse((envelope as unknown) as Record<string, unknown>);
+      return this.parseRangeQueryResponse(envelope as unknown as Record<string, unknown>);
     } catch (err) {
       this.logger.warn(`Failed to execute PromQL range query: ${err}`);
       return [];
@@ -629,9 +629,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       sourceRequest: opts.sourceRequest,
     });
 
-    const promResult = this.extractPrometheusResult(
-      (envelope as unknown) as Record<string, unknown>
-    );
+    const promResult = this.extractPrometheusResult(envelope as unknown as Record<string, unknown>);
     if (!promResult) return [];
 
     const rawSeries = (promResult.result ?? []) as Array<{
@@ -710,21 +708,20 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       stepSec,
       { sourceRequest: opts.sourceRequest }
     );
-    const liveSettled: Promise<
-      { ok: true; alerts: PromAlert[] } | { ok: false; error: string }
-    > = endIsNow
-      ? this.getAlerts(client, ds).then(
-          (alerts) => ({ ok: true, alerts } as const),
-          (err) => ({ ok: false, error: String(err) } as const)
-        )
-      : Promise.resolve({ ok: true, alerts: [] as PromAlert[] } as const);
+    const liveSettled: Promise<{ ok: true; alerts: PromAlert[] } | { ok: false; error: string }> =
+      endIsNow
+        ? this.getAlerts(client, ds).then(
+            (alerts) => ({ ok: true, alerts }) as const,
+            (err) => ({ ok: false, error: String(err) }) as const
+          )
+        : Promise.resolve({ ok: true, alerts: [] as PromAlert[] } as const);
 
     let series: PromSeriesMatrix[];
     try {
       series = await matrixPromise;
     } catch (err) {
       // Matrix failed — still surface live alerts when window ends at now,
-      // so a transient Cortex error doesn't blank the UI for what's firing
+      // so a transient Prometheus error doesn't blank the UI for what's firing
       // RIGHT NOW.
       const live = await liveSettled;
       if (!live.ok || live.alerts.length === 0) {
@@ -867,7 +864,7 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
         timeoutSeconds: timeoutSeconds(opts.requestTimeoutMs),
         sourceRequest: opts.sourceRequest,
       });
-      return this.parseInstantQueryResponse((envelope as unknown) as Record<string, unknown>);
+      return this.parseInstantQueryResponse(envelope as unknown as Record<string, unknown>);
     } catch (err) {
       this.logger.warn(`Failed to execute PromQL instant query: ${err}`);
       return [];

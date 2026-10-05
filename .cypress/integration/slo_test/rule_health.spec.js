@@ -156,6 +156,33 @@ describe('SLO rule health — recovery flow (real Cortex)', () => {
   });
 
   it('surfaces a healthy badge, flips to missing after ruler loss, restores, and lets users delete a broken SLO', () => {
+    // Warm the rule-health checker cache to `missing` by polling the listing's
+    // Refresh until the badge flips, then assert it. Used before every detail
+    // navigation that expects the "rules missing" callout: the detail page now
+    // trusts the live probe (a healthy probe wins over a stale liveStatus, so a
+    // freshly-created SLO never false-alarms — F-CRUD2), which means the detail
+    // probe itself must read `missing`. Warming the shared checker cache via the
+    // listing guarantees that, independent of TTL/reconciler timing.
+    const confirmMissingViaListing = () => {
+      cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos`);
+      cy.get('[data-test-subj="slosPage"]', { timeout: 30000 }).should('be.visible');
+      const recheck = (attempt) => {
+        if (attempt >= 12) return;
+        cy.get('[data-test-subj="slosRefresh"]').click();
+        cy.wait(3000);
+        cy.get(`[data-test-subj="slosRulesBadge-${sloId}"]`).then(($el) => {
+          if ($el.attr('data-test-rule-state') === 'missing') return;
+          recheck(attempt + 1);
+        });
+      };
+      recheck(0);
+      cy.get(`[data-test-subj="slosRulesBadge-${sloId}"]`).should(
+        'have.attr',
+        'data-test-rule-state',
+        'missing'
+      );
+    };
+
     // -----------------------------------------------------------------------
     // Step A — Baseline: rules exist (badge is healthy or no-data depending
     // on whether the source metric has traffic; CI has neither so it sits at
@@ -198,29 +225,18 @@ describe('SLO rule health — recovery flow (real Cortex)', () => {
     // listing's Refresh button — cy.get retry only re-checks the DOM,
     // React doesn't re-fetch without a navigation or refresh trigger.
     cy.wait(75000);
-    cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos`);
-    cy.get('[data-test-subj="slosPage"]', { timeout: 30000 }).should('be.visible');
-    // Loop: click Refresh, give the fetch ~3s, check the badge. Up to 10
-    // tries (≈30s of polling) — the cache should expire mid-loop.
-    const recheck = (attempt) => {
-      if (attempt >= 10) return;
-      cy.get('[data-test-subj="slosRefresh"]').click();
-      cy.wait(3000);
-      cy.get(`[data-test-subj="slosRulesBadge-${sloId}"]`).then(($el) => {
-        if ($el.attr('data-test-rule-state') === 'missing') return;
-        recheck(attempt + 1);
-      });
-    };
-    recheck(0);
-    cy.get(`[data-test-subj="slosRulesBadge-${sloId}"]`)
-      .should('have.attr', 'data-test-rule-state', 'missing');
+    confirmMissingViaListing();
 
     // -----------------------------------------------------------------------
     // Step D — Restore flow
     // -----------------------------------------------------------------------
     cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
-    cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 20000 }).should(
+    // F-CRUD2 grace window: the destructive "rules missing" callout is held
+    // back for RULE_HEALTH_MAX_RETRIES (5) × RULE_HEALTH_RETRY_INTERVAL_MS (5s)
+    // = 25s of re-probing, showing a soft "propagating" callout first. Wait
+    // past that window before asserting the alarm callout appears.
+    cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 35000 }).should(
       'be.visible'
     );
 
@@ -242,13 +258,21 @@ describe('SLO rule health — recovery flow (real Cortex)', () => {
       namespace: rulerNamespace,
       groupName: ruleGroupName,
     });
-    // Same 90s wait so the rule_health/status caches expire before the
-    // detail page revisits.
-    cy.wait(90000);
+    // Wait past the checker TTL, then warm the checker cache to `missing` via
+    // the listing before navigating — the detail page now trusts the live
+    // probe, so the probe must read `missing` for the callout to escalate
+    // (see confirmMissingViaListing). This replaces the old "wait and hope the
+    // first detail probe is fresh", which raced the TTL/reconciler.
+    cy.wait(45000);
+    confirmMissingViaListing();
 
     cy.visit(`${WORKSPACE_PREFIX}/app/${APP_ID}#/slos/${encodeURIComponent(sloId)}`);
     cy.get('[data-test-subj="sloDetailPage"]', { timeout: 30000 }).should('be.visible');
-    cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 20000 }).should(
+    // F-CRUD2 grace window: the destructive "rules missing" callout is held
+    // back for RULE_HEALTH_MAX_RETRIES (5) × RULE_HEALTH_RETRY_INTERVAL_MS (5s)
+    // = 25s of re-probing, showing a soft "propagating" callout first. Wait
+    // past that window before asserting the alarm callout appears.
+    cy.get('[data-test-subj="slosDetailRuleHealthCallout"]', { timeout: 35000 }).should(
       'be.visible'
     );
 

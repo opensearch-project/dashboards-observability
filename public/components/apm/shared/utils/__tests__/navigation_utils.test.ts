@@ -10,6 +10,10 @@ import {
   navigateToExploreLogs,
   navigateToDatasetCorrelations,
   navigateToSloSuggest,
+  navigateToExploreMetrics,
+  openCorrelatedDashboard,
+  openApmSettings,
+  navigateToServiceDetails,
 } from '../navigation_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 
@@ -114,6 +118,38 @@ describe('navigation_utils', () => {
       const url = windowOpenSpy.mock.calls[0][0];
       expect(url).toContain('from:now-1h');
       expect(url).toContain('to:now');
+    });
+
+    it('rison-quotes + encodes absolute ISO timestamps in _g (colons must not break rison)', () => {
+      navigateToExploreTraces(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        { from: '2026-09-18T18:11:01.655Z', to: '2026-09-18T20:00:00.000Z' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain(
+        "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+      );
+    });
+
+    it('encodes a relative-future to value so + does not decode to a space', () => {
+      navigateToExploreTraces(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        { from: 'now-1h', to: 'now+1h' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain('to:now%2B1h');
+      expect(url).not.toContain('to:now 1h');
+      expect(url).not.toContain('to:now+1h');
     });
 
     it('should handle datasetId with existing :: prefix', () => {
@@ -325,6 +361,39 @@ describe('navigation_utils', () => {
       expect(url).toContain('to:now');
     });
 
+    it('rison-quotes + encodes absolute ISO timestamps in _g', () => {
+      navigateToExploreLogs(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        defaultParams.serviceNameField,
+        { from: '2026-09-18T18:11:01.655Z', to: '2026-09-18T20:00:00.000Z' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain(
+        "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+      );
+    });
+
+    it('encodes a relative-future to value so + does not decode to a space', () => {
+      navigateToExploreLogs(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        defaultParams.serviceNameField,
+        { from: 'now-1h', to: 'now+1h' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain('to:now%2B1h');
+      expect(url).not.toContain('to:now 1h');
+    });
+
     it('should handle datasetId with existing :: prefix', () => {
       navigateToExploreLogs(
         'ds-123::existing-logs',
@@ -421,5 +490,237 @@ describe('navigation_utils', () => {
 
       expect(dispatchSpy).toHaveBeenCalledWith(expect.any(HashChangeEvent));
     });
+  });
+});
+
+describe('openCorrelatedDashboard (correlated dashboards, experimental)', () => {
+  let windowOpenSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+  });
+
+  afterEach(() => {
+    windowOpenSpy.mockRestore();
+  });
+
+  it('opens the dashboard in a new tab with the time range in _g', () => {
+    openCorrelatedDashboard('dash-1', { from: 'now-15m', to: 'now' });
+
+    expect(windowOpenSpy).toHaveBeenCalledTimes(1);
+    const [url, target, features] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('/app/dashboards#/view/dash-1');
+    expect(url).toContain('_g=(');
+    expect(url).toContain('time:(from:now-15m,to:now)');
+    expect(target).toBe('_blank');
+    expect(features).toBe('noopener,noreferrer');
+  });
+
+  it('uses basePath.prepend so workspace context is preserved', () => {
+    openCorrelatedDashboard('dash-1', { from: 'now-1h', to: 'now' });
+
+    // Mock prepends "/base" — the final URL must include it.
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url.startsWith('/base/app/dashboards#/view/dash-1')).toBe(true);
+  });
+
+  it('percent-encodes dashboard ids with special characters', () => {
+    openCorrelatedDashboard('with/slash and space', { from: 'now-15m', to: 'now' });
+
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('#/view/with%2Fslash%20and%20space');
+  });
+
+  it('omits _g when no time range is provided', () => {
+    openCorrelatedDashboard('dash-2');
+
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('#/view/dash-2');
+    expect(url).not.toContain('_g=');
+  });
+
+  it('rison-quotes + encodes absolute ISO timestamps so the redirect keeps its time range', () => {
+    openCorrelatedDashboard('dash-1', {
+      from: '2026-09-18T18:11:01.655Z',
+      to: '2026-09-18T20:00:00.000Z',
+    });
+
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('_g=(');
+    expect(url).toContain(
+      "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+    );
+  });
+
+  it('encodes a relative-future timestamp so + does not decode to a space', () => {
+    openCorrelatedDashboard('dash-1', { from: 'now-1h', to: 'now+1h' });
+
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('time:(from:now-1h,to:now%2B1h)');
+    expect(url).not.toContain('to:now 1h');
+    expect(url).not.toContain('to:now+1h');
+  });
+});
+
+describe('navigateToExploreMetrics (open in Discover metrics)', () => {
+  let windowOpenSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+  });
+
+  afterEach(() => {
+    windowOpenSpy.mockRestore();
+  });
+
+  it('opens the Explore metrics query view with the PromQL, datasource and time range', () => {
+    navigateToExploreMetrics('up', 'conn-1', { from: 'now-15m', to: 'now' });
+
+    expect(windowOpenSpy).toHaveBeenCalledTimes(1);
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain('/app/explore/metrics/#?');
+    expect(url).toContain('signalType:metrics');
+    expect(url).toContain('metricsPageMode:query');
+    expect(url).toContain('time:(from:now-15m,to:now)');
+  });
+
+  it('rison-quotes + encodes absolute ISO timestamps in _g', () => {
+    navigateToExploreMetrics('up', 'conn-1', {
+      from: '2026-09-18T18:11:01.655Z',
+      to: '2026-09-18T20:00:00.000Z',
+    });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain(
+      "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+    );
+  });
+
+  it('encodes a relative-future timestamp so + does not decode to a space', () => {
+    navigateToExploreMetrics('up', 'conn-1', { from: 'now-1h', to: 'now+1h' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain('to:now%2B1h');
+    expect(url).not.toContain('to:now 1h');
+  });
+
+  it('rison-escapes a PromQL matcher containing ! so the query is not dropped', () => {
+    navigateToExploreMetrics('sum(rate(x{a!="b"}[5m]))', 'conn-1', { from: 'now-15m', to: 'now' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    // `!` must be rison-escaped to `!!` (URL-encoding leaves `!` raw, and rison
+    // treats a lone `!` as an escape char → dropped query).
+    expect(url).toContain(encodeURIComponent('a!!='));
+  });
+
+  it("rison-escapes a connectionId containing ! and ' so the dataset is not dropped", () => {
+    navigateToExploreMetrics('up', "conn!'1", { from: 'now-15m', to: 'now' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    // `!`→`!!` then `'`→`!'`; the id/title live in single-quoted rison strings, so
+    // an unescaped `'` would terminate the string early and Explore drops the dataset.
+    expect(url).toContain("id:'conn!!!'1'");
+    expect(url).toContain("title:'conn!!!'1'");
+  });
+
+  it('URL-encodes a connectionId containing URL-significant characters', () => {
+    navigateToExploreMetrics('up', 'my conn&x#1%', { from: 'now-15m', to: 'now' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain("id:'my%20conn%26x%231%25'");
+    expect(url).toContain("title:'my%20conn%26x%231%25'");
+    expect(url).not.toContain('my conn');
+  });
+});
+
+describe('openApmSettings (correlated dashboards, experimental)', () => {
+  let dispatchSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    dispatchSpy = jest.spyOn(window, 'dispatchEvent');
+  });
+
+  afterEach(() => {
+    dispatchSpy.mockRestore();
+  });
+
+  it('sets the _apmSettings=true hash marker while preserving path + params', () => {
+    window.location.hash = '#/service-details/checkout/env-a?tab=overview';
+    openApmSettings();
+    expect(window.location.hash).toContain('/service-details/checkout/env-a');
+    expect(window.location.hash).toContain('tab=overview');
+    expect(window.location.hash).toContain('_apmSettings=true');
+  });
+
+  it('leaves other query params intact', () => {
+    window.location.hash = '#/services?searchQuery=foo';
+    openApmSettings();
+    expect(window.location.hash).toContain('searchQuery=foo');
+    expect(window.location.hash).toContain('_apmSettings=true');
+  });
+
+  it('does not percent-encode existing rison _g params', () => {
+    window.location.hash = '#/services?_g=(time:(from:now-15m,to:now))';
+    openApmSettings();
+    // The rison must survive verbatim (no %28/%29 churn).
+    expect(window.location.hash).toContain('_g=(time:(from:now-15m,to:now))');
+    expect(window.location.hash).toContain('_apmSettings=true');
+  });
+
+  it('does not duplicate the marker when already present', () => {
+    window.location.hash = '#/services?_apmSettings=true';
+    openApmSettings();
+    expect(window.location.hash.match(/_apmSettings=true/g)).toHaveLength(1);
+  });
+
+  it('adds the correlated-dashboards focus hint only when requested', () => {
+    window.location.hash = '#/services';
+    openApmSettings();
+    expect(window.location.hash).not.toContain('_apmSettingsFocus');
+
+    window.location.hash = '#/services';
+    openApmSettings(true);
+    expect(window.location.hash).toContain('_apmSettingsFocus=correlatedDashboards');
+    expect(window.location.hash).toContain('_apmSettings=true');
+  });
+
+  it('defaults the path to / when the hash is empty (never emits #?...)', () => {
+    window.location.hash = '';
+    openApmSettings();
+    expect(window.location.hash).toContain('#/?');
+    expect(window.location.hash).not.toContain('#?');
+    expect(window.location.hash).toContain('_apmSettings=true');
+  });
+
+  it('dispatches a hashchange event so the marker hook reacts even on a same-value hash', () => {
+    window.location.hash = '#/services';
+    openApmSettings();
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.any(HashChangeEvent));
+  });
+});
+
+describe('navigateToServiceDetails nodeType param', () => {
+  const navigateToApp = jest.fn();
+
+  beforeEach(() => {
+    navigateToApp.mockReset();
+    (coreRefs as any).application = { navigateToApp };
+  });
+
+  const pathFor = (nodeType?: string) => {
+    navigateToServiceDetails('svc', 'generic:default', { nodeType });
+    return navigateToApp.mock.calls[0][1].path as string;
+  };
+
+  it('adds the node type for dependencies', () => {
+    expect(pathFor('Database')).toContain('nodeType=database');
+  });
+
+  it('leaves service links without a node type', () => {
+    expect(pathFor('service')).not.toContain('nodeType');
+    expect(pathFor('Service')).not.toContain('nodeType');
+    expect(pathFor(undefined)).not.toContain('nodeType');
   });
 });

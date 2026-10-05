@@ -24,7 +24,7 @@ To build the docker image use the next command:
 
 ## Run the docker compose
 The [docker-compose](docker-compose.yml) file represents a simple assembly of an OpenSearch cluster with two nodes and an opensearch dashboard that has the updated image with the latest changes in this plugin.
-> This is a test only docker compose that should not be used for production purpose - for such use cases please review this [link](https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/)
+> This is a test only docker compose that should not be used for production purpose - for such use cases please review this [link](https://docs.opensearch.org/latest/install-and-configure/install-opensearch/docker/)
 
 ### Option 1 (All from docker)
 run `docker compose up -d` to start the services and once the service is up and running you can start testing the changes.
@@ -43,5 +43,5 @@ The dashboard service uses port `localhost:5601` for access and this was already
 
 ## Security Notice
 There is no security plugin and authentication definitions for this development test demo - pay attention not to use this configuration in a production or any environment that may contain
-confident or personal information without first changing the security definition for accessing the servers - for production use cases please review this [link](https://opensearch.org/docs/latest/install-and-configure/install-opensearch/docker/)
+confident or personal information without first changing the security definition for accessing the servers - for production use cases please review this [link](https://docs.opensearch.org/latest/install-and-configure/install-opensearch/docker/)
 

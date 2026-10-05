@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SLO_HEALTH_COLOR, SLO_HEALTH_ORDER, getSloHealthColor } from '../state';
+import { SLO_HEALTH_COLOR, SLO_HEALTH_ORDER, getSloHealthColor, getSloHealthLabel } from '../state';
 import type { SloHealthState } from '../slo_types';
 
 describe('slo state helpers', () => {
@@ -38,6 +38,30 @@ describe('slo state helpers', () => {
 
     it('falls back to subdued for an unknown string', () => {
       expect(getSloHealthColor('bogus')).toBe('subdued');
+    });
+  });
+
+  describe('getSloHealthLabel (single source of truth for state labels)', () => {
+    it('returns the operator-facing label for every known state (en unchanged)', () => {
+      const expected: Record<SloHealthState, string> = {
+        breached: 'Breached',
+        warning: 'Warning',
+        ok: 'Healthy',
+        no_data: 'No data',
+        source_idle: 'Source idle',
+        stale: 'Stale',
+        disabled: 'Disabled',
+        rules_missing: 'Rules missing',
+      };
+      (Object.keys(expected) as SloHealthState[]).forEach((state) => {
+        expect(getSloHealthLabel(state)).toBe(expected[state]);
+      });
+    });
+
+    it('maps an out-of-union / missing state to "Unknown" instead of leaking the raw token', () => {
+      expect(getSloHealthLabel('at_risk')).toBe('Unknown');
+      expect(getSloHealthLabel(undefined)).toBe('Unknown');
+      expect(getSloHealthLabel(null)).toBe('Unknown');
     });
   });
 

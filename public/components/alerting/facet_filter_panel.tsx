@@ -15,8 +15,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiText,
+  EuiTextColor,
   EuiBadge,
   EuiCheckbox,
   EuiHealth,
@@ -105,13 +107,11 @@ export interface FacetFilterGroupProps extends FacetGroupConfig {
 // ============================================================================
 //
 // Per-option error icon. Extracted into a sub-component so each row can own
-// its popover state (a hook inside .map() is not permitted). The button lives
-// inside the checkbox row's `<label>`, so it stops event propagation on
-// pointer AND keyboard activation (click / mousedown / keydown / keyup) — a
-// nested control does not activate the labeled input per spec, but stopping
-// propagation also prevents React's synthetic bubbling from reaching the row's
-// handlers and toggling the datasource selection when the user only wanted to
-// read the error.
+// its popover state (a hook inside .map() is not permitted). It renders as a
+// SIBLING of the row's checkbox — NOT inside the checkbox's `<label>` — so an
+// interactive button is never nested inside a label (WCAG 4.1.2). Because it
+// is no longer nested in an activatable control, it needs no event-propagation
+// workaround: clicking it only toggles the error popover.
 interface FacetErrorIndicatorProps {
   facetId: string;
   option: string;
@@ -125,7 +125,6 @@ const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
   error,
 }) => {
   const [open, setOpen] = useState(false);
-  const stop = (e: React.SyntheticEvent) => e.stopPropagation();
   const ariaLabel = i18n.translate('observability.alerting.facetFilterPanel.errorIconAriaLabel', {
     defaultMessage: '{displayLabel} — connection error, click for details',
     values: { displayLabel },
@@ -141,15 +140,9 @@ const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
           iconType="alert"
           color="danger"
           size="xs"
-          className="altFacetErrorBtn"
+          className="altFacetErrorBtn altFacetTarget"
           aria-label={ariaLabel}
-          onClick={(e: React.MouseEvent) => {
-            stop(e);
-            setOpen((v) => !v);
-          }}
-          onMouseDown={stop}
-          onKeyDown={stop}
-          onKeyUp={stop}
+          onClick={() => setOpen((v) => !v)}
           data-test-subj={`facetGroup-${facetId}-error-${option}`}
         />
       }
@@ -242,38 +235,119 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
         gutterSize="xs"
         alignItems="center"
         responsive={false}
-        style={{ cursor: 'pointer', marginBottom: 4 }}
-        onClick={() => onToggleCollapse(id)}
-        role="button"
-        tabIndex={0}
-        aria-expanded={!isCollapsed}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            onToggleCollapse(id);
-          }
-        }}
+        style={{ marginBottom: 4 }}
       >
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={isCollapsed ? 'arrowRight' : 'arrowDown'} size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs">
-            <strong>{label}</strong>
+        {/*
+         * The expand/collapse control is a real <button> (EuiButtonEmpty) so it
+         * is natively keyboard-operable (Enter/Space toggle) and exposes
+         * `aria-expanded`. It covers only the toggle/title area; the "Clear"
+         * link is a SIBLING outside it (never a link nested inside a button),
+         * which is why Clear no longer needs a stopPropagation workaround.
+         */}
+        {/*
+         * `minWidth: 0` lets this item shrink below the title's intrinsic
+         * width — without it, the badge + "Clear" link (siblings below,
+         * fixed-width) push the header row wider than the ~182px facet
+         * column instead of the title truncating. See the `textProps`
+         * comment below for why this is inline style rather than a class in
+         * alerting.scss.
+         */}
+        <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+          <EuiButtonEmpty
+            size="xs"
+            color="text"
+            flush="left"
+            // The button spans the full facet width (a large keyboard/touch
+            // target), but its content span defaults to `justify-content:
+            // center`, which centers the arrow + title instead of leaving them
+            // flush-left. Pin the content to the start so the header aligns
+            // with the plain-text groups (e.g. "Labels") at every panel width.
+            // `flush="left"` only strips padding, not alignment. `minWidth: 0`
+            // continues the shrink cascade from the EuiFlexItem above.
+            contentProps={{
+              style: { justifyContent: 'flex-start', width: '100%', minWidth: 0 },
+            }}
+            // The title (plus the optional option-count suffix) has no
+            // truncation of its own, so a long facet label — or even a short
+            // one once the badge + "Clear" link are showing — overflows this
+            // narrow column instead of shrinking. `textProps` targets EUI's
+            // internal `.euiButtonEmpty__text` span directly (there's no
+            // approved-file entry for `.eui*` selectors in alerting.scss, so
+            // this has to be inline style rather than CSS); `flex`/`minWidth`
+            // let it shrink inside the content span above.
+            //
+            // `display: flex` (NOT `block`) is load-bearing for two things:
+            //   1. Left alignment. EuiButtonEmpty defaults to
+            //      `text-align: center`; a `block` text span stretches full
+            //      width and centers the inline title inside it (the parent
+            //      `contentProps` justify only positions the span, not the
+            //      text within). A flex row with the `<strong>` as a
+            //      `flex: 1` child pins the title flush-left at every width.
+            //   2. Keeping the group `(N)` count (`showOptionCount`) on the
+            //      SAME line as the title. The title is wrapped in
+            //      `TruncatedLabel`, whose inner span is `display: block;
+            //      width: 100%` — inside a `block` text span that consumed the
+            //      whole line and wrapped the count underneath. A flex row lets
+            //      the truncating title (`flex: 1`) and the fixed-width count
+            //      (`flex-shrink: 0`, in `.altFacetGroupCount`) sit inline.
+            //
+            // `textAlign: 'start'` is also required, NOT just the flex row:
+            // EuiButtonEmpty's `text-align: center` is inherited into the
+            // `TruncatedLabel` inner span (`display: block; width: 100%`), so a
+            // short title (e.g. "Type", or a label key like "monitor_name"
+            // whose `<strong>` is widened by the flex row) renders its glyphs
+            // centered WITHIN that full-width span even though the span itself
+            // sits flush-left. `start` (not `left`) keeps it RTL-safe.
+            textProps={{
+              style: {
+                display: 'flex',
+                alignItems: 'center',
+                textAlign: 'start',
+                flex: 1,
+                minWidth: 0,
+                maxWidth: '100%',
+              },
+            }}
+            iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+            iconSide="left"
+            onClick={() => onToggleCollapse(id)}
+            aria-expanded={!isCollapsed}
+            // Only reference the region while it's actually in the DOM. The
+            // options region renders under `!isCollapsed`, so pointing
+            // `aria-controls` at it while collapsed would be a dangling
+            // reference (axe `aria-valid-attr-value`). `aria-expanded` already
+            // conveys the collapsed state; `aria-controls` is optional here.
+            aria-controls={isCollapsed ? undefined : `facetGroup-${id}-region`}
+            data-test-subj={`facetGroup-${id}-toggle`}
+          >
+            {/* A long facet key (e.g. "deployment_environment") gets clipped
+                by the narrow filter panel. Render it through `TruncatedLabel`
+                so it ellipsis-truncates AND shows the full name in a hover
+                tooltip — matching the option rows. `minWidth: 0` lets the bold
+                wrapper shrink inside the button's flex content so truncation
+                kicks in instead of overflowing. */}
+            <strong style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+              <TruncatedLabel text={label} />
+            </strong>
             {showOptionCount && (
-              <>
-                {' '}
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  className="altFacetCount"
-                  data-test-subj={`facetGroup-${id}-optionCount`}
-                >
-                  {options.length}
-                </EuiText>
-              </>
+              // Parenthesize the option count so it reads as a count and
+              // matches the per-option `({count})` style below — a bare
+              // trailing number (e.g. "severity 2") looked like a
+              // superscript/typo next to the label. Spacing + flex-shrink live
+              // in the KEY-only `.altFacetGroupCount` SCSS modifier (RTL-safe
+              // `margin-inline-start: $euiSizeXS`) — a plain `{' '}` collapses to
+              // zero inside the button's flex content, so the margin is required
+              // here; the per-option count keeps plain `.altFacetCount` (its row
+              // supplies its own gap) to avoid a double margin.
+              <EuiTextColor
+                color="subdued"
+                className="altFacetCount altFacetGroupCount"
+                data-test-subj={`facetGroup-${id}-optionCount`}
+              >
+                ({options.length})
+              </EuiTextColor>
             )}
-          </EuiText>
+          </EuiButtonEmpty>
         </EuiFlexItem>
         {activeCount > 0 && (
           <EuiFlexItem grow={false}>
@@ -284,11 +358,10 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
           <EuiFlexItem grow={false}>
             <EuiLink
               color="primary"
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                onChange([]);
-              }}
+              onClick={() => onChange([])}
               data-test-subj={`facetGroup-${id}-clear`}
+              className="altFacetTarget"
+              style={{ padding: '0 4px' }}
             >
               <EuiText size="xs">
                 <FormattedMessage
@@ -301,7 +374,12 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
         )}
       </EuiFlexGroup>
       {!isCollapsed && (
-        <div style={{ paddingLeft: 4 }}>
+        <div
+          id={`facetGroup-${id}-region`}
+          role="region"
+          aria-label={label}
+          style={{ paddingLeft: 4 }}
+        >
           {searchable && (
             <>
               <EuiFieldSearch
@@ -373,14 +451,6 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                   )}
                   {/* Explicit 12/18 preserves Alert Manager's existing look. */}
                   <TruncatedLabel text={displayLabel} fontSize={12} lineHeight={18} />
-                  {errorMap?.[opt] && (
-                    <FacetErrorIndicator
-                      facetId={id}
-                      option={opt}
-                      displayLabel={displayLabel}
-                      error={errorMap[opt]}
-                    />
-                  )}
                 </span>
                 {showCounts && (
                   <EuiText size="xs" color="subdued" className="altFacetCount">
@@ -391,36 +461,53 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
             );
 
             return (
+              // The error indicator is a SIBLING of the checkbox (not part of
+              // the checkbox `label`), so no interactive button is nested inside
+              // a `<label>` (WCAG 4.1.2 nested-interactive).
               <div key={opt} className="altFacetCheckboxRow">
-                <EuiCheckbox
-                  id={checkboxId}
-                  label={labelContent}
-                  checked={isActive}
-                  disabled={isDisabled}
-                  aria-label={
-                    isDisabled
-                      ? i18n.translate(
-                          'observability.alerting.facetFilterPanel.disabledAriaLabel',
-                          {
-                            defaultMessage: '{displayLabel} (maximum datasources reached)',
-                            values: { displayLabel },
-                          }
-                        )
-                      : undefined
-                  }
-                  onChange={() => {
-                    if (isActive) {
-                      onChange(selected.filter((s) => s !== opt));
-                      return;
-                    }
-                    if (capReached && onCapReached) {
-                      onCapReached();
-                      return;
-                    }
-                    onChange([...selected, opt]);
-                  }}
-                  compressed
-                />
+                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+                    <EuiCheckbox
+                      id={checkboxId}
+                      label={labelContent}
+                      checked={isActive}
+                      disabled={isDisabled}
+                      aria-label={
+                        isDisabled
+                          ? i18n.translate(
+                              'observability.alerting.facetFilterPanel.disabledAriaLabel',
+                              {
+                                defaultMessage: '{displayLabel} (maximum datasources reached)',
+                                values: { displayLabel },
+                              }
+                            )
+                          : undefined
+                      }
+                      onChange={() => {
+                        if (isActive) {
+                          onChange(selected.filter((s) => s !== opt));
+                          return;
+                        }
+                        if (capReached && onCapReached) {
+                          onCapReached();
+                          return;
+                        }
+                        onChange([...selected, opt]);
+                      }}
+                      compressed
+                    />
+                  </EuiFlexItem>
+                  {errorMap?.[opt] && (
+                    <EuiFlexItem grow={false}>
+                      <FacetErrorIndicator
+                        facetId={id}
+                        option={opt}
+                        displayLabel={displayLabel}
+                        error={errorMap[opt]}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               </div>
             );
           })}

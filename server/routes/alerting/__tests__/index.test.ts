@@ -19,6 +19,7 @@
  *     admin route registered inline (14 GETs)
  *   - 1 mappings POST route (POSTs index list in body to avoid URL limits)
  *   - 4 Prometheus metadata routes inside `if (enableMetadataRoutes)` (4 GETs)
+ *     + 1 Prometheus preview POST route inside the same block
  *
  * Datasource CRUD routes have been deleted — these tests also assert none
  * of them sneak back in.
@@ -55,7 +56,7 @@ describe('registerAlertingRoutes', () => {
     mockRouter.delete.mockClear();
   });
 
-  it('registers all runtime routes when metadata routes are enabled (18 GET + 3 POST + 1 PUT + 1 DELETE = 23)', () => {
+  it('registers all runtime routes when metadata routes are enabled (18 GET + 4 POST + 1 PUT + 1 DELETE = 24)', () => {
     registerAlertingRoutes(mockRouter as never, {
       osBackend: mockOsBackend,
       promBackend: mockPromBackend,
@@ -69,8 +70,8 @@ describe('registerAlertingRoutes', () => {
       mockRouter.put.mock.calls.length +
       mockRouter.delete.mock.calls.length;
     // 14 inline GETs (incl. probe + destinations + indices + aliases) + 4 metadata GETs = 18 GETs
-    // 2 monitor POSTs + 1 PUT + 1 DELETE + 1 mappings POST = 5 non-GET routes
-    expect(total).toBe(23);
+    // 2 monitor POSTs + 1 PUT + 1 DELETE + 1 mappings POST + 1 prometheus preview POST = 6 non-GET routes
+    expect(total).toBe(24);
     expect(mockRouter.get.mock.calls.length).toBe(18);
   });
 

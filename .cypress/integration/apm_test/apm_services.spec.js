@@ -6,9 +6,18 @@
 /// <reference types="cypress" />
 
 import { PROMETHEUS_CLUSTER } from '../../utils/constants';
-import { uploadAPMDataToOpenSearch, waitForPrometheusMetrics, verifyPrometheusReady, getAPMTestTimeRange } from '../../utils/apm_data_helpers';
+import {
+  uploadAPMDataToOpenSearch,
+  waitForPrometheusMetrics,
+  verifyPrometheusReady,
+  getAPMTestTimeRange,
+} from '../../utils/apm_data_helpers';
 import { setupAPMTestEnvironment, cleanupObservabilityWorkspace } from '../../utils/helpers';
-import { getRandomizedWorkspaceName, getRandomizedDatasetId, formatDateForPicker } from '../../utils/shared';
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+  formatDateForPicker,
+} from '../../utils/shared';
 
 const workspaceName = getRandomizedWorkspaceName('apm-services');
 const traceDatasetId = getRandomizedDatasetId('trace');
@@ -77,6 +86,32 @@ const setAPMTimeRange = (startDate, endDate) => {
   // Click Apply button
   cy.get('[data-test-subj="superDatePickerApplyTimeButton"]').should('be.visible').click();
   cy.get('[data-test-subj="globalLoadingIndicator"]', { timeout: 60000 }).should('not.exist');
+};
+
+// Select an option from one of the APM Settings comboboxes.
+//
+// The dataset / data-source lists load asynchronously. When a list resolves, EUI
+// swaps the combo box's `options` prop and re-renders, which closes a popover
+// that was opened too early: you see "Loading options", the option flashes in,
+// then the list immediately closes and the option click never lands. Gate the
+// open on the field's loading spinner being gone so the options are stable
+// before we click, then scope the option click to the options list so a later
+// re-render can't detach the matched element mid-click.
+const selectApmSettingComboBox = (rowLabel, optionText) => {
+  cy.get('.euiFormRow')
+    .contains('label', rowLabel)
+    .parents('.euiFormRow')
+    .first()
+    .find('.euiComboBox')
+    .as('apmComboBox');
+
+  // Wait for the async load to finish (loading spinner gone) before opening.
+  cy.get('@apmComboBox').find('.euiLoadingSpinner', { timeout: 60000 }).should('not.exist');
+
+  cy.get('@apmComboBox').click();
+  cy.get('.euiComboBoxOptionsList').should('be.visible');
+  cy.get('.euiComboBoxOptionsList').contains(optionText).click();
+  cy.get('.euiComboBoxOptionsList').should('not.exist');
 };
 
 describe('APM Services Page', () => {
@@ -166,45 +201,23 @@ describe('APM Services Page', () => {
     });
 
     it('should configure APM settings and display services page', () => {
-      // Click "Get started" button to open settings modal
-      cy.contains('button', 'Get started').should('be.visible').click();
+      // Open the APM Settings modal. The empty-state "Get started" button now
+      // launches the setup wizard, so this flow uses the header "APM Settings"
+      // button, which still opens the manual settings modal used below.
+      cy.contains('button', 'APM Settings').should('be.visible').click();
 
       // Wait for modal to appear
       cy.get('.euiModal').should('be.visible');
       cy.get('.euiModalHeader').should('be.visible');
 
-      // Select Traces dataset
-      cy.get('.euiFormRow')
-        .contains('Traces')
-        .parent()
-        .parent()
-        .find('.euiComboBox')
-        .click();
-      cy.get('.euiComboBoxOptionsList').should('be.visible');
-      cy.contains(APM_RESOURCES.TRACE_INDEX_PATTERN).click();
-      cy.get('.euiComboBoxOptionsList').should('not.exist');
+      // Select Traces dataset (waits for the dataset list to finish loading).
+      selectApmSettingComboBox('Traces', APM_RESOURCES.TRACE_INDEX_PATTERN);
 
       // Select Services dataset
-      cy.get('.euiFormRow')
-        .contains('Services')
-        .parent()
-        .parent()
-        .find('.euiComboBox')
-        .click();
-      cy.get('.euiComboBoxOptionsList').should('be.visible');
-      cy.contains(APM_RESOURCES.SERVICE_INDEX_PATTERN).click();
-      cy.get('.euiComboBoxOptionsList').should('not.exist');
+      selectApmSettingComboBox('Services', APM_RESOURCES.SERVICE_INDEX_PATTERN);
 
       // Select Prometheus data source
-      cy.get('.euiFormRow')
-        .contains('RED Metrics')
-        .parent()
-        .parent()
-        .find('.euiComboBox')
-        .click();
-      cy.get('.euiComboBoxOptionsList').should('be.visible');
-      cy.contains(APM_RESOURCES.DATA_CONNECTION_NAME).click();
-      cy.get('.euiComboBoxOptionsList').should('not.exist');
+      selectApmSettingComboBox('RED Metrics', APM_RESOURCES.DATA_CONNECTION_NAME);
 
       // Click Apply button
       cy.get('.euiModalFooter').find('.euiButton--fill').click();

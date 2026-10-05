@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   EuiOverlayMask,
   EuiModal,
@@ -38,7 +38,10 @@ import {
   useCorrelatedLogs,
 } from '../shared/hooks/use_apm_config';
 import { useApmConfig } from './apm_config_context';
-import { navigateToDatasetCorrelations } from '../shared/utils/navigation_utils';
+import {
+  navigateToDatasetCorrelations,
+  APM_SETTINGS_FOCUS_MARKER,
+} from '../shared/utils/navigation_utils';
 import { OSDSavedApmConfigClient } from '../../../services/saved_objects/saved_object_client/osd_saved_objects/apm_config';
 import { ApmArchitectureSvgLight, ApmArchitectureSvgDark } from './apm-architecture-svg';
 import {
@@ -69,6 +72,13 @@ interface ApmSettingsFormData {
   serviceMapDatasetId: string;
   prometheusDataSourceId: string;
   windowDuration: string;
+  // Optional, experimental: saved dashboard ids to link out from a service.
+  correlatedDashboardIds: string[];
+}
+
+interface DashboardComboOption {
+  label: string;
+  value: string;
 }
 
 export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
@@ -86,11 +96,86 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
     serviceMapDatasetId: '',
     prometheusDataSourceId: '',
     windowDuration: '60',
+    correlatedDashboardIds: [],
   });
 
   const [selectedTracesDataset, setSelectedTracesDataset] = useState([]);
   const [selectedServiceMapDataset, setSelectedServiceMapDataset] = useState([]);
   const [selectedPrometheusDS, setSelectedPrometheusDS] = useState([]);
+
+  // Correlated dashboards (optional, experimental) — searchable multi-select
+  const [selectedDashboards, setSelectedDashboards] = useState<DashboardComboOption[]>([]);
+  const [dashboardOptions, setDashboardOptions] = useState<DashboardComboOption[]>([]);
+  const [dashboardsLoading, setDashboardsLoading] = useState(false);
+
+  // Monotonic token so out-of-order search responses can't overwrite newer
+  // results: onSearchChange fires per keystroke, and an earlier (slower)
+  // request must not clobber a later one.
+  const dashboardSearchSeq = useRef(0);
+
+  // Search saved dashboards (type 'dashboard') for the correlated-dashboards picker.
+  const loadDashboards = useCallback(async (search?: string) => {
+    const client = coreRefs.savedObjectsClient;
+    if (!client) return;
+    const seq = ++dashboardSearchSeq.current;
+    setDashboardsLoading(true);
+    try {
+      const res = await client.find<{ title?: string }>({
+        type: 'dashboard',
+        fields: ['title'],
+        search: search ? `${search}*` : undefined,
+        searchFields: ['title'],
+        perPage: 50,
+      });
+      // Ignore this response if a newer search has started since.
+      if (seq !== dashboardSearchSeq.current) return;
+      setDashboardOptions(
+        res.savedObjects.map((so) => ({ label: so.attributes?.title || so.id, value: so.id }))
+      );
+    } catch {
+      // Non-fatal: leave options as-is if the search fails.
+    } finally {
+      if (seq === dashboardSearchSeq.current) setDashboardsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadDashboards();
+  }, [loadDashboards]);
+
+  // When opened from the correlated-dashboards empty-state CTA (which sets the
+  // `_apmSettingsFocus=correlatedDashboards` URL hint), scroll the picker into
+  // view and focus it, then strip the hint from the URL. The `_apmSettings`
+  // marker itself is already removed by useOpenOnUrlMarker.
+  useEffect(() => {
+    const hash = window.location.hash || '';
+    const qIndex = hash.indexOf('?');
+    if (qIndex === -1) return;
+    const rawQuery = hash.slice(qIndex + 1);
+    if (new URLSearchParams(rawQuery).get(APM_SETTINGS_FOCUS_MARKER) !== 'correlatedDashboards')
+      return;
+
+    const timer = setTimeout(() => {
+      const el = document.querySelector('[data-test-subj="apmCorrelatedDashboardsComboBox"]');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        (el.querySelector('input') as HTMLInputElement | null)?.focus();
+      }
+    }, 150);
+
+    // Preserve other params verbatim (don't churn rison _g/_a); drop only the hint.
+    const nextQuery = rawQuery
+      .split('&')
+      .filter((pair) => pair.split('=')[0] !== APM_SETTINGS_FOCUS_MARKER)
+      .join('&');
+    const nextHash = `${hash.slice(1, qIndex)}${nextQuery ? `?${nextQuery}` : ''}`;
+    window.history.replaceState(
+      window.history.state,
+      '',
+      `${window.location.pathname}${window.location.search}#${nextHash}`
+    );
+    return () => clearTimeout(timer);
+  }, []);
 
   // Form validation state
   const [showErrors, setShowErrors] = useState(false);
@@ -156,12 +241,17 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
       }
 
       // Populate form data
+      const existingDashboards = existingConfig.correlatedDashboards ?? [];
       setFormData({
         tracesDatasetId: existingConfig.tracesDataset.id,
         serviceMapDatasetId: existingConfig.serviceMapDataset.id,
         prometheusDataSourceId: existingConfig.prometheusDataSource.id,
         windowDuration: String(existingConfig.windowDuration ?? 60),
+        correlatedDashboardIds: existingDashboards.map((d) => d.dashboardId),
       });
+      setSelectedDashboards(
+        existingDashboards.map((d) => ({ label: d.title, value: d.dashboardId }))
+      );
 
       // Set selected options
       const tracesLabel = existingConfig.tracesDataset.name || existingConfig.tracesDataset.title;
@@ -309,6 +399,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
           serviceMapDatasetId: formData.serviceMapDatasetId,
           prometheusDataSourceId: formData.prometheusDataSourceId,
           windowDuration,
+          correlatedDashboardIds: formData.correlatedDashboardIds,
         });
       } else {
         const windowDuration = Math.max(1, parseInt(formData.windowDuration, 10) || 60);
@@ -320,6 +411,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
           serviceMapDatasetId: formData.serviceMapDatasetId,
           prometheusDataSourceId: formData.prometheusDataSourceId,
           windowDuration,
+          correlatedDashboardIds: formData.correlatedDashboardIds,
         });
       }
 
@@ -754,6 +846,41 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
                   })
                 }
                 fullWidth
+              />
+            </EuiFormRow>
+
+            {/* Correlated dashboards (optional, experimental) */}
+            <EuiFormRow
+              label={i18n.translate('observability.apm.settings.correlatedDashboardsLabel', {
+                defaultMessage: 'Correlated dashboards (experimental)',
+              })}
+              helpText={i18n.translate('observability.apm.settings.correlatedDashboardsHelpText', {
+                defaultMessage:
+                  'Optional. Pick correlated dashboards to link services and continue investigation',
+              })}
+              fullWidth
+            >
+              <EuiComboBox
+                compressed
+                fullWidth
+                async
+                isLoading={dashboardsLoading}
+                placeholder={i18n.translate(
+                  'observability.apm.settings.correlatedDashboardsPlaceholder',
+                  { defaultMessage: 'Search dashboards…' }
+                )}
+                options={dashboardOptions}
+                selectedOptions={selectedDashboards}
+                onSearchChange={(searchValue) => loadDashboards(searchValue)}
+                onChange={(selected) => {
+                  const opts = selected as DashboardComboOption[];
+                  setSelectedDashboards(opts);
+                  setFormData((prev) => ({
+                    ...prev,
+                    correlatedDashboardIds: opts.map((o) => o.value),
+                  }));
+                }}
+                data-test-subj="apmCorrelatedDashboardsComboBox"
               />
             </EuiFormRow>
           </EuiForm>

@@ -73,9 +73,12 @@ import type { OpenSearchFormState } from './create_monitor/create_monitor_types'
 import {
   extractPplValidationError,
   extractServerErrorMessage,
+  extractServerErrorStatus,
   formStateToRule,
   resolveDatasourceTokens,
 } from './alarms_page_helpers';
+import { usePendingRules } from './hooks/use_pending_rules';
+import { key as pendingRuleKey, PendingEntry } from './monitors_table/pending_rules';
 
 // ============================================================================
 // Main Page Component
@@ -172,6 +175,12 @@ function buildPrometheusRulePayload(opts: {
   annotations: Record<string, string>;
   enabled: boolean;
   groupName?: string;
+  /**
+   * Allow replacing an existing same-named rule in the group. Edit flows set
+   * this; create flows leave it false so the server rejects a name collision
+   * (409) instead of silently overwriting.
+   */
+  overwrite?: boolean;
 }) {
   return {
     name: opts.name,
@@ -182,7 +191,48 @@ function buildPrometheusRulePayload(opts: {
     annotations: opts.annotations,
     enabled: opts.enabled,
     ...(opts.groupName ? { groupName: opts.groupName } : {}),
+    ...(opts.overwrite ? { overwrite: true } : {}),
   };
+}
+
+/**
+ * Build a clone name that doesn't collide with an existing rule on the same
+ * datasource. Tries the bare suffix first (`makeSuffix(1)`, e.g. ` (Copy)`),
+ * then numbered variants (`makeSuffix(2)` → ` (Copy 2)`, …) until it finds a
+ * name the `isTaken` predicate reports as free. Each candidate is capped at
+ * `maxLen` by trimming the BASE name — never the suffix — so the disambiguator
+ * is always preserved. A bounded attempt count guarantees termination even
+ * against a pathological set of existing names; the final fallback appends a
+ * timestamp to stay unique.
+ */
+function buildUniqueCloneName(
+  baseName: string,
+  makeSuffix: (n: number) => string,
+  isTaken: (candidate: string) => boolean,
+  maxLen: number
+): string {
+  const withSuffix = (suffix: string): string => {
+    // Trim by CODE POINTS, not UTF-16 units, so a boundary that falls inside a
+    // surrogate pair (emoji / astral CJK) doesn't split the character into a
+    // lone half (which renders as U+FFFD). `[...str]` iterates code points.
+    // Measure the suffix in code points too so the budget stays consistent (all
+    // current suffixes are ASCII, so this is defensive against future ones).
+    const codePoints = [...baseName];
+    const suffixLen = [...suffix].length;
+    const base =
+      codePoints.length + suffixLen > maxLen
+        ? codePoints.slice(0, Math.max(0, maxLen - suffixLen)).join('')
+        : baseName;
+    return `${base}${suffix}`;
+  };
+  const MAX_ATTEMPTS = 1000;
+  for (let n = 1; n <= MAX_ATTEMPTS; n++) {
+    const candidate = withSuffix(makeSuffix(n));
+    if (!isTaken(candidate)) return candidate;
+  }
+  // Practically unreachable — a thousand same-named clones on one datasource.
+  // Guarantee a unique name rather than loop forever.
+  return withSuffix(`${makeSuffix(1)}-${Date.now()}`);
 }
 
 export const AlarmsPage: React.FC<AlarmsPageProps> = ({
@@ -266,12 +316,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // value — that way cross-tab deep-links inside the same app (alert
   // flyout's "Open monitor") still re-apply.
   const lastAppliedDsRef = useRef<string | undefined>(undefined);
-  const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    return () => {
-      if (refetchTimerRef.current) clearTimeout(refetchTimerRef.current);
-    };
-  }, []);
   useEffect(() => {
     const dsId = deepLink.ds;
     if (!dsId) return;
@@ -407,7 +451,58 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     setRules,
     setRulesTotal,
     refetch: refetchRules,
+    backgroundRefetch: backgroundRefetchRules,
   } = useRulesData({ selectedDsIds });
+
+  // Keep the rules list fresh without a manual reload. A rule created
+  // elsewhere (e.g. the Metrics page "Create alert rule" flyout) only lands
+  // in the unified list once Cortex's querier has loaded and first-evaluated
+  // it, which can lag the create by up to the rule's evaluation interval — so
+  // the initial mount fetch can miss it and the list would otherwise stay
+  // stale until a filter toggle. Refetch when the user switches INTO the Rules
+  // tab so a freshly-created rule shows up on navigation.
+  const prevTabRef = useRef(activeTab);
+  useEffect(() => {
+    if (activeTab === 'rules' && prevTabRef.current !== 'rules') {
+      refetchRules();
+    }
+    prevTabRef.current = activeTab;
+  }, [activeTab, refetchRules]);
+
+  // Also refetch when the window/tab regains focus, so returning to an
+  // already-open Alerts app re-syncs (e.g. after creating a rule in another
+  // browser tab). Uses the BACKGROUND refetch (no spinner, no error/warning
+  // banner clobber) — a silent refocus re-sync, matching the 15s poll's
+  // intent. `focus` and `visibilitychange` both fire when refocusing a
+  // window, so throttle to one refetch per second to avoid a double request.
+  const lastFocusRefetchRef = useRef(0);
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      const nowMs = Date.now();
+      if (nowMs - lastFocusRefetchRef.current < 1000) return;
+      lastFocusRefetchRef.current = nowMs;
+      backgroundRefetchRules();
+    };
+    window.addEventListener('focus', onVisible);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      window.removeEventListener('focus', onVisible);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [backgroundRefetchRules]);
+
+  // While the Rules tab is open and visible, poll silently every 15s so a rule
+  // that was just created — here or from the Metrics page — shows on its own
+  // once Cortex's querier has loaded it, without the user clicking Refresh.
+  // Background refetch = no spinner / no error-banner clobber.
+  useEffect(() => {
+    if (activeTab !== 'rules') return undefined;
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') backgroundRefetchRules();
+    }, 15000);
+    return () => window.clearInterval(intervalId);
+  }, [activeTab, backgroundRefetchRules]);
 
   const [deletedRuleIds, setDeletedRuleIds] = useState<Set<string>>(new Set());
   const [showCreateMonitor, setShowCreateMonitor] = useState(false);
@@ -425,40 +520,37 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // datasource filter has surfaced — saving against an unselected DS could
   // still create a same-name monitor on that DS, but that's a much narrower
   // footgun than the original "two identical names on the same cluster".
-  const rulesByDsName = useMemo(() => {
-    const map = new Map<string, Set<string>>();
-    rules.forEach((r) => {
-      if (deletedRuleIds.has(r.id)) return;
-      const dsKey = r.datasourceId;
-      const names = map.get(dsKey) ?? new Set<string>();
-      names.add(r.name.trim().toLowerCase());
-      map.set(dsKey, names);
-    });
-    return map;
-  }, [rules, deletedRuleIds]);
-
-  const isNameTakenForCreate = useCallback(
-    (name: string, dsId: string) => {
-      const set = rulesByDsName.get(dsId);
-      return !!set?.has(name.trim().toLowerCase());
-    },
-    [rulesByDsName]
-  );
-
-  const buildIsNameTakenForEdit = useCallback(
-    (excludeRuleId: string) => (name: string, dsId: string) => {
+  // Duplicate-rule detection. Prometheus rule identity is (datasource, group,
+  // name), so when a `group` is supplied the collision is scoped to that group
+  // — this lets a user legitimately keep `HighLatency` in two different groups
+  // without a false "already exists". When no group is supplied (OpenSearch/PPL
+  // monitors, which have no group) the check falls back to datasource-wide.
+  const isRuleNameTaken = useCallback(
+    (name: string, dsId: string, group: string | undefined, excludeRuleId?: string) => {
       const trimmed = name.trim().toLowerCase();
-      // Walk the rule list directly so we can exclude the monitor being
-      // edited; the cached map doesn't carry id information.
+      if (!trimmed) return false;
+      const g = group?.trim().toLowerCase();
       return rules.some(
         (r) =>
           r.id !== excludeRuleId &&
           !deletedRuleIds.has(r.id) &&
           r.datasourceId === dsId &&
-          r.name.trim().toLowerCase() === trimmed
+          r.name.trim().toLowerCase() === trimmed &&
+          (g === undefined || g === '' || (r.group ?? '').trim().toLowerCase() === g)
       );
     },
     [rules, deletedRuleIds]
+  );
+
+  const isNameTakenForCreate = useCallback(
+    (name: string, dsId: string, group?: string) => isRuleNameTaken(name, dsId, group),
+    [isRuleNameTaken]
+  );
+
+  const buildIsNameTakenForEdit = useCallback(
+    (excludeRuleId: string) => (name: string, dsId: string, group?: string) =>
+      isRuleNameTaken(name, dsId, group, excludeRuleId),
+    [isRuleNameTaken]
   );
   // The popover's "Logs" entry maps to an OpenSearch monitor and "Metrics"
   // maps to a Prometheus rule. When the user picks Logs the flyout is forced
@@ -474,6 +566,67 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const [selectedAlert, setSelectedAlert] = useState<UnifiedAlertSummary | null>(null);
   const { setToast: addToast } = useToast();
 
+  // Optimistic "pending rule" cache. A freshly-created Prometheus/metrics rule
+  // is persisted synchronously but only appears in the querier-backed list
+  // ~60s+ later; this layers an optimistic row on top and reconciles it against
+  // each background poll / refetch (no dedicated timer). A poll that hasn't
+  // seen the rule means "not propagated yet", so eviction on timeout warns
+  // softly rather than reporting a failure.
+  const warnedPendingKeysRef = useRef<Set<string>>(new Set());
+  const { mergedRules, addPending, dropPendingOutsideDsIds } = usePendingRules({
+    rules,
+    deletedRuleIds,
+    selectedDsIds,
+    onEvictWarning: (entry) => {
+      // One warning per key — reconcile can surface the same eviction on the
+      // same tick from multiple triggers.
+      if (warnedPendingKeysRef.current.has(entry.key)) return;
+      warnedPendingKeysRef.current.add(entry.key);
+      addToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.pendingRuleUnconfirmed.title', {
+          defaultMessage: "'{name}' isn't showing up yet",
+          values: { name: entry.optimisticRule.name },
+        }),
+        'warning',
+        i18n.translate('observability.alerting.alarmsPage.toast.pendingRuleUnconfirmed.body', {
+          defaultMessage:
+            "The rule was submitted but the querier hasn't confirmed it after 2 minutes. It may still appear — click Refresh, or check the datasource is reachable.",
+        })
+      );
+    },
+  });
+
+  // Register an optimistic pending row after a successful create/clone POST.
+  // The row is keyed on the create payload's (dsId, group, name) so it lines up
+  // with the eventual querier row; forcing `status: 'pending'` makes it render
+  // as the pending badge and keeps its actions disabled (its synthetic id would
+  // 404). See `pending_rules.ts`.
+  const addOptimisticPending = useCallback(
+    (
+      rule: UnifiedRuleSummary,
+      dsId: string,
+      group: string | undefined,
+      name: string,
+      origin: PendingEntry['origin']
+    ) => {
+      const entryKey = pendingRuleKey(dsId, group, name);
+      // Re-adding this key means a fresh create (e.g. a retry after a timeout);
+      // `pendingRulesStore.add` resets its clock, so clear any prior "didn't
+      // show up" warning too — otherwise a second timeout for the same rule
+      // would be silently suppressed by the once-per-key guard below.
+      warnedPendingKeysRef.current.delete(entryKey);
+      addPending({
+        key: entryKey,
+        dsId,
+        optimisticRule: { ...rule, datasourceId: dsId, group, status: 'pending' },
+        attempts: 0,
+        createdAt: Date.now(),
+        origin,
+      });
+    },
+    [addPending]
+  );
+
   const handleNavigateToDetectorResults = useCallback((href: string) => {
     if (coreRefs.application?.navigateToUrl) {
       coreRefs.application.navigateToUrl(href);
@@ -482,7 +635,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     window.location.assign(href);
   }, []);
 
-  const visibleRules = rules.filter((r) => !deletedRuleIds.has(r.id));
+  const visibleRules = useMemo(
+    () => mergedRules.filter((r) => !deletedRuleIds.has(r.id)),
+    [mergedRules, deletedRuleIds]
+  );
 
   // Fires when a user tries to select past `maxDatasources`. Pops a warning
   // toast with an in-toast link to the Advanced Settings entry so they can
@@ -560,8 +716,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     (ids: string[]) => {
       setSelectedDsIds(ids);
       setDeletedRuleIds(new Set());
+      // Drop pending rows whose datasource is no longer selected (but keep the
+      // rest — this is a scope change, not a blanket clear).
+      dropPendingOutsideDsIds(ids);
     },
-    [setSelectedDsIds]
+    [setSelectedDsIds, dropPendingOutsideDsIds]
   );
 
   // ---- Handlers ----
@@ -697,7 +856,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       }
       try {
         if (rule.datasourceType === 'prometheus') {
-          // Prometheus rules are deleted via the Cortex ruler API. Passing
+          // Prometheus rules are deleted via the Prometheus ruler API. Passing
           // the rule name makes the server splice just this rule out of the
           // group, preserving sibling rules in shared groups (the group is
           // only removed once it becomes empty).
@@ -810,7 +969,64 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     }
   };
 
+  // Names of clones issued this session but not yet reconciled into `rules` by
+  // a refetch. `isRuleNameTaken` only sees the fetched list, so cloning the
+  // same rule twice in quick succession (before the background refetch lands)
+  // would otherwise re-pick the same suffix and mint a duplicate name — the
+  // very bug the unique-naming aims to prevent. This ref bridges that window;
+  // entries are keyed by (datasourceId, lowercased name). A reserved name is
+  // released only if the create fails (see the catch) — on success it stays
+  // reserved until the refetch surfaces it in `rules` (which then covers it),
+  // at which point the reconcile effect below drops it.
+  const inFlightCloneNamesRef = useRef<Set<string>>(new Set());
+  // Normalized `trim().toLowerCase()` to match `isRuleNameTaken` (which is
+  // itself case-insensitive) — both sides compare names the same way, so a
+  // name differing only by case can't slip past the dedup.
+  const cloneNameKey = (dsId: string, name: string) => `${dsId}\n${name.trim().toLowerCase()}`;
+  // Once a reserved clone name lands in the fetched `rules`, `isRuleNameTaken`
+  // covers it, so drop it from the reservation set. This bounds the set to
+  // genuinely in-flight names (no unbounded per-session growth) and frees a
+  // name for reuse if that clone is later deleted (it left `rules`, so it's no
+  // longer reserved either).
+  useEffect(() => {
+    const set = inFlightCloneNamesRef.current;
+    if (set.size === 0) return;
+    // Mirror `isRuleNameTaken`'s soft-delete filter: a deleted rule can linger
+    // in `rules` (delete only marks `deletedRuleIds`, no immediate refetch), and
+    // `isRuleNameTaken` ignores it — so we must NOT treat its name as "present"
+    // here either, or we'd release the reservation while the name still reads as
+    // free, re-opening the duplicate-name window.
+    const present = new Set(
+      rules
+        .filter((r) => !deletedRuleIds.has(r.id))
+        .map((r) => cloneNameKey(r.datasourceId, r.name))
+    );
+    set.forEach((key) => {
+      if (present.has(key)) set.delete(key);
+    });
+  }, [rules, deletedRuleIds]);
+  // Build a unique clone name that also avoids names reserved by in-flight
+  // clones this session, then reserve the chosen name.
+  const takeUniqueCloneName = (
+    baseName: string,
+    makeSuffix: (n: number) => string,
+    dsId: string
+  ): string => {
+    const name = buildUniqueCloneName(
+      baseName,
+      makeSuffix,
+      (candidate) =>
+        isRuleNameTaken(candidate, dsId, undefined) ||
+        inFlightCloneNamesRef.current.has(cloneNameKey(dsId, candidate)),
+      PPL_MONITOR_NAME_MAX
+    );
+    inFlightCloneNamesRef.current.add(cloneNameKey(dsId, name));
+    return name;
+  };
+
   const handleCloneRule = async (monitor: UnifiedRuleSummary) => {
+    // Tracked so a failed create can release the reserved clone name.
+    let reservedCloneName: string | null = null;
     try {
       // Fetch the full rule detail to get the raw backend payload — the
       // summary shape doesn't carry the wire format needed for re-creation.
@@ -820,17 +1036,21 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         monitor.definitionType
       );
 
-      // Prometheus rules must be cloned via the Cortex ruler API, not the
+      // Prometheus rules must be cloned via the Prometheus ruler API, not the
       // OpenSearch Alerting monitor API (which requires `schedule`).
       if (detail.datasourceType === 'prometheus') {
         // Use a suffix that's safe for the ruleId regex [A-Za-z0-9_-]+
-        // (no spaces or parentheses).
-        const suffix = '-copy';
-        const baseName =
-          monitor.name.length + suffix.length > PPL_MONITOR_NAME_MAX
-            ? monitor.name.slice(0, PPL_MONITOR_NAME_MAX - suffix.length)
-            : monitor.name;
-        const clonedName = `${baseName}${suffix}`;
+        // (no spaces or parentheses), and disambiguate against existing rules
+        // so cloning the same rule twice yields `-copy`, `-copy-2`, … instead
+        // of two identical names. Prometheus rule identity is scoped by group,
+        // but the clone POST omits the group (server defaults it to the rule
+        // name), so we check datasource-wide to keep display names distinct.
+        const clonedName = takeUniqueCloneName(
+          monitor.name,
+          (n) => (n === 1 ? '-copy' : `-copy-${n}`),
+          monitor.datasourceId
+        );
+        reservedCloneName = clonedName;
 
         // Extract rule details from the unified shape + raw
         const rawDetail: unknown = detail.raw ?? {};
@@ -847,23 +1067,31 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             : String(raw.for || detail.pendingPeriod || '5m');
         const evalInterval = detail.evaluationInterval || '1m';
 
-        // Parse threshold from expression (e.g. "up == 0" → operator "==", threshold 0)
-        const parsed = detail.threshold || { operator: '>', value: 0 };
-
+        // Clone the stored PromQL expression VERBATIM. The expression itself is
+        // the complete alert condition, and the create/edit paths already send
+        // `query` unchanged for the server to use as-is. The clone path used to
+        // strip a trailing comparison and re-append a separately-parsed
+        // operator/threshold, which corrupted any expression whose trailing
+        // comparison differed from the first one — or had none at all. Examples
+        // that broke: `(a) > 0.8 and cap > 0` became `... and cap > 0.8`;
+        // `sum(rate(x[5m]))` gained a spurious `> 0`; `errors > 1e-05` became
+        // `errors > 1`. Sending `expr` as-is keeps the clone identical to its
+        // source.
         const payload = {
           name: clonedName,
-          query:
-            expr.replace(/\s*(>|>=|<|<=|==|!=)\s*[\d.]+(?:[eE][+-]?\d+)?\s*$/, '').trim() || expr,
-          operator: parsed.operator || '>',
-          threshold: parsed.value ?? 0,
+          query: expr,
           forDuration: duration,
           evaluationInterval: evalInterval,
           labels: rawLabels,
           annotations: rawAnnotations,
-          enabled: true,
+          // Start the clone DISABLED: enabling it immediately would spin up a
+          // second live rule firing the same notifications before the user has
+          // reviewed/renamed it. The user enables it explicitly afterwards.
+          enabled: false,
         };
         await mutations.createPrometheusRule(payload, monitor.datasourceId);
-        // Optimistic insert — show the cloned rule immediately in the UI
+        // Optimistic pending row — the clone POST has no groupName, so the
+        // server defaults the group to the (cloned) rule name.
         const optimisticClone: UnifiedRuleSummary = {
           ...monitor,
           id: `new-clone-${Date.now()}`,
@@ -871,27 +1099,55 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           group: clonedName,
           status: 'pending',
         };
-        setRules((prev) => [optimisticClone, ...prev]);
-        setRulesTotal((prev) => prev + 1);
+        addOptimisticPending(
+          optimisticClone,
+          monitor.datasourceId,
+          clonedName,
+          clonedName,
+          'clone'
+        );
         addToast(
           i18n.translate('observability.alerting.alarmsPage.toast.monitorCloned', {
             defaultMessage: 'Monitor cloned',
           })
         );
-        // Background refetch to reconcile with Cortex once it propagates
-        refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
+        // Background refetch: the optimistic pending row is already showing, so
+        // reconcile silently (no spinner, keeps any warning banner); the poll
+        // reconciles too if the rule is slow to propagate.
+        backgroundRefetchRules();
         return;
       }
 
       const rawDetail: unknown = detail.raw ?? {};
       const raw = rawDetail as Record<string, unknown>;
+      // `detail.raw` is the faithful upstream monitor document (see
+      // getOSRuleDetail), so it carries the real `monitor_type` and the fully
+      // wrapped, type-specific triggers we need for a valid re-create. Strip
+      // the server-owned / response-derived fields that must NOT be re-POSTed:
+      // identity + audit stamps (`id`, `*_time`, `schema_version`, `version`),
+      // ownership/principal/routing (`owner`, `user`, `data_sources`), and the
+      // read-only enrichments the alerting API adds on GET (`item_type`,
+      // `associated_workflows`, `associatedCompositeMonitorCnt`,
+      // `last_run_context`). `user` (the security principal: name/backend_roles)
+      // is stripped for parity with `owner` so the clone is attributed to and
+      // access-scoped by the CALLER — the alerting plugin re-assigns it from the
+      // request's auth context — rather than inheriting the original creator's
+      // roles on any config that doesn't override it. Legit create-time fields
+      // (e.g. the doc-level `delete_query_index_in_every_run` /
+      // `should_create_single_alert_for_findings`) fall through in `...rest`.
       const {
         id: _id,
         last_update_time: _t,
         enabled_time: _et,
         schema_version: _sv,
+        version: _v,
         owner: _ow,
+        user: _user,
         data_sources: _ds,
+        item_type: _it,
+        associated_workflows: _aw,
+        associatedCompositeMonitorCnt: _acmc,
+        last_run_context: _lrc,
         ...rest
       } = raw;
       // Strip trigger IDs so the backend assigns fresh ones. Triggers live
@@ -918,16 +1174,27 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         }
         return cleaned;
       });
-      const suffix = ' (Copy)';
-      const baseName =
-        monitor.name.length + suffix.length > PPL_MONITOR_NAME_MAX
-          ? monitor.name.slice(0, PPL_MONITOR_NAME_MAX - suffix.length)
-          : monitor.name;
+      // Disambiguate the clone name so cloning the same monitor twice yields
+      // `X (Copy)`, `X (Copy 2)`, … rather than two identical `X (Copy)`.
+      // OpenSearch monitors have no group, so the check is datasource-wide.
+      const clonedName = takeUniqueCloneName(
+        monitor.name,
+        (n) => (n === 1 ? ' (Copy)' : ` (Copy ${n})`),
+        monitor.datasourceId
+      );
+      reservedCloneName = clonedName;
+      // `rest.monitor_type` is the real upstream type (e.g.
+      // `cluster_metrics_monitor`, `bucket_level_monitor`), so it round-trips
+      // as-is — no reconstruction needed now that `raw` is faithful.
       const payload: Record<string, unknown> = {
         ...rest,
         triggers: cleanTriggers,
-        name: `${baseName}${suffix}`,
+        name: clonedName,
         type: 'monitor',
+        // Start the clone DISABLED (overriding the source's inherited `enabled`
+        // in `...rest`): a freshly-cloned monitor shouldn't fire the same alerts
+        // before the user reviews it. Matches the Prometheus clone path.
+        enabled: false,
       };
       await mutations.createMonitor(payload, monitor.datasourceId);
       addToast(
@@ -937,6 +1204,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       );
       refetchRules();
     } catch (e: unknown) {
+      // The create failed, so free the reserved name for the next attempt.
+      if (reservedCloneName) {
+        inFlightCloneNamesRef.current.delete(cloneNameKey(monitor.datasourceId, reservedCloneName));
+      }
       addToast(
         i18n.translate('observability.alerting.alarmsPage.toast.cloneMonitorFailed', {
           defaultMessage: 'Failed to clone alert rule',
@@ -1027,6 +1298,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         query: os.query,
         schedule: os.schedule,
         pplTriggers: os.pplTriggers,
+        useLookBackWindow: os.useLookBackWindow,
+        lookBackAmount: os.lookBackAmount,
+        lookBackUnit: os.lookBackUnit,
+        lookbackTimestampField: os.timeField,
       });
     }
     const formBody: unknown = form;
@@ -1037,13 +1312,19 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const dsId = resolveDatasourceId(formState);
     if (!dsId) return;
     const newRule = buildOptimisticRule(formState);
+    const isProm = formState.datasourceType === 'prometheus';
+    // Group the optimistic pending row is keyed on. Prometheus rules carry a
+    // group (from the _ruleGroup transport label or the rule name); OpenSearch
+    // monitors have none.
+    let optimisticGroup: string | undefined;
     try {
-      if (formState.datasourceType === 'prometheus') {
-        // Prometheus rules go to the Cortex ruler API
+      if (isProm) {
+        // Prometheus rules go to the Prometheus ruler API
         const promForm = formState as PrometheusFormState;
         // _ruleGroup is a form-transport metadata label, not a real Prometheus
         // label — extract it into groupName and strip it from persisted labels.
         const ruleGroupLabel = promForm.labels.find((l) => l.key === '_ruleGroup')?.value;
+        optimisticGroup = ruleGroupLabel || promForm.name;
         const payload = buildPrometheusRulePayload({
           name: promForm.name,
           query: promForm.query,
@@ -1058,27 +1339,31 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             promForm.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
           ),
           enabled: promForm.enabled,
-          groupName: ruleGroupLabel || promForm.name,
+          groupName: optimisticGroup,
         });
         await mutations.createPrometheusRule(payload, dsId);
-
-        // Cortex has eventual consistency (~30-60s propagation). Use
-        // optimistic pattern: close flyout immediately, show toast, and
-        // schedule a background refetch after 15s to sync the list.
-        refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
       } else {
         await mutations.createMonitor(buildPayload(formState), dsId);
       }
-      showMonitorCreatedToast({ monitorName: formState.name, dsId });
+      // Prometheus creates lag the querier (~30-60s), so hint at the delay;
+      // OpenSearch monitors confirm immediately.
+      showMonitorCreatedToast({ monitorName: formState.name, dsId, pending: isProm });
       setShowCreateMonitor(false);
       setCreateBackendType(null);
       setPplSubmitError(null);
-      // Refetch rules so the new monitor (with backend-assigned id /
-      // last_update_time) shows up in the list. Optimistic insert is kept
-      // for the UI to feel instant; the refetch reconciles.
-      setRules((prev) => [newRule, ...prev]);
-      setRulesTotal((prev) => prev + 1);
-      refetchRules();
+      if (isProm) {
+        // Prometheus lags the querier ~60s: layer an optimistic pending row so
+        // the UI is instant, then reconcile it via a BACKGROUND refetch — no
+        // spinner over the row that's already showing, and any cross-datasource
+        // warning banner survives — plus the ongoing poll.
+        addOptimisticPending(newRule, dsId, optimisticGroup, formState.name, 'create');
+        backgroundRefetchRules();
+      } else {
+        // OpenSearch confirms immediately (no querier lag), so no optimistic
+        // pending row — one would wrongly render as a disabled spinner. A
+        // foreground refetch shows the loading state until the real row lands.
+        refetchRules();
+      }
     } catch (e: unknown) {
       const message = extractServerErrorMessage(e);
       const pplError = extractPplValidationError(message);
@@ -1109,7 +1394,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
    * Post-save handler for the shared CreateMetricsMonitor flyout (the same
    * component the Metrics Explore page uses). The flyout persists the rule
    * itself via the http client; this handler only reconciles the page:
-   * optimistic insert, close, and a delayed refetch to bridge Cortex's
+   * optimistic insert, close, and a delayed refetch to bridge Prometheus's
    * eventual consistency (~30-60s propagation).
    */
   const handleMetricsRuleSaved = (form: MetricsMonitorFormState) => {
@@ -1152,10 +1437,17 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const newRule = buildOptimisticRule(promForm);
     setShowCreateMonitor(false);
     setCreateBackendType(null);
-    setRules((prev) => [newRule, ...prev]);
-    setRulesTotal((prev) => prev + 1);
-    refetchRules();
-    refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
+    // The flyout persisted the rule itself with groupName `form.groupName ||
+    // form.monitorName` — key the optimistic pending row on the same tuple.
+    addOptimisticPending(
+      newRule,
+      form.datasourceId,
+      form.groupName || form.monitorName,
+      form.monitorName,
+      'metrics'
+    );
+    // Optimistic row is showing — reconcile silently via background refetch + poll.
+    backgroundRefetchRules();
   };
 
   const handleEditMonitor = async (formState: MonitorFormState, ruleId: string) => {
@@ -1169,6 +1461,26 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         // _ruleGroup is a form-transport metadata label — extract it into
         // groupName and strip it from persisted labels.
         const ruleGroupLabel = promForm.labels.find((l) => l.key === '_ruleGroup')?.value;
+
+        // Resolve the rule's ORIGINAL identity (group, name) so we can tell an
+        // in-place edit from a rename/group move. `ruleId` is normally the row
+        // the user opened, so the rule is in the loaded `rules` — but a stale
+        // list or a background-refetch race could miss it, which we treat as the
+        // unsafe case (see below).
+        const originalRule = rules.find((r) => r.id === ruleId);
+        const newGroupName = ruleGroupLabel || promForm.name;
+        // Overwrite ONLY for a confirmed in-place edit: the rule was found AND
+        // its (group, name) is unchanged — the rule replacing itself, which the
+        // server's create-collision guard would otherwise reject with a 409. For
+        // a rename, a group move, OR when the original rule can't be resolved, we
+        // must NOT force overwrite: doing so could let the create silently
+        // destroy a DIFFERENT rule already occupying the target (group, name).
+        // Without overwrite the server returns 409 and the collision surfaces as
+        // an error instead of causing silent data loss.
+        const isInPlaceEdit =
+          !!originalRule &&
+          (originalRule.group || originalRule.name) === newGroupName &&
+          originalRule.name === promForm.name;
         const payload = buildPrometheusRulePayload({
           name: promForm.name,
           query: promForm.query,
@@ -1183,28 +1495,30 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             promForm.annotations.filter((a) => a.key && a.value).map((a) => [a.key, a.value])
           ),
           enabled: promForm.enabled,
-          groupName: ruleGroupLabel || promForm.name,
+          groupName: newGroupName,
+          overwrite: isInPlaceEdit,
         });
         // Create new rule first, then delete old on success (prevents data loss
         // if create fails — worst case is a harmless duplicate).
         await mutations.createPrometheusRule(payload, dsId);
 
-        const originalRule = rules.find((r) => r.id === ruleId);
-        const originalName = originalRule?.name || promForm.name;
-        const originalGroupName = originalRule?.group || originalName;
-        const newGroupName = ruleGroupLabel || promForm.name;
-        // If the rule was renamed or moved to a different group, remove the
-        // old copy. The rule-level delete splices it out of the old group,
-        // preserving any sibling rules that share the group.
-        if (originalGroupName !== newGroupName || originalName !== promForm.name) {
+        // Remove the old copy only when we KNOW the original identity AND it
+        // changed (rename/group move). The rule-level delete splices it out of
+        // the old group, preserving siblings. When the original rule wasn't
+        // resolved we skip the delete entirely — deleting a guessed name could
+        // remove the rule we just created.
+        if (originalRule && !isInPlaceEdit) {
+          const originalName = originalRule.name;
+          const originalGroupName = originalRule.group || originalRule.name;
           try {
             await mutations.deletePrometheusRule(dsId, originalGroupName, originalName);
           } catch {
             // Orphaned old rule — harmless, user can delete manually
           }
         }
-        // Background refetch to reconcile with Cortex once it propagates
-        refetchTimerRef.current = setTimeout(() => refetchRules(), 15000);
+        // Immediate refetch; the background poll continues to reconcile once
+        // Prometheus propagates the edited rule.
+        refetchRules();
       } else {
         await mutations.updateMonitor(ruleId, buildPayload(formState), dsId);
         // Immediate refetch for OpenSearch monitors (no propagation delay)
@@ -1221,45 +1535,26 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       const message = extractServerErrorMessage(e);
       const pplError = extractPplValidationError(message);
       if (pplError) setPplSubmitError(pplError);
+      // A rename/group-move that lands on an existing rule now reaches the user
+      // as a 409 (the edit no longer force-overwrites). Special-case it into an
+      // actionable title instead of the generic failure, keeping the raw server
+      // message as the toast detail.
+      const isNameCollision =
+        extractServerErrorStatus(e) === 409 || /already exists/i.test(message);
       addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.updateMonitorFailed', {
-          defaultMessage: 'Failed to update alert rule',
-        }),
+        isNameCollision
+          ? i18n.translate('observability.alerting.alarmsPage.toast.updateMonitorNameCollision', {
+              defaultMessage:
+                'A rule named "{name}" already exists in this group. Rename it or pick a different group.',
+              values: { name: formState.name },
+            })
+          : i18n.translate('observability.alerting.alarmsPage.toast.updateMonitorFailed', {
+              defaultMessage: 'Failed to update alert rule',
+            }),
         'danger',
         message
       );
     }
-  };
-
-  const handleBatchCreateMonitors = async (forms: MonitorFormState[]) => {
-    const succeededRules: UnifiedRule[] = [];
-    for (let i = 0; i < forms.length; i++) {
-      const dsId = resolveDatasourceId(forms[i]);
-      if (!dsId) continue;
-      try {
-        await mutations.createMonitor(buildPayload(forms[i]), dsId);
-        succeededRules.push(buildOptimisticRule(forms[i], i));
-      } catch (e: unknown) {
-        addToast(
-          i18n.translate('observability.alerting.alarmsPage.toast.createMonitorFailed', {
-            defaultMessage: 'Failed to create alert rule',
-          }),
-          'danger',
-          extractServerErrorMessage(e)
-        );
-      }
-    }
-    if (succeededRules.length > 0) {
-      addToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.monitorsCreated', {
-          defaultMessage: '{count} alert rule(s) created successfully',
-          values: { count: succeededRules.length },
-        })
-      );
-      setRules((prev) => [...succeededRules, ...prev]);
-      setRulesTotal((prev) => prev + succeededRules.length);
-    }
-    // Don't close flyout — AI wizard shows its own summary step and "Done" button
   };
 
   // ---- Render ----
@@ -1275,10 +1570,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     {
       id: 'rules' as TabId,
       name:
+        // Count what the table actually renders — `visibleRules` includes the
+        // optimistic pending rows (and drops optimistically-deleted ones), so
+        // the badge stays in sync with the list during the confirm window.
+        // `rulesTotal` (querier length) is used only for the not-yet-loaded
+        // sentinel: -1 → show "Rules" with no count.
         rulesTotal >= 0
           ? i18n.translate('observability.alerting.alarmsPage.tabs.rulesCount', {
               defaultMessage: 'Rules ({count})',
-              values: { count: rulesTotal },
+              values: { count: visibleRules.length },
             })
           : i18n.translate('observability.alerting.alarmsPage.tabs.rules', {
               defaultMessage: 'Rules',
@@ -1329,6 +1629,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             onTimeChange={handleTimeChange}
             onRefresh={handleRefreshTime}
             datasourceErrorMap={datasourceErrorMapByName}
+            initialSearchQuery={deepLink.q}
           />
         </>
       );
@@ -1339,6 +1640,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           rules={visibleRules}
           datasources={datasources}
           loading={dataLoading}
+          onRefresh={refetchRules}
+          refreshing={dataLoading}
           onDelete={handleDeleteRules}
           onClone={handleCloneRule}
           onEdit={(monitor) => setEditTarget({ dsId: monitor.datasourceId, ruleId: monitor.id })}
@@ -1520,7 +1823,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       ) : showCreateMonitor ? (
         <CreateMonitor
           onSave={handleCreateMonitor}
-          onBatchSave={handleBatchCreateMonitors}
           onCancel={() => {
             setShowCreateMonitor(false);
             setCreateBackendType(null);

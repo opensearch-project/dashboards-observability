@@ -5,7 +5,6 @@
 
 import {
   parseDuration,
-  formatDuration,
   PPL_MONITOR_NAME_MAX,
   PPL_NOTIFICATION_MESSAGE_MAX,
   PPL_NOTIFICATION_SUBJECT_MAX,
@@ -42,16 +41,6 @@ describe('parseDuration', () => {
     expect(parseDuration('')).toEqual({ valid: false, seconds: 0, error: 'Duration is required' });
     expect(parseDuration('abc')).toMatchObject({ valid: false });
     expect(parseDuration('0s')).toMatchObject({ valid: false, error: 'Duration must be positive' });
-  });
-});
-
-describe('formatDuration', () => {
-  it('formats seconds to human-readable', () => {
-    expect(formatDuration(86400)).toBe('1d');
-    expect(formatDuration(3600)).toBe('1h');
-    expect(formatDuration(120)).toBe('2m');
-    expect(formatDuration(45)).toBe('45s');
-    expect(formatDuration(0)).toBe('0s');
   });
 });
 
@@ -149,10 +138,12 @@ describe('validatePplForm', () => {
     expect(validatePplForm(f).errors.query).toMatch(/required/i);
   });
 
-  it('rejects query above the cap', () => {
+  it('does NOT reject a long query client-side (backend enforces the real cap)', () => {
     const f = validPplForm();
-    f.query = 'a'.repeat(PPL_QUERY_MAX_LENGTH + 1);
-    expect(validatePplForm(f).errors.query).toMatch(/2000/);
+    f.query = 'source = idx | where ' + 'a'.repeat(PPL_QUERY_MAX_LENGTH + 1);
+    // A cluster may raise `ppl_monitor_max_query_length`; blocking here would
+    // lock out those users. The backend rejects with a limit-naming message.
+    expect(validatePplForm(f).errors.query).toBeUndefined();
   });
 
   it('rejects empty triggers list', () => {

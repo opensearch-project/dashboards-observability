@@ -12,7 +12,7 @@
  *     fingerprint-named recording rules (no `slo_id=` selector), and maps
  *     samples back to objectives via the SO's fingerprint map.
  *   - A shared fingerprint across SLOs: the aggregator still makes its own
- *     per-SLO query, but the PromQL string is identical — demonstrates Cortex
+ *     per-SLO query, but the PromQL string is identical — demonstrates Prometheus
  *     can serve both from the same underlying recording series.
  *   - `rules_missing` from the health checker still wins (priority merge).
  *   - `expectedRuleGroupsFor` returns the dedup recording-group names + the
@@ -38,11 +38,11 @@ function noopLogger(): Logger {
 function ds(): Datasource {
   return {
     id: 'prom-ds-001',
-    name: 'my cortex',
+    name: 'my prometheus',
     type: 'prometheus',
     url: '',
     enabled: true,
-    directQueryName: 'my-cortex-connection',
+    directQueryName: 'my-prometheus-connection',
   };
 }
 
@@ -103,9 +103,10 @@ function dedupDoc(
   };
 }
 
-function instantForMetrics(
-  samples: Array<{ name: string; ratio: number; tsSec?: number }>
-): { resultType: 'vector'; result: unknown[] } {
+function instantForMetrics(samples: Array<{ name: string; ratio: number; tsSec?: number }>): {
+  resultType: 'vector';
+  result: unknown[];
+} {
   return {
     resultType: 'vector',
     result: samples.map((s) => ({
@@ -148,7 +149,7 @@ function envelopeToDataFrame(envelope: {
     type: 'data_frame',
     body: {
       type: 'data_frame',
-      name: 'cortex',
+      name: 'prometheus',
       schema: [],
       fields: [
         { name: 'Time', type: 'time', values: Time },
@@ -180,15 +181,15 @@ function mockClient(
     if (p.path.endsWith('/api/v1/alerts')) return { statusCode: 200, body: alertsHandler() };
     throw new Error(`Unexpected transport path: ${p.path}`);
   });
-  const searcher = (jest.fn(async (_ctx, req, _options) => {
+  const searcher = jest.fn(async (_ctx, req, _options) => {
     const reqBody = (req as { body?: unknown }).body;
     return envelopeToDataFrame(
       queryHandler(reqBody) as Parameters<typeof envelopeToDataFrame>[0]
     ) as never;
-  }) as unknown) as jest.MockedFunction<PromQLSearcher>;
+  }) as unknown as jest.MockedFunction<PromQLSearcher>;
   setPromQLSearcher(searcher as PromQLSearcher);
   return {
-    client: ({ transport: { request } } as unknown) as AlertingOSClient,
+    client: { transport: { request } } as unknown as AlertingOSClient,
     request,
     searcher,
   };
@@ -250,7 +251,7 @@ describe('DirectQueryStatusAggregator — dedup path', () => {
     expect(options).toEqual({ strategy: 'promql' });
   });
 
-  it('two SLOs sharing a fingerprint: each produces an identical query (Cortex can serve from one series)', async () => {
+  it('two SLOs sharing a fingerprint: each produces an identical query (Prometheus can serve from one series)', async () => {
     const docA = dedupDoc('slo-a', { 'availability-99-9': 'abcdef0123456789' });
     const docB = dedupDoc('slo-b', { 'availability-99-9': 'abcdef0123456789' }, { name: 'B' });
     const queries: string[] = [];

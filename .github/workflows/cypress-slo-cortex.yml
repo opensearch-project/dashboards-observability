@@ -395,10 +395,10 @@ jobs:
       # -----------------------------------------------------------------------
       # 4. Run Cypress
       # -----------------------------------------------------------------------
-      - name: Run Cypress SLO specs
+      - name: Run Cypress SLO + Prometheus alerting specs
         run: |
           cd ./OpenSearch-Dashboards/plugins/dashboards-observability
-          yarn cypress:run --headless --spec '.cypress/integration/slo_test/*.spec.js'
+          yarn cypress:run --headless --spec '.cypress/integration/slo_test/*.spec.js,.cypress/integration/alerting_test/metrics_rule_preview_api.spec.js'
         env:
           CYPRESS_sloDatasourceId: ${{ steps.register-ds.outputs.ds_name }}
           CYPRESS_cortexBaseUrl: 'http://localhost:9090'

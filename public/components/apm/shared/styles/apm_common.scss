@@ -3,17 +3,71 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Fix: Remove borders from APM range filter sliders
 .apm-range-filter .euiRangeSlider {
   border: none;
 }
 
-// APM Legacy Banner - make parent container full width
 .apm-legacy-banner-wrapper {
   width: 100%;
 }
 
-// Target the parent euiHeaderSectionItem to be full width when containing the banner
 .euiHeaderSectionItem:has(.apm-legacy-banner-wrapper) {
   width: 100%;
+}
+
+// APM filter sidebar: single-line ellipsis for long environment / attribute
+// value labels (paired with the shared TruncatedLabel hover tooltip). Each
+// checkbox row and its label must be width-bounded (min-width: 0) at every
+// level or the inner `text-overflow: ellipsis` never engages.
+//
+// Both `eui*` and `oui*` selectors are listed: the runtime EUI shipped by
+// OpenSearch Dashboards renders `eui*` DOM classes, while `@opensearch-project/oui`
+// renders `oui*` — cover both so truncation holds regardless of which is loaded.
+.apmFilterCheckboxGroup {
+  .euiCheckboxGroup__item,
+  .euiCheckbox,
+  .ouiCheckboxGroup__item,
+  .ouiCheckbox {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .euiCheckbox__label,
+  .ouiCheckbox__label {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+}
+
+// APM attribute group accordion: truncate a long attribute-path title in the
+// accordion header instead of pushing the caret / layout out of the panel. The
+// `min-width: 0` cascade must reach every level or the inner TruncatedLabel
+// `text-overflow: ellipsis` never engages:
+//   accordion button (flex-grow child of the trigger wrapper, next to the
+//   arrow) -> IEFlexWrapFix (the span EUI/OUI wraps `buttonContent` in) ->
+//   .apmAttributeTitleText (our EuiText) -> TruncatedLabel.
+// The arrow is a sibling of the button (`flex-shrink: 0` already) so it stays
+// visible next to the ellipsis. Both `eui*`/`oui*` class names are covered.
+.apmAttributeAccordion {
+  .euiAccordion__button,
+  .ouiAccordion__button {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .euiIEFlexWrapFix,
+  .ouiIEFlexWrapFix {
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  // Bold the title (the block-level TruncatedLabel replaces the former <strong>).
+  .apmAttributeTitleText {
+    min-width: 0;
+    overflow: hidden;
+    font-weight: $euiFontWeightBold;
+  }
 }

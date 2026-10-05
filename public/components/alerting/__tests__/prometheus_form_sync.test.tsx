@@ -6,10 +6,11 @@
 /**
  * Tests for the Prometheus form section (simplified Create Rule flyout).
  *
- * The form is builder-only: the PromQL query assembled from the metric and
- * label filters is the complete alert expression. There is no Code mode,
- * Trigger condition, or per-rule evaluation settings (those are rule-group
- * concerns in managed Prometheus).
+ * The Query section offers a Builder ⇄ Code toggle: the point-and-click builder
+ * OR a raw PromQL expression (the complete alert condition). An existing rule
+ * the builder can't represent opens in Code so it is never silently clobbered.
+ * There is still no Trigger condition or per-rule evaluation settings (those are
+ * rule-group concerns in managed Prometheus).
  *
  * Note: label-based queries (getByLabelText) are unreliable here because the
  * test environment stubs htmlIdGenerator, giving every form control the same
@@ -18,8 +19,16 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { PrometheusFormSection } from '../create_monitor/prometheus_form_section';
-import { parseBuilderQuery } from '../create_monitor/prom_query_builder';
+import { parseExpr } from '../create_monitor/prom_query_builder';
 import type { PrometheusFormState } from '../create_monitor/create_monitor_types';
+import type { LabelEntry } from '../monitor_form_components';
+
+/** The subset of LabelEditor props the sync tests capture and assert against. */
+interface CapturedLabelEditorProps {
+  labels: LabelEntry[];
+  onChange: (labels: LabelEntry[]) => void;
+  context?: { service?: string; team?: string };
+}
 
 // Mock dependencies that PrometheusFormSection uses
 jest.mock('../monitor_form_components', () => ({
@@ -35,6 +44,12 @@ jest.mock('../query_services/alerting_prom_resources_service', () => ({
     listLabelNames: jest.fn().mockResolvedValue({ labels: ['job', 'instance'] }),
     listLabelValues: jest.fn().mockResolvedValue({ values: ['node-exporter'] }),
     listRuleGroupNames: jest.fn().mockResolvedValue({ groups: ['team-a-rules', 'team-b-rules'] }),
+    runQueryPreview: jest.fn().mockResolvedValue({
+      points: [
+        { timestamp: 1_700_000_000_000, value: 0.02 },
+        { timestamp: 1_700_000_060_000, value: 0.05 },
+      ],
+    }),
   })),
 }));
 
@@ -71,10 +86,16 @@ describe('PrometheusFormSection — simplified layout', () => {
     // combo box placeholder text
     expect(screen.getAllByText('Label name').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Label value').length).toBeGreaterThan(0);
-    expect(screen.getByText('Select a metric to start.')).toBeInTheDocument();
+    // The Function + Aggregate + Condition rows render too.
+    expect(screen.getByText('Function')).toBeInTheDocument();
+    expect(screen.getByText('Aggregate')).toBeInTheDocument();
+    expect(screen.getByText('Condition')).toBeInTheDocument();
+    // baseForm's `up == 0` is now builder-representable, so it seeds the metric
+    // and the IS-EQUAL-TO condition rather than leaving the builder inert.
+    expect(screen.getByText('up')).toBeInTheDocument();
   });
 
-  it('does not render Code mode, Trigger condition, or Evaluation Settings', () => {
+  it('renders the Builder/Code toggle but not Trigger condition or Evaluation Settings', () => {
     render(
       <PrometheusFormSection
         form={baseForm}
@@ -84,7 +105,11 @@ describe('PrometheusFormSection — simplified layout', () => {
       />
     );
 
-    expect(screen.queryByText('Code')).not.toBeInTheDocument();
+    // The Builder ⇄ Code toggle is present (so a builder-unrepresentable rule
+    // can be edited as raw PromQL instead of a blank builder).
+    expect(screen.getByTestId('prometheusQueryModeToggle')).toBeInTheDocument();
+    // ...but the query-driven simplifications still apply: no Trigger condition,
+    // operator, or per-rule evaluation settings.
     expect(screen.queryByText(/Query library/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Metric browser/)).not.toBeInTheDocument();
     expect(screen.queryByText('Trigger condition')).not.toBeInTheDocument();
@@ -115,13 +140,14 @@ describe('PrometheusFormSection — simplified layout', () => {
     );
   });
 
-  it('shows preview results after clicking Run preview', () => {
+  it('runs a real range query and renders the results chart after clicking Run preview', async () => {
     render(
       <PrometheusFormSection
         form={baseForm}
         onUpdate={jest.fn()}
         validationErrors={{}}
         hasSubmitted={false}
+        datasourceId="ds-1"
       />
     );
 
@@ -130,8 +156,51 @@ describe('PrometheusFormSection — simplified layout', () => {
 
     fireEvent.click(screen.getByTestId('prometheusRunPreviewButton'));
 
-    expect(screen.getByTestId('echarts-render')).toBeInTheDocument();
-    expect(screen.getByText('Sample data — run the rule to see real results')).toBeInTheDocument();
+    // The chart renders once the live range query resolves (no more hardcoded
+    // "sample data" callout).
+    expect(await screen.findByTestId('echarts-render')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Sample data — run the rule to see real results')
+    ).not.toBeInTheDocument();
+  });
+
+  it('notes when the expression matched multiple series (only the first is charted)', async () => {
+    // Reconfigure the mocked resources service so the preview reports 3 matching
+    // series — the chart still plots one line, but the UI must say so.
+    const { AlertingPromResourcesService } = jest.requireMock(
+      '../query_services/alerting_prom_resources_service'
+    );
+    // Save the file-level default so overriding it here doesn't leak into
+    // later tests that rely on the original metric/label/group fixtures.
+    const original = AlertingPromResourcesService.getMockImplementation();
+    AlertingPromResourcesService.mockImplementation(() => ({
+      listMetricNames: jest.fn().mockResolvedValue({ metrics: ['up'] }),
+      listLabelNames: jest.fn().mockResolvedValue({ labels: [] }),
+      listLabelValues: jest.fn().mockResolvedValue({ values: [] }),
+      listRuleGroupNames: jest.fn().mockResolvedValue({ groups: [] }),
+      runQueryPreview: jest.fn().mockResolvedValue({
+        points: [{ timestamp: 1_700_000_000_000, value: 1 }],
+        query: 'up',
+        seriesCount: 3,
+      }),
+    }));
+
+    try {
+      render(
+        <PrometheusFormSection
+          form={baseForm}
+          onUpdate={jest.fn()}
+          validationErrors={{}}
+          hasSubmitted={false}
+          datasourceId="ds-1"
+        />
+      );
+      fireEvent.click(screen.getByTestId('prometheusRunPreviewButton'));
+
+      expect(await screen.findByText(/Matched 3 series/)).toBeInTheDocument();
+    } finally {
+      AlertingPromResourcesService.mockImplementation(original);
+    }
   });
 
   it('renders the "Build query in metrics" link in the query panel header', () => {
@@ -230,10 +299,10 @@ describe('PrometheusFormSection — rule group', () => {
 
   it('hides _ruleGroup from the label editor and preserves it through label edits', () => {
     const onUpdate = jest.fn();
-    const labelEditorProps: any[] = [];
+    const labelEditorProps: CapturedLabelEditorProps[] = [];
     // Capture what LabelEditor receives via the module mock
     const { LabelEditor } = jest.requireMock('../monitor_form_components');
-    LabelEditor.mockImplementation((props: any) => {
+    LabelEditor.mockImplementation((props: CapturedLabelEditorProps) => {
       labelEditorProps.push(props);
       return <div data-test-subj="label-editor" />;
     });
@@ -337,13 +406,13 @@ describe('PrometheusFormSection — YAML preview', () => {
   });
 });
 
-describe('parseBuilderQuery — edit-mode builder seeding', () => {
+describe('parseExpr — edit-mode builder seeding', () => {
   it('parses a bare metric', () => {
-    expect(parseBuilderQuery('up')).toEqual({ metric: 'up' });
+    expect(parseExpr('up')).toMatchObject({ metric: 'up', conditionOp: 'none', func: 'none' });
   });
 
   it('parses a metric with a single label matcher', () => {
-    expect(parseBuilderQuery('up{instance="host-1"}')).toEqual({
+    expect(parseExpr('up{instance="host-1"}')).toMatchObject({
       metric: 'up',
       labelName: 'instance',
       labelOperator: '=',
@@ -352,7 +421,7 @@ describe('parseBuilderQuery — edit-mode builder seeding', () => {
   });
 
   it('unescapes quotes and backslashes in the label value', () => {
-    expect(parseBuilderQuery('up{path="C:\\\\dir\\"x\\""}')).toEqual({
+    expect(parseExpr('up{path="C:\\\\dir\\"x\\""}')).toMatchObject({
       metric: 'up',
       labelName: 'path',
       labelOperator: '=',
@@ -360,11 +429,30 @@ describe('parseBuilderQuery — edit-mode builder seeding', () => {
     });
   });
 
+  it('now parses a simple comparison the builder can represent', () => {
+    expect(parseExpr('up == 0')).toMatchObject({
+      metric: 'up',
+      conditionOp: 'eq',
+      thresholdA: 0,
+    });
+  });
+
+  it('now parses an aggregation-over-function expression the builder can represent', () => {
+    expect(parseExpr('sum(rate(http_requests_total[5m])) > 0.05')).toMatchObject({
+      metric: 'http_requests_total',
+      func: 'rate',
+      window: '5m',
+      aggOp: 'sum',
+      conditionOp: 'gt',
+      thresholdA: 0.05,
+    });
+  });
+
   it('returns null for expressions the builder cannot represent', () => {
-    expect(parseBuilderQuery('sum(rate(http_requests_total[5m])) > 0.05')).toBeNull();
-    expect(parseBuilderQuery('up == 0')).toBeNull();
-    expect(parseBuilderQuery('up{a="1",b="2"}')).toBeNull();
-    expect(parseBuilderQuery('')).toBeNull();
+    // Nested aggregation / functions the builder does not model.
+    expect(parseExpr('histogram_quantile(0.9, rate(http_requests_total[5m]))')).toBeNull();
+    expect(parseExpr('up{a="1",b="2"}')).toBeNull();
+    expect(parseExpr('')).toBeNull();
   });
 });
 
@@ -404,19 +492,37 @@ describe('PrometheusFormSection — edit mode seeding', () => {
     expect(onUpdate).toHaveBeenCalledWith('query', '');
   });
 
-  it('does not clobber a complex seeded query on mount', () => {
+  it('does not re-emit / rewrite a non-canonically-spaced seeded query on mount', () => {
     const onUpdate = jest.fn();
     render(
       <PrometheusFormSection
-        form={{ ...baseForm, query: 'sum(rate(http_requests_total[5m])) > 0.05' }}
+        form={{ ...baseForm, query: 'up{ job = "api" }' }}
         onUpdate={onUpdate}
         validationErrors={{}}
         hasSubmitted={false}
       />
     );
 
-    // Builder is unseeded (query not representable), so the builder→query
-    // sync must stay inert — no query updates on mount
+    // The builder seeds its fields from the query but must NOT rewrite it on
+    // mount — re-emitting would normalize the whitespace the user never touched
+    // (`up{ job = "api" }` → `up{job="api"}`) and spuriously mark the form dirty.
+    expect(onUpdate).not.toHaveBeenCalledWith('query', expect.anything());
+  });
+
+  it('does not clobber a non-representable seeded query on mount', () => {
+    const onUpdate = jest.fn();
+    render(
+      <PrometheusFormSection
+        form={{ ...baseForm, query: 'histogram_quantile(0.9, rate(http_requests_total[5m]))' }}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    // This query genuinely can't be represented by the builder (parseExpr → null),
+    // so the builder stays inert and its builder→query sync must never fire —
+    // the hand-written expression is preserved, no query updates on mount.
     expect(onUpdate).not.toHaveBeenCalledWith('query', expect.anything());
   });
 });
@@ -435,5 +541,97 @@ describe('PrometheusFormSection — notification routing', () => {
     expect(screen.queryByText('Notification routing')).not.toBeInTheDocument();
     // The Labels section hint still conveys the routing relationship
     expect(screen.getByText('Categorize and route alerts')).toBeInTheDocument();
+  });
+});
+
+describe('PrometheusFormSection — Builder ⇄ Code toggle', () => {
+  // An `or`-joined expression the builder cannot represent (parseExpr → null).
+  const complexExpr = 'rate(a[5m]) > 0 or rate(b[5m]) > 0';
+
+  it('opens a builder-unrepresentable rule in Code mode showing the raw expression', () => {
+    render(
+      <PrometheusFormSection
+        form={{ ...baseForm, query: complexExpr }}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    const textarea = screen.getByTestId('prometheusPromQlExpression') as HTMLTextAreaElement;
+    expect(textarea).toBeInTheDocument();
+    expect(textarea.value).toBe(complexExpr);
+    // The builder's metric picker is not mounted in Code mode.
+    expect(screen.queryByText('Metric')).not.toBeInTheDocument();
+  });
+
+  it('opens a builder-representable rule in Builder mode (no Code textarea)', () => {
+    render(
+      <PrometheusFormSection
+        form={baseForm}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    expect(screen.queryByTestId('prometheusPromQlExpression')).not.toBeInTheDocument();
+    expect(screen.getByText('Metric')).toBeInTheDocument();
+  });
+
+  it('edits raw PromQL in Code mode without routing through the builder', () => {
+    const onUpdate = jest.fn();
+    render(
+      <PrometheusFormSection
+        form={{ ...baseForm, query: complexExpr }}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    const next = `${complexExpr} or rate(c[5m]) > 0`;
+    fireEvent.change(screen.getByTestId('prometheusPromQlExpression'), { target: { value: next } });
+    expect(onUpdate).toHaveBeenCalledWith('query', next);
+  });
+
+  it('warns before the builder would overwrite an unrepresentable expression', () => {
+    render(
+      <PrometheusFormSection
+        form={{ ...baseForm, query: complexExpr }}
+        onUpdate={jest.fn()}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    // No warning in Code mode (the expression is shown as-is).
+    expect(screen.queryByTestId('prometheusBuilderOverwriteWarning')).not.toBeInTheDocument();
+
+    // Switching to Builder surfaces the overwrite guard — the raw expression is
+    // preserved until the user actually picks a metric.
+    fireEvent.click(screen.getByText('Builder'));
+    expect(screen.getByTestId('prometheusBuilderOverwriteWarning')).toBeInTheDocument();
+  });
+
+  it('does not emit a query update when the Builder mounts with an unrepresentable expression', () => {
+    const onUpdate = jest.fn();
+    render(
+      <PrometheusFormSection
+        form={{ ...baseForm, query: complexExpr }}
+        onUpdate={onUpdate}
+        validationErrors={{}}
+        hasSubmitted={false}
+      />
+    );
+
+    // Toggle from the default Code mode into Builder, mounting PromQueryBuilder
+    // with a query parseExpr() can't represent. This is the guarantee the
+    // overwrite-warning callout promises: the builder seeds inert and must NOT
+    // emit onQueryChange on mount — the hand-written expression is preserved
+    // until the user actually picks a metric.
+    fireEvent.click(screen.getByText('Builder'));
+    expect(screen.getByText('Metric')).toBeInTheDocument();
+    expect(onUpdate).not.toHaveBeenCalledWith('query', expect.anything());
   });
 });

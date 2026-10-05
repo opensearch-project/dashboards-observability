@@ -52,6 +52,26 @@ import { ObservabilitySavedVisualization } from '../../../../services/saved_obje
 import { ParaInput } from './para_input';
 import { ParaOutput } from './para_output';
 
+// Core dashboard "Maximize panel" action id, disabled for notebook-embedded
+// visualizations where the in-place expand does not render correctly.
+const EXPAND_PANEL_ACTION_ID = 'togglePanel';
+
+// Disables the "Maximize panel" action on every panel of a dashboard input,
+// covering visualizations saved before this behavior existed.
+const disableExpandPanelAction = (input: DashboardContainerInput): DashboardContainerInput => {
+  const panels = Object.entries(input.panels ?? {}).reduce(
+    (acc, [key, panel]) => {
+      const disabledActions = Array.from(
+        new Set([...(panel.explicitInput?.disabledActions ?? []), EXPAND_PANEL_ACTION_ID])
+      );
+      acc[key] = { ...panel, explicitInput: { ...panel.explicitInput, disabledActions } };
+      return acc;
+    },
+    {} as DashboardContainerInput['panels']
+  );
+  return { ...input, panels };
+};
+
 /*
  * "Paragraphs" component is used to render cells of the notebook open and "add para div" between paragraphs
  *
@@ -240,9 +260,13 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
 
   useEffect(() => {
     if (para.isVizualisation) {
-      if (para.visSavedObjId !== '') setVisInput(JSON.parse(para.vizObjectInput));
+      if (para.visSavedObjId !== '')
+        setVisInput(disableExpandPanelAction(JSON.parse(para.vizObjectInput)));
       fetchVisualizations();
     }
+    // Intentionally only re-runs on data source change; re-running on every `para`
+    // update would re-fetch visualizations and reset visInput unnecessarily.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSourceMDSId]);
 
   const createDashboardVizObject = (objectId: string) => {
@@ -263,6 +287,7 @@ export const Paragraphs = forwardRef((props: ParagraphProps, ref) => {
           explicitInput: {
             id: '1',
             savedObjectId: objectId,
+            disabledActions: [EXPAND_PANEL_ACTION_ID],
           },
         },
       },

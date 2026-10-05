@@ -45,6 +45,17 @@ export const applicationMapI18nTexts = {
     groupBy: i18n.translate('observability.apm.applicationMap.filters.groupBy', {
       defaultMessage: 'Group by',
     }),
+    includeDependencies: i18n.translate(
+      'observability.apm.applicationMap.filters.includeDependencies',
+      { defaultMessage: 'Include external dependencies' }
+    ),
+    dependencies: i18n.translate('observability.apm.applicationMap.filters.dependencies', {
+      defaultMessage: 'Dependencies',
+    }),
+    dependenciesHidden: i18n.translate(
+      'observability.apm.applicationMap.filters.dependenciesHidden',
+      { defaultMessage: 'Hidden' }
+    ),
     noGrouping: i18n.translate('observability.apm.applicationMap.filters.noGrouping', {
       defaultMessage: 'No grouping',
     }),
@@ -57,6 +68,32 @@ export const applicationMapI18nTexts = {
     environment: i18n.translate('observability.apm.applicationMap.filters.environment', {
       defaultMessage: 'Environment',
     }),
+    selectAll: i18n.translate('observability.apm.applicationMap.filters.selectAll', {
+      defaultMessage: 'Select all',
+    }),
+    clearAll: i18n.translate('observability.apm.applicationMap.filters.clearAll', {
+      defaultMessage: 'Clear all',
+    }),
+    showLess: i18n.translate('observability.apm.applicationMap.filters.showLess', {
+      defaultMessage: 'Show less',
+    }),
+    showMore: (count: number) =>
+      i18n.translate('observability.apm.applicationMap.filters.showMore', {
+        defaultMessage: '+{count} more',
+        values: { count },
+      }),
+    noMatchingValues: i18n.translate('observability.apm.applicationMap.filters.noMatchingValues', {
+      defaultMessage: 'No matching values',
+    }),
+    noEnvironments: i18n.translate('observability.apm.applicationMap.filters.noEnvironments', {
+      defaultMessage: 'No environments available',
+    }),
+    loadingEnvironments: i18n.translate(
+      'observability.apm.applicationMap.filters.loadingEnvironments',
+      {
+        defaultMessage: 'Loading environments…',
+      }
+    ),
   },
 
   // Service details panel
@@ -198,11 +235,29 @@ export const applicationMapI18nTexts = {
     viewLogs: i18n.translate('observability.apm.applicationMap.actions.viewLogs', {
       defaultMessage: 'View logs',
     }),
+    viewDashboards: i18n.translate('observability.apm.applicationMap.actions.viewDashboards', {
+      defaultMessage: 'View correlated dashboards',
+    }),
     viewServiceDetails: i18n.translate(
       'observability.apm.applicationMap.actions.viewServiceDetails',
       {
         defaultMessage: 'View service details',
       }
+    ),
+  },
+  dependencyStacks: {
+    title: i18n.translate('observability.apm.applicationMap.dependencyStacks.title', {
+      defaultMessage: 'Dependencies are grouped on this large map',
+    }),
+    body: (stackedNodes: number, stacks: number, threshold: number) =>
+      i18n.translate('observability.apm.applicationMap.dependencyStacks.body', {
+        defaultMessage:
+          'To keep a map of more than {threshold} nodes responsive, {stackedNodes} dependencies that connect to the same services are shown as {stacks} stacks. Expand a stack with its + button.',
+        values: { stackedNodes, stacks, threshold },
+      }),
+    showIndividually: i18n.translate(
+      'observability.apm.applicationMap.dependencyStacks.showIndividually',
+      { defaultMessage: 'Show individually' }
     ),
   },
 };

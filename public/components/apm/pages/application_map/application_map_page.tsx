@@ -31,6 +31,7 @@ import { useSelectedEdgeMetrics } from '../../shared/hooks/use_selected_edge_met
 import { useGroupMetrics } from '../../shared/hooks/use_group_metrics';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { usePersistentTimeRange } from '../../shared/hooks/use_persistent_time_range';
+import { readUrlTimeRange, useTimeRangeUrlSync } from '../../shared/hooks/use_time_range_url_sync';
 import { openServiceDetailsInNewTab } from '../../shared/utils/navigation_utils';
 import {
   ServiceMapSidebar,
@@ -48,11 +49,24 @@ import {
 } from '../../common/types/service_map_types';
 import { TimeRange } from '../../common/types/service_types';
 import {
+  APM_INCLUDE_DEPENDENCIES_STORAGE_KEY,
   APPLICATION_MAP_CONSTANTS,
   THRESHOLD_LABELS,
   getEnvironmentDisplayName,
   getPlatformTypeFromEnvironment,
 } from '../../common/constants';
+import { removeDependencies } from '../../shared/utils/dependency_stacking';
+import { isDependencyType } from '../../shared/utils/platform_utils';
+
+/** Whether the map shows dependency nodes; kept per tab (sessionStorage), default on. */
+const readIncludeDependencies = (): boolean => {
+  try {
+    return sessionStorage.getItem(APM_INCLUDE_DEPENDENCIES_STORAGE_KEY) !== 'false';
+  } catch {
+    // sessionStorage unavailable (e.g. privacy mode): default on.
+    return true;
+  }
+};
 import { applicationMapI18nTexts as i18nTexts } from './application_map_i18n';
 import { LegacyBanner } from '../../shared/components/legacy_banner';
 import { ServiceCorrelationsFlyout } from '../../shared/components/service_correlations_flyout';
@@ -67,20 +81,15 @@ const URL_PARAM_VALIDATION = {
   MAX_PARAM_LENGTH: 256,
   /** Allowed characters for service names (alphanumeric, dashes, underscores, dots, colons, slashes) */
   SERVICE_NAME_REGEX: /^[a-zA-Z0-9_\-:./ ]+$/,
-  /** Allowed characters for time range values (e.g., "now-15m", "2024-01-01T00:00:00Z") */
-  TIME_RANGE_REGEX: /^[a-zA-Z0-9_\-:+.TZ]+$/,
 };
 
 /**
- * Sanitize URL parameter to prevent XSS attacks
+ * Sanitize a service/environment URL parameter to prevent XSS attacks. Time bounds are
+ * validated by `readUrlTimeRange` (shared with the URL writer).
  * @param value - Raw URL parameter value
- * @param type - Type of parameter for appropriate validation
  * @returns Sanitized value or null if invalid
  */
-function sanitizeUrlParam(
-  value: string | null,
-  type: 'service' | 'environment' | 'time'
-): string | null {
+function sanitizeUrlParam(value: string | null): string | null {
   if (!value) return null;
 
   // Check length limit
@@ -88,18 +97,22 @@ function sanitizeUrlParam(
     return null;
   }
 
-  // Apply appropriate regex validation based on type
-  const regex =
-    type === 'time'
-      ? URL_PARAM_VALIDATION.TIME_RANGE_REGEX
-      : URL_PARAM_VALIDATION.SERVICE_NAME_REGEX;
-
-  if (!regex.test(value)) {
+  if (!URL_PARAM_VALIDATION.SERVICE_NAME_REGEX.test(value)) {
     return null;
   }
 
   return value;
 }
+
+const APPLICATION_MAP_HASH_PATH = '#/application-map';
+
+/** The map app has no router: an empty hash (app root) or `#/application-map` is the map. */
+const isApplicationMapPath = (hashPath: string) =>
+  hashPath === '' ||
+  hashPath === '#' ||
+  hashPath === '#/' ||
+  hashPath === APPLICATION_MAP_HASH_PATH ||
+  hashPath.startsWith(`${APPLICATION_MAP_HASH_PATH}/`);
 
 export interface ApplicationMapPageProps {
   chrome: ChromeStart;
@@ -137,6 +150,19 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   // Filter state
   const [filters, setFilters] = useState<ApplicationMapFilters>(DEFAULT_FILTERS);
 
+  // "Include external dependencies" (sessionStorage, like the time range) and, on a large map,
+  // whether the user chose to see stacked dependencies individually (this page view only).
+  const [includeDependencies, setIncludeDependenciesState] = useState(readIncludeDependencies);
+  const setIncludeDependencies = useCallback((included: boolean) => {
+    setIncludeDependenciesState(included);
+    try {
+      sessionStorage.setItem(APM_INCLUDE_DEPENDENCIES_STORAGE_KEY, String(included));
+    } catch {
+      // Not persisted when sessionStorage is unavailable.
+    }
+  }, []);
+  const [showDependenciesIndividually, setShowDependenciesIndividually] = useState(false);
+
   // Navigation state for hierarchical view
   const [navigationState, setNavigationState] =
     useState<MapNavigationState>(DEFAULT_NAVIGATION_STATE);
@@ -161,7 +187,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
 
   // Set page-level breadcrumb
   useEffect(() => {
-    chrome?.setBreadcrumbs([{ text: i18nTexts.breadcrumb, href: '#/application-map' }]);
+    chrome?.setBreadcrumbs([{ text: i18nTexts.breadcrumb, href: APPLICATION_MAP_HASH_PATH }]);
   }, [chrome]);
 
   // The side-nav "APM settings" popover action navigates here with an
@@ -177,10 +203,11 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     if (hashParts.length < 2) return;
 
     const params = new URLSearchParams(hashParts[1]);
-    const serviceParam = sanitizeUrlParam(params.get('service'), 'service');
-    const environmentParam = sanitizeUrlParam(params.get('environment'), 'environment');
-    const fromParam = sanitizeUrlParam(params.get('from'), 'time');
-    const toParam = sanitizeUrlParam(params.get('to'), 'time');
+    const serviceParam = sanitizeUrlParam(params.get('service'));
+    const environmentParam = sanitizeUrlParam(params.get('environment'));
+    // Time bounds share one validator with the URL writer, so every value the map writes
+    // (including `now/d` from the "Today" quick select) reads back on reload.
+    const urlTimeRange = readUrlTimeRange(params);
 
     // If service parameter exists and is valid, navigate to services level and queue node selection
     if (serviceParam) {
@@ -202,8 +229,8 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     }
 
     // Apply time range from URL if provided
-    if (fromParam && toParam) {
-      setTimeRange({ from: fromParam, to: toParam });
+    if (urlTimeRange) {
+      setTimeRange(urlTimeRange);
     }
     // `setTimeRange` is stable (useCallback); listed to satisfy exhaustive-deps
     // without changing the mount-only intent.
@@ -220,7 +247,12 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   }, [configError, notifications]);
 
   // Parse time range
-  const parsedTimeRange = useMemo(() => parseTimeRange(timeRange), [timeRange]);
+  const parsedTimeRange = useMemo(
+    () => parseTimeRange(timeRange),
+    // Recalculate when refreshTrigger changes so relative ranges advance to `now`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeRange, refreshTrigger]
+  );
 
   // Fetch service map topology data
   const {
@@ -229,12 +261,23 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     isLoading: mapLoading,
     error: mapError,
     availableGroupByAttributes,
-    refetch: refetchMap,
+    truncated: mapTruncated,
   } = useServiceMap({
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     refreshTrigger,
   });
+
+  // Dependency nodes exist only with a data-prepper that synthesizes them; without them the
+  // checkbox is not shown and the map renders as before.
+  const hasDependencyNodes = useMemo(
+    () => nodes.some((n) => isDependencyType(n.KeyAttributes.Type)),
+    [nodes]
+  );
+  const mapGraph = useMemo(
+    () => (includeDependencies ? { nodes, edges } : removeDependencies(nodes, edges)),
+    [includeDependencies, nodes, edges]
+  );
 
   // Auto-select node from URL params once nodes are loaded
   useEffect(() => {
@@ -256,6 +299,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         serviceName,
         environment,
         platformType,
+        nodeType: matchingNode.KeyAttributes?.Type,
         groupByAttributes: matchingNode.GroupByAttributes,
       });
     }
@@ -269,18 +313,27 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     return nodes.map((node) => ({
       serviceName: node.KeyAttributes.Name,
       environment: node.KeyAttributes.Environment,
+      type: node.KeyAttributes.Type,
     }));
   }, [nodes]);
 
-  // Extract unique environments from nodes (sorted alphabetically by display name)
+  // Extract unique environments from nodes (sorted alphabetically by display name).
+  // Dedupe on the display name rather than the raw env string: the map filters by
+  // display name (see service_map_graph), so two raw envs sharing a prefix (e.g.
+  // "eks:cluster1" and "eks:cluster2") must collapse into a single "eks" checkbox
+  // instead of rendering as identical duplicates.
   const availableEnvironments = useMemo(() => {
-    const envSet = new Set<string>();
+    const byDisplayName = new Map<string, string>();
     nodes.forEach((node) => {
-      if (node.KeyAttributes.Environment) {
-        envSet.add(node.KeyAttributes.Environment);
+      const env = node.KeyAttributes.Environment;
+      if (env) {
+        const displayName = getEnvironmentDisplayName(env);
+        if (!byDisplayName.has(displayName)) {
+          byDisplayName.set(displayName, env);
+        }
       }
     });
-    return Array.from(envSet).sort((a, b) =>
+    return Array.from(byDisplayName.values()).sort((a, b) =>
       getEnvironmentDisplayName(a).localeCompare(getEnvironmentDisplayName(b))
     );
   }, [nodes]);
@@ -341,6 +394,15 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   // Combined loading state
   const isLoading = mapLoading || metricsLoading;
 
+  // Keep URL `from`/`to` in sync with the time range (picker or flyout brush) so a
+  // picked range survives reload and can be shared; a missing or invalid range is
+  // backfilled. The map is its own app, so any hash in it is this page.
+  useTimeRangeUrlSync({
+    timeRange,
+    isCurrentPage: isApplicationMapPath,
+    fallbackPath: APPLICATION_MAP_HASH_PATH,
+  });
+
   // Handle time range change
   const handleTimeChange = useCallback(
     (newTimeRange: TimeRange) => {
@@ -349,14 +411,24 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     [setTimeRange]
   );
 
+  // Chart brush in the insights flyout: zoom the whole map's time range (map +
+  // flyout charts re-query). Charts report ISO-8601 start/end.
+  const handleChartTimeRangeChange = useCallback(
+    (from: string, to: string) => {
+      setTimeRange({ from, to });
+    },
+    [setTimeRange]
+  );
+
   // Handle refresh
   const handleRefresh = useCallback(() => {
+    // Map refetches via the refreshTrigger prop; the metrics hook only exposes
+    // refetch(). Bumping the trigger AND calling refetchMap() double-fetched the map.
     setRefreshTrigger((prev) => prev + 1);
-    refetchMap();
     refetchMetrics();
     // Clear selected edge on refresh
     setSelectedEdge(null);
-  }, [refetchMap, refetchMetrics]);
+  }, [refetchMetrics]);
 
   // Handle filter changes
   const handleFiltersChange = useCallback((newFilters: ApplicationMapFilters) => {
@@ -391,6 +463,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         serviceName,
         environment,
         platformType,
+        nodeType: node?.KeyAttributes?.Type,
         groupByAttributes: node?.GroupByAttributes,
       });
     },
@@ -417,6 +490,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       openServiceDetailsInNewTab(serviceName, environment, {
         timeRange,
         language,
+        nodeType: node?.KeyAttributes?.Type,
       });
     },
     [nodes, timeRange]
@@ -432,7 +506,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     serviceName: string;
     environment: string;
     language?: string;
-    initialTab: 'spans' | 'logs';
+    initialTab: 'spans' | 'logs' | 'dashboards';
   } | null>(null);
 
   const handleShowSpans = useCallback(
@@ -460,6 +534,21 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         environment,
         language: node?.GroupByAttributes?.['telemetry.sdk.language'],
         initialTab: 'logs',
+      });
+    },
+    [nodes]
+  );
+
+  const handleShowDashboards = useCallback(
+    (serviceName: string, environment: string) => {
+      const node = nodes.find(
+        (n) => n.KeyAttributes.Name === serviceName && n.KeyAttributes.Environment === environment
+      );
+      setCorrelationsFlyout({
+        serviceName,
+        environment,
+        language: node?.GroupByAttributes?.['telemetry.sdk.language'],
+        initialTab: 'dashboards',
       });
     },
     [nodes]
@@ -573,6 +662,16 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       });
     }
 
+    // Dependencies hidden badge
+    if (hasDependencyNodes && !includeDependencies) {
+      badges.push({
+        key: 'dependencies',
+        category: i18nTexts.filters.dependencies,
+        values: [i18nTexts.filters.dependenciesHidden],
+        onRemove: () => setIncludeDependencies(true),
+      });
+    }
+
     // Group by badge
     if (filters.groupBy) {
       badges.push({
@@ -584,12 +683,13 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     }
 
     return badges;
-  }, [filters]);
+  }, [filters, hasDependencyNodes, includeDependencies, setIncludeDependencies]);
 
   // Clear all filters
   const handleClearAllFilters = useCallback(() => {
     setFilters(DEFAULT_FILTERS);
-  }, []);
+    setIncludeDependencies(true);
+  }, [setIncludeDependencies]);
 
   // APM Settings button for header area
   const settingsButton = (
@@ -687,6 +787,23 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
               </>
             )}
 
+            {/* Edge-cap truncation notice: the graph's node-count notice does
+                not cover a dense mesh where edges are cut before the node cap. */}
+            {mapTruncated && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  title="Showing a partial topology"
+                  color="warning"
+                  iconType="alert"
+                  size="s"
+                >
+                  The service map reached its connection limit, so some dependencies are not shown.
+                  Narrow the time range or use filters to see a complete view.
+                </EuiCallOut>
+              </>
+            )}
+
             {/* Main content with resizable filter sidebar */}
             <EuiResizableContainer className="apm-application-map__container">
               {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
@@ -707,6 +824,11 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                       availableEnvironments={availableEnvironments}
                       isLoading={isLoading}
                       onToggle={() => togglePanel('filter-sidebar', { direction: 'left' })}
+                      dependencies={
+                        hasDependencyNodes
+                          ? { included: includeDependencies, onChange: setIncludeDependencies }
+                          : undefined
+                      }
                     />
                   </EuiResizablePanel>
 
@@ -722,8 +844,10 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                     style={{ padding: '8px 0px 0px 8px' }}
                   >
                     <ServiceMapGraph
-                      nodes={nodes}
-                      edges={edges}
+                      nodes={mapGraph.nodes}
+                      edges={mapGraph.edges}
+                      stackDependencies={!showDependenciesIndividually}
+                      onShowDependenciesIndividually={() => setShowDependenciesIndividually(true)}
                       metricsMap={metricsMap}
                       filters={filters}
                       navigationState={navigationState}
@@ -756,7 +880,9 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
           onViewDetails={handleViewServiceDetails}
           onShowSpans={handleShowSpans}
           onShowLogs={handleShowLogs}
+          onShowDashboards={handleShowDashboards}
           refreshTrigger={refreshTrigger}
+          onTimeRangeChange={handleChartTimeRangeChange}
         />
       )}
 

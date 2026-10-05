@@ -457,6 +457,70 @@ describe('OSDSavedApmConfigClient', () => {
         });
       });
 
+      it('resolves correlated dashboards with title, description, updatedAt, and missing', async () => {
+        const mockResponse = {
+          savedObjects: [
+            {
+              id: 'config-1',
+              attributes: {
+                correlationType: 'APM-Config-workspace-1',
+                version: '1.0.0',
+                entities: [
+                  { prometheusDataSource: { id: 'references[0].id' } },
+                  {
+                    correlatedDashboards: [{ id: 'references[1].id' }, { id: 'references[2].id' }],
+                  },
+                ],
+              },
+              references: [
+                { name: 'entities[0].dataConnection', type: 'data-connection', id: 'prom-1' },
+                { name: 'entities.correlatedDashboards[0]', type: 'dashboard', id: 'dash-1' },
+                { name: 'entities.correlatedDashboards[1]', type: 'dashboard', id: 'dash-missing' },
+              ],
+            },
+          ],
+        };
+
+        mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
+        mockSavedObjectsClient.get.mockImplementation((type: string, id: string) => {
+          if (type === 'dashboard' && id === 'dash-1') {
+            return Promise.resolve({
+              attributes: { title: 'Infra overview', description: 'Node + pod health' },
+              updated_at: '2026-09-10T12:00:00.000Z',
+            });
+          }
+          if (type === 'dashboard') {
+            // A deleted dashboard: savedObjectsClient.get resolves a stub with an
+            // `error` (404) and empty attributes rather than rejecting.
+            return Promise.resolve({
+              error: { statusCode: 404, message: 'Not found' },
+              attributes: {},
+            });
+          }
+          return Promise.resolve({ attributes: { connectionId: 'prometheus-source' } });
+        });
+        mockDataService.dataViews.get.mockResolvedValue(null);
+
+        const result = await client.getBulkWithResolvedReferences(mockDataService);
+
+        expect(result.configs[0].correlatedDashboards).toEqual([
+          {
+            dashboardId: 'dash-1',
+            title: 'Infra overview',
+            description: 'Node + pod health',
+            updatedAt: '2026-09-10T12:00:00.000Z',
+            missing: false,
+          },
+          {
+            dashboardId: 'dash-missing',
+            title: 'dash-missing',
+            description: undefined,
+            updatedAt: undefined,
+            missing: true,
+          },
+        ]);
+      });
+
       it('should extract arn from attributes and include in meta', async () => {
         const mockResponse = {
           savedObjects: [
@@ -957,6 +1021,115 @@ describe('OSDSavedApmConfigClient', () => {
         expect(instance1).toBe(instance2);
         expect(instance2).toBe(instance3);
         expect(utils.getOSDSavedObjectsClient).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  // Correlated dashboards — optional, experimental. Extends the existing APM
+  // config SO under `entities.correlatedDashboards` + `references[]` of
+  // type: 'dashboard'. Not-set / empty must stay a no-op.
+  describe('correlated dashboards (optional, experimental)', () => {
+    const mockUuid = '12345678-1234-4234-8234-123456789abc';
+    const baseParams = {
+      workspaceId: 'workspace-123',
+      tracesDatasetId: 'trace-dataset-1',
+      serviceMapDatasetId: 'service-map-dataset-1',
+      prometheusDataSourceId: 'prometheus-ds-1',
+    };
+
+    describe('create()', () => {
+      it('adds dashboard references + correlatedDashboards entity when ids are provided', async () => {
+        mockSavedObjectsClient.create.mockResolvedValue({ id: mockUuid });
+        await client.create({ ...baseParams, correlatedDashboardIds: ['dash-1', 'dash-2'] });
+
+        const [, attrs, opts] = mockSavedObjectsClient.create.mock.calls[0];
+        expect(opts.references).toEqual(
+          expect.arrayContaining([
+            { name: 'entities.correlatedDashboards[0]', type: 'dashboard', id: 'dash-1' },
+            { name: 'entities.correlatedDashboards[1]', type: 'dashboard', id: 'dash-2' },
+          ])
+        );
+        expect(attrs.entities).toEqual(
+          expect.arrayContaining([
+            {
+              correlatedDashboards: [{ id: 'references[3].id' }, { id: 'references[4].id' }],
+            },
+          ])
+        );
+      });
+
+      it('does not add dashboard references / entity when ids are omitted (feature inert)', async () => {
+        mockSavedObjectsClient.create.mockResolvedValue({ id: mockUuid });
+        await client.create(baseParams);
+
+        const [, attrs, opts] = mockSavedObjectsClient.create.mock.calls[0];
+        expect(opts.references.some((r: any) => r.type === 'dashboard')).toBe(false);
+        expect(attrs.entities.some((e: any) => 'correlatedDashboards' in e)).toBe(false);
+      });
+    });
+
+    describe('update()', () => {
+      const existingWithDashboards = {
+        id: mockUuid,
+        attributes: {
+          correlationType: 'APM-Config-workspace-123',
+          version: '1.0.0',
+          entities: [
+            { tracesDataset: { id: 'references[0].id' } },
+            { serviceMapDataset: { id: 'references[1].id' } },
+            { prometheusDataSource: { id: 'references[2].id' } },
+            { windowDuration: 60 },
+            {
+              correlatedDashboards: [{ id: 'references[3].id' }, { id: 'references[4].id' }],
+            },
+          ],
+        },
+        references: [
+          { name: 'entities[0].index', type: 'index-pattern', id: 'trace-ds' },
+          { name: 'entities[1].index', type: 'index-pattern', id: 'svc-map-ds' },
+          { name: 'entities[2].dataConnection', type: 'data-connection', id: 'prom-ds' },
+          { name: 'entities.correlatedDashboards[0]', type: 'dashboard', id: 'dash-old-1' },
+          { name: 'entities.correlatedDashboards[1]', type: 'dashboard', id: 'dash-old-2' },
+        ],
+      };
+
+      it('preserves existing dashboard ids when update omits correlatedDashboardIds', async () => {
+        mockSavedObjectsClient.get.mockResolvedValue(existingWithDashboards);
+        mockSavedObjectsClient.update.mockResolvedValue({ id: mockUuid });
+
+        await client.update({ objectId: `correlations:${mockUuid}` });
+
+        const [, , , opts] = mockSavedObjectsClient.update.mock.calls[0];
+        const dashRefs = opts.references.filter((r: any) => r.type === 'dashboard');
+        expect(dashRefs.map((r: any) => r.id)).toEqual(['dash-old-1', 'dash-old-2']);
+      });
+
+      it('replaces dashboard ids when a new list is passed', async () => {
+        mockSavedObjectsClient.get.mockResolvedValue(existingWithDashboards);
+        mockSavedObjectsClient.update.mockResolvedValue({ id: mockUuid });
+
+        await client.update({
+          objectId: `correlations:${mockUuid}`,
+          correlatedDashboardIds: ['dash-new-1'],
+        });
+
+        const [, , , opts] = mockSavedObjectsClient.update.mock.calls[0];
+        const dashRefs = opts.references.filter((r: any) => r.type === 'dashboard');
+        expect(dashRefs.map((r: any) => r.id)).toEqual(['dash-new-1']);
+      });
+
+      it('clears dashboards when an empty array is passed', async () => {
+        mockSavedObjectsClient.get.mockResolvedValue(existingWithDashboards);
+        mockSavedObjectsClient.update.mockResolvedValue({ id: mockUuid });
+
+        await client.update({
+          objectId: `correlations:${mockUuid}`,
+          correlatedDashboardIds: [],
+        });
+
+        const [, , attrs, opts] = mockSavedObjectsClient.update.mock.calls[0];
+        expect(opts.references.some((r: any) => r.type === 'dashboard')).toBe(false);
+        expect(attrs.entities.some((e: any) => 'correlatedDashboards' in e)).toBe(false);
       });
     });
   });

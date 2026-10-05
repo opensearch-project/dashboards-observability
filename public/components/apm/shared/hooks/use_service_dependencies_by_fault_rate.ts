@@ -90,6 +90,8 @@ export const useServiceDependenciesByFaultRate = (
       return;
     }
 
+    const abortController = new AbortController();
+
     const fetchTopDependencies = async () => {
       setIsLoading(true);
       setError(null);
@@ -105,7 +107,10 @@ export const useServiceDependenciesByFaultRate = (
         const response = await promqlSearchService.executeInstantQuery({
           query,
           time: fetchParams.endTime,
+          signal: abortController.signal,
         });
+
+        if (abortController.signal.aborted) return;
 
         // Process response - handle data frame format from query enhancements plugin
         const dependencies: ServiceDependencyFaultRateItem[] = [];
@@ -149,15 +154,20 @@ export const useServiceDependenciesByFaultRate = (
 
         setData(sortedAndFiltered);
       } catch (err) {
+        if (abortController.signal.aborted) return;
         console.error('[useServiceDependenciesByFaultRate] Error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setData([]);
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchTopDependencies();
+
+    return () => abortController.abort();
   }, [
     promqlSearchService,
     fetchParams,

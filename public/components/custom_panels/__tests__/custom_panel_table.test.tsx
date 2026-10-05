@@ -124,6 +124,12 @@ describe('Panels Table Component', () => {
     await waitFor(() => {
       expect(coreRefs.savedObjectsClient.create).toHaveBeenCalledTimes(1);
     });
+
+    // The copy must not carry the source id, otherwise it shares the original's
+    // row id and selection and deletion act on the wrong dashboard.
+    const [, attributes] = coreRefs.savedObjectsClient.create.mock.calls[0];
+    expect(attributes).not.toHaveProperty('id');
+    expect(attributes.title).toBe('copy');
   });
 
   it('rename a custom panel', async () => {

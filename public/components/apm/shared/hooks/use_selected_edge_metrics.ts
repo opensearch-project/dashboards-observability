@@ -15,6 +15,7 @@ import {
   getQueryEdgeFaults,
   getQueryEdgeErrors,
 } from '../../query_services/query_requests/promql_queries';
+import { isMessagingType } from '../utils/platform_utils';
 
 export interface UseSelectedEdgeMetricsParams {
   /** Selected edge state (null when no edge is selected) */
@@ -86,36 +87,42 @@ export const useSelectedEdgeMetrics = (
     }
 
     const { sourceService, sourceEnvironment, targetService, edgeId } = params.selectedEdge;
+    // A broker -> consumer edge has no series under the broker's name: its series belong to the
+    // consumer (service=<consumer>, remoteService=<broker>). Query from the consumer's side.
+    const consumerEdge = isMessagingType(params.selectedEdge.sourceNodeType);
+    const [qService, qEnvironment, qRemote] = consumerEdge
+      ? [targetService, params.selectedEdge.targetEnvironment || sourceEnvironment, sourceService]
+      : [sourceService, sourceEnvironment, targetService];
+    // A producer -> broker edge counts publishes only, even if the producer also consumes.
+    const producerEdge = !consumerEdge && isMessagingType(params.selectedEdge.targetNodeType);
+    const edgeOptions = { consumerEdge, producerEdge };
+    const abortController = new AbortController();
+    setIsLoading(true);
+    setError(null);
 
     const fetchMetrics = async () => {
-      setIsLoading(true);
-      setError(null);
-
       try {
         // Execute all 4 queries in parallel
         const [requestsResp, latencyResp, faultsResp, errorsResp] = await Promise.all([
           promqlService.executeInstantQuery({
-            query: getQueryEdgeRequests(sourceService, sourceEnvironment, targetService, timeRange),
+            query: getQueryEdgeRequests(qService, qEnvironment, qRemote, timeRange, edgeOptions),
             time: endTimeSec,
           }),
           promqlService.executeInstantQuery({
-            query: getQueryEdgeLatencyP99(
-              sourceService,
-              sourceEnvironment,
-              targetService,
-              timeRange
-            ),
+            query: getQueryEdgeLatencyP99(qService, qEnvironment, qRemote, timeRange, edgeOptions),
             time: endTimeSec,
           }),
           promqlService.executeInstantQuery({
-            query: getQueryEdgeFaults(sourceService, sourceEnvironment, targetService, timeRange),
+            query: getQueryEdgeFaults(qService, qEnvironment, qRemote, timeRange, edgeOptions),
             time: endTimeSec,
           }),
           promqlService.executeInstantQuery({
-            query: getQueryEdgeErrors(sourceService, sourceEnvironment, targetService, timeRange),
+            query: getQueryEdgeErrors(qService, qEnvironment, qRemote, timeRange, edgeOptions),
             time: endTimeSec,
           }),
         ]);
+
+        if (abortController.signal.aborted) return;
 
         // Extract values from responses
         const requestCount = extractSingleValue(requestsResp);
@@ -134,15 +141,18 @@ export const useSelectedEdgeMetrics = (
           errorCount,
         });
       } catch (err) {
+        if (abortController.signal.aborted) return;
         console.error('[useSelectedEdgeMetrics] Error fetching edge metrics:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setMetrics(null);
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) setIsLoading(false);
       }
     };
 
     fetchMetrics();
+
+    return () => abortController.abort();
     // Using individual properties to avoid unnecessary re-fetches when only position changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -150,6 +160,9 @@ export const useSelectedEdgeMetrics = (
     params.selectedEdge?.sourceService,
     params.selectedEdge?.sourceEnvironment,
     params.selectedEdge?.targetService,
+    params.selectedEdge?.sourceNodeType,
+    params.selectedEdge?.targetNodeType,
+    params.selectedEdge?.targetEnvironment,
     promqlService,
     endTimeSec,
     timeRange,

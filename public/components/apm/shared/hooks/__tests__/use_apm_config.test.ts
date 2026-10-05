@@ -177,6 +177,37 @@ describe('useDatasets', () => {
 
       expect(mockDataService.dataViews.getIdsWithTitle).toHaveBeenCalledTimes(1);
     });
+
+    it('issues all index-pattern lookups concurrently rather than serially', async () => {
+      const mockDataViews = [
+        { id: 'a', title: 'A' },
+        { id: 'b', title: 'B' },
+        { id: 'c', title: 'C' },
+      ];
+      mockDataService.dataViews.getIdsWithTitle.mockResolvedValue(mockDataViews);
+
+      // Each get returns a promise we resolve manually, so we can assert every
+      // get is in flight before any resolves. A serial await loop would have
+      // issued only the first get until it resolved.
+      const resolvers: Array<() => void> = [];
+      mockDataService.dataViews.get.mockImplementation(
+        (id: string) =>
+          new Promise((resolve) => {
+            resolvers.push(() => resolve({ getDisplayName: () => id, signalType: 'traces' }));
+          })
+      );
+
+      (coreRefs as any).data = mockDataService;
+
+      const { result } = renderHook(() => useDatasets());
+
+      await waitFor(() => expect(mockDataService.dataViews.get).toHaveBeenCalledTimes(3));
+
+      act(() => resolvers.forEach((r) => r()));
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(result.current.allDatasets).toHaveLength(3);
+    });
   });
 
   describe('Failure Cases', () => {

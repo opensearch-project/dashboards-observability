@@ -19,7 +19,7 @@
  *            the listing filtered to remaining < 25%.
  */
 
-import React, { useMemo } from 'react';
+import React, { useId, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -27,6 +27,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiPanel,
+  EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -165,14 +166,39 @@ const KpiCell: React.FC<{
   dataTestSubj?: string;
 }> = ({ value, label, accent, tooltip, onClick, active, dataTestSubj }) => {
   const clickable = Boolean(onClick);
+  // A non-clickable readout tile (e.g. "Alerts firing") that still carries an
+  // explanatory tooltip must stay reachable by keyboard/SR — otherwise the
+  // tooltip is mouse-hover-only, unlike every clickable tile (ps48 review).
+  // Make it focusable (so EuiToolTip also shows on focus) and expose the
+  // tooltip text via aria-describedby to a screen-reader-only note, without a
+  // misleading button/toggle role.
+  const describable = !clickable && Boolean(tooltip);
+  const descId = useId();
+  const accessibleName =
+    typeof value === 'string' || typeof value === 'number' ? `${value} ${label}` : label;
   const content = (
     <div
       role={clickable ? 'button' : undefined}
-      tabIndex={clickable ? 0 : undefined}
+      tabIndex={clickable || describable ? 0 : undefined}
+      // Expose toggle state to assistive tech so SR users can tell which KPI
+      // filter is active — mirrors how HealthRail's segment buttons do it
+      // (A11Y2). The tile's accessible name comes from its text content (the
+      // value + label spans), e.g. "3 Breached".
+      aria-pressed={clickable ? Boolean(active) : undefined}
+      // A focusable readout has no widget role to name it from content, so give
+      // it an explicit name + description for keyboard/SR users.
+      aria-label={describable ? accessibleName : undefined}
+      aria-describedby={describable ? descId : undefined}
       onClick={onClick}
       onKeyDown={(e) => {
         if (!clickable) return;
-        if (e.key === 'Enter' || e.key === ' ') onClick?.();
+        if (e.key === 'Enter' || e.key === ' ') {
+          // preventDefault stops Space from scrolling the page (WCAG 2.1.1,
+          // A11Y5) and stops any implicit activation, so the toggle fires
+          // exactly once for both Enter and Space.
+          e.preventDefault();
+          onClick?.();
+        }
       }}
       data-test-subj={dataTestSubj}
       style={{
@@ -187,6 +213,11 @@ const KpiCell: React.FC<{
         minWidth: 72,
       }}
     >
+      {describable && (
+        <EuiScreenReaderOnly>
+          <span id={descId}>{tooltip}</span>
+        </EuiScreenReaderOnly>
+      )}
       <span
         style={{
           width: 3,
@@ -371,7 +402,16 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
     let reportingCount = 0;
     let budgetSum = 0;
     for (const s of items) {
-      firing += s.status.firingCount;
+      // `firingCount` counts firing MWMBR burn-rate *alert instances*, a feed
+      // wholly separate from the budget-derived `breached` SLO count below: a
+      // breached SLO with no (or not-yet-firing) alert rules legitimately
+      // contributes 0 here. The two therefore measure different units — the
+      // tile is labelled "Alerts firing" (not "Firing") so a value of 0 next
+      // to a non-zero breached count is unambiguous rather than contradictory
+      // (M12). Guard only a NaN/absent `firingCount` so one bad row can't NaN
+      // the sum — `s.status` itself is assumed present here, as everywhere else
+      // in this reducer (`s.status.state` is read unguarded just below).
+      firing += Number.isFinite(s.status.firingCount) ? s.status.firingCount : 0;
       switch (s.status.state) {
         case 'breached':
           breached++;
@@ -515,7 +555,18 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
             value={
               stats.reportingCount > 0 ? (
                 <span style={TABULAR_NUMS_STYLE}>
-                  {formatPct(stats.avgBudgetRemaining, { decimals: SLO_PRECISION.budget })}
+                  {/*
+                    Clamp the displayed hero at 0% (CLAR8). `avgBudgetRemaining`
+                    averages per-SLO worst-objective budget, which goes negative
+                    once a budget is overspent, producing absurd values like
+                    -328%. An exhausted budget reads as "0% remaining", not
+                    negative. Clamped here at format time only — the raw stat
+                    stays honest for `aggregateBudgetAccent` (which still maps a
+                    negative average into the danger band).
+                  */}
+                  {formatPct(Math.max(0, stats.avgBudgetRemaining), {
+                    decimals: SLO_PRECISION.budget,
+                  })}
                 </span>
               ) : (
                 '—'
@@ -584,16 +635,21 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
           <KpiCell
             value={stats.firing}
             label={i18n.translate('observability.apm.slo.overviewPanel.kpi.firingLabel', {
-              defaultMessage: 'Firing',
+              defaultMessage: 'Alerts firing',
             })}
             accent={
               stats.firing > 0 ? euiThemeVars.euiColorDanger : euiThemeVars.euiColorMediumShade
             }
             tooltip={i18n.translate('observability.apm.slo.overviewPanel.kpi.firingTooltip', {
-              defaultMessage: 'Total MWMBR burn-rate alerts currently firing',
+              defaultMessage:
+                'Burn-rate alert instances currently firing across all SLOs — a count of alerts, not SLOs. A breached SLO with no alert rules configured contributes 0, so this can read 0 even while SLOs are breached; use the Breached tile for the SLO count.',
             })}
-            onClick={toggle('firing')}
-            active={activeStateFilter === 'firing'}
+            // Read-only stat, not a filter: there is no server-side
+            // "firingCount > 0" facet, so a click could only map to the closest
+            // real state (breached) — which would tint the *Breached* tile and,
+            // via the aria-pressed below, announce "Breached, pressed" for a
+            // firing click. Rather than mislead keyboard/SR users, the firing
+            // tile carries no toggle affordance; use the Breached tile to filter.
             dataTestSubj="slosOverviewFiring"
           />
           <KpiCell
@@ -700,8 +756,8 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
                 const color = overBudget
                   ? euiThemeVars.euiColorDangerText
                   : critical
-                  ? euiThemeVars.euiColorAccentText
-                  : euiThemeVars.euiColorSuccessText;
+                    ? euiThemeVars.euiColorAccentText
+                    : euiThemeVars.euiColorSuccessText;
                 return (
                   <div
                     key={s.id}

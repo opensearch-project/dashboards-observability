@@ -105,6 +105,95 @@ describe('FacetFilterGroup', () => {
   });
 });
 
+describe('FacetFilterGroup — accessibility (no nested interactive controls)', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('renders the error indicator OUTSIDE the checkbox label (not a nested interactive control)', () => {
+    const { getByTestId } = render(
+      <FacetFilterGroup {...defaultProps} errorMap={{ active: 'Cluster unreachable (timeout)' }} />
+    );
+    const errorButton = getByTestId('facetGroup-status-error-active');
+    // The interactive error button must not be nested inside a <label> element.
+    expect(errorButton.closest('label')).toBeNull();
+    // And it must not live inside the option's checkbox label wrapper.
+    const checkboxLabel = document.querySelector('label[for="status-active"]');
+    expect(checkboxLabel).not.toBeNull();
+    expect(checkboxLabel?.contains(errorButton)).toBe(false);
+  });
+
+  it('exposes aria-expanded on the header toggle button reflecting the open state', () => {
+    const { getByTestId, rerender } = render(
+      <FacetFilterGroup {...defaultProps} isCollapsed={false} />
+    );
+    const toggle = getByTestId('facetGroup-status-toggle');
+    // A real <button> element, not a div with role="button".
+    expect(toggle.tagName.toLowerCase()).toBe('button');
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    rerender(<FacetFilterGroup {...defaultProps} isCollapsed={true} />);
+    expect(getByTestId('facetGroup-status-toggle')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('wires aria-controls on the toggle to the id/role="region" of the options region', () => {
+    const { getByTestId, container } = render(
+      <FacetFilterGroup {...defaultProps} isCollapsed={false} />
+    );
+    const toggle = getByTestId('facetGroup-status-toggle');
+    const controls = toggle.getAttribute('aria-controls');
+    expect(controls).toBe('facetGroup-status-region');
+    const region = container.querySelector(`#${controls}`);
+    expect(region).not.toBeNull();
+    expect(region).toHaveAttribute('role', 'region');
+    expect(region).toHaveAttribute('aria-label', 'Status');
+  });
+
+  it('drops aria-controls while collapsed so it never dangles at an unmounted region', () => {
+    const { getByTestId, container } = render(
+      <FacetFilterGroup {...defaultProps} isCollapsed={true} />
+    );
+    const toggle = getByTestId('facetGroup-status-toggle');
+    // Collapsed: the region is not rendered, so the toggle must not reference it
+    // (axe aria-valid-attr-value). aria-expanded conveys the state instead.
+    expect(toggle).not.toHaveAttribute('aria-controls');
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(container.querySelector('#facetGroup-status-region')).toBeNull();
+  });
+
+  it('gives the per-option error button a >=24px target via the shared class', () => {
+    const { getByTestId } = render(
+      <FacetFilterGroup {...defaultProps} errorMap={{ active: 'Cluster unreachable (timeout)' }} />
+    );
+    // The 24px hit-target rule lives in the shared `.altFacetTarget` SCSS class
+    // (jsdom doesn't apply stylesheets, so we assert the class is present).
+    expect(getByTestId('facetGroup-status-error-active').className).toContain('altFacetTarget');
+  });
+
+  it('toggles the accordion when the header toggle button is clicked', () => {
+    const onToggleCollapse = jest.fn();
+    const { getByTestId } = render(
+      <FacetFilterGroup {...defaultProps} onToggleCollapse={onToggleCollapse} />
+    );
+    fireEvent.click(getByTestId('facetGroup-status-toggle'));
+    expect(onToggleCollapse).toHaveBeenCalledWith('status');
+  });
+
+  it('clears the selection without toggling the accordion when Clear is clicked', () => {
+    const onChange = jest.fn();
+    const onToggleCollapse = jest.fn();
+    const { getByTestId } = render(
+      <FacetFilterGroup
+        {...defaultProps}
+        selected={['active']}
+        onChange={onChange}
+        onToggleCollapse={onToggleCollapse}
+      />
+    );
+    // Clear must be a sibling of the toggle, so activating it never expands/collapses.
+    fireEvent.click(getByTestId('facetGroup-status-clear'));
+    expect(onChange).toHaveBeenCalledWith([]);
+    expect(onToggleCollapse).not.toHaveBeenCalled();
+  });
+});
+
 describe('useFacetCollapse', () => {
   it('honors per-call defaultCollapsed when no override is set, then persists toggles', () => {
     let snapshot: ReturnType<typeof useFacetCollapse> | null = null;
@@ -125,6 +214,65 @@ describe('useFacetCollapse', () => {
     // Toggling again returns to collapsed
     act(() => snapshot!.toggleFacetCollapse('dynamic-facet', true));
     expect(snapshot!.isCollapsed('dynamic-facet', true)).toBe(true);
+  });
+});
+
+describe('FacetFilterGroup — header title alignment and inline group count', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  // Regression: the facet header title used to render centered (EuiButtonEmpty
+  // defaults to text-align:center and its text span was display:block), and the
+  // group `(N)` count wrapped onto the line below the title. The fix switches
+  // the button's text span to a left-aligned flex row so the title pins
+  // flush-left and the count sits inline. jsdom does not apply stylesheets, but
+  // it preserves inline styles — which is exactly where these load-bearing
+  // props live — so we assert them directly on the DOM.
+  const getTextSpan = (toggle: HTMLElement) =>
+    toggle.querySelector<HTMLElement>('.euiButtonEmpty__text');
+
+  it('left-aligns the header title via a flex row (not a centered block span)', () => {
+    const { getByTestId } = render(<FacetFilterGroup {...defaultProps} />);
+    const textSpan = getTextSpan(getByTestId('facetGroup-status-toggle'));
+    expect(textSpan).not.toBeNull();
+    // Load-bearing for left alignment: a flex row + start alignment, NOT a
+    // display:block span that would let EuiButtonEmpty's text-align:center
+    // center the inline title.
+    expect(textSpan!.style.display).toBe('flex');
+    expect(textSpan!.style.textAlign).toBe('start');
+    expect(textSpan!.style.display).not.toBe('block');
+  });
+
+  it('lets the title <strong> flex-grow so it pins flush-left and truncates', () => {
+    const { getByTestId } = render(<FacetFilterGroup {...defaultProps} />);
+    const textSpan = getTextSpan(getByTestId('facetGroup-status-toggle'));
+    const strong = textSpan!.querySelector<HTMLElement>('strong');
+    expect(strong).not.toBeNull();
+    // `flex: 1` makes the title consume the row and left-pin the count beside it.
+    // The shorthand normalizes to `1 1 0%`, so assert the grow factor directly.
+    expect(strong!.style.flexGrow).toBe('1');
+    expect(strong!.style.minWidth).toBe('0');
+  });
+
+  it('keeps the group (N) count inline as a sibling of the title, not wrapped below', () => {
+    const { getByTestId } = render(<FacetFilterGroup {...defaultProps} showOptionCount={true} />);
+    const textSpan = getTextSpan(getByTestId('facetGroup-status-toggle'));
+    const count = getByTestId('facetGroup-status-optionCount');
+    // The count reflects the number of options and reads as `(N)`.
+    expect(count).toHaveTextContent('(3)');
+    // It must be a direct child of the flex text span (same row as the title),
+    // sitting alongside the <strong> title rather than nested inside it.
+    expect(count.parentElement).toBe(textSpan);
+    expect(textSpan!.querySelector('strong')!.contains(count)).toBe(false);
+    // The count's `flex-shrink: 0` (which keeps it a fixed-width sibling so the
+    // truncating title yields to it instead of wrapping it below) lives in the
+    // `.altFacetGroupCount` SCSS modifier. jsdom applies no stylesheets, so we
+    // assert the class is present rather than the computed flex-shrink value.
+    expect(count.className).toContain('altFacetGroupCount');
+  });
+
+  it('omits the group count when showOptionCount is false (default)', () => {
+    const { queryByTestId } = render(<FacetFilterGroup {...defaultProps} />);
+    expect(queryByTestId('facetGroup-status-optionCount')).not.toBeInTheDocument();
   });
 });
 

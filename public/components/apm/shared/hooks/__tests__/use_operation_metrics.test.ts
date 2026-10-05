@@ -240,7 +240,7 @@ describe('useOperationMetrics', () => {
       });
 
       expect(result.current.error).toBeInstanceOf(Error);
-      expect(result.current.error?.message).toBe('Unknown error');
+      expect(result.current.error?.message).toBe('Failed to fetch some operation metrics');
     });
   });
 

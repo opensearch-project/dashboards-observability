@@ -45,8 +45,6 @@ const forecasterDetail = (): UnifiedRule => ({
   description: 'Forecasts host CPU behavior.',
   alertHistory: [],
   conditionPreviewData: [],
-  notificationRouting: [],
-  suppressionRules: [],
   raw: {
     id: 'forecast-1',
     name: 'sample-cpu-forecaster',

@@ -24,6 +24,70 @@ export const APM_CORRELATIONS_DOCS_URL =
   'https://docs.opensearch.org/latest/observing-your-data/exploring-observability-data/correlations/#creating-a-trace-to-logs-correlation';
 
 /**
+ * APM dataset naming conventions and field requirements.
+ *
+ * These describe the OpenTelemetry index shapes APM depends on and are shared
+ * domain knowledge — the setup wizard uses them to detect and auto-create
+ * datasets, and the manual "APM Settings" flow validates the same datasets. A
+ * match requires BOTH the naming convention AND that the required fields exist.
+ * Values were confirmed against a live OpenTelemetry demo cluster (indices
+ * otel-v1-apm-span-*, logs-otel-v1-*, otel-v2-apm-service-map-*) and the working
+ * DataViews on the datasets page.
+ */
+
+/** Traces: OpenTelemetry span index pattern (Data Prepper otel-v1). */
+export const APM_TRACES_INDEX_PATTERN = 'otel-v1-apm-span*';
+/** Fields that must exist for a span index to qualify as traces. */
+export const APM_TRACES_REQUIRED_FIELDS = ['traceId', 'spanId', 'serviceName'] as const;
+/**
+ * Preferred trace time field. The working DataView uses `endTime`; `startTime`
+ * is an accepted fallback (both are date_nanos). Order matters — highest first.
+ */
+export const APM_TRACES_TIME_FIELD_CANDIDATES = ['endTime', 'startTime'] as const;
+
+/** Logs: OpenTelemetry log index pattern (correlated with traces). */
+export const APM_LOGS_INDEX_PATTERN = 'logs-otel-v1*';
+/** Fields that must exist for a log index to qualify as correlatable logs. */
+export const APM_LOGS_REQUIRED_FIELDS = ['traceId', 'spanId', 'time'] as const;
+/** Log time field (matches the working DataView). */
+export const APM_LOGS_TIME_FIELD = 'time';
+/**
+ * schemaMappings written on the correlated-logs DataView, matching the working
+ * example exactly. Used by the runtime log-correlation queries.
+ */
+export const APM_LOGS_SCHEMA_MAPPINGS = {
+  otelLogs: {
+    timestamp: 'time',
+    traceId: 'traceId',
+    spanId: 'spanId',
+    serviceName: 'resource.attributes.service.name',
+  },
+} as const;
+
+/** Service map: newer v2 convention (nested source/target node schema). */
+export const APM_SERVICE_MAP_INDEX_PATTERN = 'otel-v2-apm-service-map*';
+/** Fields that must exist for a v2 service-map index to qualify. */
+export const APM_SERVICE_MAP_REQUIRED_FIELDS = [
+  'sourceNode',
+  'targetNode',
+  'sourceOperation',
+  'targetOperation',
+  'nodeConnectionHash',
+  'timestamp',
+] as const;
+/** Service-map time field. The v2 DataView has no signalType / schemaMappings. */
+export const APM_SERVICE_MAP_TIME_FIELD = 'timestamp';
+
+/**
+ * RED metrics (Rate / Errors / Duration) the wizard checks for on a direct-query
+ * Prometheus data source. These are the span-derived metrics emitted by Data
+ * Prepper (confirmed present on the live source). A data source must expose all
+ * of these to be offered as a RED-metrics source. The wizard never creates a
+ * Prometheus data source — it only detects and reuses existing ones.
+ */
+export const APM_RED_REQUIRED_METRICS = ['request', 'fault', 'latency_seconds_bucket'] as const;
+
+/**
  * App ID for Explore application used in navigation
  */
 export const EXPLORE_APP_ID = 'explore';
@@ -41,6 +105,8 @@ export const LEGACY_BANNER_DISMISSED_KEY = 'apm.legacyBannerDismissed';
  * Trace Analytics convention (see trace_analytics/home.tsx).
  */
 export const APM_TIME_RANGE_STORAGE_KEY = 'apm.timeRange';
+/** sessionStorage key for the Topology Map's "Include external dependencies" checkbox. */
+export const APM_INCLUDE_DEPENDENCIES_STORAGE_KEY = 'apm.includeDependencies';
 
 /**
  * Default APM time range used when nothing has been persisted yet.
@@ -56,6 +122,8 @@ export const DEFAULT_APM_TIME_RANGE = {
 export const APM_CONSTANTS = {
   // Filter sidebar
   ATTRIBUTE_VALUES_INITIAL_LIMIT: 5,
+  // Max height (px) of a filter value list once expanded; the list scrolls beyond this.
+  FILTER_VALUES_EXPANDED_MAX_HEIGHT: 240,
 
   // Table pagination
   DEFAULT_PAGE_SIZE: 10,
@@ -80,10 +148,17 @@ export const APM_CONSTANTS = {
     WARNING: euiThemeVars.euiColorVis5,
   },
 
-  // Query limits for fetching data
+  // Query limits for fetching data. Status/HTTP and log-level filters are pushed into
+  // the PPL WHERE clause (see service_correlations_flyout), so these return the most
+  // recent matching rows across the full time range.
   QUERY_LIMITS: {
     SPANS: 50,
     LOGS_PER_DATASET: 10,
+    // Fallback only: on OpenSearch < 3.1 the `coalesce`-based HTTP/level filters can't
+    // be pushed, so the base page is fetched wider and filtered client-side across the
+    // most recent rows. A banner tells the user the scope is limited in this case.
+    SPANS_FILTERED: 1000,
+    LOGS_PER_DATASET_FILTERED: 1000,
   },
 
   // Truncation length for log messages in table display
@@ -284,6 +359,22 @@ export const APPLICATION_MAP_CONSTANTS = {
 
   /** Map container minimum height */
   MAP_MIN_HEIGHT: 500,
+
+  /**
+   * Max nodes rendered in the Services / groupByValue graph. Above this the
+   * graph switches to a "narrow your selection" notice instead of laying out
+   * the full graph (dagre layout is O(N+E)). Set as a pathological-case guard;
+   * layout only recomputes on structural change now, so typical large fleets
+   * (a few hundred services) still render.
+   */
+  MAX_RENDERED_NODES: 500,
+  /**
+   * Above this many nodes in the map view, dependencies (databases, brokers, external
+   * endpoints) that connect to the same nodes are folded into expandable stacks. Measured on
+   * the map with synthetic topologies (~20% dependencies): at 100 nodes it stays responsive on
+   * a mid-range laptop (4x CPU slowdown), at 200 it takes ~12 s to lay out with ~2 s freezes.
+   */
+  DEPENDENCY_STACK_THRESHOLD: 150,
 } as const;
 
 // Platform utility functions moved to shared/utils/platform_utils.ts
@@ -291,5 +382,7 @@ export {
   PLATFORM_TYPE_MAP,
   getPlatformDisplayName,
   getPlatformTypeFromEnvironment,
+  getNodeIconType,
+  getNodeSubtitle,
   toPrometheusLabel,
 } from '../shared/utils/platform_utils';

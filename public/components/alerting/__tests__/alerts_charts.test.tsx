@@ -155,7 +155,7 @@ describe('alerts_charts', () => {
         severity: 'critical',
         startTime: new Date(END - 30 * 60 * 1000).toISOString(),
       }),
-      // After window — dropped (clamped startTime still >= endMs, so no bucket matches).
+      // After window — dropped (startTime >= endMs, so no bucket matches).
       makeAlert({
         id: '3',
         severity: 'critical',
@@ -173,16 +173,22 @@ describe('alerts_charts', () => {
     expect(total).toBe(1);
   });
 
-  it('AlertTimeline: pre-window alerts are credited to the first bucket (matches backend overlap)', () => {
+  it('AlertTimeline: pre-window alerts do NOT inflate bucket 0 (DVZ-AT1)', () => {
     // The OS backend's interval-overlap filter returns alerts that started
-    // before the picked window but are still firing / resolved inside it.
-    // The chart must count those too, otherwise the summary-cards counts and
-    // timeline bars disagree. We clamp startTime to the window start so the
-    // alert lands in bucket 0.
+    // before the picked window but are still firing / recently resolved inside
+    // it. This histogram counts alert *starts* per bucket, so an alert that
+    // started before the window has no start-bucket here — the old
+    // Math.max(startMs, ...) clamp forced it into bucket 0 and painted a false
+    // spike at the left edge. The fix excludes it from the bars entirely.
     const start = END - HOUR_MS;
     const alerts = [
-      // Started 2h before the window — backend returned it as overlapping,
-      // chart should credit it to the first bucket.
+      // In-window — counted in some bucket.
+      makeAlert({
+        id: 'in',
+        severity: 'critical',
+        startTime: new Date(END - 30 * 60 * 1000).toISOString(),
+      }),
+      // Started 2h before the window — must NOT be credited to bucket 0.
       makeAlert({
         id: 'pre',
         severity: 'critical',
@@ -196,10 +202,85 @@ describe('alerts_charts', () => {
     };
     const critical = option.series.find((s) => s.name === 'critical');
     expect(critical).toBeDefined();
-    // First bucket holds the clamped pre-window alert.
-    expect(critical!.data[0]).toBe(1);
-    // Total across all buckets is still 1 — no double-counting.
+    // Bucket 0 must not be inflated by the pre-window alert. The in-window
+    // alert started at END-30m, which lands in a later bucket, so bucket 0 is 0.
+    expect(critical!.data[0]).toBe(0);
+    // Only the in-window alert is counted across all buckets.
     const total = (critical!.data as number[]).reduce((a, b) => a + b, 0);
     expect(total).toBe(1);
+  });
+
+  it('AlertTimeline: excluded pre-window count is surfaced in the chart title (DVZ-AT1)', () => {
+    const start = END - HOUR_MS;
+    const alerts = [
+      makeAlert({ id: 'pre1', startTime: new Date(END - 2 * HOUR_MS).toISOString() }),
+      makeAlert({ id: 'pre2', startTime: new Date(END - 3 * HOUR_MS).toISOString() }),
+      makeAlert({ id: 'in', startTime: new Date(END - 10 * 60 * 1000).toISOString() }),
+    ];
+    render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} />);
+
+    const option = mockSetOption.mock.calls[0][0] as { title?: { text: string } };
+    expect(option.title).toBeDefined();
+    // Two alerts started before the window; the count must appear in the title.
+    expect(option.title!.text).toContain('2');
+    expect(option.title!.text).toContain('before this window');
+  });
+
+  it('AlertTimeline: no title is rendered when nothing was excluded', () => {
+    const start = END - HOUR_MS;
+    const alerts = [
+      makeAlert({ id: 'in', startTime: new Date(END - 10 * 60 * 1000).toISOString() }),
+    ];
+    render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} />);
+
+    const option = mockSetOption.mock.calls[0][0] as { title?: unknown };
+    expect(option.title).toBeUndefined();
+  });
+
+  it('AlertTimeline: an unparseable start time is surfaced as an "unknown start time" note, not dropped', () => {
+    const start = END - HOUR_MS;
+    const alerts = [
+      makeAlert({ id: 'in', startTime: new Date(END - 10 * 60 * 1000).toISOString() }),
+      // Malformed startTime → NaN. Must not vanish from both bars and notes.
+      makeAlert({ id: 'bad', startTime: 'not a date' }),
+    ];
+    render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} />);
+
+    const option = mockSetOption.mock.calls[0][0] as {
+      title?: { text: string };
+      series: Array<{ name: string; data: number[] }>;
+    };
+    // Only the in-window alert is on the bars.
+    const critical = option.series.find((s) => s.name === 'critical');
+    const total = (critical!.data as number[]).reduce((a, b) => a + b, 0);
+    expect(total).toBe(1);
+    // The bad one is reconcilable via the title note.
+    expect(option.title).toBeDefined();
+    expect(option.title!.text).toContain('unknown start time');
+  });
+
+  it('AlertTimeline: an alert starting exactly at endMs lands in the last bucket (not dropped)', () => {
+    const start = END - HOUR_MS;
+    const alerts = [
+      makeAlert({ id: 'edge', severity: 'critical', startTime: new Date(END).toISOString() }),
+    ];
+    render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} />);
+
+    const option = mockSetOption.mock.calls[0][0] as {
+      series: Array<{ name: string; data: number[] }>;
+    };
+    const critical = option.series.find((s) => s.name === 'critical');
+    const data = critical!.data as number[];
+    // Counted, and specifically in the final bucket.
+    expect(data.reduce((a, b) => a + b, 0)).toBe(1);
+    expect(data[data.length - 1]).toBe(1);
+  });
+
+  it('AlertTimeline: y-axis has an "Alerts" title (DVZ-AT2)', () => {
+    const alerts = [makeAlert({ startTime: new Date(END - 30 * 60 * 1000).toISOString() })];
+    render(<AlertTimeline alerts={alerts} startMs={END - HOUR_MS} endMs={END} />);
+
+    const option = mockSetOption.mock.calls[0][0] as { yAxis: { name: string } };
+    expect(option.yAxis.name).toBe('Alerts');
   });
 });

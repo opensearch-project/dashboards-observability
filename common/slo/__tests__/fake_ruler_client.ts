@@ -106,7 +106,7 @@ export class FakeRulerClient implements RulerClient, SloRulerClient {
   ): Promise<void> {
     this.upsertCalls += 1;
     if (this.upsertError) throw this.upsertError;
-    // Mimic Cortex: recording rules may not carry annotations. Any rule with
+    // Mimic Prometheus: recording rules may not carry annotations. Any rule with
     // `type: 'recording'` that ships an annotation payload is a 400 the ruler
     // would reject; fail the upsert loudly so a future regression that
     // re-adds `osd_slo_recording_provenance` (or anything else) doesn't

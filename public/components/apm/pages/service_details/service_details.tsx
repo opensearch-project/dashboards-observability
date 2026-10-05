@@ -17,6 +17,7 @@ import {
   EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { isServiceDetailsHashPath } from '../../shared/utils/navigation_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 import { ServiceOverview } from './service_overview';
 import { ServiceOperations } from './service_operations';
@@ -31,6 +32,12 @@ import {
   ServiceDetailsUrlParams,
 } from '../../common/types/service_details_types';
 import { SERVICE_DETAILS_CONSTANTS } from '../../common/constants';
+import { ApmCursorContext, createApmCursorBus } from '../../shared/hooks/apm_cursor_context';
+import {
+  readUrlTimeRange,
+  splitHash,
+  useTimeRangeUrlSync,
+} from '../../shared/hooks/use_time_range_url_sync';
 import '../../shared/styles/apm_common.scss';
 
 export interface ServiceDetailsProps {
@@ -67,15 +74,22 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   // State for active tab
   const [activeTab, setActiveTab] = useState<ServiceDetailsTabId>(initialTab);
 
-  // Helper to parse URL params from hash
-  const parseUrlParams = useCallback((): ServiceDetailsUrlParams => {
-    const params = new URLSearchParams(window.location.search);
-    const hash = window.location.hash;
+  // One cursor bus for the whole page. EuiTabbedContent mounts only the active
+  // tab, so a single bus scopes the synced crosshair to that tab's charts.
+  const cursorBus = useMemo(() => createApmCursorBus(), []);
 
-    // Parse query params from hash
-    const hashQueryIndex = hash.indexOf('?');
-    const hashParams =
-      hashQueryIndex >= 0 ? new URLSearchParams(hash.substring(hashQueryIndex + 1)) : params;
+  // Whether a hash path is this page (`#/service-details/<service>/<env>`). URL writes are
+  // skipped otherwise, so leaving by a hash link (breadcrumb, another service) is never
+  // rewritten back to this service.
+  const isThisPagePath = useCallback(
+    (hashPath: string) => isServiceDetailsHashPath(hashPath, serviceName, environment),
+    [serviceName, environment]
+  );
+
+  // Helper to parse URL params from hash. `from`/`to` are only returned when both are valid.
+  const parseUrlParams = useCallback((): ServiceDetailsUrlParams => {
+    const { params: hashParams } = splitHash();
+    const urlRange = readUrlTimeRange(hashParams);
 
     return {
       serviceName,
@@ -83,13 +97,14 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
       tab:
         (hashParams.get(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TAB) as ServiceDetailsTabId) ||
         initialTab,
-      from: hashParams.get(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.FROM) || undefined,
-      to: hashParams.get(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TO) || undefined,
+      from: urlRange?.from,
+      to: urlRange?.to,
     };
   }, [serviceName, environment, initialTab]);
 
   // Parse URL params on mount
   useEffect(() => {
+    if (!isThisPagePath(splitHash().path)) return;
     const urlParams = parseUrlParams();
 
     // Set tab from URL
@@ -104,39 +119,51 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceName, environment, initialTab, onTimeChange, parseUrlParams]);
 
-  // Listen for URL hash changes and update tab
+  // Update URL when state changes. Keeps the current hash path and every other param
+  // (e.g. `lang`, used for the breadcrumb icon); a no-op once the URL is another page's.
+  const updateUrl = useCallback(
+    (newTab?: ServiceDetailsTabId, newTimeRange?: TimeRange) => {
+      const { path, params } = splitHash();
+      if (!isThisPagePath(path)) return;
+      const time = newTimeRange || timeRange;
+      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TAB, newTab || activeTab);
+      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.FROM, time.from);
+      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TO, time.to);
+      window.history.replaceState(null, '', `${path}?${params.toString()}`);
+    },
+    [isThisPagePath, activeTab, timeRange]
+  );
+
+  // Listen for URL hash changes and update tab and time range. A deep link to the
+  // same service with a different `from`/`to` only changes the hash, so without
+  // this the charts would stay on the previous range while the URL shows the new one.
+  // Backfilling a hash with no range is handled by useTimeRangeUrlSync.
   useEffect(() => {
     const handleHashChange = () => {
+      if (!isThisPagePath(splitHash().path)) return;
       const urlParams = parseUrlParams();
       if (urlParams.tab && urlParams.tab !== activeTab) {
         setActiveTab(urlParams.tab);
+      }
+      if (
+        urlParams.from &&
+        urlParams.to &&
+        (urlParams.from !== timeRange.from || urlParams.to !== timeRange.to)
+      ) {
+        onTimeChange({ from: urlParams.from, to: urlParams.to });
       }
     };
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [parseUrlParams, activeTab]);
+  }, [isThisPagePath, parseUrlParams, activeTab, timeRange, onTimeChange]);
 
-  // Update URL when state changes
-  const updateUrl = useCallback(
-    (newTab?: ServiceDetailsTabId, newTimeRange?: TimeRange) => {
-      const tab = newTab || activeTab;
-      const time = newTimeRange || timeRange;
-
-      const params = new URLSearchParams();
-      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TAB, tab);
-      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.FROM, time.from);
-      params.set(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TO, time.to);
-
-      const encodedServiceName = encodeURIComponent(serviceName);
-      const encodedEnvironment = encodeURIComponent(environment || 'default');
-
-      // Update hash with params
-      const newHash = `#/service-details/${encodedServiceName}/${encodedEnvironment}?${params.toString()}`;
-      window.history.replaceState(null, '', newHash);
-    },
-    [serviceName, environment, activeTab, timeRange]
-  );
+  // Keep URL `from`/`to` in sync with the page time range and backfill a URL without one.
+  useTimeRangeUrlSync({
+    timeRange,
+    isCurrentPage: isThisPagePath,
+    pageKey: `${serviceName}/${environment || ''}`,
+  });
 
   // Handle tab change
   const handleTabChange = useCallback(
@@ -146,6 +173,17 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
       updateUrl(tabId);
     },
     [updateUrl]
+  );
+
+  // Handle a chart brush selection: zoom the whole page time range (all charts
+  // re-query) and persist it to the URL. Charts report ISO-8601 start/end.
+  const handleTimeRangeChange = useCallback(
+    (from: string, to: string) => {
+      const newRange = { from, to };
+      onTimeChange(newRange);
+      updateUrl(undefined, newRange);
+    },
+    [onTimeChange, updateUrl]
   );
 
   // Get Prometheus connection ID from config
@@ -167,7 +205,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   }, []);
   const sloApiClientStub = useMemo(
     () =>
-      (({
+      ({
         list: () =>
           Promise.resolve({
             results: [],
@@ -177,7 +215,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             nextCursor: null,
             prevCursor: null,
           }),
-      } as unknown) as SloApiClient),
+      }) as unknown as SloApiClient,
     []
   );
   // Feature flag: when `observability.slo.enabled` is false the SLOs tab is
@@ -192,9 +230,10 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   });
   const sloBucket = tabSloHealth.bySvc.get(serviceName);
   const breachedCount = sloBucket?.breached ?? 0;
-  const sloAccessError = useMemo(() => toSloHealthAccessError(tabSloHealth.error), [
-    tabSloHealth.error,
-  ]);
+  const sloAccessError = useMemo(
+    () => toSloHealthAccessError(tabSloHealth.error),
+    [tabSloHealth.error]
+  );
 
   // Define tabs
   const tabs: EuiTabbedContentTab[] = useMemo(
@@ -212,6 +251,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             prometheusConnectionId={prometheusConnectionId}
             serviceMapDataset={serviceMapDataset}
             refreshTrigger={refreshTrigger}
+            onTimeRangeChange={handleTimeRangeChange}
           />
         ),
       },
@@ -228,6 +268,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             prometheusConnectionId={prometheusConnectionId}
             serviceMapDataset={serviceMapDataset}
             refreshTrigger={refreshTrigger}
+            onTimeRangeChange={handleTimeRangeChange}
           />
         ),
       },
@@ -244,6 +285,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
             prometheusConnectionId={prometheusConnectionId}
             serviceMapDataset={serviceMapDataset}
             refreshTrigger={refreshTrigger}
+            onTimeRangeChange={handleTimeRangeChange}
           />
         ),
       },
@@ -279,6 +321,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
       prometheusConnectionId,
       serviceMapDataset,
       refreshTrigger,
+      handleTimeRangeChange,
       breachedCount,
       sloBucket,
       sloAccessError,
@@ -344,12 +387,14 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
         <EuiPageContent color="transparent" hasBorder={false} paddingSize="none">
           <EuiPageContentBody>
             {/* Tabbed Content - time picker is now in header area */}
-            <EuiTabbedContent
-              tabs={tabs}
-              selectedTab={selectedTab}
-              onTabClick={handleTabChange}
-              autoFocus="initial"
-            />
+            <ApmCursorContext.Provider value={cursorBus}>
+              <EuiTabbedContent
+                tabs={tabs}
+                selectedTab={selectedTab}
+                onTabClick={handleTabChange}
+                autoFocus="initial"
+              />
+            </ApmCursorContext.Provider>
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>

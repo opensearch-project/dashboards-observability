@@ -195,6 +195,113 @@ describe('response_processor', () => {
       expect(result.ServiceSummaries[0].KeyAttributes.Name).toBe('alpha-service');
       expect(result.ServiceSummaries[1].KeyAttributes.Name).toBe('zebra-service');
     });
+    describe('node type (backward compatibility with untyped / service-only data)', () => {
+      const types = (result: any) =>
+        Object.fromEntries(
+          result.ServiceSummaries.map((x: any) => [x.KeyAttributes.Name, x.KeyAttributes.Type])
+        );
+
+      it('defaults to Service when the type field is absent or null', () => {
+        const result = transformListServicesResponse({
+          jsonData: [
+            {
+              'sourceNode.keyAttributes': { name: 'frontend', environment: 'prod' },
+              'targetNode.keyAttributes': { name: 'cart', environment: 'prod' },
+            },
+            {
+              'sourceNode.keyAttributes': { name: 'checkout', environment: 'prod' },
+              'sourceNode.type': null,
+              'targetNode.keyAttributes': null,
+              'targetNode.type': null,
+            },
+          ],
+          size: 2,
+        } as unknown);
+
+        expect(types(result)).toEqual({
+          frontend: 'Service',
+          cart: 'Service',
+          checkout: 'Service',
+        });
+      });
+
+      it('keeps every service when all nodes are typed service (feature off)', () => {
+        const result = transformListServicesResponse({
+          jsonData: [
+            {
+              'sourceNode.keyAttributes': { name: 'frontend', environment: 'prod' },
+              'sourceNode.type': 'service',
+              'targetNode.keyAttributes': { name: 'unknown', environment: 'prod' },
+              'targetNode.type': 'service',
+            },
+          ],
+          size: 1,
+        } as unknown);
+
+        // A real service named "unknown" is not a dependency placeholder.
+        expect(types(result)).toEqual({ frontend: 'service', unknown: 'service' });
+      });
+
+      it('preserves dependency types and drops unresolved dependency placeholders', () => {
+        const result = transformListServicesResponse({
+          jsonData: [
+            {
+              'sourceNode.keyAttributes': { name: 'cart', environment: 'prod' },
+              'sourceNode.type': 'service',
+              'targetNode.keyAttributes': { name: 'redis:valkey-cart', environment: 'prod' },
+              'targetNode.type': 'database',
+            },
+            {
+              'sourceNode.keyAttributes': { name: 'cart', environment: 'prod' },
+              'sourceNode.type': 'service',
+              'targetNode.keyAttributes': { name: 'UnknownRemoteService', environment: 'prod' },
+              'targetNode.type': 'external',
+            },
+          ],
+          size: 2,
+        } as unknown);
+
+        expect(types(result)).toEqual({ cart: 'service', 'redis:valkey-cart': 'database' });
+      });
+    });
+  });
+
+  describe('transformGetServiceMapResponse dependency placeholders', () => {
+    it('drops unresolved dependency placeholders and their edges, as the catalog does', () => {
+      const result = transformGetServiceMapResponse({
+        jsonData: [
+          {
+            'sourceNode.keyAttributes': { name: 'cart', environment: 'prod' },
+            'sourceNode.type': 'service',
+            'targetNode.keyAttributes': { name: 'redis:valkey-cart', environment: 'prod' },
+            'targetNode.type': 'database',
+          },
+          {
+            'sourceNode.keyAttributes': { name: 'cart', environment: 'prod' },
+            'sourceNode.type': 'service',
+            'targetNode.keyAttributes': { name: 'UnknownRemoteService', environment: 'prod' },
+            'targetNode.type': 'external',
+          },
+          {
+            'sourceNode.keyAttributes': { name: 'cart', environment: 'prod' },
+            'sourceNode.type': 'service',
+            'targetNode.keyAttributes': { name: 'unknown', environment: 'prod' },
+            'targetNode.type': 'service',
+          },
+        ],
+        size: 3,
+      } as unknown);
+
+      expect(result.Nodes.map((n: any) => n.Name).sort()).toEqual([
+        'cart',
+        'redis:valkey-cart',
+        'unknown',
+      ]);
+      expect(result.Edges).toHaveLength(2);
+      expect(result.Edges.map((e: any) => e.DestinationNodeId).join(' ')).not.toContain(
+        'UnknownRemoteService'
+      );
+    });
   });
 
   describe('transformGetServiceResponse', () => {
@@ -385,6 +492,31 @@ describe('response_processor', () => {
           n.KeyAttributes.Name === 'api-gateway'
       );
       expect(apiGatewayNodes).toHaveLength(1);
+    });
+
+    it('defaults node type to Service for untyped rows and preserves dependency types', () => {
+      const result = transformGetServiceMapResponse({
+        jsonData: [
+          {
+            'sourceNode.keyAttributes': { name: 'frontend', environment: 'prod' },
+            'targetNode.keyAttributes': { name: 'cart', environment: 'prod' },
+          },
+          {
+            'sourceNode.keyAttributes': { name: 'cart', environment: 'prod' },
+            'sourceNode.type': 'service',
+            'targetNode.keyAttributes': { name: 'redis:valkey-cart', environment: 'prod' },
+            'targetNode.type': 'database',
+          },
+        ],
+        size: 2,
+      } as unknown);
+
+      const typeOf = (name: string) =>
+        result.Nodes.find((n: { KeyAttributes: { Name: string } }) => n.KeyAttributes.Name === name)
+          ?.KeyAttributes.Type;
+      expect(typeOf('frontend')).toBe('Service');
+      expect(typeOf('cart')).toBe('Service');
+      expect(typeOf('redis:valkey-cart')).toBe('database');
     });
   });
 

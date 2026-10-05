@@ -22,7 +22,7 @@ function fakeSuggestion(
   key: string,
   kindId: 'http-availability' | 'apm-latency' = 'http-availability'
 ): Suggestion {
-  return ({
+  return {
     key,
     kindId,
     kind: 'k',
@@ -64,7 +64,7 @@ function fakeSuggestion(
         annotations: {},
       },
     },
-  } as unknown) as Suggestion;
+  } as unknown as Suggestion;
 }
 
 const fakeGroup: GeneratedRuleGroup = {
@@ -81,7 +81,7 @@ describe('useLivePreview', () => {
 
   it('emits a per-key loading PerPreview synchronously and a success on resolve', async () => {
     const preview = jest.fn().mockResolvedValue(fakeGroup);
-    const apiClient = ({ preview } as unknown) as Pick<SloApiClient, 'preview'>;
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
     mockExecuteInstantQuery.mockResolvedValue({
       fields: [{ name: 'Value', values: ['0.99'] }],
     });
@@ -108,7 +108,7 @@ describe('useLivePreview', () => {
       .fn()
       .mockResolvedValueOnce(fakeGroup)
       .mockRejectedValueOnce(new Error('preview failed'));
-    const apiClient = ({ preview } as unknown) as Pick<SloApiClient, 'preview'>;
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
     mockExecuteInstantQuery.mockResolvedValue(undefined);
 
     const { result } = renderHook(() =>
@@ -130,7 +130,7 @@ describe('useLivePreview', () => {
 
   it('skips live SLI when no prometheusConnectionId is supplied', async () => {
     const preview = jest.fn().mockResolvedValue(fakeGroup);
-    const apiClient = ({ preview } as unknown) as Pick<SloApiClient, 'preview'>;
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
     const { result } = renderHook(() =>
       useLivePreview({
         apiClient,
@@ -146,7 +146,7 @@ describe('useLivePreview', () => {
 
   it('populates liveByKey with sliRatio / totalSamples / p99Ms on success', async () => {
     const preview = jest.fn().mockResolvedValue(fakeGroup);
-    const apiClient = ({ preview } as unknown) as Pick<SloApiClient, 'preview'>;
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
     // 3 fan-out queries per row — return distinct values to verify the mapping.
     mockExecuteInstantQuery
       .mockResolvedValueOnce({ fields: [{ name: 'Value', values: ['0.91'] }] })
@@ -175,8 +175,8 @@ describe('useLivePreview', () => {
 
   it('survives executeInstantQuery rejection (per-query catch) and yields a success row with undefined values', async () => {
     const preview = jest.fn().mockResolvedValue(fakeGroup);
-    const apiClient = ({ preview } as unknown) as Pick<SloApiClient, 'preview'>;
-    mockExecuteInstantQuery.mockRejectedValue(new Error('cortex 502'));
+    const apiClient = { preview } as unknown as Pick<SloApiClient, 'preview'>;
+    mockExecuteInstantQuery.mockRejectedValue(new Error('prometheus 502'));
     const { result } = renderHook(() =>
       useLivePreview({
         apiClient,

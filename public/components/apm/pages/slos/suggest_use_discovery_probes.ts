@@ -97,7 +97,7 @@ export function useDiscoveryProbes({
               });
               return { metric: probe.metric, label, values: res?.values ?? [] };
             } catch (err) {
-              // Per-probe failure is expected (rejected by Cortex when the
+              // Per-probe failure is expected (rejected by Prometheus when the
               // metric family is absent). Log at warn level so the failure is
               // visible in dev tools without blowing up the discovery effect.
 

@@ -10,6 +10,9 @@ import {
   EuiPanel,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
+  EuiProgress,
+  EuiCallOut,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { CelestialMap, getIcon } from '@osd/apm-topology';
 import type { CelestialCardProps, CelestialEdge, Breadcrumb } from '@osd/apm-topology';
@@ -25,11 +28,13 @@ import {
   SelectedEdgeState,
 } from '../../../common/types/service_map_types';
 import {
-  getPlatformTypeFromEnvironment,
+  getNodeIconType,
+  getNodeSubtitle,
   getEnvironmentDisplayName,
   APPLICATION_MAP_CONSTANTS,
 } from '../../../common/constants';
 import { matchesErrorRateThreshold } from '../filters';
+import { computeDependencyStacks } from '../../utils/dependency_stacking';
 import { applicationMapI18nTexts as i18nTexts } from '../../../pages/application_map/application_map_i18n';
 
 export interface ServiceMapGraphProps {
@@ -51,6 +56,13 @@ export interface ServiceMapGraphProps {
   selectedEdgeNodeIds?: string[];
   /** Callback when filters change (e.g., clearing groupBy on breadcrumb click) */
   onFiltersChange?: (filters: ApplicationMapFilters) => void;
+  /**
+   * Fold dependencies that connect to the same nodes into expandable stacks when the view has
+   * more than DEPENDENCY_STACK_THRESHOLD nodes. Defaults to true.
+   */
+  stackDependencies?: boolean;
+  /** Called from the stacking notice's "Show individually". */
+  onShowDependenciesIndividually?: () => void;
 }
 
 /**
@@ -60,7 +72,7 @@ export interface ServiceMapGraphProps {
  * - Transforming PPL nodes/edges to CelestialMap format
  * - Hierarchical navigation (Application -> Services)
  * - Client-side filtering
- * - Node click/double-click interactions
+ * - Node click and keyboard interactions
  */
 export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
   nodes,
@@ -76,84 +88,104 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
   selectedNodeId,
   selectedEdgeNodeIds,
   onFiltersChange: _onFiltersChange,
+  stackDependencies = true,
+  onShowDependenciesIndividually,
 }) => {
   // Build a map from NodeId to service info for edge click handling
   const nodeIdToServiceInfo = useMemo(() => {
-    const map = new Map<string, { serviceName: string; environment: string }>();
+    const map = new Map<string, { serviceName: string; environment: string; type?: string }>();
     nodes.forEach((node) => {
       map.set(node.NodeId, {
         serviceName: node.KeyAttributes.Name,
         environment: node.KeyAttributes.Environment,
+        type: node.KeyAttributes.Type,
       });
     });
     return map;
   }, [nodes]);
 
-  // Transform ALL nodes to CelestialMap format based on navigation level
-  const { celestialNodes, celestialEdges } = useMemo(() => {
+  // Structural graph for the current level: which raw nodes/edges render.
+  // Excludes metric values and edge selection so a metrics tick or edge click
+  // does not rebuild it (and does not force a dagre relayout of all nodes).
+  const levelGraph = useMemo(() => {
     if (navigationState.level === 'application') {
-      // Aggregated application view - single node representing all services
-      const aggregatedNode = createAggregatedApplicationNode(nodes, metricsMap);
-      return {
-        celestialNodes: aggregatedNode ? [aggregatedNode] : [],
-        celestialEdges: [],
-      };
+      return { kind: 'application' as const };
     }
-
     if (navigationState.level === 'groupBy' && navigationState.groupByAttribute) {
-      // Group by attribute view - show group nodes for each unique value
-      const groupNodes = createGroupByNodes(nodes, metricsMap, navigationState.groupByAttribute);
-      return {
-        celestialNodes: groupNodes,
-        celestialEdges: [], // No edges between groups
-      };
+      return { kind: 'groupBy' as const };
     }
-
     if (
       navigationState.level === 'groupByValue' &&
       navigationState.groupByAttribute &&
       navigationState.groupByValue
     ) {
-      // Filter nodes to those matching the selected group value
-      const filteredNodes = nodes.filter((node) => {
-        const attrValue = node.GroupByAttributes?.[navigationState.groupByAttribute];
-        return attrValue === navigationState.groupByValue;
-      });
-
-      // Get node IDs for edge filtering
+      const filteredNodes = nodes.filter(
+        (node) =>
+          node.GroupByAttributes?.[navigationState.groupByAttribute!] ===
+          navigationState.groupByValue
+      );
       const filteredNodeIds = new Set(filteredNodes.map((n) => n.NodeId));
-
-      // Filter edges to only those between filtered nodes
       const filteredEdges = edges.filter(
         (edge) =>
           filteredNodeIds.has(edge.SourceNodeId) && filteredNodeIds.has(edge.DestinationNodeId)
       );
-
-      const transformed = transformToCelestialFormat(
-        filteredNodes,
-        filteredEdges,
-        metricsMap,
-        selectedEdge?.edgeId || null
-      );
-      return {
-        celestialNodes: transformed.nodes,
-        celestialEdges: transformed.edges,
-      };
+      return { kind: 'graph' as const, nodes: filteredNodes, edges: filteredEdges };
     }
+    // Services view - all nodes (filtering handled by nodesInFocus)
+    return { kind: 'graph' as const, nodes, edges };
+  }, [nodes, edges, navigationState]);
 
-    // Services view - transform all nodes (filtering handled by nodesInFocus)
-    const transformed = transformToCelestialFormat(
-      nodes,
-      edges,
-      metricsMap,
-      selectedEdge?.edgeId || null
+  // Large maps: dependencies connected to the same nodes fold into stacks (no edge is lost),
+  // which keeps them visible while taking them out of the layout. The selected node is never
+  // stacked, so it stays on the map.
+  const dependencyStacks = useMemo(() => {
+    if (
+      !stackDependencies ||
+      levelGraph.kind !== 'graph' ||
+      levelGraph.nodes.length <= APPLICATION_MAP_CONSTANTS.DEPENDENCY_STACK_THRESHOLD
+    ) {
+      return { stackIdByNodeId: new Map<string, string>(), stackedNodes: 0, stacks: 0 };
+    }
+    return computeDependencyStacks(
+      levelGraph.nodes,
+      levelGraph.edges,
+      new Set(selectedNodeId ? [selectedNodeId] : [])
     );
+  }, [stackDependencies, levelGraph, selectedNodeId]);
 
-    return {
-      celestialNodes: transformed.nodes,
-      celestialEdges: transformed.edges,
-    };
-  }, [nodes, edges, metricsMap, navigationState, selectedEdge?.edgeId]);
+  // Node overlay: metric values applied on top of the structural graph.
+  // Recomputes on metric ticks but leaves edges (layout inputs) untouched.
+  const celestialNodes = useMemo(() => {
+    if (levelGraph.kind === 'application') {
+      const aggregatedNode = createAggregatedApplicationNode(nodes, metricsMap);
+      return aggregatedNode ? [aggregatedNode] : [];
+    }
+    if (levelGraph.kind === 'groupBy') {
+      return createGroupByNodes(nodes, metricsMap, navigationState.groupByAttribute!);
+    }
+    const built = buildCelestialNodes(levelGraph.nodes, metricsMap);
+    if (dependencyStacks.stacks === 0) return built;
+    // The topology package folds nodes sharing an aggregatedNodeId into one expandable stack.
+    return built.map((node) => {
+      const stackId = dependencyStacks.stackIdByNodeId.get(node.id);
+      return stackId ? { ...node, data: { ...node.data, aggregatedNodeId: stackId } } : node;
+    });
+  }, [levelGraph, nodes, metricsMap, navigationState.groupByAttribute, dependencyStacks]);
+
+  // Edge overlay: selection styling applied on top of the structural edges.
+  // Recomputes only when the selected edge changes, never rebuilding nodes.
+  const celestialEdges = useMemo(() => {
+    if (levelGraph.kind !== 'graph') return [];
+    return buildCelestialEdges(levelGraph.edges, selectedEdge?.edgeId || null);
+  }, [levelGraph, selectedEdge?.edgeId]);
+
+  // Above the cap the graph switches to a guidance notice instead of laying out
+  // hundreds of nodes (dagre is O(N+E) and re-runs on interaction).
+  // Stacked dependencies are not laid out, so only the visible nodes count against the cap.
+  const visibleNodeCount =
+    celestialNodes.length - dependencyStacks.stackedNodes + dependencyStacks.stacks;
+  const exceedsRenderCap =
+    levelGraph.kind === 'graph' && visibleNodeCount > APPLICATION_MAP_CONSTANTS.MAX_RENDERED_NODES;
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
@@ -346,6 +378,7 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
       // Return celestial nodes that match the filters
       return celestialNodes.filter((n) => matchingNodeIds.has(n.id));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     nodes,
     filters,
@@ -365,7 +398,7 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
     [onNodeClick]
   );
 
-  // Handle breadcrumb addition (triggered by double-clicking group nodes in CelestialMap)
+  // Handle breadcrumb addition (triggered by clicking or pressing Enter on a group node in CelestialMap)
   const handleAddBreadcrumb = useCallback(
     (title: string, node?: CelestialCardProps) => {
       // GUARD: If groupBy filter is active but navigation state hasn't synced yet,
@@ -428,6 +461,9 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
           targetService: targetInfo.serviceName,
           sourceNodeId: edge.source,
           targetNodeId: edge.target,
+          sourceNodeType: sourceInfo.type,
+          targetNodeType: targetInfo.type,
+          targetEnvironment: targetInfo.environment,
         });
       }
     },
@@ -562,8 +598,11 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
     [onNavigationStateChange, filters, navigationState]
   );
 
-  // Loading state
-  if (isLoading) {
+  // Initial load only: show the full spinner while there is nothing to draw yet.
+  // On a refetch (time-range change, chart brush, refresh) keep the current map
+  // mounted and show a progress bar instead — swapping in the spinner unmounts
+  // CelestialMap, which flashes the page and re-runs layout from scratch.
+  if (isLoading && celestialNodes.length === 0) {
     return (
       <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 400 }}>
         <EuiFlexItem grow={false}>
@@ -584,8 +623,59 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
     );
   }
 
+  // Too-large state: guide the user to narrow the selection instead of
+  // laying out more nodes than the map can render responsively.
+  if (exceedsRenderCap) {
+    return (
+      <EuiEmptyPrompt
+        iconType="alert"
+        title={<h2>Too many services to display</h2>}
+        body={
+          <p>
+            {`This view has ${visibleNodeCount} services, above the ${APPLICATION_MAP_CONSTANTS.MAX_RENDERED_NODES} node display limit. Narrow the selection with filters, group by an attribute, or reduce the time range.`}
+          </p>
+        }
+      />
+    );
+  }
+
   return (
     <EuiPanel paddingSize="s" style={{ height: '100%', position: 'relative' }}>
+      {isLoading && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          position="absolute"
+          data-test-subj="serviceMapRefetchProgress"
+        />
+      )}
+      {dependencyStacks.stacks > 0 && (
+        <EuiCallOut
+          size="s"
+          iconType="iInCircle"
+          title={i18nTexts.dependencyStacks.title}
+          data-test-subj="dependencyStacksNotice"
+          style={{ position: 'absolute', top: 8, left: 8, right: 64, zIndex: 5 }}
+        >
+          <p>
+            {i18nTexts.dependencyStacks.body(
+              dependencyStacks.stackedNodes,
+              dependencyStacks.stacks,
+              APPLICATION_MAP_CONSTANTS.DEPENDENCY_STACK_THRESHOLD
+            )}
+          </p>
+          {onShowDependenciesIndividually && (
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              onClick={onShowDependenciesIndividually}
+              data-test-subj="showDependenciesIndividually"
+            >
+              {i18nTexts.dependencyStacks.showIndividually}
+            </EuiButtonEmpty>
+          )}
+        </EuiCallOut>
+      )}
       {/* CelestialMap - click/keyboard handlers for deselecting edges */}
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div
@@ -738,21 +828,21 @@ function createGroupByNodes(
 }
 
 /**
- * Transform PPL nodes/edges to CelestialMap format
+ * Build CelestialMap nodes with metric values applied.
  */
-function transformToCelestialFormat(
+function buildCelestialNodes(
   nodes: ServiceMapNode[],
-  edges: ServiceMapEdge[],
-  metricsMap: Map<string, ServiceMapNodeMetrics>,
-  selectedEdgeId: string | null
-): { nodes: CelestialMapNode[]; edges: CelestialMapEdge[] } {
-  const celestialNodes: CelestialMapNode[] = nodes.map((node) => {
+  metricsMap: Map<string, ServiceMapNodeMetrics>
+): CelestialMapNode[] {
+  return nodes.map((node) => {
     const serviceName = node.KeyAttributes.Name;
     const environment = node.KeyAttributes.Environment;
     const nodeId = `${serviceName}::${environment}`;
     const metrics = metricsMap.get(nodeId);
 
-    const platformType = getPlatformTypeFromEnvironment(environment);
+    const nodeType = node.KeyAttributes.Type;
+    const iconType = getNodeIconType(nodeType, environment, serviceName);
+    const subtitle = getNodeSubtitle(nodeType, environment);
     const failureRate = metrics
       ? ((metrics.totalFaults + metrics.totalErrors) / (metrics.totalRequests || 1)) * 100
       : 0;
@@ -765,8 +855,8 @@ function transformToCelestialFormat(
       data: {
         id: node.NodeId,
         title: node.Name,
-        subtitle: platformType,
-        icon: getIcon(platformType),
+        subtitle,
+        icon: getIcon(iconType),
         isGroup: false,
         keyAttributes: node.KeyAttributes,
         groupByAttributes: node.GroupByAttributes,
@@ -785,8 +875,16 @@ function transformToCelestialFormat(
       },
     };
   });
+}
 
-  const celestialEdges: CelestialMapEdge[] = edges.map((edge) => {
+/**
+ * Build CelestialMap edges with selection styling applied.
+ */
+function buildCelestialEdges(
+  edges: ServiceMapEdge[],
+  selectedEdgeId: string | null
+): CelestialMapEdge[] {
+  return edges.map((edge) => {
     const isSelected = edge.EdgeId === selectedEdgeId;
 
     return {
@@ -804,8 +902,6 @@ function transformToCelestialFormat(
       style: isSelected ? { strokeWidth: 3, stroke: '#0077cc' } : undefined,
     };
   });
-
-  return { nodes: celestialNodes, edges: celestialEdges };
 }
 
 /**

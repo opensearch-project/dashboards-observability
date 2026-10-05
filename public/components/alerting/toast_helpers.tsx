@@ -57,6 +57,11 @@ export function navigateToRuleInAlarmsPage(monitorName: string, dsId: string): v
  * "View rule" inline link that lands on the alarms page Rules tab,
  * filtered to the new monitor.
  *
+ * `pending` appends a note that the rule may take up to a minute to appear —
+ * set it ONLY for Prometheus/Cortex creates, whose querier lags the create by
+ * the ruler poll + one eval interval. OpenSearch monitors confirm immediately,
+ * so the note would be misleading there.
+ *
  * No-ops gracefully when the toasts service hasn't been wired yet — same
  * shape as the existing `useToast` helper, so the create flow can call
  * this even on unusual init paths without throwing.
@@ -64,9 +69,11 @@ export function navigateToRuleInAlarmsPage(monitorName: string, dsId: string): v
 export function showMonitorCreatedToast({
   monitorName,
   dsId,
+  pending = false,
 }: {
   monitorName: string;
   dsId: string;
+  pending?: boolean;
 }): void {
   const toasts = coreRefs?.toasts;
   if (!toasts) return;
@@ -76,14 +83,23 @@ export function showMonitorCreatedToast({
       defaultMessage: 'Alert rule created',
     }),
     text: toMountPoint(
-      <EuiLink
-        onClick={() => navigateToRuleInAlarmsPage(monitorName, dsId)}
-        data-test-subj="alertManagerToastViewRule"
-      >
-        {i18n.translate('observability.alerting.toast.monitorCreated.link', {
-          defaultMessage: 'View rule',
-        })}
-      </EuiLink>
+      <>
+        {pending && (
+          <p>
+            {i18n.translate('observability.alerting.toast.monitorCreated.pendingNote', {
+              defaultMessage: 'It may take up to a minute to appear in the list.',
+            })}
+          </p>
+        )}
+        <EuiLink
+          onClick={() => navigateToRuleInAlarmsPage(monitorName, dsId)}
+          data-test-subj="alertManagerToastViewRule"
+        >
+          {i18n.translate('observability.alerting.toast.monitorCreated.link', {
+            defaultMessage: 'View rule',
+          })}
+        </EuiLink>
+      </>
     ),
     toastLifeTimeMs: TOAST_LIFETIME_MS,
   });

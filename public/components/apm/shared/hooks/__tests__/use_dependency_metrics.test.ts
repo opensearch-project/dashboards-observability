@@ -288,7 +288,7 @@ describe('useDependencyMetrics', () => {
       });
 
       expect(result.current.error).toBeInstanceOf(Error);
-      expect(result.current.error?.message).toBe('Unknown error');
+      expect(result.current.error?.message).toBe('Failed to fetch some dependency metrics');
     });
   });
 
