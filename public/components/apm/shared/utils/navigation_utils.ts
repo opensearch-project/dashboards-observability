@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { combineLatest, of } from 'rxjs';
 import { TimeRange } from '../../common/types/service_types';
 import { TimeRange as ServiceDetailsTimeRange } from '../../common/types/service_details_types';
 import { AGENT_TRACES_APP_ID, EXPLORE_APP_ID } from '../../common/constants';
@@ -421,7 +422,7 @@ function openAgentTraces(
     dataSourceId || ''
   }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',signalType:traces,timeFieldName:startTime,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     escapeRisonString(pplQuery)
-  )}')&_a=(ui:(activeTabId:${tab}))`;
+  )}')&_a=(ui:(activeTabId:${tab},showHistogram:!t))`;
 
   const fullUrl =
     coreRefs.http?.basePath.prepend(`/app/${AGENT_TRACES_APP_ID}/${path}`) ||
@@ -483,17 +484,39 @@ export function navigateToAgentTraceDetails(
   );
 }
 
+/** Workspace use cases Agent Traces opens in; elsewhere it redirects to Discover. */
+const AGENT_TRACES_WORKSPACE_FEATURES = ['use-case-observability', 'use-case-all'];
+// AppStatus.accessible and AppNavLinkStatus.hidden, by value to keep core enums out of this module.
+const APP_STATUS_ACCESSIBLE = 0;
+const APP_NAV_LINK_HIDDEN = 3;
+
 /**
- * Calls back with whether Agent Traces is registered and accessible (it is behind the
- * `explore.agentTraces.enabled` flag). Returns an unsubscribe function.
+ * Calls back with whether links can open Agent Traces: the app is registered and accessible,
+ * enabled (`explore.agentTraces.enabled`, which drives its capability and nav link), and the
+ * current workspace has the observability or all use case (Agent Traces redirects to Discover
+ * elsewhere, including when workspaces are off). Returns an unsubscribe function.
  */
 export function subscribeAgentTracesAvailable(callback: (available: boolean) => void): () => void {
-  const subscription = coreRefs.application?.applications$?.subscribe((apps) => {
-    // AppStatus.accessible is 0; compared by value to keep core enums out of this module.
-    callback(apps.get(AGENT_TRACES_APP_ID)?.status === 0);
+  const apps$ = coreRefs.application?.applications$;
+  if (!apps$) {
+    callback(false);
+    return () => {};
+  }
+  const workspace$ = coreRefs.workspaces?.currentWorkspace$ ?? of(null);
+  const subscription = combineLatest([apps$, workspace$]).subscribe(([apps, workspace]) => {
+    const app = apps.get(AGENT_TRACES_APP_ID);
+    const capabilities = coreRefs.application?.capabilities as
+      { agentTraces?: { agentTracesEnabled?: boolean } } | undefined;
+    const features = workspace?.features ?? [];
+    callback(
+      !!app &&
+        app.status === APP_STATUS_ACCESSIBLE &&
+        app.navLinkStatus !== APP_NAV_LINK_HIDDEN &&
+        capabilities?.agentTraces?.agentTracesEnabled === true &&
+        AGENT_TRACES_WORKSPACE_FEATURES.some((feature) => features.includes(feature))
+    );
   });
-  if (!subscription) callback(false);
-  return () => subscription?.unsubscribe();
+  return () => subscription.unsubscribe();
 }
 
 /**

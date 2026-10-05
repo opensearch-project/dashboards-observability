@@ -18,6 +18,7 @@ import {
   navigateToAgentTraceDetails,
   subscribeAgentTracesAvailable,
 } from '../navigation_utils';
+import { BehaviorSubject } from 'rxjs';
 import { coreRefs } from '../../../../../framework/core_refs';
 
 // Mock coreRefs
@@ -747,7 +748,7 @@ describe('Agent Traces navigation', () => {
     expect(windowOpenSpy).toHaveBeenCalledWith(expect.any(String), '_blank');
     expect(url).toContain('/base/app/agentTraces/spans#?_g=');
     expect(url).toContain('query:\'| where serviceName = "travel-planner"\'');
-    expect(url).toContain('activeTabId:spans');
+    expect(url).toContain('activeTabId:spans,showHistogram:!t');
     expect(url).toContain("id:'ds::traces'");
     expect(url).toContain('signalType:traces');
   });
@@ -778,23 +779,49 @@ describe('Agent Traces navigation', () => {
     expect(decodedUrl()).toContain('query:\'| where traceId = "abc123"\'');
   });
 
-  it('reports whether Agent Traces is accessible', () => {
-    const apps = (status?: number) => ({
-      subscribe: (next: (m: Map<string, { status: number }>) => void) => {
-        next(new Map(status === undefined ? [] : [['agentTraces', { status }]]));
-        return { unsubscribe: jest.fn() };
-      },
+  describe('subscribeAgentTracesAvailable', () => {
+    const refs = coreRefs as { application?: unknown; workspaces?: unknown };
+    const setup = ({
+      app = { status: 0, navLinkStatus: 1 } as { status: number; navLinkStatus?: number } | null,
+      enabled = true as boolean | undefined,
+      features = ['use-case-observability'] as string[] | null,
+    } = {}) => {
+      refs.application = {
+        applications$: new BehaviorSubject(new Map(app ? [['agentTraces', app]] : [])),
+        capabilities: { agentTraces: { agentTracesEnabled: enabled } },
+      };
+      refs.workspaces = { currentWorkspace$: new BehaviorSubject(features ? { features } : null) };
+      const callback = jest.fn();
+      subscribeAgentTracesAvailable(callback)();
+      return callback.mock.calls[callback.mock.calls.length - 1][0];
+    };
+    afterEach(() => {
+      refs.application = undefined;
+      refs.workspaces = undefined;
     });
-    const refs = coreRefs as { application?: unknown };
-    const callback = jest.fn();
-    refs.application = { applications$: apps(0) };
-    subscribeAgentTracesAvailable(callback);
-    refs.application = { applications$: apps(1) };
-    subscribeAgentTracesAvailable(callback);
-    refs.application = { applications$: apps() };
-    subscribeAgentTracesAvailable(callback);
-    refs.application = undefined;
-    subscribeAgentTracesAvailable(callback);
-    expect(callback.mock.calls.map((c) => c[0])).toEqual([true, false, false, false]);
+
+    it('is available when enabled, accessible and in an observability workspace', () => {
+      expect(setup()).toBe(true);
+      expect(setup({ features: ['use-case-all'] })).toBe(true);
+    });
+
+    it('is unavailable when the feature flag is off', () => {
+      expect(setup({ enabled: false })).toBe(false);
+      expect(setup({ app: { status: 0, navLinkStatus: 3 } })).toBe(false);
+    });
+
+    it('is unavailable outside an observability workspace or without workspaces', () => {
+      expect(setup({ features: ['use-case-search'] })).toBe(false);
+      expect(setup({ features: null })).toBe(false);
+    });
+
+    it('is unavailable when the app is missing or inaccessible', () => {
+      expect(setup({ app: null })).toBe(false);
+      expect(setup({ app: { status: 1 } })).toBe(false);
+      refs.application = undefined;
+      const callback = jest.fn();
+      subscribeAgentTracesAvailable(callback);
+      expect(callback).toHaveBeenCalledWith(false);
+    });
   });
 });
