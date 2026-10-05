@@ -377,5 +377,6 @@ describe('isGenAiSpan', () => {
     expect(isGenAiSpan(undefined)).toBe(false);
     expect(isGenAiSpan({ attributes: { 'http.method': 'GET' } })).toBe(false);
     expect(isGenAiSpan({ attributes: { 'gen_ai.operation.name': '' } })).toBe(false);
+    expect(isGenAiSpan({ attributes: { 'gen_ai.operation.name': '   ' } })).toBe(false);
   });
 });

@@ -773,6 +773,20 @@ describe('Agent Traces navigation', () => {
     expect(url).toContain("title:'Bob!'s cluster'");
   });
 
+  it('rison-escapes the dataset id, title and data source id', () => {
+    navigateToAgentTraces(
+      "ds'1::traces",
+      "Bob's spans",
+      'svc',
+      { from: 'now-1h', to: 'now' },
+      "src'1"
+    );
+    const url = decodedUrl();
+    expect(url).toContain("id:'ds!'1::traces'");
+    expect(url).toContain("title:'Bob!'s spans'");
+    expect(url).toContain("dataSource:(id:'src!'1'");
+  });
+
   it('opens a trace by id', () => {
     navigateToAgentTraceDetails('ds::traces', 'spans', 'abc123', { from: 'now-1h', to: 'now' });
     expect(decodedUrl()).toContain('/base/app/agentTraces/spans#');

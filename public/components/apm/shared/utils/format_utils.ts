@@ -183,5 +183,5 @@ export function isGenAiSpan(span: Record<string, unknown> | undefined): boolean 
     get(attributes, 'gen_ai.operation.name') ??
     get(get(get(attributes, 'gen_ai'), 'operation'), 'name') ??
     get(get(attributes, 'gen_ai.operation'), 'name');
-  return typeof value === 'string' && value !== '';
+  return typeof value === 'string' && value.trim() !== '';
 }

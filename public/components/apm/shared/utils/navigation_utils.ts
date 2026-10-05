@@ -4,6 +4,7 @@
  */
 
 import { combineLatest, of } from 'rxjs';
+import { AppNavLinkStatus, AppStatus } from '../../../../../../../src/core/public';
 import { TimeRange } from '../../common/types/service_types';
 import { TimeRange as ServiceDetailsTimeRange } from '../../common/types/service_details_types';
 import { AGENT_TRACES_APP_ID, EXPLORE_APP_ID } from '../../common/constants';
@@ -418,9 +419,13 @@ function openAgentTraces(
   const dsTitle = dataSourceTitle ? `'${escapeRisonString(dataSourceTitle)}'` : "''";
   const path = `${tab}#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
     timeRange.from
-  )},to:${encodeTimeRangeValueForG(timeRange.to)}))&_q=(dataset:(dataSource:(id:'${
-    dataSourceId || ''
-  }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',signalType:traces,timeFieldName:startTime,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+  )},to:${encodeTimeRangeValueForG(timeRange.to)}))&_q=(dataset:(dataSource:(id:'${encodeURIComponent(
+    escapeRisonString(dataSourceId || '')
+  )}',title:${dsTitle},type:OpenSearch),id:'${encodeURIComponent(
+    escapeRisonString(datasetId)
+  )}',signalType:traces,timeFieldName:startTime,title:'${encodeURIComponent(
+    escapeRisonString(datasetTitle)
+  )}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
     escapeRisonString(pplQuery)
   )}')&_a=(ui:(activeTabId:${tab},showHistogram:!t))`;
 
@@ -486,9 +491,6 @@ export function navigateToAgentTraceDetails(
 
 /** Workspace use cases Agent Traces opens in; elsewhere it redirects to Discover. */
 const AGENT_TRACES_WORKSPACE_FEATURES = ['use-case-observability', 'use-case-all'];
-// AppStatus.accessible and AppNavLinkStatus.hidden, by value to keep core enums out of this module.
-const APP_STATUS_ACCESSIBLE = 0;
-const APP_NAV_LINK_HIDDEN = 3;
 
 /**
  * Calls back with whether links can open Agent Traces: the app is registered and accessible,
@@ -510,8 +512,8 @@ export function subscribeAgentTracesAvailable(callback: (available: boolean) => 
     const features = workspace?.features ?? [];
     callback(
       !!app &&
-        app.status === APP_STATUS_ACCESSIBLE &&
-        app.navLinkStatus !== APP_NAV_LINK_HIDDEN &&
+        app.status === AppStatus.accessible &&
+        app.navLinkStatus !== AppNavLinkStatus.hidden &&
         capabilities?.agentTraces?.agentTracesEnabled === true &&
         AGENT_TRACES_WORKSPACE_FEATURES.some((feature) => features.includes(feature))
     );
