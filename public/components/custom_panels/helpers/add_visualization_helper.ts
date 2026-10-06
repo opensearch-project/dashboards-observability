@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { v4 as uuidv4 } from 'uuid';
 import { BoxType, VisualizationType } from '../../../../common/types/custom_panels';
 
