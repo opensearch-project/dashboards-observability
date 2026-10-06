@@ -79,52 +79,97 @@ function formatMultiplier(n: number): string {
 }
 
 /**
- * Health of a single tier: a tier is "firing" when BOTH windows exceed the
- * threshold (mirroring the alert expression `short > t AND long > t`). When
- * only one window exceeds, we show "warming" since the `and` prevents the alert.
+ * Health of a single tier:
+ *  - `firing`   — BOTH windows exceed the threshold (mirrors the alert
+ *    expression `short > t AND long > t`).
+ *  - `at_risk`  — exactly one window exceeds; the `and` prevents the alert from
+ *    firing yet, but the tier is trending toward it.
+ *  - `ok`       — both windows are under the threshold.
+ *  - `no_data`  — at least one window has no (finite) sample. This MUST NOT read
+ *    as healthy: absent data is not the same as a passing check.
  */
-type TierHealth = 'firing' | 'warming' | 'ok' | 'no_data';
+export type TierHealth = 'firing' | 'at_risk' | 'ok' | 'no_data';
 
-function classifyTier(short: number | null, long: number | null, threshold: number): TierHealth {
-  if (short === null && long === null) return 'no_data';
-  const s = short ?? 0;
-  const l = long ?? 0;
+/** A window value is usable only when it's a finite number. */
+function isMissingWindow(value: number | null | undefined): boolean {
+  return value === null || value === undefined || !Number.isFinite(value);
+}
+
+export function classifyTier(
+  short: number | null,
+  long: number | null,
+  threshold: number
+): TierHealth {
+  // A missing window can never be coerced to 0 → "ok" → green. If either
+  // window is absent we genuinely don't know the tier's health.
+  if (isMissingWindow(short) || isMissingWindow(long)) return 'no_data';
+  const s = short as number;
+  const l = long as number;
   if (s > threshold && l > threshold) return 'firing';
-  if (s > threshold || l > threshold) return 'warming';
+  if (s > threshold || l > threshold) return 'at_risk';
   return 'ok';
 }
 
-function healthColor(h: TierHealth): string {
+export function healthColor(h: TierHealth): string {
   switch (h) {
     case 'firing':
       return 'danger';
-    case 'warming':
+    case 'at_risk':
       return 'warning';
     case 'ok':
       return 'success';
     default:
+      // no_data — subdued/grey, never green.
       return 'subdued';
   }
 }
 
-function healthLabel(h: TierHealth): string {
+export function healthLabel(h: TierHealth): string {
   switch (h) {
     case 'firing':
       return i18n.translate('observability.apm.slo.burnRatePanel.health.firing', {
-        defaultMessage: 'firing',
+        defaultMessage: 'Firing',
       });
-    case 'warming':
-      return i18n.translate('observability.apm.slo.burnRatePanel.health.warming', {
-        defaultMessage: 'warming',
+    case 'at_risk':
+      return i18n.translate('observability.apm.slo.burnRatePanel.health.atRisk', {
+        defaultMessage: 'At risk',
       });
     case 'ok':
       return i18n.translate('observability.apm.slo.burnRatePanel.health.healthy', {
-        defaultMessage: 'healthy',
+        defaultMessage: 'Healthy',
       });
     default:
       return i18n.translate('observability.apm.slo.burnRatePanel.health.noData', {
-        defaultMessage: 'no data',
+        defaultMessage: 'No data',
       });
+  }
+}
+
+/**
+ * Map a raw burn-rate severity token to a user-facing label. Severity is an
+ * open string (orgs use critical/warning, page/ticket, sev1..sev4), so unknown
+ * values fall through to the raw token rather than being dropped.
+ */
+export function severityLabel(severity: string): string {
+  switch (severity.toLowerCase()) {
+    case 'critical':
+      return i18n.translate('observability.apm.slo.burnRatePanel.severity.critical', {
+        defaultMessage: 'Critical',
+      });
+    case 'warning':
+      return i18n.translate('observability.apm.slo.burnRatePanel.severity.warning', {
+        defaultMessage: 'Warning',
+      });
+    case 'page':
+      return i18n.translate('observability.apm.slo.burnRatePanel.severity.page', {
+        defaultMessage: 'Page',
+      });
+    case 'ticket':
+      return i18n.translate('observability.apm.slo.burnRatePanel.severity.ticket', {
+        defaultMessage: 'Ticket',
+      });
+    default:
+      return severity;
   }
 }
 
@@ -140,6 +185,9 @@ const BurnBar: React.FC<{ ratio: number | null; threshold: number }> = ({ ratio,
   const thresholdPct = Math.min(100, (threshold / (threshold * 1.5)) * 100); // always 66.6%
   const exceeded = ratio !== null && ratio > threshold;
   const fillColor = exceeded ? euiThemeVars.euiColorDanger : euiThemeVars.euiColorSuccess;
+  // WCAG 1.4.1: the exceeded (danger) fill also carries a diagonal hatch so it's
+  // distinguishable from the healthy fill without relying on the red/green hue.
+  const exceededTexture = `repeating-linear-gradient(45deg, rgba(255,255,255,0.45) 0, rgba(255,255,255,0.45) 2px, transparent 2px, transparent 4px)`;
 
   return (
     <div
@@ -156,6 +204,7 @@ const BurnBar: React.FC<{ ratio: number | null; threshold: number }> = ({ ratio,
           width: `${Math.min(100, pct / 1.5)}%`,
           height: '100%',
           background: fillColor,
+          backgroundImage: exceeded ? exceededTexture : undefined,
           transition: 'width 200ms ease',
         }}
       />
@@ -223,16 +272,14 @@ const TierCard: React.FC<TierCardProps> = ({
   reportKey,
   onHealthChange,
 }) => {
-  const shortQuery = useMemo(() => buildErrorRatioExprForWindow(slo, objective, tier.shortWindow), [
-    slo,
-    objective,
-    tier.shortWindow,
-  ]);
-  const longQuery = useMemo(() => buildErrorRatioExprForWindow(slo, objective, tier.longWindow), [
-    slo,
-    objective,
-    tier.longWindow,
-  ]);
+  const shortQuery = useMemo(
+    () => buildErrorRatioExprForWindow(slo, objective, tier.shortWindow),
+    [slo, objective, tier.shortWindow]
+  );
+  const longQuery = useMemo(
+    () => buildErrorRatioExprForWindow(slo, objective, tier.longWindow),
+    [slo, objective, tier.longWindow]
+  );
 
   const shortData = usePromQLChartData({
     promqlQuery: shortQuery ?? '',
@@ -300,7 +347,7 @@ const TierCard: React.FC<TierCardProps> = ({
               defaultMessage: '{multiplier} burn · {severity}',
               values: {
                 multiplier: formatMultiplier(tier.burnRateMultiplier),
-                severity: tier.severity,
+                severity: severityLabel(tier.severity),
               },
             })}
           </EuiText>
