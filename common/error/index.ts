@@ -35,6 +35,7 @@ export { rulerClassifier } from './classifiers/ruler';
 export { upstreamWrappedClassifier } from './classifiers/upstream_wrapped';
 export { httpStatusClassifier } from './classifiers/http_status';
 export { timeoutClassifier } from './classifiers/timeout';
+export { cloudWatchClassifier, CloudWatchErrorCode } from './classifiers/cloudwatch';
 export { rawDetails, stringifyRaw } from './classifiers/util';
 
 import { registerErrorClassifier } from './registry';
@@ -43,6 +44,7 @@ import { stateClassifier } from './classifiers/state';
 import { rulerClassifier } from './classifiers/ruler';
 import { timeoutClassifier } from './classifiers/timeout';
 import { httpStatusClassifier } from './classifiers/http_status';
+import { cloudWatchClassifier } from './classifiers/cloudwatch';
 
 let defaultsRegistered = false;
 
@@ -57,6 +59,7 @@ export function registerDefaultClassifiers(): void {
   registerErrorClassifier(upstreamWrappedClassifier);
   registerErrorClassifier(stateClassifier);
   registerErrorClassifier(rulerClassifier);
+  registerErrorClassifier(cloudWatchClassifier);
   registerErrorClassifier(timeoutClassifier);
   registerErrorClassifier(httpStatusClassifier);
 }

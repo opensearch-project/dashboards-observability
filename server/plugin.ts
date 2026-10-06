@@ -348,6 +348,7 @@ export class ObservabilityPlugin implements Plugin<
     const observabilityConfig = await this.initializerContext.config
       .create<{
         alertManager?: { enabled?: boolean };
+        cloudwatch?: { enabled?: boolean; defaultRegion?: string };
         errors?: { exposeSensitiveErrorDetail?: boolean };
         slo?: {
           enabled?: boolean;
@@ -408,6 +409,12 @@ export class ObservabilityPlugin implements Plugin<
       client: openSearchObservabilityClient,
       dataSourceEnabled,
       logger: this.logger,
+      cloudWatch: {
+        // Experimental — fail dark: absent config reads as disabled, matching
+        // the schema default.
+        enabled: observabilityConfig.cloudwatch?.enabled ?? false,
+        region: observabilityConfig.cloudwatch?.defaultRegion ?? 'us-east-1',
+      },
     });
 
     // SLO service + routes. Starts on `InMemorySloStore` so it's available

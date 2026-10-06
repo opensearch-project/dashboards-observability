@@ -116,9 +116,17 @@ export const SLI_BACKEND_TO_DATASOURCE_TYPE: Record<SliBackend, 'prometheus' | '
   opensearch: 'opensearch',
 };
 
-/** Datasource types that can back a currently-supported SLO. */
-export const SUPPORTED_DATASOURCE_TYPES: ReadonlyArray<'prometheus' | 'opensearch'> =
-  SUPPORTED_SLI_BACKENDS.map((b) => SLI_BACKEND_TO_DATASOURCE_TYPE[b]);
+/**
+ * Datasource types that can back a currently-supported SLO.
+ *
+ * Declared as `ReadonlyArray<string>` (not the narrow literal union) so
+ * membership checks against the full `DatasourceType` space compile as the
+ * datasource union grows (e.g. `'cloudwatch'`) — the *contents* still come
+ * exclusively from `SUPPORTED_SLI_BACKENDS`, so semantics are unchanged.
+ */
+export const SUPPORTED_DATASOURCE_TYPES: readonly string[] = SUPPORTED_SLI_BACKENDS.map(
+  (b) => SLI_BACKEND_TO_DATASOURCE_TYPE[b]
+);
 
 /**
  * Grouping dimensions live inside the SingleSli node. Composite SLOs (P2)

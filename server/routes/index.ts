@@ -33,17 +33,21 @@ import {
   MonitorMutationService,
   DirectQueryPrometheusBackend,
 } from '../services/alerting';
+import { CloudWatchBackend } from '../services/alerting/cloudwatch/cloudwatch_backend';
+import { SdkCloudWatchAlarmSource } from '../services/alerting/cloudwatch/sdk_cloudwatch_alarm_source';
 
 export function setupRoutes({
   router,
   client,
   dataSourceEnabled,
   logger,
+  cloudWatch,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
   logger: Logger;
+  cloudWatch?: { enabled: boolean; region: string };
 }) {
   PanelsRouter(router);
   VisualizationsRouter(router);
@@ -94,11 +98,27 @@ export function setupRoutes({
   const { DirectQueryRulerClient } = require('../services/slo/ruler_client');
   const rulerClient = new DirectQueryRulerClient(logger);
 
+  // CloudWatch backend — a stateless backend over the AWS SDK seam. Built once
+  // at server start (like the OS/Prom backends) when the virtual datasource is
+  // enabled. Credentials come from the ambient AWS provider chain at call time,
+  // so constructing this never touches AWS.
+  // Experimental — fail dark: absent config reads as disabled, matching the
+  // schema default in server/index.ts.
+  const cwEnabled = cloudWatch?.enabled ?? false;
+  const cwBackend = cwEnabled
+    ? new CloudWatchBackend(
+        logger,
+        new SdkCloudWatchAlarmSource(logger, cloudWatch?.region ?? 'us-east-1')
+      )
+    : undefined;
+
   registerAlertingRoutes(router, {
     osBackend,
     promBackend,
     mutationSvc,
     logger,
     rulerClient,
+    cwBackend,
+    cloudWatch: cloudWatch ? { enabled: cwEnabled, region: cloudWatch.region } : undefined,
   });
 }

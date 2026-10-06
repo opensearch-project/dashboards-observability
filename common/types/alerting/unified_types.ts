@@ -14,6 +14,8 @@
 
 import type { OSAlert, OSMonitor } from './opensearch_types';
 import type { PromAlert, PromAlertingRule } from './prometheus_types';
+import type { CloudWatchAlarmState, CloudWatchAlarmType } from './cloudwatch_types';
+import type { ClassifiedError } from '../../error';
 
 /**
  * Known fallback reasons a backend may surface through
@@ -149,7 +151,7 @@ export interface AlertingOSClient {
 // Datasource
 // ============================================================================
 
-export type DatasourceType = 'opensearch' | 'prometheus';
+export type DatasourceType = 'opensearch' | 'prometheus' | 'cloudwatch';
 
 export interface Datasource {
   id: string;
@@ -157,6 +159,17 @@ export interface Datasource {
   type: DatasourceType;
   url: string;
   enabled: boolean;
+  /**
+   * AWS region for a CloudWatch (virtual) datasource. Resolved from
+   * `AWS_REGION`/`AWS_DEFAULT_REGION` → `observability.cloudwatch.defaultRegion`
+   * → `us-east-1`. Unused by OpenSearch/Prometheus datasources.
+   */
+  region?: string;
+  /**
+   * AWS account id backing a CloudWatch (virtual) datasource. Auto-detected via
+   * STS `GetCallerIdentity` from the ambient credentials — never configured.
+   */
+  accountId?: string;
   /** For Prometheus datasources decomposed into workspaces */
   workspaceId?: string;
   workspaceName?: string;
@@ -190,6 +203,13 @@ export interface DatasourceWarning {
   datasourceName: string;
   datasourceType: DatasourceType;
   error: string;
+  /**
+   * Structured classification of the failure (client-safe payload), when the
+   * error-classification layer recognized it. Lets the UI name the failure
+   * class (e.g. expired AWS session) with remediation instead of echoing the
+   * raw message. Absent for unclassified (UNKNOWN) failures.
+   */
+  errorDetail?: ClassifiedError;
 }
 
 export interface PaginatedResponse<T> {
@@ -226,7 +246,7 @@ export interface DatasourceService {
 
 export type UnifiedAlertSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
 export type UnifiedAlertState =
-  'active' | 'pending' | 'acknowledged' | 'silenced' | 'resolved' | 'error';
+  'active' | 'pending' | 'insufficient_data' | 'acknowledged' | 'silenced' | 'resolved' | 'error';
 export type UnifiedAlertKind = 'alert' | 'anomaly';
 
 /** Lightweight alert representation for list views and tables. */
@@ -257,6 +277,8 @@ export interface UnifiedAlertSummary {
    * to scope `getAlertDetail` to one monitor's alerts (avoids full-scan).
    */
   monitorId?: string;
+  /** CloudWatch-specific row metadata; present only for CloudWatch alarms. */
+  cloudWatch?: UnifiedCloudWatchMeta;
 }
 
 /** Full alert with backend-specific raw data. Use for detail views only. */
@@ -279,6 +301,7 @@ export type MonitorType =
 export type MonitorStatus =
   | 'active'
   | 'pending'
+  | 'insufficient_data'
   | 'muted'
   | 'disabled'
   | 'Running'
@@ -300,7 +323,25 @@ export type MonitorStatus =
   | 'Forecast failure'
   | 'Init test failure';
 export type MonitorHealthStatus = 'healthy' | 'failing' | 'no_data';
-export type UnifiedDefinitionType = 'monitor' | 'prometheus_rule' | 'detector' | 'forecaster';
+export type UnifiedDefinitionType =
+  'monitor' | 'prometheus_rule' | 'detector' | 'forecaster' | 'cloudwatch_alarm';
+
+/**
+ * CloudWatch-specific fields carried on a unified rule/alert row. Present only
+ * when the row originates from a CloudWatch datasource; drives the `CW: <state>`
+ * badge, the `account · region` Datasource cell, and the alarm flyout dispatch.
+ */
+export interface UnifiedCloudWatchMeta {
+  state: CloudWatchAlarmState;
+  alarmType: CloudWatchAlarmType;
+  accountId?: string;
+  region?: string;
+  namespace?: string;
+  metricName?: string;
+  alarmArn?: string;
+  /** Some detail (e.g. history) is unreadable with the current IAM role. */
+  partialAccess?: boolean;
+}
 
 export interface AlertHistoryEntry {
   timestamp: string;
@@ -335,6 +376,8 @@ export interface UnifiedRuleSummary {
   evaluationInterval: string;
   pendingPeriod: string;
   threshold?: { operator: string; value: number; unit?: string };
+  /** CloudWatch-specific row metadata; present only for CloudWatch alarms. */
+  cloudWatch?: UnifiedCloudWatchMeta;
 }
 
 /** Full rule with detail-view fields. Use for single-item detail views only. */
@@ -360,6 +403,8 @@ export interface DatasourceFetchResult<T> {
   status: DatasourceFetchStatus;
   data: T[];
   error?: string;
+  /** Structured failure classification (client-safe). See DatasourceWarning. */
+  errorDetail?: ClassifiedError;
   durationMs: number;
   /**
    * Set by the OpenSearch backend when the post-fetch time-range filter

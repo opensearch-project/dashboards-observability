@@ -27,7 +27,13 @@ export { MultiBackendAlertService } from './alert_service';
 export { HttpOpenSearchBackend } from './opensearch_backend';
 export { DirectQueryPrometheusBackend } from './directquery_prometheus_backend';
 export { PrometheusMetadataService } from './prometheus_metadata_service';
-export { SavedObjectDatasourceService } from './saved_object_datasource_service';
+export {
+  SavedObjectDatasourceService,
+  CLOUDWATCH_DATASOURCE_ID,
+} from './saved_object_datasource_service';
+export type { CloudWatchDatasourceConfig } from './saved_object_datasource_service';
+export { CloudWatchBackend } from './cloudwatch/cloudwatch_backend';
+export { SdkCloudWatchAlarmSource } from './cloudwatch/sdk_cloudwatch_alarm_source';
 // SLO routes/tests rely on the in-memory datasource service + discovery
 // helpers (followups' wiring carried these forward). Keep them exported
 // alongside the redesigned alerting backend.

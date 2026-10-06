@@ -20,7 +20,9 @@ import type { ColumnId } from './monitors_table_columns';
 // Default widths per column
 export const DEFAULT_WIDTHS: Record<string, number> = {
   name: 220,
-  status: 100,
+  // Wide enough for "insufficient data" + the `CW: <state>` badge on
+  // CloudWatch rows; both truncate with tooltips beyond this.
+  status: 150,
   severity: 100,
   monitorType: 110,
   healthStatus: 90,

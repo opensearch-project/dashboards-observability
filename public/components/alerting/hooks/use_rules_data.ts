@@ -20,12 +20,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import type { UnifiedRuleSummary } from '../../../../common/types/alerting';
+import type { ClassifiedError } from '../../../../common/error';
 import { AlertingOpenSearchService } from '../query_services/alerting_opensearch_service';
 import { isAlertingConfigMissingError } from '../alarms_page_helpers';
 
 export interface DatasourceWarning {
   datasourceName: string;
   error: string;
+  /** Structured failure classification when the server attached one. */
+  errorDetail?: ClassifiedError;
 }
 
 export interface UseRulesDataParams {
@@ -90,6 +93,7 @@ export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDat
                 i18n.translate('observability.alerting.alarmsPage.unknownError', {
                   defaultMessage: 'Unknown error',
                 }),
+              errorDetail: s.errorDetail,
             }))
           );
         }

@@ -800,7 +800,12 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const datasourceIconMap = useMemo(() => {
     const map: Record<string, string> = {};
     for (const ds of datasources) {
-      map[ds.name] = ds.type === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
+      map[ds.name] =
+        ds.type === 'cloudwatch'
+          ? 'logoAWS'
+          : ds.type === 'prometheus'
+            ? 'logoPrometheus'
+            : 'logoOpenSearch';
     }
     return map;
   }, [datasources]);
@@ -966,7 +971,11 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           const isGrouped = isGroupedAnomalyRow(alert);
           const isExpanded = Boolean(expandedGroupIds[alert.id]);
           const iconType =
-            alert.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
+            alert.datasourceType === 'cloudwatch'
+              ? 'logoAWS'
+              : alert.datasourceType === 'prometheus'
+                ? 'logoPrometheus'
+                : 'logoOpenSearch';
           const toggleExpandedGroup = () => {
             setExpandedGroupIds((prev) => ({
               ...prev,

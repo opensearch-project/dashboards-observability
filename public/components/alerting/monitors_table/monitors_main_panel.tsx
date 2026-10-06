@@ -31,10 +31,11 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedRuleSummary } from '../../../../common/types/alerting';
 import { DeleteModal } from '../../common/helpers/delete_modal';
+import { CloudWatchAlarmDetailFlyout } from '../cloudwatch_alarm_detail_flyout';
 import { DetectorDetailFlyout } from '../detector_detail_flyout';
 import { ForecasterDetailFlyout } from '../forecaster_detail_flyout';
 import { MonitorDetailFlyout } from '../monitor_detail_flyout';
-import { isAdResourceRunning } from '../shared_constants';
+import { isAdResourceRunning, isCloudWatchRule } from '../shared_constants';
 import { isDetectorDefinition, isForecasterDefinition } from './monitors_table_columns';
 import { MonitorsEuiTable } from './monitors_eui_table';
 import type { MonitorsEuiTableProps } from './monitors_eui_table';
@@ -694,7 +695,12 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       )}
 
       {/* Rule / detector detail flyout */}
-      {selectedMonitor && isDetectorDefinition(selectedMonitor) ? (
+      {selectedMonitor && isCloudWatchRule(selectedMonitor) ? (
+        <CloudWatchAlarmDetailFlyout
+          rule={selectedMonitor}
+          onClose={() => setSelectedMonitor(null)}
+        />
+      ) : selectedMonitor && isDetectorDefinition(selectedMonitor) ? (
         <DetectorDetailFlyout
           detector={selectedMonitor}
           onClose={() => setSelectedMonitor(null)}

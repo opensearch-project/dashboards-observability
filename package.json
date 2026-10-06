@@ -24,6 +24,9 @@
   "dependencies": {
     "@algolia/autocomplete-core": "^1.4.1",
     "@algolia/autocomplete-theme-classic": "^1.2.1",
+    "@aws-sdk/client-cloudwatch": "^3.658.0",
+    "@aws-sdk/client-sts": "^3.658.0",
+    "@aws-sdk/credential-provider-node": "^3.658.0",
     "@egjs/hammerjs": "^2.0.17",
     "@nteract/outputs": "^3.0.11",
     "@nteract/presentational-components": "^3.4.3",
