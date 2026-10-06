@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { combineLatest, of } from 'rxjs';
+import { AppNavLinkStatus, AppStatus } from '../../../../../../../src/core/public';
 import { TimeRange } from '../../common/types/service_types';
 import { TimeRange as ServiceDetailsTimeRange } from '../../common/types/service_details_types';
-import { EXPLORE_APP_ID } from '../../common/constants';
+import { AGENT_TRACES_APP_ID, EXPLORE_APP_ID } from '../../common/constants';
 import {
   observabilityApmApplicationMapID,
   observabilityApmServicesID,
@@ -390,6 +392,133 @@ export function navigateToSpanDetails(
 
   // Open in new tab
   window.open(fullUrl, '_blank');
+}
+
+/** Escape a value for a PPL double-quoted string literal. */
+function escapePplString(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/** Agent Traces tab to open: the trace list or the span list. */
+export type AgentTracesTab = 'traces' | 'spans';
+
+/**
+ * Opens Agent Traces in a new tab with a PPL filter, the given time range and the APM
+ * traces dataset. Agent Traces understands GenAI spans (agent, LLM and tool views,
+ * sessions), so APM sends GenAI correlations there instead of Explore traces.
+ */
+function openAgentTraces(
+  tab: AgentTracesTab,
+  pplQuery: string,
+  timeRange: TimeRange,
+  datasetId: string,
+  datasetTitle: string,
+  dataSourceId?: string,
+  dataSourceTitle?: string
+): void {
+  const dsTitle = dataSourceTitle ? `'${escapeRisonString(dataSourceTitle)}'` : "''";
+  const path = `${tab}#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
+    timeRange.from
+  )},to:${encodeTimeRangeValueForG(timeRange.to)}))&_q=(dataset:(dataSource:(id:'${encodeURIComponent(
+    escapeRisonString(dataSourceId || '')
+  )}',title:${dsTitle},type:OpenSearch),id:'${encodeURIComponent(
+    escapeRisonString(datasetId)
+  )}',signalType:traces,timeFieldName:startTime,title:'${encodeURIComponent(
+    escapeRisonString(datasetTitle)
+  )}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
+    escapeRisonString(pplQuery)
+  )}')&_a=(ui:(activeTabId:${tab},showHistogram:!t))`;
+
+  const fullUrl =
+    coreRefs.http?.basePath.prepend(`/app/${AGENT_TRACES_APP_ID}/${path}`) ||
+    `/app/${AGENT_TRACES_APP_ID}/${path}`;
+  window.open(fullUrl, '_blank');
+}
+
+/**
+ * Opens a service's spans in Agent Traces (the counterpart of navigateToExploreTraces for
+ * GenAI services), filtered to the service and optional operation. Uses the Spans tab: the
+ * Traces tab lists traces by their root span, and a GenAI service behind a plain HTTP
+ * server span (no gen_ai attributes on the root) would not appear there.
+ */
+export function navigateToAgentTraces(
+  datasetId: string,
+  datasetTitle: string,
+  serviceName: string,
+  timeRange: TimeRange,
+  dataSourceId?: string,
+  dataSourceTitle?: string,
+  operationFilter?: string
+): void {
+  let pplQuery = `| where serviceName = "${escapePplString(serviceName)}"`;
+  if (operationFilter) {
+    pplQuery += ` | where name = "${escapePplString(operationFilter)}"`;
+  }
+  openAgentTraces(
+    'spans',
+    pplQuery,
+    timeRange,
+    datasetId,
+    datasetTitle,
+    dataSourceId,
+    dataSourceTitle
+  );
+}
+
+/**
+ * Opens the trace of a GenAI span in Agent Traces (the counterpart of navigateToSpanDetails).
+ * Agent Traces has no span deep link yet, so it lists the trace's GenAI spans (Spans tab, see
+ * navigateToAgentTraces); one click opens the trace tree.
+ */
+export function navigateToAgentTraceDetails(
+  datasetId: string,
+  datasetTitle: string,
+  traceId: string,
+  timeRange: TimeRange,
+  dataSourceId?: string,
+  dataSourceTitle?: string
+): void {
+  openAgentTraces(
+    'spans',
+    `| where traceId = "${escapePplString(traceId)}"`,
+    timeRange,
+    datasetId,
+    datasetTitle,
+    dataSourceId,
+    dataSourceTitle
+  );
+}
+
+/** Workspace use cases Agent Traces opens in; elsewhere it redirects to Discover. */
+const AGENT_TRACES_WORKSPACE_FEATURES = ['use-case-observability', 'use-case-all'];
+
+/**
+ * Calls back with whether links can open Agent Traces: the app is registered and accessible,
+ * enabled (`explore.agentTraces.enabled`, which drives its capability and nav link), and the
+ * current workspace has the observability or all use case (Agent Traces redirects to Discover
+ * elsewhere, including when workspaces are off). Returns an unsubscribe function.
+ */
+export function subscribeAgentTracesAvailable(callback: (available: boolean) => void): () => void {
+  const apps$ = coreRefs.application?.applications$;
+  if (!apps$) {
+    callback(false);
+    return () => {};
+  }
+  const workspace$ = coreRefs.workspaces?.currentWorkspace$ ?? of(null);
+  const subscription = combineLatest([apps$, workspace$]).subscribe(([apps, workspace]) => {
+    const app = apps.get(AGENT_TRACES_APP_ID);
+    const capabilities = coreRefs.application?.capabilities as
+      { agentTraces?: { agentTracesEnabled?: boolean } } | undefined;
+    const features = workspace?.features ?? [];
+    callback(
+      !!app &&
+        app.status === AppStatus.accessible &&
+        app.navLinkStatus !== AppNavLinkStatus.hidden &&
+        capabilities?.agentTraces?.agentTracesEnabled === true &&
+        AGENT_TRACES_WORKSPACE_FEATURES.some((feature) => features.includes(feature))
+    );
+  });
+  return () => subscription.unsubscribe();
 }
 
 /**

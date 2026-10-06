@@ -14,7 +14,11 @@ import {
   openCorrelatedDashboard,
   openApmSettings,
   navigateToServiceDetails,
+  navigateToAgentTraces,
+  navigateToAgentTraceDetails,
+  subscribeAgentTracesAvailable,
 } from '../navigation_utils';
+import { BehaviorSubject } from 'rxjs';
 import { coreRefs } from '../../../../../framework/core_refs';
 
 // Mock coreRefs
@@ -722,5 +726,116 @@ describe('navigateToServiceDetails nodeType param', () => {
     expect(pathFor('service')).not.toContain('nodeType');
     expect(pathFor('Service')).not.toContain('nodeType');
     expect(pathFor(undefined)).not.toContain('nodeType');
+  });
+});
+
+describe('Agent Traces navigation', () => {
+  let windowOpenSpy: jest.SpyInstance;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+  });
+  afterEach(() => windowOpenSpy.mockRestore());
+
+  const decodedUrl = () => decodeURIComponent(windowOpenSpy.mock.calls[0][0]);
+
+  it('opens the service in the Agent Traces spans tab', () => {
+    navigateToAgentTraces('ds::traces', 'otel-v1-apm-span*', 'travel-planner', {
+      from: 'now-1h',
+      to: 'now',
+    });
+    const url = decodedUrl();
+    expect(windowOpenSpy).toHaveBeenCalledWith(expect.any(String), '_blank');
+    expect(url).toContain('/base/app/agentTraces/spans#?_g=');
+    expect(url).toContain('query:\'| where serviceName = "travel-planner"\'');
+    expect(url).toContain('activeTabId:spans,showHistogram:!t');
+    expect(url).toContain("id:'ds::traces'");
+    expect(url).toContain('signalType:traces');
+  });
+
+  it('opens an operation in the spans tab and escapes values', () => {
+    navigateToAgentTraces(
+      'ds::traces',
+      'spans',
+      'o\'brien "svc"',
+      { from: 'now-1h', to: 'now' },
+      'ds',
+      "Bob's cluster",
+      'chat gpt-4o'
+    );
+    const url = decodedUrl();
+    expect(url).toContain('/base/app/agentTraces/spans#');
+    expect(url).toContain('activeTabId:spans');
+    // PPL escapes the double quotes; rison escapes the single quotes.
+    expect(url).toContain(
+      'query:\'| where serviceName = "o!\'brien \\"svc\\"" | where name = "chat gpt-4o"\''
+    );
+    expect(url).toContain("title:'Bob!'s cluster'");
+  });
+
+  it('rison-escapes the dataset id, title and data source id', () => {
+    navigateToAgentTraces(
+      "ds'1::traces",
+      "Bob's spans",
+      'svc',
+      { from: 'now-1h', to: 'now' },
+      "src'1"
+    );
+    const url = decodedUrl();
+    expect(url).toContain("id:'ds!'1::traces'");
+    expect(url).toContain("title:'Bob!'s spans'");
+    expect(url).toContain("dataSource:(id:'src!'1'");
+  });
+
+  it('opens a trace by id', () => {
+    navigateToAgentTraceDetails('ds::traces', 'spans', 'abc123', { from: 'now-1h', to: 'now' });
+    expect(decodedUrl()).toContain('/base/app/agentTraces/spans#');
+    expect(decodedUrl()).toContain('query:\'| where traceId = "abc123"\'');
+  });
+
+  describe('subscribeAgentTracesAvailable', () => {
+    const refs = coreRefs as { application?: unknown; workspaces?: unknown };
+    const setup = ({
+      app = { status: 0, navLinkStatus: 1 } as { status: number; navLinkStatus?: number } | null,
+      enabled = true as boolean | undefined,
+      features = ['use-case-observability'] as string[] | null,
+    } = {}) => {
+      refs.application = {
+        applications$: new BehaviorSubject(new Map(app ? [['agentTraces', app]] : [])),
+        capabilities: { agentTraces: { agentTracesEnabled: enabled } },
+      };
+      refs.workspaces = { currentWorkspace$: new BehaviorSubject(features ? { features } : null) };
+      const callback = jest.fn();
+      subscribeAgentTracesAvailable(callback)();
+      return callback.mock.calls[callback.mock.calls.length - 1][0];
+    };
+    afterEach(() => {
+      refs.application = undefined;
+      refs.workspaces = undefined;
+    });
+
+    it('is available when enabled, accessible and in an observability workspace', () => {
+      expect(setup()).toBe(true);
+      expect(setup({ features: ['use-case-all'] })).toBe(true);
+    });
+
+    it('is unavailable when the feature flag is off', () => {
+      expect(setup({ enabled: false })).toBe(false);
+      expect(setup({ app: { status: 0, navLinkStatus: 3 } })).toBe(false);
+    });
+
+    it('is unavailable outside an observability workspace or without workspaces', () => {
+      expect(setup({ features: ['use-case-search'] })).toBe(false);
+      expect(setup({ features: null })).toBe(false);
+    });
+
+    it('is unavailable when the app is missing or inaccessible', () => {
+      expect(setup({ app: null })).toBe(false);
+      expect(setup({ app: { status: 1 } })).toBe(false);
+      refs.application = undefined;
+      const callback = jest.fn();
+      subscribeAgentTracesAvailable(callback);
+      expect(callback).toHaveBeenCalledWith(false);
+    });
   });
 });

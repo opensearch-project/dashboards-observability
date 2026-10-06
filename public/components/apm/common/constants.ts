@@ -93,6 +93,12 @@ export const APM_RED_REQUIRED_METRICS = ['request', 'fault', 'latency_seconds_bu
 export const EXPLORE_APP_ID = 'explore';
 
 /**
+ * App ID of Agent Traces (OSD core `agent_traces` plugin). GenAI spans correlate there
+ * instead of Explore traces when it is available.
+ */
+export const AGENT_TRACES_APP_ID = 'agentTraces';
+
+/**
  * LocalStorage key for tracking if the legacy banner has been dismissed
  */
 export const LEGACY_BANNER_DISMISSED_KEY = 'apm.legacyBannerDismissed';
