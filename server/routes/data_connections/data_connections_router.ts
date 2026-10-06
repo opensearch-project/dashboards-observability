@@ -21,13 +21,32 @@ import {
 const EXPECTED_ERROR_STATUS_CODES = [401, 403, 404];
 
 /**
+ * Builds a safe, human-readable detail string from a thrown error without leaking sensitive
+ * content. The security plugin appends `User [name=..., backend_roles=[...]]` to the reason of a
+ * 403, and the legacy OpenSearch client surfaces that reason as `error.message`, so the trailing
+ * user/role segment is stripped to keep it out of the logs even at debug level. Non-Error values
+ * are handled explicitly so a thrown object never renders as `[object Object]`.
+ */
+export const sanitizeDataConnectionErrorMessage = (error: any): string => {
+  const rawMessage =
+    typeof error?.message === 'string' && error.message
+      ? error.message
+      : typeof error === 'string' && error
+        ? error
+        : 'Unknown error';
+  return rawMessage.replace(/\s*(and )?User \[[\s\S]*$/, '').trim() || rawMessage;
+};
+
+/**
  * Logs a concise, single-line summary of a failed data connection call. The full error object
  * (stack trace, response body, user and role details) is intentionally not logged, since
  * serializing it for every request can flood the server logs.
  */
 export const logDataConnectionError = (logger: Logger, message: string, error: any) => {
-  const statusCode = error?.statusCode || error?.body?.statusCode;
-  const summary = `${message} [${statusCode ?? 'unknown'}]: ${error?.message ?? error}`;
+  const statusCode = error?.statusCode || error?.body?.statusCode || error?.body?.status;
+  const summary = `${message} [${statusCode ?? 'unknown'}]: ${sanitizeDataConnectionErrorMessage(
+    error
+  )}`;
   if (EXPECTED_ERROR_STATUS_CODES.includes(statusCode)) {
     logger.debug(summary);
   } else {
