@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 // @ts-ignore
 import defaultLayoutSpec from '!!raw-loader!./default.layout.spec.hjson';
 import defaultDataSpec from '!!raw-loader!./default.data.spec.hjson';
