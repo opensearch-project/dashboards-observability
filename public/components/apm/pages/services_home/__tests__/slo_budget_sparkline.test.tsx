@@ -11,7 +11,11 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { buildAggregateErrorRatioQuery, SloBudgetSparkline } from '../slo_budget_sparkline';
+import {
+  buildAggregateErrorRatioQuery,
+  buildOption,
+  SloBudgetSparkline,
+} from '../slo_budget_sparkline';
 import type { UsePromQLChartDataResult } from '../../../shared/hooks/use_promql_chart_data';
 
 // Stub the PromQL hook so the component's branches are directly selectable
@@ -65,6 +69,18 @@ describe('buildAggregateErrorRatioQuery', () => {
     expect(q).toContain('__name__=~"slo:sli_error:ratio_rate_3d:.+"');
     // Should NOT try to filter by service — no such label on recording rules.
     expect(q).not.toContain('slo_service=');
+  });
+});
+
+describe('buildOption (m4)', () => {
+  it('keeps the line linear (smooth: false) so short-lived burn spikes stay visible', () => {
+    const opt = buildOption([
+      [1, 0.1],
+      [2, 0.9],
+      [3, 0.1],
+    ]);
+    const series = (opt.series as Array<Record<string, unknown>>)[0];
+    expect(series.smooth).toBe(false);
   });
 });
 
