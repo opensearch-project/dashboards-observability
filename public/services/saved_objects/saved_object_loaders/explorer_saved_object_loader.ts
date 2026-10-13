@@ -112,12 +112,20 @@ function isInnerObjectSavedVisualization(
 }
 
 const parseStringDataSource = (
-  dsInSavedObject: string,
+  dsInSavedObject: string | undefined,
   notifications: NotificationsStart
 ): SelectedDataSource[] => {
+  // A saved object may not carry data sources at all. The observability backend
+  // store (POST /_plugins/_observability/object) drops `data_sources` on write,
+  // so a GET returns it as undefined. Treat a missing or empty value as "no
+  // explicit data source" and let the caller fall back to the default cluster,
+  // instead of surfacing a parsing error and failing to open the object.
+  if (isEmpty(dsInSavedObject)) {
+    return [] as SelectedDataSource[];
+  }
   let selectedDataSources: SelectedDataSource[];
   try {
-    selectedDataSources = JSON.parse(dsInSavedObject);
+    selectedDataSources = JSON.parse(dsInSavedObject as string);
   } catch (err: unknown) {
     console.error(err);
     notifications.toasts.addError(err as Error, {
@@ -174,26 +182,32 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
     const currQuery = objectData?.query || '';
     const { appLogEvents } = this.loadContext;
 
+    // Parse the saved data sources once. This tolerates a missing/undefined
+    // value (see parseStringDataSource) so objects stored in the observability
+    // backend, which drops `data_sources`, can still be opened.
+    const dataSources = parseStringDataSource(objectData.data_sources, this.notifications);
+
     // app analytics specific
     if (appLogEvents && objectData.selected_date_range) {
       this.updateAppAnalyticSelectedDateRange(objectData.selected_date_range);
     }
 
     // update redux store with this saved object data
-    await this.updateReduxState(savedType, objectData, currQuery);
+    await this.updateReduxState(savedType, objectData, currQuery, dataSources);
 
     // update UI state with this saved object data
     await this.updateUIState(objectData);
 
     // fetch data based on saved object data
     const { tabId } = this.loadContext;
-    await this.loadDataFromSavedObject(objectData, tabId);
+    await this.loadDataFromSavedObject(objectData, tabId, dataSources);
   }
 
   async updateReduxState(
     savedType: typeof SAVED_QUERY | typeof SAVED_VISUALIZATION,
     objectData: SavedQuery | SavedVisualization,
-    currQuery: string
+    currQuery: string,
+    dataSources: SelectedDataSource[]
   ) {
     const { batch, dispatch, changeQuery, updateFields, updateTabName } = this.dispatchers;
     const { tabId } = this.loadContext;
@@ -232,7 +246,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
         updateSearchMetaData({
           tabId,
           data: {
-            datasources: JSON.parse(objectData.data_sources),
+            datasources: dataSources,
             lang: objectData.query_lang,
           },
         })
@@ -409,9 +423,7 @@ export class ExplorerSavedObjectLoader extends SavedObjectLoaderBase implements 
       });
   };
 
-  async loadDataFromSavedObject(objectData, tabId: string) {
-    const dataSources = parseStringDataSource(objectData.data_sources, this.notifications);
-
+  async loadDataFromSavedObject(objectData, tabId: string, dataSources: SelectedDataSource[]) {
     // backward compatibility for saved object that doesn't contain datasource
     if (dataSources.length === 0) {
       this.loadWODataSource({ tabId });
