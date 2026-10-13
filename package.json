@@ -70,7 +70,6 @@
     "ws": "^8.21.0",
     "serialize-javascript": "^7.0.3",
     "uuid": "^11.1.1",
-    "linkify-it": "^5.0.2",
-    "fast-uri": "^3.1.7"
+    "linkify-it": "^5.0.2"
   }
 }
