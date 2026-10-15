@@ -324,7 +324,7 @@ export const Services = (props: ApmServicesProps) => {
                 name={decodeURIComponent(serviceName)}
                 nodeType={nodeType}
                 language={language}
-                environment={environment}
+                environment={environment ? decodeURIComponent(environment) : environment}
                 size="l"
               />
             </EuiFlexItem>
