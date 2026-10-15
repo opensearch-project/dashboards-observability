@@ -22,7 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { HealthDonut, HEALTH_DONUT_COLORS } from '@osd/apm-topology';
-import { LanguageIcon } from '../language_icon';
+import { ServiceNodeIcon } from '../service_node_icon';
 import { PromQLLineChart } from '../promql_line_chart';
 import { ApmCursorContext, createApmCursorBus } from '../../hooks/apm_cursor_context';
 import { SelectedNodeState, ServiceMapNodeMetrics } from '../../../common/types/service_map_types';
@@ -230,7 +230,13 @@ label_replace(
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           {!isApplicationNode && (
             <EuiFlexItem grow={false}>
-              <LanguageIcon language={language} size="l" />
+              <ServiceNodeIcon
+                name={node.serviceName}
+                nodeType={node.nodeType}
+                language={language}
+                environment={node.environment}
+                size="l"
+              />
             </EuiFlexItem>
           )}
           <EuiFlexItem>

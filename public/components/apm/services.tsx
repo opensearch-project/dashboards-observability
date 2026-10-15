@@ -38,7 +38,7 @@ import { isDependencyType } from './shared/utils/platform_utils';
 import { useResolvedNodeType } from './shared/hooks/use_resolved_node_type';
 import { TimeRange as ServiceDetailsTimeRange } from './common/types/service_details_types';
 import { TimeRangePicker } from './shared/components/time_filter';
-import { LanguageIcon } from './shared/components/language_icon';
+import { ServiceNodeIcon } from './shared/components/service_node_icon';
 import { LegacyBanner } from './shared/components/legacy_banner';
 import { usePersistentTimeRange } from './shared/hooks/use_persistent_time_range';
 import './shared/styles/apm_common.scss';
@@ -304,7 +304,7 @@ export const Services = (props: ApmServicesProps) => {
     ]);
   };
 
-  // Set breadcrumbs for service details with language icon (gear icon as fallback)
+  // Set breadcrumbs for service details with the node's icon (language, or dependency system)
   const setServiceDetailsBreadcrumbs = (
     serviceName: string,
     environment?: string,
@@ -320,7 +320,13 @@ export const Services = (props: ApmServicesProps) => {
         text: (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <LanguageIcon language={language} size="l" />
+              <ServiceNodeIcon
+                name={decodeURIComponent(serviceName)}
+                nodeType={nodeType}
+                language={language}
+                environment={environment}
+                size="l"
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText>
