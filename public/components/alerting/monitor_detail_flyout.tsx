@@ -53,6 +53,7 @@ import { coreRefs } from '../../framework/core_refs';
 import { isPending } from './monitors_table/pending_rules';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
+import { getMonitorStateLabel, getStateLabel } from './enum_labels';
 
 // Cap for the alert-history table in the flyout. `EuiBasicTable` doesn't
 // paginate by default; without this cap a monitor that has accumulated
@@ -306,7 +307,9 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
       name: i18n.translate('observability.alerting.monitorDetailFlyout.history.state', {
         defaultMessage: 'State',
       }),
-      render: (s: string) => <EuiHealth color={STATE_COLORS[s] || 'subdued'}>{s}</EuiHealth>,
+      render: (s: string) => (
+        <EuiHealth color={STATE_COLORS[s] || 'subdued'}>{getStateLabel(s)}</EuiHealth>
+      ),
     },
     {
       field: 'value',
@@ -337,7 +340,9 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={STATUS_COLORS[monitor.status]}>{monitor.status}</EuiBadge>
+                  <EuiBadge color={STATUS_COLORS[monitor.status]}>
+                    {getMonitorStateLabel(monitor.status)}
+                  </EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiBadge color={SEVERITY_COLORS[monitor.severity]}>{monitor.severity}</EuiBadge>

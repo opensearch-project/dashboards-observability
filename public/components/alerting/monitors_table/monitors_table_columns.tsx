@@ -24,6 +24,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiLoadingSpinner,
+  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -46,6 +47,13 @@ import { TruncatedLabel } from '../../common/truncated_label';
 import { getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
 import { DEFAULT_WIDTHS } from './resizable_columns';
 import { isPending } from './pending_rules';
+
+/** Tint for the `CW: <state>` badge shown alongside the unified status. */
+const CLOUDWATCH_STATE_BADGE_COLOR: Record<string, string> = {
+  ALARM: 'danger',
+  OK: 'success',
+  INSUFFICIENT_DATA: 'warning',
+};
 
 // ============================================================================
 // Column Definitions
@@ -152,8 +160,15 @@ export function buildTableColumns({
         width: w('name'),
         render: (name: string, item: UnifiedRuleSummary) => {
           const iconType =
-            item.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
-          const showGroupBadge = item.datasourceType === 'prometheus' && !!item.group;
+            item.datasourceType === 'cloudwatch'
+              ? 'logoAWS'
+              : item.datasourceType === 'prometheus'
+                ? 'logoPrometheus'
+                : 'logoOpenSearch';
+          // Avoid duplicating the group when the dedicated Rule Group column is visible
+          const showGroupBadge =
+            item.datasourceType === 'prometheus' && !!item.group && !visibleColumns.has('group');
+          const showPartialAccess = !!item.cloudWatch?.partialAccess;
           return (
             <div>
               <EuiButtonEmpty
@@ -172,6 +187,13 @@ export function buildTableColumns({
               >
                 <strong>{name}</strong>
               </EuiButtonEmpty>
+              {showPartialAccess && (
+                <EuiBadge color="hollow" style={{ fontSize: 10, marginLeft: 4 }}>
+                  {i18n.translate('observability.alerting.monitorsTable.partialAccessBadge', {
+                    defaultMessage: 'partial access',
+                  })}
+                </EuiBadge>
+              )}
               {showGroupBadge && (
                 <div style={{ marginLeft: 24, marginTop: -2 }}>
                   <EuiBadge color="hollow" style={{ fontSize: 10 }}>
@@ -218,8 +240,44 @@ export function buildTableColumns({
               </EuiToolTip>
             );
           }
+          const cw = item.cloudWatch;
+          const unifiedLabel = getMonitorStateLabel(s);
+          // Long values ("insufficient data", "CW: INSUFFICIENT_DATA") must
+          // not overflow the (user-resizable) status column: both the health
+          // label and the CW badge truncate with an ellipsis, and the full
+          // text stays reachable via tooltip.
+          const truncate: React.CSSProperties = {
+            display: 'block',
+            maxWidth: '100%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          };
           return (
-            <EuiHealth color={STATUS_COLORS[s] || 'subdued'}>{getMonitorStateLabel(s)}</EuiHealth>
+            <EuiFlexGroup
+              gutterSize="xs"
+              alignItems="center"
+              responsive={false}
+              wrap
+              style={{ minWidth: 0 }}
+            >
+              <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
+                <EuiHealth color={STATUS_COLORS[s] || 'subdued'}>
+                  <span style={truncate} title={unifiedLabel}>
+                    {unifiedLabel}
+                  </span>
+                </EuiHealth>
+              </EuiFlexItem>
+              {cw && (
+                <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
+                  <EuiToolTip content={`CloudWatch state: ${cw.state}`}>
+                    <EuiBadge color={CLOUDWATCH_STATE_BADGE_COLOR[cw.state] || 'hollow'}>
+                      <span style={truncate}>CW: {cw.state}</span>
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           );
         },
       });
@@ -271,7 +329,25 @@ export function buildTableColumns({
         // single-line a plain-text render in this table, so use the shared
         // `TruncatedLabel` (single-line ellipsis + instant full-text tooltip),
         // matching the datasource facet in the filter panel.
-        render: (id: string) => <TruncatedLabel text={dsNameMap.get(id) || id} />,
+        render: (id: string, item: UnifiedRuleSummary) => {
+          const label = dsNameMap.get(id) || id;
+          const cw = item.cloudWatch;
+          // CloudWatch rows show the account · region beneath the name so a
+          // multi-account view is legible at a glance (matches the demo).
+          const accountRegion =
+            cw && (cw.accountId || cw.region)
+              ? [cw.accountId, cw.region].filter(Boolean).join(' · ')
+              : undefined;
+          if (!accountRegion) return <TruncatedLabel text={label} />;
+          return (
+            <div>
+              <TruncatedLabel text={label} />
+              <EuiTextColor color="subdued" style={{ fontSize: 11 }}>
+                {accountRegion}
+              </EuiTextColor>
+            </div>
+          );
+        },
       });
     }
   }

@@ -56,7 +56,7 @@ describe('registerAlertingRoutes', () => {
     mockRouter.delete.mockClear();
   });
 
-  it('registers all runtime routes when metadata routes are enabled (18 GET + 4 POST + 1 PUT + 1 DELETE = 24)', () => {
+  it('registers all runtime routes when metadata routes are enabled (21 GET + 4 POST + 1 PUT + 1 DELETE = 27)', () => {
     registerAlertingRoutes(mockRouter as never, {
       osBackend: mockOsBackend,
       promBackend: mockPromBackend,
@@ -69,13 +69,15 @@ describe('registerAlertingRoutes', () => {
       mockRouter.post.mock.calls.length +
       mockRouter.put.mock.calls.length +
       mockRouter.delete.mock.calls.length;
-    // 14 inline GETs (incl. probe + destinations + indices + aliases) + 4 metadata GETs = 18 GETs
+    // 14 inline GETs (incl. probe + destinations + indices + aliases)
+    // + 3 CloudWatch alarm detail GETs (detail/history/relationships)
+    // + 4 metadata GETs = 21 GETs
     // 2 monitor POSTs + 1 PUT + 1 DELETE + 1 mappings POST + 1 prometheus preview POST = 6 non-GET routes
-    expect(total).toBe(24);
-    expect(mockRouter.get.mock.calls.length).toBe(18);
+    expect(total).toBe(27);
+    expect(mockRouter.get.mock.calls.length).toBe(21);
   });
 
-  it('skips the 4 metadata GET routes when enableMetadataRoutes is false (14 GET + 3 POST + 1 PUT + 1 DELETE = 19)', () => {
+  it('skips the 4 metadata GET routes when enableMetadataRoutes is false (17 GET + 3 POST + 1 PUT + 1 DELETE = 22)', () => {
     registerAlertingRoutes(mockRouter as never, {
       osBackend: mockOsBackend,
       promBackend: mockPromBackend,
@@ -88,8 +90,8 @@ describe('registerAlertingRoutes', () => {
       mockRouter.post.mock.calls.length +
       mockRouter.put.mock.calls.length +
       mockRouter.delete.mock.calls.length;
-    expect(total).toBe(19);
-    expect(mockRouter.get.mock.calls.length).toBe(14);
+    expect(total).toBe(22);
+    expect(mockRouter.get.mock.calls.length).toBe(17);
   });
 
   it('registers the destinations read route', () => {

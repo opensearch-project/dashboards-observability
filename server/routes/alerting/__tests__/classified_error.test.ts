@@ -51,6 +51,21 @@ describe('contextFromError', () => {
     const e = Object.assign(new Error('nope'), { statusCode: 404 });
     expect(contextFromError(e, 'op', 'cid').httpStatus).toBe(404);
   });
+
+  it('reads the AWS SDK v3 $metadata.httpStatusCode off a plain Error', () => {
+    const e = Object.assign(new Error('The security token included in the request is invalid.'), {
+      name: 'UnrecognizedClientException',
+      $metadata: { httpStatusCode: 403 },
+    });
+    const ctx = contextFromError(e, 'op', 'cid');
+    expect(ctx.httpStatus).toBe(403);
+    expect(ctx.errorName).toBe('UnrecognizedClientException');
+  });
+
+  it('threads the sourceType hint into the context', () => {
+    const ctx = contextFromError(new Error('x'), 'op', 'cid', 'cloudwatch');
+    expect(ctx.sourceType).toBe('cloudwatch');
+  });
 });
 
 describe('classifyToHandlerResult', () => {
@@ -84,6 +99,23 @@ describe('classifyToHandlerResult', () => {
     expect(detail.category).toBe('CONFLICT');
     expect(detail.code).toBe('RULE_GROUP_CONFLICT');
     expect(result.status).toBe(409);
+  });
+
+  it('classifies a CloudWatch auth failure into a named failure class via sourceType', () => {
+    const err = Object.assign(new Error('The security token included in the request is expired'), {
+      name: 'ExpiredTokenException',
+      $metadata: { httpStatusCode: 403 },
+    });
+    const result = classifyToHandlerResult(err, {
+      operation: 'cloudwatch.alarm.detail',
+      logger,
+      sourceType: 'cloudwatch',
+    });
+    const detail = result.body.errorDetail as ClassifiedError;
+    expect(detail.code).toBe('CLOUDWATCH_AUTH_EXPIRED');
+    expect(detail.category).toBe('PERMISSION_DENIED');
+    expect(detail.title).toBe('AWS session expired');
+    expect(result.status).toBe(403);
   });
 
   it('strips sensitive detail by default but keeps it when exposure is enabled', () => {

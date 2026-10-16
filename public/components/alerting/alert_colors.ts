@@ -39,6 +39,7 @@ export const SEVERITY_HEX: Record<UnifiedAlertSeverity, string> = {
 export const STATE_HEX: Record<UnifiedAlertState, string> = {
   active: euiThemeVars.euiColorDanger,
   pending: euiThemeVars.euiColorWarning,
+  insufficient_data: euiThemeVars.euiColorWarning,
   acknowledged: euiThemeVars.euiColorPrimary,
   silenced: euiThemeVars.euiColorMediumShade,
   resolved: euiThemeVars.euiColorSuccess,

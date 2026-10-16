@@ -44,9 +44,14 @@ export function configureErrorExposure(next: boolean): void {
 export function contextFromError(
   e: unknown,
   operation: string,
-  correlationId: string
+  correlationId: string,
+  sourceType?: string
 ): RawErrorContext {
-  const base: RawErrorContext = { operation, correlationId };
+  const base: RawErrorContext = {
+    operation,
+    correlationId,
+    ...(sourceType ? { sourceType } : {}),
+  };
   if (e instanceof SloRulerError) {
     return {
       ...base,
@@ -69,9 +74,17 @@ export function contextFromError(
   }
   if (e instanceof Error) {
     const statusCode = (e as { statusCode?: unknown }).statusCode;
+    // AWS SDK v3 errors carry their HTTP status on `$metadata.httpStatusCode`.
+    const awsStatus = (e as { $metadata?: { httpStatusCode?: unknown } }).$metadata?.httpStatusCode;
+    const httpStatus =
+      typeof statusCode === 'number'
+        ? statusCode
+        : typeof awsStatus === 'number'
+          ? awsStatus
+          : undefined;
     return {
       ...base,
-      httpStatus: typeof statusCode === 'number' ? statusCode : undefined,
+      httpStatus,
       message: e.message,
       errorName: e.name,
     };
@@ -97,6 +110,8 @@ function stringifyRaw(rawBody: unknown): string {
 export interface ClassifyOptions {
   operation: string;
   logger?: Logger;
+  /** Neutral source hint threaded to classifiers, e.g. 'cloudwatch'. */
+  sourceType?: string;
 }
 
 /**
@@ -107,7 +122,7 @@ export interface ClassifyOptions {
  */
 export function classifyToHandlerResult(e: unknown, opts: ClassifyOptions): HandlerResult {
   const correlationId = randomUUID();
-  const ctx = contextFromError(e, opts.operation, correlationId);
+  const ctx = contextFromError(e, opts.operation, correlationId, opts.sourceType);
   const classified: ClassifiedError = { ...classifyError(ctx), correlationId };
 
   if (opts.logger) {

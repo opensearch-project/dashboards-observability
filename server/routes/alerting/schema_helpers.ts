@@ -71,6 +71,35 @@ export const alertingRuleIdSchema = schema.string({
   },
 });
 
+/**
+ * CloudWatch alarm name. CloudWatch allows a broad UTF-8 charset (including
+ * spaces, hyphens and dots — e.g. "checkout-errors-high"), so we can't reuse
+ * the strict `ID_PATTERN`. We instead reject only the genuinely dangerous
+ * shapes for a path-interpolated value: ASCII control chars, the path
+ * separators `/` and `\`, and any `..` traversal sequence. Bounded to 255
+ * chars (the CloudWatch limit). Callers must URL-encode the name; OSD decodes
+ * it before validation. Character checks use charCodeAt (not a regex) to keep
+ * the intent unambiguous.
+ */
+const ALARM_NAME_MAX_LENGTH = 255;
+const FORWARD_SLASH = '/'.charCodeAt(0);
+const BACK_SLASH = '\\'.charCodeAt(0);
+
+export const cloudWatchAlarmNameSchema = schema.string({
+  validate: (value: string) => {
+    if (value.length < 1) return `value has length [0] but it must have a minimum length of [1].`;
+    if (value.length > ALARM_NAME_MAX_LENGTH)
+      return `value has length [${value.length}] but it must have a maximum length of [${ALARM_NAME_MAX_LENGTH}].`;
+    for (let i = 0; i < value.length; i++) {
+      const code = value.charCodeAt(i);
+      if (code < 0x20 || code === FORWARD_SLASH || code === BACK_SLASH) {
+        return 'contains forbidden characters (control chars or path separators)';
+      }
+    }
+    if (value.includes('..')) return 'must not contain ".."';
+  },
+});
+
 /** Prometheus label name — `[a-zA-Z_:][a-zA-Z0-9_:]*`, bounded. */
 const LABEL_NAME_PATTERN = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
 const LABEL_NAME_MAX_LENGTH = 256;

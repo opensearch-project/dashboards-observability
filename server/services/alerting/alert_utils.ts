@@ -28,8 +28,11 @@ import {
   ADAnomalyResult,
   ADDetector,
   ADForecaster,
+  CloudWatchAlarm,
+  CloudWatchAlarmState,
   Datasource,
   DatasourceService,
+  MonitorHealthStatus,
   MonitorStatus,
   MonitorType,
   OpenSearchBackend,
@@ -41,6 +44,7 @@ import {
   UnifiedAlertSeverity,
   UnifiedAlertState,
   UnifiedAlertSummary,
+  UnifiedCloudWatchMeta,
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
 
@@ -1117,5 +1121,148 @@ export function promRuleToUnified(
         unit: inferUnitFromExpression(r.query),
       };
     })(),
+  };
+}
+
+// ============================================================================
+// CloudWatch → unified mappers
+// ============================================================================
+
+/** Map a CloudWatch alarm state to the unified monitor status used by rows. */
+export function cloudWatchStateToMonitorStatus(state: CloudWatchAlarmState): MonitorStatus {
+  if (state === 'ALARM') return 'active';
+  // Distinct unified status (not `pending`): insufficient data means the alarm
+  // cannot evaluate, which users filter for separately from Prom-style pending.
+  if (state === 'INSUFFICIENT_DATA') return 'insufficient_data';
+  return 'muted'; // OK — steady state, rendered subdued like a non-firing rule
+}
+
+/** Map a CloudWatch alarm state to a unified alert state (Alerts tab). */
+export function cloudWatchStateToAlertState(state: CloudWatchAlarmState): UnifiedAlertState {
+  if (state === 'ALARM') return 'active';
+  if (state === 'INSUFFICIENT_DATA') return 'insufficient_data';
+  return 'resolved';
+}
+
+/** CloudWatch alarm health: INSUFFICIENT_DATA reads as degraded (no data). */
+export function cloudWatchHealthStatus(alarm: CloudWatchAlarm): MonitorHealthStatus {
+  if (alarm.stateValue === 'INSUFFICIENT_DATA') return 'no_data';
+  return 'healthy';
+}
+
+/**
+ * Severity for a CloudWatch alarm. CloudWatch has no native severity, so we
+ * derive it: ALARM composites/critical-named alarms → critical; ALARM metric
+ * alarms → medium unless the name/description hints otherwise; non-ALARM → info.
+ * A `severity` hint could later be sourced from alarm tags.
+ */
+export function cloudWatchSeverity(alarm: CloudWatchAlarm): UnifiedAlertSeverity {
+  const hint = `${alarm.alarmName} ${alarm.description || ''}`.toLowerCase();
+  if (/\bcritical\b|\bsev1\b|\bsev-1\b|\bp0\b|\bpage\b/.test(hint)) return 'critical';
+  if (alarm.stateValue === 'ALARM') {
+    return alarm.alarmType === 'composite' ? 'critical' : 'medium';
+  }
+  if (/\bwarn/.test(hint)) return 'medium';
+  return 'info';
+}
+
+function cloudWatchMeta(alarm: CloudWatchAlarm): UnifiedCloudWatchMeta {
+  return {
+    state: alarm.stateValue,
+    alarmType: alarm.alarmType,
+    accountId: alarm.accountId,
+    region: alarm.region,
+    namespace: alarm.namespace,
+    metricName: alarm.metricName,
+    alarmArn: alarm.alarmArn,
+    partialAccess: alarm.partialAccess,
+  };
+}
+
+function cloudWatchCondition(alarm: CloudWatchAlarm): string {
+  if (alarm.alarmType === 'composite') return alarm.alarmRule || 'Composite alarm';
+  const op = alarm.comparisonOperator || 'GreaterThanThreshold';
+  const thr = alarm.threshold != null ? alarm.threshold : '';
+  const dp =
+    alarm.datapointsToAlarm && alarm.evaluationPeriods
+      ? ` for ${alarm.datapointsToAlarm}/${alarm.evaluationPeriods} datapoints`
+      : '';
+  return `${op} ${thr}${dp}`.trim();
+}
+
+/**
+ * CloudWatch alarm → unified rule row (Rules tab). The `cloudWatch` meta carries
+ * everything the row/flyout dispatch needs; `monitorType` is `metric` /
+ * `composite` so the existing Type column labels reuse cleanly.
+ */
+export function cloudWatchAlarmToUnifiedRuleSummary(
+  alarm: CloudWatchAlarm,
+  dsId: string
+): UnifiedRuleSummary {
+  const meta = cloudWatchMeta(alarm);
+  return {
+    id: alarm.alarmName,
+    datasourceId: dsId,
+    datasourceType: 'cloudwatch',
+    definitionType: 'cloudwatch_alarm',
+    name: alarm.alarmName,
+    enabled: alarm.actionsEnabled !== false,
+    severity: cloudWatchSeverity(alarm),
+    query:
+      alarm.alarmType === 'composite'
+        ? alarm.alarmRule || ''
+        : `${alarm.namespace || ''} / ${alarm.metricName || ''}`,
+    condition: cloudWatchCondition(alarm),
+    labels: {
+      ...(alarm.namespace ? { namespace: alarm.namespace } : {}),
+      ...(alarm.metricName ? { metric: alarm.metricName } : {}),
+      ...(alarm.accountId ? { account: alarm.accountId } : {}),
+      ...(alarm.region ? { region: alarm.region } : {}),
+    },
+    annotations: alarm.description ? { description: alarm.description } : {},
+    monitorType: alarm.alarmType, // 'metric' | 'composite'
+    status: cloudWatchStateToMonitorStatus(alarm.stateValue),
+    healthStatus: cloudWatchHealthStatus(alarm),
+    createdBy: 'cloudwatch',
+    createdAt: alarm.stateUpdatedTimestamp || new Date().toISOString(),
+    lastModified: alarm.stateUpdatedTimestamp || new Date().toISOString(),
+    lastTriggered: alarm.stateValue === 'ALARM' ? alarm.stateUpdatedTimestamp : undefined,
+    notificationDestinations: alarm.alarmActions || [],
+    evaluationInterval: alarm.period ? `${alarm.period}s` : '—',
+    pendingPeriod:
+      alarm.datapointsToAlarm && alarm.period ? `${alarm.datapointsToAlarm * alarm.period}s` : '0s',
+    threshold:
+      alarm.threshold != null
+        ? { operator: alarm.comparisonOperator || 'GreaterThanThreshold', value: alarm.threshold }
+        : undefined,
+    cloudWatch: meta,
+  };
+}
+
+/** CloudWatch alarm (in ALARM) → unified alert row (Alerts tab). */
+export function cloudWatchAlarmToUnifiedAlertSummary(
+  alarm: CloudWatchAlarm,
+  dsId: string
+): UnifiedAlertSummary {
+  return {
+    id: alarm.alarmName,
+    datasourceId: dsId,
+    datasourceType: 'cloudwatch',
+    alertKind: 'alert',
+    name: alarm.alarmName,
+    state: cloudWatchStateToAlertState(alarm.stateValue),
+    severity: cloudWatchSeverity(alarm),
+    message: alarm.stateReason || alarm.description,
+    startTime: alarm.stateUpdatedTimestamp || new Date().toISOString(),
+    lastUpdated: alarm.stateUpdatedTimestamp || new Date().toISOString(),
+    labels: {
+      ...(alarm.namespace ? { namespace: alarm.namespace } : {}),
+      ...(alarm.metricName ? { metric: alarm.metricName } : {}),
+      ...(alarm.accountId ? { account: alarm.accountId } : {}),
+      ...(alarm.region ? { region: alarm.region } : {}),
+    },
+    annotations: alarm.description ? { description: alarm.description } : {},
+    monitorId: alarm.alarmName,
+    cloudWatch: cloudWatchMeta(alarm),
   };
 }

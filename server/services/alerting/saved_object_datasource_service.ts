@@ -38,11 +38,41 @@ interface DataConnectionSOAttributes {
   type?: string;
 }
 
+/**
+ * The virtual CloudWatch datasource id. There is no saved object for it — the
+ * CloudWatch integration is a zero-setup virtual datasource that binds to the
+ * account the ambient AWS credentials resolve to. Kept in sync with the
+ * client-side synthetic entry in `use_datasources.ts`.
+ */
+export const CLOUDWATCH_DATASOURCE_ID = 'cloudwatch';
+
+export interface CloudWatchDatasourceConfig {
+  enabled: boolean;
+  region: string;
+}
+
 export class SavedObjectDatasourceService implements DatasourceService {
   constructor(
     private readonly savedObjects: SavedObjectsClientContract,
-    private readonly logger?: Logger
+    private readonly logger?: Logger,
+    /**
+     * When present and `enabled`, the virtual CloudWatch datasource is appended
+     * to `list()` and resolvable via `get('cloudwatch')`. Injected from the
+     * `observability.cloudwatch` config so the whole integration ships dark.
+     */
+    private readonly cloudWatch?: CloudWatchDatasourceConfig
   ) {}
+
+  private cloudWatchDatasource(): Datasource {
+    return {
+      id: CLOUDWATCH_DATASOURCE_ID,
+      name: 'CloudWatch',
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+      region: this.cloudWatch?.region,
+    };
+  }
 
   async list(): Promise<Datasource[]> {
     const all: Datasource[] = [];
@@ -103,10 +133,18 @@ export class SavedObjectDatasourceService implements DatasourceService {
         enabled: true,
       });
     }
+    // Virtual CloudWatch datasource — no saved object; appears automatically
+    // when the feature is enabled and binds to the ambient credentials.
+    if (this.cloudWatch?.enabled) {
+      all.push(this.cloudWatchDatasource());
+    }
     return all;
   }
 
   async get(id: string): Promise<Datasource | null> {
+    if (id === CLOUDWATCH_DATASOURCE_ID && this.cloudWatch?.enabled) {
+      return this.cloudWatchDatasource();
+    }
     if (!id || id === 'local-cluster') {
       return {
         id: 'local-cluster',

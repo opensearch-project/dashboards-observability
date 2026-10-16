@@ -41,6 +41,7 @@ export const SEVERITY_COLORS: Record<string, string> = {
 export const STATE_COLORS: Record<string, string> = {
   active: 'danger',
   pending: 'warning',
+  insufficient_data: 'warning',
   acknowledged: 'primary',
   silenced: 'default',
   resolved: 'success',
@@ -57,6 +58,7 @@ export const STATE_COLORS: Record<string, string> = {
 export const STATUS_COLORS: Record<string, string> = {
   active: 'danger',
   pending: 'warning',
+  insufficient_data: 'warning',
   muted: 'default',
   disabled: 'subdued',
   Running: 'success',
@@ -125,6 +127,11 @@ export const isStandardOpenSearchDatasource = (datasource: Datasource): boolean 
 // ============================================================================
 // Anomaly detection / forecasting lifecycle helpers
 // ============================================================================
+
+export const isCloudWatchRule = (rule: UnifiedRuleSummary): boolean =>
+  rule.definitionType === 'cloudwatch_alarm' ||
+  rule.datasourceType === 'cloudwatch' ||
+  !!rule.cloudWatch;
 
 export const isDetectorRule = (rule: UnifiedRuleSummary): boolean =>
   rule.definitionType === 'detector' || rule.monitorType === 'detector';
@@ -212,6 +219,8 @@ export function formatDatasourceType(type: string): string {
       return 'OpenSearch';
     case 'prometheus':
       return 'Prometheus';
+    case 'cloudwatch':
+      return 'CloudWatch';
     default:
       return type.charAt(0).toUpperCase() + type.slice(1);
   }

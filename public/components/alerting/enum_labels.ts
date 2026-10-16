@@ -47,6 +47,9 @@ export const STATE_LABELS: Record<UnifiedAlertState, string> = {
   pending: i18n.translate('observability.alerting.stateLabel.pending', {
     defaultMessage: 'Pending',
   }),
+  insufficient_data: i18n.translate('observability.alerting.stateLabel.insufficientData', {
+    defaultMessage: 'Insufficient data',
+  }),
   acknowledged: i18n.translate('observability.alerting.stateLabel.acknowledged', {
     defaultMessage: 'Acknowledged',
   }),
@@ -113,6 +116,9 @@ const MONITOR_STATE_LABELS: Record<string, string> = {
   }),
   pending: i18n.translate('observability.alerting.monitorStateLabel.pending', {
     defaultMessage: 'Pending',
+  }),
+  insufficient_data: i18n.translate('observability.alerting.monitorStateLabel.insufficientData', {
+    defaultMessage: 'Insufficient data',
   }),
   muted: i18n.translate('observability.alerting.monitorStateLabel.muted', {
     defaultMessage: 'Muted',
