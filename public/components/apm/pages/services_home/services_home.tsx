@@ -52,7 +52,7 @@ import {
 import { coreRefs } from '../../../../framework/core_refs';
 import { ApmPageHeader } from '../../shared/components/apm_page_header';
 import { EmptyState } from '../../shared/components/empty_state';
-import { LanguageIcon } from '../../shared/components/language_icon';
+import { ServiceNodeIcon } from '../../shared/components/service_node_icon';
 import { MetricSparkline } from '../../shared/components/metric_sparkline';
 import { TopServicesByFaultRate } from '../../shared/components/fault_widgets/top_services_by_fault_rate';
 import { TopDependenciesByFaultRate } from '../../shared/components/fault_widgets/top_dependencies_by_fault_rate';
@@ -1062,7 +1062,13 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <LanguageIcon language={language} size="m" />
+                <ServiceNodeIcon
+                  name={serviceName}
+                  nodeType={item.type}
+                  language={language}
+                  environment={item.environment}
+                  size="m"
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink
