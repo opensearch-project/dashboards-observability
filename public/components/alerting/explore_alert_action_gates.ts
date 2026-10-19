@@ -4,43 +4,96 @@
  */
 
 /**
- * When Explore's query panel offers our "Create alert rule" actions. Explore can show datasets
- * and languages from other plugins' sources, so each action checks that the active query is one
- * its flyout can turn into a rule, not just which page it is on.
+ * When Explore's query panel offers our "Create alert rule" actions. Explore can show datasets,
+ * languages and data sources that other plugins add, so each action is offered only for the
+ * combinations listed here as supported. A deployment that supports more registers them through
+ * the plugin's setup contract (`exploreAlerting.addSupported`).
  */
+
+/** Which of our two "Create alert rule" actions an entry applies to. */
+export type ExploreAlertRuleKind = 'logs' | 'metrics';
+
+/** A combination of query that an action's flyout can turn into a rule. */
+export interface ExploreAlertSupport {
+  /** Dataset types, e.g. `INDEX_PATTERN` or `PROMETHEUS`. */
+  datasetTypes: string[];
+  /** Query languages (matched case-insensitively), e.g. `PPL` or `PROMQL`. */
+  languages: string[];
+  /**
+   * Data source engine types (`dataset.dataSource.type`). Omit to accept any, including datasets
+   * without a data source (the local cluster).
+   */
+  dataSourceTypes?: string[];
+}
 
 interface ExploreQueryLike {
   language?: string;
   dataset?: { type?: string; dataSource?: { type?: string } };
 }
 
-// The Logs rule flyout builds a monitor from the query in the editor, which only works for
-// Explore's own query languages.
-const LOGS_RULE_LANGUAGES = ['PPL', 'SQL'];
+// The local cluster has no data source; a remote one must be an OpenSearch cluster, which is
+// what can host monitors.
+const LOCAL_CLUSTER = '';
+const OPENSEARCH_ENGINES = [LOCAL_CLUSTER, 'OpenSearch'];
 
-// The Metrics rule flyout targets the dataset's Prometheus connection (the dataset id).
-const PROMETHEUS_DATASET_TYPE = 'PROMETHEUS';
+const defaults = (): Record<ExploreAlertRuleKind, ExploreAlertSupport[]> => ({
+  // The Logs rule flyout builds a monitor from the PPL or SQL query in the editor.
+  logs: [
+    {
+      datasetTypes: ['INDEX_PATTERN', 'INDEXES'],
+      languages: ['PPL', 'SQL'],
+      dataSourceTypes: OPENSEARCH_ENGINES,
+    },
+  ],
+  // The Metrics rule flyout targets the dataset's Prometheus connection (the dataset id).
+  metrics: [
+    {
+      datasetTypes: ['PROMETHEUS'],
+      languages: ['PROMQL'],
+      dataSourceTypes: OPENSEARCH_ENGINES,
+    },
+  ],
+});
 
-// AOSS collections can't host monitors.
-const isAOSS = (query: ExploreQueryLike) =>
-  query.dataset?.dataSource?.type === 'OpenSearch Serverless';
+let supported = defaults();
 
-/** Logs (PPL) rule: PPL alerting is on, the query is PPL or SQL, and the cluster can host it. */
+/** Adds a combination the action for `kind` supports, on top of the built-in ones. */
+export const addExploreAlertSupport = (
+  kind: ExploreAlertRuleKind,
+  support: ExploreAlertSupport
+) => {
+  supported[kind] = [...supported[kind], support];
+};
+
+/** Restores the built-in list. For tests. */
+export const resetExploreAlertSupport = () => {
+  supported = defaults();
+};
+
+const matches = (query: ExploreQueryLike, support: ExploreAlertSupport) => {
+  const language = query.language?.toUpperCase();
+  const dataSourceType = query.dataset?.dataSource?.type ?? LOCAL_CLUSTER;
+  return (
+    !!query.dataset?.type &&
+    support.datasetTypes.includes(query.dataset.type) &&
+    !!language &&
+    support.languages.some((supportedLanguage) => supportedLanguage.toUpperCase() === language) &&
+    (!support.dataSourceTypes || support.dataSourceTypes.includes(dataSourceType))
+  );
+};
+
+/** Whether the action for `kind` can create a rule from this query. */
+export const isExploreAlertSupported = (
+  kind: ExploreAlertRuleKind,
+  query: ExploreQueryLike | undefined
+): boolean => !!query && supported[kind].some((support) => matches(query, support));
+
+/** Logs (PPL) rule: PPL alerting is on and the query is a supported one. */
 export const isLogsAlertActionEnabled = (
   query: ExploreQueryLike | undefined,
   pplAlertingEnabled: boolean
-): boolean => {
-  if (!pplAlertingEnabled || !query) return false;
-  const language = query.language?.toUpperCase() ?? '';
-  return LOGS_RULE_LANGUAGES.includes(language) && !isAOSS(query);
-};
+): boolean => pplAlertingEnabled && isExploreAlertSupported('logs', query);
 
-/** Metrics (PromQL) rule: a PromQL query on a Prometheus connection the cluster can alert on. */
-export const isMetricsAlertActionEnabled = (query: ExploreQueryLike | undefined): boolean => {
-  if (!query) return false;
-  return (
-    query.language?.toUpperCase() === 'PROMQL' &&
-    query.dataset?.type === PROMETHEUS_DATASET_TYPE &&
-    !isAOSS(query)
-  );
-};
+/** Metrics (PromQL) rule: the query is a supported one. */
+export const isMetricsAlertActionEnabled = (query: ExploreQueryLike | undefined): boolean =>
+  isExploreAlertSupported('metrics', query);

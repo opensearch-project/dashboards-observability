@@ -142,6 +142,7 @@ import {
   SetupDependencies,
 } from './types';
 import {
+  addExploreAlertSupport,
   isLogsAlertActionEnabled,
   isMetricsAlertActionEnabled,
 } from './components/alerting/explore_alert_action_gates';
@@ -838,7 +839,9 @@ export class ObservabilityPlugin implements Plugin<
         });
     }
 
-    return {};
+    return {
+      exploreAlerting: { addSupported: addExploreAlertSupport },
+    };
   }
 
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
