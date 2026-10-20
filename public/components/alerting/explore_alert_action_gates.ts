@@ -41,18 +41,23 @@ interface ExploreQueryLike {
 }
 
 // Monitors run on OpenSearch clusters: the local one, or a data source whose engine is OpenSearch.
-// Data sources saved before engine detection report `No Engine Type Available`; they got the
-// action before this list existed, so they keep it.
+// Data sources whose engine detection failed at creation report `No Engine Type Available`; they
+// got the action before this list existed, so they keep it.
 const LOCAL_CLUSTER = '';
-const OPENSEARCH_ENGINES = [LOCAL_CLUSTER, 'OpenSearch', 'No Engine Type Available'];
+const OPENSEARCH = 'OpenSearch';
+const OPENSEARCH_ENGINES = [LOCAL_CLUSTER, OPENSEARCH, 'No Engine Type Available'];
 
 // The engine a dataset runs on. Index patterns on the local cluster have no data source, and
 // indexes on it get `{ id: '', type: 'DATA_SOURCE' }`; both are the local cluster. Otherwise the
-// engine is `engineType` (set on indexes), else `type` (the engine, on index patterns).
-const engineOf = (dataSource?: DataSourceLike) =>
-  !dataSource || !dataSource.id
-    ? LOCAL_CLUSTER
-    : (dataSource.engineType ?? dataSource.type ?? LOCAL_CLUSTER);
+// engine is `engineType` (set on indexes), else `type` (the engine, on index patterns). An index
+// on a data source saved before engine detection has `type: 'DATA_SOURCE'` and no `engineType`;
+// it counts as OpenSearch, the same default index patterns get for a missing engine.
+const engineOf = (dataSource?: DataSourceLike) => {
+  if (!dataSource || !dataSource.id) return LOCAL_CLUSTER;
+  if (dataSource.engineType) return dataSource.engineType;
+  if (!dataSource.type || dataSource.type === 'DATA_SOURCE') return OPENSEARCH;
+  return dataSource.type;
+};
 
 const defaults = (): Record<ExploreAlertRuleKind, ExploreAlertSupport[]> => ({
   // The Logs rule flyout builds a PPL monitor from the query in the editor, so PPL only.

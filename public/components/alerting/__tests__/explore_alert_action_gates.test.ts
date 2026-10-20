@@ -42,9 +42,11 @@ describe('isLogsAlertActionEnabled', () => {
     ['a local index', localIndex],
     ['an index on an OpenSearch data source', remoteIndex('OpenSearch')],
     [
-      'an index on a data source without a detected engine',
+      'an index on a data source whose engine detection failed',
       remoteIndex('No Engine Type Available'),
     ],
+    // Saved before engine detection: no engine at all, defaulted to OpenSearch like index patterns.
+    ['an index on a data source saved before engine detection', remoteIndex()],
   ])('offers the rule for PPL on %s', (_name, dataset) => {
     expect(isLogsAlertActionEnabled({ language: 'PPL', dataset }, true)).toBe(true);
     expect(isLogsAlertActionEnabled({ language: 'ppl', dataset }, true)).toBe(true);
@@ -78,8 +80,6 @@ describe('isLogsAlertActionEnabled', () => {
         true
       )
     ).toBe(false);
-    // An index whose engine wasn't carried over isn't assumed to be OpenSearch.
-    expect(isLogsAlertActionEnabled({ language: 'PPL', dataset: remoteIndex() }, true)).toBe(false);
   });
 
   it('stays hidden for other languages and dataset types, and without a query', () => {
