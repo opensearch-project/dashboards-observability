@@ -1255,13 +1255,20 @@ export const dependencyNamesFilter = (names: string[]): string =>
 
 /**
  * Dependency-node throughput — client-side request count aggregated by target.
+ * `remoteFilter` optionally bounds the targets (see dependencyNamesFilter).
  * @page Topology Map — dependency node/edge metric (via useServiceMapMetrics hook)
  */
-export const getQueryServiceMapDependencyThroughput = (timeRange: string): string =>
+export const getQueryServiceMapDependencyThroughput = (
+  timeRange: string,
+  remoteFilter?: string
+): string =>
   relabelRemoteToService(
     withConsumerFallback(
       (f) =>
-        `${BY_TARGET} (sum_over_time(request{${serviceMapDependencySelector(f)}}[${timeRange}]))`
+        `${BY_TARGET} (sum_over_time(request{${serviceMapDependencySelector(
+          f,
+          remoteFilter
+        )}}[${timeRange}]))`
     )
   );
 
@@ -1290,10 +1297,13 @@ export const getQueryServiceMapDependencyErrors = (timeRange: string): string =>
  * relabeled to service/environment for the catalog's per-node extractor.
  * (Σerror + Σfault) / Σrequest * 100.
  */
-export const getQueryServiceMapDependencyFailureRatioTotal = (timeRange: string): string =>
+export const getQueryServiceMapDependencyFailureRatioTotal = (
+  timeRange: string,
+  remoteFilter?: string
+): string =>
   relabelRemoteToService(
     withConsumerFallback((f) => {
-      const sel = serviceMapDependencySelector(f);
+      const sel = serviceMapDependencySelector(f, remoteFilter);
       return `(
       ${BY_TARGET} (sum_over_time(error{${sel}}[${timeRange}]))
       +
@@ -1311,13 +1321,17 @@ export const getQueryServiceMapDependencyFailureRatioTotal = (timeRange: string)
  */
 export const getQueryServiceMapDependencyLatencyInstant = (
   percentile: number,
-  timeRange: string
+  timeRange: string,
+  remoteFilter?: string
 ): string =>
   relabelRemoteToService(
     withConsumerFallback(
       (f) => `histogram_quantile(${percentile},
       sum by (remoteEnvironment, remoteService, le) (
-        sum_over_time(latency_seconds_bucket{${serviceMapDependencySelector(f)}}[${timeRange}])
+        sum_over_time(latency_seconds_bucket{${serviceMapDependencySelector(
+          f,
+          remoteFilter
+        )}}[${timeRange}])
       )
     ) * 1000`
     )

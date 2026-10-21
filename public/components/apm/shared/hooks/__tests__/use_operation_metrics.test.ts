@@ -245,7 +245,7 @@ describe('useOperationMetrics', () => {
   });
 
   describe('parameter changes', () => {
-    it('should refetch when operations change', async () => {
+    it('joins a re-fetched operations list without re-sending the queries', async () => {
       mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result, rerender } = renderHook(({ params }) => useOperationMetrics(params), {
@@ -269,7 +269,10 @@ describe('useOperationMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(initialCallCount);
+      // The queries depend only on service + time range; a new list (e.g. the PPL
+      // response for a new range) is joined onto the existing responses.
+      expect(mockExecuteInstantQuery.mock.calls.length).toBe(initialCallCount);
+      expect(result.current.metrics.has('NEW /api/endpoint')).toBe(true);
     });
 
     it('should refetch when refreshTrigger changes', async () => {

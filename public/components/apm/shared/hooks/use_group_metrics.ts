@@ -92,6 +92,10 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
       return;
     }
 
+    // Cancel on a selection / time change so a late response cannot overwrite
+    // the newer group's metrics.
+    const abortController = new AbortController();
+
     const fetchMetrics = async () => {
       setIsLoading(true);
       setError(null);
@@ -125,28 +129,36 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
           promqlService.executeInstantQuery({
             query: queries.throughput,
             time: endTimeSec,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: queries.faults,
             time: endTimeSec,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: queries.errors,
             time: endTimeSec,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: queries.latencyP50,
             time: endTimeSec,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: queries.latencyP90,
             time: endTimeSec,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: queries.latencyP99,
             time: endTimeSec,
+            signal: abortController.signal,
           }),
         ]);
+
+        if (abortController.signal.aborted) return;
 
         // Extract data points from responses
         const throughputData = extractAggregatedData(throughputResp);
@@ -183,15 +195,18 @@ export const useGroupMetrics = (params: UseGroupMetricsParams): UseGroupMetricsR
           totalRequests,
         });
       } catch (err) {
+        if (abortController.signal.aborted) return;
         console.error('[useGroupMetrics] Error fetching metrics:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setMetrics(null);
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) setIsLoading(false);
       }
     };
 
     fetchMetrics();
+
+    return () => abortController.abort();
   }, [
     params.enabled,
     params.groupByAttribute,

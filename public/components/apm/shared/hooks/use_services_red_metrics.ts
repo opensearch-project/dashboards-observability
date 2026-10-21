@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import {
   getQueryServicesThroughput,
@@ -29,6 +29,18 @@ import { isDependencyType } from '../utils/platform_utils';
 // Debounce for the visible-page sparkline fetch: skimming past pages within
 // this window will not fire a request for each intermediate page.
 const SPARKLINE_FETCH_DEBOUNCE_MS = 250;
+
+// The instant queries read every sample in the window (sum_over_time over the
+// full range), so their cost grows with both the range and the matched series.
+// A scoped (filtered) catalog bounds them with service=~ / remoteService=~ name
+// lists. Above this length the list is dropped and the query runs unbounded,
+// keeping every query clear of the 10,000-char PromQL limit (the dependency
+// failure-ratio query repeats its selector six times).
+const MAX_SCOPED_FILTER_CHARS = 1200;
+
+// Debounce for scoped instant fetches, so typing a search issues one query set
+// for the settled filter rather than one per keystroke.
+const SCOPED_FETCH_DEBOUNCE_MS = 300;
 
 /**
  * Composite key for a service node. Metrics are grouped by (environment, service),
@@ -72,9 +84,24 @@ export interface UseServicesRedMetricsParams {
    * whole batch, blanking every row's sparkline on the page.
    */
   sparklineServices?: Array<{ serviceName: string; environment?: string; type?: string }>;
+  /**
+   * The subset of `services` the page currently shows (search / environment /
+   * type / attribute filters applied; metric-range filters NOT applied, since
+   * those are evaluated on these metrics). When narrower than `services`, the
+   * instant queries are bounded to these names and metricsMap covers only them.
+   * Omit to fetch every service.
+   */
+  scopeServices?: Array<{ serviceName: string; environment?: string; type?: string }>;
   startTime: Date;
   endTime: Date;
   latencyPercentile?: 'p99' | 'p90' | 'p50';
+  /**
+   * When false, no query is issued (in-flight ones are cancelled) and the hook
+   * reports loading. Pass false while `services` is still being fetched for the
+   * current time range, so the metrics are not queried once with the previous
+   * range's list and again when the new list lands. Defaults to true.
+   */
+  enabled?: boolean;
 }
 
 export interface UseServicesRedMetricsResult {
@@ -140,6 +167,7 @@ export const useServicesRedMetrics = (
   // Get config values
   // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
   const prometheusConnectionId = config?.prometheusDataSource?.name;
+  const enabled = params.enabled ?? true;
   const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
 
   const promqlService = useMemo(() => {
@@ -149,21 +177,65 @@ export const useServicesRedMetrics = (
     return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
   }, [prometheusConnectionId, prometheusConnectionMeta]);
 
-  // Rely on `sum by (service)` grouping rather than a service=~"..." filter.
-  // Embedding the full service list made this query grow past the 10,000-char
-  // PromQL limit at scale; the grouping already yields one series per service.
-  const serviceFilter = '';
+  // The rows the instant metrics are fetched for: the page's filtered subset
+  // when one is given, otherwise the whole catalog.
+  const scope = params.scopeServices ?? params.services;
+  const isScoped = !!params.scopeServices && params.scopeServices.length < params.services.length;
 
-  // Stable key over the service set, used only to retrigger fetches when the
-  // set changes (the query itself no longer depends on the list).
-  const servicesKey = useMemo(
-    () => params.services.map((s) => `${s.serviceName}::${s.type || ''}`).join('|'),
-    [params.services]
-  );
-  // Caller-derived (remoteService=) queries run only when the catalog has
-  // dependency rows, so a service-only catalog (feature off / older data)
-  // issues exactly the service queries.
-  const hasDependencyRows = params.services.some((s) => isDependencyType(s.type));
+  // Stable keys over the catalog and the scoped set, used to retrigger fetches
+  // when either changes.
+  const nodeSetKey = (rows: typeof scope) =>
+    rows.map((s) => `${serviceNodeKey(s.serviceName, s.environment)}::${s.type || ''}`).join('|');
+  const catalogKey = nodeSetKey(params.services);
+  const scopeKey = isScoped ? nodeSetKey(scope) : catalogKey;
+
+  // Instant-query name filters. Unscoped, the full catalog relies on
+  // `sum by (service)` grouping with no list filter (a full list would pass the
+  // PromQL length limit at scale). Scoped, the queries are bounded to the
+  // filtered names, unless the list is too long to embed.
+  const catalogHasDependencies = params.services.some((s) => isDependencyType(s.type));
+  const instantFilters = useMemo(() => {
+    const unbounded = {
+      bounded: false,
+      serviceFilter: '',
+      dependencyFilter: undefined as string | undefined,
+      // Caller-derived (remoteService=) queries run only when the catalog has
+      // dependency rows, so a service-only catalog (feature off / older data)
+      // issues exactly the service queries.
+      runServices: true,
+      runDependencies: catalogHasDependencies,
+    };
+    if (!isScoped) return unbounded;
+
+    const unique = (rows: typeof scope) => Array.from(new Set(rows.map((s) => s.serviceName)));
+    const serviceNames = unique(scope.filter((s) => !isDependencyType(s.type)));
+    const dependencyNames = unique(scope.filter((s) => isDependencyType(s.type)));
+    const serviceFilter =
+      serviceNames.length > 0 ? `service=~"${serviceNames.map(escapePromQLRegex).join('|')}"` : '';
+    const dependencyFilter =
+      dependencyNames.length > 0 ? dependencyNamesFilter(dependencyNames) : undefined;
+    if (
+      serviceFilter.length > MAX_SCOPED_FILTER_CHARS ||
+      (dependencyFilter?.length ?? 0) > MAX_SCOPED_FILTER_CHARS
+    ) {
+      return unbounded;
+    }
+    return {
+      bounded: true,
+      serviceFilter,
+      dependencyFilter,
+      runServices: serviceNames.length > 0,
+      runDependencies: dependencyNames.length > 0,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scopeKey, isScoped, catalogHasDependencies]);
+
+  // Generation key of the last unbounded instant fetch that fully succeeded, per
+  // effect. Its maps cover the whole catalog, so for the same catalog, time
+  // range and refresh generation, narrowing (or clearing) a filter is served
+  // from them with no new request.
+  const unboundedThroughputGen = useRef<string | null>(null);
+  const unboundedLatencyGen = useRef<string | null>(null);
 
   // Unique service names on the visible page — used to build the bounded
   // `service=~"..."` range filter (grouped by (environment, service), so one
@@ -182,22 +254,40 @@ export const useServicesRedMetrics = (
   const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);
   const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
 
-  // Effect 1: instant throughput total + failure ratio for ALL services. These
-  // drive the displayed numbers, sorting, and the range filters, so they must
-  // cover every service. No per-step (sparkline) data is fetched here.
+  // Effect 1: instant throughput total + failure ratio for every scoped service.
+  // These drive the displayed numbers, sorting, and the range filters, so they
+  // must cover every row the page can show. No per-step (sparkline) data is
+  // fetched here.
   useEffect(() => {
     if (params.services.length === 0 || !promqlService) {
+      unboundedThroughputGen.current = null;
       setTotalCountMap(new Map());
       setFailureRatioInstantMap(new Map());
       setIsLoadingThroughputFailure(false);
       return;
     }
+    if (!enabled) {
+      setIsLoadingThroughputFailure(true);
+      return;
+    }
+    // A filter matching no rows needs no metrics; keep the maps for reuse.
+    if (scope.length === 0) {
+      setIsLoadingThroughputFailure(false);
+      return;
+    }
+
+    const gen = `${catalogKey}|${startTimeSec}|${endTimeSec}|${refetchAllTrigger}`;
+    if (unboundedThroughputGen.current === gen) {
+      setIsLoadingThroughputFailure(false);
+      return;
+    }
 
     const abortController = new AbortController();
+    const { bounded, serviceFilter, dependencyFilter, runServices, runDependencies } =
+      instantFilters;
 
     const fetchInstant = async () => {
-      setIsLoadingThroughputFailure(true);
-      setThroughputFailureError(null);
+      unboundedThroughputGen.current = null;
 
       const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
       const totalQuery = getQueryServicesThroughputTotal(serviceFilter, timeRangeDuration);
@@ -207,8 +297,14 @@ export const useServicesRedMetrics = (
       );
       // Dependency (database / messaging / external) rows have no SERVER-span
       // series; these caller-derived (remoteService=) queries fill them in.
-      const depTotalQuery = getQueryServiceMapDependencyThroughput(timeRangeDuration);
-      const depFailureRatioQuery = getQueryServiceMapDependencyFailureRatioTotal(timeRangeDuration);
+      const depTotalQuery = getQueryServiceMapDependencyThroughput(
+        timeRangeDuration,
+        dependencyFilter
+      );
+      const depFailureRatioQuery = getQueryServiceMapDependencyFailureRatioTotal(
+        timeRangeDuration,
+        dependencyFilter
+      );
 
       const runInstant = (query: string) =>
         promqlService.executeInstantQuery({
@@ -216,13 +312,12 @@ export const useServicesRedMetrics = (
           time: endTimeSec,
           signal: abortController.signal,
         });
+      const skipped = Promise.resolve(null);
       const [totalResult, failureRatioTotalResult, depTotalResult, depFailureRatioResult] =
         await Promise.allSettled([
-          runInstant(totalQuery),
-          runInstant(failureRatioTotalQuery),
-          ...(hasDependencyRows
-            ? [runInstant(depTotalQuery), runInstant(depFailureRatioQuery)]
-            : []),
+          runServices ? runInstant(totalQuery) : skipped,
+          runServices ? runInstant(failureRatioTotalQuery) : skipped,
+          ...(runDependencies ? [runInstant(depTotalQuery), runInstant(depFailureRatioQuery)] : []),
         ]);
 
       // Drop stale results if params changed while this fetch was in flight.
@@ -237,7 +332,8 @@ export const useServicesRedMetrics = (
 
       const newTotalMap = new Map<string, number>();
       const newFailureRatioInstantMap = new Map<string, number>();
-      params.services.forEach(({ serviceName, environment, type }) => {
+      // An unbounded fetch fills the whole catalog (what the reuse check relies on).
+      (bounded ? scope : params.services).forEach(({ serviceName, environment, type }) => {
         const key = serviceNodeKey(serviceName, environment);
         // Dependency rows use caller-derived metrics (they have no server data);
         // service rows keep the SERVER-span series only.
@@ -273,31 +369,64 @@ export const useServicesRedMetrics = (
         setThroughputFailureError(
           rejected.reason instanceof Error ? rejected.reason : new Error('Unknown error')
         );
+      } else if (!bounded) {
+        unboundedThroughputGen.current = gen;
       }
       setIsLoadingThroughputFailure(false);
     };
 
-    fetchInstant();
+    setIsLoadingThroughputFailure(true);
+    setThroughputFailureError(null);
+    const timer = bounded ? setTimeout(fetchInstant, SCOPED_FETCH_DEBOUNCE_MS) : undefined;
+    if (!bounded) fetchInstant();
 
-    return () => abortController.abort();
-    // serviceFilter is constant; servicesKey tracks changes to the service set.
+    return () => {
+      clearTimeout(timer);
+      abortController.abort();
+    };
+    // scopeKey / instantFilters track changes to the scoped service set.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [promqlService, servicesKey, startTimeSec, endTimeSec, refetchAllTrigger]);
+  }, [
+    promqlService,
+    enabled,
+    catalogKey,
+    scopeKey,
+    instantFilters,
+    startTimeSec,
+    endTimeSec,
+    refetchAllTrigger,
+  ]);
 
-  // Effect 2: instant latency percentile for ALL services (drives the number
+  // Effect 2: instant latency percentile for every scoped service (drives the number
   // and latency sort/filter). Sparkline handled by Effect 3.
   useEffect(() => {
     if (params.services.length === 0 || !promqlService) {
+      unboundedLatencyGen.current = null;
       setLatencyInstantMap(new Map());
+      setIsLoadingLatency(false);
+      return;
+    }
+    if (!enabled) {
+      setIsLoadingLatency(true);
+      return;
+    }
+    if (scope.length === 0) {
+      setIsLoadingLatency(false);
+      return;
+    }
+
+    const gen = `${catalogKey}|${startTimeSec}|${endTimeSec}|${refetchAllTrigger}|${params.latencyPercentile}`;
+    if (unboundedLatencyGen.current === gen) {
       setIsLoadingLatency(false);
       return;
     }
 
     const abortController = new AbortController();
+    const { bounded, serviceFilter, dependencyFilter, runServices, runDependencies } =
+      instantFilters;
 
     const fetchLatencyInstant = async () => {
-      setIsLoadingLatency(true);
-      setLatencyError(null);
+      unboundedLatencyGen.current = null;
 
       const percentileValue =
         params.latencyPercentile === 'p50' ? 0.5 : params.latencyPercentile === 'p90' ? 0.9 : 0.99; // default p99
@@ -310,7 +439,8 @@ export const useServicesRedMetrics = (
       // Caller-derived latency for dependency nodes (no server-span buckets).
       const depLatencyQuery = getQueryServiceMapDependencyLatencyInstant(
         percentileValue,
-        timeRangeDuration
+        timeRangeDuration,
+        dependencyFilter
       );
 
       const runInstant = (query: string) =>
@@ -320,8 +450,8 @@ export const useServicesRedMetrics = (
           signal: abortController.signal,
         });
       const [latencyInstantResult, depLatencyResult] = await Promise.allSettled([
-        runInstant(latencyInstantQuery),
-        ...(hasDependencyRows ? [runInstant(depLatencyQuery)] : []),
+        runServices ? runInstant(latencyInstantQuery) : Promise.resolve(null),
+        ...(runDependencies ? [runInstant(depLatencyQuery)] : []),
       ]);
 
       if (abortController.signal.aborted) return;
@@ -332,7 +462,7 @@ export const useServicesRedMetrics = (
         depLatencyResult?.status === 'fulfilled' ? depLatencyResult.value : null;
 
       const newInstantMap = new Map<string, number>();
-      params.services.forEach(({ serviceName, environment, type }) => {
+      (bounded ? scope : params.services).forEach(({ serviceName, environment, type }) => {
         const key = serviceNodeKey(serviceName, environment);
         const data = extractServiceData(
           isDependencyType(type) ? depLatencyResp : latencyInstantResp,
@@ -357,18 +487,29 @@ export const useServicesRedMetrics = (
             ? latencyRejected.reason
             : new Error('Unknown error')
         );
+      } else if (!bounded) {
+        unboundedLatencyGen.current = gen;
       }
       setIsLoadingLatency(false);
     };
 
-    fetchLatencyInstant();
+    setIsLoadingLatency(true);
+    setLatencyError(null);
+    const timer = bounded ? setTimeout(fetchLatencyInstant, SCOPED_FETCH_DEBOUNCE_MS) : undefined;
+    if (!bounded) fetchLatencyInstant();
 
-    return () => abortController.abort();
-    // serviceFilter is constant; servicesKey tracks changes to the service set.
+    return () => {
+      clearTimeout(timer);
+      abortController.abort();
+    };
+    // scopeKey / instantFilters track changes to the scoped service set.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     promqlService,
-    servicesKey,
+    enabled,
+    catalogKey,
+    scopeKey,
+    instantFilters,
     startTimeSec,
     endTimeSec,
     refetchAllTrigger,
@@ -389,7 +530,7 @@ export const useServicesRedMetrics = (
   // already cached are fetched. Debounced so skimming pages fires one request
   // for the page landed on; superseded in-flight fetches are aborted.
   useEffect(() => {
-    if (!promqlService || sparklineNames.length === 0) return;
+    if (!promqlService || !enabled || sparklineNames.length === 0) return;
 
     // Instrumented services use the bounded `service=~` filter. Dependency nodes
     // (database / messaging / external) are fetched separately: they have no
@@ -521,6 +662,7 @@ export const useServicesRedMetrics = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     promqlService,
+    enabled,
     sparklineKey,
     throughputFailureMap,
     startTimeSec,

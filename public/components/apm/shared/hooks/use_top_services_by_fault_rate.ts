@@ -82,6 +82,9 @@ export const useTopServicesByFaultRate = (
       return;
     }
 
+    // Cancel on a time change / refresh so a late response cannot overwrite newer data.
+    const abortController = new AbortController();
+
     const fetchTopServices = async () => {
       setIsLoading(true);
       setError(null);
@@ -92,7 +95,9 @@ export const useTopServicesByFaultRate = (
         const response = await promqlSearchService.executeInstantQuery({
           query,
           time: fetchParams.endTime,
+          signal: abortController.signal,
         });
+        if (abortController.signal.aborted) return;
 
         // Process response - handle data frame format from query enhancements plugin
         const services: ServiceFaultRateItem[] = [];
@@ -149,15 +154,18 @@ export const useTopServicesByFaultRate = (
 
         setData(sortedAndFiltered);
       } catch (err) {
+        if (abortController.signal.aborted) return;
         console.error('[useTopServicesByFaultRate] Error:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setData([]);
       } finally {
-        setIsLoading(false);
+        if (!abortController.signal.aborted) setIsLoading(false);
       }
     };
 
     fetchTopServices();
+
+    return () => abortController.abort();
   }, [promqlSearchService, fetchParams, refetchTrigger, params.refreshTrigger]);
 
   const refetch = () => {

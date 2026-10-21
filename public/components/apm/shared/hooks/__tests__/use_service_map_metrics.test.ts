@@ -4,7 +4,7 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useServiceMapMetrics } from '../use_service_map_metrics';
+import { useServiceMapMetrics, ServiceMapMetricParams } from '../use_service_map_metrics';
 
 // Mock the PromQLSearchService
 const mockExecuteInstantQuery = jest.fn();
@@ -29,7 +29,7 @@ jest.mock('../../../config/apm_config_context', () => ({
 import { useApmConfig } from '../../../config/apm_config_context';
 
 describe('useServiceMapMetrics', () => {
-  const defaultParams = {
+  const defaultParams: ServiceMapMetricParams = {
     services: [
       { serviceName: 'api-gateway', environment: 'generic:default' },
       { serviceName: 'user-service', environment: 'eks:cluster' },
@@ -250,6 +250,58 @@ describe('useServiceMapMetrics', () => {
       });
 
       expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(initialCallCount);
+    });
+  });
+
+  describe('node list changes', () => {
+    it('joins a new node list without re-sending the queries', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
+
+      const { result, rerender } = renderHook(
+        (props: ServiceMapMetricParams) => useServiceMapMetrics(props),
+        {
+          initialProps: defaultParams,
+        }
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      const initialCallCount = mockExecuteInstantQuery.mock.calls.length;
+
+      // e.g. the PPL map for a new time range adds a node.
+      rerender({
+        ...defaultParams,
+        services: [
+          ...defaultParams.services,
+          { serviceName: 'cart', environment: 'generic:default' },
+        ],
+      });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockExecuteInstantQuery.mock.calls.length).toBe(initialCallCount);
+      expect(result.current.metricsMap.has('cart::generic:default')).toBe(true);
+    });
+
+    it('fetches the caller-derived queries once dependency nodes appear', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
+
+      const { result, rerender } = renderHook(
+        (props: ServiceMapMetricParams) => useServiceMapMetrics(props),
+        {
+          initialProps: defaultParams,
+        }
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(3);
+
+      rerender({
+        ...defaultParams,
+        services: [
+          ...defaultParams.services,
+          { serviceName: 'redis', environment: 'generic:default', type: 'database' },
+        ],
+      });
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(9));
     });
   });
 

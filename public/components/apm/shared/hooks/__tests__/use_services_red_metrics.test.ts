@@ -292,6 +292,147 @@ describe('useServicesRedMetrics', () => {
     });
   });
 
+  describe('scoped (filtered) catalog', () => {
+    const catalog = [
+      { serviceName: 'api-gateway', environment: 'prod', type: 'service' },
+      { serviceName: 'user-service', environment: 'prod', type: 'service' },
+      { serviceName: 'api.openai.com', environment: 'prod', type: 'external' },
+    ];
+    const instantQueries = () =>
+      mockExecuteInstantQuery.mock.calls.map((c) => c[0].query as string);
+    const isDependencyQuery = (q: string) => /remoteService(!=""|=~)/.test(q);
+
+    it('bounds the instant queries to the scoped service names', async () => {
+      const { result } = renderHook(() =>
+        useServicesRedMetrics({
+          ...defaultParams,
+          services: catalog,
+          scopeServices: [catalog[1]],
+        })
+      );
+
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(3));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      // Only service rows are in scope, so no caller-derived queries run.
+      instantQueries().forEach((q) => {
+        expect(q).toContain('service=~"user-service"');
+        expect(isDependencyQuery(q)).toBe(false);
+      });
+      expect([...result.current.metricsMap.keys()]).toEqual([
+        serviceNodeKey('user-service', 'prod'),
+      ]);
+    });
+
+    it('bounds the caller-derived queries to the scoped dependencies only', async () => {
+      const { result } = renderHook(() =>
+        useServicesRedMetrics({
+          ...defaultParams,
+          services: catalog,
+          scopeServices: [catalog[2]],
+        })
+      );
+
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(3));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      instantQueries().forEach((q) => {
+        expect(q).toContain('remoteService=~"api\\\\.openai\\\\.com"');
+        expect(q).not.toContain('remoteService!=""');
+      });
+    });
+
+    it('issues no query when the filter matches nothing', async () => {
+      const { result } = renderHook(() =>
+        useServicesRedMetrics({ ...defaultParams, services: catalog, scopeServices: [] })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(mockExecuteInstantQuery).not.toHaveBeenCalled();
+    });
+
+    it('falls back to unbounded queries when the name list is too long to embed', async () => {
+      const many = Array.from({ length: 200 }, (_, i) => ({
+        serviceName: `service-with-a-long-name-${i}`,
+        environment: 'prod',
+        type: 'service',
+      }));
+      const { result } = renderHook(() =>
+        useServicesRedMetrics({
+          ...defaultParams,
+          services: [...many, catalog[0]],
+          scopeServices: many,
+        })
+      );
+
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(3);
+      instantQueries().forEach((q) => expect(q).not.toContain('service=~'));
+    });
+
+    it('serves a narrowed (and cleared) filter from the loaded full catalog', async () => {
+      const { result, rerender } = renderHook(
+        (props: { scopeServices?: typeof catalog }) =>
+          useServicesRedMetrics({ ...defaultParams, services: catalog, ...props }),
+        { initialProps: {} }
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      // Full catalog: 3 service + 3 caller-derived queries.
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(6);
+
+      rerender({ scopeServices: [catalog[0]] });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      rerender({});
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      // Let any (wrongly) debounced fetch fire before asserting.
+      await new Promise((r) => setTimeout(r, 400));
+
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(6);
+      expect(result.current.metricsMap.has(serviceNodeKey('user-service', 'prod'))).toBe(true);
+    });
+
+    it('refetches bounded when the full catalog has not loaded', async () => {
+      // The unbounded catalog load times out (the customer's 503 case).
+      mockExecuteInstantQuery.mockRejectedValue(new Error('Read timed out'));
+      const { result, rerender } = renderHook(
+        (props: { scopeServices?: typeof catalog }) =>
+          useServicesRedMetrics({ ...defaultParams, services: catalog, ...props }),
+        { initialProps: {} }
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      mockExecuteInstantQuery.mockClear();
+      mockExecuteInstantQuery.mockResolvedValue({ type: 'data_frame', fields: [] });
+
+      rerender({ scopeServices: [catalog[0]] });
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(3));
+      instantQueries().forEach((q) => expect(q).toContain('service=~"api-gateway"'));
+    });
+  });
+
+  describe('enabled', () => {
+    it('issues no query while disabled and fetches once enabled', async () => {
+      const { result, rerender } = renderHook(
+        (props: { enabled: boolean }) =>
+          useServicesRedMetrics({
+            ...defaultParams,
+            sparklineServices: defaultParams.services,
+            ...props,
+          }),
+        { initialProps: { enabled: false } }
+      );
+
+      await new Promise((r) => setTimeout(r, 400));
+      expect(result.current.isLoading).toBe(true);
+      expect(mockExecuteInstantQuery).not.toHaveBeenCalled();
+      expect(mockExecuteMetricRequest).not.toHaveBeenCalled();
+
+      rerender({ enabled: true });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(3);
+      await waitFor(() => expect(mockExecuteMetricRequest).toHaveBeenCalledTimes(3));
+    });
+  });
+
   describe('error handling', () => {
     it('surfaces an error but still returns zeroed entries on total failure', async () => {
       const mockError = new Error('Prometheus query failed');

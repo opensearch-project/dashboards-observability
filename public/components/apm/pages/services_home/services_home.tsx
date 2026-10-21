@@ -666,22 +666,31 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     selectedGroupByAttributes,
   ]);
 
-  // Fetch RED (Request rate, Error rate, Duration) metrics for ALL services
-  // Fetched separately and before filtering to avoid re-fetching on filter changes
+  // Fetch RED (Request rate, Error rate, Duration) metrics. The instant queries
+  // scan the whole time range, so they are scoped to the rows the search /
+  // environment / type / attribute filters leave (the metric-range filters below
+  // are evaluated on these metrics). Narrowing after the full catalog has loaded
+  // reuses its data with no new request.
+  const toMetricsNode = (s: ServiceTableItem) => ({
+    serviceName: s.serviceName,
+    environment: s.environment,
+    type: s.type,
+  });
   const {
     metricsMap,
     isLoading: metricsLoading,
     refetch: refetchMetrics,
   } = useServicesRedMetrics({
-    services: (services || []).map((s) => ({
-      serviceName: s.serviceName,
-      environment: s.environment,
-      type: s.type,
-    })),
+    services: (services || []).map(toMetricsNode),
+    scopeServices: fullyFilteredItems.map(toMetricsNode),
     sparklineServices: visibleServices,
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     latencyPercentile,
+    // Wait for the service list of the current time range; querying with the
+    // previous range's list would be cancelled and re-sent when it lands, and a
+    // cancelled request still runs to completion in Prometheus.
+    enabled: !isLoading,
   });
 
   const handleRefresh = useCallback(() => {

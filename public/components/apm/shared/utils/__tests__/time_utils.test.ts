@@ -215,13 +215,13 @@ describe('time_utils', () => {
         expect(result).toBe('15m');
       });
 
-      it('should return minutes for exactly 60 min', () => {
+      it('should return hours for exactly 60 min', () => {
         const startTime = new Date('2024-01-15T10:00:00.000Z');
         const endTime = new Date('2024-01-15T11:00:00.000Z'); // 60 minutes
 
         const result = calculateTimeRangeDuration(startTime, endTime);
 
-        expect(result).toBe('60m');
+        expect(result).toBe('1h');
       });
 
       it('should return hours for 1-24 hour range', () => {
@@ -233,13 +233,13 @@ describe('time_utils', () => {
         expect(result).toBe('3h');
       });
 
-      it('should return hours for 24 hour range', () => {
+      it('should return days for 24 hour range', () => {
         const startTime = new Date('2024-01-15T00:00:00.000Z');
         const endTime = new Date('2024-01-16T00:00:00.000Z'); // 24 hours
 
         const result = calculateTimeRangeDuration(startTime, endTime);
 
-        expect(result).toBe('24h');
+        expect(result).toBe('1d');
       });
 
       it('should return days for > 24 hour range', () => {
@@ -261,32 +261,32 @@ describe('time_utils', () => {
       });
     });
 
-    describe('ceiling behavior', () => {
-      it('should ceil minutes for partial minutes', () => {
+    describe('exact window (no rounding up)', () => {
+      it('should keep seconds for partial minutes', () => {
         const startTime = new Date('2024-01-15T10:00:00.000Z');
         const endTime = new Date('2024-01-15T10:14:30.000Z'); // 14.5 minutes
 
         const result = calculateTimeRangeDuration(startTime, endTime);
 
-        expect(result).toBe('15m'); // Should ceil to 15
+        expect(result).toBe('870s'); // 14.5 min, not 15m
       });
 
-      it('should ceil hours for partial hours', () => {
+      it('should use minutes for partial hours', () => {
         const startTime = new Date('2024-01-15T10:00:00.000Z');
         const endTime = new Date('2024-01-15T12:30:00.000Z'); // 2.5 hours
 
         const result = calculateTimeRangeDuration(startTime, endTime);
 
-        expect(result).toBe('3h'); // Should ceil to 3
+        expect(result).toBe('150m'); // 2.5h, not 3h
       });
 
-      it('should ceil days for partial days', () => {
+      it('should use hours for partial days', () => {
         const startTime = new Date('2024-01-15T00:00:00.000Z');
         const endTime = new Date('2024-01-17T12:00:00.000Z'); // 2.5 days
 
         const result = calculateTimeRangeDuration(startTime, endTime);
 
-        expect(result).toBe('3d'); // Should ceil to 3
+        expect(result).toBe('60h'); // 2.5d, not 3d
       });
     });
 
@@ -306,7 +306,7 @@ describe('time_utils', () => {
 
         const result = calculateTimeRangeDuration(startTime, endTime);
 
-        expect(result).toBe('2h'); // 61 min = 1.017h, ceil to 2h
+        expect(result).toBe('61m'); // not rounded up to 2h
       });
 
       it('should handle transition from hours to days', () => {
@@ -315,7 +315,7 @@ describe('time_utils', () => {
 
         const result = calculateTimeRangeDuration(startTime, endTime);
 
-        expect(result).toBe('2d'); // 25h = 1.04d, ceil to 2d
+        expect(result).toBe('25h'); // not rounded up to 2d (which doubled the window)
       });
     });
   });

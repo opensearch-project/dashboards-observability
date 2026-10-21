@@ -60,6 +60,41 @@ describe('useServices', () => {
     });
   });
 
+  describe('time range changes', () => {
+    const summary = (name: string) => ({
+      ServiceSummaries: [{ KeyAttributes: { Name: name, Environment: 'prod' } }],
+      AvailableGroupByAttributes: {},
+    });
+
+    it('reports loading in the same render the range changes', async () => {
+      mockListServices.mockResolvedValue(summary('a'));
+      const { result, rerender } = renderHook((props) => useServices(props), {
+        initialProps: defaultParams,
+      });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      rerender({ ...defaultParams, startTime: new Date('2024-01-01T00:30:00Z') });
+      expect(result.current.isLoading).toBe(true);
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+    });
+
+    it('ignores a superseded response that lands after the newer one', async () => {
+      let resolveOld: (v: unknown) => void = () => {};
+      mockListServices
+        .mockImplementationOnce(() => new Promise((r) => (resolveOld = r)))
+        .mockResolvedValueOnce(summary('new'));
+      const { result, rerender } = renderHook((props) => useServices(props), {
+        initialProps: defaultParams,
+      });
+      rerender({ ...defaultParams, startTime: new Date('2024-01-01T00:30:00Z') });
+      await waitFor(() => expect(result.current.data[0]?.serviceName).toBe('new'));
+
+      await act(async () => resolveOld(summary('old')));
+      expect(result.current.data[0].serviceName).toBe('new');
+      expect(result.current.isLoading).toBe(false);
+    });
+  });
+
   describe('successful fetch', () => {
     it('should fetch and transform services data', async () => {
       const mockResponse = {
