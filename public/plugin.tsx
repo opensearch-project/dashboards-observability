@@ -141,6 +141,11 @@ import {
   ObservabilityStart,
   SetupDependencies,
 } from './types';
+import {
+  addExploreAlertSupport,
+  isLogsAlertActionEnabled,
+  isMetricsAlertActionEnabled,
+} from './components/alerting/explore_alert_action_gates';
 
 interface PublicConfig {
   query_assist: {
@@ -645,16 +650,12 @@ export class ObservabilityPlugin implements Plugin<
               // theirs so users see this option when PPL alerting is on.
               const liveCapabilities = coreRefs.application?.capabilities as
                 { alertingDashboards?: { pplV2?: boolean } } | undefined;
-              if (!liveCapabilities?.alertingDashboards?.pplV2) return false;
-              // This is a Logs (PPL) rule action — disable on Metrics
-              // (PromQL) pages so users don't get the wrong flyout.
-              const queryLanguage = (deps.query as { language?: string })?.language?.toUpperCase();
-              if (queryLanguage === 'PROMQL') return false;
-              // AOSS clusters can't host monitors; the button greys out.
-              const isAOSS =
-                (deps.query as { dataset?: { dataSource?: { type?: string } } })?.dataset
-                  ?.dataSource?.type === 'OpenSearch Serverless';
-              return !isAOSS;
+              // A Logs (PPL) rule: hidden on Metrics pages and on languages
+              // other sources bring to Explore, which its flyout can't use.
+              return isLogsAlertActionEnabled(
+                deps.query as Parameters<typeof isLogsAlertActionEnabled>[0],
+                !!liveCapabilities?.alertingDashboards?.pplV2
+              );
             },
             component: (props) => {
               const dataset = (
@@ -724,14 +725,11 @@ export class ObservabilityPlugin implements Plugin<
               }),
             getIcon: () => 'bell',
             getIsEnabled: (deps) => {
-              // Only enable on Metrics (PromQL) pages.
-              const queryLanguage = (deps.query as { language?: string })?.language?.toUpperCase();
-              if (queryLanguage !== 'PROMQL') return false;
-              // AOSS clusters can't host monitors.
-              const isAOSS =
-                (deps.query as { dataset?: { dataSource?: { type?: string } } })?.dataset
-                  ?.dataSource?.type === 'OpenSearch Serverless';
-              return !isAOSS;
+              // PromQL on a Prometheus connection only: another source's
+              // PromQL dataset has no connection for the flyout to target.
+              return isMetricsAlertActionEnabled(
+                deps.query as Parameters<typeof isMetricsAlertActionEnabled>[0]
+              );
             },
             component: (props) => {
               const dataset = (
@@ -841,7 +839,9 @@ export class ObservabilityPlugin implements Plugin<
         });
     }
 
-    return {};
+    return {
+      exploreAlerting: { addSupported: addExploreAlertSupport },
+    };
   }
 
   public start(core: CoreStart, startDeps: AppPluginStartDependencies): ObservabilityStart {
