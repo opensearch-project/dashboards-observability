@@ -59,7 +59,7 @@ export const SLI_WINDOW_TOKEN = '{{.window}}';
  * names are fingerprint- or id-derived and don't change with the math).
  */
 export const SLO_RULES_VERSION_LABEL = 'slo_rules_version';
-export const SLO_RULES_VERSION = '2';
+export const SLO_RULES_VERSION = '3';
 
 /**
  * Bucket bounds (seconds) of the span-derived `latency_seconds` histogram
@@ -324,7 +324,8 @@ function errorRatioExpr(sli: SingleSli, window: string, objective: Objective): s
  *   - latency_threshold, cumulative histogram: good = the `le` bucket at the
  *     threshold, total = the `+Inf` bucket. `le` is matched numerically
  *     tolerant (`0.5`, `0.50`, `1`, `1.0`) since producers format it
- *     differently.
+ *     differently, and falls back to the bound in milliseconds for
+ *     histograms whose `_seconds` name hides millisecond buckets.
  *   - latency_threshold, delta histogram (span-derived): good = every bucket
  *     with a bound <= threshold, total = `<metric>_count`.
  *   - custom: the user's queries with `{{.window}}` substituted; legacy
@@ -379,10 +380,14 @@ export function buildSliEventQueries(
       total: over(`${ensureCountMetric(prom.metric || '')}{${joinMatchers(...dims)}}`),
     };
   }
+  // Some producers export a millisecond histogram under a `_seconds` name
+  // (bounds 5, 10, … 10000): there is no `le="0.5"` series, only `le="500"`.
+  // Fall back to the bound scaled by 1000 — `or` only takes the right side
+  // when the left is empty, so correctly scaled histograms are unaffected.
+  const bucketAt = (le: number) =>
+    over(`${bucketMetric}{${joinMatchers(...dims, `le=~"${leValuePattern(le)}"`)}}`);
   return {
-    good: over(
-      `${bucketMetric}{${joinMatchers(...dims, `le=~"${leValuePattern(boundSeconds)}"`)}}`
-    ),
+    good: `(${bucketAt(boundSeconds)} or ${bucketAt(boundSeconds * 1000)})`,
     total: over(`${bucketMetric}{${joinMatchers(...dims, 'le="+Inf"')}}`),
   };
 }

@@ -118,11 +118,26 @@ describe('buildSliEventQueries — cumulative metrics', () => {
       '5m'
     ) as { good: string; total: string };
     expect(q.good).toBe(
-      'sum(rate(http_server_duration_seconds_bucket{job="api", le=~"0\\\\.50*"}[5m]))'
+      '(sum(rate(http_server_duration_seconds_bucket{job="api", le=~"0\\\\.50*"}[5m])) or ' +
+        'sum(rate(http_server_duration_seconds_bucket{job="api", le=~"500(\\\\.0*)?"}[5m])))'
     );
     expect(q.total).toBe(
       'sum(rate(http_server_duration_seconds_bucket{job="api", le="+Inf"}[5m]))'
     );
+  });
+
+  it('falls back to millisecond bounds for a `_seconds` histogram that reports milliseconds', () => {
+    const q = buildSliEventQueries(
+      sli({ type: 'latency_threshold', metric: 'http_server_request_duration_seconds' }, dims),
+      lat,
+      '5m'
+    ) as { good: string };
+    // Left side matches a real seconds histogram (`le="0.5"`); the right side
+    // only applies when that is empty — e.g. bounds 0, 5, 10, …, 500, … 10000.
+    const [left, right] = q.good.slice(1, -1).split(' or ');
+    expect(leMatches(left, '0.5')).toBe(true);
+    expect(leMatches(right, '500.0')).toBe(true);
+    expect(leMatches(right, '5000.0')).toBe(false);
   });
 
   it('omits the dangling comma when the SLI has no dimensions', () => {
