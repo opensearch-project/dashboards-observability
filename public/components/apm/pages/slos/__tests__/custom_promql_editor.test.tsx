@@ -110,7 +110,8 @@ describe('CustomPromqlEditor — Ratio / Advanced', () => {
     fireEvent.click(screen.getByRole('option', { name: 'http_requests_total' }));
     expect(dispatch).toHaveBeenCalledWith({
       kind: 'setCustomPromql',
-      patch: { goodQuery: 'sum(rate(http_requests_total[5m]))' },
+      // Window token: each recording rule substitutes its own window.
+      patch: { goodQuery: 'sum(rate(http_requests_total[{{.window}}]))' },
     });
   });
 
