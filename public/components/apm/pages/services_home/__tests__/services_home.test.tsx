@@ -20,7 +20,8 @@ jest.mock('../../../shared/hooks/use_services', () => ({
 const mockMetricsReturn = {
   metricsMap: new Map(),
   isLoading: false,
-  error: null,
+  error: null as Error | null,
+  scopeFellBack: false,
   refetch: jest.fn(),
 };
 const mockRedMetricsArgs = jest.fn();
@@ -333,5 +334,32 @@ describe('ServicesHome — Node type column and filter', () => {
       .sparklineServices.map((s: { serviceName: string }) => s.serviceName);
     expect(shown).toEqual(['c-db', 'b-broker', 'a-service']);
     expect(sparkline).toEqual(shown);
+  });
+});
+
+describe('ServicesHome — metrics notices', () => {
+  beforeEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    mockMetricsReturn.error = null;
+    mockMetricsReturn.scopeFellBack = false;
+  });
+
+  it('warns when a metrics query failed and shows "-" for the missing values', () => {
+    mockMetricsReturn.error = new Error('Read timed out');
+    renderHome(['prod:default']);
+    expect(screen.getByTestId('servicesMetricsFailedCallout')).toBeInTheDocument();
+    expect(screen.queryByText('0 ms')).not.toBeInTheDocument();
+  });
+
+  it('explains when the filter was too broad to narrow the queries', () => {
+    mockMetricsReturn.scopeFellBack = true;
+    renderHome(['prod:default']);
+    expect(screen.getByTestId('servicesBroadFilterCallout')).toBeInTheDocument();
+  });
+
+  it('shows no notice when metrics loaded', () => {
+    renderHome(['prod:default']);
+    expect(screen.queryByTestId('servicesMetricsFailedCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('servicesBroadFilterCallout')).not.toBeInTheDocument();
   });
 });

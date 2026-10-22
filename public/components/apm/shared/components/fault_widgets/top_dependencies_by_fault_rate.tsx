@@ -21,6 +21,9 @@ import { TimeRange } from '../../../common/types/service_types';
 import { parseTimeRange } from '../../utils/time_utils';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 import { ServiceCell } from './service_cell';
+import { PageScope, SCOPED_TOPK } from '../../utils/scope_filters';
+import { isDependencyType } from '../../utils/platform_utils';
+import { serviceNodeKey } from '../../hooks/use_services_red_metrics';
 
 // i18n translations
 const i18nTexts = {
@@ -60,7 +63,13 @@ export interface TopDependenciesByFaultRateProps {
     dependencyService: string,
     environment: string
   ) => void;
-  searchQuery?: string;
+  /**
+   * The page's filtered scope. Paths are kept whose calling service is in it, or, when it holds
+   * only dependency rows, whose target is. Omit for all paths.
+   */
+  scope?: PageScope;
+  /** When false nothing is fetched (e.g. the page's service list is still loading). */
+  enabled?: boolean;
 }
 
 interface DependencyFaultRateItem {
@@ -81,7 +90,8 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
   refreshTrigger,
   onServiceClick,
   onDependencyClick,
-  searchQuery,
+  scope,
+  enabled,
 }) => {
   // Parse time range using datemath for proper handling of all relative formats
   // Recalculate when refreshTrigger changes to get fresh timestamps
@@ -90,11 +100,43 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRange, refreshTrigger]);
 
-  const { data: dependencies, isLoading, error } = useTopDependenciesByFaultRate({
+  // Within the page's filters (see `scope`): bound the query, then re-check rows against the
+  // scope (the query filter can be broader) before taking the top 5.
+  const filters = scope?.filters;
+  const scoped = !!filters && (filters.bounded || filters.fellBack);
+  const byCaller = !!filters?.runServices;
+  const scopeMatch = useMemo(() => {
+    if (!scoped) return null;
+    const rows = scope!.services;
+    const callers = new Set(
+      rows
+        .filter((s) => !isDependencyType(s.type))
+        .map((s) => serviceNodeKey(s.serviceName, s.environment))
+    );
+    const targets = new Set(rows.filter((s) => isDependencyType(s.type)).map((s) => s.serviceName));
+    return byCaller
+      ? (d: { source: string; environment: string }) =>
+          callers.has(serviceNodeKey(d.source, d.environment))
+      : (d: { target: string }) => targets.has(d.target);
+  }, [scoped, scope, byCaller]);
+  const {
+    data: dependencies,
+    isLoading,
+    error,
+  } = useTopDependenciesByFaultRate({
     startTime,
     endTime,
     limit: 5,
     refreshTrigger,
+    callerFilter: filters?.bounded && byCaller ? filters.serviceFilter : undefined,
+    remoteFilter:
+      filters?.bounded && !byCaller && filters.runDependencies
+        ? filters.dependencyFilter
+        : undefined,
+    queryLimit: scoped ? SCOPED_TOPK : undefined,
+    include: scopeMatch ?? undefined,
+    skip: scoped && !filters!.runServices && !filters!.runDependencies,
+    enabled,
   });
 
   // Calculate relative percentages for progress bars
@@ -103,17 +145,7 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       return [];
     }
 
-    // Filter by search query if provided
-    let filteredDependencies = dependencies;
-    if (searchQuery?.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      filteredDependencies = dependencies.filter(
-        (d) =>
-          d.source.toLowerCase().includes(query) ||
-          d.target.toLowerCase().includes(query) ||
-          d.environment.toLowerCase().includes(query)
-      );
-    }
+    const filteredDependencies = dependencies;
 
     // Calculate sum for relative percentages
     const faultRateSum = filteredDependencies.reduce((sum, d) => sum + d.faultRate, 0);
@@ -128,7 +160,7 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
         dep.environment
       )}`,
     }));
-  }, [dependencies, searchQuery]);
+  }, [dependencies]);
 
   // Define table columns
   const columns: Array<EuiBasicTableColumn<DependencyFaultRateItem>> = [

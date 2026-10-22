@@ -90,7 +90,7 @@ const DAY_MS = 24 * HOUR_MS;
 
 /**
  * PromQL range-selector duration covering exactly the selected time range, in
- * the largest whole unit (e.g. "15m", "3h", "7d", or "90060s").
+ * the largest whole unit (e.g. "15m", "3h", "7d", or "90060s"), at least one minute.
  *
  * Exact, not rounded up: rounding (e.g. a 25h range to "2d") made
  * `sum_over_time` count data from outside the range (inflating totals and the
@@ -100,9 +100,14 @@ const DAY_MS = 24 * HOUR_MS;
  * @param startTime - Start time of the range
  * @param endTime - End time of the range
  */
+// Floor for the window (the previous minimum). Span-derived metrics are emitted per pipeline
+// flush interval (tens of seconds, deployment-dependent), so a shorter window can hold no sample
+// and show an empty range.
+const MIN_RANGE_SECONDS = 60;
+
 export const calculateTimeRangeDuration = (startTime: Date, endTime: Date): string =>
   formatPrometheusDuration(
-    Math.max(1, Math.floor((endTime.getTime() - startTime.getTime()) / 1000))
+    Math.max(MIN_RANGE_SECONDS, Math.floor((endTime.getTime() - startTime.getTime()) / 1000))
   );
 
 /**

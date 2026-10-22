@@ -391,6 +391,56 @@ describe('useServicesRedMetrics', () => {
       expect(result.current.metricsMap.has(serviceNodeKey('user-service', 'prod'))).toBe(true);
     });
 
+    it('keeps an in-flight catalog fetch through a filter change and does not resend it', async () => {
+      // Hold the unbounded (catalog) queries open; scoped queries answer immediately.
+      const pending: Array<(v: unknown) => void> = [];
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) =>
+        /service=~|remoteService=~/.test(query)
+          ? Promise.resolve({ type: 'data_frame', fields: [] })
+          : new Promise((r) => pending.push(r))
+      );
+      const { result, rerender } = renderHook(
+        (props: { scopeServices?: typeof catalog }) =>
+          useServicesRedMetrics({ ...defaultParams, services: catalog, ...props }),
+        { initialProps: {} }
+      );
+      await waitFor(() => expect(pending).toHaveLength(6));
+      const catalogCalls = mockExecuteInstantQuery.mock.calls.slice();
+
+      // Type a search while the catalog scan runs: scoped queries go out, the scan survives.
+      rerender({ scopeServices: [catalog[0]] });
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(9));
+      catalogCalls.forEach((c) => expect(c[0].signal.aborted).toBe(false));
+
+      // Clear the search: answered by the in-flight scan, not a second one.
+      rerender({});
+      await new Promise((r) => setTimeout(r, 400));
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(9);
+      expect(result.current.isLoading).toBe(true);
+
+      await act(async () => pending.forEach((r) => r({ type: 'data_frame', fields: [] })));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.metricsMap.has(serviceNodeKey('user-service', 'prod'))).toBe(true);
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(9);
+    });
+
+    it('reports when a filter is too broad to narrow the queries', async () => {
+      const many = Array.from({ length: 200 }, (_, i) => ({
+        serviceName: `service-with-a-long-name-${i}`,
+        environment: 'prod',
+        type: 'service',
+      }));
+      const { result } = renderHook(() =>
+        useServicesRedMetrics({
+          ...defaultParams,
+          services: [...many, catalog[0]],
+          scopeServices: many,
+        })
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.scopeFellBack).toBe(true);
+    });
+
     it('refetches bounded when the full catalog has not loaded', async () => {
       // The unbounded catalog load times out (the customer's 503 case).
       mockExecuteInstantQuery.mockRejectedValue(new Error('Read timed out'));
@@ -434,7 +484,7 @@ describe('useServicesRedMetrics', () => {
   });
 
   describe('error handling', () => {
-    it('surfaces an error but still returns zeroed entries on total failure', async () => {
+    it('surfaces an error and leaves failed metrics unavailable, not 0', async () => {
       const mockError = new Error('Prometheus query failed');
       mockExecuteInstantQuery.mockRejectedValue(mockError);
 
@@ -445,12 +495,25 @@ describe('useServicesRedMetrics', () => {
       });
 
       expect(result.current.error).toEqual(mockError);
-      // Promise.allSettled keeps sibling metrics flowing: every service still has
-      // a (zeroed) entry rather than the whole map going empty.
-      expect(result.current.metricsMap.size).toBe(2);
-      expect(result.current.metricsMap.get(serviceNodeKey('api-gateway', 'prod'))!.avgLatency).toBe(
-        0
+      // A failed query must not read as a real 0 (it would sort and filter as one).
+      expect(result.current.metricsMap.get(serviceNodeKey('api-gateway', 'prod'))).toBeUndefined();
+    });
+
+    it('keeps the metrics that succeeded when one query fails', async () => {
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) =>
+        query.includes('histogram_quantile')
+          ? Promise.reject(new Error('Read timed out'))
+          : Promise.resolve(dataFrame('{environment="prod", service="api-gateway"}', 36))
       );
+
+      const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      const m = result.current.metricsMap.get(serviceNodeKey('api-gateway', 'prod'))!;
+      expect(m.avgLatency).toBeUndefined();
+      expect(m.avgThroughput).toBeCloseTo(36 / 3600, 5);
+      expect(m.avgFailureRatio).toBe(36);
+      expect(result.current.error?.message).toBe('Read timed out');
     });
   });
 

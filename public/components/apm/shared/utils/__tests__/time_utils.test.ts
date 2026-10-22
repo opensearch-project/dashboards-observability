@@ -291,6 +291,13 @@ describe('time_utils', () => {
     });
 
     describe('edge cases', () => {
+      it('should floor sub-minute ranges at 1 minute', () => {
+        const startTime = new Date('2024-01-15T10:00:00.000Z');
+        const endTime = new Date('2024-01-15T10:00:20.000Z'); // 20 seconds
+
+        expect(calculateTimeRangeDuration(startTime, endTime)).toBe('1m');
+      });
+
       it('should handle 1 minute range', () => {
         const startTime = new Date('2024-01-15T10:00:00.000Z');
         const endTime = new Date('2024-01-15T10:01:00.000Z'); // 1 minute

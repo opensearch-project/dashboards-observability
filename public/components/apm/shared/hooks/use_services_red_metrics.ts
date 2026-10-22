@@ -20,6 +20,7 @@ import {
   getQueryServiceMapDependencyLatencyRange,
   dependencyNamesFilter,
 } from '../../query_services/query_requests/promql_queries';
+import { buildScopeFilters, scopeFiltersKey, ScopeFilters } from '../utils/scope_filters';
 import { escapePromQLRegex } from '../../query_services/query_requests/escape_utils';
 import { getTimeInSeconds, calculateTimeRangeDuration } from '../utils/time_utils';
 import { calculateStep, RESOLUTION_LOW } from '../utils/step_utils';
@@ -30,18 +31,6 @@ import { isDependencyType } from '../utils/platform_utils';
 // this window will not fire a request for each intermediate page.
 const SPARKLINE_FETCH_DEBOUNCE_MS = 250;
 
-// The instant queries read every sample in the window (sum_over_time over the
-// full range), so their cost grows with both the range and the matched series.
-// A scoped (filtered) catalog bounds them with service=~ / remoteService=~ name
-// lists. Above this length the list is dropped and the query runs unbounded,
-// keeping every query clear of the 10,000-char PromQL limit (the dependency
-// failure-ratio query repeats its selector six times).
-const MAX_SCOPED_FILTER_CHARS = 1200;
-
-// Debounce for scoped instant fetches, so typing a search issues one query set
-// for the settled filter rather than one per keystroke.
-const SCOPED_FETCH_DEBOUNCE_MS = 300;
-
 /**
  * Composite key for a service node. Metrics are grouped by (environment, service),
  * so the catalog keys rows on both to avoid summing a service across environments.
@@ -51,11 +40,13 @@ export const serviceNodeKey = (serviceName: string, environment?: string): strin
 
 export interface ServiceRedMetrics {
   latency: MetricDataPoint[];
-  avgLatency: number; // True percentile over the full time range (via instant query)
+  // Instant values over the full time range. Undefined when that metric's query failed (shown
+  // as "-"), so a failure never reads as a real 0.
+  avgLatency?: number; // True percentile over the full time range
   throughput: MetricDataPoint[];
-  avgThroughput: number; // Average of all throughput data points over the time period
+  avgThroughput?: number; // Requests per second over the time range
   failureRatio: MetricDataPoint[];
-  avgFailureRatio: number; // Average of all failure ratio data points over the time period
+  avgFailureRatio?: number; // (errors + faults) / requests over the time range, in %
 }
 
 export interface MetricDataPoint {
@@ -92,6 +83,11 @@ export interface UseServicesRedMetricsParams {
    * Omit to fetch every service.
    */
   scopeServices?: Array<{ serviceName: string; environment?: string; type?: string }>;
+  /**
+   * Query filters for `scopeServices`, from buildScopeFilters. Lets the page push facets that
+   * map to a label (environment) down as label matchers; built from the rows if omitted.
+   */
+  scopeFilters?: ScopeFilters;
   startTime: Date;
   endTime: Date;
   latencyPercentile?: 'p99' | 'p90' | 'p50';
@@ -108,6 +104,11 @@ export interface UseServicesRedMetricsResult {
   metricsMap: Map<string, ServiceRedMetrics>;
   isLoading: boolean;
   error: Error | null;
+  /**
+   * The page is filtered, but the filter was too broad to narrow the instant queries, so they
+   * scan every service (see ScopeFilters.fellBack).
+   */
+  scopeFellBack: boolean;
   refetch: () => void;
 }
 
@@ -153,14 +154,6 @@ export const useServicesRedMetrics = (
   // Instant latency per service (true percentile over full time range)
   const [latencyInstantMap, setLatencyInstantMap] = useState<Map<string, number>>(new Map());
 
-  // Separate loading states
-  const [isLoadingLatency, setIsLoadingLatency] = useState(true);
-  const [isLoadingThroughputFailure, setIsLoadingThroughputFailure] = useState(true);
-
-  // Separate error states
-  const [latencyError, setLatencyError] = useState<Error | null>(null);
-  const [throughputFailureError, setThroughputFailureError] = useState<Error | null>(null);
-
   // Separate refetch triggers
   const [refetchAllTrigger, setRefetchAllTrigger] = useState(0);
 
@@ -189,53 +182,20 @@ export const useServicesRedMetrics = (
   const catalogKey = nodeSetKey(params.services);
   const scopeKey = isScoped ? nodeSetKey(scope) : catalogKey;
 
-  // Instant-query name filters. Unscoped, the full catalog relies on
-  // `sum by (service)` grouping with no list filter (a full list would pass the
-  // PromQL length limit at scale). Scoped, the queries are bounded to the
-  // filtered names, unless the list is too long to embed.
-  const catalogHasDependencies = params.services.some((s) => isDependencyType(s.type));
-  const instantFilters = useMemo(() => {
-    const unbounded = {
-      bounded: false,
-      serviceFilter: '',
-      dependencyFilter: undefined as string | undefined,
-      // Caller-derived (remoteService=) queries run only when the catalog has
-      // dependency rows, so a service-only catalog (feature off / older data)
-      // issues exactly the service queries.
-      runServices: true,
-      runDependencies: catalogHasDependencies,
-    };
-    if (!isScoped) return unbounded;
-
-    const unique = (rows: typeof scope) => Array.from(new Set(rows.map((s) => s.serviceName)));
-    const serviceNames = unique(scope.filter((s) => !isDependencyType(s.type)));
-    const dependencyNames = unique(scope.filter((s) => isDependencyType(s.type)));
-    const serviceFilter =
-      serviceNames.length > 0 ? `service=~"${serviceNames.map(escapePromQLRegex).join('|')}"` : '';
-    const dependencyFilter =
-      dependencyNames.length > 0 ? dependencyNamesFilter(dependencyNames) : undefined;
-    if (
-      serviceFilter.length > MAX_SCOPED_FILTER_CHARS ||
-      (dependencyFilter?.length ?? 0) > MAX_SCOPED_FILTER_CHARS
-    ) {
-      return unbounded;
-    }
-    return {
-      bounded: true,
-      serviceFilter,
-      dependencyFilter,
-      runServices: serviceNames.length > 0,
-      runDependencies: dependencyNames.length > 0,
-    };
+  // Instant-query filters for the scope (see buildScopeFilters). The page may pass its own
+  // (e.g. with the environment facet as a label matcher); otherwise they are built from the
+  // scoped rows as a name list.
+  const instantFilters = useMemo(
+    () =>
+      params.scopeFilters ??
+      buildScopeFilters({
+        catalog: params.services,
+        scope: params.scopeServices ?? params.services,
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scopeKey, isScoped, catalogHasDependencies]);
-
-  // Generation key of the last unbounded instant fetch that fully succeeded, per
-  // effect. Its maps cover the whole catalog, so for the same catalog, time
-  // range and refresh generation, narrowing (or clearing) a filter is served
-  // from them with no new request.
-  const unboundedThroughputGen = useRef<string | null>(null);
-  const unboundedLatencyGen = useRef<string | null>(null);
+    [params.scopeFilters, catalogKey, scopeKey]
+  );
+  const filtersKey = scopeFiltersKey(instantFilters);
 
   // Unique service names on the visible page — used to build the bounded
   // `service=~"..."` range filter (grouped by (environment, service), so one
@@ -254,267 +214,128 @@ export const useServicesRedMetrics = (
   const startTimeSec = useMemo(() => getTimeInSeconds(params.startTime), [params.startTime]);
   const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
 
-  // Effect 1: instant throughput total + failure ratio for every scoped service.
-  // These drive the displayed numbers, sorting, and the range filters, so they
-  // must cover every row the page can show. No per-step (sparkline) data is
-  // fetched here.
-  useEffect(() => {
-    if (params.services.length === 0 || !promqlService) {
-      unboundedThroughputGen.current = null;
+  const ready = params.services.length > 0 && !!promqlService;
+  // Reuse key: what the whole-catalog results depend on.
+  const catalogGen = `${prometheusConnectionId}|${catalogKey}|${startTimeSec}|${endTimeSec}|${refetchAllTrigger}`;
+  // Rows a fetch fills: the scope when bounded, else the whole catalog (what reuse relies on).
+  const rowsFor = (bounded: boolean) => (bounded ? scope : params.services);
+
+  // Effect 1: instant throughput total + failure ratio for every scoped row. These drive the
+  // displayed numbers, sorting, and the range filters. No per-step (sparkline) data here.
+  const throughputFailure = useCatalogInstantFetch({
+    ready,
+    enabled,
+    scopeEmpty: scope.length === 0,
+    gen: catalogGen,
+    bounded: instantFilters.bounded,
+    filtersKey,
+    onReset: () => {
       setTotalCountMap(new Map());
       setFailureRatioInstantMap(new Map());
-      setIsLoadingThroughputFailure(false);
-      return;
-    }
-    if (!enabled) {
-      setIsLoadingThroughputFailure(true);
-      return;
-    }
-    // A filter matching no rows needs no metrics; keep the maps for reuse.
-    if (scope.length === 0) {
-      setIsLoadingThroughputFailure(false);
-      return;
-    }
-
-    const gen = `${catalogKey}|${startTimeSec}|${endTimeSec}|${refetchAllTrigger}`;
-    if (unboundedThroughputGen.current === gen) {
-      setIsLoadingThroughputFailure(false);
-      return;
-    }
-
-    const abortController = new AbortController();
-    const { bounded, serviceFilter, dependencyFilter, runServices, runDependencies } =
-      instantFilters;
-
-    const fetchInstant = async () => {
-      unboundedThroughputGen.current = null;
-
+    },
+    run: async (signal) => {
+      const { bounded, serviceFilter, dependencyFilter, runServices, runDependencies } =
+        instantFilters;
       const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
-      const totalQuery = getQueryServicesThroughputTotal(serviceFilter, timeRangeDuration);
-      const failureRatioTotalQuery = getQueryServicesFailureRatioTotal(
-        serviceFilter,
-        timeRangeDuration
-      );
-      // Dependency (database / messaging / external) rows have no SERVER-span
-      // series; these caller-derived (remoteService=) queries fill them in.
-      const depTotalQuery = getQueryServiceMapDependencyThroughput(
-        timeRangeDuration,
-        dependencyFilter
-      );
-      const depFailureRatioQuery = getQueryServiceMapDependencyFailureRatioTotal(
-        timeRangeDuration,
-        dependencyFilter
-      );
-
       const runInstant = (query: string) =>
-        promqlService.executeInstantQuery({
-          query,
-          time: endTimeSec,
-          signal: abortController.signal,
-        });
+        promqlService!.executeInstantQuery({ query, time: endTimeSec, signal });
       const skipped = Promise.resolve(null);
-      const [totalResult, failureRatioTotalResult, depTotalResult, depFailureRatioResult] =
-        await Promise.allSettled([
-          runServices ? runInstant(totalQuery) : skipped,
-          runServices ? runInstant(failureRatioTotalQuery) : skipped,
-          ...(runDependencies ? [runInstant(depTotalQuery), runInstant(depFailureRatioQuery)] : []),
-        ]);
-
-      // Drop stale results if params changed while this fetch was in flight.
-      if (abortController.signal.aborted) return;
-
-      const totalResp = totalResult.status === 'fulfilled' ? totalResult.value : null;
-      const failureRatioTotalResp =
-        failureRatioTotalResult.status === 'fulfilled' ? failureRatioTotalResult.value : null;
-      const depTotalResp = depTotalResult?.status === 'fulfilled' ? depTotalResult.value : null;
-      const depFailureRatioResp =
-        depFailureRatioResult?.status === 'fulfilled' ? depFailureRatioResult.value : null;
-
-      const newTotalMap = new Map<string, number>();
-      const newFailureRatioInstantMap = new Map<string, number>();
-      // An unbounded fetch fills the whole catalog (what the reuse check relies on).
-      (bounded ? scope : params.services).forEach(({ serviceName, environment, type }) => {
-        const key = serviceNodeKey(serviceName, environment);
-        // Dependency rows use caller-derived metrics (they have no server data);
-        // service rows keep the SERVER-span series only.
-        const isDependency = isDependencyType(type);
-        const data = extractServiceData(
-          isDependency ? depTotalResp : totalResp,
-          serviceName,
-          environment
-        );
-        newTotalMap.set(key, data.length > 0 ? data[0].value : 0);
-        const frData = extractServiceData(
-          isDependency ? depFailureRatioResp : failureRatioTotalResp,
-          serviceName,
-          environment
-        );
-        newFailureRatioInstantMap.set(key, frData.length > 0 ? frData[0].value : 0);
-      });
-
-      setTotalCountMap(newTotalMap);
-      setFailureRatioInstantMap(newFailureRatioInstantMap);
-
-      const rejected = [
-        totalResult,
-        failureRatioTotalResult,
-        depTotalResult,
-        depFailureRatioResult,
-      ].find((r) => r?.status === 'rejected') as PromiseRejectedResult | undefined;
-      if (rejected) {
-        console.error(
-          '[useServicesRedMetrics] Partial failure fetching instant metrics:',
-          rejected.reason
-        );
-        setThroughputFailureError(
-          rejected.reason instanceof Error ? rejected.reason : new Error('Unknown error')
-        );
-      } else if (!bounded) {
-        unboundedThroughputGen.current = gen;
-      }
-      setIsLoadingThroughputFailure(false);
-    };
-
-    setIsLoadingThroughputFailure(true);
-    setThroughputFailureError(null);
-    const timer = bounded ? setTimeout(fetchInstant, SCOPED_FETCH_DEBOUNCE_MS) : undefined;
-    if (!bounded) fetchInstant();
-
-    return () => {
-      clearTimeout(timer);
-      abortController.abort();
-    };
-    // scopeKey / instantFilters track changes to the scoped service set.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    promqlService,
-    enabled,
-    catalogKey,
-    scopeKey,
-    instantFilters,
-    startTimeSec,
-    endTimeSec,
-    refetchAllTrigger,
-  ]);
-
-  // Effect 2: instant latency percentile for every scoped service (drives the number
-  // and latency sort/filter). Sparkline handled by Effect 3.
-  useEffect(() => {
-    if (params.services.length === 0 || !promqlService) {
-      unboundedLatencyGen.current = null;
-      setLatencyInstantMap(new Map());
-      setIsLoadingLatency(false);
-      return;
-    }
-    if (!enabled) {
-      setIsLoadingLatency(true);
-      return;
-    }
-    if (scope.length === 0) {
-      setIsLoadingLatency(false);
-      return;
-    }
-
-    const gen = `${catalogKey}|${startTimeSec}|${endTimeSec}|${refetchAllTrigger}|${params.latencyPercentile}`;
-    if (unboundedLatencyGen.current === gen) {
-      setIsLoadingLatency(false);
-      return;
-    }
-
-    const abortController = new AbortController();
-    const { bounded, serviceFilter, dependencyFilter, runServices, runDependencies } =
-      instantFilters;
-
-    const fetchLatencyInstant = async () => {
-      unboundedLatencyGen.current = null;
-
-      const percentileValue =
-        params.latencyPercentile === 'p50' ? 0.5 : params.latencyPercentile === 'p90' ? 0.9 : 0.99; // default p99
-      const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
-      const latencyInstantQuery = getQueryServicesLatencyInstant(
-        serviceFilter,
-        percentileValue,
-        timeRangeDuration
-      );
-      // Caller-derived latency for dependency nodes (no server-span buckets).
-      const depLatencyQuery = getQueryServiceMapDependencyLatencyInstant(
-        percentileValue,
-        timeRangeDuration,
-        dependencyFilter
-      );
-
-      const runInstant = (query: string) =>
-        promqlService.executeInstantQuery({
-          query,
-          time: endTimeSec,
-          signal: abortController.signal,
-        });
-      const [latencyInstantResult, depLatencyResult] = await Promise.allSettled([
-        runServices ? runInstant(latencyInstantQuery) : Promise.resolve(null),
-        ...(runDependencies ? [runInstant(depLatencyQuery)] : []),
+      const [total, failureRatio, depTotal, depFailureRatio] = await Promise.allSettled([
+        runServices
+          ? runInstant(getQueryServicesThroughputTotal(serviceFilter, timeRangeDuration))
+          : skipped,
+        runServices
+          ? runInstant(getQueryServicesFailureRatioTotal(serviceFilter, timeRangeDuration))
+          : skipped,
+        // Dependency (database / messaging / external) rows have no SERVER-span series; these
+        // caller-derived (remoteService=) queries fill them in.
+        runDependencies
+          ? runInstant(getQueryServiceMapDependencyThroughput(timeRangeDuration, dependencyFilter))
+          : skipped,
+        runDependencies
+          ? runInstant(
+              getQueryServiceMapDependencyFailureRatioTotal(timeRangeDuration, dependencyFilter)
+            )
+          : skipped,
       ]);
 
-      if (abortController.signal.aborted) return;
-
-      const latencyInstantResp =
-        latencyInstantResult.status === 'fulfilled' ? latencyInstantResult.value : null;
-      const depLatencyResp =
-        depLatencyResult?.status === 'fulfilled' ? depLatencyResult.value : null;
-
-      const newInstantMap = new Map<string, number>();
-      (bounded ? scope : params.services).forEach(({ serviceName, environment, type }) => {
+      const newTotalMap = new Map<string, number>();
+      const newFailureRatioMap = new Map<string, number>();
+      rowsFor(bounded).forEach(({ serviceName, environment, type }) => {
         const key = serviceNodeKey(serviceName, environment);
-        const data = extractServiceData(
-          isDependencyType(type) ? depLatencyResp : latencyInstantResp,
+        // Dependency rows use caller-derived metrics; service rows the SERVER-span series.
+        const isDependency = isDependencyType(type);
+        setFromResult(newTotalMap, key, isDependency ? depTotal : total, serviceName, environment);
+        setFromResult(
+          newFailureRatioMap,
+          key,
+          isDependency ? depFailureRatio : failureRatio,
           serviceName,
           environment
         );
-        newInstantMap.set(key, data.length > 0 ? data[0].value : 0);
       });
+      return {
+        apply: () => {
+          setTotalCountMap(newTotalMap);
+          setFailureRatioInstantMap(newFailureRatioMap);
+        },
+        error: firstRejection([total, failureRatio, depTotal, depFailureRatio], 'instant metrics'),
+      };
+    },
+  });
 
-      setLatencyInstantMap(newInstantMap);
-
-      const latencyRejected = [latencyInstantResult, depLatencyResult].find(
-        (r) => r?.status === 'rejected'
-      ) as PromiseRejectedResult | undefined;
-      if (latencyRejected) {
-        console.error(
-          '[useServicesRedMetrics] Partial failure fetching latency metrics:',
-          latencyRejected.reason
-        );
-        setLatencyError(
-          latencyRejected.reason instanceof Error
-            ? latencyRejected.reason
-            : new Error('Unknown error')
-        );
-      } else if (!bounded) {
-        unboundedLatencyGen.current = gen;
-      }
-      setIsLoadingLatency(false);
-    };
-
-    setIsLoadingLatency(true);
-    setLatencyError(null);
-    const timer = bounded ? setTimeout(fetchLatencyInstant, SCOPED_FETCH_DEBOUNCE_MS) : undefined;
-    if (!bounded) fetchLatencyInstant();
-
-    return () => {
-      clearTimeout(timer);
-      abortController.abort();
-    };
-    // scopeKey / instantFilters track changes to the scoped service set.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    promqlService,
+  // Effect 2: instant latency percentile for every scoped row (drives the number and latency
+  // sort/filter). Sparkline handled by Effect 3.
+  const latency = useCatalogInstantFetch({
+    ready,
     enabled,
-    catalogKey,
-    scopeKey,
-    instantFilters,
-    startTimeSec,
-    endTimeSec,
-    refetchAllTrigger,
-    params.latencyPercentile,
-  ]);
+    scopeEmpty: scope.length === 0,
+    gen: `${catalogGen}|${params.latencyPercentile}`,
+    bounded: instantFilters.bounded,
+    filtersKey,
+    onReset: () => setLatencyInstantMap(new Map()),
+    run: async (signal) => {
+      const { bounded, serviceFilter, dependencyFilter, runServices, runDependencies } =
+        instantFilters;
+      const percentileValue = toPercentileValue(params.latencyPercentile);
+      const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
+      const runInstant = (query: string) =>
+        promqlService!.executeInstantQuery({ query, time: endTimeSec, signal });
+      const skipped = Promise.resolve(null);
+      const [svcLatency, depLatency] = await Promise.allSettled([
+        runServices
+          ? runInstant(
+              getQueryServicesLatencyInstant(serviceFilter, percentileValue, timeRangeDuration)
+            )
+          : skipped,
+        // Caller-derived latency for dependency nodes (no server-span buckets).
+        runDependencies
+          ? runInstant(
+              getQueryServiceMapDependencyLatencyInstant(
+                percentileValue,
+                timeRangeDuration,
+                dependencyFilter
+              )
+            )
+          : skipped,
+      ]);
+
+      const newLatencyMap = new Map<string, number>();
+      rowsFor(bounded).forEach(({ serviceName, environment, type }) => {
+        setFromResult(
+          newLatencyMap,
+          serviceNodeKey(serviceName, environment),
+          isDependencyType(type) ? depLatency : svcLatency,
+          serviceName,
+          environment
+        );
+      });
+      return {
+        apply: () => setLatencyInstantMap(newLatencyMap),
+        error: firstRejection([svcLatency, depLatency], 'latency metrics'),
+      };
+    },
+  });
 
   // The sparkline cache is valid only for the current time range, percentile,
   // and refresh generation. When any of those change, drop the cached
@@ -546,12 +367,7 @@ export const useServicesRedMetrics = (
     const abortController = new AbortController();
     const timer = setTimeout(() => {
       const fetchSparklines = async () => {
-        const percentileValue =
-          params.latencyPercentile === 'p50'
-            ? 0.5
-            : params.latencyPercentile === 'p90'
-              ? 0.9
-              : 0.99;
+        const percentileValue = toPercentileValue(params.latencyPercentile);
         const step = calculateStep(startTimeSec, endTimeSec, RESOLUTION_LOW);
         const runRange = (query: string) =>
           promqlService.executeMetricRequest({
@@ -691,19 +507,22 @@ export const useServicesRedMetrics = (
       const throughputData = throughputFailureMap.get(serviceName)?.throughput || [];
       const failureData = throughputFailureMap.get(serviceName)?.failureRatio || [];
 
-      // Use instant query result for true percentile over full time range
-      const avgLatency = latencyInstantMap.get(serviceName) || 0;
-      // Use sum_over_time total / time range for accurate req/s
-      // (plain gauge range query is inflated by Prometheus stale lookback)
+      // A metric whose query failed has no entry, so it reads as unavailable (undefined, shown
+      // as "-") rather than as a real 0.
+      // Instant query result: true percentile over full time range.
+      const avgLatency = latencyInstantMap.get(serviceName);
+      // sum_over_time total / time range for accurate req/s (a plain gauge range query is
+      // inflated by Prometheus stale lookback).
       const timeRangeSeconds = endTimeSec - startTimeSec;
-      const totalRequests = totalCountMap.get(serviceName) || 0;
-      const avgThroughput = timeRangeSeconds > 0 ? totalRequests / timeRangeSeconds : 0;
-      // Ratio-of-sums over the window (unbiased); fall back to the sparkline mean.
-      const avgFailureRatio = failureRatioInstantMap.has(serviceName)
-        ? failureRatioInstantMap.get(serviceName)!
-        : failureData.length > 0
-          ? failureData.reduce((sum, point) => sum + point.value, 0) / failureData.length
-          : 0;
+      const totalRequests = totalCountMap.get(serviceName);
+      const avgThroughput =
+        totalRequests === undefined
+          ? undefined
+          : timeRangeSeconds > 0
+            ? totalRequests / timeRangeSeconds
+            : 0;
+      // Ratio-of-sums over the window (unbiased vs averaging per-step ratios).
+      const avgFailureRatio = failureRatioInstantMap.get(serviceName);
 
       combined.set(serviceName, {
         latency: latencyData,
@@ -726,17 +545,202 @@ export const useServicesRedMetrics = (
   ]);
 
   // Combined loading state
-  const isLoading = isLoadingLatency || isLoadingThroughputFailure;
+  const isLoading = latency.isLoading || throughputFailure.isLoading;
 
   // Return first error encountered
-  const error = latencyError || throughputFailureError;
+  const error = latency.error || throughputFailure.error;
 
   const refetch = useCallback(() => {
     setRefetchAllTrigger((prev) => prev + 1);
   }, []);
 
-  return { metricsMap, isLoading, error, refetch };
+  return { metricsMap, isLoading, error, scopeFellBack: instantFilters.fellBack, refetch };
 };
+
+// Debounce for scoped instant fetches, so typing a search issues one query set for the settled
+// filter rather than one per keystroke.
+const SCOPED_FETCH_DEBOUNCE_MS = 300;
+
+interface InstantFetchResult {
+  /** Writes the fetched maps into state. */
+  apply: () => void;
+  /** First rejected query, if any; the affected rows are left unset (unavailable). */
+  error: Error | null;
+}
+
+interface CatalogInstantFetchParams {
+  /** A catalog and a Prometheus connection exist. */
+  ready: boolean;
+  enabled: boolean;
+  scopeEmpty: boolean;
+  /** What the whole-catalog results depend on (connection, catalog, time, refresh, ...). */
+  gen: string;
+  bounded: boolean;
+  filtersKey: string;
+  run: (signal: AbortSignal) => Promise<InstantFetchResult>;
+  onReset: () => void;
+}
+
+/**
+ * Fetch policy for the whole-range instant metrics:
+ * - Unbounded (whole-catalog) fetch: its results cover every row, so once one has succeeded for
+ *   the current `gen`, any scope is served from it with no request. It is not cancelled by a
+ *   scope change, only when `gen` changes: a cancelled request still runs in Prometheus, and
+ *   clearing the filter would otherwise send the most expensive query set a second time.
+ * - Bounded (scoped) fetch: debounced, cancelled when the scope changes. If the catalog fetch
+ *   lands first, the scoped result is dropped (the catalog covers it).
+ * - Re-requesting what the maps already hold (same signature) sends nothing.
+ */
+function useCatalogInstantFetch({
+  ready,
+  enabled,
+  scopeEmpty,
+  gen,
+  bounded,
+  filtersKey,
+  run,
+  onReset,
+}: CatalogInstantFetchParams): { isLoading: boolean; error: Error | null } {
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  // gen of the last unbounded fetch that fully succeeded (maps cover the whole catalog).
+  const fullGen = useRef<string | null>(null);
+  // Signature of what the maps currently hold, and of what the page currently wants.
+  const loadedSig = useRef<string | null>(null);
+  const requestedSig = useRef<string | null>(null);
+  const inflight = useRef<{ gen: string; controller: AbortController } | null>(null);
+  // Latest closures, so a debounced or in-flight fetch never captures a stale render.
+  const runRef = useRef(run);
+  runRef.current = run;
+  const onResetRef = useRef(onReset);
+  onResetRef.current = onReset;
+
+  useEffect(() => () => inflight.current?.controller.abort(), []);
+
+  const sig = bounded ? `B|${gen}|${filtersKey}` : `U|${gen}`;
+
+  useEffect(() => {
+    const safeRun = (signal: AbortSignal) =>
+      runRef
+        .current(signal)
+        .catch((err) => ({ apply: () => {}, error: toError(err) }) as InstantFetchResult);
+
+    if (!ready) {
+      inflight.current?.controller.abort();
+      inflight.current = null;
+      fullGen.current = loadedSig.current = requestedSig.current = null;
+      onResetRef.current();
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
+    // A catalog fetch for another time range / catalog / refresh is no longer useful.
+    if (inflight.current && inflight.current.gen !== gen) {
+      inflight.current.controller.abort();
+      inflight.current = null;
+    }
+    requestedSig.current = enabled ? sig : null;
+    if (!enabled) {
+      setIsLoading(true);
+      return;
+    }
+    // A filter matching no rows needs no metrics; keep the maps for reuse.
+    if (scopeEmpty) {
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
+    if (fullGen.current === gen) {
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
+    if (loadedSig.current === sig) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    if (!bounded) {
+      // The in-flight catalog fetch for this gen answers this request when it lands.
+      if (inflight.current?.gen === gen) return;
+      const controller = new AbortController();
+      inflight.current = { gen, controller };
+      safeRun(controller.signal).then((res) => {
+        if (controller.signal.aborted) return;
+        if (inflight.current?.controller === controller) inflight.current = null;
+        const requested = requestedSig.current;
+        const wanted = requested === sig || !!requested?.startsWith(`B|${gen}|`);
+        if (!res.error) {
+          // Covers every row: serves this and any scope for the same gen.
+          res.apply();
+          fullGen.current = gen;
+          loadedSig.current = sig;
+          setError(null);
+          if (wanted) setIsLoading(false);
+        } else if (requested === sig) {
+          res.apply();
+          loadedSig.current = sig;
+          setError(res.error);
+          setIsLoading(false);
+        }
+        // A failed catalog fetch no longer requested is dropped (the scoped result stands).
+      });
+      // No cleanup cancel: a scope change must not cancel the catalog fetch (see above).
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      safeRun(controller.signal).then((res) => {
+        if (controller.signal.aborted) return;
+        if (fullGen.current !== gen) {
+          res.apply();
+          loadedSig.current = sig;
+          setError(res.error);
+        }
+        setIsLoading(false);
+      });
+    }, SCOPED_FETCH_DEBOUNCE_MS);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [ready, enabled, scopeEmpty, sig, gen, bounded]);
+
+  return { isLoading, error };
+}
+
+const toError = (reason: unknown): Error =>
+  reason instanceof Error ? reason : new Error('Unknown error');
+
+/** First rejected result as an Error (logged), or null. */
+function firstRejection(results: Array<PromiseSettledResult<unknown>>, what: string): Error | null {
+  const rejected = results.find((r) => r.status === 'rejected') as
+    PromiseRejectedResult | undefined;
+  if (!rejected) return null;
+  console.error(`[useServicesRedMetrics] Partial failure fetching ${what}:`, rejected.reason);
+  return toError(rejected.reason);
+}
+
+/**
+ * Set a row's instant value from a settled query. A rejected query leaves the row unset, so it
+ * reads as unavailable rather than 0; a fulfilled query with no series for the row is a real 0.
+ */
+function setFromResult(
+  map: Map<string, number>,
+  key: string,
+  result: PromiseSettledResult<unknown>,
+  serviceName: string,
+  environment?: string
+): void {
+  if (result.status !== 'fulfilled') return;
+  const data = extractServiceData(result.value, serviceName, environment);
+  map.set(key, data.length > 0 ? data[0].value : 0);
+}
+
+const toPercentileValue = (p?: 'p99' | 'p90' | 'p50'): number =>
+  p === 'p50' ? 0.5 : p === 'p90' ? 0.9 : 0.99;
 
 /**
  * Extract metric data for a specific service from Prometheus response

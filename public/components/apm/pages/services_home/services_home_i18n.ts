@@ -118,6 +118,25 @@ export const servicesI18nTexts = {
       defaultMessage: 'No matching values',
     }),
   },
+  metricsNotice: {
+    failedTitle: i18n.translate('observability.apm.services.metricsNotice.failedTitle', {
+      defaultMessage: 'Some metrics could not be loaded',
+    }),
+    failedBody: i18n.translate('observability.apm.services.metricsNotice.failedBody', {
+      defaultMessage:
+        'Metrics that failed to load (for example, a query that timed out on a wide time range) show as "-". Narrow the time range or filter services, then refresh.',
+    }),
+    broadFilterTitle: i18n.translate('observability.apm.services.metricsNotice.broadFilterTitle', {
+      defaultMessage: 'Metrics are queried for all services',
+    }),
+    broadFilterBody: i18n.translate('observability.apm.services.metricsNotice.broadFilterBody', {
+      defaultMessage:
+        'Your filters match too many services to narrow the metrics query, so it scans every service and can be slow on wide time ranges. Narrow the search or select an environment to speed it up.',
+    }),
+  },
+  unavailable: i18n.translate('observability.apm.services.table.unavailable', {
+    defaultMessage: '-',
+  }),
   noMatching: {
     title: i18n.translate('observability.apm.services.noMatching.title', {
       defaultMessage: 'No matching services',

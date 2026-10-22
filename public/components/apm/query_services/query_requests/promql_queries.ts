@@ -221,38 +221,55 @@ label_replace(
  * Uses sum_over_time for accurate total rate calculation
  * @param timeRange - Time range (e.g., "1h", "24h")
  * @param limit - Number of top services (default: 5)
+ * @param serviceFilter - Optional selector fragment bounding the services (see buildScopeFilters)
  * @page Services Home — Top Services by Fault Rate widget
  * @page Service Overview — Top Services by Fault Rate widget
  */
-export const getQueryTopServicesByFaultRateAvg = (timeRange: string, limit: number = 5): string => `
+export const getQueryTopServicesByFaultRateAvg = (
+  timeRange: string,
+  limit: number = 5,
+  serviceFilter: string = ''
+): string => {
+  const sel = [serviceFilter, 'remoteService=""', 'namespace="span_derived"']
+    .filter(Boolean)
+    .join(',');
+  return `
 topk(${limit},
   (
-    sum by (environment, service) (sum_over_time(fault{remoteService="",namespace="span_derived"}[${timeRange}]))
+    sum by (environment, service) (sum_over_time(fault{${sel}}[${timeRange}]))
     /
-    clamp_min(sum by (environment, service) (sum_over_time(request{remoteService="",namespace="span_derived"}[${timeRange}])), 1)
+    clamp_min(sum by (environment, service) (sum_over_time(request{${sel}}[${timeRange}])), 1)
   ) * 100
 )
 `;
+};
 
 /**
  * Top Dependencies by Fault Rate over time range - Global view
  * @param timeRange - Time range (e.g., "1h", "24h")
  * @param limit - Number of top dependencies (default: 5)
+ * @param callerFilter - Optional selector fragment bounding the calling services
+ * @param remoteFilter - Target selector (default every target, `remoteService!=""`)
  * @page Services Home — Top Dependencies by Fault Rate widget
  * @page Service Overview — Top Dependencies by Fault Rate widget
  */
 export const getQueryTopDependenciesByFaultRateAvg = (
   timeRange: string,
-  limit: number = 5
-): string => `
+  limit: number = 5,
+  callerFilter: string = '',
+  remoteFilter: string = 'remoteService!=""'
+): string => {
+  const sel = [callerFilter, remoteFilter, 'namespace="span_derived"'].filter(Boolean).join(',');
+  return `
 topk(${limit},
   (
-    sum by (environment, service, remoteService) (sum_over_time(fault{remoteService!="",namespace="span_derived"}[${timeRange}]))
+    sum by (environment, service, remoteService) (sum_over_time(fault{${sel}}[${timeRange}]))
     /
-    clamp_min(sum by (environment, service, remoteService) (sum_over_time(request{remoteService!="",namespace="span_derived"}[${timeRange}])), 1)
+    clamp_min(sum by (environment, service, remoteService) (sum_over_time(request{${sel}}[${timeRange}])), 1)
   ) * 100
 )
 `;
+};
 
 /**
  * Top Dependencies by Fault Rate - Service-specific

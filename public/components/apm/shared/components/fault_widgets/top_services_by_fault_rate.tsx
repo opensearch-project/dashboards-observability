@@ -20,6 +20,9 @@ import { TimeRange } from '../../../common/types/service_types';
 import { parseTimeRange } from '../../utils/time_utils';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 import { ServiceCell } from './service_cell';
+import { PageScope, SCOPED_TOPK } from '../../utils/scope_filters';
+import { isDependencyType } from '../../utils/platform_utils';
+import { serviceNodeKey } from '../../hooks/use_services_red_metrics';
 
 // i18n translations
 const i18nTexts = {
@@ -45,7 +48,10 @@ export interface TopServicesByFaultRateProps {
   timeRange: TimeRange;
   onServiceClick?: (serviceName: string, environment: string) => void;
   refreshTrigger?: number;
-  searchQuery?: string;
+  /** The page's filtered scope; the top services are taken within it. Omit for all services. */
+  scope?: PageScope;
+  /** When false nothing is fetched (e.g. the page's service list is still loading). */
+  enabled?: boolean;
 }
 
 interface ServiceFaultRateItem {
@@ -64,7 +70,8 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
   timeRange,
   onServiceClick,
   refreshTrigger,
-  searchQuery,
+  scope,
+  enabled,
 }) => {
   // Parse time range using datemath for proper handling of all relative formats
   // Recalculate when refreshTrigger changes to get fresh timestamps
@@ -73,11 +80,36 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRange, refreshTrigger]);
 
-  const { data: services, isLoading, error } = useTopServicesByFaultRate({
+  // Within the page's filters: bound the query, then re-check rows against the scope (the query
+  // filter can be broader) before taking the top 5.
+  const scoped = !!scope && (scope.filters.bounded || scope.filters.fellBack);
+  const scopeKeys = useMemo(
+    () =>
+      scoped
+        ? new Set(
+            scope!.services
+              .filter((s) => !isDependencyType(s.type))
+              .map((s) => serviceNodeKey(s.serviceName, s.environment))
+          )
+        : null,
+    [scoped, scope]
+  );
+  const {
+    data: services,
+    isLoading,
+    error,
+  } = useTopServicesByFaultRate({
     startTime,
     endTime,
     limit: 5,
     refreshTrigger,
+    serviceFilter: scope?.filters.bounded ? scope.filters.serviceFilter : undefined,
+    queryLimit: scoped ? SCOPED_TOPK : undefined,
+    include: scopeKeys
+      ? (s) => scopeKeys.has(serviceNodeKey(s.serviceName, s.environment))
+      : undefined,
+    skip: scoped && !scope!.filters.runServices,
+    enabled,
   });
 
   // Build table items with relative percentages for progress bars
@@ -86,15 +118,7 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
       return [];
     }
 
-    // Filter by search query if provided
-    let filteredServices = services;
-    if (searchQuery?.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      filteredServices = services.filter(
-        (s) =>
-          s.serviceName.toLowerCase().includes(query) || s.environment.toLowerCase().includes(query)
-      );
-    }
+    const filteredServices = services;
 
     // Calculate sum for relative percentages (capped at 100 in getRelativePercentage)
     const faultRateSum = filteredServices.reduce((sum, s) => sum + s.faultRate, 0);
@@ -108,7 +132,7 @@ export const TopServicesByFaultRate: React.FC<TopServicesByFaultRateProps> = ({
         service.environment
       )}`,
     }));
-  }, [services, searchQuery]);
+  }, [services]);
 
   // Define table columns
   const columns: Array<EuiBasicTableColumn<ServiceFaultRateItem>> = [
