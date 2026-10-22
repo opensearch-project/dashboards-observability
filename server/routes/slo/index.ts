@@ -23,12 +23,14 @@ import type {
   SloStatusAggregationContext,
 } from '../../../common/slo/slo_service';
 import { SloService, SloValidationError, WORKSPACE_ID_RE } from '../../../common/slo/slo_service';
+import type { SloDocument } from '../../../common/slo/slo_types';
 import type { AlertingOSClient, Datasource } from '../../../common/types/alerting';
 import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
 import type { DatasourceDiscoveryService } from '../../services/alerting/datasource_discovery';
 import type { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
 import type { RulerClient } from '../../services/slo/ruler_client';
 import type { RuleHealthChecker } from '../../services/slo/rule_health_checker';
+import { OutdatedRuleRepairer } from '../../services/slo/outdated_rule_repairer';
 import {
   handleCreateSLO,
   handleDeleteSLO,
@@ -487,7 +489,8 @@ function buildStatusContext(
   discoveryService: DatasourceDiscoveryService | undefined,
   ruleHealthChecker: RuleHealthChecker | undefined,
   ruleDedupEnabled?: boolean,
-  request?: OpenSearchDashboardsRequest
+  request?: OpenSearchDashboardsRequest,
+  onOutdatedRules?: (doc: SloDocument) => void
 ): SloStatusAggregationContext | undefined {
   if (!datasourceService) return undefined;
   const client = ctx.core.opensearch.client.asCurrentUser;
@@ -531,6 +534,9 @@ function buildStatusContext(
     // the sample-derived state. When absent (offline dev / tests), the
     // aggregator falls through to the existing derivation.
     healthChecker: ruleHealthChecker,
+    // Re-provision recording groups that record an older version of the SLI
+    // math, in the background (see OutdatedRuleRepairer).
+    onOutdatedRules,
     // Propagate the dedup flag so the aggregator can pick fingerprint-keyed
     // selectors when true.
     ruleDedupEnabled,
@@ -579,6 +585,51 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     registerProbeSliRoute(router, logger, prometheusBackend, datasourceService, discoveryService);
   }
 
+  // Status reads hand SLOs whose recording groups predate the current SLI
+  // math to a throttled background repair, in the caller's request scope.
+  const outdatedRuleRepairer = new OutdatedRuleRepairer(logger);
+  const statusContextFor = (ctx: SloHandlerContext, req?: OpenSearchDashboardsRequest) =>
+    buildStatusContext(
+      ctx,
+      datasourceService,
+      discoveryService,
+      ruleHealthChecker,
+      ruleDedupEnabled,
+      req,
+      ruleHealthChecker && req
+        ? (doc: SloDocument) => {
+            void outdatedRuleRepairer.schedule(`${doc.spec.datasourceId}|${doc.id}`, async () => {
+              const built = await tryBuildDeployContext(
+                ctx,
+                req,
+                doc.spec.datasourceId,
+                rulerClient,
+                datasourceService,
+                discoveryService,
+                logger
+              );
+              if (built.errorResponse) {
+                throw new Error(
+                  String(built.errorResponse.body.error ?? `HTTP ${built.errorResponse.status}`)
+                );
+              }
+              const result = await handleRepairSLO(
+                sloService,
+                doc.id,
+                logger,
+                { health: ruleHealthChecker, deploy: built.deploy },
+                req
+              );
+              if (result.status !== 200) {
+                throw new Error(
+                  String((result.body as { error?: string }).error ?? `HTTP ${result.status}`)
+                );
+              }
+            });
+          }
+        : undefined
+    );
+
   // F1 — per-service aggregate rollup. Registered ahead of the list route so
   // the `/_aggregate` path isn't shadowed by the `/{id}` catch-all.
   registerSloAggregateRoute(
@@ -586,14 +637,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     sloService,
     logger,
     (ctx, req) =>
-      buildStatusContext(
-        ctx,
-        datasourceService,
-        discoveryService,
-        ruleHealthChecker,
-        ruleDedupEnabled,
-        req
-      ),
+      statusContextFor(ctx, req),
     datasourceService,
     discoveryService
   );
@@ -661,14 +705,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
         mode: q.mode ? (q.mode.split(',') as Array<'active' | 'shadow'>) : undefined,
         search: q.search,
       };
-      const statusCtx = buildStatusContext(
-        ctx as SloHandlerContext,
-        datasourceService,
-        discoveryService,
-        ruleHealthChecker,
-        ruleDedupEnabled,
-        req
-      );
+      const statusCtx = statusContextFor(ctx as SloHandlerContext, req);
       const result = await handleListSLOs(sloService, filters, logger, statusCtx, req, q.cursor);
       if (result.status >= 400) {
         return res.customError({
@@ -741,14 +778,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { body: schema.object({ ids: schema.arrayOf(schema.string()) }) },
     },
     async (ctx, req, res) => {
-      const statusCtx = buildStatusContext(
-        ctx as SloHandlerContext,
-        datasourceService,
-        discoveryService,
-        ruleHealthChecker,
-        ruleDedupEnabled,
-        req
-      );
+      const statusCtx = statusContextFor(ctx as SloHandlerContext, req);
       const result = await handleGetSLOStatuses(sloService, req.body.ids, logger, statusCtx, req);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({
@@ -764,14 +794,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       validate: { params: schema.object({ id: schema.string() }) },
     },
     async (ctx, req, res) => {
-      const statusCtx = buildStatusContext(
-        ctx as SloHandlerContext,
-        datasourceService,
-        discoveryService,
-        ruleHealthChecker,
-        ruleDedupEnabled,
-        req
-      );
+      const statusCtx = statusContextFor(ctx as SloHandlerContext, req);
       const result = await handleGetSLO(sloService, req.params.id, logger, statusCtx, req);
       if (result.status === 200) return res.ok({ body: result.body });
       return res.customError({

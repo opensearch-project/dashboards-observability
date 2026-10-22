@@ -849,12 +849,13 @@ export class SloLifecycleService {
    *      per unique fingerprint plus the per-SLO alert group; single-group
    *      shape returns just the alert group.
    *   3. Probe current rule health via the injected checker.
-   *   4. If healthy (`state === 'ok'`), return `{ repaired: false, health }`
-   *      without touching the ruler. Idempotent — repeat calls are cheap.
+   *   4. If healthy (`state === 'ok'` and no outdated recording groups),
+   *      return `{ repaired: false, health }` without touching the ruler.
+   *      Idempotent — repeat calls are cheap.
    *   5. If `ruler_unreachable`, throw `SloRulerError` with the probe's
    *      reported code (defaulting to `RULER_UNREACHABLE`) so the route
    *      adapter maps it to a 502 / upstream-gateway response.
-   *   6. Otherwise (`rules_missing` / `rules_partial`) regenerate the group
+   *   6. Otherwise (`rules_missing` / `rules_partial` / outdated) regenerate the group
    *      from the doc, upsert via the ruler, invalidate the health cache,
    *      re-probe, and return the post-repair snapshot with `repaired: true`.
    */
@@ -882,7 +883,7 @@ export class SloLifecycleService {
       expectedGroups,
     });
 
-    if (pre.state === 'ok') {
+    if (pre.state === 'ok' && !pre.outdatedGroups?.length) {
       return { sloId: doc.id, repaired: false, health: pre };
     }
 
@@ -966,7 +967,7 @@ export class SloLifecycleService {
       expectedGroups,
     });
 
-    if (pre.state === 'ok') {
+    if (pre.state === 'ok' && !pre.outdatedGroups?.length) {
       return { sloId: doc.id, repaired: false, health: pre };
     }
     if (pre.state === 'ruler_unreachable') {

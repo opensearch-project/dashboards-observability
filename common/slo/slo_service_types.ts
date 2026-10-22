@@ -241,6 +241,11 @@ export interface SloStatusAggregationContext {
    * sample-derived state alone.
    */
   healthChecker?: unknown;
+  /**
+   * Fire-and-forget hook for SLOs whose recording groups predate the current
+   * SLI math; the route layer wires it to a throttled background repair.
+   */
+  onOutdatedRules?: (doc: SloDocument) => void;
 }
 
 // ============================================================================
@@ -312,6 +317,8 @@ export interface RuleHealthReportLite {
   expectedGroups: string[];
   presentGroups: string[];
   missingGroups: string[];
+  /** Present groups whose recording rules predate the current SLI math. */
+  outdatedGroups?: string[];
   rulerErrorCode?: SloRulerErrorCode;
   computedAt: string;
 }
