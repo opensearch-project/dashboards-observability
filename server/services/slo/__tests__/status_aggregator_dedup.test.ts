@@ -121,6 +121,8 @@ function instantForMetrics(samples: Array<{ name: string; ratio: number; tsSec?:
  * PromQL adapter expects from the search strategy. Mirrors the shape
  * `createDataFrame` produces for a single PROMQL request.
  */
+let seriesShape: 'current' | 'legacy' = 'current';
+
 function envelopeToDataFrame(envelope: {
   resultType: string;
   result: Array<{ metric?: Record<string, string>; value?: [number, string] }>;
@@ -133,11 +135,17 @@ function envelopeToDataFrame(envelope: {
     const metric = entry.metric ?? {};
     const labelsWithoutName = { ...metric };
     delete labelsWithoutName.__name__;
-    const seriesParts = Object.entries(metric)
+    // Matches the strategy's current `name{labels-without-__name__}` shape
+    // (`seriesShape: 'legacy'` emits the older `{__name__="...", ...}` form).
+    const seriesSource = seriesShape === 'legacy' ? metric : labelsWithoutName;
+    const seriesParts = Object.entries(seriesSource)
       .filter(([, v]) => v !== undefined && v !== '')
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}="${v}"`);
-    const seriesName = `{${seriesParts.join(', ')}}`;
+    const seriesName =
+      seriesShape === 'legacy'
+        ? `{${seriesParts.join(', ')}}`
+        : `${metric.__name__ ?? ''}{${seriesParts.join(', ')}}`;
     if (entry.value) {
       Time.push(entry.value[0] * 1000);
       Series.push(seriesName);
@@ -197,6 +205,7 @@ function mockClient(
 
 afterEach(() => {
   resetPromQLSearcherForTests();
+  seriesShape = 'current';
 });
 
 function ctxDedup(
@@ -249,6 +258,20 @@ describe('DirectQueryStatusAggregator — dedup path', () => {
     expect(searcher).toHaveBeenCalledTimes(1);
     const [, , options] = searcher.mock.calls[0];
     expect(options).toEqual({ strategy: 'promql' });
+  });
+
+  it('still maps samples when the strategy emits the older `{__name__=...}` Series shape', async () => {
+    seriesShape = 'legacy';
+    const doc = dedupDoc('slo-a', { 'availability-99-9': 'abcdef0123456789' });
+    const { client } = mockClient(() =>
+      instantForMetrics([
+        { name: 'slo:sli_error:ratio_rate_3d:sli_abcdef0123456789', ratio: 0.0002 },
+      ])
+    );
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([doc], ctxDedup(client));
+    expect(status.state).toBe('ok');
+    expect(status.objectives[0].currentValue).toBeCloseTo(0.0002, 6);
   });
 
   it('two SLOs sharing a fingerprint: each produces an identical query (Prometheus can serve from one series)', async () => {
