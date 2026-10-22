@@ -46,6 +46,57 @@ const DEFAULT_INTERVAL_SECONDS = 60;
 export const SLO_RULER_NAMESPACE = 'slo-generated';
 
 /**
+ * Placeholder a custom SLI query uses for the evaluation window (Sloth's
+ * convention). Substituted with each recording window (`5m` … `3d`) so a
+ * custom query such as `sum(increase(x_total[{{.window}}]))` records a real
+ * per-window ratio instead of one instant value copied into every window.
+ */
+export const SLI_WINDOW_TOKEN = '{{.window}}';
+
+/**
+ * Label stamped on every generated recording rule. Bump the value whenever
+ * the recorded math changes: the rule-health checker reports groups without
+ * the current value as outdated so they get re-provisioned in place (rule
+ * names are fingerprint- or id-derived and don't change with the math).
+ */
+export const SLO_RULES_VERSION_LABEL = 'slo_rules_version';
+export const SLO_RULES_VERSION = '2';
+
+/**
+ * Bucket bounds (seconds) of the span-derived `latency_seconds` histogram
+ * the trace pipeline's service-map processor emits. Those buckets are
+ * per-interval and non-cumulative — each `le` holds only its own slice and
+ * `+Inf` is just the overflow — so "requests under X" is the sum of every
+ * bucket whose bound is <= X, not the single `le="X"` series.
+ */
+export const SPAN_DERIVED_LATENCY_BUCKETS_SECONDS: readonly number[] = [
+  0,
+  0.005,
+  0.01,
+  0.025,
+  0.05,
+  0.075,
+  0.1,
+  0.25,
+  0.5,
+  0.75,
+  1,
+  2.5,
+  5,
+  7.5,
+  10,
+];
+
+/** Span-derived RED metric names: per-interval delta gauges, never counters. */
+const SPAN_DERIVED_GAUGES = [
+  'request',
+  'error',
+  'fault',
+  'latency_seconds_count',
+  'latency_seconds_sum',
+] as const;
+
+/**
  * Default MWMBR tiers per the Google SRE Workbook Ch. 5 Table 5-8 and Sloth's
  * google-30d.yaml. Consumers can override per-SLO.
  */
@@ -212,19 +263,9 @@ function commonLabels(spec: SloSpec, sloId: string, objective: Objective): Recor
 // ============================================================================
 
 /**
- * Generate the 7 error-ratio recording rules for one objective.
- *
- * Availability: `1 - (sum(rate(metric{dims, good}[w])) / sum(rate(metric{dims}[w])))`
- *
- * Latency threshold: "error" = requests that exceeded the latency bound:
- *   `1 - (sum(rate(metric_bucket{dims, le="<bound>"}[w])) / sum(rate(metric_bucket{dims, le="+Inf"}[w])))`
- *
- * Custom (events): `1 - (goodQuery / totalQuery)` wrapped at each window via
- *   direct substitution — users already provide windowed PromQL, but for custom
- *   the recording rules just record the error ratio at evaluation time without
- *   a window wrap (P0 limitation — documented in §11).
- *
- * Custom (raw): the user's errorRatioQuery is recorded as-is (one rule per window).
+ * Generate the 7 error-ratio recording rules for one objective. The math for
+ * every SLI shape lives in `buildSliEventQueries`; each rule records
+ * `1 - (good / total)` for its window.
  */
 function generateRecordingRules(
   spec: SloSpec,
@@ -236,76 +277,200 @@ function generateRecordingRules(
   if (spec.sli.type !== 'single') return [];
   const sli = spec.sli;
   if (sli.definition.backend !== 'prometheus') return [];
-  const prom = sli.definition;
 
   const base = commonLabels(spec, sloId, objective);
   const rules: GeneratedRule[] = [];
 
   for (const window of RECORDING_WINDOWS) {
     const name = `slo:sli_error:ratio_rate_${window}:${slug}_${suffix}`;
-    const expr = errorRatioExpr(prom, sli, window, objective);
+    const expr = errorRatioExpr(sli, window, objective);
     rules.push({
       type: 'recording',
       name,
       expr,
-      labels: { ...base, slo_window: window },
+      labels: { ...base, slo_window: window, [SLO_RULES_VERSION_LABEL]: SLO_RULES_VERSION },
       description: `Pre-computed error ratio over the ${window} window`,
     });
   }
   return rules;
 }
 
-function errorRatioExpr(
-  prom: PrometheusSli,
+/**
+ * Error-ratio PromQL for one SLI over `window` — exactly what the recording
+ * rule for that window evaluates. Exported so the status reader can evaluate
+ * the same expression inline when a recorded sample is missing, and the UI
+ * can chart it. Returns null when the SLI can't be queried (composite,
+ * non-Prometheus, custom without an expression).
+ */
+export function buildErrorRatioExpr(
   sli: SingleSli,
+  objective: Objective,
+  window: string
+): string | null {
+  const q = buildSliEventQueries(sli, objective, window);
+  if (!q) return null;
+  if ('errorRatio' in q) return q.errorRatio;
+  // Wrap each sub-expression in its own parens — PromQL `/` binds tighter
+  // than `-`/`+`, so an unparenthesized `sum(a) - sum(b) / sum(c)` parses
+  // as `sum(a) - (sum(b) / sum(c))`.
+  return `1 - (\n  (${q.good})\n  /\n  (${q.total})\n)`;
+}
+
+function errorRatioExpr(sli: SingleSli, window: string, objective: Objective): string {
+  return buildErrorRatioExpr(sli, objective, window) ?? `# custom SLI requires customExpr`;
+}
+
+/**
+ * Good / total event queries for one SLI over `window`, or the raw error
+ * ratio for a raw custom SLI. Single source of truth for the recording
+ * rules, the probe, the inline status fallback and the detail-page charts.
+ *
+ * `mode: 'ratio'` (default) yields per-second rates for cumulative counters;
+ * `mode: 'count'` yields event counts over the window (`increase`). Delta
+ * gauges are summed over the window in both modes — the ratio is the same.
+ *
+ * Shapes:
+ *   - availability: good `sum(f(m{dims, good}[w])) or vector(0)`, total
+ *     `sum(f(m{dims}[w]))`. The `or vector(0)` keeps a total outage (no
+ *     series matches the good filter) from reading as "no data".
+ *   - latency_threshold, cumulative histogram: good = the `le` bucket at the
+ *     threshold, total = the `+Inf` bucket. `le` is matched numerically
+ *     tolerant (`0.5`, `0.50`, `1`, `1.0`) since producers format it
+ *     differently.
+ *   - latency_threshold, delta histogram (span-derived): good = every bucket
+ *     with a bound <= threshold, total = `<metric>_count`.
+ *   - custom: the user's queries with `{{.window}}` substituted; legacy
+ *     instant reads of span-derived gauges are upgraded to windowed sums.
+ */
+export function buildSliEventQueries(
+  sli: SingleSli,
+  objective: Objective,
   window: string,
-  objective: Objective
-): string {
+  mode: 'ratio' | 'count' = 'ratio'
+): { good: string; total: string } | { errorRatio: string } | null {
+  const prom = sli.definition;
+  if (prom.backend !== 'prometheus') return null;
+
   if (prom.type === 'custom') {
-    if (!prom.customExpr) {
-      return `# custom SLI requires customExpr`;
+    const custom = prom.customExpr;
+    if (!custom) return null;
+    if (custom.mode === 'raw') {
+      return { errorRatio: substituteWindowToken(custom.errorRatioQuery, window) };
     }
-    if (prom.customExpr.mode === 'raw') {
-      return prom.customExpr.errorRatioQuery;
-    }
-    // Wrap each sub-expression in its own parens — PromQL `/` binds tighter
-    // than `-`/`+`, so an unparenthesized `sum(a) - sum(b) / sum(c)` parses
-    // as `sum(a) - (sum(b) / sum(c))`. A goodQuery of `sum(request) -
-    // sum(fault)` paired with totalQuery `sum(request)` otherwise evaluates
-    // to `-1` when traffic is healthy, which feeds nonsense into the
-    // recording rule and the budget-remaining chart (`20,100%` headline
-    // remaining budget, vs the correct `100%`).
-    return (
-      `1 - (\n` +
-      `  (${prom.customExpr.goodQuery})\n` +
-      `  /\n` +
-      `  (${prom.customExpr.totalQuery})\n` +
-      `)`
-    );
+    return {
+      good: windowCustomQuery(custom.goodQuery, window),
+      total: windowCustomQuery(custom.totalQuery, window),
+    };
   }
-  const dimSelectors = buildSelectors(sli, false);
-  const goodSelectors = buildSelectors(sli, true);
+
+  const delta = effectiveMetricTemporality(sli) === 'delta';
+  const over = (selector: string): string => {
+    if (delta) return `sum(sum_over_time(${selector}[${window}]))`;
+    return `sum(${mode === 'count' ? 'increase' : 'rate'}(${selector}[${window}]))`;
+  };
+  const dims = sli.dimensions.map((d) => `${d.name}="${escapeLabelValue(d.value)}"`);
+  const goodFilter = prom.goodEventsFilter?.trim();
+
   if (prom.type === 'availability') {
     const metric = prom.metric || '';
-    return (
-      `1 - (\n` +
-      `  sum(rate(${metric}{${goodSelectors}}[${window}]))\n` +
-      `  /\n` +
-      `  sum(rate(${metric}{${dimSelectors}}[${window}]))\n` +
-      `)`
-    );
+    return {
+      good: `${over(`${metric}{${joinMatchers(...dims, goodFilter)}}`)} or vector(0)`,
+      total: over(`${metric}{${joinMatchers(...dims)}}`),
+    };
   }
+
   // latency_threshold
   const bucketMetric = ensureBucketMetric(prom.metric || '');
-  const bound = objective.latencyThreshold ?? 0;
-  const boundLe = formatLatencyBoundLe(bound, prom.latencyThresholdUnit ?? 'seconds');
-  return (
-    `1 - (\n` +
-    `  sum(rate(${bucketMetric}{${dimSelectors}, le="${boundLe}"}[${window}]))\n` +
-    `  /\n` +
-    `  sum(rate(${bucketMetric}{${dimSelectors}, le="+Inf"}[${window}]))\n` +
-    `)`
-  );
+  const boundSeconds = toSeconds(objective.latencyThreshold ?? 0, prom.latencyThresholdUnit);
+  if (delta) {
+    const bounds = SPAN_DERIVED_LATENCY_BUCKETS_SECONDS.filter((b) => b <= boundSeconds);
+    const le = `le=~"${bounds.map(leValuePattern).join('|')}"`;
+    return {
+      good: over(`${bucketMetric}{${joinMatchers(...dims, le)}}`),
+      total: over(`${ensureCountMetric(prom.metric || '')}{${joinMatchers(...dims)}}`),
+    };
+  }
+  return {
+    good: over(`${bucketMetric}{${joinMatchers(...dims, `le=~"${leValuePattern(boundSeconds)}"`)}}`),
+    total: over(`${bucketMetric}{${joinMatchers(...dims, 'le="+Inf"')}}`),
+  };
+}
+
+/**
+ * Whether the SLI's source metric is a cumulative counter/histogram (the
+ * Prometheus norm — read with `rate`/`increase`) or a per-interval delta
+ * gauge (read with `sum_over_time`). An explicit `metricTemporality` wins;
+ * otherwise SLIs scoped to `namespace="span_derived"` are delta, since
+ * every span-derived RED metric is.
+ */
+export function effectiveMetricTemporality(sli: SingleSli): 'cumulative' | 'delta' {
+  const def = sli.definition;
+  if (def.backend === 'prometheus' && def.metricTemporality) return def.metricTemporality;
+  return sli.dimensions.some((d) => d.name === 'namespace' && d.value === 'span_derived')
+    ? 'delta'
+    : 'cumulative';
+}
+
+/** Replace every `{{.window}}` token with `window`. */
+export function substituteWindowToken(query: string, window: string): string {
+  return query.split(SLI_WINDOW_TOKEN).join(window);
+}
+
+/**
+ * Window a custom good/total query. Queries carrying `{{.window}}` get it
+ * substituted. Queries without any range selector that read span-derived
+ * gauges instantly (what earlier suggestion drafts and templates produced,
+ * e.g. `sum(request{...}) - sum(fault{...})`) are rewritten to windowed sums
+ * — an instant read of a sparse per-interval gauge ignores the window and
+ * goes empty between emissions. Anything else is returned unchanged.
+ */
+function windowCustomQuery(query: string, window: string): string {
+  if (query.includes(SLI_WINDOW_TOKEN)) return substituteWindowToken(query, window);
+  if (query.includes('[') || !/namespace\s*=\s*"span_derived"/.test(query)) return query;
+  const gauges = SPAN_DERIVED_GAUGES.join('|');
+  return query
+    .replace(new RegExp(`sum\\((${gauges})\\{([^{}]*)\\}\\)`, 'g'), (_m, metric, sel) => {
+      const windowed = `sum(sum_over_time(${metric}{${sel}}[${window}]))`;
+      return metric === 'fault' || metric === 'error' ? `(${windowed} or vector(0))` : windowed;
+    })
+    .replace(/sum\(latency_seconds_bucket\{([^{}]*)\}\)/g, (m, sel: string) => {
+      const leMatch = sel.match(/(?:^|,)\s*le\s*=\s*"([^"]*)"/);
+      if (!leMatch) return m;
+      const rest = sel
+        .replace(/(^|,)\s*le\s*=\s*"[^"]*"/, '$1')
+        .replace(/^\s*,|,\s*$/g, '')
+        .replace(/,\s*,/g, ',');
+      if (leMatch[1] === '+Inf') {
+        return `sum(sum_over_time(latency_seconds_count{${rest}}[${window}]))`;
+      }
+      const bound = Number(leMatch[1]);
+      if (!Number.isFinite(bound)) return m;
+      const bounds = SPAN_DERIVED_LATENCY_BUCKETS_SECONDS.filter((b) => b <= bound);
+      const le = `le=~"${bounds.map(leValuePattern).join('|')}"`;
+      return `sum(sum_over_time(latency_seconds_bucket{${joinMatchers(rest, le)}}[${window}]))`;
+    });
+}
+
+/** Join non-empty label matchers with `, `. */
+function joinMatchers(...parts: Array<string | undefined>): string {
+  return parts.filter((p): p is string => !!p && p.trim().length > 0).join(', ');
+}
+
+function toSeconds(bound: number, unit: 'seconds' | 'milliseconds' | undefined): number {
+  return unit === 'milliseconds' ? bound / 1000 : bound;
+}
+
+/**
+ * RE2 pattern (escaped for a PromQL string literal) matching an `le` label
+ * for `seconds` however the producer formats it: `0.5` also matches `0.50`,
+ * `1` also matches `1.0`. Bucket labels must match literally, and producers
+ * disagree on trailing zeros (OTel SDKs emit `1`, the span-derived pipeline
+ * emits `1.0`), so an exact `le="1"` silently misses half of them.
+ */
+export function leValuePattern(seconds: number): string {
+  const canonical = formatLatencyBoundLe(seconds, 'seconds');
+  const [intPart, frac] = canonical.split('.');
+  return frac === undefined ? `${intPart}(\\\\.0*)?` : `${intPart}\\\\.${frac}0*`;
 }
 
 /**
@@ -313,21 +478,27 @@ function errorRatioExpr(
  * Accepts `x_total`, `x_count`, `x`, or `x_bucket`.
  */
 export function ensureBucketMetric(metric: string): string {
-  const base = metric
+  return `${histogramBase(metric)}_bucket`;
+}
+
+/** Normalize a histogram metric name to its `_count` suffix. */
+export function ensureCountMetric(metric: string): string {
+  return `${histogramBase(metric)}_count`;
+}
+
+function histogramBase(metric: string): string {
+  return metric
     .replace(/_total$/, '')
     .replace(/_count$/, '')
     .replace(/_sum$/, '')
     .replace(/_bucket$/, '');
-  return `${base}_bucket`;
 }
 
 /**
- * Convert a latency bound + unit into the string Prometheus expects on the
- * histogram `le` label. Prometheus convention is seconds, so millisecond bounds
- * are scaled down.
+ * Convert a latency bound + unit into the canonical decimal string for a
+ * histogram `le` label, in seconds (the Prometheus convention).
  *
- * Bucket labels must literally match the producer's `le=` annotation, so the
- * output stays in fixed decimal notation regardless of magnitude — using
+ * The output stays in fixed decimal notation regardless of magnitude — using
  * `parseFloat(toPrecision)` would emit scientific notation (e.g. `"1e-7"`)
  * for very small bounds and silently miss the bucket. We pick `toFixed(9)`
  * (the smallest histogram bucket Prometheus emits is `1ns = 1e-9 s`) and trim
@@ -771,7 +942,6 @@ export function generateRecordingGroupForFingerprint(input: {
   const def = input.sli.definition;
   if (def.backend !== 'prometheus') return null;
   const { fingerprint, sli } = input;
-  const prom = def;
 
   // Build a minimal Objective stand-in so `errorRatioExpr` can read
   // `latencyThreshold` the same way it does for legacy rules. Name/target
@@ -785,12 +955,12 @@ export function generateRecordingGroupForFingerprint(input: {
   const rules: GeneratedRule[] = [];
   for (const window of RECORDING_WINDOWS) {
     const name = dedupRecordingRuleName(fingerprint, window);
-    const expr = errorRatioExpr(prom, sli, window, objectiveStub);
+    const expr = errorRatioExpr(sli, window, objectiveStub);
     rules.push({
       type: 'recording',
       name,
       expr,
-      labels: { slo_window: window },
+      labels: { slo_window: window, [SLO_RULES_VERSION_LABEL]: SLO_RULES_VERSION },
       description: `Pre-computed error ratio over the ${window} window (fingerprint ${fingerprint})`,
     });
   }
@@ -1061,35 +1231,9 @@ export function buildProbeQueries(
   window: string
 ): { good: string; total: string } | null {
   if (spec.sli.type !== 'single') return null;
-  const sli = spec.sli;
-  if (sli.definition.backend !== 'prometheus') return null;
-  const prom = sli.definition;
-
-  if (prom.type === 'custom') {
-    if (!prom.customExpr) return null;
-    if (prom.customExpr.mode === 'raw') {
-      // Raw error-ratio has no separable good/total — the probe surface only
-      // supports the events split. Callers pre-check for `mode === 'events'`.
-      return null;
-    }
-    return { good: prom.customExpr.goodQuery, total: prom.customExpr.totalQuery };
-  }
-
-  const dimSelectors = buildSelectors(sli, false);
-  const goodSelectors = buildSelectors(sli, true);
-  if (prom.type === 'availability') {
-    const metric = prom.metric || '';
-    return {
-      good: `sum(rate(${metric}{${goodSelectors}}[${window}]))`,
-      total: `sum(rate(${metric}{${dimSelectors}}[${window}]))`,
-    };
-  }
-  // latency_threshold — "good" = requests under the latency bound.
-  const bucketMetric = ensureBucketMetric(prom.metric || '');
-  const bound = objective.latencyThreshold ?? 0;
-  const boundLe = formatLatencyBoundLe(bound, prom.latencyThresholdUnit ?? 'seconds');
-  return {
-    good: `sum(rate(${bucketMetric}{${dimSelectors}, le="${boundLe}"}[${window}]))`,
-    total: `sum(rate(${bucketMetric}{${dimSelectors}, le="+Inf"}[${window}]))`,
-  };
+  const q = buildSliEventQueries(spec.sli, objective, window);
+  // Raw error-ratio has no separable good/total — the probe surface only
+  // supports the events split. Callers pre-check for `mode === 'events'`.
+  if (!q || 'errorRatio' in q) return null;
+  return q;
 }

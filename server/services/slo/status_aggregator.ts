@@ -61,6 +61,7 @@ import type {
   SloLiveStatus,
 } from '../../../common/slo/slo_types';
 import {
+  buildErrorRatioExpr,
   dedupRecordingRuleName,
   findClosestRecordingWindow,
   parseDurationToMs,
@@ -227,6 +228,12 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
    * plugin start, so this matches the lifetime of the other caches.
    */
   private readonly loggedHealthCheckerFailures = new Set<string>();
+
+  /** Short-lived cache of inline SLI evaluations, keyed by (datasource, query). */
+  private readonly inlineCache = new Map<
+    string,
+    { parsed: ParsedInstantResponse; expiresAt: number }
+  >();
 
   constructor(
     private readonly logger: Logger,
@@ -643,6 +650,33 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       }
     }
 
+    // Inline fallback: an objective whose recording rule returned nothing
+    // usable (missing, or NaN/Inf) is evaluated directly from its source
+    // metrics with the exact expression the rule records. A rule that hasn't
+    // run its first evaluation yet, is mid re-provision, or still records an
+    // outdated expression must not read as "No data" / "Source idle" while
+    // the source metric is reporting. Only when the direct evaluation is also
+    // empty or non-finite does the objective keep that state.
+    const inlineObjectives = new Set<string>();
+    const unresolved = spec.objectives.filter((o) => !byObjective.has(o.name));
+    if (unresolved.length > 0) {
+      const inline = await this.evaluateObjectivesInline(doc, unresolved, longWindow, ctx, ds);
+      if (inline.size > 0) {
+        byObjective = new Map(byObjective);
+        sourceIdleObjectives = new Set(sourceIdleObjectives);
+        const nowSec = Math.floor(Date.now() / 1000);
+        for (const [name, value] of inline) {
+          if (value === null) {
+            sourceIdleObjectives.add(name);
+            continue;
+          }
+          byObjective.set(name, { labels: {}, timestamp: nowSec, value });
+          sourceIdleObjectives.delete(name);
+          inlineObjectives.add(name);
+        }
+      }
+    }
+
     const staleAfterMs = 2 * parseDurationToMs(longWindow);
     const nowMs = Date.now();
     let lastEvalMs: number | undefined;
@@ -664,7 +698,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       if (lastEvalMs === undefined || sampleMs > lastEvalMs) lastEvalMs = sampleMs;
       const stale = nowMs - sampleMs > staleAfterMs;
       if (stale) anyStale = true;
-      return buildObjectiveStatus(obj, doc, s.value, spec.budgetWarningThresholds);
+      const status = buildObjectiveStatus(obj, doc, s.value, spec.budgetWarningThresholds);
+      return inlineObjectives.has(obj.name) ? { ...status, evaluatedInline: true } : status;
     });
 
     const topState = deriveTopLevelState(
@@ -739,6 +774,77 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       }
     }
     return { byObjective, sourceIdleObjectives };
+  }
+
+  /**
+   * Evaluate the error ratio of `objectives` directly from the SLI's source
+   * metrics over `window`, in one instant query: each objective's expression
+   * is tagged with its index via `label_replace` and the parts are `or`-ed.
+   * Returns `objectiveName → errorRatio` for objectives that produced a
+   * finite sample, `→ null` for ones that only produced NaN/Inf (the source
+   * really had no traffic in the window), and omits ones with no sample.
+   *
+   * Never throws: a failed fallback leaves the recorded-sample derivation
+   * untouched. Results are cached briefly per (datasource, query) because the
+   * listing polls and the source-side `[3d]` read is the expensive part.
+   */
+  private async evaluateObjectivesInline(
+    doc: SloDocument,
+    objectives: Objective[],
+    window: string,
+    ctx: SloStatusAggregationContext,
+    ds: Datasource
+  ): Promise<Map<string, number | null>> {
+    const out = new Map<string, number | null>();
+    if (doc.spec.sli.type !== 'single') return out;
+    const sli = doc.spec.sli;
+    const parts: string[] = [];
+    objectives.forEach((objective, i) => {
+      const expr = buildErrorRatioExpr(sli, objective, window);
+      // Newline before the closing paren so a trailing `# comment` in a raw
+      // custom expression can't swallow it.
+      if (expr) parts.push(`label_replace((${expr}\n), "${INLINE_OBJECTIVE_LABEL}", "${i}", "", "")`);
+    });
+    if (parts.length === 0) return out;
+    const query = parts.join('\nor\n');
+
+    let parsed: ParsedInstantResponse;
+    const cacheKey = `${ds.id}\u0000${query}`;
+    const cached = this.inlineCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      parsed = cached.parsed;
+    } else {
+      try {
+        parsed = await this.queryInstant(ctx, ds, query);
+      } catch (err) {
+        this.logger.debug(
+          `StatusAggregator: inline SLI evaluation failed for ${doc.id}: ${errMsg(err)}`
+        );
+        return out;
+      }
+      if (this.inlineCache.size >= INLINE_CACHE_MAX_ENTRIES) this.inlineCache.clear();
+      this.inlineCache.set(cacheKey, { parsed, expiresAt: Date.now() + INLINE_CACHE_TTL_MS });
+    }
+
+    const byIndex = new Map<number, number>();
+    for (const sample of parsed.samples) {
+      const idx = Number(sample.labels[INLINE_OBJECTIVE_LABEL]);
+      if (!Number.isInteger(idx)) continue;
+      // A raw custom expression can return several series; report the worst.
+      const prev = byIndex.get(idx);
+      if (prev === undefined || sample.value > prev) byIndex.set(idx, sample.value);
+    }
+    const nonFiniteIndexes = new Set<number>();
+    for (const sample of parsed.nonFinite) {
+      const idx = Number(sample.labels[INLINE_OBJECTIVE_LABEL]);
+      if (Number.isInteger(idx)) nonFiniteIndexes.add(idx);
+    }
+    objectives.forEach((objective, i) => {
+      const value = byIndex.get(i);
+      if (value !== undefined) out.set(objective.name, value);
+      else if (nonFiniteIndexes.has(i)) out.set(objective.name, null);
+    });
+    return out;
   }
 
   // --------------------------------------------------------------------------
@@ -823,6 +929,13 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
  * large fleet.
  */
 const MAX_SLO_IDS_PER_BATCH = 200;
+
+/** Label tagging each objective's part of a combined inline-evaluation query. */
+const INLINE_OBJECTIVE_LABEL = 'slo_inline_objective';
+/** Inline evaluations are reused across listing polls for this long. */
+const INLINE_CACHE_TTL_MS = 60_000;
+/** Bound on cached inline evaluations; the cache is dropped wholesale past it. */
+const INLINE_CACHE_MAX_ENTRIES = 500;
 
 /** Split an array into fixed-size chunks. Last chunk may be shorter. */
 function chunk<T>(items: T[], size: number): T[][] {

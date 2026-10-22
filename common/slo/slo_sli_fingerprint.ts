@@ -63,6 +63,10 @@ export function computeSliFingerprint(
         : null,
     periodLength: prom.periodLength ?? null,
     customExpr: normalizeCustomExpr(prom.customExpr),
+    // Only an explicit temporality joins the hash: `undefined` keeps every
+    // pre-existing fingerprint (and the recording rules named after it)
+    // stable, and the generator infers the same default either way.
+    ...(prom.metricTemporality ? { metricTemporality: prom.metricTemporality } : {}),
     dimensions: normalizeDimensions(sli.dimensions),
   });
 

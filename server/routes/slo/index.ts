@@ -129,6 +129,9 @@ const prometheusSliSchema = schema.object(
     latencyThresholdUnit: schema.maybe(
       schema.oneOf([schema.literal('seconds'), schema.literal('milliseconds')])
     ),
+    metricTemporality: schema.maybe(
+      schema.oneOf([schema.literal('cumulative'), schema.literal('delta')])
+    ),
     customExpr: schema.maybe(
       schema.oneOf([
         schema.object({
