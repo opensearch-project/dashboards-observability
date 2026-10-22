@@ -6,39 +6,35 @@
 /**
  * PromQL builders for SLO visualizations.
  *
- * Kept in sync with `common/slo/slo_promql_generator.ts` so the charts render
- * the same math the recording rules will emit. Any divergence leads to UI that
- * misrepresents alerting state — extend both files together.
+ * The SLI math itself comes from `common/slo/slo_promql_generator.ts`
+ * (`buildErrorRatioExpr` / `buildSliEventQueries`), so the charts render
+ * exactly what the recording rules record — there is no second copy to drift.
  *
  * Separated from `slo_visualizations.tsx` so the burn-rate panel and detail
  * page share one code path for turning an (SLO, objective, window) triple into
  * a runnable PromQL query.
  */
 
-import type { Objective, SloDocument } from '../../../../../common/slo/slo_types';
+import type { Objective, SingleSli, SloDocument } from '../../../../../common/slo/slo_types';
+import {
+  SPAN_DERIVED_LATENCY_BUCKETS_SECONDS,
+  buildErrorRatioExpr,
+  buildSliEventQueries,
+  effectiveMetricTemporality,
+  ensureBucketMetric,
+  ensureCountMetric,
+  leValuePattern,
+  substituteWindowToken,
+} from '../../../../../common/slo/slo_promql_generator';
 
-/** Prometheus counter suffix normalization — matches generator's ensureBucketMetric. */
-function ensureBucketMetric(metric: string): string {
-  const base = metric
-    .replace(/_total$/, '')
-    .replace(/_count$/, '')
-    .replace(/_sum$/, '')
-    .replace(/_bucket$/, '');
-  return `${base}_bucket`;
+/** The SLO's single Prometheus SLI, or null when it can't be charted. */
+function promSli(slo: SloDocument): SingleSli | null {
+  if (slo.spec.sli.type !== 'single') return null;
+  return slo.spec.sli.definition.backend === 'prometheus' ? slo.spec.sli : null;
 }
 
-function ensureCountMetric(metric: string): string {
-  const base = metric
-    .replace(/_total$/, '')
-    .replace(/_count$/, '')
-    .replace(/_sum$/, '')
-    .replace(/_bucket$/, '');
-  return `${base}_count`;
-}
-
-function formatLeBound(bound: number, unit: 'seconds' | 'milliseconds'): string {
-  const seconds = unit === 'milliseconds' ? bound / 1000 : bound;
-  return parseFloat(seconds.toPrecision(10)).toString();
+function isDelta(sli: SingleSli): boolean {
+  return effectiveMetricTemporality(sli) === 'delta';
 }
 
 /**
@@ -63,59 +59,18 @@ export function buildSelectors(slo: SloDocument, includeGoodFilter: boolean): st
 }
 
 /**
- * Error ratio over a configurable window — same math as
- * `errorRatioExpr` in the generator but with the window passed in so the same
- * helper builds the detail-page 5m chart and the burn-rate panel's
- * short/long window scalars.
+ * Error ratio over a configurable window — the generator's own
+ * `buildErrorRatioExpr`, so the detail-page 5m chart and the burn-rate
+ * panel's short/long window scalars chart exactly what the recording rules
+ * record.
  */
 export function buildErrorRatioExprForWindow(
   slo: SloDocument,
   objective: Objective,
   window: string
 ): string | null {
-  if (slo.spec.sli.type !== 'single') return null;
-  const def = slo.spec.sli.definition;
-  if (def.backend !== 'prometheus') return null;
-
-  if (def.type === 'custom') {
-    if (!def.customExpr) return null;
-    if (def.customExpr.mode === 'raw') return def.customExpr.errorRatioQuery;
-    // Wrap each sub-expression in its own parens — PromQL `/` binds tighter
-    // than `-`/`+`, so an unparenthesized `sum(a) - sum(b) / sum(c)` parses
-    // as `sum(a) - (sum(b) / sum(c))` rather than the operator-intended
-    // `(sum(a) - sum(b)) / sum(c)`. Seen in the wild: a goodQuery of
-    // `sum(request) - sum(fault)` + totalQuery `sum(request)` produced an
-    // errorRatio of `-1` (→ budget-remaining `20,100%`) when the real ratio
-    // was `0`.
-    return `1 - ((${def.customExpr.goodQuery}) / (${def.customExpr.totalQuery}))`;
-  }
-
-  const dim = buildSelectors(slo, false);
-  const good = buildSelectors(slo, true);
-
-  if (def.type === 'availability') {
-    const metric = def.metric;
-    if (!metric) return null;
-    const counter = metric.endsWith('_total') ? metric : ensureCountMetric(metric);
-    return (
-      `1 - (\n` +
-      `  sum(rate(${counter}{${good}}[${window}]))\n` +
-      `  /\n` +
-      `  sum(rate(${counter}{${dim}}[${window}]))\n` +
-      `)`
-    );
-  }
-
-  // latency_threshold
-  const bucket = ensureBucketMetric(def.metric ?? '');
-  const le = formatLeBound(objective.latencyThreshold ?? 0, def.latencyThresholdUnit ?? 'seconds');
-  return (
-    `1 - (\n` +
-    `  sum(rate(${bucket}{${dim}, le="${le}"}[${window}]))\n` +
-    `  /\n` +
-    `  sum(rate(${bucket}{${dim}, le="+Inf"}[${window}]))\n` +
-    `)`
-  );
+  const sli = promSli(slo);
+  return sli ? buildErrorRatioExpr(sli, objective, window) : null;
 }
 
 /** Convenience — detail page's primary 5m query. */
@@ -123,10 +78,21 @@ export function buildErrorRatioQuery(slo: SloDocument, objective: Objective): st
   return buildErrorRatioExprForWindow(slo, objective, '5m');
 }
 
+/** Good/total event counts over `window`; null for custom SLIs (unknown units). */
+function eventCounts(
+  slo: SloDocument,
+  objective: Objective,
+  window: string
+): { good: string; total: string } | null {
+  const sli = promSli(slo);
+  if (!sli || sli.definition.type === 'custom') return null;
+  const q = buildSliEventQueries(sli, objective, window, 'count');
+  return q && !('errorRatio' in q) ? q : null;
+}
+
 /**
- * Raw "good events" count over a window. Returned as the PromQL expression
- * for `sum(increase(<counter>{good_selectors}[window]))`. Used by the detail
- * page's Events stat to surface good/total alongside the ratio.
+ * Raw "good events" count over a window. Used by the detail page's Events
+ * stat to surface good/total alongside the ratio.
  *
  * Returns `null` for custom SLIs or when the SLI shape cannot emit a count —
  * callers render the Events card with em-dashes + "waiting for samples".
@@ -136,25 +102,7 @@ export function buildGoodEventsCountQuery(
   objective: Objective,
   window: string
 ): string | null {
-  if (slo.spec.sli.type !== 'single') return null;
-  const def = slo.spec.sli.definition;
-  if (def.backend !== 'prometheus') return null;
-  if (def.type === 'custom') return null;
-
-  const good = buildSelectors(slo, true);
-
-  if (def.type === 'availability') {
-    const metric = def.metric;
-    if (!metric) return null;
-    const counter = metric.endsWith('_total') ? metric : ensureCountMetric(metric);
-    return `sum(increase(${counter}{${good}}[${window}]))`;
-  }
-
-  // latency_threshold: "good" = requests under the latency bucket bound.
-  const bucket = ensureBucketMetric(def.metric ?? '');
-  const dim = buildSelectors(slo, false);
-  const le = formatLeBound(objective.latencyThreshold ?? 0, def.latencyThresholdUnit ?? 'seconds');
-  return `sum(increase(${bucket}{${dim}, le="${le}"}[${window}]))`;
+  return eventCounts(slo, objective, window)?.good ?? null;
 }
 
 /**
@@ -166,22 +114,7 @@ export function buildTotalEventsCountQuery(
   objective: Objective,
   window: string
 ): string | null {
-  if (slo.spec.sli.type !== 'single') return null;
-  const def = slo.spec.sli.definition;
-  if (def.backend !== 'prometheus') return null;
-  if (def.type === 'custom') return null;
-
-  const dim = buildSelectors(slo, false);
-
-  if (def.type === 'availability') {
-    const metric = def.metric;
-    if (!metric) return null;
-    const counter = metric.endsWith('_total') ? metric : ensureCountMetric(metric);
-    return `sum(increase(${counter}{${dim}}[${window}]))`;
-  }
-
-  const bucket = ensureBucketMetric(def.metric ?? '');
-  return `sum(increase(${bucket}{${dim}, le="+Inf"}[${window}]))`;
+  return eventCounts(slo, objective, window)?.total ?? null;
 }
 
 /**
@@ -197,16 +130,16 @@ export function buildTotalEventsCountQuery(
  * point of view".
  *
  *   - availability: `count(last_over_time(<metric>{<dim>}[1h]))`
- *   - latency:      `count(last_over_time(<bucket>{<dim>, le="+Inf"}[1h]))`
- *   - custom:       `(max_over_time((<totalQuery>)[1h:5m])) > bool 0`
+ *   - latency:      `count(last_over_time(<count series>{<dim>}[1h]))`
+ *   - custom:       `(max_over_time((<totalQuery>)[1h:5m])) > 0`
  *
  * Returns `null` for SLIs where a probe can't be formed (composite, opensearch
  * backend, or custom without an expression).
  */
 export function buildCoverageProbeQuery(slo: SloDocument, _objective: Objective): string | null {
-  if (slo.spec.sli.type !== 'single') return null;
-  const def = slo.spec.sli.definition;
-  if (def.backend !== 'prometheus') return null;
+  const sli = promSli(slo);
+  if (!sli || sli.definition.backend !== 'prometheus') return null;
+  const def = sli.definition;
 
   if (def.type === 'custom') {
     if (!def.customExpr) return null;
@@ -217,50 +150,67 @@ export function buildCoverageProbeQuery(slo: SloDocument, _objective: Objective)
     // the expression produced a nonzero value in the last hour. An expression
     // whose selectors match nothing emits `sum=0` → filtered out; a real
     // traffic-backed service emits >0 at least once per hour → kept.
-    return `(max_over_time((${base})[1h:5m])) > 0`;
+    return `(max_over_time((${substituteWindowToken(base, '5m')})[1h:5m])) > 0`;
   }
 
   const dim = buildSelectors(slo, false);
   if (def.type === 'availability') {
-    const metric = def.metric;
-    if (!metric) return null;
-    const counter = metric.endsWith('_total') ? metric : ensureCountMetric(metric);
-    return `count(last_over_time(${counter}{${dim}}[1h]))`;
+    if (!def.metric) return null;
+    return `count(last_over_time(${def.metric}{${dim}}[1h]))`;
   }
-
-  // latency_threshold
-  const bucket = ensureBucketMetric(def.metric ?? '');
-  return `count(last_over_time(${bucket}{${dim}, le="+Inf"}[1h]))`;
+  // latency_threshold — the count series exists for cumulative and delta
+  // histograms alike.
+  return `count(last_over_time(${ensureCountMetric(def.metric ?? '')}{${dim}}[1h]))`;
 }
 
 /** Request rate per second, evaluated with the SLI's dimensions. */
 export function buildRequestRateQuery(slo: SloDocument): string | null {
-  if (slo.spec.sli.type !== 'single') return null;
-  const def = slo.spec.sli.definition;
-  if (def.backend !== 'prometheus') return null;
+  const sli = promSli(slo);
+  if (!sli || sli.definition.backend !== 'prometheus') return null;
+  const def = sli.definition;
+  if (def.type === 'custom' || !def.metric) return null;
   const dim = buildSelectors(slo, false);
-
-  if (def.type === 'availability') {
-    const metric = def.metric;
-    if (!metric) return null;
-    const counter = metric.endsWith('_total') ? metric : ensureCountMetric(metric);
-    return `sum(rate(${counter}{${dim}}[5m]))`;
-  }
-  if (def.type === 'latency_threshold') {
-    const bucket = ensureBucketMetric(def.metric ?? '');
-    return `sum(rate(${bucket}{${dim}, le="+Inf"}[5m]))`;
-  }
-  return null;
+  const metric = def.type === 'availability' ? def.metric : ensureCountMetric(def.metric);
+  // Delta gauges carry per-interval counts: sum the last 5m and divide.
+  return isDelta(sli)
+    ? `sum(sum_over_time(${metric}{${dim}}[5m])) / 300`
+    : `sum(rate(${metric}{${dim}}[5m]))`;
 }
 
-/** Histogram quantile query. `q` must be in [0, 1]. */
+/**
+ * Histogram quantile query. `q` must be in [0, 1].
+ *
+ * `histogram_quantile` needs cumulative buckets. A delta (span-derived)
+ * histogram's buckets are non-cumulative, so they're re-accumulated first:
+ * one `le="<b>"` series per known bound = the sum of every bucket <= b, plus
+ * `le="+Inf"` = the count.
+ */
 export function buildLatencyPercentileQuery(slo: SloDocument, q: number): string | null {
-  if (slo.spec.sli.type !== 'single') return null;
-  const def = slo.spec.sli.definition;
-  if (def.backend !== 'prometheus' || def.type !== 'latency_threshold') return null;
+  const sli = promSli(slo);
+  if (!sli || sli.definition.backend !== 'prometheus') return null;
+  const def = sli.definition;
+  if (def.type !== 'latency_threshold') return null;
   const bucket = ensureBucketMetric(def.metric ?? '');
   const dim = buildSelectors(slo, false);
-  return `histogram_quantile(${q}, sum(rate(${bucket}{${dim}}[5m])) by (le))`;
+  if (!isDelta(sli)) {
+    return `histogram_quantile(${q}, sum(rate(${bucket}{${dim}}[5m])) by (le))`;
+  }
+  const sel = (extra: string) => (dim ? `${dim}, ${extra}` : extra);
+  const cumulative = SPAN_DERIVED_LATENCY_BUCKETS_SECONDS.map((b, i, all) => {
+    const le = all
+      .slice(0, i + 1)
+      .map(leValuePattern)
+      .join('|');
+    return `label_replace(sum(sum_over_time(${bucket}{${sel(
+      `le=~"${le}"`
+    )}}[5m])), "le", "${b}", "", "")`;
+  });
+  cumulative.push(
+    `label_replace(sum(sum_over_time(${ensureCountMetric(
+      def.metric ?? ''
+    )}{${dim}}[5m])), "le", "+Inf", "", "")`
+  );
+  return `histogram_quantile(${q}, ${cumulative.join(' or ')})`;
 }
 
 /**

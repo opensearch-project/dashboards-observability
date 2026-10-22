@@ -317,7 +317,7 @@ export function buildErrorRatioExpr(
 }
 
 function errorRatioExpr(sli: SingleSli, window: string, objective: Objective): string {
-  return buildErrorRatioExpr(sli, objective, window) ?? `# custom SLI requires customExpr`;
+  return buildErrorRatioExpr(sli, objective, window) ?? `# SLI has no query (missing metric or customExpr)`;
 }
 
 /**
@@ -363,6 +363,7 @@ export function buildSliEventQueries(
     };
   }
 
+  if (!prom.metric) return null;
   const delta = effectiveMetricTemporality(sli) === 'delta';
   const over = (selector: string): string => {
     if (delta) return `sum(sum_over_time(${selector}[${window}]))`;
@@ -372,7 +373,7 @@ export function buildSliEventQueries(
   const goodFilter = prom.goodEventsFilter?.trim();
 
   if (prom.type === 'availability') {
-    const metric = prom.metric || '';
+    const metric = prom.metric;
     return {
       good: `${over(`${metric}{${joinMatchers(...dims, goodFilter)}}`)} or vector(0)`,
       total: over(`${metric}{${joinMatchers(...dims)}}`),

@@ -95,11 +95,14 @@ describe('generateSuggestionsFromServices (back-compat alias)', () => {
     expect(availExpr.goodQuery).toContain('fault{service="checkout"');
     expect(availExpr.goodQuery).toContain('remoteService=""');
     expect(availExpr.goodQuery).toContain('namespace="span_derived"');
+    // Per-interval gauges: summed over each recording window, fault guarded.
+    expect(availExpr.goodQuery).toContain('sum(sum_over_time(request{');
+    expect(availExpr.goodQuery).toContain('[{{.window}}])) or vector(0))');
+    expect(availExpr.totalQuery).toMatch(/^sum\(sum_over_time\(request\{.*\}\[\{\{\.window\}\}\]\)\)$/);
 
-    // Latency draft uses the native latency_threshold SLI type so the
-    // generator wraps each side of the ratio in sum(rate(...)[<window>]) per
-    // recording window — the custom-events path otherwise substitutes raw
-    // sums of a counter and produces NaN when the source metric is idle.
+    // Latency draft uses the native latency_threshold SLI type; its
+    // namespace="span_derived" dimension makes the generator treat the
+    // histogram as delta (non-cumulative buckets summed over the window).
     const latDef = getPromSli(latency.input.spec.sli);
     expect(latDef.type).toBe('latency_threshold');
     expect(latDef.metric).toBe('latency_seconds_bucket');

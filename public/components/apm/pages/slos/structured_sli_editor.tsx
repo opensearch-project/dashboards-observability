@@ -37,10 +37,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import type { SloTemplate } from '../../../../../common/slo/slo_templates';
-import {
-  ensureBucketMetric,
-  formatLatencyBoundLe,
-} from '../../../../../common/slo/slo_promql_generator';
+import { buildSliEventQueries } from '../../../../../common/slo/slo_promql_generator';
+import type { SingleSli } from '../../../../../common/slo/slo_types';
 import { usePrometheusMetadata } from '../../../alerting/hooks/use_prometheus_metadata';
 import type { Action, FormState } from './wizard_state';
 
@@ -84,32 +82,35 @@ function summaryText(template: SloTemplate, service: string): string {
 }
 
 /**
- * Read-only summary of the derived query. Uses the deploy path's own helpers
- * (`ensureBucketMetric`, `formatLatencyBoundLe`) so the preview matches what's
- * recorded — notably the latency `_bucket` suffix and unit-scaled `le` bound.
- * The `5m` window is illustrative (deploy emits one rule per MWMBR window).
+ * Read-only summary of the derived query — built by the same
+ * `buildSliEventQueries` the recording rules use, so the preview matches
+ * what's recorded (including the `_bucket` suffix, unit-scaled `le` bound
+ * and span-derived delta handling). The `5m` window is illustrative (deploy
+ * emits one rule per recording window).
  */
 function summaryQuery(state: FormState, template: SloTemplate): string {
   const metric = state.metric || template.sli.metric || '';
   if (!metric) {
     return '';
   }
-  const dims = state.dimensions
-    .filter((d) => d.name && d.value)
-    .map((d) => `${d.name}="${d.value}"`)
-    .join(', ');
-  if (template.sli.type === SLI_TYPE.latency) {
-    const bucketMetric = ensureBucketMetric(metric);
-    const raw = Number(state.objectives[0]?.latencyThreshold);
-    const le =
-      Number.isFinite(raw) && raw > 0 ? formatLatencyBoundLe(raw, state.latencyThresholdUnit) : '…';
-    const sel = dims ? `${dims}, ` : '';
-    return `sum(rate(${bucketMetric}{${sel}le="${le}"}[5m])) / sum(rate(${bucketMetric}{${sel}le="+Inf"}[5m]))`;
-  }
-  const good = state.goodEventsFilter
-    ? `${dims ? `${dims}, ` : ''}${state.goodEventsFilter}`
-    : dims;
-  return `sum(rate(${metric}{${good}}[5m])) / sum(rate(${metric}{${dims}}[5m]))`;
+  const isLatency = template.sli.type === SLI_TYPE.latency;
+  const raw = Number(state.objectives[0]?.latencyThreshold);
+  if (isLatency && !(Number.isFinite(raw) && raw > 0)) return '';
+  const sli: SingleSli = {
+    type: 'single',
+    definition: {
+      backend: 'prometheus',
+      type: isLatency ? 'latency_threshold' : 'availability',
+      calcMethod: 'events',
+      metric,
+      goodEventsFilter: isLatency ? undefined : state.goodEventsFilter || undefined,
+      latencyThresholdUnit: state.latencyThresholdUnit,
+    },
+    dimensions: state.dimensions.filter((d) => d.name && d.value),
+  };
+  const q = buildSliEventQueries(sli, { name: 'preview', target: 0, latencyThreshold: raw }, '5m');
+  if (!q || 'errorRatio' in q) return '';
+  return `(${q.good}) / (${q.total})`;
 }
 
 /** True when the metric + good-filter are still the template defaults. */
