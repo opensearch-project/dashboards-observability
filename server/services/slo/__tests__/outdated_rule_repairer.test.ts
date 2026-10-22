@@ -27,26 +27,35 @@ describe('OutdatedRuleRepairer', () => {
     expect(repair).toHaveBeenCalledTimes(2);
   });
 
-  it('never runs the same SLO twice concurrently and caps total in-flight', async () => {
+  it('caps concurrency and queues the rest so one poll heals every SLO', async () => {
     const r = new OutdatedRuleRepairer(logger(), { maxInFlight: 1, now: clock });
-    let release: () => void = () => undefined;
-    const slow = jest.fn(() => new Promise<void>((res) => (release = res)));
-    const p = r.schedule('a', slow);
-    expect(r.schedule('a', slow)).toBeUndefined();
-    expect(
-      r.schedule(
-        'b',
-        jest.fn(async () => undefined)
-      )
-    ).toBeUndefined();
-    release();
-    await p;
-    expect(
-      r.schedule(
-        'b',
-        jest.fn(async () => undefined)
-      )
-    ).toBeDefined();
+    let running = 0;
+    let maxRunning = 0;
+    const order: string[] = [];
+    const job = (key: string) => async () => {
+      running++;
+      maxRunning = Math.max(maxRunning, running);
+      await new Promise((res) => setTimeout(res, 5));
+      order.push(key);
+      running--;
+    };
+    const pa = r.schedule('a', job('a'));
+    // Same SLO while running or queued: skipped.
+    expect(r.schedule('a', job('a'))).toBeUndefined();
+    const pb = r.schedule('b', job('b'));
+    const pc = r.schedule('c', job('c'));
+    expect(r.schedule('b', job('b'))).toBeUndefined();
+    await Promise.all([pa, pb, pc]);
+    expect(order).toEqual(['a', 'b', 'c']);
+    expect(maxRunning).toBe(1);
+  });
+
+  it('drops requests beyond the queue bound', () => {
+    const r = new OutdatedRuleRepairer(logger(), { maxInFlight: 1, maxQueued: 1, now: clock });
+    const never = () => new Promise<void>(() => undefined);
+    expect(r.schedule('a', never)).toBeDefined(); // running
+    expect(r.schedule('b', never)).toBeDefined(); // queued
+    expect(r.schedule('c', never)).toBeUndefined(); // queue full
   });
 
   it('backs off exponentially on failure, warns once, and never throws', async () => {

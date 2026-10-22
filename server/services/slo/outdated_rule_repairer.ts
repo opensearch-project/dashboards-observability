@@ -19,7 +19,9 @@
  * same per-request credentials as any other SLO write, and some deployments
  * have no system identity that can write rules. Bounded so a listing of many
  * outdated SLOs can't fan out into a burst of ruler writes:
- *   - at most `maxInFlight` repairs at once across the process;
+ *   - at most `maxInFlight` repairs at once across the process; the rest wait
+ *     in a FIFO queue (at most `maxQueued`), so one listing visit heals every
+ *     outdated SLO it saw instead of two per poll;
  *   - one attempt per SLO per `cooldownMs`;
  *   - failures back off exponentially up to `maxBackoffMs`, and are logged
  *     at warn only on the first failure per SLO.
@@ -34,6 +36,8 @@ export interface OutdatedRuleRepairerOptions {
   maxBackoffMs?: number;
   /** Concurrent repairs across all SLOs. Default 2. */
   maxInFlight?: number;
+  /** Repairs waiting for a slot; further requests are dropped. Default 200. */
+  maxQueued?: number;
   now?: () => number;
 }
 
@@ -42,12 +46,21 @@ interface Attempt {
   failures: number;
 }
 
+interface Job {
+  key: string;
+  repair: () => Promise<void>;
+  done: () => void;
+}
+
 export class OutdatedRuleRepairer {
   private readonly attempts = new Map<string, Attempt>();
   private readonly inFlightKeys = new Set<string>();
+  private readonly queue: Job[] = [];
+  private readonly queuedKeys = new Set<string>();
   private readonly cooldownMs: number;
   private readonly maxBackoffMs: number;
   private readonly maxInFlight: number;
+  private readonly maxQueued: number;
   private readonly now: () => number;
 
   constructor(
@@ -57,47 +70,67 @@ export class OutdatedRuleRepairer {
     this.cooldownMs = opts.cooldownMs ?? 15 * 60_000;
     this.maxBackoffMs = opts.maxBackoffMs ?? 24 * 3_600_000;
     this.maxInFlight = opts.maxInFlight ?? 2;
+    this.maxQueued = opts.maxQueued ?? 200;
     this.now = opts.now ?? Date.now;
   }
 
   /**
-   * Run `repair` for `key` (one SLO) unless it's already running, cooling
-   * down, or the process is at its in-flight cap. Never throws and never
-   * blocks the caller. Returns the in-flight promise when a repair started
+   * Run `repair` for `key` (one SLO) now, or queue it when the process is at
+   * its in-flight cap. Skipped when the SLO is already running or queued, is
+   * cooling down, or the queue is full. Never throws and never blocks the
+   * caller. Returns a promise that settles when this SLO's repair finishes
    * (tests await it), or `undefined` when the request was skipped.
    */
   schedule(key: string, repair: () => Promise<void>): Promise<void> | undefined {
-    if (this.inFlightKeys.has(key)) return undefined;
-    if (this.inFlightKeys.size >= this.maxInFlight) return undefined;
+    if (this.inFlightKeys.has(key) || this.queuedKeys.has(key)) return undefined;
     const prev = this.attempts.get(key);
-    const nowMs = this.now();
-    if (prev && prev.nextAllowedAt > nowMs) return undefined;
+    if (prev && prev.nextAllowedAt > this.now()) return undefined;
+    if (this.inFlightKeys.size >= this.maxInFlight && this.queue.length >= this.maxQueued) {
+      return undefined;
+    }
 
+    return new Promise<void>((resolve) => {
+      this.queue.push({ key, repair, done: resolve });
+      this.queuedKeys.add(key);
+      this.drain();
+    });
+  }
+
+  private drain(): void {
+    while (this.inFlightKeys.size < this.maxInFlight && this.queue.length > 0) {
+      const job = this.queue.shift()!;
+      this.queuedKeys.delete(job.key);
+      void this.run(job);
+    }
+  }
+
+  private async run(job: Job): Promise<void> {
+    const { key } = job;
+    const prev = this.attempts.get(key);
     this.inFlightKeys.add(key);
     // Reserve the cooldown up front so a burst of listing polls can't
     // re-enter while this attempt is still running.
     this.attempts.set(key, {
-      nextAllowedAt: nowMs + this.cooldownMs,
+      nextAllowedAt: this.now() + this.cooldownMs,
       failures: prev?.failures ?? 0,
     });
-
-    return (async () => {
-      try {
-        await repair();
-        this.attempts.set(key, { nextAllowedAt: this.now() + this.cooldownMs, failures: 0 });
-        this.logger.info(`SLO rules re-provisioned to the current SLI math (${key})`);
-      } catch (err) {
-        const failures = (prev?.failures ?? 0) + 1;
-        const backoff = Math.min(this.cooldownMs * 2 ** (failures - 1), this.maxBackoffMs);
-        this.attempts.set(key, { nextAllowedAt: this.now() + backoff, failures });
-        const msg = `Re-provisioning outdated SLO rules failed (${key}, attempt ${failures}): ${
-          err instanceof Error ? err.message : String(err)
-        }`;
-        if (failures === 1) this.logger.warn(msg);
-        else this.logger.debug(msg);
-      } finally {
-        this.inFlightKeys.delete(key);
-      }
-    })();
+    try {
+      await job.repair();
+      this.attempts.set(key, { nextAllowedAt: this.now() + this.cooldownMs, failures: 0 });
+      this.logger.info(`SLO rules re-provisioned to the current SLI math (${key})`);
+    } catch (err) {
+      const failures = (prev?.failures ?? 0) + 1;
+      const backoff = Math.min(this.cooldownMs * 2 ** (failures - 1), this.maxBackoffMs);
+      this.attempts.set(key, { nextAllowedAt: this.now() + backoff, failures });
+      const msg = `Re-provisioning outdated SLO rules failed (${key}, attempt ${failures}): ${
+        err instanceof Error ? err.message : String(err)
+      }`;
+      if (failures === 1) this.logger.warn(msg);
+      else this.logger.debug(msg);
+    } finally {
+      this.inFlightKeys.delete(key);
+      job.done();
+      this.drain();
+    }
   }
 }
