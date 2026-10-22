@@ -21,6 +21,7 @@ import {
   CloudWatchBackend,
   computeAlarmBands,
   computeThresholdBreachBands,
+  findCausingAlarm,
   parseAlarmRuleReferences,
 } from '../cloudwatch_backend';
 import {
@@ -102,6 +103,59 @@ describe('parseAlarmRuleReferences', () => {
     expect(parseAlarmRuleReferences(undefined)).toEqual([]);
     expect(parseAlarmRuleReferences('')).toEqual([]);
     expect(parseAlarmRuleReferences('TRUE')).toEqual([]);
+  });
+});
+
+describe('findCausingAlarm', () => {
+  const composite = {
+    alarmName: 'checkout-composite',
+    alarmType: 'composite' as const,
+    stateValue: 'ALARM' as const,
+  };
+  const arn = 'arn:aws:cloudwatch:us-east-1:123456789012:alarm:checkout-service-degraded';
+  const relationships = {
+    parents: [],
+    tree: {
+      alarmName: 'checkout-composite',
+      role: 'self' as const,
+      children: [
+        {
+          alarmName: 'checkout-service-degraded',
+          role: 'child' as const,
+          alarmType: 'metric' as const,
+          stateValue: 'ALARM' as const,
+        },
+      ],
+    },
+  };
+
+  it('reads the triggering alarm from StateReasonData, with its state from the tree', () => {
+    expect(
+      findCausingAlarm(
+        { ...composite, stateReasonData: JSON.stringify({ triggeringAlarms: [{ arn }] }) },
+        relationships
+      )
+    ).toEqual({ alarmName: 'checkout-service-degraded', alarmType: 'metric', stateValue: 'ALARM' });
+  });
+
+  it('falls back to the alarm ARN in StateReason', () => {
+    expect(
+      findCausingAlarm({ ...composite, stateReason: `${arn} transitioned to ALARM at Wednesday` })
+    ).toEqual({
+      alarmName: 'checkout-service-degraded',
+      alarmType: undefined,
+      stateValue: undefined,
+    });
+  });
+
+  it('reports no cause for metric alarms or composites without one', () => {
+    expect(
+      findCausingAlarm({ ...composite, alarmType: 'metric', stateReason: arn })
+    ).toBeUndefined();
+    expect(
+      findCausingAlarm({ ...composite, stateReason: 'Rule evaluated to TRUE' })
+    ).toBeUndefined();
+    expect(findCausingAlarm({ ...composite, stateReasonData: 'not json' })).toBeUndefined();
   });
 });
 
@@ -193,6 +247,27 @@ describe('CloudWatchBackend.getAlarmDetail', () => {
     const detail = await backend.getAlarmDetail(ds, 'cpu-high');
     expect(detail!.metricPreview).toBeUndefined();
     expect(detail!.alarm.partialAccess).toBe(true);
+  });
+
+  it('widens an empty default window to 24h, but respects a caller-picked window', async () => {
+    const source = new FakeSource();
+    source.alarms = [alarm()];
+    const spy = jest.spyOn(source, 'getMetricData');
+    const backend = new CloudWatchBackend(noopLogger, source);
+
+    await backend.getAlarmDetail(ds, 'cpu-high');
+    expect(spy).toHaveBeenCalledTimes(2);
+    const widened = spy.mock.calls[1][0];
+    expect(widened.endTimeMs - widened.startTimeMs).toBe(24 * 60 * 60 * 1000);
+
+    spy.mockClear();
+    const detail = await backend.getAlarmDetail(ds, 'cpu-high', {
+      startTimeMs: 1_000,
+      endTimeMs: 2_000,
+    });
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0]).toMatchObject({ startTimeMs: 1_000, endTimeMs: 2_000 });
+    expect(detail!.metricPreview?.points).toEqual([]);
   });
 });
 

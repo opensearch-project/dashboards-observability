@@ -34,6 +34,7 @@ import {
   EuiConfirmModal,
   EuiLink,
   EuiLoadingContent,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -54,6 +55,7 @@ import { isPending } from './monitors_table/pending_rules';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
 import { getMonitorStateLabel, getStateLabel } from './enum_labels';
+import { stateHistoryUnavailableMessage } from './alarm_time_window';
 
 // Cap for the alert-history table in the flyout. `EuiBasicTable` doesn't
 // paginate by default; without this cap a monitor that has accumulated
@@ -1000,6 +1002,21 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   </EuiText>
                 )}
               </EuiAccordion>
+
+              <EuiSpacer size="m" />
+
+              {/* State history: OpenSearch and Prometheus rules don't report it, so say so
+                  rather than show an empty panel (CloudWatch alarms have their own flyout). */}
+              <EuiText size="s" data-test-subj="monitorDetailStateHistoryUnavailable">
+                <strong>
+                  {i18n.translate('observability.alerting.monitorDetailFlyout.stateHistory', {
+                    defaultMessage: 'State history',
+                  })}
+                </strong>{' '}
+                <EuiTextColor color="subdued">
+                  {stateHistoryUnavailableMessage(monitor.datasourceType)}
+                </EuiTextColor>
+              </EuiText>
 
               <EuiSpacer size="m" />
 

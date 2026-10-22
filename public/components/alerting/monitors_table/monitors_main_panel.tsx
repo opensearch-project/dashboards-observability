@@ -12,18 +12,20 @@
  * Like `MonitorsFiltersPanel`, this is a pure render of state + callbacks.
  * All state lives in the `MonitorsTable` parent (index.tsx).
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiSuperDatePicker,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -39,6 +41,9 @@ import { isAdResourceRunning, isCloudWatchRule } from '../shared_constants';
 import { isDetectorDefinition, isForecasterDefinition } from './monitors_table_columns';
 import { MonitorsEuiTable } from './monitors_eui_table';
 import type { MonitorsEuiTableProps } from './monitors_eui_table';
+import { AlarmTimeWindow, describeTimeRange } from '../alarm_time_window';
+import { RULES_END_TIME_KEY, RULES_START_TIME_KEY } from '../alarms_page_helpers';
+import { useTimeRange } from '../hooks/use_time_range';
 
 export interface MonitorsMainPanelProps {
   // Data
@@ -184,6 +189,22 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   );
   const selectedStoppableResources = selectedAdResources.filter(isAdResourceRunning);
 
+  // The Rules tab's time picker: a lens on CloudWatch alarm state and history (the alarm
+  // flyout's timeline, metric preview and state history), not a row filter, so the rule count
+  // doesn't change. Kept here rather than in the parent because nothing else reads it.
+  // OpenSearch and Prometheus rules report no state history, so the picker only shows when
+  // CloudWatch alarms are listed.
+  const rulesTime = useTimeRange({ startKey: RULES_START_TIME_KEY, endKey: RULES_END_TIME_KEY });
+  const showRulesTimePicker = rules.some(isCloudWatchRule);
+  const rulesWindow = useMemo<AlarmTimeWindow>(
+    () => ({
+      startMs: rulesTime.startMs,
+      endMs: rulesTime.endMs,
+      label: describeTimeRange(rulesTime.startTime, rulesTime.endTime),
+    }),
+    [rulesTime.startMs, rulesTime.endMs, rulesTime.startTime, rulesTime.endTime]
+  );
+
   return (
     <>
       <EuiPanel
@@ -200,13 +221,47 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               gutterSize="s"
               style={{ marginBottom: 8 }}
             >
+              {showRulesTimePicker && (
+                <EuiFlexItem grow={false} data-test-subj="alertManagerRulesTimePicker">
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiSuperDatePicker
+                        compressed
+                        start={rulesTime.startTime}
+                        end={rulesTime.endTime}
+                        onTimeChange={rulesTime.onTimeChange}
+                        // Refresh sits right next to it, so no second update button.
+                        showUpdateButton={false}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="questionInCircle"
+                        color="subdued"
+                        content={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.rulesTimePickerHelp',
+                          { defaultMessage: 'Applies to CloudWatch state and history' }
+                        )}
+                        aria-label={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.rulesTimePickerHelpAria',
+                          { defaultMessage: 'About the time range' }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
               {onRefresh && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     iconType="refresh"
                     size="s"
                     isLoading={refreshing}
-                    onClick={() => onRefresh()}
+                    onClick={() => {
+                      // Re-resolve a relative window ("now-24h") to the current time too.
+                      rulesTime.bumpRefreshToken();
+                      onRefresh();
+                    }}
                     data-test-subj="alertManagerRefreshRulesButton"
                   >
                     <FormattedMessage
@@ -698,6 +753,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       {selectedMonitor && isCloudWatchRule(selectedMonitor) ? (
         <CloudWatchAlarmDetailFlyout
           rule={selectedMonitor}
+          timeRange={rulesWindow}
           onClose={() => setSelectedMonitor(null)}
         />
       ) : selectedMonitor && isDetectorDefinition(selectedMonitor) ? (

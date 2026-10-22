@@ -62,6 +62,41 @@ export function parseAlarmRuleReferences(rule?: string): string[] {
   return refs;
 }
 
+const ALARM_ARN = /arn:aws[a-z-]*:cloudwatch:[^:\s]*:\d*:alarm:([^\s,;"']+)/;
+
+/** The alarm name in an alarm ARN, or the input when it isn't one. */
+const alarmNameFromArn = (ref: string): string => {
+  const idx = ref.indexOf(':alarm:');
+  return idx >= 0 ? ref.slice(idx + ':alarm:'.length) : ref;
+};
+
+/**
+ * The child alarm that caused a composite alarm's current state: the first triggering alarm in
+ * `StateReasonData`, else the alarm ARN in `StateReason`. Undefined for metric alarms and for
+ * composites CloudWatch reports no cause for. State and type come from the relationships tree
+ * when the child is in it.
+ */
+export function findCausingAlarm(
+  alarm: CloudWatchAlarm,
+  relationships?: CloudWatchRelationshipGraph
+): CloudWatchAlarmDetail['causedBy'] {
+  if (alarm.alarmType !== 'composite') return undefined;
+  let name: string | undefined;
+  if (alarm.stateReasonData) {
+    try {
+      const data = JSON.parse(alarm.stateReasonData);
+      const arn = data?.triggeringAlarms?.[0]?.arn;
+      if (typeof arn === 'string' && arn) name = alarmNameFromArn(arn);
+    } catch {
+      // Not JSON; fall back to the reason text.
+    }
+  }
+  if (!name) name = alarm.stateReason ? ALARM_ARN.exec(alarm.stateReason)?.[1] : undefined;
+  if (!name || name === alarm.alarmName) return undefined;
+  const child = relationships?.tree.children?.find((node) => node.alarmName === name);
+  return { alarmName: name, alarmType: child?.alarmType, stateValue: child?.stateValue };
+}
+
 export class CloudWatchBackend {
   readonly type = 'cloudwatch' as const;
 
@@ -174,10 +209,11 @@ export class CloudWatchBackend {
           endTimeMs,
         };
         let points = await this.source.getMetricData(query);
-        // If the primary window has no samples (e.g. the metric only reported
+        // If the default window has no samples (e.g. the metric only reported
         // earlier), widen to the last 24h so the preview still shows the
-        // series rather than rendering an empty chart.
-        if (points.length === 0) {
+        // series rather than rendering an empty chart. A caller-picked window
+        // is respected as-is: the flyout says "No metric data in {window}".
+        if (points.length === 0 && opts.startTimeMs === undefined) {
           points = await this.source.getMetricData({
             ...query,
             startTimeMs: endTimeMs - 24 * 60 * 60 * 1000,
@@ -217,9 +253,13 @@ export class CloudWatchBackend {
       );
     }
 
+    const causedBy = findCausingAlarm(alarm, relationships);
     return {
       alarm,
-      summary: buildSummary(alarm, history),
+      // With a known cause, the summary leaves out CloudWatch's reason text (which names the
+      // child by ARN); the flyout shows "Caused by: <child>" instead.
+      summary: buildSummary(alarm, history, !causedBy),
+      causedBy,
       history,
       historyAccessDenied,
       metricPreview,
@@ -407,7 +447,11 @@ export function computeThresholdBreachBands(
 }
 
 /** One-line natural-language summary shown at the top of the flyout. */
-function buildSummary(alarm: CloudWatchAlarm, history?: CloudWatchAlarmHistoryItem[]): string {
+function buildSummary(
+  alarm: CloudWatchAlarm,
+  history?: CloudWatchAlarmHistoryItem[],
+  includeReason = true
+): string {
   const lastUpdate = alarm.stateUpdatedTimestamp
     ? new Date(alarm.stateUpdatedTimestamp).toISOString()
     : undefined;
@@ -419,6 +463,6 @@ function buildSummary(alarm: CloudWatchAlarm, history?: CloudWatchAlarmHistoryIt
         ? 'has insufficient data'
         : 'is OK';
   const when = lastUpdate ? ` Last state change ${lastUpdate}.` : '';
-  const because = reason ? ` ${reason}` : '';
+  const because = includeReason && reason ? ` ${reason}` : '';
   return `${alarm.alarmName} ${state}.${when}${because}`.trim();
 }

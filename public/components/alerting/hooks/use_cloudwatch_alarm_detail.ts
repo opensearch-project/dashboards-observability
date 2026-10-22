@@ -23,6 +23,13 @@ import { AlertingOpenSearchService } from '../query_services/alerting_opensearch
 export interface UseCloudWatchAlarmDetailParams {
   dsId: string;
   alarmName: string;
+  /**
+   * Optional window (date-math or ISO) for the metric preview. Omitted: the
+   * server's default window. History always comes back unwindowed so the
+   * flyout knows the last change even when it's outside the window.
+   */
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface UseCloudWatchAlarmDetailResult {
@@ -43,6 +50,8 @@ export interface UseCloudWatchAlarmDetailResult {
 export function useCloudWatchAlarmDetail({
   dsId,
   alarmName,
+  startTime,
+  endTime,
 }: UseCloudWatchAlarmDetailParams): UseCloudWatchAlarmDetailResult {
   const service = useMemo(() => new AlertingOpenSearchService(), []);
   const [detail, setDetail] = useState<CloudWatchAlarmDetail | null>(null);
@@ -61,7 +70,11 @@ export function useCloudWatchAlarmDetail({
     setError(null);
     setClassifiedError(null);
     service
-      .getCloudWatchAlarmDetail(dsId, alarmName, { signal: controller.signal })
+      .getCloudWatchAlarmDetail(dsId, alarmName, {
+        // The route rejects one-sided ranges, so send both or neither.
+        ...(startTime && endTime ? { startTime, endTime } : {}),
+        signal: controller.signal,
+      })
       .then((data: CloudWatchAlarmDetail) => {
         if (!cancelled && data) setDetail(data);
       })
@@ -79,7 +92,7 @@ export function useCloudWatchAlarmDetail({
       cancelled = true;
       controller.abort();
     };
-  }, [dsId, alarmName, service, attempt]);
+  }, [dsId, alarmName, startTime, endTime, service, attempt]);
 
   return { detail, isLoading, error, classifiedError, retry };
 }

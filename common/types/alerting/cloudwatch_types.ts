@@ -41,6 +41,8 @@ export interface CloudWatchAlarm {
   description?: string;
   stateValue: CloudWatchAlarmState;
   stateReason?: string;
+  /** CloudWatch's machine-readable `StateReasonData` (JSON), when present. */
+  stateReasonData?: string;
   stateUpdatedTimestamp?: string;
   actionsEnabled?: boolean;
 
@@ -150,6 +152,15 @@ export interface CloudWatchAlarmDetail {
   historyAccessDenied?: boolean;
   metricPreview?: CloudWatchMetricPreview;
   relationships?: CloudWatchRelationshipGraph;
+  /**
+   * For a composite alarm, the child alarm whose change caused its current state, when
+   * CloudWatch reports one. Shown as "Caused by: <name>" in place of the raw ARN.
+   */
+  causedBy?: {
+    alarmName: string;
+    alarmType?: CloudWatchAlarmType;
+    stateValue?: CloudWatchAlarmState;
+  };
 }
 
 /** Options for listing alarms. */

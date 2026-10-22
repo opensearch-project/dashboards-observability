@@ -192,6 +192,24 @@ describe('MonitorsTable', () => {
     expect(onCreateMonitor).toHaveBeenCalledWith('forecaster');
   });
 
+  it('shows the CloudWatch time picker only when CloudWatch alarms are listed', () => {
+    const { rerender } = render(<MonitorsTable {...defaultProps} onCreateMonitor={jest.fn()} />);
+    expect(screen.queryByTestId('alertManagerRulesTimePicker')).toBeNull();
+    rerender(
+      <MonitorsTable
+        {...defaultProps}
+        rules={[
+          sampleRule(),
+          sampleRule({ id: 'cw-1', name: 'checkout-errors-high', datasourceType: 'cloudwatch' }),
+        ]}
+        onCreateMonitor={jest.fn()}
+      />
+    );
+    expect(screen.getByTestId('alertManagerRulesTimePicker')).toBeInTheDocument();
+    // A lens on state, not a row filter: both rules are still listed.
+    expect(screen.getByText('HighCPU')).toBeInTheDocument();
+    expect(screen.getByText('checkout-errors-high')).toBeInTheDocument();
+  });
   it('disables detector and forecaster creation for an AOSS datasource', () => {
     const onCreateMonitor = jest.fn();
     render(

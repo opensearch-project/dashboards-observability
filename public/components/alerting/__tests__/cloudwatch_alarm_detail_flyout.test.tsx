@@ -19,6 +19,7 @@ import {
   CloudWatchAlarmFlyoutRow,
 } from '../cloudwatch_alarm_detail_flyout';
 import { useCloudWatchAlarmDetail } from '../hooks/use_cloudwatch_alarm_detail';
+import type { AlarmTimeWindow } from '../alarm_time_window';
 
 jest.mock('../hooks/use_cloudwatch_alarm_detail', () => ({
   useCloudWatchAlarmDetail: jest.fn(),
@@ -101,6 +102,37 @@ describe('CloudWatchAlarmDetailFlyout', () => {
     ).toBeInTheDocument();
   });
 
+  it("names a composite's causing child as a link instead of the raw ARN", () => {
+    mockHook({
+      detail: {
+        ...detailFixture(),
+        alarm: { alarmName: 'checkout-composite', alarmType: 'composite', stateValue: 'ALARM' },
+        summary: 'checkout-composite is in ALARM. Last state change 2026-09-24T10:00:00.000Z.',
+        causedBy: {
+          alarmName: 'checkout-service-degraded',
+          alarmType: 'metric',
+          stateValue: 'ALARM',
+        },
+      },
+    });
+    renderFlyout();
+    expect(screen.getByTestId('cwAlarmDetailCausedBy')).toHaveTextContent(
+      'Caused by: checkout-service-degraded'
+    );
+    expect(screen.queryByText(/arn:aws/)).toBeNull();
+    // The link opens the child in the same flyout.
+    fireEvent.click(screen.getByTestId('cwAlarmDetailCausedByLink'));
+    expect(useDetailMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ alarmName: 'checkout-service-degraded' })
+    );
+  });
+
+  it('shows no cause line without one', () => {
+    mockHook({ detail: detailFixture() });
+    renderFlyout();
+    expect(screen.queryByTestId('cwAlarmDetailCausedBy')).toBeNull();
+  });
+
   it('renders the classified error callout with Retry when the failure is classified', () => {
     const retry = jest.fn();
     mockHook({ error: new Error('403'), classifiedError: classifiedFixture(), retry });
@@ -134,5 +166,106 @@ describe('CloudWatchAlarmDetailFlyout', () => {
     // to OUI, so match the class name prefix-agnostically.
     expect(document.body.querySelector('[class*="LoadingContent"]')).toBeTruthy();
     expect(screen.queryByTestId('cwAlarmDetailRetry')).not.toBeInTheDocument();
+  });
+});
+
+describe('CloudWatchAlarmDetailFlyout time window', () => {
+  // Midday timestamps so the M/D in the copy doesn't depend on the test machine's timezone.
+  const timeWindow: AlarmTimeWindow = {
+    startMs: Date.parse('2026-10-01T12:00:00.000Z'),
+    endMs: Date.parse('2026-10-02T12:00:00.000Z'),
+    label: 'last 24h',
+  };
+  const stateUpdate = (timestamp: string, oldState: string, newState: string) => ({
+    timestamp,
+    historyItemType: 'StateUpdate' as const,
+    oldState: oldState as 'OK',
+    newState: newState as 'ALARM',
+    summary: `Alarm updated from ${oldState} to ${newState}`,
+  });
+  function renderWithWindow() {
+    return render(
+      <I18nProvider>
+        <CloudWatchAlarmDetailFlyout rule={row} onClose={jest.fn()} timeRange={timeWindow} />
+      </I18nProvider>
+    );
+  }
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('fetches the detail for the window', () => {
+    mockHook({ isLoading: true });
+    renderWithWindow();
+    expect(useDetailMock).toHaveBeenCalledWith({
+      dsId: 'cloudwatch',
+      alarmName: 'checkout-errors-high',
+      startTime: '2026-10-01T12:00:00.000Z',
+      endTime: '2026-10-02T12:00:00.000Z',
+    });
+  });
+
+  it('says when nothing changed in the window and when the last change was', () => {
+    mockHook({
+      detail: {
+        ...detailFixture(),
+        alarm: { ...detailFixture().alarm, stateUpdatedTimestamp: '2026-09-24T12:00:00.000Z' },
+        history: [stateUpdate('2026-09-24T12:00:00.000Z', 'OK', 'ALARM')],
+      },
+    });
+    renderWithWindow();
+    expect(screen.getByTestId('cwAlarmHistoryNoChanges')).toHaveTextContent(
+      'No changes in last 24h, last change 9/24'
+    );
+    expect(screen.getByTestId('cwAlarmNoMetricData')).toHaveTextContent(
+      'No metric data in last 24h.'
+    );
+  });
+
+  it('lists only the changes inside the window', () => {
+    mockHook({
+      detail: {
+        ...detailFixture(),
+        history: [
+          stateUpdate('2026-10-02T06:00:00.000Z', 'OK', 'ALARM'),
+          stateUpdate('2026-09-24T12:00:00.000Z', 'ALARM', 'OK'),
+        ],
+      },
+    });
+    renderWithWindow();
+    expect(screen.getByText('Alarm updated from OK to ALARM')).toBeInTheDocument();
+    expect(screen.queryByText('Alarm updated from ALARM to OK')).toBeNull();
+    expect(screen.queryByTestId('cwAlarmHistoryNoChanges')).toBeNull();
+  });
+
+  it("draws a composite's current state across a window with no changes", () => {
+    mockHook({
+      detail: {
+        ...detailFixture(),
+        alarm: {
+          alarmName: 'checkout-composite',
+          alarmType: 'composite',
+          stateValue: 'ALARM',
+          stateUpdatedTimestamp: '2026-09-24T12:00:00.000Z',
+        },
+        history: [],
+      },
+    });
+    render(
+      <I18nProvider>
+        <CloudWatchAlarmDetailFlyout
+          rule={{
+            ...row,
+            monitorType: 'composite',
+            cloudWatch: { state: 'ALARM', alarmType: 'composite' },
+          }}
+          onClose={jest.fn()}
+          timeRange={timeWindow}
+        />
+      </I18nProvider>
+    );
+    expect(screen.getByTestId('mockEcharts')).toBeInTheDocument();
+    expect(screen.getByTestId('cwAlarmTimelineNoChanges')).toHaveTextContent(
+      'No changes in last 24h, last change 9/24'
+    );
   });
 });

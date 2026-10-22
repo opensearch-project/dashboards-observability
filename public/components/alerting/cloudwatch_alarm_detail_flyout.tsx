@@ -45,6 +45,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import * as echarts from 'echarts';
+import moment from 'moment';
 import { i18n } from '@osd/i18n';
 import type {
   CloudWatchAlarm,
@@ -63,6 +64,12 @@ import { ClassifiedErrorCallout } from '../common/error';
 import { useCloudWatchAlarmDetail } from './hooks/use_cloudwatch_alarm_detail';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { SEVERITY_COLORS } from './shared_constants';
+import {
+  AlarmTimeWindow,
+  defaultAlarmTimeWindow,
+  isInWindow,
+  noChangesInWindowMessage,
+} from './alarm_time_window';
 
 /**
  * Structural subset shared by `UnifiedRuleSummary` (Rules tab) and
@@ -86,6 +93,11 @@ export interface CloudWatchAlarmFlyoutRow {
 export interface CloudWatchAlarmDetailFlyoutProps {
   rule: CloudWatchAlarmFlyoutRow;
   onClose: () => void;
+  /**
+   * The window that scopes the state timeline, metric preview and state history (the Rules
+   * tab's time picker). Default: the last 24h as of opening. Memoize it: a new window refetches.
+   */
+  timeRange?: AlarmTimeWindow;
 }
 
 // State → OUI health colour used consistently for dots/badges in this flyout.
@@ -380,10 +392,21 @@ const RelationshipsSection: React.FC<{
 // State timeline (composite header band)
 // ============================================================================
 
-const StateTimeline: React.FC<{ history?: CloudWatchAlarmHistoryItem[] }> = ({ history }) => {
-  const now = Date.now();
-  const windowStart = now - 24 * 60 * 60 * 1000;
-  const segments = useMemo(() => {
+/** How the timeline's axis names a window edge: "now" when it's the present, else M/D HH:mm. */
+function axisLabel(ms: number): string {
+  return Math.abs(Date.now() - ms) < 60 * 1000 ? 'now' : moment(ms).format('M/D HH:mm');
+}
+
+export const StateTimeline: React.FC<{
+  history?: CloudWatchAlarmHistoryItem[];
+  timeWindow: AlarmTimeWindow;
+  /** The alarm's current state, drawn across the window when nothing changed in it. */
+  currentState?: CloudWatchAlarmState;
+  /** When the alarm last changed state, for "No changes in last 24h, last change 9/24". */
+  lastChange?: string;
+}> = ({ history, timeWindow, currentState, lastChange }) => {
+  const { startMs: windowStart, endMs: windowEnd } = timeWindow;
+  const { segments, changedInWindow } = useMemo(() => {
     const updates = (history || [])
       .filter((h) => h.historyItemType === 'StateUpdate' && (h.newState || h.oldState))
       .map((h) => ({
@@ -391,39 +414,37 @@ const StateTimeline: React.FC<{ history?: CloudWatchAlarmHistoryItem[] }> = ({ h
         oldState: h.oldState,
         newState: h.newState,
       }))
-      .filter((u) => Number.isFinite(u.ts))
+      .filter((u) => Number.isFinite(u.ts) && u.ts <= windowEnd)
       .sort((a, b) => a.ts - b.ts);
-    if (updates.length === 0)
-      return [] as Array<{ start: number; end: number; state: CloudWatchAlarmState }>;
+    const inWindow = updates.filter((u) => u.ts >= windowStart);
+    // The state at the window start: the last change before it, else the first in-window
+    // change's prior state, else (nothing changed at all) the current state. CloudWatch only
+    // records transitions, so this backfill makes the band span the whole window.
+    const before = updates.filter((u) => u.ts < windowStart);
+    const initial =
+      before[before.length - 1]?.newState ||
+      inWindow[0]?.oldState ||
+      inWindow[0]?.newState ||
+      currentState;
     const segs: Array<{ start: number; end: number; state: CloudWatchAlarmState }> = [];
-    // Backfill from the window start using the first transition's prior state
-    // (`oldState`) so the band spans the whole 24h rather than a sliver at the
-    // right — CloudWatch only records transitions at real evaluation times.
-    const firstPrior = updates[0].oldState || updates[0].newState;
-    if (firstPrior && updates[0].ts > windowStart) {
-      segs.push({ start: windowStart, end: updates[0].ts, state: firstPrior });
+    let cursor = windowStart;
+    let state = initial;
+    for (const u of inWindow) {
+      if (state && u.ts > cursor) segs.push({ start: cursor, end: u.ts, state });
+      cursor = Math.max(cursor, u.ts);
+      state = u.newState || state;
     }
-    for (let i = 0; i < updates.length; i++) {
-      const state = updates[i].newState || updates[i].oldState;
-      if (!state) continue;
-      const start = Math.max(updates[i].ts, windowStart);
-      const end = i + 1 < updates.length ? updates[i + 1].ts : now;
-      if (end <= windowStart) continue;
-      segs.push({ start, end: Math.min(end, now), state });
-    }
-    return segs;
-  }, [history, now, windowStart]);
+    if (state && windowEnd > cursor) segs.push({ start: cursor, end: windowEnd, state });
+    return { segments: segs, changedInWindow: inWindow.length > 0 };
+  }, [history, windowStart, windowEnd, currentState]);
 
-  if (segments.length === 0) {
-    return (
-      <EuiTextColor color="subdued">
-        {i18n.translate('observability.alerting.cloudwatch.noTimeline', {
-          defaultMessage: 'No state changes recorded in the selected window.',
-        })}
-      </EuiTextColor>
-    );
-  }
-  const total = now - windowStart;
+  const noChanges = changedInWindow ? null : (
+    <EuiTextColor color="subdued" data-test-subj="cwAlarmTimelineNoChanges">
+      {noChangesInWindowMessage(timeWindow, lastChange)}
+    </EuiTextColor>
+  );
+  if (segments.length === 0) return noChanges;
+  const total = windowEnd - windowStart;
   // Render the timeline as an ECharts horizontal stacked bar (one segment per
   // state interval) so it uses the same viz engine as the rest of the plugin.
   const spec: echarts.EChartsOption = {
@@ -452,15 +473,21 @@ const StateTimeline: React.FC<{ history?: CloudWatchAlarmHistoryItem[] }> = ({ h
       <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
         <EuiFlexItem grow={false}>
           <EuiTextColor color="subdued" style={{ fontSize: 11 }}>
-            -24h
+            {axisLabel(windowStart)}
           </EuiTextColor>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTextColor color="subdued" style={{ fontSize: 11 }}>
-            now
+            {axisLabel(windowEnd)}
           </EuiTextColor>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {noChanges && (
+        <>
+          <EuiSpacer size="xs" />
+          {noChanges}
+        </>
+      )}
     </div>
   );
 };
@@ -482,8 +509,11 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutProps> = ({
   rule,
   onClose,
+  timeRange,
 }) => {
   const dsId = rule.datasourceId;
+  const defaultWindow = useMemo(() => defaultAlarmTimeWindow(), []);
+  const timeWindow = timeRange ?? defaultWindow;
 
   // In-flyout navigation stack. Clicking a related alarm (parent/child) pushes
   // it here and re-fetches its detail, so users move between linked alarms
@@ -495,6 +525,8 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
   const { detail, isLoading, error, classifiedError, retry } = useCloudWatchAlarmDetail({
     dsId,
     alarmName,
+    startTime: new Date(timeWindow.startMs).toISOString(),
+    endTime: new Date(timeWindow.endMs).toISOString(),
   });
 
   const openAlarm = useCallback<OpenAlarmFn>(
@@ -703,10 +735,25 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
 
         {!isLoading && detail && (
           <>
-            {detail.summary && (
+            {(detail.summary || detail.causedBy) && (
               <>
                 <EuiText size="s">
-                  <p>{detail.summary}</p>
+                  {detail.summary && <p>{detail.summary}</p>}
+                  {/* A composite's cause, by name and as a link, instead of the raw ARN in
+                      CloudWatch's reason text. */}
+                  {detail.causedBy && (
+                    <p data-test-subj="cwAlarmDetailCausedBy">
+                      {i18n.translate('observability.alerting.cloudwatch.causedBy', {
+                        defaultMessage: 'Caused by:',
+                      })}{' '}
+                      <EuiLink
+                        onClick={() => openAlarm(detail.causedBy!)}
+                        data-test-subj="cwAlarmDetailCausedByLink"
+                      >
+                        {detail.causedBy.alarmName}
+                      </EuiLink>
+                    </p>
+                  )}
                 </EuiText>
                 <EuiSpacer size="m" />
               </>
@@ -728,8 +775,8 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
             )}
 
             {alarmType === 'composite'
-              ? renderCompositeBody(detail, dsId, alarmName, openAlarm)
-              : renderMetricBody(detail, openAlarm)}
+              ? renderCompositeBody(detail, dsId, alarmName, openAlarm, timeWindow)
+              : renderMetricBody(detail, openAlarm, timeWindow)}
           </>
         )}
       </EuiFlyoutBody>
@@ -741,16 +788,20 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
 // Body renderers
 // ============================================================================
 
-function renderStateHistory(history?: CloudWatchAlarmHistoryItem[]): React.ReactNode {
+export function renderStateHistory(
+  history: CloudWatchAlarmHistoryItem[] | undefined,
+  timeWindow: AlarmTimeWindow,
+  lastChange?: string
+): React.ReactNode {
   const stateUpdates = (history || []).filter(
-    (h) => h.historyItemType === 'StateUpdate' || h.oldState || h.newState
+    (h) =>
+      (h.historyItemType === 'StateUpdate' || h.oldState || h.newState) &&
+      isInWindow(h.timestamp, timeWindow)
   );
   if (stateUpdates.length === 0) {
     return (
-      <EuiTextColor color="subdued">
-        {i18n.translate('observability.alerting.cloudwatch.noHistory', {
-          defaultMessage: 'No state changes recorded in the selected window.',
-        })}
+      <EuiTextColor color="subdued" data-test-subj="cwAlarmHistoryNoChanges">
+        {noChangesInWindowMessage(timeWindow, lastChange)}
       </EuiTextColor>
     );
   }
@@ -815,7 +866,8 @@ function renderAlarmActions(alarm: CloudWatchAlarm): React.ReactNode {
 
 function renderMetricBody(
   detail: import('../../../common/types/alerting').CloudWatchAlarmDetail,
-  onOpen: OpenAlarmFn
+  onOpen: OpenAlarmFn,
+  timeWindow: AlarmTimeWindow
 ) {
   const { alarm, metricPreview } = detail;
   const conditions = [
@@ -875,9 +927,10 @@ function renderMetricBody(
       {metricPreview && metricPreview.points.length > 0 ? (
         <EchartsRender spec={buildMetricPreviewSpec(metricPreview)} height={220} />
       ) : (
-        <EuiTextColor color="subdued">
+        <EuiTextColor color="subdued" data-test-subj="cwAlarmNoMetricData">
           {i18n.translate('observability.alerting.cloudwatch.noMetricData', {
-            defaultMessage: 'No metric data reported in the selected window.',
+            defaultMessage: 'No metric data in {window}.',
+            values: { window: timeWindow.label },
           })}
         </EuiTextColor>
       )}
@@ -898,7 +951,7 @@ function renderMetricBody(
         })}
       </SectionTitle>
       <EuiSpacer size="s" />
-      {renderStateHistory(detail.history)}
+      {renderStateHistory(detail.history, timeWindow, detail.alarm.stateUpdatedTimestamp)}
       <EuiHorizontalRule margin="m" />
 
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -961,7 +1014,8 @@ function renderCompositeBody(
   detail: import('../../../common/types/alerting').CloudWatchAlarmDetail,
   dsId: string,
   alarmName: string,
-  onOpen: OpenAlarmFn
+  onOpen: OpenAlarmFn,
+  timeWindow: AlarmTimeWindow
 ) {
   const { alarm } = detail;
   return (
@@ -972,7 +1026,12 @@ function renderCompositeBody(
         })}
       </SectionTitle>
       <EuiSpacer size="s" />
-      <StateTimeline history={detail.history} />
+      <StateTimeline
+        history={detail.history}
+        timeWindow={timeWindow}
+        currentState={alarm.stateValue}
+        lastChange={alarm.stateUpdatedTimestamp}
+      />
       <EuiHorizontalRule margin="m" />
 
       <SectionTitle>
@@ -1022,7 +1081,7 @@ function renderCompositeBody(
         })}
       </SectionTitle>
       <EuiSpacer size="s" />
-      {renderStateHistory(detail.history)}
+      {renderStateHistory(detail.history, timeWindow, detail.alarm.stateUpdatedTimestamp)}
     </>
   );
 }
