@@ -26,7 +26,6 @@ import type {
   GeneratedRule,
   GeneratedRuleGroup,
   Objective,
-  PrometheusSli,
   SingleSli,
   SloDocument,
   SloSpec,
@@ -70,21 +69,7 @@ export const SLO_RULES_VERSION = '2';
  * bucket whose bound is <= X, not the single `le="X"` series.
  */
 export const SPAN_DERIVED_LATENCY_BUCKETS_SECONDS: readonly number[] = [
-  0,
-  0.005,
-  0.01,
-  0.025,
-  0.05,
-  0.075,
-  0.1,
-  0.25,
-  0.5,
-  0.75,
-  1,
-  2.5,
-  5,
-  7.5,
-  10,
+  0, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10,
 ];
 
 /** Span-derived RED metric names: per-interval delta gauges, never counters. */
@@ -317,7 +302,10 @@ export function buildErrorRatioExpr(
 }
 
 function errorRatioExpr(sli: SingleSli, window: string, objective: Objective): string {
-  return buildErrorRatioExpr(sli, objective, window) ?? `# SLI has no query (missing metric or customExpr)`;
+  return (
+    buildErrorRatioExpr(sli, objective, window) ??
+    `# SLI has no query (missing metric or customExpr)`
+  );
 }
 
 /**
@@ -392,7 +380,9 @@ export function buildSliEventQueries(
     };
   }
   return {
-    good: over(`${bucketMetric}{${joinMatchers(...dims, `le=~"${leValuePattern(boundSeconds)}"`)}}`),
+    good: over(
+      `${bucketMetric}{${joinMatchers(...dims, `le=~"${leValuePattern(boundSeconds)}"`)}}`
+    ),
     total: over(`${bucketMetric}{${joinMatchers(...dims, 'le="+Inf"')}}`),
   };
 }

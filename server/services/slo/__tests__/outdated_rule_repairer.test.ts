@@ -33,10 +33,20 @@ describe('OutdatedRuleRepairer', () => {
     const slow = jest.fn(() => new Promise<void>((res) => (release = res)));
     const p = r.schedule('a', slow);
     expect(r.schedule('a', slow)).toBeUndefined();
-    expect(r.schedule('b', jest.fn(async () => undefined))).toBeUndefined();
+    expect(
+      r.schedule(
+        'b',
+        jest.fn(async () => undefined)
+      )
+    ).toBeUndefined();
     release();
     await p;
-    expect(r.schedule('b', jest.fn(async () => undefined))).toBeDefined();
+    expect(
+      r.schedule(
+        'b',
+        jest.fn(async () => undefined)
+      )
+    ).toBeDefined();
   });
 
   it('backs off exponentially on failure, warns once, and never throws', async () => {

@@ -517,15 +517,15 @@ describe('SloService.repair — outdated recording math', () => {
     const doc = await svc.create({ spec: validSpec() }, 'alice', deploy);
     const groupName =
       doc.status.provisioning.backend === 'prometheus'
-        ? doc.status.provisioning.alertGroupName ?? ''
+        ? (doc.status.provisioning.alertGroupName ?? '')
         : '';
     ageRecordingRules(ruler, namespace, groupName);
 
     const result = await svc.repair(doc.id, repairCtx);
     expect(result.repaired).toBe(true);
-    const rules = ruler.groupByName(namespace, groupName)!.rules.filter(
-      (r) => r.type === 'recording'
-    );
+    const rules = ruler
+      .groupByName(namespace, groupName)!
+      .rules.filter((r) => r.type === 'recording');
     expect(rules.length).toBeGreaterThan(0);
     for (const r of rules) expect(r.labels[SLO_RULES_VERSION_LABEL]).toBe(SLO_RULES_VERSION);
   });

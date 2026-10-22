@@ -219,6 +219,7 @@ export const StructuredSliEditor: React.FC<StructuredSliEditorProps> = ({
             fullWidth
           >
             <EuiFieldText
+              isInvalid={!!goodFilterError}
               value={state.goodEventsFilter}
               onChange={(e) =>
                 dispatch({ kind: 'setField', field: 'goodEventsFilter', value: e.target.value })

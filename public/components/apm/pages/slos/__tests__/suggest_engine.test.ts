@@ -90,7 +90,7 @@ describe('generateSuggestionsFromServices (back-compat alias)', () => {
     const availExpr =
       availDef.customExpr?.mode === 'events'
         ? availDef.customExpr
-        : ((undefined as never) as { goodQuery: string; totalQuery: string });
+        : (undefined as never as { goodQuery: string; totalQuery: string });
     expect(availExpr.goodQuery).toContain('request{service="checkout"');
     expect(availExpr.goodQuery).toContain('fault{service="checkout"');
     expect(availExpr.goodQuery).toContain('remoteService=""');
@@ -98,7 +98,9 @@ describe('generateSuggestionsFromServices (back-compat alias)', () => {
     // Per-interval gauges: summed over each recording window, fault guarded.
     expect(availExpr.goodQuery).toContain('sum(sum_over_time(request{');
     expect(availExpr.goodQuery).toContain('[{{.window}}])) or vector(0))');
-    expect(availExpr.totalQuery).toMatch(/^sum\(sum_over_time\(request\{.*\}\[\{\{\.window\}\}\]\)\)$/);
+    expect(availExpr.totalQuery).toMatch(
+      /^sum\(sum_over_time\(request\{.*\}\[\{\{\.window\}\}\]\)\)$/
+    );
 
     // Latency draft uses the native latency_threshold SLI type; its
     // namespace="span_derived" dimension makes the generator treat the
@@ -110,10 +112,9 @@ describe('generateSuggestionsFromServices (back-compat alias)', () => {
     expect(latency.input.spec.objectives[0].latencyThreshold).toBe(0.5);
     expect(latency.input.spec.objectives[0].target).toBe(0.95);
     const dimsByName = Object.fromEntries(
-      (latency.input.spec.sli.type === 'single'
-        ? latency.input.spec.sli.dimensions
-        : []
-      ).map((d) => [d.name, d.value])
+      (latency.input.spec.sli.type === 'single' ? latency.input.spec.sli.dimensions : []).map(
+        (d) => [d.name, d.value]
+      )
     );
     expect(dimsByName.service).toBe('checkout');
     expect(dimsByName.namespace).toBe('span_derived');

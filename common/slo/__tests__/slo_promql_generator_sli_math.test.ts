@@ -38,7 +38,12 @@ const SEL = 'service="checkout",remoteService="",namespace="span_derived"';
 function sli(definition: Partial<PrometheusSli>, dimensions = SPAN): SingleSli {
   return {
     type: 'single',
-    definition: { backend: 'prometheus', calcMethod: 'events', type: 'availability', ...definition },
+    definition: {
+      backend: 'prometheus',
+      calcMethod: 'events',
+      type: 'availability',
+      ...definition,
+    },
     dimensions,
   } as SingleSli;
 }
@@ -76,13 +81,9 @@ describe('effectiveMetricTemporality', () => {
   });
 
   it('lets an explicit metricTemporality win', () => {
-    expect(effectiveMetricTemporality(sli({ metricTemporality: 'cumulative' }))).toBe(
-      'cumulative'
-    );
+    expect(effectiveMetricTemporality(sli({ metricTemporality: 'cumulative' }))).toBe('cumulative');
     expect(
-      effectiveMetricTemporality(
-        sli({ metricTemporality: 'delta' }, [{ name: 'job', value: 'a' }])
-      )
+      effectiveMetricTemporality(sli({ metricTemporality: 'delta' }, [{ name: 'job', value: 'a' }]))
     ).toBe('delta');
   });
 });
@@ -119,7 +120,9 @@ describe('buildSliEventQueries — cumulative metrics', () => {
     expect(q.good).toBe(
       'sum(rate(http_server_duration_seconds_bucket{job="api", le=~"0\\\\.50*"}[5m]))'
     );
-    expect(q.total).toBe('sum(rate(http_server_duration_seconds_bucket{job="api", le="+Inf"}[5m]))');
+    expect(q.total).toBe(
+      'sum(rate(http_server_duration_seconds_bucket{job="api", le="+Inf"}[5m]))'
+    );
   });
 
   it('omits the dangling comma when the SLI has no dimensions', () => {
@@ -137,7 +140,9 @@ describe('buildSliEventQueries — delta (span-derived) metrics', () => {
       lat,
       '30m'
     ) as { good: string; total: string };
-    expect(q.total).toBe(`sum(sum_over_time(latency_seconds_count{${SEL.replace(/,/g, ', ')}}[30m]))`);
+    expect(q.total).toBe(
+      `sum(sum_over_time(latency_seconds_count{${SEL.replace(/,/g, ', ')}}[30m]))`
+    );
     expect(q.good).toContain('sum(sum_over_time(latency_seconds_bucket{');
     // The span-derived pipeline formats bounds like `1.0`; every bucket
     // <= 0.5 s is "good", nothing above it is.

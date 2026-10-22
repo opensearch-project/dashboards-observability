@@ -636,8 +636,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     router,
     sloService,
     logger,
-    (ctx, req) =>
-      statusContextFor(ctx, req),
+    (ctx, req) => statusContextFor(ctx, req),
     datasourceService,
     discoveryService
   );

@@ -343,7 +343,9 @@ describe('buildRequestRateQuery', () => {
 
   it('latency emits the histogram count rate', () => {
     const out = buildRequestRateQuery(latencyDoc())!;
-    expect(out).toBe('sum(rate(http_server_request_duration_seconds_count{service_name="api"}[5m]))');
+    expect(out).toBe(
+      'sum(rate(http_server_request_duration_seconds_count{service_name="api"}[5m]))'
+    );
   });
 
   it('returns null for custom and non-single SLI', () => {
@@ -405,9 +407,15 @@ describe('span-derived (delta) histograms', () => {
   }
 
   it('error ratio sums buckets over the window instead of rate()', () => {
-    const out = buildErrorRatioExprForWindow(spanLatencyDoc(), spanLatencyDoc().spec.objectives[0], '1h')!;
+    const out = buildErrorRatioExprForWindow(
+      spanLatencyDoc(),
+      spanLatencyDoc().spec.objectives[0],
+      '1h'
+    )!;
     expect(out).not.toMatch(/\brate\(/);
-    expect(out).toContain('sum(sum_over_time(latency_seconds_count{service="cart", namespace="span_derived"}[1h]))');
+    expect(out).toContain(
+      'sum(sum_over_time(latency_seconds_count{service="cart", namespace="span_derived"}[1h]))'
+    );
   });
 
   it('request rate divides the per-interval counts by the window', () => {

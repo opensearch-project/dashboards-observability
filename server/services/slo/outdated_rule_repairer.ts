@@ -50,7 +50,10 @@ export class OutdatedRuleRepairer {
   private readonly maxInFlight: number;
   private readonly now: () => number;
 
-  constructor(private readonly logger: Logger, opts: OutdatedRuleRepairerOptions = {}) {
+  constructor(
+    private readonly logger: Logger,
+    opts: OutdatedRuleRepairerOptions = {}
+  ) {
     this.cooldownMs = opts.cooldownMs ?? 15 * 60_000;
     this.maxBackoffMs = opts.maxBackoffMs ?? 24 * 3_600_000;
     this.maxInFlight = opts.maxInFlight ?? 2;

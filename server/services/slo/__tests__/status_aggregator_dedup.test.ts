@@ -458,10 +458,13 @@ describe('DirectQueryStatusAggregator — inline fallback', () => {
   it('maps a multi-objective inline result back by index and reuses it within the TTL', async () => {
     const doc = dedupDoc('slo-a', { 'avail-a': FP, 'avail-b': 'fedcba9876543210' });
     const { client, searcher } = mockClient(
-      handler([], [
-        { idx: '0', ratio: 0.0002 },
-        { idx: '1', ratio: 0.5 },
-      ])
+      handler(
+        [],
+        [
+          { idx: '0', ratio: 0.0002 },
+          { idx: '1', ratio: 0.5 },
+        ]
+      )
     );
     const agg = new DirectQueryStatusAggregator(noopLogger());
     const [status] = await agg.aggregate([doc], ctxDedup(client));

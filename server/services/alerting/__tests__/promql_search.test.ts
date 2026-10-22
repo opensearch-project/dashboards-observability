@@ -40,7 +40,7 @@ function captureSearcher(): {
   const searcher = (async (_c, request, options) => {
     recorded.push({ request: request as Record<string, unknown>, options });
     // Minimal well-formed empty envelope so rebuildEnvelope doesn't throw.
-    return ({ type: 'data_frame', body: { fields: [] } } as unknown) as never;
+    return { type: 'data_frame', body: { fields: [] } } as unknown as never;
   }) as PromQLSearcher;
   return { searcher, calls: () => recorded };
 }
@@ -161,7 +161,7 @@ describe('nameFromSeries', () => {
 
 describe('runPromQLInstant envelope rebuild', () => {
   function frame(rows: Array<{ series: string; labels: Record<string, string>; value: number }>) {
-    return ({
+    return {
       type: 'data_frame',
       body: {
         fields: [
@@ -171,7 +171,7 @@ describe('runPromQLInstant envelope rebuild', () => {
           { name: 'Value', values: rows.map((r) => r.value) },
         ],
       },
-    } as unknown) as never;
+    } as unknown as never;
   }
 
   it.each([

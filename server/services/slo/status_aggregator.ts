@@ -820,7 +820,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       const expr = buildErrorRatioExpr(sli, objective, window);
       // Newline before the closing paren so a trailing `# comment` in a raw
       // custom expression can't swallow it.
-      if (expr) parts.push(`label_replace((${expr}\n), "${INLINE_OBJECTIVE_LABEL}", "${i}", "", "")`);
+      if (expr)
+        parts.push(`label_replace((${expr}\n), "${INLINE_OBJECTIVE_LABEL}", "${i}", "", "")`);
     });
     if (parts.length === 0) return out;
     const query = parts.join('\nor\n');

@@ -20,10 +20,7 @@ import { PROMQL_SIZE_CAP, validateCustomPromQL } from '../../../common/slo/slo_v
 import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
 import type { DatasourceDiscoveryService } from '../../services/alerting/datasource_discovery';
 import type { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
-import {
-  RECORDING_WINDOWS,
-  substituteWindowToken,
-} from '../../../common/slo/slo_promql_generator';
+import { RECORDING_WINDOWS, substituteWindowToken } from '../../../common/slo/slo_promql_generator';
 
 type ProbeSliHandlerContext = RequestHandlerContext & {
   dataSource?: {
