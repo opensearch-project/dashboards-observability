@@ -474,3 +474,34 @@ describe('DirectQueryStatusAggregator — inline fallback', () => {
     expect(searcher).toHaveBeenCalledTimes(3);
   });
 });
+
+describe('DirectQueryStatusAggregator — outdated recording rules', () => {
+  const FP = 'abcdef0123456789';
+
+  function checker(outdatedGroups?: string[]) {
+    const check = jest.fn(async (input: { expectedGroups: string[] }) => ({
+      state: 'ok' as const,
+      expectedGroups: input.expectedGroups,
+      presentGroups: input.expectedGroups,
+      missingGroups: [],
+      ...(outdatedGroups ? { outdatedGroups } : {}),
+      computedAt: new Date().toISOString(),
+    }));
+    return { check } as unknown as SloRuleHealthChecker & { check: jest.Mock };
+  }
+
+  it('hands SLOs with outdated recording groups to onOutdatedRules', async () => {
+    const doc = dedupDoc('slo-a', { 'availability-99-9': FP });
+    const { client } = mockClient(() =>
+      instantForMetrics([{ name: `slo:sli_error:ratio_rate_3d:sli_${FP}`, ratio: 0.0002 }])
+    );
+    const onOutdatedRules = jest.fn();
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate([doc], {
+      ...ctxDedup(client, checker([`slo:rec:${FP}`])),
+      onOutdatedRules,
+    });
+    expect(onOutdatedRules).toHaveBeenCalledWith(doc);
+    // Outdated rules still evaluate — the status itself is unaffected.
+    expect(status.state).toBe('ok');
+  });
+});
