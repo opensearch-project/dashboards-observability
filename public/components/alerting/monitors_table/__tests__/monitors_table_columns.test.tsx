@@ -65,3 +65,49 @@ describe('monitors_table_columns cell labels', () => {
     expect(getByText('Awaiting data to init')).toBeInTheDocument();
   });
 });
+
+describe('monitors_table_columns CloudWatch state at the window end', () => {
+  const cwRule = {
+    id: 'checkout-errors-high',
+    name: 'checkout-errors-high',
+    datasourceId: 'cloudwatch',
+    datasourceType: 'cloudwatch',
+    status: 'active',
+    healthStatus: 'healthy',
+    cloudWatch: { state: 'ALARM', alarmType: 'metric' },
+  } as UnifiedRuleSummary;
+  const cell = (
+    field: string,
+    stateAt?: Parameters<typeof buildTableColumns>[0]['cloudWatchStateAt']
+  ) => {
+    const cols = buildTableColumns({
+      ...baseParams,
+      visibleColumns: new Set([field]) as Parameters<typeof buildTableColumns>[0]['visibleColumns'],
+      cloudWatchStateAt: stateAt,
+    });
+    const col = cols.find((c) => c.field === field) as {
+      render: (v: unknown, item: UnifiedRuleSummary) => React.ReactNode;
+    };
+    return render(<div>{col.render((cwRule as never)[field], cwRule)}</div>);
+  };
+
+  it('shows the current state when the window ends now', () => {
+    const { getByText } = cell('status');
+    expect(getByText('Active')).toBeInTheDocument();
+    expect(getByText('CW: ALARM')).toBeInTheDocument();
+  });
+
+  it('shows the state at the window end in Status and Health', () => {
+    const at = {
+      state: 'INSUFFICIENT_DATA' as const,
+      atMs: Date.now() - 86_400_000,
+      complete: true,
+    };
+    const status = cell('status', () => at);
+    expect(status.getByText('Insufficient data')).toBeInTheDocument();
+    expect(status.getByText('CW: INSUFFICIENT_DATA')).toBeInTheDocument();
+    expect(status.getByTestId('cloudWatchStatusAtWindowEnd')).toBeInTheDocument();
+    status.unmount();
+    expect(cell('healthStatus', () => at).getByText('No data')).toBeInTheDocument();
+  });
+});

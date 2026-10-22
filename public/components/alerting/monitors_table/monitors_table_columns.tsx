@@ -28,6 +28,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import moment from 'moment';
 import {
   MonitorHealthStatus,
   MonitorStatus,
@@ -36,6 +37,8 @@ import {
   UnifiedRuleSummary,
 } from '../../../../common/types/alerting';
 import {
+  cloudWatchStateToHealth,
+  cloudWatchStateToStatus,
   HEALTH_COLORS,
   isDetectorRule,
   isForecasterRule,
@@ -47,6 +50,7 @@ import { TruncatedLabel } from '../../common/truncated_label';
 import { getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
 import { DEFAULT_WIDTHS } from './resizable_columns';
 import { isPending } from './pending_rules';
+import type { CloudWatchWindowState } from '../hooks/use_cloudwatch_states_at';
 
 /** Tint for the `CW: <state>` badge shown alongside the unified status. */
 const CLOUDWATCH_STATE_BADGE_COLOR: Record<string, string> = {
@@ -91,6 +95,24 @@ export interface BuildTableColumnsParams {
   toggleSelect: (id: string) => void;
   toggleSelectAll: () => void;
   setSelectedMonitor: (r: UnifiedRuleSummary) => void;
+  /**
+   * A CloudWatch row's state at the end of the Rules tab's window, when that window ends in the
+   * past. Status and Health then show that state instead of the current one.
+   */
+  cloudWatchStateAt?: (r: UnifiedRuleSummary) => CloudWatchWindowState | undefined;
+}
+
+/** "CloudWatch state at 9/24 14:00" (plus a caveat when the history read stopped short). */
+function stateAtTooltip(at: CloudWatchWindowState): string {
+  const label = i18n.translate('observability.alerting.monitorsTable.columns.cloudWatchStateAt', {
+    defaultMessage: 'CloudWatch state at {time}',
+    values: { time: moment(at.atMs).format('M/D HH:mm') },
+  });
+  if (at.complete) return label;
+  return `${label}. ${i18n.translate(
+    'observability.alerting.monitorsTable.columns.cloudWatchStateAtPartial',
+    { defaultMessage: 'Not all history loaded, so this may be the current state.' }
+  )}`;
 }
 
 export function buildTableColumns({
@@ -102,6 +124,7 @@ export function buildTableColumns({
   toggleSelect,
   toggleSelectAll,
   setSelectedMonitor,
+  cloudWatchStateAt,
 }: BuildTableColumnsParams): Array<Record<string, unknown>> {
   const w = (id: string) => `${columnWidths[id] || DEFAULT_WIDTHS[id] || 120}px`;
   // Pending optimistic rows aren't selectable (their synthetic id would 404),
@@ -240,8 +263,11 @@ export function buildTableColumns({
               </EuiToolTip>
             );
           }
-          const cw = item.cloudWatch;
-          const unifiedLabel = getMonitorStateLabel(s);
+          const at = cloudWatchStateAt?.(item);
+          const cw =
+            item.cloudWatch && at ? { ...item.cloudWatch, state: at.state } : item.cloudWatch;
+          const status = at ? cloudWatchStateToStatus(at.state) : s;
+          const unifiedLabel = getMonitorStateLabel(status);
           // Long values ("insufficient data", "CW: INSUFFICIENT_DATA") must
           // not overflow the (user-resizable) status column: both the health
           // label and the CW badge truncate with an ellipsis, and the full
@@ -262,15 +288,18 @@ export function buildTableColumns({
               style={{ minWidth: 0 }}
             >
               <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
-                <EuiHealth color={STATUS_COLORS[s] || 'subdued'}>
-                  <span style={truncate} title={unifiedLabel}>
+                <EuiHealth
+                  color={STATUS_COLORS[status] || 'subdued'}
+                  data-test-subj={at ? 'cloudWatchStatusAtWindowEnd' : undefined}
+                >
+                  <span style={truncate} title={at ? stateAtTooltip(at) : unifiedLabel}>
                     {unifiedLabel}
                   </span>
                 </EuiHealth>
               </EuiFlexItem>
               {cw && (
                 <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
-                  <EuiToolTip content={`CloudWatch state: ${cw.state}`}>
+                  <EuiToolTip content={at ? stateAtTooltip(at) : `CloudWatch state: ${cw.state}`}>
                     <EuiBadge color={CLOUDWATCH_STATE_BADGE_COLOR[cw.state] || 'hollow'}>
                       <span style={truncate}>CW: {cw.state}</span>
                     </EuiBadge>
@@ -311,9 +340,16 @@ export function buildTableColumns({
         }),
         sortable: true,
         width: w('healthStatus'),
-        render: (h: MonitorHealthStatus) => (
-          <EuiHealth color={HEALTH_COLORS[h] || 'subdued'}>{getMonitorStateLabel(h)}</EuiHealth>
-        ),
+        render: (h: MonitorHealthStatus, item: UnifiedRuleSummary) => {
+          const at = cloudWatchStateAt?.(item);
+          const health = at ? cloudWatchStateToHealth(at.state) : h;
+          const cell = (
+            <EuiHealth color={HEALTH_COLORS[health] || 'subdued'}>
+              {getMonitorStateLabel(health)}
+            </EuiHealth>
+          );
+          return at ? <EuiToolTip content={stateAtTooltip(at)}>{cell}</EuiToolTip> : cell;
+        },
       });
     } else if (colId === 'datasource') {
       cols.push({

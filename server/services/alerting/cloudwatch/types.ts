@@ -18,6 +18,7 @@
 import type {
   CloudWatchAlarm,
   CloudWatchAlarmHistoryItem,
+  CloudWatchAlarmState,
   CloudWatchMetricDataPoint,
   DescribeAlarmsOptions,
 } from '../../../../common/types/alerting';
@@ -39,6 +40,20 @@ export interface CloudWatchMetricDataQuery {
   endTimeMs: number;
 }
 
+/** One alarm state change, from the account-wide alarm history. */
+export interface CloudWatchStateChange {
+  alarmName: string;
+  timestamp: number;
+  oldState?: CloudWatchAlarmState;
+  newState?: CloudWatchAlarmState;
+}
+export interface CloudWatchStateChangesQuery {
+  region?: string;
+  startTimeMs: number;
+  endTimeMs: number;
+  /** Page cap; the result says whether it stopped short. */
+  maxPages?: number;
+}
 /**
  * A specific error type the source throws when the ambient credential chain
  * yields nothing. Callers translate this into a per-datasource fetch error so a
@@ -65,6 +80,14 @@ export interface CloudWatchAlarmSource {
   /** State/config history for one alarm, newest first. */
   describeAlarmHistory(alarmName: string, region?: string): Promise<CloudWatchAlarmHistoryItem[]>;
 
+  /**
+   * State changes across every alarm in the region within a window, oldest first. One
+   * account-wide history call instead of one per alarm; `complete` is false when the page cap
+   * stopped it short.
+   */
+  describeStateChanges(
+    query: CloudWatchStateChangesQuery
+  ): Promise<{ changes: CloudWatchStateChange[]; complete: boolean }>;
   /** Metric samples for the alarm's watched series (for the preview chart). */
   getMetricData(query: CloudWatchMetricDataQuery): Promise<CloudWatchMetricDataPoint[]>;
 }

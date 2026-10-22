@@ -45,6 +45,7 @@ import { alertMatchesSearch, filterAlerts } from '../../../common/services/alert
 import { AlertTimeline } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import {
+  canAcknowledgeAlert,
   countBy,
   isStandardOpenSearchDatasource,
   SEVERITY_COLORS,
@@ -1180,24 +1181,22 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              {getAlertKind(alert) === 'alert' &&
-                alert.state === 'active' &&
-                alert.datasourceType !== 'prometheus' && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconType="check"
-                      size="xs"
-                      color="primary"
-                      style={{ minWidth: 24, minHeight: 24 }}
-                      onClick={() => onAcknowledge(alert.id)}
-                    >
-                      <FormattedMessage
-                        id="observability.alerting.alertsDashboard.ackButton"
-                        defaultMessage="Ack"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                )}
+              {canAcknowledgeAlert(alert) && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="check"
+                    size="xs"
+                    color="primary"
+                    style={{ minWidth: 24, minHeight: 24 }}
+                    onClick={() => onAcknowledge(alert.id)}
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.alertsDashboard.ackButton"
+                      defaultMessage="Ack"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           );
         },

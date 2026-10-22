@@ -42,11 +42,16 @@ import {
   CloudWatchCallerIdentity,
   CloudWatchCredentialsError,
   CloudWatchMetricDataQuery,
+  CloudWatchStateChange,
+  CloudWatchStateChangesQuery,
 } from './types';
 
 const DEFAULT_FALLBACK_REGION = 'us-east-1';
 const DESCRIBE_ALARMS_PAGE_SIZE = 100;
 const DESCRIBE_ALARMS_MAX = 500;
+// Account-wide state changes: 10 pages of 100 bounds a busy account's call count.
+const STATE_CHANGES_PAGE_SIZE = 100;
+const STATE_CHANGES_MAX_PAGES = 10;
 
 /**
  * Resolve credentials, preferring explicit `AWS_*` env vars when present and
@@ -72,6 +77,23 @@ const credentials = resolveCredentials();
 function normalizeState(value?: string): CloudWatchAlarmState {
   if (value === 'ALARM' || value === 'INSUFFICIENT_DATA') return value;
   return 'OK';
+}
+
+/** oldState/newState from a history item's HistoryData (a JSON string, set for StateUpdate). */
+function parseHistoryStates(historyData?: string): {
+  oldState?: CloudWatchAlarmState;
+  newState?: CloudWatchAlarmState;
+} {
+  try {
+    const data = historyData ? JSON.parse(historyData) : undefined;
+    return {
+      oldState: data?.oldState?.stateValue ? normalizeState(data.oldState.stateValue) : undefined,
+      newState: data?.newState?.stateValue ? normalizeState(data.newState.stateValue) : undefined,
+    };
+  } catch {
+    // HistoryData is best-effort context; ignore parse failures.
+    return {};
+  }
 }
 
 function toIso(value?: Date): string | undefined {
@@ -216,20 +238,7 @@ export class SdkCloudWatchAlarmSource implements CloudWatchAlarmSource {
       )
     );
     return (resp.AlarmHistoryItems || []).map((h) => {
-      // HistoryData is a JSON string carrying oldState/newState for StateUpdate.
-      let oldState: CloudWatchAlarmState | undefined;
-      let newState: CloudWatchAlarmState | undefined;
-      try {
-        const data = h.HistoryData ? JSON.parse(h.HistoryData) : undefined;
-        oldState = data?.oldState?.stateValue
-          ? normalizeState(data.oldState.stateValue)
-          : undefined;
-        newState = data?.newState?.stateValue
-          ? normalizeState(data.newState.stateValue)
-          : undefined;
-      } catch {
-        // HistoryData is best-effort context; ignore parse failures.
-      }
+      const { oldState, newState } = parseHistoryStates(h.HistoryData);
       return {
         timestamp: toIso(h.Timestamp) || new Date(0).toISOString(),
         historyItemType: h.HistoryItemType,
@@ -238,6 +247,41 @@ export class SdkCloudWatchAlarmSource implements CloudWatchAlarmSource {
         newState,
       };
     });
+  }
+
+  async describeStateChanges(
+    query: CloudWatchStateChangesQuery
+  ): Promise<{ changes: CloudWatchStateChange[]; complete: boolean }> {
+    const client = this.getClient(this.resolveRegion(query.region));
+    const maxPages = query.maxPages ?? STATE_CHANGES_MAX_PAGES;
+    const changes: CloudWatchStateChange[] = [];
+    let nextToken: string | undefined;
+    let pages = 0;
+    do {
+      // No AlarmName: DescribeAlarmHistory then covers every alarm in the region.
+      const resp = await this.send(() =>
+        client.send(
+          new DescribeAlarmHistoryCommand({
+            AlarmTypes: ['MetricAlarm', 'CompositeAlarm'],
+            HistoryItemType: 'StateUpdate',
+            StartDate: new Date(query.startTimeMs),
+            EndDate: new Date(query.endTimeMs),
+            ScanBy: 'TimestampAscending',
+            MaxRecords: STATE_CHANGES_PAGE_SIZE,
+            NextToken: nextToken,
+          })
+        )
+      );
+      for (const h of resp.AlarmHistoryItems || []) {
+        const timestamp = h.Timestamp ? h.Timestamp.getTime() : NaN;
+        if (!h.AlarmName || !Number.isFinite(timestamp)) continue;
+        const { oldState, newState } = parseHistoryStates(h.HistoryData);
+        changes.push({ alarmName: h.AlarmName, timestamp, oldState, newState });
+      }
+      nextToken = resp.NextToken;
+      pages++;
+    } while (nextToken && pages < maxPages);
+    return { changes, complete: !nextToken };
   }
 
   async getMetricData(query: CloudWatchMetricDataQuery): Promise<CloudWatchMetricDataPoint[]> {

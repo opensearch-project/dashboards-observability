@@ -36,7 +36,7 @@ import { coreRefs } from '../../framework/core_refs';
 import { AnomalyDetailContent } from './anomaly_detail_flyout';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { LinkifyAnnotation } from './linkify_annotation';
-import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
+import { canAcknowledgeAlert, SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
 import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
 import { formatTimestamp } from './time_format';
 
@@ -572,8 +572,8 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
-              {/* Acknowledge button — only for non-Prometheus active alerts */}
-              {alert.state === 'active' && alert.datasourceType !== 'prometheus' && (
+              {/* Acknowledge: only OpenSearch alerting alerts have an acknowledge API */}
+              {canAcknowledgeAlert(alert) && (
                 <EuiFlexItem grow={false}>
                   <EuiButton fill size="s" iconType="check" onClick={() => onAcknowledge(alert.id)}>
                     <FormattedMessage

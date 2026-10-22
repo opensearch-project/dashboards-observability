@@ -438,6 +438,23 @@ describe('AlertsDashboard', () => {
 
   // CLAR2: the State column routes the raw enum through getStateLabel, so it
   // reads "Active" rather than the lowercase wire value `active`.
+  it('offers Ack on OpenSearch alerts but not on CloudWatch alarms', () => {
+    const cloudWatchAlarm: UnifiedAlertSummary = {
+      ...sampleAlert,
+      id: 'checkout-errors-high',
+      name: 'checkout-errors-high',
+      datasourceId: 'cloudwatch',
+      datasourceType: 'cloudwatch',
+      alertKind: 'alert',
+      cloudWatch: { state: 'ALARM', alarmType: 'metric' },
+    };
+    render(<AlertsDashboard {...baseProps} alerts={[sampleAlert, cloudWatchAlarm]} />);
+    const table = within(screen.getByRole('table'));
+    // One Ack button, on the OpenSearch row only.
+    expect(table.getAllByText('Ack')).toHaveLength(1);
+    const cwRow = table.getByText('checkout-errors-high').closest('tr')!;
+    expect(within(cwRow).queryByText('Ack')).toBeNull();
+  });
   it('renders the alert state as a human label in the table', () => {
     render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
     // The facet still lists the raw `active` option; the table cell shows "Active".

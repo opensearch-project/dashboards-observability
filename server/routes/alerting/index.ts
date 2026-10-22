@@ -903,6 +903,32 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     return { cwBackend, ds };
   };
 
+  // Alarm states at a past moment (the end of the Rules tab's window), from one
+  // account-wide history read. Alarms not listed are still in their current state.
+  router.get(
+    {
+      path: '/api/alerting/cloudwatch/{dsId}/alarm-states',
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        query: schema.object({
+          at: schema.string({
+            validate: (v: string) => (validateDateMath(v) ? undefined : `invalid date-math: ${v}`),
+          }),
+        }),
+      },
+    },
+    async (ctx, req, res) =>
+      runClassifiedHandler(res, 'cloudwatch.alarm.statesAt', 'cloudwatch', async () => {
+        const { cwBackend, ds } = await resolveCloudWatch(
+          ctx as AlertingHandlerContext,
+          req,
+          req.params.dsId
+        );
+        const atMs = parseDateMathMs(req.query.at, /* isEndTime */ true);
+        return { status: 200, body: await cwBackend.getStatesAt(ds, atMs) };
+      })
+  );
+
   // Full alarm detail (metadata + summary + history + metric preview + graph).
   router.get(
     {

@@ -144,6 +144,17 @@ export interface CloudWatchRelationshipGraph {
 }
 
 /** Full detail payload the alarm flyout consumes (loaded on demand). */
+/**
+ * Alarm states at a past moment (the end of the Rules tab's window). `states` only holds alarms
+ * that changed since `atMs`; any other alarm is still in its current state. `complete` is false
+ * when the history read stopped short, so alarms not listed may also have changed.
+ */
+export interface CloudWatchStatesAt {
+  atMs: number;
+  states: Record<string, CloudWatchAlarmState>;
+  complete: boolean;
+}
+
 export interface CloudWatchAlarmDetail {
   alarm: CloudWatchAlarm;
   summary?: string;

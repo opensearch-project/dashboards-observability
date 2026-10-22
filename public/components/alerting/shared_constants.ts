@@ -4,7 +4,14 @@
  */
 
 import { i18n } from '@osd/i18n';
-import type { Datasource, MonitorStatus, UnifiedRuleSummary } from '../../../common/types/alerting';
+import type {
+  CloudWatchAlarmState,
+  Datasource,
+  MonitorHealthStatus,
+  MonitorStatus,
+  UnifiedAlertSummary,
+  UnifiedRuleSummary,
+} from '../../../common/types/alerting';
 
 /**
  * Shared color maps, formatting utilities, and style constants
@@ -132,6 +139,33 @@ export const isCloudWatchRule = (rule: UnifiedRuleSummary): boolean =>
   rule.definitionType === 'cloudwatch_alarm' ||
   rule.datasourceType === 'cloudwatch' ||
   !!rule.cloudWatch;
+
+/**
+ * Rule status and health for a CloudWatch alarm state, as the server maps them
+ * (`cloudWatchStateToMonitorStatus` / `cloudWatchHealthStatus`). Used to show a CloudWatch row
+ * as it was at the end of the Rules tab's window.
+ */
+export function cloudWatchStateToStatus(state: CloudWatchAlarmState): MonitorStatus {
+  if (state === 'ALARM') return 'active';
+  if (state === 'INSUFFICIENT_DATA') return 'insufficient_data';
+  return 'muted';
+}
+export function cloudWatchStateToHealth(state: CloudWatchAlarmState): MonitorHealthStatus {
+  return state === 'INSUFFICIENT_DATA' ? 'no_data' : 'healthy';
+}
+
+/**
+ * Whether an alert can be acknowledged here. Only OpenSearch alerting monitors have an
+ * acknowledge API: Prometheus alerts are silenced in Alertmanager instead, and CloudWatch alarms
+ * have no acknowledgement (an alarm stays in ALARM until its metric recovers). Anomaly and
+ * forecast results aren't alerts.
+ */
+export const canAcknowledgeAlert = (alert: UnifiedAlertSummary): boolean =>
+  alert.state === 'active' &&
+  (alert.alertKind ?? 'alert') === 'alert' &&
+  !alert.cloudWatch &&
+  alert.datasourceType !== 'prometheus' &&
+  alert.datasourceType !== 'cloudwatch';
 
 export const isDetectorRule = (rule: UnifiedRuleSummary): boolean =>
   rule.definitionType === 'detector' || rule.monitorType === 'detector';

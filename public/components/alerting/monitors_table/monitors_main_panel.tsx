@@ -42,8 +42,7 @@ import { isDetectorDefinition, isForecasterDefinition } from './monitors_table_c
 import { MonitorsEuiTable } from './monitors_eui_table';
 import type { MonitorsEuiTableProps } from './monitors_eui_table';
 import { AlarmTimeWindow, describeTimeRange } from '../alarm_time_window';
-import { RULES_END_TIME_KEY, RULES_START_TIME_KEY } from '../alarms_page_helpers';
-import { useTimeRange } from '../hooks/use_time_range';
+import type { UseTimeRangeResult } from '../hooks/use_time_range';
 
 export interface MonitorsMainPanelProps {
   // Data
@@ -133,6 +132,12 @@ export interface MonitorsMainPanelProps {
    * flyout shows a loading spinner on the button until it resolves.
    */
   onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
+  /**
+   * The Rules tab's time picker: a lens on CloudWatch alarm state and history (the Status and
+   * Health columns, and the alarm flyout's timeline, metric preview and state history), not a
+   * row filter.
+   */
+  rulesTime: UseTimeRangeResult;
 }
 
 export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
@@ -179,6 +184,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   onStopResources,
   lifecycleActionPending = false,
   onToggleEnabled,
+  rulesTime,
 }) => {
   const selectedRules = filtered.filter((rule) => selectedIds.has(rule.id));
   const selectedAdResources = selectedRules.filter(
@@ -189,12 +195,8 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   );
   const selectedStoppableResources = selectedAdResources.filter(isAdResourceRunning);
 
-  // The Rules tab's time picker: a lens on CloudWatch alarm state and history (the alarm
-  // flyout's timeline, metric preview and state history), not a row filter, so the rule count
-  // doesn't change. Kept here rather than in the parent because nothing else reads it.
   // OpenSearch and Prometheus rules report no state history, so the picker only shows when
-  // CloudWatch alarms are listed.
-  const rulesTime = useTimeRange({ startKey: RULES_START_TIME_KEY, endKey: RULES_END_TIME_KEY });
+  // CloudWatch alarms are listed. It doesn't filter rows, so the rule count doesn't change.
   const showRulesTimePicker = rules.some(isCloudWatchRule);
   const rulesWindow = useMemo<AlarmTimeWindow>(
     () => ({

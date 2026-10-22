@@ -17,9 +17,11 @@ import type {
   CloudWatchAlarm,
   CloudWatchAlarmDetail,
   CloudWatchAlarmHistoryItem,
+  CloudWatchAlarmState,
   CloudWatchMetricPreview,
   CloudWatchRelationshipGraph,
   CloudWatchRelationshipNode,
+  CloudWatchStatesAt,
   Datasource,
   Logger,
 } from '../../../../common/types/alerting';
@@ -143,6 +145,27 @@ export class CloudWatchBackend {
       accountId: a.accountId || identity?.accountId,
       region: a.region || identity?.region || ds.region,
     }));
+  }
+
+  /**
+   * Each alarm's state at `atMs`, from the changes since then: an alarm's first change after
+   * `atMs` started from the state it was in at `atMs` (its `oldState`). Alarms that haven't
+   * changed since are left out; they are still in their current state.
+   */
+  async getStatesAt(ds: Datasource, atMs: number, nowMs = Date.now()): Promise<CloudWatchStatesAt> {
+    if (atMs >= nowMs) return { atMs, states: {}, complete: true };
+    const { changes, complete } = await this.guarded(() =>
+      this.source.describeStateChanges({ region: ds.region, startTimeMs: atMs, endTimeMs: nowMs })
+    );
+    const states: Record<string, CloudWatchAlarmState> = {};
+    const seen = new Set<string>();
+    // Oldest first, so the first change seen per alarm is the one right after `atMs`.
+    for (const c of [...changes].sort((a, b) => a.timestamp - b.timestamp)) {
+      if (c.timestamp <= atMs || seen.has(c.alarmName)) continue;
+      seen.add(c.alarmName);
+      if (c.oldState) states[c.alarmName] = c.oldState;
+    }
+    return { atMs, states, complete };
   }
 
   private async getIdentitySafe(

@@ -29,6 +29,8 @@ import {
   CloudWatchCallerIdentity,
   CloudWatchCredentialsError,
   CloudWatchMetricDataQuery,
+  CloudWatchStateChange,
+  CloudWatchStateChangesQuery,
 } from '../types';
 
 const noopLogger = {
@@ -65,6 +67,8 @@ class FakeSource implements CloudWatchAlarmSource {
   alarms: CloudWatchAlarm[] = [];
   history: CloudWatchAlarmHistoryItem[] = [];
   metricPoints: CloudWatchMetricDataPoint[] = [];
+  stateChanges: CloudWatchStateChange[] = [];
+  stateChangesComplete = true;
   identity: CloudWatchCallerIdentity = { accountId: '123456789012', region: 'us-east-1' };
   failWith: { [K in keyof CloudWatchAlarmSource]?: Error } = {};
 
@@ -84,6 +88,12 @@ class FakeSource implements CloudWatchAlarmSource {
   async describeAlarmHistory(): Promise<CloudWatchAlarmHistoryItem[]> {
     if (this.failWith.describeAlarmHistory) throw this.failWith.describeAlarmHistory;
     return this.history;
+  }
+  async describeStateChanges(
+    _query: CloudWatchStateChangesQuery
+  ): Promise<{ changes: CloudWatchStateChange[]; complete: boolean }> {
+    if (this.failWith.describeStateChanges) throw this.failWith.describeStateChanges;
+    return { changes: this.stateChanges, complete: this.stateChangesComplete };
   }
   async getMetricData(_query: CloudWatchMetricDataQuery): Promise<CloudWatchMetricDataPoint[]> {
     if (this.failWith.getMetricData) throw this.failWith.getMetricData;
@@ -268,6 +278,59 @@ describe('CloudWatchBackend.getAlarmDetail', () => {
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy.mock.calls[0][0]).toMatchObject({ startTimeMs: 1_000, endTimeMs: 2_000 });
     expect(detail!.metricPreview?.points).toEqual([]);
+  });
+});
+
+describe('CloudWatchBackend.getStatesAt', () => {
+  const at = 1_000_000;
+  const now = 2_000_000;
+
+  it("takes each alarm's state from its first change after the moment", async () => {
+    const source = new FakeSource();
+    // Unsorted on purpose: the backend orders them itself.
+    source.stateChanges = [
+      { alarmName: 'cpu-high', timestamp: at + 500, oldState: 'ALARM', newState: 'OK' },
+      { alarmName: 'cpu-high', timestamp: at + 100, oldState: 'OK', newState: 'ALARM' },
+      {
+        alarmName: 'disk-full',
+        timestamp: at + 200,
+        oldState: 'INSUFFICIENT_DATA',
+        newState: 'OK',
+      },
+    ];
+    const spy = jest.spyOn(source, 'describeStateChanges');
+    const backend = new CloudWatchBackend(noopLogger, source);
+    expect(await backend.getStatesAt(ds, at, now)).toEqual({
+      atMs: at,
+      states: { 'cpu-high': 'OK', 'disk-full': 'INSUFFICIENT_DATA' },
+      complete: true,
+    });
+    expect(spy).toHaveBeenCalledWith({ region: 'us-east-1', startTimeMs: at, endTimeMs: now });
+  });
+
+  it("leaves out an alarm whose first change doesn't say where it started", async () => {
+    const source = new FakeSource();
+    source.stateChanges = [
+      { alarmName: 'cpu-high', timestamp: at + 100, newState: 'ALARM' },
+      { alarmName: 'cpu-high', timestamp: at + 200, oldState: 'ALARM', newState: 'OK' },
+    ];
+    const backend = new CloudWatchBackend(noopLogger, source);
+    expect((await backend.getStatesAt(ds, at, now)).states).toEqual({});
+  });
+
+  it('passes on an incomplete read and skips the call for a moment not in the past', async () => {
+    const source = new FakeSource();
+    source.stateChangesComplete = false;
+    const spy = jest.spyOn(source, 'describeStateChanges');
+    const backend = new CloudWatchBackend(noopLogger, source);
+    expect((await backend.getStatesAt(ds, at, now)).complete).toBe(false);
+    spy.mockClear();
+    expect(await backend.getStatesAt(ds, now, now)).toEqual({
+      atMs: now,
+      states: {},
+      complete: true,
+    });
+    expect(spy).not.toHaveBeenCalled();
   });
 });
 

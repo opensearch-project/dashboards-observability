@@ -37,6 +37,9 @@ import { SavedSearch } from './monitors_table_helpers';
 import { DEFAULT_WIDTHS, useResizableColumns } from './resizable_columns';
 import { MonitorsFiltersPanel } from './monitors_filters_panel';
 import { MonitorsMainPanel } from './monitors_main_panel';
+import { RULES_END_TIME_KEY, RULES_START_TIME_KEY } from '../alarms_page_helpers';
+import { useTimeRange } from '../hooks/use_time_range';
+import { useCloudWatchStatesAt } from '../hooks/use_cloudwatch_states_at';
 import '../alerting.scss';
 
 interface MonitorsTableProps {
@@ -322,6 +325,15 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     [lifecycleActionPending]
   );
 
+  // The Rules tab's own window (picker in the main panel). For CloudWatch rows the Status and
+  // Health columns show the state at its end; other rules have no state history.
+  const rulesTime = useTimeRange({ startKey: RULES_START_TIME_KEY, endKey: RULES_END_TIME_KEY });
+  const { stateAt: cloudWatchStateAt } = useCloudWatchStatesAt({
+    rules,
+    endMs: rulesTime.endMs,
+    refreshToken: rulesTime.refreshToken,
+  });
+
   // Build table columns from visible set
   const tableColumns = useMemo(() => {
     return buildTableColumns({
@@ -333,13 +345,14 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       toggleSelect,
       toggleSelectAll,
       setSelectedMonitor,
+      cloudWatchStateAt,
     });
     // `toggleSelect`/`toggleSelectAll` are recreated every render; adding them
     // would invalidate this memo every render. The closures only read from
     // `selectedIds`/`filtered` which are in the dep list, so staleness is
     // bounded to the same render cycle as the columns.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleColumns, selectedIds, filtered, dsNameMap, columnWidths]);
+  }, [visibleColumns, selectedIds, filtered, dsNameMap, columnWidths, cloudWatchStateAt]);
 
   // Attach DOM-based resize handles to table header cells
   useResizableColumns(tableWrapperRef, columnWidths, setColumnWidths, visibleColumns);
@@ -522,6 +535,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onStopResources={(resources) => handleLifecycleAction(resources, onStopResources)}
                 lifecycleActionPending={lifecycleActionPending}
                 onToggleEnabled={onToggleEnabled}
+                rulesTime={rulesTime}
               />
             </EuiResizablePanel>
           </>

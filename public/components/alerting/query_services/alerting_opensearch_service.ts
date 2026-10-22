@@ -15,6 +15,7 @@ import type {
   CloudWatchAlarmDetail,
   CloudWatchAlarmHistoryItem,
   CloudWatchRelationshipGraph,
+  CloudWatchStatesAt,
   ProgressiveResponse,
   UnifiedAlert,
   UnifiedAlertSummary,
@@ -124,6 +125,21 @@ export class AlertingOpenSearchService {
       )}`,
       { query, signal: opts?.signal }
     )) as CloudWatchAlarmDetail;
+  }
+
+  /**
+   * CloudWatch alarm states at `at` (date-math or ISO): only the alarms that changed since;
+   * the rest are in their current state.
+   */
+  async getCloudWatchStatesAt(
+    dsId: string,
+    at: string,
+    signal?: AbortSignal
+  ): Promise<CloudWatchStatesAt> {
+    return (await this.requireHttp().get(
+      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarm-states`,
+      { query: { at }, signal }
+    )) as CloudWatchStatesAt;
   }
 
   /** CloudWatch alarm history (partial-permission aware). */
