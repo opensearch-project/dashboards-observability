@@ -21,6 +21,7 @@
     ".lock",
     ".snap",
     ".git",
+    ".github",
     ".gitignore",
     ".prettierrc",
     ".prettierignore",
