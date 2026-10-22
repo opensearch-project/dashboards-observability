@@ -625,6 +625,15 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
                   String((result.body as { error?: string }).error ?? `HTTP ${result.status}`)
                 );
               }
+              // A ruler that drops rule labels on read-back would look outdated
+              // forever; fail so the scheduler backs off instead of re-writing
+              // the same rules every cooldown.
+              const health = (result.body as { health?: { outdatedGroups?: string[] } }).health;
+              if (health?.outdatedGroups?.length) {
+                throw new Error(
+                  `groups still outdated after repair: ${health.outdatedGroups.join(', ')}`
+                );
+              }
             });
           }
         : undefined
