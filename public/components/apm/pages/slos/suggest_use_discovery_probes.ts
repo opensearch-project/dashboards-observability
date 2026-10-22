@@ -24,7 +24,7 @@
 import { useEffect, useState } from 'react';
 import type { HttpStart } from '../../../../../../../src/core/public';
 import type { PromRuleGroup } from '../../../../../common/types/alerting';
-import type { LabelValuesByMetric, MetricLabelValues } from './suggest_engine';
+import type { EmptyHistogram, LabelValuesByMetric, MetricLabelValues } from './suggest_engine';
 
 interface OtelProbe {
   metric: string;
@@ -41,7 +41,26 @@ const OTEL_PROBES: OtelProbe[] = [
   { metric: 'gen_ai_client_operation_duration_seconds_count', labels: ['service_name', 'job'] },
 ];
 
+/**
+ * OTel latency histograms and the labels their series are attributed by.
+ * Probed for services whose `+Inf` bucket never moved — see
+ * `findEmptyHistograms`.
+ */
+const LATENCY_HISTOGRAMS: OtelProbe[] = [
+  { metric: 'http_server_request_duration_seconds_bucket', labels: ['service_name', 'job'] },
+  { metric: 'rpc_server_duration_seconds_bucket', labels: ['rpc_service'] },
+  { metric: 'db_client_operation_duration_seconds_bucket', labels: ['service_name', 'job'] },
+  { metric: 'messaging_process_duration_seconds_bucket', labels: ['service_name', 'job'] },
+];
+
 export interface DiscoveryProbesResult {
+  /**
+   * Latency histograms whose buckets recorded nothing over the last hour for a
+   * service even though the series exist — the producer exports `_count` but
+   * leaves every bucket (including `+Inf`) at 0, so no latency SLI can be
+   * computed. The engine skips latency drafts for these.
+   */
+  emptyHistograms: EmptyHistogram[];
   metricNames: string[];
   labelValuesByMetric: LabelValuesByMetric;
   existingRuleGroups: PromRuleGroup[];
@@ -56,13 +75,18 @@ export interface UseDiscoveryProbesArgs {
   datasourceId: string;
   /** Bump to force the probe + ruler fetch to re-run (the "Rediscover" button). */
   epoch?: number;
+  /** Datasource meta forwarded on PromQL probes (MDS / data-connection routing). */
+  prometheusConnectionMeta?: Record<string, unknown>;
 }
 
 export function useDiscoveryProbes({
   http,
   datasourceId,
   epoch = 0,
+  prometheusConnectionMeta,
 }: UseDiscoveryProbesArgs): DiscoveryProbesResult {
+  const [emptyHistograms, setEmptyHistograms] = useState<EmptyHistogram[]>([]);
+  const metaKey = JSON.stringify(prometheusConnectionMeta ?? null);
   const [metricNames, setMetricNames] = useState<string[]>([]);
   const [labelValuesByMetric, setLabelValuesByMetric] = useState<LabelValuesByMetric>({});
   const [existingRuleGroups, setExistingRuleGroups] = useState<PromRuleGroup[]>([]);
@@ -71,6 +95,7 @@ export function useDiscoveryProbes({
 
   useEffect(() => {
     if (!datasourceId) {
+      setEmptyHistograms([]);
       setMetricNames([]);
       setLabelValuesByMetric({});
       setExistingRuleGroups([]);
@@ -140,6 +165,14 @@ export function useDiscoveryProbes({
           labelsByMetric[metric] = existing;
           if (values.length > 0) presentMetrics.add(metric);
         }
+        const empty = await findEmptyHistograms(
+          http,
+          datasourceId,
+          prometheusConnectionMeta,
+          LATENCY_HISTOGRAMS.filter((h) => presentMetrics.has(h.metric))
+        );
+        if (cancelled) return;
+        setEmptyHistograms(empty);
         setMetricNames([...presentMetrics]);
         setLabelValuesByMetric(labelsByMetric);
         setExistingRuleGroups(rulerRes.groups);
@@ -151,13 +184,83 @@ export function useDiscoveryProbes({
     return () => {
       cancelled = true;
     };
-  }, [datasourceId, http, epoch]);
+    // Keyed on the serialized meta: callers often pass a fresh object each
+    // render, which would otherwise re-run every probe on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [datasourceId, http, epoch, metaKey]);
 
   return {
+    emptyHistograms,
     metricNames,
     labelValuesByMetric,
     existingRuleGroups,
     rulerFetchFailed,
     loading,
   };
+}
+
+/**
+ * For each present latency histogram, find the (label, value) attributions
+ * whose `+Inf` bucket didn't move over the last hour: `== 0` keeps only those
+ * rows, so services without the metric at all never appear. Best effort — a
+ * failed probe returns nothing and no draft is skipped.
+ */
+async function findEmptyHistograms(
+  http: HttpStart,
+  connectionId: string,
+  meta: Record<string, unknown> | undefined,
+  histograms: OtelProbe[]
+): Promise<EmptyHistogram[]> {
+  const queries = histograms.flatMap((h) =>
+    h.labels.map((label) => ({
+      metric: h.metric,
+      label,
+      query: `sum by (${label}) (increase(${h.metric}{le="+Inf"}[1h])) == 0`,
+    }))
+  );
+  const results = await Promise.all(
+    queries.map(async ({ metric, label, query }) => {
+      try {
+        const res = await http.post<{ body?: unknown }>('/api/enhancements/search/promql', {
+          body: JSON.stringify({
+            query: {
+              query,
+              language: 'PROMQL',
+              dataset: { id: connectionId, type: 'PROMETHEUS', dataSource: { meta } },
+              format: 'jdbc',
+            },
+            timeRange: { from: 'now-5m', to: 'now' },
+          }),
+        });
+        return labelValuesFromFrame(res?.body ?? res, label).map((value) => ({
+          metric,
+          label,
+          value,
+        }));
+      } catch (err) {
+        console.warn('[slo-suggest] empty-histogram probe failed for', metric, label, err);
+        return [] as EmptyHistogram[];
+      }
+    })
+  );
+  return results.flat();
+}
+
+/** Pull one label's values out of a PromQL search response (data frame or instant rows). */
+export function labelValuesFromFrame(body: unknown, label: string): string[] {
+  const b = body as {
+    fields?: Array<{ name: string; values: unknown[] }>;
+    meta?: { instantData?: { rows?: Array<Record<string, unknown>> } };
+  };
+  const out = new Set<string>();
+  for (const row of b?.meta?.instantData?.rows ?? []) {
+    const v = row[label];
+    if (typeof v === 'string' && v) out.add(v);
+  }
+  const labels = b?.fields?.find((f) => f.name === 'Labels')?.values ?? [];
+  for (const l of labels) {
+    const v = (l as Record<string, unknown> | null)?.[label];
+    if (typeof v === 'string' && v) out.add(v);
+  }
+  return [...out];
 }

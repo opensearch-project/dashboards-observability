@@ -460,3 +460,34 @@ describe('metricsToProbe', () => {
     ]);
   });
 });
+
+describe('generateSuggestionsForServices — empty latency histograms', () => {
+  const bucket = 'http_server_request_duration_seconds_bucket';
+  const count = 'http_server_request_duration_seconds_count';
+  const base = {
+    datasourceId: 'prom-1',
+    services: [{ serviceName: 'flagd' }, { serviceName: 'cart' }],
+    metricNames: [bucket, count],
+    labelValuesByMetric: {
+      [bucket]: { service_name: ['flagd', 'cart'] },
+      [count]: { service_name: ['flagd', 'cart'] },
+    },
+  };
+  const keys = (s: ReturnType<typeof generateSuggestionsForServices>) => s.map((x) => x.key);
+
+  it('skips HTTP latency drafts for services whose buckets recorded nothing', () => {
+    const out = generateSuggestionsForServices({
+      ...base,
+      emptyHistograms: [{ metric: bucket, label: 'service_name', value: 'flagd' }],
+    });
+    expect(keys(out)).not.toContain('http-lat:flagd');
+    expect(keys(out)).toContain('http-lat:cart');
+    // Availability (from _count) and span-derived drafts are unaffected.
+    expect(keys(out)).toContain('http-avail:flagd');
+    expect(keys(out)).toContain('apm-lat:flagd');
+  });
+
+  it('keeps every draft when the probe found nothing', () => {
+    expect(keys(generateSuggestionsForServices(base))).toContain('http-lat:flagd');
+  });
+});

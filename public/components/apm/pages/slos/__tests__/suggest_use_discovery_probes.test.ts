@@ -10,6 +10,8 @@ import type { HttpStart } from '../../../../../../../../src/core/public';
 function makeHttp(implementations: {
   labelValues?: Record<string, Record<string, string[]> | Error>;
   ruler?: { groups: unknown[] } | Error;
+  /** metric → label → values whose `+Inf` bucket stayed at 0. */
+  emptyHistograms?: Record<string, Record<string, string[]> | Error>;
 }): HttpStart {
   const get = jest.fn(async (url: string, opts?: { query?: { selector?: string } }) => {
     if (url.includes('/metadata/label-values/')) {
@@ -27,7 +29,23 @@ function makeHttp(implementations: {
     }
     return {};
   });
-  return { get } as unknown as HttpStart;
+  const post = jest.fn(async (_url: string, opts?: { body?: string }) => {
+    const q: string = JSON.parse(opts?.body ?? '{}')?.query?.query ?? '';
+    const metric = /increase\((\w+)\{/.exec(q)?.[1] ?? '';
+    const label = /sum by \((\w+)\)/.exec(q)?.[1] ?? '';
+    const slot = implementations.emptyHistograms?.[metric];
+    if (slot instanceof Error) throw slot;
+    const values = slot?.[label] ?? [];
+    return {
+      body: {
+        fields: [
+          { name: 'Labels', values: values.map((v) => ({ [label]: v })) },
+          { name: 'Value', values: values.map(() => 0) },
+        ],
+      },
+    };
+  });
+  return { get, post } as unknown as HttpStart;
 }
 
 describe('useDiscoveryProbes', () => {
@@ -124,5 +142,43 @@ describe('useDiscoveryProbes', () => {
     } finally {
       errSpy.mockRestore();
     }
+  });
+
+  it('reports latency histograms whose buckets recorded nothing, per service', async () => {
+    const http = makeHttp({
+      labelValues: {
+        http_server_request_duration_seconds_bucket: { service_name: ['flagd', 'cart'] },
+      },
+      emptyHistograms: {
+        http_server_request_duration_seconds_bucket: { service_name: ['flagd'] },
+      },
+    });
+    const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.emptyHistograms).toEqual([
+      {
+        metric: 'http_server_request_duration_seconds_bucket',
+        label: 'service_name',
+        value: 'flagd',
+      },
+    ]);
+    // Only histograms actually present are probed.
+    const posts = (http as unknown as { post: jest.Mock }).post.mock.calls;
+    expect(
+      posts.every(([, o]) => (o.body as string).includes('http_server_request_duration'))
+    ).toBe(true);
+  });
+
+  it('a failed empty-histogram probe filters nothing', async () => {
+    const http = makeHttp({
+      labelValues: {
+        http_server_request_duration_seconds_bucket: { service_name: ['flagd'] },
+      },
+      emptyHistograms: { http_server_request_duration_seconds_bucket: new Error('timeout') },
+    });
+    const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.emptyHistograms).toEqual([]);
+    expect(result.current.metricNames).toContain('http_server_request_duration_seconds_bucket');
   });
 });

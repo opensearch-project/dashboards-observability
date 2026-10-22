@@ -365,8 +365,14 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     labelValuesByMetric,
     existingRuleGroups,
     rulerFetchFailed,
+    emptyHistograms,
     loading: discoveryLoading,
-  } = useDiscoveryProbes({ http, datasourceId, epoch: discoveryEpoch });
+  } = useDiscoveryProbes({
+    http,
+    datasourceId,
+    epoch: discoveryEpoch,
+    prometheusConnectionMeta: config?.prometheusDataSource?.meta,
+  });
 
   const suggestions = useMemo<Suggestion[]>(() => {
     if (!datasourceId || !services || services.length === 0) return [];
@@ -380,8 +386,16 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
       metricNames,
       labelValuesByMetric,
       existingRuleGroups,
+      emptyHistograms,
     });
-  }, [datasourceId, services, metricNames, labelValuesByMetric, existingRuleGroups]);
+  }, [
+    datasourceId,
+    services,
+    metricNames,
+    labelValuesByMetric,
+    existingRuleGroups,
+    emptyHistograms,
+  ]);
 
   const allServiceNames = useMemo(
     () => (allDiscoveredServices ?? []).map((s) => s.serviceName).filter(Boolean),

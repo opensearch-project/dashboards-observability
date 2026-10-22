@@ -102,6 +102,19 @@ export interface ServiceDiscoveryInput {
    * `slo_service="<service>"` so callers can avoid dual-writing.
    */
   existingRuleGroups?: PromRuleGroup[];
+  /**
+   * Latency histograms that exist but recorded no observations for a service
+   * (every bucket stuck at 0). Latency drafts on them would never report a
+   * value, so they're skipped.
+   */
+  emptyHistograms?: EmptyHistogram[];
+}
+
+/** A latency histogram whose buckets are empty for `label="value"`. */
+export interface EmptyHistogram {
+  metric: string;
+  label: string;
+  value: string;
 }
 
 /** Display-friendly label shown in the card badge. */
@@ -896,7 +909,26 @@ export function generateSuggestionsForServices(input: ServiceDiscoveryInput): Su
   messagingDrafts(input, out);
   genAiDrafts(input, out);
   attachExistingRuleMatches(out, input.existingRuleGroups);
-  return out;
+  return dropEmptyHistogramDrafts(out, input.emptyHistograms);
+}
+
+/**
+ * Drop latency drafts whose histogram recorded nothing for their service —
+ * they'd sit at "No data" while the service is clearly reporting traffic.
+ */
+function dropEmptyHistogramDrafts(
+  drafts: Suggestion[],
+  empty: EmptyHistogram[] | undefined
+): Suggestion[] {
+  if (!empty || empty.length === 0) return drafts;
+  const keys = new Set(empty.map((e) => `${e.metric}|${e.label}|${e.value}`));
+  return drafts.filter((d) => {
+    const sli = d.input.spec.sli;
+    if (sli.type !== 'single' || sli.definition.backend !== 'prometheus') return true;
+    if (sli.definition.type !== 'latency_threshold') return true;
+    const metric = sli.definition.metric ?? '';
+    return !sli.dimensions.some((dim) => keys.has(`${metric}|${dim.name}|${dim.value}`));
+  });
 }
 
 /**
