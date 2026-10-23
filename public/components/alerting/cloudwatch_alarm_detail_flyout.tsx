@@ -764,7 +764,7 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
                 <p>
                   {i18n.translate('observability.alerting.cloudwatch.loadErrorHint', {
                     defaultMessage:
-                      'Check that the server has valid AWS credentials and cloudwatch:DescribeAlarms permission, then reopen this alarm.',
+                      'Check that your AWS credentials allow cloudwatch:DescribeAlarms, then reopen this alarm.',
                   })}
                 </p>
               </EuiCallOut>

@@ -7,7 +7,7 @@
  * CloudWatch alerting backend.
  *
  * Parallels `DirectQueryPrometheusBackend`, but instead of routing through the
- * OSD scoped cluster client it delegates to a `CloudWatchAlarmSource` (the SDK
+ * OSD scoped cluster client it delegates to a `CloudWatchAlarmSource` (the deployment-provided
  * seam). All CloudWatch-specific logic that isn't a raw API call lives here and
  * is pure over the source — the composite relationships tree, the metric-preview
  * band computation, and graceful partial-permission handling — so it is

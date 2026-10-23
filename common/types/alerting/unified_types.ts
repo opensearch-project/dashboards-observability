@@ -166,8 +166,8 @@ export interface Datasource {
    */
   region?: string;
   /**
-   * AWS account id backing a CloudWatch (virtual) datasource. Auto-detected via
-   * STS `GetCallerIdentity` from the ambient credentials — never configured.
+   * AWS account id backing a CloudWatch (virtual) datasource. Reported by the
+   * CloudWatch source for the caller's credentials — never configured.
    */
   accountId?: string;
   /** For Prometheus datasources decomposed into workspaces */

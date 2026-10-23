@@ -109,8 +109,8 @@ export function mapSavedObjectsToDatasources(
     }));
 
   // Virtual CloudWatch datasource — no saved object. It appears automatically
-  // when the feature is enabled and binds to whatever AWS account the server's
-  // ambient credentials resolve to. Mirrors the server-side synthetic entry in
+  // when the feature is enabled, for the account the caller's AWS credentials
+  // reach. Mirrors the server-side synthetic entry in
   // `SavedObjectDatasourceService` (id `cloudwatch`). The per-row Datasource
   // cell shows `account · region` carried on each alarm's `cloudWatch` meta.
   const cloudWatchRows: Datasource[] = coreRefs.cloudwatchEnabled

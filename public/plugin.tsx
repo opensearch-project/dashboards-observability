@@ -865,9 +865,13 @@ export class ObservabilityPlugin implements Plugin<
     coreRefs.dashboard = startDeps.dashboard;
     coreRefs.queryAssistEnabled = this.config.query_assist.enabled;
     coreRefs.summarizeEnabled = this.config.summarize.enabled;
-    // Virtual CloudWatch alarms datasource in the unified Alerts view. Defaults
-    // on (see server config); read here so the datasource facet can surface it.
-    coreRefs.cloudwatchEnabled = this.config.cloudwatch?.enabled ?? true;
+    // Virtual CloudWatch alarms datasource in the unified Alerts view. The server sets this
+    // capability only when the flag is on and a CloudWatch source is available, so the
+    // datasource facet never offers CloudWatch that can't be reached.
+    coreRefs.cloudwatchEnabled = !!(
+      core.application.capabilities.observability as
+        { cloudWatchAlarmsEnabled?: boolean } | undefined
+    )?.cloudWatchAlarmsEnabled;
     // Resolved from the dynamic-config-backed capability so AppConfig flips
     // take effect on the next page load. Components
     // (`apm/pages/services_home`, `apm/pages/service_details`) read this ref.

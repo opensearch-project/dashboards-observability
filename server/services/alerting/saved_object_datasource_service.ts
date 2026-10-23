@@ -40,8 +40,8 @@ interface DataConnectionSOAttributes {
 
 /**
  * The virtual CloudWatch datasource id. There is no saved object for it — the
- * CloudWatch integration is a zero-setup virtual datasource that binds to the
- * account the ambient AWS credentials resolve to. Kept in sync with the
+ * CloudWatch integration is a zero-setup virtual datasource for the account the
+ * caller's AWS credentials reach (through the deployment's source). Kept in sync with the
  * client-side synthetic entry in `use_datasources.ts`.
  */
 export const CLOUDWATCH_DATASOURCE_ID = 'cloudwatch';
@@ -134,7 +134,7 @@ export class SavedObjectDatasourceService implements DatasourceService {
       });
     }
     // Virtual CloudWatch datasource — no saved object; appears automatically
-    // when the feature is enabled and binds to the ambient credentials.
+    // when the feature is enabled and a CloudWatch source is available.
     if (this.cloudWatch?.enabled) {
       all.push(this.cloudWatchDatasource());
     }

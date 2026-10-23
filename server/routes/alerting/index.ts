@@ -113,15 +113,11 @@ export interface AlertingRoutesDeps {
    */
   rulerClient?: import('../../services/slo/ruler_client').RulerClient;
   /**
-   * CloudWatch alarms backend (AWS SDK seam). When provided, the virtual
-   * CloudWatch datasource is registered on each per-request alert service and
-   * the CloudWatch alarm detail routes are wired.
-   *
-   * Accepts either a shared instance (the default SDK source, whose ambient
-   * credential chain is process-wide) or a per-request factory. The factory
-   * form exists for deployments whose AWS credentials are request-scoped
-   * (e.g. resolved from the caller's session via a token exchange): they can
-   * bind a `CloudWatchAlarmSource` to the request without patching routes.
+   * CloudWatch alarms backend. When provided, the virtual CloudWatch datasource
+   * is registered on each per-request alert service and the CloudWatch alarm
+   * detail routes are wired. `setupRoutes` passes a per-request factory over
+   * the deployment's `CloudWatchAlarmSourceFactory`, so each call carries that
+   * caller's credentials; a shared instance is accepted for tests.
    */
   cwBackend?: CloudWatchBackend | ((request: OpenSearchDashboardsRequest) => CloudWatchBackend);
   /** Virtual CloudWatch datasource config (enabled + region). */
@@ -269,7 +265,7 @@ export async function getAlertingClient(
     return ctx.core.opensearch.client.asCurrentUser;
   }
   // The virtual CloudWatch datasource does not use an OpenSearch client at all
-  // (the CloudWatch backend talks to AWS directly). The unified fan-out still
+  // (the CloudWatch backend goes through its own source). The unified fan-out still
   // resolves a client per datasource id before dispatch, so return the local
   // client as a harmless placeholder rather than throwing "not found".
   if (dsId === CLOUDWATCH_DATASOURCE_ID) {
@@ -321,8 +317,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
    */
   /**
    * Resolve the CloudWatch backend for this request. `cwBackend` may be a
-   * shared instance (default SDK source, process-wide ambient credentials) or
-   * a per-request factory for deployments with request-scoped AWS credentials.
+   * shared instance (tests) or a per-request factory (what `setupRoutes` passes,
+   * so each call carries the caller's credentials).
    */
   function resolveCwBackend(request: OpenSearchDashboardsRequest): CloudWatchBackend | undefined {
     return typeof deps.cwBackend === 'function' ? deps.cwBackend(request) : deps.cwBackend;

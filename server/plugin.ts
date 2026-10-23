@@ -51,6 +51,7 @@ import { DirectQueryPrometheusBackend } from './services/alerting/directquery_pr
 import { bindPromQLSearcherFromStartServices } from './services/alerting/promql_search';
 import { AssistantPluginSetup, ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
 import type { DataPluginStart } from '../../../src/plugins/data/server';
+import type { CloudWatchAlarmSourceFactory } from './services/alerting/cloudwatch/types';
 
 export interface ObservabilityPluginSetupDependencies {
   dataSourceManagement: ReturnType<DataSourceManagementPlugin['setup']>;
@@ -376,6 +377,13 @@ export class ObservabilityPlugin implements Plugin<
     // dynamic store overrides them per account/application.
     const ymlAlertManagerEnabled = observabilityConfig.alertManager?.enabled ?? false;
     const ymlSloEnabled = observabilityConfig.slo?.enabled ?? false;
+    // CloudWatch alarms (experimental) need both the flag and a source that reaches CloudWatch
+    // with the caller's credentials. This plugin ships no source (and no AWS SDK), so here they
+    // stay off; a deployment that can reach CloudWatch provides the factory at this point, the
+    // way it can provide a Prometheus backend.
+    const cloudWatchAlarmSourceFactory: CloudWatchAlarmSourceFactory | undefined = undefined;
+    const cloudWatchAlarmsEnabled =
+      (observabilityConfig.cloudwatch?.enabled ?? false) && !!cloudWatchAlarmSourceFactory;
     const ruleDedupEnabled = observabilityConfig.slo?.ruleDedup?.enabled ?? true;
     this.sloReconcilerOpts = {
       enabled: observabilityConfig.slo?.reconciler?.enabled ?? true,
@@ -415,6 +423,7 @@ export class ObservabilityPlugin implements Plugin<
         enabled: observabilityConfig.cloudwatch?.enabled ?? false,
         region: observabilityConfig.cloudwatch?.defaultRegion ?? 'us-east-1',
       },
+      cloudWatchAlarmSourceFactory,
     });
 
     // SLO service + routes. Starts on `InMemorySloStore` so it's available
@@ -513,6 +522,8 @@ export class ObservabilityPlugin implements Plugin<
         show: true,
         alertManagerEnabled: ymlAlertManagerEnabled,
         sloEnabled: ymlSloEnabled,
+        // Whether the browser shows the virtual CloudWatch datasource (flag and source, above).
+        cloudWatchAlarmsEnabled,
       },
     }));
 

@@ -29,13 +29,10 @@ const observabilityConfig = {
       //
       // EXPERIMENTAL — ships dark. Operators opt in via
       // `observability.cloudwatch.enabled: true` in `opensearch_dashboards.yml`
-      // (mirrors the `alertManager.enabled` / `slo.enabled` pattern). When
-      // enabled it is a zero-setup virtual datasource that binds to whatever
-      // AWS account the server's ambient credentials resolve to (AWS SDK
-      // default provider chain). With no credentials present it simply
-      // surfaces a per-datasource warning — no data leaks and nothing to
-      // configure. Region falls back to `defaultRegion` when the process has
-      // no AWS_REGION/AWS_DEFAULT_REGION.
+      // (mirrors the `alertManager.enabled` / `slo.enabled` pattern). The plugin
+      // ships no AWS SDK: CloudWatch is reached through a source the deployment
+      // provides (with the caller's own credentials). Without one, the flag has
+      // no effect. `defaultRegion` is the region the virtual datasource queries.
       enabled: schema.boolean({ defaultValue: false }),
       defaultRegion: schema.string({ defaultValue: 'us-east-1' }),
     }),

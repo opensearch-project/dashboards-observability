@@ -7,12 +7,10 @@
  * AWS CloudWatch alarm domain types.
  *
  * These are the neutral, wire-agnostic shapes the alerting layer works with —
- * they are NOT the raw `@aws-sdk/client-cloudwatch` command output. The
- * `CloudWatchAlarmSource` implementation (server side) is responsible for
- * translating the SDK response into these shapes, so that the rest of the
- * plugin (mappers, routes, UI) never imports the AWS SDK. This keeps the SDK
- * dependency isolated to a single seam that can later be swapped for a backend
- * that hits different API routes.
+ * they are NOT the raw CloudWatch API (`DescribeAlarms` etc.) output. The
+ * `CloudWatchAlarmSource` the deployment provides (server side) translates the
+ * CloudWatch responses into these shapes, so this plugin (mappers, routes, UI)
+ * never depends on the AWS SDK.
  *
  * Mirrors the structure of `prometheus_types.ts` (raw + domain shapes for one
  * backend) so the two integrations read the same way.

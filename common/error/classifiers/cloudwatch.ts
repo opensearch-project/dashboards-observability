@@ -161,7 +161,7 @@ export const cloudWatchClassifier: ErrorClassifier = {
           CloudWatchErrorCode.CREDENTIALS_MISSING,
           'CloudWatch credentials missing',
           'No AWS credentials were found, so CloudWatch could not be queried.',
-          'Launch the server with AWS credentials (AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / AWS_SESSION_TOKEN) or attach an IAM role, then retry.'
+          'Sign in again so your AWS credentials are available, or ask an administrator to check the CloudWatch access for this deployment, then retry.'
         ),
       };
     }

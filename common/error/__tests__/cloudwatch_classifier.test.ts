@@ -34,7 +34,7 @@ describe('cloudWatchClassifier — coverage table', () => {
     expect(out.code).toBe(CloudWatchErrorCode.CREDENTIALS_MISSING);
     expect(out.retryable).toBe(false);
     expect(out.title).toBe('CloudWatch credentials missing');
-    expect(out.remediation).toContain('AWS_ACCESS_KEY_ID');
+    expect(out.remediation).toContain('Sign in again');
   });
 
   it('typed CloudWatchCredentialsError wrapper also lands on CREDENTIALS_MISSING', () => {

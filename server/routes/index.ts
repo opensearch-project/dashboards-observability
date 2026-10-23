@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ILegacyClusterClient, IRouter, Logger } from '../../../../src/core/server';
+import {
+  ILegacyClusterClient,
+  IRouter,
+  Logger,
+  OpenSearchDashboardsRequest,
+} from '../../../../src/core/server';
 import { DSLFacet } from '../services/facets/dsl_facet';
 import { PPLFacet } from '../services/facets/ppl_facet';
 import SavedObjectFacet from '../services/facets/saved_objects';
@@ -34,7 +39,7 @@ import {
   DirectQueryPrometheusBackend,
 } from '../services/alerting';
 import { CloudWatchBackend } from '../services/alerting/cloudwatch/cloudwatch_backend';
-import { SdkCloudWatchAlarmSource } from '../services/alerting/cloudwatch/sdk_cloudwatch_alarm_source';
+import type { CloudWatchAlarmSourceFactory } from '../services/alerting/cloudwatch/types';
 
 export function setupRoutes({
   router,
@@ -42,12 +47,18 @@ export function setupRoutes({
   dataSourceEnabled,
   logger,
   cloudWatch,
+  cloudWatchAlarmSourceFactory,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
   logger: Logger;
   cloudWatch?: { enabled: boolean; region: string };
+  /**
+   * Reaches CloudWatch for one request. This plugin ships none: a deployment that can call
+   * CloudWatch with the caller's credentials passes one (as it can pass a Prometheus backend).
+   */
+  cloudWatchAlarmSourceFactory?: CloudWatchAlarmSourceFactory;
 }) {
   PanelsRouter(router);
   VisualizationsRouter(router);
@@ -98,19 +109,21 @@ export function setupRoutes({
   const { DirectQueryRulerClient } = require('../services/slo/ruler_client');
   const rulerClient = new DirectQueryRulerClient(logger);
 
-  // CloudWatch backend — a stateless backend over the AWS SDK seam. Built once
-  // at server start (like the OS/Prom backends) when the virtual datasource is
-  // enabled. Credentials come from the ambient AWS provider chain at call time,
-  // so constructing this never touches AWS.
-  // Experimental — fail dark: absent config reads as disabled, matching the
-  // schema default in server/index.ts.
-  const cwEnabled = cloudWatch?.enabled ?? false;
-  const cwBackend = cwEnabled
-    ? new CloudWatchBackend(
-        logger,
-        new SdkCloudWatchAlarmSource(logger, cloudWatch?.region ?? 'us-east-1')
-      )
-    : undefined;
+  // CloudWatch backend, built per request over the deployment's source so each call carries
+  // that caller's credentials. Experimental and fail dark: it needs both the config flag and a
+  // source; with either missing the virtual datasource, routes and UI stay off.
+  const cwEnabled = (cloudWatch?.enabled ?? false) && !!cloudWatchAlarmSourceFactory;
+  if ((cloudWatch?.enabled ?? false) && !cloudWatchAlarmSourceFactory) {
+    logger.info(
+      'observability.cloudwatch.enabled is set but no CloudWatch alarm source is available; ' +
+        'CloudWatch alarms stay off.'
+    );
+  }
+  const cwBackend =
+    cwEnabled && cloudWatchAlarmSourceFactory
+      ? (request: OpenSearchDashboardsRequest) =>
+          new CloudWatchBackend(logger, cloudWatchAlarmSourceFactory(request))
+      : undefined;
 
   registerAlertingRoutes(router, {
     osBackend,
