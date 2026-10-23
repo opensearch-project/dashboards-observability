@@ -22,8 +22,10 @@
 
 import {
   DirectQueryStatusAggregator,
+  SLO_PROVISIONING_GRACE_MS,
   buildDedupObjectiveQuery,
   expectedRuleGroupsFor,
+  withinProvisioningGrace,
 } from '../status_aggregator';
 import type { SloRuleHealthChecker, SloStatusAggregationContext } from '../status_aggregator';
 import { resetPromQLSearcherForTests, setPromQLSearcher } from '../../alerting/promql_search';
@@ -503,5 +505,61 @@ describe('DirectQueryStatusAggregator — outdated recording rules', () => {
     expect(onOutdatedRules).toHaveBeenCalledWith(doc, [`slo:rec:${FP}`]);
     // Outdated rules still evaluate — the status itself is unaffected.
     expect(status.state).toBe('ok');
+  });
+});
+
+describe('DirectQueryStatusAggregator — provisioning grace', () => {
+  const FP = 'abcdef0123456789';
+  const missing: SloRuleHealthChecker = {
+    check: jest.fn().mockResolvedValue({
+      state: 'rules_missing',
+      expectedGroups: [`slo:rec:${FP}`],
+      presentGroups: [],
+      missingGroups: [`slo:rec:${FP}`],
+      computedAt: new Date().toISOString(),
+    }),
+  };
+  function freshDoc(ageMs: number) {
+    const doc = dedupDoc('slo-a', { 'availability-99-9': FP });
+    const at = new Date(Date.now() - ageMs).toISOString();
+    doc.status.createdAt = at;
+    doc.status.updatedAt = at;
+    return doc;
+  }
+  const withSample = () =>
+    mockClient(() =>
+      instantForMetrics([{ name: `slo:sli_error:ratio_rate_3d:sli_${FP}`, ratio: 0.0002 }])
+    ).client;
+
+  it('a just-created SLO with real data keeps its state while the ruler catches up', async () => {
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [freshDoc(30_000)],
+      ctxDedup(withSample(), missing)
+    );
+    expect(status.state).toBe('ok');
+  });
+
+  it('shows rules_missing once the grace window has passed', async () => {
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [freshDoc(SLO_PROVISIONING_GRACE_MS + 1_000)],
+      ctxDedup(withSample(), missing)
+    );
+    expect(status.state).toBe('rules_missing');
+  });
+
+  it('shows rules_missing inside the window when there is no data to show instead', async () => {
+    const { client } = mockClient(() => instantForMetrics([]));
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [freshDoc(30_000)],
+      ctxDedup(client, missing)
+    );
+    expect(status.state).toBe('rules_missing');
+  });
+
+  it('withinProvisioningGrace uses the later of createdAt / updatedAt', () => {
+    const doc = freshDoc(10 * 60_000);
+    expect(withinProvisioningGrace(doc, SLO_PROVISIONING_GRACE_MS)).toBe(false);
+    doc.status.updatedAt = new Date(Date.now() - 1_000).toISOString();
+    expect(withinProvisioningGrace(doc, SLO_PROVISIONING_GRACE_MS)).toBe(true);
   });
 });

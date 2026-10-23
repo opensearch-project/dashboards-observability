@@ -255,7 +255,12 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
      * single-failure datasources; the breaker is the second-and-beyond
      * cost protection.
      */
-    private readonly circuitBreaker?: import('./datasource_circuit_breaker').DatasourceCircuitBreaker
+    private readonly circuitBreaker?: import('./datasource_circuit_breaker').DatasourceCircuitBreaker,
+    /**
+     * How long after an SLO's last create/update a "rules missing" health
+     * result is treated as the ruler not having loaded the new groups yet.
+     */
+    private readonly provisioningGraceMs: number = SLO_PROVISIONING_GRACE_MS
   ) {}
 
   async aggregate(docs: SloDocument[], ctx: SloStatusAggregationContext): Promise<SloLiveStatus[]> {
@@ -471,6 +476,16 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     }
 
     if (result.state === 'rules_missing' || result.state === 'rules_partial') {
+      // Some rulers only list a just-written rule group once they've loaded
+      // it (evaluated-rules read paths lag the write). Within the provisioning
+      // grace window after a create/update, an SLO whose SLI already reads
+      // real data keeps that state instead of flashing "Rules missing".
+      if (hasSampleData && withinProvisioningGrace(doc, this.provisioningGraceMs)) {
+        this.logger.debug(
+          `rules not yet visible for slo=${doc.id} within the provisioning grace window — keeping ${base.state}`
+        );
+        return base;
+      }
       return { ...base, state: 'rules_missing' };
     }
     if (result.state === 'ruler_unreachable') {
@@ -947,6 +962,24 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
  * large fleet.
  */
 const MAX_SLO_IDS_PER_BATCH = 200;
+
+/**
+ * Provisioning grace window — see `applyRuleHealthMerge`. Measured: a ruler
+ * whose read path lists evaluated groups took up to ~72 s (load time plus the
+ * 30 s rule-health cache) to show freshly written groups; 3 min is ~2.5× that,
+ * and a group that is really missing still surfaces within 3 min of the write.
+ */
+export const SLO_PROVISIONING_GRACE_MS = 3 * 60_000;
+
+/** True when the SLO was created or last updated within `graceMs`. */
+export function withinProvisioningGrace(
+  doc: SloDocument,
+  graceMs: number,
+  nowMs: number = Date.now()
+): boolean {
+  const changed = Math.max(Date.parse(doc.status.createdAt), Date.parse(doc.status.updatedAt));
+  return Number.isFinite(changed) && nowMs - changed >= 0 && nowMs - changed < graceMs;
+}
 
 /** Label tagging each objective's part of a combined inline-evaluation query. */
 const INLINE_OBJECTIVE_LABEL = 'slo_inline_objective';
