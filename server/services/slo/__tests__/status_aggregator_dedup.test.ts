@@ -22,8 +22,10 @@
 
 import {
   DirectQueryStatusAggregator,
+  SLO_PROVISIONING_GRACE_MS,
   buildDedupObjectiveQuery,
   expectedRuleGroupsFor,
+  withinProvisioningGrace,
 } from '../status_aggregator';
 import type { SloRuleHealthChecker, SloStatusAggregationContext } from '../status_aggregator';
 import { resetPromQLSearcherForTests, setPromQLSearcher } from '../../alerting/promql_search';
@@ -121,6 +123,8 @@ function instantForMetrics(samples: Array<{ name: string; ratio: number; tsSec?:
  * PromQL adapter expects from the search strategy. Mirrors the shape
  * `createDataFrame` produces for a single PROMQL request.
  */
+let seriesShape: 'current' | 'legacy' = 'current';
+
 function envelopeToDataFrame(envelope: {
   resultType: string;
   result: Array<{ metric?: Record<string, string>; value?: [number, string] }>;
@@ -133,11 +137,17 @@ function envelopeToDataFrame(envelope: {
     const metric = entry.metric ?? {};
     const labelsWithoutName = { ...metric };
     delete labelsWithoutName.__name__;
-    const seriesParts = Object.entries(metric)
+    // Matches the strategy's current `name{labels-without-__name__}` shape
+    // (`seriesShape: 'legacy'` emits the older `{__name__="...", ...}` form).
+    const seriesSource = seriesShape === 'legacy' ? metric : labelsWithoutName;
+    const seriesParts = Object.entries(seriesSource)
       .filter(([, v]) => v !== undefined && v !== '')
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, v]) => `${k}="${v}"`);
-    const seriesName = `{${seriesParts.join(', ')}}`;
+    const seriesName =
+      seriesShape === 'legacy'
+        ? `{${seriesParts.join(', ')}}`
+        : `${metric.__name__ ?? ''}{${seriesParts.join(', ')}}`;
     if (entry.value) {
       Time.push(entry.value[0] * 1000);
       Series.push(seriesName);
@@ -197,6 +207,7 @@ function mockClient(
 
 afterEach(() => {
   resetPromQLSearcherForTests();
+  seriesShape = 'current';
 });
 
 function ctxDedup(
@@ -249,6 +260,20 @@ describe('DirectQueryStatusAggregator — dedup path', () => {
     expect(searcher).toHaveBeenCalledTimes(1);
     const [, , options] = searcher.mock.calls[0];
     expect(options).toEqual({ strategy: 'promql' });
+  });
+
+  it('still maps samples when the strategy emits the older `{__name__=...}` Series shape', async () => {
+    seriesShape = 'legacy';
+    const doc = dedupDoc('slo-a', { 'availability-99-9': 'abcdef0123456789' });
+    const { client } = mockClient(() =>
+      instantForMetrics([
+        { name: 'slo:sli_error:ratio_rate_3d:sli_abcdef0123456789', ratio: 0.0002 },
+      ])
+    );
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([doc], ctxDedup(client));
+    expect(status.state).toBe('ok');
+    expect(status.objectives[0].currentValue).toBeCloseTo(0.0002, 6);
   });
 
   it('two SLOs sharing a fingerprint: each produces an identical query (Prometheus can serve from one series)', async () => {
@@ -333,5 +358,208 @@ describe('expectedRuleGroupsFor — dedup fields', () => {
     const names = expectedRuleGroupsFor(doc);
     const recs = names.filter((n) => n.startsWith('slo:rec:'));
     expect(recs).toEqual(['slo:rec:cccccccccccccccc']);
+  });
+});
+
+describe('DirectQueryStatusAggregator — inline fallback', () => {
+  const FP = 'abcdef0123456789';
+  const REC = `slo:sli_error:ratio_rate_3d:sli_${FP}`;
+
+  /** Route recorded-sample queries and inline evaluations to separate fixtures. */
+  function handler(
+    recorded: Array<{ name: string; ratio: number }>,
+    inline: Array<{ idx: string; ratio: number }> | 'throw'
+  ) {
+    return (body: unknown) => {
+      const q = (body as { query: { query: string } }).query.query;
+      if (!q.includes('label_replace(')) return instantForMetrics(recorded);
+      if (inline === 'throw') throw new Error('query timeout');
+      return {
+        resultType: 'vector',
+        result: inline.map((s) => ({
+          metric: { slo_inline_objective: s.idx },
+          value: [Math.floor(Date.now() / 1000), String(s.ratio)],
+        })),
+      };
+    };
+  }
+
+  it('evaluates the SLI directly when the recording rule has no sample yet', async () => {
+    const doc = dedupDoc('slo-a', { 'availability-99-9': FP });
+    const { client, searcher } = mockClient(handler([], [{ idx: '0', ratio: 0.0002 }]));
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [doc],
+      ctxDedup(client)
+    );
+    expect(status.state).toBe('ok');
+    expect(status.objectives[0].currentValue).toBeCloseTo(0.0002, 6);
+    expect(status.objectives[0].evaluatedInline).toBe(true);
+    // The inline query is the same math the rule records, over the 3d window.
+    const inlineQuery = (searcher.mock.calls[1][1] as { body: { query: { query: string } } }).body
+      .query.query;
+    expect(inlineQuery).toContain('rate(http_requests_total{service="checkout"}[3d])');
+    expect(inlineQuery).toContain('"slo_inline_objective", "0"');
+  });
+
+  it('replaces a NaN recording (outdated expression) with the inline value', async () => {
+    const doc = dedupDoc('slo-a', { 'availability-99-9': FP });
+    const { client } = mockClient(
+      handler([{ name: REC, ratio: Number.NaN }], [{ idx: '0', ratio: 0.5 }])
+    );
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [doc],
+      ctxDedup(client)
+    );
+    expect(status.state).toBe('breached');
+    expect(status.objectives[0].evaluatedInline).toBe(true);
+  });
+
+  it('keeps source_idle only when the direct evaluation is also non-finite', async () => {
+    const doc = dedupDoc('slo-a', { 'availability-99-9': FP });
+    const { client } = mockClient(
+      handler([{ name: REC, ratio: Number.NaN }], [{ idx: '0', ratio: Number.NaN }])
+    );
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [doc],
+      ctxDedup(client)
+    );
+    expect(status.state).toBe('source_idle');
+  });
+
+  it('keeps no_data when neither the rule nor the source has samples', async () => {
+    const doc = dedupDoc('slo-a', { 'availability-99-9': FP });
+    const { client } = mockClient(handler([], []));
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [doc],
+      ctxDedup(client)
+    );
+    expect(status.state).toBe('no_data');
+  });
+
+  it('a failing inline evaluation never breaks the listing', async () => {
+    const doc = dedupDoc('slo-a', { 'availability-99-9': FP });
+    const { client } = mockClient(handler([], 'throw'));
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [doc],
+      ctxDedup(client)
+    );
+    expect(status.state).toBe('no_data');
+  });
+
+  it('skips the inline query when every objective has a recorded sample', async () => {
+    const doc = dedupDoc('slo-a', { 'availability-99-9': FP });
+    const { client, searcher } = mockClient(handler([{ name: REC, ratio: 0.0002 }], []));
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [doc],
+      ctxDedup(client)
+    );
+    expect(status.objectives[0].evaluatedInline).toBeUndefined();
+    expect(searcher).toHaveBeenCalledTimes(1);
+  });
+
+  it('maps a multi-objective inline result back by index and reuses it within the TTL', async () => {
+    const doc = dedupDoc('slo-a', { 'avail-a': FP, 'avail-b': 'fedcba9876543210' });
+    const { client, searcher } = mockClient(
+      handler(
+        [],
+        [
+          { idx: '0', ratio: 0.0002 },
+          { idx: '1', ratio: 0.5 },
+        ]
+      )
+    );
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([doc], ctxDedup(client));
+    expect(status.objectives.map((o) => o.state)).toEqual(['ok', 'breached']);
+    await agg.aggregate([doc], ctxDedup(client));
+    // 2 recorded-sample reads + 1 inline evaluation (second poll hit the cache).
+    expect(searcher).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe('DirectQueryStatusAggregator — outdated recording rules', () => {
+  const FP = 'abcdef0123456789';
+
+  function checker(outdatedGroups?: string[]) {
+    const check = jest.fn(async (input: { expectedGroups: string[] }) => ({
+      state: 'ok' as const,
+      expectedGroups: input.expectedGroups,
+      presentGroups: input.expectedGroups,
+      missingGroups: [],
+      ...(outdatedGroups ? { outdatedGroups } : {}),
+      computedAt: new Date().toISOString(),
+    }));
+    return { check } as unknown as SloRuleHealthChecker & { check: jest.Mock };
+  }
+
+  it('hands SLOs with outdated recording groups to onOutdatedRules', async () => {
+    const doc = dedupDoc('slo-a', { 'availability-99-9': FP });
+    const { client } = mockClient(() =>
+      instantForMetrics([{ name: `slo:sli_error:ratio_rate_3d:sli_${FP}`, ratio: 0.0002 }])
+    );
+    const onOutdatedRules = jest.fn();
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate([doc], {
+      ...ctxDedup(client, checker([`slo:rec:${FP}`])),
+      onOutdatedRules,
+    });
+    expect(onOutdatedRules).toHaveBeenCalledWith(doc, [`slo:rec:${FP}`]);
+    // Outdated rules still evaluate — the status itself is unaffected.
+    expect(status.state).toBe('ok');
+  });
+});
+
+describe('DirectQueryStatusAggregator — provisioning grace', () => {
+  const FP = 'abcdef0123456789';
+  const missing: SloRuleHealthChecker = {
+    check: jest.fn().mockResolvedValue({
+      state: 'rules_missing',
+      expectedGroups: [`slo:rec:${FP}`],
+      presentGroups: [],
+      missingGroups: [`slo:rec:${FP}`],
+      computedAt: new Date().toISOString(),
+    }),
+  };
+  function freshDoc(ageMs: number) {
+    const doc = dedupDoc('slo-a', { 'availability-99-9': FP });
+    const at = new Date(Date.now() - ageMs).toISOString();
+    doc.status.createdAt = at;
+    doc.status.updatedAt = at;
+    return doc;
+  }
+  const withSample = () =>
+    mockClient(() =>
+      instantForMetrics([{ name: `slo:sli_error:ratio_rate_3d:sli_${FP}`, ratio: 0.0002 }])
+    ).client;
+
+  it('a just-created SLO with real data keeps its state while the ruler catches up', async () => {
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [freshDoc(30_000)],
+      ctxDedup(withSample(), missing)
+    );
+    expect(status.state).toBe('ok');
+  });
+
+  it('shows rules_missing once the grace window has passed', async () => {
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [freshDoc(SLO_PROVISIONING_GRACE_MS + 1_000)],
+      ctxDedup(withSample(), missing)
+    );
+    expect(status.state).toBe('rules_missing');
+  });
+
+  it('shows rules_missing inside the window when there is no data to show instead', async () => {
+    const { client } = mockClient(() => instantForMetrics([]));
+    const [status] = await new DirectQueryStatusAggregator(noopLogger()).aggregate(
+      [freshDoc(30_000)],
+      ctxDedup(client, missing)
+    );
+    expect(status.state).toBe('rules_missing');
+  });
+
+  it('withinProvisioningGrace uses the later of createdAt / updatedAt', () => {
+    const doc = freshDoc(10 * 60_000);
+    expect(withinProvisioningGrace(doc, SLO_PROVISIONING_GRACE_MS)).toBe(false);
+    doc.status.updatedAt = new Date(Date.now() - 1_000).toISOString();
+    expect(withinProvisioningGrace(doc, SLO_PROVISIONING_GRACE_MS)).toBe(true);
   });
 });

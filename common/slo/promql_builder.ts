@@ -19,6 +19,8 @@
  * returns null), so the user is never blocked.
  */
 
+import { SLI_WINDOW_TOKEN } from './slo_promql_generator';
+
 /** Prometheus label matcher operators. */
 export type MatchOp = '=' | '!=' | '=~' | '!~';
 
@@ -61,7 +63,9 @@ export const DEFAULT_MODEL: PromQLModel = {
   metric: '',
   filters: [],
   rate: true,
-  window: '5m',
+  // The recording-window token: each recording rule substitutes its own
+  // window (5m … 3d), so the long-window status isn't just the last 5m rate.
+  window: SLI_WINDOW_TOKEN,
   agg: 'sum',
   by: [],
 };
@@ -140,7 +144,9 @@ function filtersComplete(filters: LabelFilter[]): boolean {
 /** True when a model is complete enough to serialize into a usable query. */
 export function isModelComplete(model: PromQLModel): boolean {
   if (!METRIC_NAME_RE.test(model.metric)) return false;
-  if (model.rate && !WINDOW_RE.test(model.window)) return false;
+  if (model.rate && model.window !== SLI_WINDOW_TOKEN && !WINDOW_RE.test(model.window)) {
+    return false;
+  }
   if (model.by.some((l) => !LABEL_NAME_RE.test(l))) return false;
   if (!filtersComplete(model.filters)) return false;
   if (model.subtract && model.subtract.metric) {
@@ -285,8 +291,10 @@ function parseTerm(input: string): ParsedTerm | null {
     if (innerRate === null) return null;
     rate = true;
     const trimmedInner = innerRate.trim();
-    const winMatch = trimmedInner.match(/\[(\w+)\]$/);
-    if (!winMatch || !WINDOW_RE.test(winMatch[1])) return null;
+    const winMatch = trimmedInner.match(/\[(\w+|\{\{\.window\}\})\]$/);
+    if (!winMatch || (winMatch[1] !== SLI_WINDOW_TOKEN && !WINDOW_RE.test(winMatch[1]))) {
+      return null;
+    }
     window = winMatch[1];
     text = trimmedInner.slice(0, trimmedInner.length - winMatch[0].length).trim();
   }

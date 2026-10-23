@@ -75,6 +75,14 @@ export interface PrometheusSli extends BaseSli {
   latencyThresholdUnit?: 'seconds' | 'milliseconds';
   /** When `type === 'custom'`, `customExpr` is authoritative. */
   customExpr?: CustomPromQLExpr;
+  /**
+   * How the source metric accumulates. `cumulative` (the Prometheus norm —
+   * counters / classic histograms, read with `rate`) or `delta` (per-interval
+   * gauges with non-cumulative histogram buckets, read with `sum_over_time`).
+   * When omitted, SLIs scoped to `namespace="span_derived"` are treated as
+   * `delta` and everything else as `cumulative`.
+   */
+  metricTemporality?: 'cumulative' | 'delta';
 }
 
 /** Reserved for P2. Shape fixed now so P0 SLOs don't need migration later. */
@@ -383,6 +391,13 @@ export interface ObjectiveStatus {
   /** 0–1 fraction; can go negative once the budget is exhausted. */
   errorBudgetRemaining: number;
   state: SloHealthState;
+  /**
+   * True when the value was computed by evaluating the SLI expression
+   * directly because its recording rule had no usable sample yet (freshly
+   * created, still being re-provisioned, or recording an outdated
+   * expression). The value matches what the rule will record.
+   */
+  evaluatedInline?: boolean;
 }
 
 export interface SloLiveStatus {

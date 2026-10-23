@@ -20,6 +20,7 @@ import { PROMQL_SIZE_CAP, validateCustomPromQL } from '../../../common/slo/slo_v
 import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
 import type { DatasourceDiscoveryService } from '../../services/alerting/datasource_discovery';
 import type { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
+import { RECORDING_WINDOWS, substituteWindowToken } from '../../../common/slo/slo_promql_generator';
 
 type ProbeSliHandlerContext = RequestHandlerContext & {
   dataSource?: {
@@ -163,7 +164,11 @@ export function registerProbeSliRoute(
   discoveryService?: DatasourceDiscoveryService
 ) {
   router.post({ path: PROBE_BASE, validate: { body: probeBody } }, async (ctx, req, res) => {
-    const { datasourceId, goodQuery, totalQuery } = req.body;
+    const { datasourceId } = req.body;
+    // Custom queries may carry the recording-window token; probe them at the
+    // shortest recording window so they execute as plain PromQL.
+    const goodQuery = substituteWindowToken(req.body.goodQuery, RECORDING_WINDOWS[0]);
+    const totalQuery = substituteWindowToken(req.body.totalQuery, RECORDING_WINDOWS[0]);
     const lookback = (req.body.lookback ?? '1h') as '1h' | '24h' | '7d';
 
     // Same shape check as create, so the probe can't be used to push PromQL

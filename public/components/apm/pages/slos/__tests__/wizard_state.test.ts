@@ -127,7 +127,9 @@ describe('wizard_state reducer', () => {
     s = reducer(s, { kind: 'setTemplate', templateId: 'apm-service-latency' });
     s = reducer(s, { kind: 'setField', field: 'service', value: 'checkout' });
     expect(s.customPromql.goodQuery).toContain('latency_seconds_bucket');
-    expect(s.customPromql.goodQuery).toContain('le="0.5"');
+    // Non-cumulative span-derived buckets: every bound <= 0.5 s, summed over the window.
+    expect(s.customPromql.goodQuery).toContain('le=~"');
+    expect(s.customPromql.goodQuery).toContain('0?\\\\.50*"}[{{.window}}]');
   });
 
   it('substitutes ${service} when the service is set AFTER the template (deep-link order)', () => {

@@ -167,7 +167,8 @@ describe('buildErrorRatioExprForWindow / buildErrorRatioQuery', () => {
     const doc = latencyDoc();
     const out = buildErrorRatioExprForWindow(doc, doc.spec.objectives[0], '5m')!;
     expect(out).toContain('http_server_request_duration_seconds_bucket{');
-    expect(out).toContain('le="0.5"');
+    // Format-tolerant match on the bound (`0.5` / `0.50`).
+    expect(out).toContain('le=~"0?\\\\.50*"');
     expect(out).toContain('le="+Inf"');
   });
 
@@ -179,7 +180,7 @@ describe('buildErrorRatioExprForWindow / buildErrorRatioQuery', () => {
     }
     doc.spec.objectives = [{ name: 'obj', target: 0.95, latencyThreshold: 250 }];
     const out = buildErrorRatioExprForWindow(doc, doc.spec.objectives[0], '5m')!;
-    expect(out).toContain('le="0.25"');
+    expect(out).toContain('le=~"0?\\\\.250*"');
   });
 
   it('custom mode raw returns the user-supplied errorRatioQuery verbatim', () => {
@@ -195,7 +196,7 @@ describe('buildErrorRatioExprForWindow / buildErrorRatioQuery', () => {
     });
     const out = buildErrorRatioExprForWindow(doc, OBJ, '5m')!;
     // Outer wrap so the operator-intended (good)/(total) parses correctly.
-    expect(out).toBe('1 - ((sum(request) - sum(fault)) / (sum(request)))');
+    expect(out).toBe('1 - (\n  (sum(request) - sum(fault))\n  /\n  (sum(request))\n)');
     expect(validateCustomPromQL(out)).toBeNull();
   });
 
@@ -245,7 +246,8 @@ describe('buildGoodEventsCountQuery / buildTotalEventsCountQuery', () => {
   it('availability emits sum(increase(<counter>{good}[w])) for good and {dim}[w] for total', () => {
     const doc = availabilityDoc();
     expect(buildGoodEventsCountQuery(doc, OBJ, '5m')).toBe(
-      'sum(increase(http_requests_total{service="api", route="/v1/users", status_code!~"5.."}[5m]))'
+      // `or vector(0)`: zero good events reads as 0, not "no data".
+      'sum(increase(http_requests_total{service="api", route="/v1/users", status_code!~"5.."}[5m])) or vector(0)'
     );
     expect(buildTotalEventsCountQuery(doc, OBJ, '5m')).toBe(
       'sum(increase(http_requests_total{service="api", route="/v1/users"}[5m]))'
@@ -255,7 +257,7 @@ describe('buildGoodEventsCountQuery / buildTotalEventsCountQuery', () => {
   it('latency emits le-bounded good count and le="+Inf" total', () => {
     const doc = latencyDoc();
     const obj = doc.spec.objectives[0];
-    expect(buildGoodEventsCountQuery(doc, obj, '5m')).toContain('le="0.5"');
+    expect(buildGoodEventsCountQuery(doc, obj, '5m')).toContain('le=~"0?\\\\.50*"');
     expect(buildTotalEventsCountQuery(doc, obj, '5m')).toContain('le="+Inf"');
   });
 
@@ -300,10 +302,11 @@ describe('buildCoverageProbeQuery', () => {
     );
   });
 
-  it('latency uses count(last_over_time(<bucket>{... le="+Inf"}[1h]))', () => {
+  it('latency uses count(last_over_time(<count>{...}[1h]))', () => {
     const out = buildCoverageProbeQuery(latencyDoc(), OBJ)!;
-    expect(out).toContain('http_server_request_duration_seconds_bucket{');
-    expect(out).toContain('le="+Inf"');
+    expect(out).toBe(
+      'count(last_over_time(http_server_request_duration_seconds_count{service_name="api"}[1h]))'
+    );
   });
 
   it('custom raw uses (max_over_time((<errorRatio>)[1h:5m])) > 0', () => {
@@ -338,10 +341,11 @@ describe('buildRequestRateQuery', () => {
     expect(buildRequestRateQuery(availabilityDoc())).toContain('rate(http_requests_total{');
   });
 
-  it('latency emits the bucket rate scoped to le="+Inf"', () => {
+  it('latency emits the histogram count rate', () => {
     const out = buildRequestRateQuery(latencyDoc())!;
-    expect(out).toContain('http_server_request_duration_seconds_bucket{');
-    expect(out).toContain('le="+Inf"');
+    expect(out).toBe(
+      'sum(rate(http_server_request_duration_seconds_count{service_name="api"}[5m]))'
+    );
   });
 
   it('returns null for custom and non-single SLI', () => {
@@ -379,5 +383,56 @@ describe('buildWindowErrorRatioQuery', () => {
     // @ts-expect-error stub the calendar branch
     doc.spec.window = { type: 'calendar' };
     expect(buildWindowErrorRatioQuery(doc, OBJ)).toBeNull();
+  });
+});
+
+describe('span-derived (delta) histograms', () => {
+  function spanLatencyDoc(): SloDocument {
+    const doc = latencyDoc();
+    doc.spec.sli = {
+      type: 'single',
+      definition: {
+        backend: 'prometheus',
+        type: 'latency_threshold',
+        calcMethod: 'events',
+        metric: 'latency_seconds_bucket',
+        latencyThresholdUnit: 'seconds',
+      },
+      dimensions: [
+        { name: 'service', value: 'cart' },
+        { name: 'namespace', value: 'span_derived' },
+      ],
+    };
+    return doc;
+  }
+
+  it('error ratio sums buckets over the window instead of rate()', () => {
+    const out = buildErrorRatioExprForWindow(
+      spanLatencyDoc(),
+      spanLatencyDoc().spec.objectives[0],
+      '1h'
+    )!;
+    expect(out).not.toMatch(/\brate\(/);
+    expect(out).toContain(
+      'sum(sum_over_time(latency_seconds_count{service="cart", namespace="span_derived"}[1h]))'
+    );
+  });
+
+  it('request rate divides the per-interval counts by the window', () => {
+    expect(buildRequestRateQuery(spanLatencyDoc())).toBe(
+      'sum(sum_over_time(latency_seconds_count{service="cart", namespace="span_derived"}[5m])) / 300'
+    );
+  });
+
+  it('percentile re-accumulates the non-cumulative buckets before histogram_quantile', () => {
+    const out = buildLatencyPercentileQuery(spanLatencyDoc(), 0.99)!;
+    expect(out.startsWith('histogram_quantile(0.99, ')).toBe(true);
+    expect(out).toContain('"le", "0.5", "", "")');
+    expect(out).toContain('"le", "+Inf", "", "")');
+    // The 0.5 s cumulative bucket covers every bound up to 0.5 s.
+    const part = out.split(' or ').find((p) => p.includes('"le", "0.5"'))!;
+    expect(part).toContain('0(\\\\.0*)?|');
+    expect(part).toContain('|0?\\\\.50*"');
+    expect(part).not.toContain('0?\\\\.750*');
   });
 });

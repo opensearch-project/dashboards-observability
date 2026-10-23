@@ -33,6 +33,8 @@ import {
 import { InMemorySloStore } from '../slo_store';
 import {
   DEFAULT_MWMBR_TIERS,
+  SLO_RULES_VERSION,
+  SLO_RULES_VERSION_LABEL,
   dedupAlertGroupName,
   dedupRecordingGroupName,
 } from '../slo_promql_generator';
@@ -448,5 +450,83 @@ describe('SloService.repair — dedup integration', () => {
     expect(second.repaired).toBe(false);
     expect(second.health.state).toBe('ok');
     expect(ruler.upsertCalls).toBe(upsertsAfterCreate);
+  });
+});
+
+// ============================================================================
+// Outdated recording math — rules written by an older generator version
+// ============================================================================
+
+/** Rewrite a stored group as an older generator would have left it. */
+function ageRecordingRules(
+  ruler: FakeRulerClient,
+  namespace: string,
+  groupName: string,
+  expr = 'vector(0)'
+) {
+  const group = ruler.groupByName(namespace, groupName)!;
+  ruler.seedGroup(namespace, {
+    ...group,
+    rules: group.rules.map((r) => {
+      if (r.type !== 'recording') return r;
+      const labels = { ...r.labels };
+      delete labels[SLO_RULES_VERSION_LABEL];
+      return { ...r, expr, labels };
+    }),
+  });
+}
+
+describe('SloService.repair — outdated recording math', () => {
+  it('dedup: re-provisions an outdated shared recording group in place', async () => {
+    const { svc, ruler, deploy, repairCtx, namespace } = makeDedupHarness();
+    const spec = validSpec();
+    const doc = await svc.create({ spec }, 'alice', deploy);
+    const fp = computeSliFingerprint(spec.datasourceId, spec.sli, spec.objectives[0])!;
+    const recGroup = dedupRecordingGroupName(fp);
+    const expectedRules = ruler.groupByName(namespace, recGroup)!.rules;
+    ageRecordingRules(ruler, namespace, recGroup);
+
+    const pre = await repairCtx.health.check({
+      workspaceId: deploy.workspaceId,
+      datasource: deploy.datasource,
+      client: deploy.client,
+      sloId: doc.id,
+      namespace,
+      expectedGroups: deriveExpectedGroups(doc),
+    });
+    expect(pre.state).toBe('ok');
+    expect(pre.outdatedGroups).toEqual([recGroup]);
+
+    const result = await svc.repair(doc.id, repairCtx);
+    expect(result.repaired).toBe(true);
+    expect(result.health.outdatedGroups).toBeUndefined();
+    // Same group, same rule names, current math and version label.
+    const rec = ruler.groupByName(namespace, recGroup)!;
+    expect(rec.rules.map((r) => r.name)).toEqual(expectedRules.map((r) => r.name));
+    expect(rec.rules.map((r) => r.expr)).toEqual(expectedRules.map((r) => r.expr));
+    for (const r of rec.rules) expect(r.labels[SLO_RULES_VERSION_LABEL]).toBe(SLO_RULES_VERSION);
+
+    // Once current, repair is a no-op again.
+    const upserts = ruler.upsertCalls;
+    expect((await svc.repair(doc.id, repairCtx)).repaired).toBe(false);
+    expect(ruler.upsertCalls).toBe(upserts);
+  });
+
+  it('single-group: re-provisions recording rules missing the version label', async () => {
+    const { svc, ruler, deploy, repairCtx, namespace } = makeHarness();
+    const doc = await svc.create({ spec: validSpec() }, 'alice', deploy);
+    const groupName =
+      doc.status.provisioning.backend === 'prometheus'
+        ? (doc.status.provisioning.alertGroupName ?? '')
+        : '';
+    ageRecordingRules(ruler, namespace, groupName);
+
+    const result = await svc.repair(doc.id, repairCtx);
+    expect(result.repaired).toBe(true);
+    const rules = ruler
+      .groupByName(namespace, groupName)!
+      .rules.filter((r) => r.type === 'recording');
+    expect(rules.length).toBeGreaterThan(0);
+    for (const r of rules) expect(r.labels[SLO_RULES_VERSION_LABEL]).toBe(SLO_RULES_VERSION);
   });
 });

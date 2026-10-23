@@ -127,7 +127,7 @@ describe('generateRecordingGroupForFingerprint', () => {
     for (const rule of group!.rules) {
       // `slo_window` is the only permitted label on recording rules in
       // dedup mode. Any identity label would defeat the sharing.
-      expect(Object.keys(rule.labels).sort()).toEqual(['slo_window']);
+      expect(Object.keys(rule.labels).sort()).toEqual(['slo_rules_version', 'slo_window']);
       for (const key of Object.keys(rule.labels)) {
         expect(key).not.toMatch(/^slo_id$|^slo_name$|^slo_service$|^slo_objective$|^slo_owner/);
       }
@@ -201,7 +201,7 @@ describe('generateRecordingGroupForFingerprint', () => {
       sli: latencySli,
       objectiveLatencyThreshold: 0.5,
     });
-    expect(group!.rules[0].expr).toContain('le="0.5"');
+    expect(group!.rules[0].expr).toContain('le=~"0?\\\\.50*"');
   });
 });
 

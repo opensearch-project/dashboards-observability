@@ -90,16 +90,21 @@ describe('generateSuggestionsFromServices (back-compat alias)', () => {
     const availExpr =
       availDef.customExpr?.mode === 'events'
         ? availDef.customExpr
-        : ((undefined as never) as { goodQuery: string; totalQuery: string });
+        : (undefined as never as { goodQuery: string; totalQuery: string });
     expect(availExpr.goodQuery).toContain('request{service="checkout"');
     expect(availExpr.goodQuery).toContain('fault{service="checkout"');
     expect(availExpr.goodQuery).toContain('remoteService=""');
     expect(availExpr.goodQuery).toContain('namespace="span_derived"');
+    // Per-interval gauges: summed over each recording window, fault guarded.
+    expect(availExpr.goodQuery).toContain('sum(sum_over_time(request{');
+    expect(availExpr.goodQuery).toContain('[{{.window}}])) or vector(0))');
+    expect(availExpr.totalQuery).toMatch(
+      /^sum\(sum_over_time\(request\{.*\}\[\{\{\.window\}\}\]\)\)$/
+    );
 
-    // Latency draft uses the native latency_threshold SLI type so the
-    // generator wraps each side of the ratio in sum(rate(...)[<window>]) per
-    // recording window — the custom-events path otherwise substitutes raw
-    // sums of a counter and produces NaN when the source metric is idle.
+    // Latency draft uses the native latency_threshold SLI type; its
+    // namespace="span_derived" dimension makes the generator treat the
+    // histogram as delta (non-cumulative buckets summed over the window).
     const latDef = getPromSli(latency.input.spec.sli);
     expect(latDef.type).toBe('latency_threshold');
     expect(latDef.metric).toBe('latency_seconds_bucket');
@@ -107,10 +112,9 @@ describe('generateSuggestionsFromServices (back-compat alias)', () => {
     expect(latency.input.spec.objectives[0].latencyThreshold).toBe(0.5);
     expect(latency.input.spec.objectives[0].target).toBe(0.95);
     const dimsByName = Object.fromEntries(
-      (latency.input.spec.sli.type === 'single'
-        ? latency.input.spec.sli.dimensions
-        : []
-      ).map((d) => [d.name, d.value])
+      (latency.input.spec.sli.type === 'single' ? latency.input.spec.sli.dimensions : []).map(
+        (d) => [d.name, d.value]
+      )
     );
     expect(dimsByName.service).toBe('checkout');
     expect(dimsByName.namespace).toBe('span_derived');
@@ -454,5 +458,58 @@ describe('metricsToProbe', () => {
       'http_server_request_duration_seconds_count',
       'rpc_server_duration_seconds_bucket',
     ]);
+  });
+});
+
+describe('generateSuggestionsForServices — empty latency histograms', () => {
+  const bucket = 'http_server_request_duration_seconds_bucket';
+  const count = 'http_server_request_duration_seconds_count';
+  const base = {
+    datasourceId: 'prom-1',
+    services: [{ serviceName: 'flagd' }, { serviceName: 'cart' }],
+    metricNames: [bucket, count],
+    labelValuesByMetric: {
+      [bucket]: { service_name: ['flagd', 'cart'] },
+      [count]: { service_name: ['flagd', 'cart'] },
+    },
+  };
+  const keys = (s: ReturnType<typeof generateSuggestionsForServices>) => s.map((x) => x.key);
+
+  it('skips HTTP latency drafts for services whose buckets recorded nothing', () => {
+    const out = generateSuggestionsForServices({
+      ...base,
+      emptyHistograms: [{ metric: bucket, label: 'service_name', value: 'flagd' }],
+    });
+    expect(keys(out)).not.toContain('http-lat:flagd');
+    expect(keys(out)).toContain('http-lat:cart');
+    // Availability (from _count) and span-derived drafts are unaffected.
+    expect(keys(out)).toContain('http-avail:flagd');
+    expect(keys(out)).toContain('apm-lat:flagd');
+  });
+
+  it('keeps every draft when the probe found nothing', () => {
+    expect(keys(generateSuggestionsForServices(base))).toContain('http-lat:flagd');
+  });
+});
+
+describe('generateSuggestionsForServices — services without span-derived metrics', () => {
+  const base = {
+    datasourceId: 'prom-1',
+    services: [{ serviceName: 'checkout' }, { serviceName: 'load-generator' }],
+  };
+  const keys = (s: ReturnType<typeof generateSuggestionsForServices>) => s.map((x) => x.key);
+
+  it('only drafts APM SLOs for services that report server-side span metrics', () => {
+    const out = keys(
+      generateSuggestionsForServices({ ...base, spanDerivedServices: ['checkout'] })
+    );
+    expect(out).toEqual(expect.arrayContaining(['apm-avail:checkout', 'apm-lat:checkout']));
+    expect(out).not.toContain('apm-avail:load-generator');
+    expect(out).not.toContain('apm-lat:load-generator');
+  });
+
+  it('drafts for every service when the probe result is unknown', () => {
+    const out = keys(generateSuggestionsForServices(base));
+    expect(out).toContain('apm-avail:load-generator');
   });
 });
