@@ -237,33 +237,65 @@ export interface CloudWatchStateChangesQuery {
   maxPages?: number;
 }
 
+/**
+ * Per-call options. `signal` aborts when nobody is waiting for the result any more (the route
+ * timed out, or the client disconnected); a source should stop its remaining calls and paging
+ * and reject. Optional: a source may ignore it.
+ */
+export interface CloudWatchCallOptions {
+  signal?: AbortSignal;
+}
+
 export interface CloudWatchAlarmSource {
   /**
    * The account + region the request's credentials reach. Every `region` parameter below is
-   * optional: without one, the source uses its own default region.
+   * optional: without one, the source uses its own default region. Every method takes optional
+   * `CloudWatchCallOptions` last.
    */
-  getCallerIdentity(region?: string): Promise<CloudWatchCallerIdentity>;
+  getCallerIdentity(
+    region?: string,
+    options?: CloudWatchCallOptions
+  ): Promise<CloudWatchCallerIdentity>;
 
   /**
    * List metric + composite alarms (optionally filtered by state), up to `maxItems`; `truncated`
    * says more exist.
    */
-  describeAlarms(options?: DescribeAlarmsOptions): Promise<CloudWatchAlarmList>;
+  describeAlarms(
+    options?: DescribeAlarmsOptions,
+    callOptions?: CloudWatchCallOptions
+  ): Promise<CloudWatchAlarmList>;
 
   /** Fetch a single alarm by exact name (metric or composite). Null if absent. */
-  describeAlarm(alarmName: string, region?: string): Promise<CloudWatchAlarm | null>;
+  describeAlarm(
+    alarmName: string,
+    region?: string,
+    options?: CloudWatchCallOptions
+  ): Promise<CloudWatchAlarm | null>;
 
   /**
    * The named alarms that exist (metric or composite), in any order; a name with no alarm is
    * left out. Used to resolve a composite's children without listing every alarm.
    */
-  describeAlarmsByName(alarmNames: string[], region?: string): Promise<CloudWatchAlarm[]>;
+  describeAlarmsByName(
+    alarmNames: string[],
+    region?: string,
+    options?: CloudWatchCallOptions
+  ): Promise<CloudWatchAlarm[]>;
 
   /** The composite alarms whose rule references `alarmName` (its parents). */
-  describeParentAlarms(alarmName: string, region?: string): Promise<CloudWatchAlarm[]>;
+  describeParentAlarms(
+    alarmName: string,
+    region?: string,
+    options?: CloudWatchCallOptions
+  ): Promise<CloudWatchAlarm[]>;
 
   /** State/config history for one alarm, newest first. */
-  describeAlarmHistory(alarmName: string, region?: string): Promise<CloudWatchAlarmHistoryItem[]>;
+  describeAlarmHistory(
+    alarmName: string,
+    region?: string,
+    options?: CloudWatchCallOptions
+  ): Promise<CloudWatchAlarmHistoryItem[]>;
 
   /**
    * State changes across every alarm in the region within a window, oldest first. One
@@ -271,8 +303,12 @@ export interface CloudWatchAlarmSource {
    * stopped it short.
    */
   describeStateChanges(
-    query: CloudWatchStateChangesQuery
+    query: CloudWatchStateChangesQuery,
+    options?: CloudWatchCallOptions
   ): Promise<{ changes: CloudWatchStateChange[]; complete: boolean }>;
   /** Metric samples for the alarm's watched series (for the preview chart). */
-  getMetricData(query: CloudWatchMetricDataQuery): Promise<CloudWatchMetricDataPoint[]>;
+  getMetricData(
+    query: CloudWatchMetricDataQuery,
+    options?: CloudWatchCallOptions
+  ): Promise<CloudWatchMetricDataPoint[]>;
 }

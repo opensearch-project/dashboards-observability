@@ -19,6 +19,7 @@ import type {
   CloudWatchAlarmHistoryItem,
   CloudWatchAlarmList,
   CloudWatchAlarmState,
+  CloudWatchCallOptions,
   CloudWatchMetricPreview,
   CloudWatchRelationshipGraph,
   CloudWatchRelationshipNode,
@@ -143,22 +144,26 @@ export class CloudWatchBackend {
    * List all alarms for a CloudWatch datasource, account-id enriched. `truncated` when the source
    * capped the list (the fan-out reports it on the datasource's status).
    */
-  async describeAlarms(ds: Datasource): Promise<CloudWatchAlarmList> {
-    return this.listAlarms(ds, {});
+  async describeAlarms(ds: Datasource, call?: CloudWatchCallOptions): Promise<CloudWatchAlarmList> {
+    return this.listAlarms(ds, {}, call);
   }
 
   /** List alarms currently in ALARM state (for the Alerts tab). */
-  async describeAlarmingAlarms(ds: Datasource): Promise<CloudWatchAlarmList> {
-    return this.listAlarms(ds, { stateValue: 'ALARM' });
+  async describeAlarmingAlarms(
+    ds: Datasource,
+    call?: CloudWatchCallOptions
+  ): Promise<CloudWatchAlarmList> {
+    return this.listAlarms(ds, { stateValue: 'ALARM' }, call);
   }
 
   private async listAlarms(
     ds: Datasource,
-    options: { stateValue?: CloudWatchAlarmState }
+    options: { stateValue?: CloudWatchAlarmState },
+    call?: CloudWatchCallOptions
   ): Promise<CloudWatchAlarmList> {
     const [list, identity] = await Promise.all([
-      this.guarded(() => this.source.describeAlarms({ region: ds.region, ...options })),
-      this.getIdentitySafe(ds),
+      this.guarded(() => this.source.describeAlarms({ region: ds.region, ...options }, call)),
+      this.getIdentitySafe(ds, call),
     ]);
     return {
       alarms: list.alarms.map((a) => ({
@@ -175,7 +180,12 @@ export class CloudWatchBackend {
    * `atMs` started from the state it was in at `atMs` (its `oldState`). Alarms that haven't
    * changed since are left out; they are still in their current state.
    */
-  async getStatesAt(ds: Datasource, atMs: number, nowMs = Date.now()): Promise<CloudWatchStatesAt> {
+  async getStatesAt(
+    ds: Datasource,
+    atMs: number,
+    nowMs = Date.now(),
+    call?: CloudWatchCallOptions
+  ): Promise<CloudWatchStatesAt> {
     if (atMs >= nowMs) return { atMs, states: {}, complete: true };
     // Older than the history CloudWatch keeps: the first change we could read would be from the
     // retention edge, not right after `atMs`, so its prior state would be wrong. Say unknown.
@@ -183,7 +193,10 @@ export class CloudWatchBackend {
       return { atMs, states: {}, complete: true, beyondRetention: true };
     }
     const { changes, complete } = await this.guarded(() =>
-      this.source.describeStateChanges({ region: ds.region, startTimeMs: atMs, endTimeMs: nowMs })
+      this.source.describeStateChanges(
+        { region: ds.region, startTimeMs: atMs, endTimeMs: nowMs },
+        call
+      )
     );
     const states: Record<string, CloudWatchAlarmState> = {};
     const seen = new Set<string>();
@@ -197,10 +210,11 @@ export class CloudWatchBackend {
   }
 
   private async getIdentitySafe(
-    ds: Datasource
+    ds: Datasource,
+    call?: CloudWatchCallOptions
   ): Promise<{ accountId: string; region: string } | undefined> {
     try {
-      return await this.source.getCallerIdentity(ds.region);
+      return await this.source.getCallerIdentity(ds.region, call);
     } catch (err) {
       // Identity is best-effort labeling; a failure here shouldn't blank rows.
       this.logger.debug(`CloudWatch getCallerIdentity failed: ${describeSourceError(err)}`);
@@ -217,11 +231,12 @@ export class CloudWatchBackend {
   async getAlarmDetail(
     ds: Datasource,
     alarmName: string,
-    opts: { startTimeMs?: number; endTimeMs?: number } = {}
+    opts: { startTimeMs?: number; endTimeMs?: number; signal?: AbortSignal } = {}
   ): Promise<CloudWatchAlarmDetail | null> {
-    const alarm = await this.guarded(() => this.source.describeAlarm(alarmName, ds.region));
+    const call: CloudWatchCallOptions = { signal: opts.signal };
+    const alarm = await this.guarded(() => this.source.describeAlarm(alarmName, ds.region, call));
     if (!alarm) return null;
-    const identity = await this.getIdentitySafe(ds);
+    const identity = await this.getIdentitySafe(ds, call);
     alarm.accountId = alarm.accountId || identity?.accountId;
     alarm.region = alarm.region || identity?.region || ds.region;
 
@@ -232,7 +247,7 @@ export class CloudWatchBackend {
     let history: CloudWatchAlarmHistoryItem[] | undefined;
     let historyAccessDenied = false;
     try {
-      history = await this.source.describeAlarmHistory(alarmName, ds.region);
+      history = await this.source.describeAlarmHistory(alarmName, ds.region, call);
     } catch (err) {
       if (isAccessDenied(err)) {
         historyAccessDenied = true;
@@ -257,16 +272,16 @@ export class CloudWatchBackend {
           startTimeMs,
           endTimeMs,
         };
-        let points = await this.source.getMetricData(query);
+        let points = await this.source.getMetricData(query, call);
         // If the default window has no samples (e.g. the metric only reported
         // earlier), widen to the last 24h so the preview still shows the
         // series rather than rendering an empty chart. A caller-picked window
         // is respected as-is: the flyout says "No metric data in {window}".
         if (points.length === 0 && opts.startTimeMs === undefined) {
-          points = await this.source.getMetricData({
-            ...query,
-            startTimeMs: endTimeMs - 24 * 60 * 60 * 1000,
-          });
+          points = await this.source.getMetricData(
+            { ...query, startTimeMs: endTimeMs - 24 * 60 * 60 * 1000 },
+            call
+          );
         }
         const stat = alarm.statistic || alarm.extendedStatistic || 'Average';
         const periodLabel = alarm.period ? `, ${alarm.period}s` : '';
@@ -292,7 +307,7 @@ export class CloudWatchBackend {
     // Relationships (composite alarms; metric alarms may still have parents).
     let relationships: CloudWatchRelationshipGraph | undefined;
     try {
-      relationships = await this.buildRelationships(ds, alarm, DEFAULT_RELATIONSHIP_DEPTH);
+      relationships = await this.buildRelationships(ds, alarm, DEFAULT_RELATIONSHIP_DEPTH, call);
     } catch (err) {
       this.logger.debug(`CloudWatch relationships failed: ${describeSourceError(err)}`);
     }
@@ -314,10 +329,11 @@ export class CloudWatchBackend {
   /** Alarm history for one alarm (used by the lazy history route). */
   async getAlarmHistory(
     ds: Datasource,
-    alarmName: string
+    alarmName: string,
+    call?: CloudWatchCallOptions
   ): Promise<{ items: CloudWatchAlarmHistoryItem[]; accessDenied: boolean }> {
     try {
-      const items = await this.source.describeAlarmHistory(alarmName, ds.region);
+      const items = await this.source.describeAlarmHistory(alarmName, ds.region, call);
       return { items, accessDenied: false };
     } catch (err) {
       if (isAccessDenied(err)) return { items: [], accessDenied: true };
@@ -333,10 +349,11 @@ export class CloudWatchBackend {
   async getRelationships(
     ds: Datasource,
     alarmName: string,
-    depth?: number
+    depth?: number,
+    call?: CloudWatchCallOptions
   ): Promise<CloudWatchRelationshipGraph | null> {
-    const alarm = await this.guarded(() => this.source.describeAlarm(alarmName, ds.region));
-    return alarm ? this.buildRelationships(ds, alarm, depth) : null;
+    const alarm = await this.guarded(() => this.source.describeAlarm(alarmName, ds.region, call));
+    return alarm ? this.buildRelationships(ds, alarm, depth, call) : null;
   }
 
   /**
@@ -352,7 +369,8 @@ export class CloudWatchBackend {
   async buildRelationships(
     ds: Datasource,
     alarm: CloudWatchAlarm,
-    depth: number = DEFAULT_RELATIONSHIP_DEPTH
+    depth: number = DEFAULT_RELATIONSHIP_DEPTH,
+    call?: CloudWatchCallOptions
   ): Promise<CloudWatchRelationshipGraph> {
     const cappedDepth = Math.min(Math.max(depth, 1), MAX_RELATIONSHIP_DEPTH);
     const byName = new Map<string, CloudWatchAlarm>([[alarm.alarmName, alarm]]);
@@ -369,7 +387,9 @@ export class CloudWatchBackend {
       const found: CloudWatchAlarm[] = [];
       for (let k = 0; k < unseen.length; k += ALARM_NAMES_PER_CALL) {
         const batch = unseen.slice(k, k + ALARM_NAMES_PER_CALL);
-        const alarms = await this.guarded(() => this.source.describeAlarmsByName(batch, ds.region));
+        const alarms = await this.guarded(() =>
+          this.source.describeAlarmsByName(batch, ds.region, call)
+        );
         found.push(...alarms);
       }
       for (const a of found) byName.set(a.alarmName, a);
@@ -422,7 +442,7 @@ export class CloudWatchBackend {
 
     // Parents: composite alarms whose rule references this alarm.
     const parentAlarms = await this.guarded(() =>
-      this.source.describeParentAlarms(alarm.alarmName, ds.region)
+      this.source.describeParentAlarms(alarm.alarmName, ds.region, call)
     );
     const parents: CloudWatchRelationshipNode[] = parentAlarms
       .filter((p) => p.alarmName !== alarm.alarmName)

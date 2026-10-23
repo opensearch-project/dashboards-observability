@@ -125,16 +125,34 @@ export interface AlertingRoutesDeps {
   cloudWatchRegion?: string;
 }
 
-/** Upper bound on one CloudWatch detail route; CloudWatch calls themselves have no timeout here. */
+/** Upper bound on one CloudWatch detail route. */
 const CLOUDWATCH_DETAIL_TIMEOUT_MS = 30_000;
 
-/** Rejects with a `TimeoutError` (classified as a timeout) when `promise` takes over `ms`. */
-function withRouteTimeout<T>(promise: Promise<T>, ms: number, what: string): Promise<T> {
+/**
+ * Runs `work` with an `AbortSignal` that fires when the route gives up (after `ms`) or the client
+ * disconnects, so the source can stop calls nobody is waiting for. Rejects with a `TimeoutError`
+ * (classified as a timeout) when `work` takes over `ms`.
+ */
+export function withRouteTimeout<T>(
+  request: OpenSearchDashboardsRequest,
+  work: (signal: AbortSignal) => Promise<T>,
+  ms: number,
+  what: string
+): Promise<T> {
+  const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new TimeoutError(`${what} timed out after ${ms}ms`, ms)), ms);
+    timer = setTimeout(() => {
+      const err = new TimeoutError(`${what} timed out after ${ms}ms`, ms);
+      controller.abort(err);
+      reject(err);
+    }, ms);
   });
-  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  const disconnect = request.events?.aborted$?.subscribe(() => controller.abort());
+  return Promise.race([work(controller.signal), timeout]).finally(() => {
+    clearTimeout(timer);
+    disconnect?.unsubscribe();
+  });
 }
 
 /**
@@ -951,7 +969,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         );
         const atMs = parseDateMathMs(req.query.at, /* isEndTime */ true);
         const body = await withRouteTimeout(
-          cwBackend.getStatesAt(ds, atMs),
+          req,
+          (signal) => cwBackend.getStatesAt(ds, atMs, Date.now(), { signal }),
           CLOUDWATCH_DETAIL_TIMEOUT_MS,
           'CloudWatch alarm states'
         );
@@ -981,7 +1000,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         );
         const range = resolveDetailRange(req.query.startTime, req.query.endTime);
         const detail = await withRouteTimeout(
-          cwBackend.getAlarmDetail(ds, req.query.name, range),
+          req,
+          (signal) => cwBackend.getAlarmDetail(ds, req.query.name, { ...range, signal }),
           CLOUDWATCH_DETAIL_TIMEOUT_MS,
           'CloudWatch alarm detail'
         );
@@ -1007,7 +1027,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           req.params.dsId
         );
         const body = await withRouteTimeout(
-          cwBackend.getAlarmHistory(ds, req.query.name),
+          req,
+          (signal) => cwBackend.getAlarmHistory(ds, req.query.name, { signal }),
           CLOUDWATCH_DETAIL_TIMEOUT_MS,
           'CloudWatch alarm history'
         );
@@ -1038,7 +1059,8 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         const depth = rawDepth && Number.isFinite(rawDepth) ? rawDepth : undefined;
         // Only the alarm and the graph: not the full detail (history, metric data).
         const graph = await withRouteTimeout(
-          cwBackend.getRelationships(ds, req.query.name, depth),
+          req,
+          (signal) => cwBackend.getRelationships(ds, req.query.name, depth, { signal }),
           CLOUDWATCH_DETAIL_TIMEOUT_MS,
           'CloudWatch alarm relationships'
         );

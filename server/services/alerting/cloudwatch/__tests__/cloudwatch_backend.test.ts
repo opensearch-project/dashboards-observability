@@ -345,7 +345,10 @@ describe('CloudWatchBackend.getStatesAt', () => {
       states: { 'cpu-high': 'OK', 'disk-full': 'INSUFFICIENT_DATA' },
       complete: true,
     });
-    expect(spy).toHaveBeenCalledWith({ region: 'us-east-1', startTimeMs: at, endTimeMs: now });
+    expect(spy).toHaveBeenCalledWith(
+      { region: 'us-east-1', startTimeMs: at, endTimeMs: now },
+      undefined
+    );
   });
 
   it("leaves out an alarm whose first change doesn't say where it started", async () => {
@@ -450,8 +453,8 @@ describe('CloudWatchBackend.buildRelationships', () => {
     const backend = new CloudWatchBackend(noopLogger, source);
     const graph = await backend.buildRelationships(ds, source.alarms[0], 3);
     expect(listSpy).not.toHaveBeenCalled();
-    expect(byNameSpy).toHaveBeenNthCalledWith(1, ['mid', 'gone'], ds.region);
-    expect(byNameSpy).toHaveBeenNthCalledWith(2, ['leaf'], ds.region);
+    expect(byNameSpy).toHaveBeenNthCalledWith(1, ['mid', 'gone'], ds.region, undefined);
+    expect(byNameSpy).toHaveBeenNthCalledWith(2, ['leaf'], ds.region, undefined);
     expect(graph.tree.children?.find((c) => c.alarmName === 'mid')?.deleted).toBeUndefined();
     expect(graph.tree.children?.find((c) => c.alarmName === 'gone')?.deleted).toBe(true);
   });
@@ -486,6 +489,63 @@ describe('CloudWatchBackend.getRelationships', () => {
     expect(await backend.getRelationships(ds, 'nope')).toBeNull();
     expect(history).not.toHaveBeenCalled();
     expect(metric).not.toHaveBeenCalled();
+  });
+});
+
+describe('CloudWatchBackend abort signal', () => {
+  /** The `CloudWatchCallOptions` each source call received (always the last argument). */
+  function spySignals(source: FakeSource) {
+    const methods = [
+      'getCallerIdentity',
+      'describeAlarms',
+      'describeAlarm',
+      'describeAlarmsByName',
+      'describeParentAlarms',
+      'describeAlarmHistory',
+      'describeStateChanges',
+      'getMetricData',
+    ] as const;
+    const seen: Array<{ method: string; signal?: AbortSignal }> = [];
+    for (const method of methods) {
+      const original = (source[method] as (...args: unknown[]) => Promise<unknown>).bind(source);
+      jest.spyOn(source, method).mockImplementation(((...args: unknown[]) => {
+        const last = args[args.length - 1] as { signal?: AbortSignal } | undefined;
+        seen.push({ method, signal: last?.signal });
+        return original(...args);
+      }) as never);
+    }
+    return seen;
+  }
+
+  it('passes the caller signal to every source call', async () => {
+    const source = new FakeSource();
+    source.alarms = [
+      alarm({ alarmName: 'root', alarmType: 'composite', alarmRule: 'ALARM("cpu-high")' }),
+      alarm(),
+    ];
+    const seen = spySignals(source);
+    const backend = new CloudWatchBackend(noopLogger, source);
+    const { signal } = new AbortController();
+
+    await backend.describeAlarms(ds, { signal });
+    await backend.getAlarmDetail(ds, 'cpu-high', { signal });
+    await backend.getAlarmHistory(ds, 'cpu-high', { signal });
+    await backend.getRelationships(ds, 'root', undefined, { signal });
+    await backend.getStatesAt(ds, Date.now() - 60_000, Date.now(), { signal });
+
+    expect(new Set(seen.map((s) => s.method))).toEqual(
+      new Set([
+        'getCallerIdentity',
+        'describeAlarms',
+        'describeAlarm',
+        'describeAlarmsByName',
+        'describeParentAlarms',
+        'describeAlarmHistory',
+        'describeStateChanges',
+        'getMetricData',
+      ])
+    );
+    expect(seen.every((s) => s.signal === signal)).toBe(true);
   });
 });
 

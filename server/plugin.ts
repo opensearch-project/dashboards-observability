@@ -393,12 +393,12 @@ export class ObservabilityPlugin implements Plugin<
     const isCloudWatchFlagOn: CloudWatchFlagResolver = async (request) => {
       try {
         const dynamicConfig = await core.dynamicConfigService.getStartService();
+        const store = dynamicConfig.createStoreFromRequest(request);
+        // No per-request store (e.g. no dynamic config for this request): use the yml value.
+        if (!store) return ymlCloudWatchEnabled;
         const config = await dynamicConfig
           .getClient()
-          .getConfig(
-            { name: 'observability' },
-            { asyncLocalStorageContext: dynamicConfig.createStoreFromRequest(request)! }
-          );
+          .getConfig({ name: 'observability' }, { asyncLocalStorageContext: store });
         return config.cloudwatch?.enabled ?? ymlCloudWatchEnabled;
       } catch {
         return ymlCloudWatchEnabled;

@@ -17,7 +17,7 @@
  *   - Caller-supplied `setRules`/`setRulesTotal` are returned via state
  *     so the page can layer optimistic inserts on top.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import type { UnifiedRuleSummary } from '../../../../common/types/alerting';
 import type { ClassifiedError } from '../../../../common/error';
@@ -60,6 +60,9 @@ export interface UseRulesDataResult {
 export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDataResult {
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
   const [rules, setRules] = useState<UnifiedRuleSummary[]>([]);
+  // The latest rows, read by a background poll that keeps the CloudWatch rows it skipped.
+  const rulesRef = useRef(rules);
+  rulesRef.current = rules;
   const [rulesTotal, setRulesTotal] = useState(-1); // -1 = not yet loaded
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,14 +98,12 @@ export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDat
             : { results: [], datasourceStatus: [] };
         const fetched = res.results || [];
         if (skipCloudWatch) {
-          setRules((prev) => {
-            const next = [
-              ...fetched,
-              ...prev.filter((r) => r.datasourceId === CLOUDWATCH_DATASOURCE_ID),
-            ];
-            setRulesTotal(next.length);
-            return next;
-          });
+          const next = [
+            ...fetched,
+            ...rulesRef.current.filter((r) => r.datasourceId === CLOUDWATCH_DATASOURCE_ID),
+          ];
+          setRules(next);
+          setRulesTotal(next.length);
         } else {
           setRules(fetched);
           setRulesTotal(fetched.length);
