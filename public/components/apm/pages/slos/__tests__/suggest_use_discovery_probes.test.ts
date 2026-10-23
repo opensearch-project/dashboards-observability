@@ -31,7 +31,7 @@ function makeHttp(implementations: {
   });
   const post = jest.fn(async (_url: string, opts?: { body?: string }) => {
     const q: string = JSON.parse(opts?.body ?? '{}')?.query?.query ?? '';
-    const metric = /increase\((\w+)\{/.exec(q)?.[1] ?? '';
+    const metric = /increase\((\w+)[\[{]/.exec(q)?.[1] ?? '';
     const label = /sum by \((\w+)\)/.exec(q)?.[1] ?? '';
     const slot = implementations.emptyHistograms?.[metric];
     if (slot instanceof Error) throw slot;

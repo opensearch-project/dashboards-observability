@@ -168,7 +168,7 @@ describe('buildErrorRatioExprForWindow / buildErrorRatioQuery', () => {
     const out = buildErrorRatioExprForWindow(doc, doc.spec.objectives[0], '5m')!;
     expect(out).toContain('http_server_request_duration_seconds_bucket{');
     // Format-tolerant match on the bound (`0.5` / `0.50`).
-    expect(out).toContain('le=~"0\\\\.50*"');
+    expect(out).toContain('le=~"0?\\\\.50*"');
     expect(out).toContain('le="+Inf"');
   });
 
@@ -180,7 +180,7 @@ describe('buildErrorRatioExprForWindow / buildErrorRatioQuery', () => {
     }
     doc.spec.objectives = [{ name: 'obj', target: 0.95, latencyThreshold: 250 }];
     const out = buildErrorRatioExprForWindow(doc, doc.spec.objectives[0], '5m')!;
-    expect(out).toContain('le=~"0\\\\.250*"');
+    expect(out).toContain('le=~"0?\\\\.250*"');
   });
 
   it('custom mode raw returns the user-supplied errorRatioQuery verbatim', () => {
@@ -257,7 +257,7 @@ describe('buildGoodEventsCountQuery / buildTotalEventsCountQuery', () => {
   it('latency emits le-bounded good count and le="+Inf" total', () => {
     const doc = latencyDoc();
     const obj = doc.spec.objectives[0];
-    expect(buildGoodEventsCountQuery(doc, obj, '5m')).toContain('le=~"0\\\\.50*"');
+    expect(buildGoodEventsCountQuery(doc, obj, '5m')).toContain('le=~"0?\\\\.50*"');
     expect(buildTotalEventsCountQuery(doc, obj, '5m')).toContain('le="+Inf"');
   });
 
@@ -432,7 +432,7 @@ describe('span-derived (delta) histograms', () => {
     // The 0.5 s cumulative bucket covers every bound up to 0.5 s.
     const part = out.split(' or ').find((p) => p.includes('"le", "0.5"'))!;
     expect(part).toContain('0(\\\\.0*)?|');
-    expect(part).toContain('|0\\\\.50*"');
-    expect(part).not.toContain('0\\\\.750*');
+    expect(part).toContain('|0?\\\\.50*"');
+    expect(part).not.toContain('0?\\\\.750*');
   });
 });

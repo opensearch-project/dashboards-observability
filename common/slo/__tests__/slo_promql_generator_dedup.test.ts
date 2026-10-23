@@ -201,7 +201,7 @@ describe('generateRecordingGroupForFingerprint', () => {
       sli: latencySli,
       objectiveLatencyThreshold: 0.5,
     });
-    expect(group!.rules[0].expr).toContain('le=~"0\\\\.50*"');
+    expect(group!.rules[0].expr).toContain('le=~"0?\\\\.50*"');
   });
 });
 

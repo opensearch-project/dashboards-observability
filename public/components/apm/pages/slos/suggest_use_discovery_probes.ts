@@ -43,7 +43,7 @@ const OTEL_PROBES: OtelProbe[] = [
 
 /**
  * OTel latency histograms and the labels their series are attributed by.
- * Probed for services whose `+Inf` bucket never moved — see
+ * Probed for services whose buckets never recorded anything — see
  * `findEmptyHistograms`.
  */
 const LATENCY_HISTOGRAMS: OtelProbe[] = [
@@ -201,7 +201,7 @@ export function useDiscoveryProbes({
 
 /**
  * For each present latency histogram, find the (label, value) attributions
- * whose `+Inf` bucket didn't move over the last hour: `== 0` keeps only those
+ * whose buckets recorded nothing over the last hour: `== 0` keeps only those
  * rows, so services without the metric at all never appear. Best effort — a
  * failed probe returns nothing and no draft is skipped.
  */
@@ -215,7 +215,9 @@ async function findEmptyHistograms(
     h.labels.map((label) => ({
       metric: h.metric,
       label,
-      query: `sum by (${label}) (increase(${h.metric}{le="+Inf"}[1h])) == 0`,
+      // Every bucket series, not just `+Inf`: a series-wide sum is 0 only
+      // when no bucket recorded anything, whatever the bucket layout.
+      query: `sum by (${label}) (increase(${h.metric}[1h])) == 0`,
     }))
   );
   const results = await Promise.all(

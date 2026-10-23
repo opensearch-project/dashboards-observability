@@ -61,7 +61,7 @@ function leMatches(expr: string, le: string): boolean {
 
 describe('leValuePattern', () => {
   it.each([
-    [0.5, ['0.5', '0.50', '0.500'], ['0.05', '0.55', '5']],
+    [0.5, ['0.5', '0.50', '0.500', '.5'], ['0.05', '0.55', '5', '00.5']],
     [1, ['1', '1.0', '1.00'], ['10', '0.1', '1.5']],
     [0, ['0', '0.0'], ['0.005']],
     [2.5, ['2.5', '2.50'], ['25', '2.05']],
@@ -118,7 +118,7 @@ describe('buildSliEventQueries — cumulative metrics', () => {
       '5m'
     ) as { good: string; total: string };
     expect(q.good).toBe(
-      '(sum(rate(http_server_duration_seconds_bucket{job="api", le=~"0\\\\.50*"}[5m])) or ' +
+      '(sum(rate(http_server_duration_seconds_bucket{job="api", le=~"0?\\\\.50*"}[5m])) or ' +
         'sum(rate(http_server_duration_seconds_bucket{job="api", le=~"500(\\\\.0*)?"}[5m])))'
     );
     expect(q.total).toBe(
@@ -228,6 +228,34 @@ describe('buildSliEventQueries — custom', () => {
       '5m'
     );
     expect(q).toEqual({ good: 'sum(up{job="a"})', total: 'count(up)' });
+  });
+
+  it('leaves hand-written span-derived queries alone unless they are an exact legacy shape', () => {
+    const custom = {
+      mode: 'events' as const,
+      // Instant reads, span-derived, but not the draft/template shape.
+      goodQuery: `sum by (operation) (request{${SEL}}) - sum(fault{${SEL}})`,
+      totalQuery: `sum(request{${SEL}})`,
+    };
+    const q = buildSliEventQueries(sli({ type: 'custom', customExpr: custom }, []), avail, '1h');
+    expect(q).toEqual({ good: custom.goodQuery, total: custom.totalQuery });
+    // Mismatched selectors between good and total are not the legacy shape either.
+    const mismatched = buildSliEventQueries(
+      sli(
+        {
+          type: 'custom',
+          customExpr: {
+            mode: 'events',
+            goodQuery: `sum(request{${SEL}}) - sum(fault{${SEL}})`,
+            totalQuery: 'sum(request{service="other",namespace="span_derived"})',
+          },
+        },
+        []
+      ),
+      avail,
+      '1h'
+    ) as { good: string };
+    expect(mismatched.good).not.toContain('sum_over_time');
   });
 
   it('upgrades the legacy instant span-derived availability draft to windowed sums', () => {

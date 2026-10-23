@@ -72,15 +72,6 @@ export const SPAN_DERIVED_LATENCY_BUCKETS_SECONDS: readonly number[] = [
   0, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10,
 ];
 
-/** Span-derived RED metric names: per-interval delta gauges, never counters. */
-const SPAN_DERIVED_GAUGES = [
-  'request',
-  'error',
-  'fault',
-  'latency_seconds_count',
-  'latency_seconds_sum',
-] as const;
-
 /**
  * Default MWMBR tiers per the Google SRE Workbook Ch. 5 Table 5-8 and Sloth's
  * google-30d.yaml. Consumers can override per-SLO.
@@ -328,8 +319,9 @@ function errorRatioExpr(sli: SingleSli, window: string, objective: Objective): s
  *     histograms whose `_seconds` name hides millisecond buckets.
  *   - latency_threshold, delta histogram (span-derived): good = every bucket
  *     with a bound <= threshold, total = `<metric>_count`.
- *   - custom: the user's queries with `{{.window}}` substituted; legacy
- *     instant reads of span-derived gauges are upgraded to windowed sums.
+ *   - custom: the user's queries with `{{.window}}` substituted; the exact
+ *     legacy instant span-derived draft/template shapes are upgraded to
+ *     windowed sums.
  */
 export function buildSliEventQueries(
   sli: SingleSli,
@@ -346,10 +338,7 @@ export function buildSliEventQueries(
     if (custom.mode === 'raw') {
       return { errorRatio: substituteWindowToken(custom.errorRatioQuery, window) };
     }
-    return {
-      good: windowCustomQuery(custom.goodQuery, window),
-      total: windowCustomQuery(custom.totalQuery, window),
-    };
+    return windowCustomPair(custom.goodQuery, custom.totalQuery, window);
   }
 
   if (!prom.metric) return null;
@@ -413,38 +402,78 @@ export function substituteWindowToken(query: string, window: string): string {
 }
 
 /**
- * Window a custom good/total query. Queries carrying `{{.window}}` get it
- * substituted. Queries without any range selector that read span-derived
- * gauges instantly (what earlier suggestion drafts and templates produced,
- * e.g. `sum(request{...}) - sum(fault{...})`) are rewritten to windowed sums
- * — an instant read of a sparse per-interval gauge ignores the window and
- * goes empty between emissions. Anything else is returned unchanged.
+ * Window a custom good/total pair. Queries carrying `{{.window}}` get it
+ * substituted. The exact instant-read shapes that earlier suggestion drafts
+ * and templates produced for span-derived gauges — e.g.
+ * `sum(request{S}) - sum(fault{S})` over `sum(request{S})` with
+ * `namespace="span_derived"` in `S` — are upgraded to windowed sums: an
+ * instant read of a sparse per-interval gauge ignores the window and goes
+ * empty between emissions. Anything else is returned unchanged.
  */
-function windowCustomQuery(query: string, window: string): string {
-  if (query.includes(SLI_WINDOW_TOKEN)) return substituteWindowToken(query, window);
-  if (query.includes('[') || !/namespace\s*=\s*"span_derived"/.test(query)) return query;
-  const gauges = SPAN_DERIVED_GAUGES.join('|');
-  return query
-    .replace(new RegExp(`sum\\((${gauges})\\{([^{}]*)\\}\\)`, 'g'), (_m, metric, sel) => {
-      const windowed = `sum(sum_over_time(${metric}{${sel}}[${window}]))`;
-      return metric === 'fault' || metric === 'error' ? `(${windowed} or vector(0))` : windowed;
-    })
-    .replace(/sum\(latency_seconds_bucket\{([^{}]*)\}\)/g, (m, sel: string) => {
-      const leMatch = sel.match(/(?:^|,)\s*le\s*=\s*"([^"]*)"/);
-      if (!leMatch) return m;
-      const rest = sel
-        .replace(/(^|,)\s*le\s*=\s*"[^"]*"/, '$1')
-        .replace(/^\s*,|,\s*$/g, '')
-        .replace(/,\s*,/g, ',');
-      if (leMatch[1] === '+Inf') {
-        return `sum(sum_over_time(latency_seconds_count{${rest}}[${window}]))`;
-      }
-      const bound = Number(leMatch[1]);
-      if (!Number.isFinite(bound)) return m;
-      const bounds = SPAN_DERIVED_LATENCY_BUCKETS_SECONDS.filter((b) => b <= bound);
-      const le = `le=~"${bounds.map(leValuePattern).join('|')}"`;
-      return `sum(sum_over_time(latency_seconds_bucket{${joinMatchers(rest, le)}}[${window}]))`;
-    });
+function windowCustomPair(
+  goodQuery: string,
+  totalQuery: string,
+  window: string
+): { good: string; total: string } {
+  const good = goodQuery.trim();
+  const total = totalQuery.trim();
+  if (good.includes(SLI_WINDOW_TOKEN) || total.includes(SLI_WINDOW_TOKEN)) {
+    return {
+      good: substituteWindowToken(good, window),
+      total: substituteWindowToken(total, window),
+    };
+  }
+  const upgraded = upgradeLegacySpanDerivedPair(good, total, window);
+  return upgraded ?? { good, total };
+}
+
+const SPAN_SELECTOR = '([^{}"]*(?:"[^"]*"[^{}"]*)*)';
+
+/** Exact legacy instant shapes → windowed equivalents, or null when `good`/`total` aren't one. */
+function upgradeLegacySpanDerivedPair(
+  good: string,
+  total: string,
+  window: string
+): { good: string; total: string } | null {
+  const isSpan = (sel: string) => /(^|,)\s*namespace\s*=\s*"span_derived"/.test(sel);
+  const sum = (metric: string, sel: string) => `sum(sum_over_time(${metric}{${sel}}[${window}]))`;
+
+  // Availability: sum(request{S}) - sum(fault{S})  /  sum(request{S})
+  const availGood = good.match(
+    new RegExp(`^sum\\(request\\{${SPAN_SELECTOR}\\}\\) - sum\\(fault\\{${SPAN_SELECTOR}\\}\\)$`)
+  );
+  const availTotal = total.match(new RegExp(`^sum\\(request\\{${SPAN_SELECTOR}\\}\\)$`));
+  if (availGood && availTotal) {
+    const sel = availTotal[1];
+    if (isSpan(sel) && availGood[1] === sel && availGood[2] === sel) {
+      return {
+        good: `${sum('request', sel)} - (${sum('fault', sel)} or vector(0))`,
+        total: sum('request', sel),
+      };
+    }
+  }
+
+  // Latency: sum(latency_seconds_bucket{S,le="X"})  /  sum(latency_seconds_bucket{S,le="+Inf"})
+  const latGood = good.match(
+    new RegExp(`^sum\\(latency_seconds_bucket\\{${SPAN_SELECTOR},\\s*le="([^"]+)"\\}\\)$`)
+  );
+  const latTotal = total.match(
+    new RegExp(`^sum\\(latency_seconds_bucket\\{${SPAN_SELECTOR},\\s*le="\\+Inf"\\}\\)$`)
+  );
+  if (latGood && latTotal) {
+    const sel = latTotal[1];
+    const bound = Number(latGood[2]);
+    if (isSpan(sel) && latGood[1] === sel && Number.isFinite(bound)) {
+      const le = `le=~"${SPAN_DERIVED_LATENCY_BUCKETS_SECONDS.filter((b) => b <= bound)
+        .map(leValuePattern)
+        .join('|')}"`;
+      return {
+        good: sum('latency_seconds_bucket', joinMatchers(sel, le)),
+        total: sum('latency_seconds_count', sel),
+      };
+    }
+  }
+  return null;
 }
 
 /** Join non-empty label matchers with `, `. */
@@ -466,7 +495,9 @@ function toSeconds(bound: number, unit: 'seconds' | 'milliseconds' | undefined):
 export function leValuePattern(seconds: number): string {
   const canonical = formatLatencyBoundLe(seconds, 'seconds');
   const [intPart, frac] = canonical.split('.');
-  return frac === undefined ? `${intPart}(\\\\.0*)?` : `${intPart}\\\\.${frac}0*`;
+  if (frac === undefined) return `${intPart}(\\\\.0*)?`;
+  // A sub-second bound may also be written without its leading zero (`.5`).
+  return `${intPart === '0' ? '0?' : intPart}\\\\.${frac}0*`;
 }
 
 /**

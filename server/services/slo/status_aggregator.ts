@@ -139,7 +139,7 @@ export interface SloStatusAggregationContext {
    * wires this to a throttled background repair; the status itself is
    * unaffected — the inline fallback already covers an outdated recording.
    */
-  onOutdatedRules?: (doc: SloDocument) => void;
+  onOutdatedRules?: (doc: SloDocument, outdatedGroups: string[]) => void;
   /**
    * When true, the aggregator queries fingerprint-named recording rules
    * (e.g. `slo:sli_error:ratio_rate_3d:sli_<fp>`) and maps samples back to
@@ -464,7 +464,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
 
     if (result.outdatedGroups?.length && ctx.onOutdatedRules) {
       try {
-        ctx.onOutdatedRules(doc);
+        ctx.onOutdatedRules(doc, result.outdatedGroups);
       } catch (err) {
         this.logger.debug(`StatusAggregator: onOutdatedRules threw for ${doc.id}: ${errMsg(err)}`);
       }

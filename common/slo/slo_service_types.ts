@@ -245,7 +245,7 @@ export interface SloStatusAggregationContext {
    * Fire-and-forget hook for SLOs whose recording groups predate the current
    * SLI math; the route layer wires it to a throttled background repair.
    */
-  onOutdatedRules?: (doc: SloDocument) => void;
+  onOutdatedRules?: (doc: SloDocument, outdatedGroups: string[]) => void;
 }
 
 // ============================================================================

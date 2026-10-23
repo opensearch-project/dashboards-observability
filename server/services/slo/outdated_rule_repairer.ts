@@ -20,8 +20,9 @@
  * have no system identity that can write rules. Bounded so a listing of many
  * outdated SLOs can't fan out into a burst of ruler writes:
  *   - at most `maxInFlight` repairs at once across the process; the rest wait
- *     in a FIFO queue (at most `maxQueued`), so one listing visit heals every
- *     outdated SLO it saw instead of two per poll;
+ *     in a FIFO queue (at most `maxQueued`, each for at most `maxQueueAgeMs`),
+ *     so one listing visit heals every outdated SLO it saw instead of two per
+ *     poll;
  *   - one attempt per SLO per `cooldownMs`;
  *   - failures back off exponentially up to `maxBackoffMs`, and are logged
  *     at warn only on the first failure per SLO.
@@ -38,6 +39,12 @@ export interface OutdatedRuleRepairerOptions {
   maxInFlight?: number;
   /** Repairs waiting for a slot; further requests are dropped. Default 200. */
   maxQueued?: number;
+  /**
+   * A queued repair older than this is dropped instead of run: it holds the
+   * request scope it was scheduled from, and the next status read re-queues
+   * it with a fresh one. Default 60 s.
+   */
+  maxQueueAgeMs?: number;
   now?: () => number;
 }
 
@@ -50,6 +57,7 @@ interface Job {
   key: string;
   repair: () => Promise<void>;
   done: () => void;
+  queuedAt: number;
 }
 
 export class OutdatedRuleRepairer {
@@ -61,6 +69,7 @@ export class OutdatedRuleRepairer {
   private readonly maxBackoffMs: number;
   private readonly maxInFlight: number;
   private readonly maxQueued: number;
+  private readonly maxQueueAgeMs: number;
   private readonly now: () => number;
 
   constructor(
@@ -71,6 +80,7 @@ export class OutdatedRuleRepairer {
     this.maxBackoffMs = opts.maxBackoffMs ?? 24 * 3_600_000;
     this.maxInFlight = opts.maxInFlight ?? 2;
     this.maxQueued = opts.maxQueued ?? 200;
+    this.maxQueueAgeMs = opts.maxQueueAgeMs ?? 60_000;
     this.now = opts.now ?? Date.now;
   }
 
@@ -82,6 +92,7 @@ export class OutdatedRuleRepairer {
    * (tests await it), or `undefined` when the request was skipped.
    */
   schedule(key: string, repair: () => Promise<void>): Promise<void> | undefined {
+    this.pruneAttempts();
     if (this.inFlightKeys.has(key) || this.queuedKeys.has(key)) return undefined;
     const prev = this.attempts.get(key);
     if (prev && prev.nextAllowedAt > this.now()) return undefined;
@@ -90,7 +101,7 @@ export class OutdatedRuleRepairer {
     }
 
     return new Promise<void>((resolve) => {
-      this.queue.push({ key, repair, done: resolve });
+      this.queue.push({ key, repair, done: resolve, queuedAt: this.now() });
       this.queuedKeys.add(key);
       this.drain();
     });
@@ -100,7 +111,25 @@ export class OutdatedRuleRepairer {
     while (this.inFlightKeys.size < this.maxInFlight && this.queue.length > 0) {
       const job = this.queue.shift()!;
       this.queuedKeys.delete(job.key);
+      if (this.now() - job.queuedAt > this.maxQueueAgeMs) {
+        job.done();
+        continue;
+      }
       void this.run(job);
+    }
+  }
+
+  /**
+   * Forget SLOs whose cooldown has passed with no outstanding failures —
+   * keeps the map from accumulating entries for SLOs that were since repaired
+   * or deleted. Failed entries stay so their backoff is honoured.
+   */
+  private pruneAttempts(): void {
+    const nowMs = this.now();
+    for (const [key, attempt] of this.attempts) {
+      if (attempt.failures === 0 && attempt.nextAllowedAt <= nowMs && !this.inFlightKeys.has(key)) {
+        this.attempts.delete(key);
+      }
     }
   }
 

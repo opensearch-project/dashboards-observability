@@ -490,7 +490,7 @@ function buildStatusContext(
   ruleHealthChecker: RuleHealthChecker | undefined,
   ruleDedupEnabled?: boolean,
   request?: OpenSearchDashboardsRequest,
-  onOutdatedRules?: (doc: SloDocument) => void
+  onOutdatedRules?: (doc: SloDocument, outdatedGroups: string[]) => void
 ): SloStatusAggregationContext | undefined {
   if (!datasourceService) return undefined;
   const client = ctx.core.opensearch.client.asCurrentUser;
@@ -597,8 +597,12 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
       ruleDedupEnabled,
       req,
       ruleHealthChecker && req
-        ? (doc: SloDocument) => {
-            void outdatedRuleRepairer.schedule(`${doc.spec.datasourceId}|${doc.id}`, async () => {
+        ? (doc: SloDocument, outdatedGroups: string[]) => {
+            // Keyed on the outdated groups, not the SLO: SLOs sharing a
+            // fingerprint share its recording group, and one repair rewrites
+            // it for all of them.
+            const key = `${doc.spec.datasourceId}|${[...outdatedGroups].sort().join(',')}`;
+            void outdatedRuleRepairer.schedule(key, async () => {
               const built = await tryBuildDeployContext(
                 ctx,
                 req,

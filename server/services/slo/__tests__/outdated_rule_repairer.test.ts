@@ -75,4 +75,34 @@ describe('OutdatedRuleRepairer', () => {
     expect(log.warn).toHaveBeenCalledTimes(1);
     expect(log.debug).toHaveBeenCalledTimes(2);
   });
+
+  it('drops a queued repair that waited longer than maxQueueAgeMs', async () => {
+    const r = new OutdatedRuleRepairer(logger(), {
+      maxInFlight: 1,
+      maxQueueAgeMs: 1000,
+      now: clock,
+    });
+    let release: () => void = () => undefined;
+    const first = r.schedule('a', () => new Promise<void>((res) => (release = res)));
+    const stale = jest.fn(async () => undefined);
+    const queued = r.schedule('b', stale);
+    now += 5000; // 'b' sat in the queue past its age limit
+    release();
+    await first;
+    await queued;
+    expect(stale).not.toHaveBeenCalled();
+    // A fresh request for the same SLO runs normally.
+    await r.schedule('b', stale);
+    expect(stale).toHaveBeenCalledTimes(1);
+  });
+
+  it('forgets SLOs whose cooldown passed without failures', async () => {
+    const r = new OutdatedRuleRepairer(logger(), { cooldownMs: 1000, now: clock });
+    await r.schedule('a', async () => undefined);
+    const attempts = (r as unknown as { attempts: Map<string, unknown> }).attempts;
+    expect(attempts.has('a')).toBe(true);
+    now += 1001;
+    r.schedule('b', async () => undefined);
+    expect(attempts.has('a')).toBe(false);
+  });
 });

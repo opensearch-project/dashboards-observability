@@ -129,7 +129,7 @@ describe('wizard_state reducer', () => {
     expect(s.customPromql.goodQuery).toContain('latency_seconds_bucket');
     // Non-cumulative span-derived buckets: every bound <= 0.5 s, summed over the window.
     expect(s.customPromql.goodQuery).toContain('le=~"');
-    expect(s.customPromql.goodQuery).toContain('0\\\\.50*"}[{{.window}}]');
+    expect(s.customPromql.goodQuery).toContain('0?\\\\.50*"}[{{.window}}]');
   });
 
   it('substitutes ${service} when the service is set AFTER the template (deep-link order)', () => {

@@ -500,7 +500,7 @@ describe('DirectQueryStatusAggregator — outdated recording rules', () => {
       ...ctxDedup(client, checker([`slo:rec:${FP}`])),
       onOutdatedRules,
     });
-    expect(onOutdatedRules).toHaveBeenCalledWith(doc);
+    expect(onOutdatedRules).toHaveBeenCalledWith(doc, [`slo:rec:${FP}`]);
     // Outdated rules still evaluate — the status itself is unaffected.
     expect(status.state).toBe('ok');
   });

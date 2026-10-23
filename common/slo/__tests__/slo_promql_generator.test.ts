@@ -308,7 +308,7 @@ describe('generateSloRuleGroup — latency_threshold', () => {
     const group = generateSloRuleGroup(doc);
     const rec5m = group.rules.find((r) => r.type === 'recording' && r.labels.slo_window === '5m')!;
     expect(rec5m.expr).toContain('http_request_duration_seconds_bucket');
-    expect(rec5m.expr).toContain('le=~"0\\\\.50*"');
+    expect(rec5m.expr).toContain('le=~"0?\\\\.50*"');
     expect(rec5m.expr).toContain('le="+Inf"');
   });
 
@@ -329,7 +329,7 @@ describe('generateSloRuleGroup — latency_threshold', () => {
     });
     const group = generateSloRuleGroup(doc);
     const rec = group.rules.find((r) => r.type === 'recording' && r.labels.slo_window === '5m')!;
-    expect(rec.expr).toContain('le=~"0\\\\.50*"');
+    expect(rec.expr).toContain('le=~"0?\\\\.50*"');
   });
 });
 

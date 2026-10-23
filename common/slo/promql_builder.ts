@@ -19,9 +19,9 @@
  * returns null), so the user is never blocked.
  */
 
-/** Prometheus label matcher operators. */
 import { SLI_WINDOW_TOKEN } from './slo_promql_generator';
 
+/** Prometheus label matcher operators. */
 export type MatchOp = '=' | '!=' | '=~' | '!~';
 
 export interface LabelFilter {
