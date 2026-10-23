@@ -102,11 +102,20 @@ export interface BuildTableColumnsParams {
   cloudWatchStateAt?: (r: UnifiedRuleSummary) => CloudWatchWindowState | undefined;
 }
 
+const formatAt = (ms: number) => moment(ms).format('M/D HH:mm');
+
 /** "CloudWatch state at 9/24 14:00" (plus a caveat when the history read stopped short). */
 function stateAtTooltip(at: CloudWatchWindowState): string {
+  if (!at.state) {
+    return i18n.translate('observability.alerting.monitorsTable.columns.cloudWatchStateAtUnknown', {
+      defaultMessage:
+        "CloudWatch keeps 30 days of alarm history, so the state at {time} isn't available.",
+      values: { time: formatAt(at.atMs) },
+    });
+  }
   const label = i18n.translate('observability.alerting.monitorsTable.columns.cloudWatchStateAt', {
     defaultMessage: 'CloudWatch state at {time}',
-    values: { time: moment(at.atMs).format('M/D HH:mm') },
+    values: { time: formatAt(at.atMs) },
   });
   if (at.complete) return label;
   return `${label}. ${i18n.translate(
@@ -264,9 +273,22 @@ export function buildTableColumns({
             );
           }
           const at = cloudWatchStateAt?.(item);
+          if (at && !at.state) {
+            // Older than CloudWatch's alarm history: say so instead of guessing.
+            return (
+              <EuiToolTip content={stateAtTooltip(at)}>
+                <EuiTextColor color="subdued" data-test-subj="cloudWatchStatusUnknownAtWindowEnd">
+                  {i18n.translate('observability.alerting.monitorsTable.columns.noHistory', {
+                    defaultMessage: 'No history',
+                  })}
+                </EuiTextColor>
+              </EuiToolTip>
+            );
+          }
+          const atState = at?.state;
           const cw =
-            item.cloudWatch && at ? { ...item.cloudWatch, state: at.state } : item.cloudWatch;
-          const status = at ? cloudWatchStateToStatus(at.state) : s;
+            item.cloudWatch && atState ? { ...item.cloudWatch, state: atState } : item.cloudWatch;
+          const status = atState ? cloudWatchStateToStatus(atState) : s;
           const unifiedLabel = getMonitorStateLabel(status);
           // Long values ("insufficient data", "CW: INSUFFICIENT_DATA") must
           // not overflow the (user-resizable) status column: both the health
@@ -306,6 +328,17 @@ export function buildTableColumns({
                   </EuiToolTip>
                 </EuiFlexItem>
               )}
+              {at && (
+                // Visible cue that the row shows the window end, not now.
+                <EuiFlexItem grow={false} style={{ flexBasis: '100%' }}>
+                  <EuiTextColor color="subdued" style={{ fontSize: 11 }}>
+                    {i18n.translate('observability.alerting.monitorsTable.columns.atTime', {
+                      defaultMessage: 'at {time}',
+                      values: { time: formatAt(at.atMs) },
+                    })}
+                  </EuiTextColor>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           );
         },
@@ -342,7 +375,14 @@ export function buildTableColumns({
         width: w('healthStatus'),
         render: (h: MonitorHealthStatus, item: UnifiedRuleSummary) => {
           const at = cloudWatchStateAt?.(item);
-          const health = at ? cloudWatchStateToHealth(at.state) : h;
+          if (at && !at.state) {
+            return (
+              <EuiToolTip content={stateAtTooltip(at)}>
+                <EuiTextColor color="subdued">—</EuiTextColor>
+              </EuiToolTip>
+            );
+          }
+          const health = at?.state ? cloudWatchStateToHealth(at.state) : h;
           const cell = (
             <EuiHealth color={HEALTH_COLORS[health] || 'subdued'}>
               {getMonitorStateLabel(health)}

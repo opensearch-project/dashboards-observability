@@ -191,7 +191,12 @@ describe('CloudWatchAlarmDetailFlyout time window', () => {
     );
   }
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Keep the window inside CloudWatch's 30-day history whenever the tests run.
+    jest.spyOn(Date, 'now').mockReturnValue(timeWindow.endMs);
+  });
+  afterEach(() => jest.restoreAllMocks());
 
   it('fetches the detail for the window', () => {
     mockHook({ isLoading: true });

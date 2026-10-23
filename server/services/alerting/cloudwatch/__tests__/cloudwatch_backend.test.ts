@@ -318,6 +318,20 @@ describe('CloudWatchBackend.getStatesAt', () => {
     expect((await backend.getStatesAt(ds, at, now)).states).toEqual({});
   });
 
+  it("reports a moment older than CloudWatch's 30-day history as unknown, without a call", async () => {
+    const source = new FakeSource();
+    const spy = jest.spyOn(source, 'describeStateChanges');
+    const backend = new CloudWatchBackend(noopLogger, source);
+    const longAgo = now - 31 * 24 * 60 * 60 * 1000;
+    expect(await backend.getStatesAt(ds, longAgo, now)).toEqual({
+      atMs: longAgo,
+      states: {},
+      complete: true,
+      beyondRetention: true,
+    });
+    expect(spy).not.toHaveBeenCalled();
+  });
+
   it('passes on an incomplete read and skips the call for a moment not in the past', async () => {
     const source = new FakeSource();
     source.stateChangesComplete = false;

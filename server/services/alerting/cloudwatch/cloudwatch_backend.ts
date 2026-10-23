@@ -25,6 +25,7 @@ import type {
   Datasource,
   Logger,
 } from '../../../../common/types/alerting';
+import { CLOUDWATCH_HISTORY_RETENTION_MS } from '../../../../common/types/alerting';
 import { CloudWatchAlarmSource, CloudWatchCredentialsError } from './types';
 import { createInternalError } from '../errors';
 
@@ -154,6 +155,11 @@ export class CloudWatchBackend {
    */
   async getStatesAt(ds: Datasource, atMs: number, nowMs = Date.now()): Promise<CloudWatchStatesAt> {
     if (atMs >= nowMs) return { atMs, states: {}, complete: true };
+    // Older than the history CloudWatch keeps: the first change we could read would be from the
+    // retention edge, not right after `atMs`, so its prior state would be wrong. Say unknown.
+    if (atMs < nowMs - CLOUDWATCH_HISTORY_RETENTION_MS) {
+      return { atMs, states: {}, complete: true, beyondRetention: true };
+    }
     const { changes, complete } = await this.guarded(() =>
       this.source.describeStateChanges({ region: ds.region, startTimeMs: atMs, endTimeMs: nowMs })
     );

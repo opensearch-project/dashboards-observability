@@ -110,4 +110,15 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
     status.unmount();
     expect(cell('healthStatus', () => at).getByText('No data')).toBeInTheDocument();
   });
+
+  it("says No history when the window end is older than CloudWatch's history", () => {
+    const at = { atMs: Date.now() - 200 * 86_400_000, complete: true };
+    const status = cell('status', () => at);
+    expect(status.getByTestId('cloudWatchStatusUnknownAtWindowEnd')).toHaveTextContent(
+      'No history'
+    );
+    expect(status.queryByText('CW: ALARM')).toBeNull();
+    status.unmount();
+    expect(cell('healthStatus', () => at).getByText('—')).toBeInTheDocument();
+  });
 });

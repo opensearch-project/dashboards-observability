@@ -153,7 +153,12 @@ export interface CloudWatchStatesAt {
   atMs: number;
   states: Record<string, CloudWatchAlarmState>;
   complete: boolean;
+  /** `atMs` is older than CloudWatch keeps alarm history, so no state is known for it. */
+  beyondRetention?: boolean;
 }
+
+/** CloudWatch keeps alarm history for 30 days; nothing older can be read back. */
+export const CLOUDWATCH_HISTORY_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 
 export interface CloudWatchAlarmDetail {
   alarm: CloudWatchAlarm;

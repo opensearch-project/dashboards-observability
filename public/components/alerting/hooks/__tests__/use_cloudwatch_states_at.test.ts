@@ -62,6 +62,21 @@ describe('useCloudWatchStatesAt', () => {
     expect(result.current.stateAt(prom)).toBeUndefined();
   });
 
+  it('reports no state for a moment beyond the history', async () => {
+    const endMs = Date.parse('2026-01-01T00:00:00.000Z');
+    mockGetStatesAt.mockResolvedValue({
+      atMs: endMs,
+      states: {},
+      complete: true,
+      beyondRetention: true,
+    });
+    const rules = [cw('a', 'ALARM')];
+    const { result } = renderHook(() => useCloudWatchStatesAt({ rules, endMs }));
+    await waitFor(() =>
+      expect(result.current.stateAt(rules[0])).toEqual({ atMs: endMs, complete: true })
+    );
+  });
+
   it('falls back to the current state when the read fails', async () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     mockGetStatesAt.mockRejectedValue(new Error('denied'));

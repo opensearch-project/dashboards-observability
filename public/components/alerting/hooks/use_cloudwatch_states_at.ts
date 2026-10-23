@@ -21,7 +21,8 @@ import { isCloudWatchRule } from '../shared_constants';
 const NOW_TOLERANCE_MS = 60 * 1000;
 
 export interface CloudWatchWindowState {
-  state: CloudWatchAlarmState;
+  /** Undefined when the moment is older than CloudWatch's 30-day alarm history. */
+  state?: CloudWatchAlarmState;
   /** The moment the state is for (the window end). */
   atMs: number;
   /** False when the history read stopped short, so the state may be the current one. */
@@ -100,6 +101,7 @@ export function useCloudWatchStatesAt({
       if (!isCloudWatchRule(rule)) return undefined;
       const result = byDs[rule.datasourceId];
       if (!result) return undefined;
+      if (result.beyondRetention) return { atMs: result.atMs, complete: true };
       // Alarms that haven't changed since the window end are still in their current state.
       const state = result.states[rule.id] ?? rule.cloudWatch?.state;
       if (!state) return undefined;

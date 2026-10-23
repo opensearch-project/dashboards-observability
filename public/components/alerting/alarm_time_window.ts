@@ -10,6 +10,7 @@
  */
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import { CLOUDWATCH_HISTORY_RETENTION_MS } from '../../../common/types/alerting';
 
 export interface AlarmTimeWindow {
   startMs: number;
@@ -64,7 +65,18 @@ export function isInWindow(timestamp: string | undefined, window: AlarmTimeWindo
  * change before the window: "No changes in last 24h, last change 9/24". Otherwise: "No changes
  * in last 24h."
  */
-export function noChangesInWindowMessage(window: AlarmTimeWindow, lastChange?: string): string {
+export function noChangesInWindowMessage(
+  window: AlarmTimeWindow,
+  lastChange?: string,
+  now: number = Date.now()
+): string {
+  // The whole window predates the history CloudWatch keeps, so "no changes" would be a guess.
+  if (window.endMs < now - CLOUDWATCH_HISTORY_RETENTION_MS) {
+    return i18n.translate('observability.alerting.alarmTimeWindow.beyondRetention', {
+      defaultMessage: "CloudWatch keeps 30 days of alarm history, so {window} isn't available.",
+      values: { window: window.label },
+    });
+  }
   const t = lastChange ? new Date(lastChange).getTime() : NaN;
   if (Number.isFinite(t) && t < window.startMs) {
     return i18n.translate('observability.alerting.alarmTimeWindow.noChangesLastChange', {

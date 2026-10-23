@@ -53,16 +53,24 @@ describe('isInWindow', () => {
 });
 
 describe('noChangesInWindowMessage', () => {
+  const now = timeWindow.endMs;
   it('names the last change when it was before the window', () => {
-    expect(noChangesInWindowMessage(timeWindow, '2026-09-24T12:00:00.000Z')).toBe(
+    expect(noChangesInWindowMessage(timeWindow, '2026-09-24T12:00:00.000Z', now)).toBe(
       'No changes in last 24h, last change 9/24'
     );
   });
 
   it('leaves out the last change when it is unknown or not before the window', () => {
-    expect(noChangesInWindowMessage(timeWindow)).toBe('No changes in last 24h.');
-    expect(noChangesInWindowMessage(timeWindow, '2026-10-02T06:00:00.000Z')).toBe(
+    expect(noChangesInWindowMessage(timeWindow, undefined, now)).toBe('No changes in last 24h.');
+    expect(noChangesInWindowMessage(timeWindow, '2026-10-02T06:00:00.000Z', now)).toBe(
       'No changes in last 24h.'
+    );
+  });
+
+  it("says a window older than CloudWatch's 30-day history isn't available", () => {
+    const old = { ...timeWindow, label: 'the selected range' };
+    expect(noChangesInWindowMessage(old, undefined, timeWindow.endMs + 31 * 86_400_000)).toBe(
+      "CloudWatch keeps 30 days of alarm history, so the selected range isn't available."
     );
   });
 });
