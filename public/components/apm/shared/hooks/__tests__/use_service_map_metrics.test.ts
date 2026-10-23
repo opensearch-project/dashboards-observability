@@ -138,6 +138,63 @@ describe('useServiceMapMetrics', () => {
     });
   });
 
+  describe('dependency nodes (database / messaging / external)', () => {
+    const isDependencyQuery = (q: string) => q.includes('remoteService!=""');
+    const series = (serviceName: string, value: number) => ({
+      metric: { service: serviceName, environment: 'generic:default' },
+      values: [[1704067200, String(value)]],
+    });
+
+    it('issues only the service queries for a service-only map (older data)', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
+
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      const queries = mockExecuteInstantQuery.mock.calls.map((c) => c[0].query as string);
+      expect(queries).toHaveLength(3);
+      queries.forEach((q) => expect(isDependencyQuery(q)).toBe(false));
+    });
+
+    it('uses caller-derived series for dependency nodes only', async () => {
+      mockExecuteInstantQuery.mockReset();
+      // The caller-derived series names both nodes; only the database node may use it.
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) =>
+        Promise.resolve({
+          data: {
+            result: isDependencyQuery(query)
+              ? [series('redis:valkey-cart', 40), series('api-gateway', 99)]
+              : [],
+          },
+        })
+      );
+
+      const { result } = renderHook(() =>
+        useServiceMapMetrics({
+          ...defaultParams,
+          services: [
+            { serviceName: 'api-gateway', environment: 'generic:default', type: 'service' },
+            { serviceName: 'redis:valkey-cart', environment: 'generic:default', type: 'database' },
+          ],
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(6);
+      expect(
+        result.current.metricsMap.get('redis:valkey-cart::generic:default')?.totalRequests
+      ).toBe(40);
+      expect(result.current.metricsMap.get('api-gateway::generic:default')?.totalRequests).toBe(0);
+    });
+  });
+
   describe('error handling', () => {
     it('should set error state on fetch failure', async () => {
       mockExecuteInstantQuery.mockReset();

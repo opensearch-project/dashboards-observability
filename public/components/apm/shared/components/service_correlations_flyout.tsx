@@ -48,6 +48,9 @@ import { ResolvedCorrelatedDashboard } from '../../../../../common/types/observa
 import {
   navigateToExploreTraces,
   navigateToSpanDetails,
+  navigateToAgentTraces,
+  navigateToAgentTraceDetails,
+  subscribeAgentTracesAvailable,
   navigateToExploreLogs,
   navigateToDatasetCorrelations,
 } from '../utils/navigation_utils';
@@ -69,6 +72,7 @@ import {
   buildLogLevelPplWhere,
   buildHttpStatusPplWhere,
   isCoalesceUnsupportedError,
+  isGenAiSpan,
 } from '../utils/format_utils';
 
 /**
@@ -124,6 +128,16 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
 
   // Spans state
   const [spans, setSpans] = useState<SpanData[]>([]);
+  // GenAI spans correlate to Agent Traces when it is available (agent views, sessions).
+  const [agentTracesAvailable, setAgentTracesAvailable] = useState(false);
+  useEffect(() => subscribeAgentTracesAvailable(setAgentTracesAvailable), []);
+  const isGenAiService = useMemo(() => spans.some((span) => isGenAiSpan(span.raw)), [spans]);
+  // GenAI spans among the loaded spans, by span id. A log row only has the span id, so a
+  // log's span link uses this; spans not loaded here keep the Explore span view.
+  const genAiSpanIds = useMemo(
+    () => new Set(spans.filter((span) => isGenAiSpan(span.raw)).map((span) => span.spanId)),
+    [spans]
+  );
   const [spansLoading, setSpansLoading] = useState(false);
   const [spansError, setSpansError] = useState<Error | null>(null);
   const [expandedSpanRows, setExpandedSpanRows] = useState<Record<string, React.ReactNode>>({});
@@ -575,6 +589,30 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
   const toggleSpanRow = createToggleRowHandler(setExpandedSpanRows);
   const toggleLogRow = createToggleRowHandler(setExpandedLogRows);
 
+  /** Open a span: GenAI spans in Agent Traces when available, others in Explore traces. */
+  const openSpan = (spanId: string, traceId: string, genAi: boolean) => {
+    const dataset = config?.tracesDataset;
+    if (agentTracesAvailable && genAi && traceId) {
+      navigateToAgentTraceDetails(
+        dataset?.id || '',
+        dataset?.title || '',
+        traceId,
+        timeRange,
+        dataset?.datasourceId,
+        dataset?.datasourceTitle
+      );
+      return;
+    }
+    navigateToSpanDetails(
+      dataset?.id || '',
+      dataset?.title || '',
+      spanId,
+      traceId,
+      dataset?.datasourceId,
+      dataset?.datasourceTitle
+    );
+  };
+
   // Spans table columns
   const spanColumns: Array<EuiBasicTableColumn<SpanData>> = [
     {
@@ -642,15 +680,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       render: (spanId: string, item: SpanData) =>
         spanId ? (
           <EuiLink
-            onClick={() =>
-              navigateToSpanDetails(
-                config?.tracesDataset?.id || '',
-                config?.tracesDataset?.title || '',
-                spanId,
-                item.raw.traceId || '',
-                config?.tracesDataset?.datasourceId,
-                config?.tracesDataset?.datasourceTitle
-              )
+            onClick={() => openSpan(spanId, item.raw.traceId || '', isGenAiSpan(item.raw))}
+            title={
+              agentTracesAvailable && isGenAiSpan(item.raw)
+                ? i18nTexts.openSpanInAgentTraces
+                : undefined
             }
             style={{ fontFamily: 'monospace', fontSize: '12px' }}
           >
@@ -715,16 +749,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       render: (spanId: string, item: LogData) =>
         spanId ? (
           <EuiLink
-            onClick={() =>
-              navigateToSpanDetails(
-                config?.tracesDataset?.id || '',
-                config?.tracesDataset?.title || '',
-                spanId,
-                item.raw.traceId || '',
-                config?.tracesDataset?.datasourceId,
-                config?.tracesDataset?.datasourceTitle
-              )
-            }
+            onClick={() => openSpan(spanId, item.raw.traceId || '', genAiSpanIds.has(spanId))}
             style={{ fontFamily: 'monospace', fontSize: '12px' }}
           >
             {spanId} <EuiIcon type="popout" size="s" />
@@ -766,7 +791,9 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                 size="s"
                 disabled={!spansLoading && spans.length === 0}
                 onClick={() =>
-                  navigateToExploreTraces(
+                  (agentTracesAvailable && isGenAiService
+                    ? navigateToAgentTraces
+                    : navigateToExploreTraces)(
                     config?.tracesDataset?.id || '',
                     config?.tracesDataset?.title || '',
                     serviceName,
@@ -776,8 +803,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                     operationFilter // Pass the operation filter
                   )
                 }
+                data-test-subj="apmCorrelationsExploreTraces"
               >
-                {i18nTexts.exploreTraces}
+                {agentTracesAvailable && isGenAiService
+                  ? i18nTexts.viewInAgentTraces
+                  : i18nTexts.exploreTraces}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -785,7 +815,9 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiText size="xs" color="subdued">
-        {i18nTexts.spansDescription}
+        {agentTracesAvailable && isGenAiService
+          ? i18nTexts.spansDescriptionAgentTraces
+          : i18nTexts.spansDescription}
       </EuiText>
       {spanFilterFallback && (
         <>

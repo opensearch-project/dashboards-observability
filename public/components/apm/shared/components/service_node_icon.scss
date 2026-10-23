@@ -1,0 +1,53 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Dependency icons from @osd/apm-topology outside the map. The rules mirror the map's
+// (celestial.scss), keyed on .apmNodeIcon--dark instead of the map's theme class:
+// - generic glyphs and AWS icons are black and turn white in dark mode;
+// - brand marks (.celBrandIcon) keep their color; a mark too faint for a theme renders in one
+//   color there (--monoOnLight / --monoOnDark);
+// - a mark with a vendor light version renders both images and the theme shows one.
+.apmNodeIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  img.celBrandIcon--monoOnLight {
+    filter: brightness(0);
+  }
+
+  img.celBrandIcon--darkTheme {
+    display: none;
+  }
+}
+
+.apmNodeIcon--dark {
+  img {
+    filter: brightness(0) invert(1);
+  }
+
+  img.celBrandIcon {
+    filter: none;
+  }
+
+  img.celBrandIcon--monoOnDark {
+    filter: brightness(0) invert(1);
+  }
+
+  img.celBrandIcon--lightTheme {
+    display: none;
+  }
+
+  img.celBrandIcon--darkTheme {
+    display: inline;
+  }
+}

@@ -279,7 +279,7 @@ describe('useDatasets', () => {
     });
   });
 
-  describe('AnalyticEngine exclusion', () => {
+  describe('AnalyticEngine data sources', () => {
     const mockBulkGet = jest.fn();
 
     beforeEach(() => {
@@ -287,7 +287,7 @@ describe('useDatasets', () => {
       (coreRefs as any).savedObjectsClient = { bulkGet: mockBulkGet };
     });
 
-    it('drops datasets backed by an AnalyticEngine data source from both lists', async () => {
+    it('lists datasets backed by an AnalyticEngine data source in both lists', async () => {
       mockDataService.dataViews.getIdsWithTitle.mockResolvedValue([
         { id: 'trace-analytic-engine', title: 'AnalyticEngine Traces' },
         { id: 'trace-os', title: 'OpenSearch Traces' },
@@ -303,64 +303,22 @@ describe('useDatasets', () => {
           signalType: 'traces',
           dataSourceRef: { id: 'ds-os', type: 'data-source' },
         });
-      mockBulkGet.mockResolvedValue({
-        savedObjects: [
-          { id: 'ds-analytic-engine', attributes: { dataSourceEngineType: 'AnalyticEngine' } },
-          { id: 'ds-os', attributes: { dataSourceEngineType: 'OpenSearch' } },
-        ],
-      });
 
       (coreRefs as any).data = mockDataService;
 
       const { result } = renderHook(() => useDatasets());
       await waitFor(() => expect(result.current.loading).toBe(false));
 
-      expect(result.current.tracesDatasets).toHaveLength(1);
-      expect(result.current.tracesDatasets[0].label).toBe('OpenSearch Traces');
-      expect(result.current.allDatasets).toHaveLength(1);
-      expect(result.current.allDatasets[0].label).toBe('OpenSearch Traces');
-      expect(mockBulkGet).toHaveBeenCalledWith([
-        { id: 'ds-analytic-engine', type: 'data-source' },
-        { id: 'ds-os', type: 'data-source' },
+      expect(result.current.tracesDatasets.map((o) => o.label)).toEqual([
+        'AnalyticEngine Traces',
+        'OpenSearch Traces',
       ]);
-    });
-
-    it('keeps all datasets when the data-source lookup fails (fail-open)', async () => {
-      mockDataService.dataViews.getIdsWithTitle.mockResolvedValue([
-        { id: 'trace-1', title: 'Traces 1' },
+      expect(result.current.allDatasets.map((o) => o.label)).toEqual([
+        'AnalyticEngine Traces',
+        'OpenSearch Traces',
       ]);
-      mockDataService.dataViews.get.mockResolvedValueOnce({
-        getDisplayName: () => 'Traces 1',
-        signalType: 'traces',
-        dataSourceRef: { id: 'ds-1', type: 'data-source' },
-      });
-      mockBulkGet.mockRejectedValue(new Error('bulkGet failed'));
-
-      (coreRefs as any).data = mockDataService;
-
-      const { result } = renderHook(() => useDatasets());
-      await waitFor(() => expect(result.current.loading).toBe(false));
-
-      expect(result.current.tracesDatasets).toHaveLength(1);
-      expect(result.current.allDatasets).toHaveLength(1);
-    });
-
-    it('skips the data-source lookup when no dataset has a backing data source', async () => {
-      mockDataService.dataViews.getIdsWithTitle.mockResolvedValue([
-        { id: 'local-1', title: 'Local Traces' },
-      ]);
-      mockDataService.dataViews.get.mockResolvedValueOnce({
-        getDisplayName: () => 'Local Traces',
-        signalType: 'traces',
-        // no dataSourceRef -> local cluster
-      });
-
-      (coreRefs as any).data = mockDataService;
-
-      const { result } = renderHook(() => useDatasets());
-      await waitFor(() => expect(result.current.loading).toBe(false));
-
-      expect(result.current.tracesDatasets).toHaveLength(1);
+      expect(result.current.tracesDatasets[0].value?.datasourceId).toBe('ds-analytic-engine');
+      // No engine-type lookup: datasets are not filtered by data source engine.
       expect(mockBulkGet).not.toHaveBeenCalled();
     });
   });

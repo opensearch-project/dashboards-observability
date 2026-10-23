@@ -11,24 +11,29 @@ describe('escape_utils', () => {
       expect(escapePromQLRegex('api-gateway')).toBe('api-gateway');
     });
 
-    it('escapes regex metacharacters', () => {
-      expect(escapePromQLRegex('svc.a')).toBe('svc\\.a');
-      expect(escapePromQLRegex('a|b')).toBe('a\\|b');
-      expect(escapePromQLRegex('a+b*c?')).toBe('a\\+b\\*c\\?');
-      expect(escapePromQLRegex('grp(a)[b]{c}')).toBe('grp\\(a\\)\\[b\\]\\{c\\}');
-      expect(escapePromQLRegex('^a$')).toBe('\\^a\\$');
+    it('escapes regex metacharacters for the regex, then for the string literal', () => {
+      // `\.` alone inside a PromQL string is a lexer error ("unknown escape sequence"), so the
+      // regex escape's backslash is itself escaped: the literal holds `svc\\.a`, the regex `svc\.a`.
+      expect(escapePromQLRegex('svc.a')).toBe('svc\\\\.a');
+      expect(escapePromQLRegex('api.openai.com:443')).toBe('api\\\\.openai\\\\.com:443');
+      expect(escapePromQLRegex('a|b')).toBe('a\\\\|b');
+      expect(escapePromQLRegex('a+b*c?')).toBe('a\\\\+b\\\\*c\\\\?');
+      expect(escapePromQLRegex('grp(a)[b]{c}')).toBe('grp\\\\(a\\\\)\\\\[b\\\\]\\\\{c\\\\}');
+      expect(escapePromQLRegex('^a$')).toBe('\\\\^a\\\\$');
     });
 
     it('escapes quotes and backslashes', () => {
       expect(escapePromQLRegex('a"b')).toBe('a\\"b');
-      expect(escapePromQLRegex('a\\b')).toBe('a\\\\b');
+      // A literal backslash: `\\` in the regex, each half escaped again in the string literal.
+      expect(escapePromQLRegex('a\\b')).toBe('a\\\\\\\\b');
     });
 
     it('neutralizes an injection attempt in a regex matcher', () => {
       // A crafted name must not be able to break out of the service=~"..." matcher.
       const escaped = escapePromQLRegex('x"} or up{');
-      expect(escaped).not.toContain('"}');
-      expect(escaped).toBe('x\\"\\} or up\\{');
+      expect(escaped).toBe('x\\"\\\\} or up\\\\{');
+      // Every quote is preceded by a backslash, so the string literal never closes early.
+      expect(escaped).not.toMatch(/(^|[^\\])"/);
     });
   });
 

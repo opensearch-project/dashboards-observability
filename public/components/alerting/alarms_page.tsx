@@ -1320,6 +1320,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         query: os.query,
         schedule: os.schedule,
         pplTriggers: os.pplTriggers,
+        useLookBackWindow: os.useLookBackWindow,
+        lookBackAmount: os.lookBackAmount,
+        lookBackUnit: os.lookBackUnit,
+        lookbackTimestampField: os.timeField,
       });
     }
     const formBody: unknown = form;

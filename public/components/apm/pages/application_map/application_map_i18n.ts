@@ -45,6 +45,17 @@ export const applicationMapI18nTexts = {
     groupBy: i18n.translate('observability.apm.applicationMap.filters.groupBy', {
       defaultMessage: 'Group by',
     }),
+    includeDependencies: i18n.translate(
+      'observability.apm.applicationMap.filters.includeDependencies',
+      { defaultMessage: 'Include external dependencies' }
+    ),
+    dependencies: i18n.translate('observability.apm.applicationMap.filters.dependencies', {
+      defaultMessage: 'Dependencies',
+    }),
+    dependenciesHidden: i18n.translate(
+      'observability.apm.applicationMap.filters.dependenciesHidden',
+      { defaultMessage: 'Hidden' }
+    ),
     noGrouping: i18n.translate('observability.apm.applicationMap.filters.noGrouping', {
       defaultMessage: 'No grouping',
     }),
@@ -232,6 +243,21 @@ export const applicationMapI18nTexts = {
       {
         defaultMessage: 'View service details',
       }
+    ),
+  },
+  dependencyStacks: {
+    title: i18n.translate('observability.apm.applicationMap.dependencyStacks.title', {
+      defaultMessage: 'Dependencies are grouped on this large map',
+    }),
+    body: (stackedNodes: number, stacks: number, threshold: number) =>
+      i18n.translate('observability.apm.applicationMap.dependencyStacks.body', {
+        defaultMessage:
+          'To keep a map of more than {threshold} nodes responsive, {stackedNodes} dependencies that connect to the same services are shown as {stacks} stacks. Expand a stack with its + button.',
+        values: { stackedNodes, stacks, threshold },
+      }),
+    showIndividually: i18n.translate(
+      'observability.apm.applicationMap.dependencyStacks.showIndividually',
+      { defaultMessage: 'Show individually' }
     ),
   },
 };

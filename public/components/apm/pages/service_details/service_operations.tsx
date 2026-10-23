@@ -88,6 +88,8 @@ export interface ServiceOperationsProps {
   prometheusConnectionId: string;
   serviceMapDataset: string;
   refreshTrigger?: number;
+  /** Brush selection on any inline chart zooms the whole page range. */
+  onTimeRangeChange?: (from: string, to: string) => void;
 }
 
 interface OperationRow {
@@ -185,6 +187,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
   prometheusConnectionId,
   serviceMapDataset: _serviceMapDataset,
   refreshTrigger,
+  onTimeRangeChange,
 }) => {
   // Expandable rows state
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -253,7 +256,9 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
         endTime: new Date(),
       };
     }
-  }, [timeRange]);
+    // Recalculate when refreshTrigger changes so relative ranges advance to `now`
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange, refreshTrigger]);
 
   // The operations list (PPL) and the metrics (PromQL) must query the same
   // environment, otherwise rows and metrics line up under different env values.
@@ -862,6 +867,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
                 timeRange={timeRange}
                 height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
                 seriesLabel="Requests"
+                onTimeRangeChange={onTimeRangeChange}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -875,6 +881,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
                 prometheusConnectionId={prometheusConnectionId}
                 timeRange={timeRange}
                 height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
+                onTimeRangeChange={onTimeRangeChange}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -888,6 +895,7 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
                 prometheusConnectionId={prometheusConnectionId}
                 timeRange={timeRange}
                 height={SERVICE_DETAILS_CONSTANTS.EXPANDED_ROW_CHART_HEIGHT}
+                onTimeRangeChange={onTimeRangeChange}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -896,7 +904,15 @@ export const ServiceOperations: React.FC<ServiceOperationsProps> = ({
     });
 
     return map;
-  }, [expandedRows, environment, serviceName, timeRange, prometheusConnectionId, chartStepWindow]);
+  }, [
+    expandedRows,
+    environment,
+    serviceName,
+    timeRange,
+    prometheusConnectionId,
+    chartStepWindow,
+    onTimeRangeChange,
+  ]);
 
   if (error) {
     return (

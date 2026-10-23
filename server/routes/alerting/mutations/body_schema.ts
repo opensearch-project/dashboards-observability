@@ -24,7 +24,13 @@
 import { schema } from '@osd/config-schema';
 
 const ALERTING_NAME_MAX = 256;
-const PPL_QUERY_MAX = 2000;
+// Generous abuse guard only — NOT the product query-length limit. The alerting
+// backend enforces the real cap (`plugins.alerting.ppl_monitor_max_query_length`,
+// default 2000) and a cluster may raise it; pinning this to 2000 would block
+// those users at our proxy before their request ever reaches the backend. Keep
+// this high enough to never pre-empt a legitimately-raised limit while still
+// bounding payload size at the API boundary.
+const PPL_QUERY_MAX = 100000;
 const TRIGGERS_MAX = 50;
 const INPUTS_MAX = 10;
 

@@ -10,9 +10,15 @@ import {
   navigateToExploreLogs,
   navigateToDatasetCorrelations,
   navigateToSloSuggest,
+  navigateToExploreMetrics,
   openCorrelatedDashboard,
   openApmSettings,
+  navigateToServiceDetails,
+  navigateToAgentTraces,
+  navigateToAgentTraceDetails,
+  subscribeAgentTracesAvailable,
 } from '../navigation_utils';
+import { BehaviorSubject } from 'rxjs';
 import { coreRefs } from '../../../../../framework/core_refs';
 
 // Mock coreRefs
@@ -116,6 +122,38 @@ describe('navigation_utils', () => {
       const url = windowOpenSpy.mock.calls[0][0];
       expect(url).toContain('from:now-1h');
       expect(url).toContain('to:now');
+    });
+
+    it('rison-quotes + encodes absolute ISO timestamps in _g (colons must not break rison)', () => {
+      navigateToExploreTraces(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        { from: '2026-09-18T18:11:01.655Z', to: '2026-09-18T20:00:00.000Z' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain(
+        "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+      );
+    });
+
+    it('encodes a relative-future to value so + does not decode to a space', () => {
+      navigateToExploreTraces(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        { from: 'now-1h', to: 'now+1h' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain('to:now%2B1h');
+      expect(url).not.toContain('to:now 1h');
+      expect(url).not.toContain('to:now+1h');
     });
 
     it('should handle datasetId with existing :: prefix', () => {
@@ -327,6 +365,39 @@ describe('navigation_utils', () => {
       expect(url).toContain('to:now');
     });
 
+    it('rison-quotes + encodes absolute ISO timestamps in _g', () => {
+      navigateToExploreLogs(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        defaultParams.serviceNameField,
+        { from: '2026-09-18T18:11:01.655Z', to: '2026-09-18T20:00:00.000Z' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain(
+        "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+      );
+    });
+
+    it('encodes a relative-future to value so + does not decode to a space', () => {
+      navigateToExploreLogs(
+        defaultParams.datasetId,
+        defaultParams.datasetTitle,
+        defaultParams.serviceName,
+        defaultParams.serviceNameField,
+        { from: 'now-1h', to: 'now+1h' },
+        defaultParams.dataSourceId,
+        defaultParams.dataSourceTitle
+      );
+
+      const url = windowOpenSpy.mock.calls[0][0];
+      expect(url).toContain('to:now%2B1h');
+      expect(url).not.toContain('to:now 1h');
+    });
+
     it('should handle datasetId with existing :: prefix', () => {
       navigateToExploreLogs(
         'ds-123::existing-logs',
@@ -472,6 +543,100 @@ describe('openCorrelatedDashboard (correlated dashboards, experimental)', () => 
     expect(url).toContain('#/view/dash-2');
     expect(url).not.toContain('_g=');
   });
+
+  it('rison-quotes + encodes absolute ISO timestamps so the redirect keeps its time range', () => {
+    openCorrelatedDashboard('dash-1', {
+      from: '2026-09-18T18:11:01.655Z',
+      to: '2026-09-18T20:00:00.000Z',
+    });
+
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('_g=(');
+    expect(url).toContain(
+      "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+    );
+  });
+
+  it('encodes a relative-future timestamp so + does not decode to a space', () => {
+    openCorrelatedDashboard('dash-1', { from: 'now-1h', to: 'now+1h' });
+
+    const [url] = windowOpenSpy.mock.calls[0];
+    expect(url).toContain('time:(from:now-1h,to:now%2B1h)');
+    expect(url).not.toContain('to:now 1h');
+    expect(url).not.toContain('to:now+1h');
+  });
+});
+
+describe('navigateToExploreMetrics (open in Discover metrics)', () => {
+  let windowOpenSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+  });
+
+  afterEach(() => {
+    windowOpenSpy.mockRestore();
+  });
+
+  it('opens the Explore metrics query view with the PromQL, datasource and time range', () => {
+    navigateToExploreMetrics('up', 'conn-1', { from: 'now-15m', to: 'now' });
+
+    expect(windowOpenSpy).toHaveBeenCalledTimes(1);
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain('/app/explore/metrics/#?');
+    expect(url).toContain('signalType:metrics');
+    expect(url).toContain('metricsPageMode:query');
+    expect(url).toContain('time:(from:now-15m,to:now)');
+  });
+
+  it('rison-quotes + encodes absolute ISO timestamps in _g', () => {
+    navigateToExploreMetrics('up', 'conn-1', {
+      from: '2026-09-18T18:11:01.655Z',
+      to: '2026-09-18T20:00:00.000Z',
+    });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain(
+      "time:(from:'2026-09-18T18%3A11%3A01.655Z',to:'2026-09-18T20%3A00%3A00.000Z')"
+    );
+  });
+
+  it('encodes a relative-future timestamp so + does not decode to a space', () => {
+    navigateToExploreMetrics('up', 'conn-1', { from: 'now-1h', to: 'now+1h' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain('to:now%2B1h');
+    expect(url).not.toContain('to:now 1h');
+  });
+
+  it('rison-escapes a PromQL matcher containing ! so the query is not dropped', () => {
+    navigateToExploreMetrics('sum(rate(x{a!="b"}[5m]))', 'conn-1', { from: 'now-15m', to: 'now' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    // `!` must be rison-escaped to `!!` (URL-encoding leaves `!` raw, and rison
+    // treats a lone `!` as an escape char → dropped query).
+    expect(url).toContain(encodeURIComponent('a!!='));
+  });
+
+  it("rison-escapes a connectionId containing ! and ' so the dataset is not dropped", () => {
+    navigateToExploreMetrics('up', "conn!'1", { from: 'now-15m', to: 'now' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    // `!`→`!!` then `'`→`!'`; the id/title live in single-quoted rison strings, so
+    // an unescaped `'` would terminate the string early and Explore drops the dataset.
+    expect(url).toContain("id:'conn!!!'1'");
+    expect(url).toContain("title:'conn!!!'1'");
+  });
+
+  it('URL-encodes a connectionId containing URL-significant characters', () => {
+    navigateToExploreMetrics('up', 'my conn&x#1%', { from: 'now-15m', to: 'now' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain("id:'my%20conn%26x%231%25'");
+    expect(url).toContain("title:'my%20conn%26x%231%25'");
+    expect(url).not.toContain('my conn');
+  });
 });
 
 describe('openApmSettings (correlated dashboards, experimental)', () => {
@@ -537,5 +702,140 @@ describe('openApmSettings (correlated dashboards, experimental)', () => {
     window.location.hash = '#/services';
     openApmSettings();
     expect(dispatchSpy).toHaveBeenCalledWith(expect.any(HashChangeEvent));
+  });
+});
+
+describe('navigateToServiceDetails nodeType param', () => {
+  const navigateToApp = jest.fn();
+
+  beforeEach(() => {
+    navigateToApp.mockReset();
+    (coreRefs as any).application = { navigateToApp };
+  });
+
+  const pathFor = (nodeType?: string) => {
+    navigateToServiceDetails('svc', 'generic:default', { nodeType });
+    return navigateToApp.mock.calls[0][1].path as string;
+  };
+
+  it('adds the node type for dependencies', () => {
+    expect(pathFor('Database')).toContain('nodeType=database');
+  });
+
+  it('leaves service links without a node type', () => {
+    expect(pathFor('service')).not.toContain('nodeType');
+    expect(pathFor('Service')).not.toContain('nodeType');
+    expect(pathFor(undefined)).not.toContain('nodeType');
+  });
+});
+
+describe('Agent Traces navigation', () => {
+  let windowOpenSpy: jest.SpyInstance;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
+  });
+  afterEach(() => windowOpenSpy.mockRestore());
+
+  const decodedUrl = () => decodeURIComponent(windowOpenSpy.mock.calls[0][0]);
+
+  it('opens the service in the Agent Traces spans tab', () => {
+    navigateToAgentTraces('ds::traces', 'otel-v1-apm-span*', 'travel-planner', {
+      from: 'now-1h',
+      to: 'now',
+    });
+    const url = decodedUrl();
+    expect(windowOpenSpy).toHaveBeenCalledWith(expect.any(String), '_blank');
+    expect(url).toContain('/base/app/agentTraces/spans#?_g=');
+    expect(url).toContain('query:\'| where serviceName = "travel-planner"\'');
+    expect(url).toContain('activeTabId:spans,showHistogram:!t');
+    expect(url).toContain("id:'ds::traces'");
+    expect(url).toContain('signalType:traces');
+  });
+
+  it('opens an operation in the spans tab and escapes values', () => {
+    navigateToAgentTraces(
+      'ds::traces',
+      'spans',
+      'o\'brien "svc"',
+      { from: 'now-1h', to: 'now' },
+      'ds',
+      "Bob's cluster",
+      'chat gpt-4o'
+    );
+    const url = decodedUrl();
+    expect(url).toContain('/base/app/agentTraces/spans#');
+    expect(url).toContain('activeTabId:spans');
+    // PPL escapes the double quotes; rison escapes the single quotes.
+    expect(url).toContain(
+      'query:\'| where serviceName = "o!\'brien \\"svc\\"" | where name = "chat gpt-4o"\''
+    );
+    expect(url).toContain("title:'Bob!'s cluster'");
+  });
+
+  it('rison-escapes the dataset id, title and data source id', () => {
+    navigateToAgentTraces(
+      "ds'1::traces",
+      "Bob's spans",
+      'svc',
+      { from: 'now-1h', to: 'now' },
+      "src'1"
+    );
+    const url = decodedUrl();
+    expect(url).toContain("id:'ds!'1::traces'");
+    expect(url).toContain("title:'Bob!'s spans'");
+    expect(url).toContain("dataSource:(id:'src!'1'");
+  });
+
+  it('opens a trace by id', () => {
+    navigateToAgentTraceDetails('ds::traces', 'spans', 'abc123', { from: 'now-1h', to: 'now' });
+    expect(decodedUrl()).toContain('/base/app/agentTraces/spans#');
+    expect(decodedUrl()).toContain('query:\'| where traceId = "abc123"\'');
+  });
+
+  describe('subscribeAgentTracesAvailable', () => {
+    const refs = coreRefs as { application?: unknown; workspaces?: unknown };
+    const setup = ({
+      app = { status: 0, navLinkStatus: 1 } as { status: number; navLinkStatus?: number } | null,
+      enabled = true as boolean | undefined,
+      features = ['use-case-observability'] as string[] | null,
+    } = {}) => {
+      refs.application = {
+        applications$: new BehaviorSubject(new Map(app ? [['agentTraces', app]] : [])),
+        capabilities: { agentTraces: { agentTracesEnabled: enabled } },
+      };
+      refs.workspaces = { currentWorkspace$: new BehaviorSubject(features ? { features } : null) };
+      const callback = jest.fn();
+      subscribeAgentTracesAvailable(callback)();
+      return callback.mock.calls[callback.mock.calls.length - 1][0];
+    };
+    afterEach(() => {
+      refs.application = undefined;
+      refs.workspaces = undefined;
+    });
+
+    it('is available when enabled, accessible and in an observability workspace', () => {
+      expect(setup()).toBe(true);
+      expect(setup({ features: ['use-case-all'] })).toBe(true);
+    });
+
+    it('is unavailable when the feature flag is off', () => {
+      expect(setup({ enabled: false })).toBe(false);
+      expect(setup({ app: { status: 0, navLinkStatus: 3 } })).toBe(false);
+    });
+
+    it('is unavailable outside an observability workspace or without workspaces', () => {
+      expect(setup({ features: ['use-case-search'] })).toBe(false);
+      expect(setup({ features: null })).toBe(false);
+    });
+
+    it('is unavailable when the app is missing or inaccessible', () => {
+      expect(setup({ app: null })).toBe(false);
+      expect(setup({ app: { status: 1 } })).toBe(false);
+      refs.application = undefined;
+      const callback = jest.fn();
+      subscribeAgentTracesAvailable(callback);
+      expect(callback).toHaveBeenCalledWith(false);
+    });
   });
 });

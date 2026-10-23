@@ -29,6 +29,10 @@ import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
 } from '../../../src/plugins/content_management/public/types';
+import type {
+  ExploreAlertRuleKind,
+  ExploreAlertSupport,
+} from './components/alerting/explore_alert_action_gates';
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
@@ -56,8 +60,21 @@ export interface SetupDependencies {
   explore?: ExplorePluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilitySetup {}
+export interface ObservabilitySetup {
+  /**
+   * Which queries Explore's "Create alert rule" actions are offered for. Built in: PPL on
+   * OpenSearch index patterns and indexes (Logs), and PromQL on Prometheus connections (Metrics).
+   * A deployment that supports more adds them here, from its plugin's setup.
+   *
+   * This only controls where the actions show; the flyouts are unchanged. Add only queries the
+   * flyout can turn into a rule: PPL on an OpenSearch cluster for `logs`, and a Prometheus-backed
+   * dataset for `metrics` (its flyout uses `dataset.dataSource.id`, else `dataset.id`, as the
+   * Prometheus connection). Entries can be added, not removed.
+   */
+  exploreAlerting: {
+    addSupported: (kind: ExploreAlertRuleKind, support: ExploreAlertSupport) => void;
+  };
+}
 
 export interface ObservabilityStart {
   renderAccelerationDetailsFlyout: ({

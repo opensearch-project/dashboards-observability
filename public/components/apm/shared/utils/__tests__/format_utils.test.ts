@@ -13,6 +13,7 @@ import {
   buildLogLevelPplWhere,
   buildHttpStatusPplWhere,
   isCoalesceUnsupportedError,
+  isGenAiSpan,
 } from '../format_utils';
 
 describe('format_utils', () => {
@@ -360,5 +361,22 @@ describe('format_utils', () => {
       circular.self = circular;
       expect(isCoalesceUnsupportedError({ body: circular })).toBe(false);
     });
+  });
+});
+
+describe('isGenAiSpan', () => {
+  it('detects gen_ai.operation.name in each document shape', () => {
+    expect(isGenAiSpan({ 'attributes.gen_ai.operation.name': 'chat' })).toBe(true);
+    expect(isGenAiSpan({ attributes: { 'gen_ai.operation.name': 'execute_tool' } })).toBe(true);
+    expect(isGenAiSpan({ attributes: { gen_ai: { operation: { name: 'invoke_agent' } } } })).toBe(
+      true
+    );
+  });
+
+  it('is false for other spans', () => {
+    expect(isGenAiSpan(undefined)).toBe(false);
+    expect(isGenAiSpan({ attributes: { 'http.method': 'GET' } })).toBe(false);
+    expect(isGenAiSpan({ attributes: { 'gen_ai.operation.name': '' } })).toBe(false);
+    expect(isGenAiSpan({ attributes: { 'gen_ai.operation.name': '   ' } })).toBe(false);
   });
 });

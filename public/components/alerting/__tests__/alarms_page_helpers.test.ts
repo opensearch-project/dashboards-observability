@@ -254,6 +254,14 @@ describe('alarms_page_helpers', () => {
       );
     });
 
+    it('extracts the backend query-length error (names the real configured cap)', () => {
+      const msg =
+        'alerting_exception: [alerting_exception] Reason: PPL Query length must be at most 5000 but was 6123';
+      expect(extractPplValidationError(msg)).toBe(
+        'PPL Query length must be at most 5000 but was 6123'
+      );
+    });
+
     it('returns null when the message is not a PPL validation error', () => {
       expect(extractPplValidationError('Bad Request')).toBeNull();
       expect(extractPplValidationError('alerting_exception: monitor not found')).toBeNull();
