@@ -481,9 +481,8 @@ function buildSummary(
   history?: CloudWatchAlarmHistoryItem[],
   includeReason = true
 ): string {
-  const lastUpdate = alarm.stateUpdatedTimestamp
-    ? new Date(alarm.stateUpdatedTimestamp).toISOString()
-    : undefined;
+  // No timestamp here: the flyout renders the last state change itself, in the user's zone,
+  // so one flyout doesn't mix ISO and local formats.
   const reason = alarm.stateReason || history?.find((h) => h.summary)?.summary;
   const state =
     alarm.stateValue === 'ALARM'
@@ -491,7 +490,6 @@ function buildSummary(
       : alarm.stateValue === 'INSUFFICIENT_DATA'
         ? 'has insufficient data'
         : 'is OK';
-  const when = lastUpdate ? ` Last state change ${lastUpdate}.` : '';
   const because = includeReason && reason ? ` ${reason}` : '';
-  return `${alarm.alarmName} ${state}.${when}${because}`.trim();
+  return `${alarm.alarmName} ${state}.${because}`.trim();
 }

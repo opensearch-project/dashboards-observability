@@ -514,8 +514,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               placeholder={i18n.translate(
                 'observability.alerting.monitorsTable.mainPanel.searchPlaceholder',
                 {
-                  defaultMessage:
-                    'Search rules, detectors, or forecasters by name, labels (team:infra), annotations...',
+                  defaultMessage: 'Search rules by name, labels (team:infra), annotations...',
                 }
               )}
               value={searchQuery}
@@ -531,7 +530,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               aria-label={i18n.translate(
                 'observability.alerting.monitorsTable.mainPanel.searchAriaLabel',
                 {
-                  defaultMessage: 'Search rules, detectors, or forecasters',
+                  defaultMessage: 'Search rules',
                 }
               )}
             />
@@ -583,8 +582,12 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   <EuiText size="s">
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.monitorsCount"
-                      defaultMessage="{count} rules / detectors / forecasters"
-                      values={{ count: <strong>{filtered.length}</strong> }}
+                      // `plural` needs a number, so the bold count is a separate value.
+                      defaultMessage="{countBold} {count, plural, one {rule} other {rules}}"
+                      values={{
+                        count: filtered.length,
+                        countBold: <strong>{filtered.length}</strong>,
+                      }}
                     />
                     {selectedIds.size > 0 && (
                       <span>
@@ -695,7 +698,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   ) : (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsFoundTitle"
-                      defaultMessage="No rules, detectors, or forecasters found"
+                      defaultMessage="No rules found"
                     />
                   )}
                 </h2>
@@ -713,17 +716,17 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   {noDatasourceSelected ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.selectDatasourcePrompt"
-                      defaultMessage="Select a datasource in the filter panel to see rules, detectors, and forecasters."
+                      defaultMessage="Select a datasource in the filter panel to see rules."
                     />
                   ) : rules.length === 0 ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsConfigured"
-                      defaultMessage="No rules, anomaly detectors, or forecasters configured yet."
+                      defaultMessage="No rules configured yet."
                     />
                   ) : (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsMatch"
-                      defaultMessage="No rules, detectors, or forecasters match your current search and filters."
+                      defaultMessage="No rules match your current search and filters."
                     />
                   )}
                 </p>

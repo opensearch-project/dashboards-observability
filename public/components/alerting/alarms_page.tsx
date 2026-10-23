@@ -73,6 +73,9 @@ import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validato
 import { showMonitorCreatedToast } from './toast_helpers';
 import { isAdResourceRunning, isDetectorRule, isForecasterRule } from './shared_constants';
 import './alerting.scss';
+
+/** sessionStorage key: the CloudWatch experimental banner was dismissed this session. */
+const CW_BANNER_DISMISSED_KEY = 'AlertManagerCloudWatchBannerDismissed';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
 import {
   extractPplValidationError,
@@ -1768,9 +1771,23 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
 
   // Experimental-feature banner for the opt-in CloudWatch alarms datasource.
   // Shown only when the operator enabled it (a `cloudwatch` datasource is
-  // present); dismissal lasts for the page session.
-  const [cwBannerDismissed, setCwBannerDismissed] = useState(false);
-  const dismissCloudWatchExperimentalBanner = useCallback(() => setCwBannerDismissed(true), []);
+  // present). Dismissal lasts for the browser session, across tabs and reloads, so it isn't
+  // restated on every tab.
+  const [cwBannerDismissed, setCwBannerDismissed] = useState(() => {
+    try {
+      return window.sessionStorage.getItem(CW_BANNER_DISMISSED_KEY) === 'true';
+    } catch (_e) {
+      return false;
+    }
+  });
+  const dismissCloudWatchExperimentalBanner = useCallback(() => {
+    setCwBannerDismissed(true);
+    try {
+      window.sessionStorage.setItem(CW_BANNER_DISMISSED_KEY, 'true');
+    } catch (_e) {
+      // sessionStorage can be unavailable; the banner then stays dismissed for this page only.
+    }
+  }, []);
   const showCloudWatchExperimentalBanner =
     !cwBannerDismissed && datasources.some((d) => d.type === 'cloudwatch');
 
@@ -1842,9 +1859,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       {showCloudWatchExperimentalBanner && (
         <>
           <EuiSpacer size="s" />
+          {/* Primary, not warning: OUI only renders the dismiss button on non-warning
+              callouts, and this is a notice, not a problem. */}
           <EuiCallOut
             size="s"
-            color="warning"
+            color="primary"
             iconType="beaker"
             data-test-subj="cloudWatchExperimentalCallout"
             title={i18n.translate(
@@ -1858,7 +1877,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           >
             <FormattedMessage
               id="observability.alerting.alarmsPage.cloudwatchExperimental.body"
-              defaultMessage="Amazon CloudWatch alarms shown in this view are an experimental feature and may change or be removed in a future release. Alarm data is read-only."
+              defaultMessage="Amazon CloudWatch alarms shown in this view are an experimental feature and may change or be removed in a future release. They're read-only here."
             />
           </EuiCallOut>
         </>

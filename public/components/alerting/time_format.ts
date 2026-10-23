@@ -83,3 +83,30 @@ export function formatTimestamp(
 
   return withZone ? `${instant.format(format)} ${instant.format('z')}` : instant.format(format);
 }
+
+// CloudWatch writes UTC timestamps into its reason and history text in three shapes:
+// ISO ("2026-09-24T19:25:24.887Z"), long form ("Thursday 24 September, 2026 19:24:24 UTC")
+// and datapoint form ("(24/09/26 19:22:00)", day/month/2-digit year).
+const ISO_IN_TEXT = /\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\b/g;
+const LONG_UTC_IN_TEXT =
+  /\b(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday) (\d{1,2}) (January|February|March|April|May|June|July|August|September|October|November|December),? (\d{4}) (\d{2}:\d{2}:\d{2}) UTC\b/g;
+const DATAPOINT_UTC_IN_TEXT = /\((\d{2})\/(\d{2})\/(\d{2}) (\d{2}:\d{2}:\d{2})\)/g;
+
+/**
+ * Rewrite the UTC timestamps CloudWatch embeds in its free text into the same local, zone-named
+ * format as the rest of the UI, so one panel doesn't mix three formats. Text without a
+ * recognised timestamp comes back unchanged.
+ */
+export function localizeTimestampsInText(text?: string): string {
+  if (!text) return '';
+  return text
+    .replace(ISO_IN_TEXT, (iso) => formatTimestamp(iso, { fallback: iso }))
+    .replace(LONG_UTC_IN_TEXT, (match, day, month, year, time) => {
+      const ms = Date.parse(`${day} ${month} ${year} ${time} UTC`);
+      return Number.isNaN(ms) ? match : formatTimestamp(ms);
+    })
+    .replace(DATAPOINT_UTC_IN_TEXT, (match, dd, mm, yy, time) => {
+      const ms = Date.parse(`20${yy}-${mm}-${dd}T${time}Z`);
+      return Number.isNaN(ms) ? match : `(${formatTimestamp(ms)})`;
+    });
+}

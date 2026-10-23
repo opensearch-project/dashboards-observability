@@ -65,9 +65,27 @@ describe('MonitorsTable', () => {
   it('renders the table with a rule row', () => {
     render(<MonitorsTable {...defaultProps} />);
     expect(screen.getByText('HighCPU')).toBeInTheDocument();
-    expect(screen.getByText(/rules/)).toBeInTheDocument();
+    expect(screen.getByText(/^rule$/)).toBeInTheDocument();
   });
 
+  it('counts rules in plain words, case-insensitively sorted by name', () => {
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        rules={[
+          sampleRule({ id: 'r1', name: 'Observability Stack - Cluster Health Red' }),
+          sampleRule({ id: 'r2', name: 'always-in-alarm' }),
+        ]}
+      />
+    );
+    expect(screen.getByText(/^2$/).closest('div')).toHaveTextContent('2 rules');
+    const names = screen
+      .getAllByRole('row')
+      .slice(1)
+      .map((r) => r.textContent || '');
+    expect(names[0]).toContain('always-in-alarm');
+    expect(names[1]).toContain('Observability Stack');
+  });
   it('selects a row checkbox', () => {
     render(<MonitorsTable {...defaultProps} />);
     const checkbox = screen.getByLabelText('Select HighCPU');

@@ -24,6 +24,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBetaBadge,
+  EuiBreadcrumbs,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -64,6 +65,8 @@ import { ClassifiedErrorCallout } from '../common/error';
 import { useCloudWatchAlarmDetail } from './hooks/use_cloudwatch_alarm_detail';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { SEVERITY_COLORS } from './shared_constants';
+import { formatTimestamp, localizeTimestampsInText } from './time_format';
+import { getSeverityLabel, getStateLabel } from './enum_labels';
 import {
   AlarmTimeWindow,
   defaultAlarmTimeWindow,
@@ -129,14 +132,6 @@ function deriveSeverity(alarm: CloudWatchAlarm): UnifiedAlertSeverity {
   if (alarm.stateValue === 'ALARM') return alarm.alarmType === 'composite' ? 'critical' : 'medium';
   if (/\bwarn/.test(hint)) return 'medium';
   return 'info';
-}
-
-function formatTs(ts?: string): string {
-  if (!ts) return '—';
-  const d = new Date(ts);
-  return Number.isNaN(d.getTime())
-    ? '—'
-    : d.toISOString().replace('T', ' ').replace(/\..+/, ' UTC');
 }
 
 // ============================================================================
@@ -281,7 +276,7 @@ const RelationshipRow: React.FC<{
             <EuiFlexItem grow={false}>
               <EuiTextColor color="subdued">
                 {i18n.translate('observability.alerting.cloudwatch.childCount', {
-                  defaultMessage: '{count} children',
+                  defaultMessage: '{count, plural, one {# child alarm} other {# child alarms}}',
                   values: { count: node.childCount },
                 })}
               </EuiTextColor>
@@ -379,7 +374,9 @@ const RelationshipsSection: React.FC<{
         <div style={{ marginTop: 6 }}>
           <EuiButtonEmpty size="xs" onClick={loadDeeper} isLoading={loadingDeeper} flush="left">
             {i18n.translate('observability.alerting.cloudwatch.loadDeeper', {
-              defaultMessage: 'Load 2 deeper levels…',
+              defaultMessage:
+                'Show child alarms {more} more levels down (showing {depth} {depth, plural, one {level} other {levels}} now)',
+              values: { more: 2, depth },
             })}
           </EuiButtonEmpty>
         </div>
@@ -397,6 +394,65 @@ function axisLabel(ms: number): string {
   return Math.abs(Date.now() - ms) < 60 * 1000 ? 'now' : moment(ms).format('M/D HH:mm');
 }
 
+export interface TimelineSegment {
+  start: number;
+  end: number;
+  state: CloudWatchAlarmState;
+}
+
+/**
+ * The state bands across a window, from an alarm's history: the state at the window start (the
+ * last change before it, else the first in-window change's prior state, else the current
+ * state), then one band per change. CloudWatch only records transitions, so the backfill makes
+ * the bands span the whole window. `changes` counts the transitions inside the window.
+ */
+export function buildTimelineSegments(
+  history: CloudWatchAlarmHistoryItem[] | undefined,
+  windowStart: number,
+  windowEnd: number,
+  currentState?: CloudWatchAlarmState
+): { segments: TimelineSegment[]; changes: number } {
+  const updates = (history || [])
+    .filter((h) => h.historyItemType === 'StateUpdate' && (h.newState || h.oldState))
+    .map((h) => ({
+      ts: new Date(h.timestamp).getTime(),
+      oldState: h.oldState,
+      newState: h.newState,
+    }))
+    .filter((u) => Number.isFinite(u.ts) && u.ts <= windowEnd)
+    .sort((a, b) => a.ts - b.ts);
+  const inWindow = updates.filter((u) => u.ts >= windowStart);
+  const before = updates.filter((u) => u.ts < windowStart);
+  const initial =
+    before[before.length - 1]?.newState ||
+    inWindow[0]?.oldState ||
+    inWindow[0]?.newState ||
+    currentState;
+  const segments: TimelineSegment[] = [];
+  let cursor = windowStart;
+  let state = initial;
+  for (const u of inWindow) {
+    if (state && u.ts > cursor) segments.push({ start: cursor, end: u.ts, state });
+    cursor = Math.max(cursor, u.ts);
+    state = u.newState || state;
+  }
+  if (state && windowEnd > cursor) segments.push({ start: cursor, end: windowEnd, state });
+  return { segments, changes: inWindow.length };
+}
+
+/** "ALARM · 9/24 19:22 → 9/24 19:24 (2m)" for a band's tooltip. */
+function segmentTooltip(seg: TimelineSegment): string {
+  const span = moment.duration(seg.end - seg.start);
+  const days = Math.floor(span.asDays());
+  const length =
+    days > 0
+      ? `${days}d ${span.hours()}h`
+      : span.hours() > 0
+        ? `${span.hours()}h ${span.minutes()}m`
+        : `${Math.max(1, span.minutes())}m`;
+  return `${seg.state} · ${axisLabel(seg.start)} → ${axisLabel(seg.end)} (${length})`;
+}
+
 export const StateTimeline: React.FC<{
   history?: CloudWatchAlarmHistoryItem[];
   timeWindow: AlarmTimeWindow;
@@ -406,88 +462,71 @@ export const StateTimeline: React.FC<{
   lastChange?: string;
 }> = ({ history, timeWindow, currentState, lastChange }) => {
   const { startMs: windowStart, endMs: windowEnd } = timeWindow;
-  const { segments, changedInWindow } = useMemo(() => {
-    const updates = (history || [])
-      .filter((h) => h.historyItemType === 'StateUpdate' && (h.newState || h.oldState))
-      .map((h) => ({
-        ts: new Date(h.timestamp).getTime(),
-        oldState: h.oldState,
-        newState: h.newState,
-      }))
-      .filter((u) => Number.isFinite(u.ts) && u.ts <= windowEnd)
-      .sort((a, b) => a.ts - b.ts);
-    const inWindow = updates.filter((u) => u.ts >= windowStart);
-    // The state at the window start: the last change before it, else the first in-window
-    // change's prior state, else (nothing changed at all) the current state. CloudWatch only
-    // records transitions, so this backfill makes the band span the whole window.
-    const before = updates.filter((u) => u.ts < windowStart);
-    const initial =
-      before[before.length - 1]?.newState ||
-      inWindow[0]?.oldState ||
-      inWindow[0]?.newState ||
-      currentState;
-    const segs: Array<{ start: number; end: number; state: CloudWatchAlarmState }> = [];
-    let cursor = windowStart;
-    let state = initial;
-    for (const u of inWindow) {
-      if (state && u.ts > cursor) segs.push({ start: cursor, end: u.ts, state });
-      cursor = Math.max(cursor, u.ts);
-      state = u.newState || state;
-    }
-    if (state && windowEnd > cursor) segs.push({ start: cursor, end: windowEnd, state });
-    return { segments: segs, changedInWindow: inWindow.length > 0 };
-  }, [history, windowStart, windowEnd, currentState]);
-
-  const noChanges = changedInWindow ? null : (
-    <EuiTextColor color="subdued" data-test-subj="cwAlarmTimelineNoChanges">
-      {noChangesInWindowMessage(timeWindow, lastChange)}
-    </EuiTextColor>
+  const { segments, changes } = useMemo(
+    () => buildTimelineSegments(history, windowStart, windowEnd, currentState),
+    [history, windowStart, windowEnd, currentState]
   );
-  if (segments.length === 0) return noChanges;
+  // Always say how many changes the bands stand for, so one flat band reads as "no changes"
+  // rather than looking the same as a busy window.
+  const caption =
+    changes > 0 ? (
+      <EuiTextColor color="subdued" data-test-subj="cwAlarmTimelineChanges">
+        {i18n.translate('observability.alerting.cloudwatch.timelineChanges', {
+          defaultMessage:
+            '{count, plural, one {# state change} other {# state changes}} in {window}',
+          values: { count: changes, window: timeWindow.label },
+        })}
+      </EuiTextColor>
+    ) : (
+      <EuiTextColor color="subdued" data-test-subj="cwAlarmTimelineNoChanges">
+        {noChangesInWindowMessage(timeWindow, lastChange)}
+      </EuiTextColor>
+    );
+  if (segments.length === 0) return caption;
   const total = windowEnd - windowStart;
-  // Render the timeline as an ECharts horizontal stacked bar (one segment per
-  // state interval) so it uses the same viz engine as the rest of the plugin.
+  // An ECharts horizontal stacked bar, one segment per state interval, on a time axis with
+  // ticks; hovering a segment names its state and span.
   const spec: echarts.EChartsOption = {
-    grid: { left: 0, right: 0, top: 2, bottom: 2 },
+    grid: { left: 8, right: 8, top: 2, bottom: 22 },
     tooltip: {
       trigger: 'item',
-      // Cast: echarts' TooltipOption formatter typing rejects this narrower
-      // (and safe) param shape; only `seriesName` is read.
-      formatter: ((p: { seriesName?: string }) =>
-        p.seriesName || '') as unknown as echarts.TooltipComponentOption['formatter'],
+      // Cast: echarts' TooltipOption formatter typing rejects this narrower (and safe) param
+      // shape; only `seriesIndex` is read.
+      formatter: ((p: { seriesIndex?: number }) => {
+        const seg = segments[p.seriesIndex ?? -1];
+        return seg ? segmentTooltip(seg) : '';
+      }) as unknown as echarts.TooltipComponentOption['formatter'],
     },
-    xAxis: { type: 'value', min: 0, max: total, show: false },
+    xAxis: {
+      type: 'value',
+      min: 0,
+      max: total,
+      splitNumber: 4,
+      axisLine: { show: false },
+      axisTick: { show: true },
+      splitLine: { show: false },
+      axisLabel: {
+        fontSize: 10,
+        color: '#69707D',
+        formatter: (v: number) => axisLabel(windowStart + v),
+      },
+    },
     yAxis: { type: 'category', data: [''], show: false },
-    series: segments.map((s) => ({
-      name: s.state,
+    series: segments.map((seg) => ({
+      name: seg.state,
       type: 'bar' as const,
       stack: 'timeline',
       barWidth: 16,
-      data: [s.end - s.start],
-      itemStyle: { color: STATE_HEX[s.state] },
+      data: [seg.end - seg.start],
+      // A thin gap between bands so adjacent transitions stay visible.
+      itemStyle: { color: STATE_HEX[seg.state], borderColor: '#FFFFFF', borderWidth: 1 },
     })),
   };
   return (
     <div>
-      <EchartsRender spec={spec} height={26} />
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="subdued" style={{ fontSize: 11 }}>
-            {axisLabel(windowStart)}
-          </EuiTextColor>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="subdued" style={{ fontSize: 11 }}>
-            {axisLabel(windowEnd)}
-          </EuiTextColor>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {noChanges && (
-        <>
-          <EuiSpacer size="xs" />
-          {noChanges}
-        </>
-      )}
+      <EchartsRender spec={spec} height={44} />
+      <EuiSpacer size="xs" />
+      {caption}
     </div>
   );
 };
@@ -547,8 +586,9 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
     },
     [dsId]
   );
-  const goBack = useCallback(() => {
-    setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
+  /** Go back to the stack entry at `index` (a breadcrumb in the trail). */
+  const goTo = useCallback((index: number) => {
+    setStack((s) => (index >= 0 && index < s.length - 1 ? s.slice(0, index + 1) : s));
   }, []);
 
   // Header shows the current stack entry's meta immediately, then prefers the
@@ -612,12 +652,21 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
       <EuiFlyoutHeader hasBorder>
         {stack.length > 1 && (
           <>
-            <EuiButtonEmpty size="xs" iconType="arrowLeft" flush="left" onClick={goBack}>
-              {i18n.translate('observability.alerting.cloudwatch.back', {
-                defaultMessage: 'Back to {name}',
-                values: { name: stack[stack.length - 2].name },
+            {/* The trail of alarms opened from here: each earlier one is a link back to it, so
+                several levels in it's clear where you are and how you got there. */}
+            <EuiBreadcrumbs
+              data-test-subj="cwAlarmFlyoutTrail"
+              truncate
+              max={5}
+              responsive={false}
+              aria-label={i18n.translate('observability.alerting.cloudwatch.trailAria', {
+                defaultMessage: 'Alarms opened in this flyout',
               })}
-            </EuiButtonEmpty>
+              breadcrumbs={stack.map((entry, i) => ({
+                text: entry.name,
+                ...(i < stack.length - 1 ? { onClick: () => goTo(i) } : {}),
+              }))}
+            />
             <EuiSpacer size="xs" />
           </>
         )}
@@ -637,15 +686,17 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
                 <EuiFlexItem grow={false}>
                   <EuiHealth color={STATE_HEALTH[state]}>
                     {state === 'ALARM'
-                      ? 'active'
+                      ? getStateLabel('active')
                       : state === 'INSUFFICIENT_DATA'
-                        ? 'insufficient data'
-                        : 'ok'}
+                        ? getStateLabel('insufficient_data')
+                        : 'OK'}
                   </EuiHealth>
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
-                <EuiBadge color={SEVERITY_COLORS[severity] || 'default'}>{severity}</EuiBadge>
+                <EuiBadge color={SEVERITY_COLORS[severity] || 'default'}>
+                  {getSeverityLabel(severity)}
+                </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge color={alarmType === 'composite' ? '#E0D6FB' : 'hollow'}>
@@ -666,27 +717,25 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
                   )}
                 />
               </EuiFlexItem>
+              {/* The one place the flyout says it's read-only (no edit, ack or mute here). */}
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate('observability.alerting.cloudwatch.readOnlyTooltip', {
+                    defaultMessage: 'CloudWatch alarms are read-only in this view.',
+                  })}
+                >
+                  <EuiBadge color="hollow" data-test-subj="cwAlarmReadOnlyBadge">
+                    {i18n.translate('observability.alerting.cloudwatch.readOnly', {
+                      defaultMessage: 'Read-only',
+                    })}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         {headerState}
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate('observability.alerting.cloudwatch.readOnlyTooltip', {
-                defaultMessage: 'CloudWatch alarms are read-only in this view.',
-              })}
-            >
-              <EuiBadge color="hollow">
-                {i18n.translate('observability.alerting.cloudwatch.readOnly', {
-                  defaultMessage: 'Read-only',
-                })}
-              </EuiBadge>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -736,10 +785,20 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
 
         {!isLoading && detail && (
           <>
-            {(detail.summary || detail.causedBy) && (
+            {(detail.summary || detail.causedBy || detail.alarm.stateUpdatedTimestamp) && (
               <>
                 <EuiText size="s">
-                  {detail.summary && <p>{detail.summary}</p>}
+                  {detail.summary && <p>{localizeTimestampsInText(detail.summary)}</p>}
+                  {detail.alarm.stateUpdatedTimestamp && (
+                    <p data-test-subj="cwAlarmDetailLastChange">
+                      <EuiTextColor color="subdued">
+                        {i18n.translate('observability.alerting.cloudwatch.lastStateChange', {
+                          defaultMessage: 'Last state change {time}',
+                          values: { time: formatTimestamp(detail.alarm.stateUpdatedTimestamp) },
+                        })}
+                      </EuiTextColor>
+                    </p>
+                  )}
                   {/* A composite's cause, by name and as a link, instead of the raw ARN in
                       CloudWatch's reason text. */}
                   {detail.causedBy && (
@@ -827,7 +886,7 @@ export function renderStateHistory(
         <div key={i} style={{ marginBottom: 6 }}>
           <EuiFlexGroup gutterSize="s" responsive={false} wrap alignItems="baseline">
             <EuiFlexItem grow={false} style={{ minWidth: 150 }}>
-              <EuiTextColor color="subdued">{formatTs(h.timestamp)}</EuiTextColor>
+              <EuiTextColor color="subdued">{formatTimestamp(h.timestamp)}</EuiTextColor>
             </EuiFlexItem>
             {(h.oldState || h.newState) && (
               <EuiFlexItem grow={false}>
@@ -838,7 +897,7 @@ export function renderStateHistory(
             )}
             {h.summary && (
               <EuiFlexItem>
-                <EuiText size="s">{h.summary}</EuiText>
+                <EuiText size="s">{localizeTimestampsInText(h.summary)}</EuiText>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -978,13 +1037,6 @@ function renderMetricBody(
             })}
           </SectionTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">
-            {i18n.translate('observability.alerting.cloudwatch.readOnly', {
-              defaultMessage: 'Read-only',
-            })}
-          </EuiBadge>
-        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       {renderAlarmActions(alarm)}
@@ -1070,8 +1122,9 @@ function renderCompositeBody(
       <EuiHorizontalRule margin="m" />
 
       <SectionTitle>
-        {i18n.translate('observability.alerting.cloudwatch.relationships', {
-          defaultMessage: 'Relationships',
+        {/* Same name as the metric alarm's section: it's the same tree. */}
+        {i18n.translate('observability.alerting.cloudwatch.relatedAlarms', {
+          defaultMessage: 'Related alarms',
         })}
       </SectionTitle>
       <EuiSpacer size="s" />

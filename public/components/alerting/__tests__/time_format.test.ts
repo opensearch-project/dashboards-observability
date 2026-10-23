@@ -5,7 +5,12 @@
 
 import { uiSettingsService } from '../../../../common/utils';
 import { EMPTY_VALUE } from '../enum_labels';
-import { formatTimestamp, getTimezoneLabel, resolveDisplayTz } from '../time_format';
+import {
+  formatTimestamp,
+  getTimezoneLabel,
+  localizeTimestampsInText,
+  resolveDisplayTz,
+} from '../time_format';
 
 // 2026-08-25T18:04:05Z — a fixed instant so assertions don't depend on "now".
 const INSTANT = '2026-08-25T18:04:05.000Z';
@@ -104,5 +109,27 @@ describe('time_format', () => {
       getSpy.mockReturnValue('Asia/Kathmandu');
       expect(getTimezoneLabel(INSTANT)).toBe('+0545');
     });
+  });
+});
+
+describe('localizeTimestampsInText', () => {
+  it("rewrites CloudWatch's ISO, long-form and datapoint timestamps into one format", () => {
+    const iso = formatTimestamp('2026-09-24T19:24:24.000Z');
+    expect(localizeTimestampsInText('Last state change 2026-09-24T19:24:24.000Z.')).toBe(
+      `Last state change ${iso}.`
+    );
+    expect(
+      localizeTimestampsInText(
+        'ALARM transitioned to ALARM at Thursday 24 September, 2026 19:24:24 UTC'
+      )
+    ).toBe(`ALARM transitioned to ALARM at ${iso}`);
+    expect(localizeTimestampsInText('[7.0 (24/09/26 19:24:24)] was greater than 5.0')).toBe(
+      `[7.0 (${iso})] was greater than 5.0`
+    );
+  });
+
+  it('leaves text without timestamps alone', () => {
+    expect(localizeTimestampsInText('Threshold Crossed')).toBe('Threshold Crossed');
+    expect(localizeTimestampsInText(undefined)).toBe('');
   });
 });

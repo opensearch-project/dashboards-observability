@@ -15,6 +15,7 @@ import { I18nProvider } from '@osd/i18n/react';
 import type { CloudWatchAlarmDetail } from '../../../../common/types/alerting';
 import type { ClassifiedError } from '../../../../common/error';
 import {
+  buildTimelineSegments,
   CloudWatchAlarmDetailFlyout,
   CloudWatchAlarmFlyoutRow,
 } from '../cloudwatch_alarm_detail_flyout';
@@ -108,7 +109,7 @@ describe('CloudWatchAlarmDetailFlyout', () => {
       detail: {
         ...detailFixture(),
         alarm: { alarmName: 'checkout-composite', alarmType: 'composite', stateValue: 'ALARM' },
-        summary: 'checkout-composite is in ALARM. Last state change 2026-09-24T10:00:00.000Z.',
+        summary: 'checkout-composite is in ALARM.',
         causedBy: {
           alarmName: 'checkout-service-degraded',
           alarmType: 'metric',
@@ -280,5 +281,73 @@ describe('CloudWatchAlarmDetailFlyout time window', () => {
     expect(screen.getByTestId('cwAlarmTimelineNoChanges')).toHaveTextContent(
       'No changes in last 24h, last change 9/24'
     );
+  });
+});
+
+describe('CloudWatchAlarmDetailFlyout polish', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('states read-only once, and the last change in the local format', () => {
+    mockHook({ detail: detailFixture() });
+    renderFlyout();
+    expect(screen.getAllByText('Read-only')).toHaveLength(1);
+    expect(screen.getByTestId('cwAlarmDetailLastChange')).not.toHaveTextContent('T10:00:00');
+  });
+
+  it('shows a trail of the alarms opened in the flyout, each a way back', () => {
+    mockHook({
+      detail: {
+        ...detailFixture(),
+        alarm: { alarmName: 'checkout-composite', alarmType: 'composite', stateValue: 'ALARM' },
+        causedBy: {
+          alarmName: 'checkout-service-degraded',
+          alarmType: 'metric',
+          stateValue: 'ALARM',
+        },
+      },
+    });
+    renderFlyout();
+    expect(screen.queryByTestId('cwAlarmFlyoutTrail')).toBeNull();
+    fireEvent.click(screen.getByTestId('cwAlarmDetailCausedByLink'));
+    const trail = screen.getByTestId('cwAlarmFlyoutTrail');
+    expect(trail).toHaveTextContent('checkout-errors-high');
+    expect(trail).toHaveTextContent('checkout-service-degraded');
+    fireEvent.click(screen.getByText('checkout-errors-high', { selector: 'button, a' }));
+    expect(screen.queryByTestId('cwAlarmFlyoutTrail')).toBeNull();
+  });
+});
+
+describe('buildTimelineSegments', () => {
+  const start = 1_000;
+  const end = 10_000;
+  const update = (ts: number, oldState: string, newState: string) => ({
+    timestamp: new Date(ts).toISOString(),
+    historyItemType: 'StateUpdate' as const,
+    oldState: oldState as 'OK',
+    newState: newState as 'ALARM',
+  });
+
+  it('splits the window at each change and counts them', () => {
+    expect(
+      buildTimelineSegments(
+        [update(4_000, 'OK', 'ALARM'), update(7_000, 'ALARM', 'OK')],
+        start,
+        end
+      )
+    ).toEqual({
+      segments: [
+        { start, end: 4_000, state: 'OK' },
+        { start: 4_000, end: 7_000, state: 'ALARM' },
+        { start: 7_000, end, state: 'OK' },
+      ],
+      changes: 2,
+    });
+  });
+
+  it('draws the state carried in from before the window when nothing changed in it', () => {
+    expect(buildTimelineSegments([update(500, 'OK', 'ALARM')], start, end)).toEqual({
+      segments: [{ start, end, state: 'ALARM' }],
+      changes: 0,
+    });
   });
 });

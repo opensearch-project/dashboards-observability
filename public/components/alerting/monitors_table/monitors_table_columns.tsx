@@ -187,7 +187,8 @@ export function buildTableColumns({
         name: i18n.translate('observability.alerting.monitorsTable.columns.name', {
           defaultMessage: 'Name',
         }),
-        sortable: true,
+        // Case-insensitive, so "always-in-alarm" sorts above "Observability Stack - …".
+        sortable: (r: UnifiedRuleSummary) => (r.name || '').toLowerCase(),
         truncateText: true,
         width: w('name'),
         render: (name: string, item: UnifiedRuleSummary) => {

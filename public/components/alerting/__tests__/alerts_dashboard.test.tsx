@@ -298,7 +298,7 @@ describe('AlertsDashboard', () => {
 
     expect(screen.getByText('test - DestCityName: London')).toBeInTheDocument();
     expect(screen.getByText('2 occurrences')).toBeInTheDocument();
-    expect(screen.getAllByText('anomaly').length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/^anomaly$/i).length).toBeGreaterThan(0);
     expect(screen.getByText('1 row')).toBeInTheDocument();
     expect(screen.getByText('2 alerts grouped')).toBeInTheDocument();
 
@@ -317,11 +317,11 @@ describe('AlertsDashboard', () => {
     render(<AlertsDashboard {...baseProps} alerts={[sampleAlert, buildAnomaly()]} />);
 
     const stateFacet = within(screen.getByTestId('facetGroup-state'));
-    expect(stateFacet.getByText('active')).toBeInTheDocument();
-    expect(stateFacet.getByText('anomaly')).toBeInTheDocument();
+    expect(stateFacet.getByText('Active')).toBeInTheDocument();
+    expect(stateFacet.getByText('Anomaly')).toBeInTheDocument();
     expect(stateFacet.getAllByText('(1)')).toHaveLength(2);
 
-    fireEvent.click(stateFacet.getByLabelText(/anomaly/));
+    fireEvent.click(stateFacet.getByLabelText(/anomaly/i));
 
     expect(screen.queryByText('HighCPU')).not.toBeInTheDocument();
     expect(screen.getByText('test - DestCityName=London')).toBeInTheDocument();
@@ -348,14 +348,14 @@ describe('AlertsDashboard', () => {
     );
 
     const typeFacet = within(screen.getByTestId('facetGroup-type'));
-    expect(typeFacet.getByText('alert')).toBeInTheDocument();
-    expect(typeFacet.getByText('anomaly')).toBeInTheDocument();
+    expect(typeFacet.getByText('Alert')).toBeInTheDocument();
+    expect(typeFacet.getByText('Anomaly')).toBeInTheDocument();
 
     expect(screen.queryByText('anomaly_result_id')).not.toBeInTheDocument();
     expect(screen.queryByText('detector_id')).not.toBeInTheDocument();
     expect(screen.queryByText('source')).not.toBeInTheDocument();
 
-    fireEvent.click(typeFacet.getByLabelText(/anomaly/));
+    fireEvent.click(typeFacet.getByLabelText(/anomaly/i));
 
     expect(screen.queryByText('HighCPU')).not.toBeInTheDocument();
     expect(screen.getByText('test - DestCityName=London')).toBeInTheDocument();
