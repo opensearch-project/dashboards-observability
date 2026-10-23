@@ -181,4 +181,26 @@ describe('useDiscoveryProbes', () => {
     expect(result.current.emptyHistograms).toEqual([]);
     expect(result.current.metricNames).toContain('http_server_request_duration_seconds_bucket');
   });
+
+  it('reports services with server-side span-derived metrics', async () => {
+    const http = makeHttp({ labelValues: { request: { service: ['checkout', 'cart'] } } });
+    const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.spanDerivedServices).toEqual(['checkout', 'cart']);
+    const call = (http as unknown as { get: jest.Mock }).get.mock.calls.find(([url]) =>
+      String(url).endsWith('/label-values/service')
+    );
+    expect(call?.[1]?.query?.selector).toBe(
+      '{__name__="request",namespace="span_derived",remoteService=""}'
+    );
+  });
+
+  it('leaves spanDerivedServices undefined when that probe fails or finds none', async () => {
+    for (const request of [new Error('boom'), { service: [] }]) {
+      const http = makeHttp({ labelValues: { request } });
+      const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(result.current.spanDerivedServices).toBeUndefined();
+    }
+  });
 });

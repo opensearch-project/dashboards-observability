@@ -108,6 +108,12 @@ export interface ServiceDiscoveryInput {
    * value, so they're skipped.
    */
   emptyHistograms?: EmptyHistogram[];
+  /**
+   * Services that have server-side span-derived RED metrics. When provided,
+   * APM drafts are only produced for these — others would sit at "No data".
+   * Omit (undefined) when unknown.
+   */
+  spanDerivedServices?: string[];
 }
 
 /** A latency histogram whose buckets are empty for `label="value"`. */
@@ -415,8 +421,10 @@ function spanWindowSum(metric: string, selector: string): string {
 }
 
 function apmDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
+  const withSpanMetrics = input.spanDerivedServices ? new Set(input.spanDerivedServices) : null;
   for (const svc of input.services) {
     if (!svc.serviceName) continue;
+    if (withSpanMetrics && !withSpanMetrics.has(svc.serviceName)) continue;
     const service = svc.serviceName;
     const serverSelector = `service="${service}",remoteService="",namespace="span_derived"`;
     const detected: Record<string, string> = { service };

@@ -491,3 +491,25 @@ describe('generateSuggestionsForServices — empty latency histograms', () => {
     expect(keys(generateSuggestionsForServices(base))).toContain('http-lat:flagd');
   });
 });
+
+describe('generateSuggestionsForServices — services without span-derived metrics', () => {
+  const base = {
+    datasourceId: 'prom-1',
+    services: [{ serviceName: 'checkout' }, { serviceName: 'load-generator' }],
+  };
+  const keys = (s: ReturnType<typeof generateSuggestionsForServices>) => s.map((x) => x.key);
+
+  it('only drafts APM SLOs for services that report server-side span metrics', () => {
+    const out = keys(
+      generateSuggestionsForServices({ ...base, spanDerivedServices: ['checkout'] })
+    );
+    expect(out).toEqual(expect.arrayContaining(['apm-avail:checkout', 'apm-lat:checkout']));
+    expect(out).not.toContain('apm-avail:load-generator');
+    expect(out).not.toContain('apm-lat:load-generator');
+  });
+
+  it('drafts for every service when the probe result is unknown', () => {
+    const out = keys(generateSuggestionsForServices(base));
+    expect(out).toContain('apm-avail:load-generator');
+  });
+});

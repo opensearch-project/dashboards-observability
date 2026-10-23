@@ -41,6 +41,10 @@ const OTEL_PROBES: OtelProbe[] = [
   { metric: 'gen_ai_client_operation_duration_seconds_count', labels: ['service_name', 'job'] },
 ];
 
+/** Series selector for server-side span-derived request counts. */
+const SPAN_DERIVED_SERVER_SELECTOR =
+  '{__name__="request",namespace="span_derived",remoteService=""}';
+
 /**
  * OTel latency histograms and the labels their series are attributed by.
  * Probed for services whose buckets never recorded anything — see
@@ -61,6 +65,15 @@ export interface DiscoveryProbesResult {
    * computed. The engine skips latency drafts for these.
    */
   emptyHistograms: EmptyHistogram[];
+  /**
+   * Services with server-side span-derived RED metrics (`request` with
+   * `remoteService=""`). A service can appear in the trace service list
+   * without them — e.g. it only makes outgoing calls or consumes from a
+   * queue — and an APM SLO on it could never report a value. `undefined`
+   * when the probe failed or found none, so callers don't filter on missing
+   * information.
+   */
+  spanDerivedServices: string[] | undefined;
   metricNames: string[];
   labelValuesByMetric: LabelValuesByMetric;
   existingRuleGroups: PromRuleGroup[];
@@ -86,6 +99,7 @@ export function useDiscoveryProbes({
   prometheusConnectionMeta,
 }: UseDiscoveryProbesArgs): DiscoveryProbesResult {
   const [emptyHistograms, setEmptyHistograms] = useState<EmptyHistogram[]>([]);
+  const [spanDerivedServices, setSpanDerivedServices] = useState<string[] | undefined>();
   const metaKey = JSON.stringify(prometheusConnectionMeta ?? null);
   const [metricNames, setMetricNames] = useState<string[]>([]);
   const [labelValuesByMetric, setLabelValuesByMetric] = useState<LabelValuesByMetric>({});
@@ -96,6 +110,7 @@ export function useDiscoveryProbes({
   useEffect(() => {
     if (!datasourceId) {
       setEmptyHistograms([]);
+      setSpanDerivedServices(undefined);
       setMetricNames([]);
       setLabelValuesByMetric({});
       setExistingRuleGroups([]);
@@ -147,9 +162,27 @@ export function useDiscoveryProbes({
             }
           );
 
-        const [labelResults, rulerRes] = await Promise.all([
+        const spanServicesPromise = http
+          .get<{ values: string[] }>(
+            `/api/alerting/prometheus/${encodeURIComponent(
+              datasourceId
+            )}/metadata/label-values/service`,
+            { query: { selector: SPAN_DERIVED_SERVER_SELECTOR } }
+          )
+          .then(
+            // Empty = no positive signal (e.g. span metrics live elsewhere):
+            // report unknown rather than filtering every APM draft out.
+            (res) => (res?.values?.length ? res.values : undefined),
+            (err) => {
+              console.warn('[slo-suggest] span-derived services probe failed', err);
+              return undefined;
+            }
+          );
+
+        const [labelResults, rulerRes, spanServices] = await Promise.all([
           Promise.all(labelPromises),
           rulerPromise,
+          spanServicesPromise,
         ]);
         if (cancelled) return;
 
@@ -173,6 +206,7 @@ export function useDiscoveryProbes({
         );
         if (cancelled) return;
         setEmptyHistograms(empty);
+        setSpanDerivedServices(spanServices);
         setMetricNames([...presentMetrics]);
         setLabelValuesByMetric(labelsByMetric);
         setExistingRuleGroups(rulerRes.groups);
@@ -191,6 +225,7 @@ export function useDiscoveryProbes({
 
   return {
     emptyHistograms,
+    spanDerivedServices,
     metricNames,
     labelValuesByMetric,
     existingRuleGroups,

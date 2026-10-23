@@ -366,6 +366,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     existingRuleGroups,
     rulerFetchFailed,
     emptyHistograms,
+    spanDerivedServices,
     loading: discoveryLoading,
   } = useDiscoveryProbes({
     http,
@@ -387,6 +388,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
       labelValuesByMetric,
       existingRuleGroups,
       emptyHistograms,
+      spanDerivedServices,
     });
   }, [
     datasourceId,
@@ -395,6 +397,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     labelValuesByMetric,
     existingRuleGroups,
     emptyHistograms,
+    spanDerivedServices,
   ]);
 
   const allServiceNames = useMemo(
