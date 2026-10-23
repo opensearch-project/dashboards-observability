@@ -14,6 +14,7 @@ import {
   EuiAccordion,
   EuiSpacer,
   EuiComboBox,
+  EuiCheckbox,
   EuiCheckboxGroup,
   EuiFieldSearch,
   EuiLink,
@@ -34,6 +35,14 @@ export interface ServiceMapSidebarProps {
   availableEnvironments: string[];
   isLoading: boolean;
   onToggle: () => void;
+  /**
+   * The "Include external dependencies" checkbox, shown only when the map has dependency
+   * nodes (data without them renders as before).
+   */
+  dependencies?: {
+    included: boolean;
+    onChange: (included: boolean) => void;
+  };
 }
 
 /**
@@ -51,6 +60,7 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
   availableEnvironments,
   isLoading,
   onToggle,
+  dependencies,
 }) => {
   // Local state for groupBy select - syncs with filter prop but gives us control
   const [localGroupBy, setLocalGroupBy] = useState<string>(filters.groupBy || '');
@@ -174,6 +184,21 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="xs" />
+
+      {dependencies && (
+        <>
+          <EuiCheckbox
+            id="apmIncludeDependencies"
+            label={<EuiText size="xs">{i18nTexts.filters.includeDependencies}</EuiText>}
+            checked={dependencies.included}
+            onChange={(e) => dependencies.onChange(e.target.checked)}
+            disabled={isLoading}
+            compressed
+            data-test-subj="includeDependenciesCheckbox"
+          />
+          <EuiHorizontalRule margin="xs" />
+        </>
+      )}
 
       {/* Group By Filter */}
       <EuiAccordion

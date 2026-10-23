@@ -212,6 +212,47 @@ describe('validateSloSpec', () => {
 // Custom-expr PromQL defensive checks. The character set closes the classes
 // most likely to confuse downstream parsers; the real PromQL parse happens
 // at Prometheus when the rule group is upserted.
+describe('validateSloSpec — forDuration messages', () => {
+  const tiersWith = (forDuration: string) =>
+    DEFAULT_MWMBR_TIERS.map((t, i) => ({
+      ...t,
+      forDuration: i === 0 ? forDuration : t.forDuration,
+    }));
+
+  it('says "required" only when the burn-rate forDuration is actually missing', () => {
+    const result = validateSloSpec(
+      minimalSpec({ alerting: { strategy: 'mwmbr', burnRates: tiersWith('') } })
+    );
+    expect(result.errors['spec.alerting.burnRates[0].forDuration']).toBe('forDuration is required');
+  });
+
+  it('explains that a zero or unparseable burn-rate forDuration must be positive', () => {
+    for (const bad of ['0m', '0s', 'soon']) {
+      const result = validateSloSpec(
+        minimalSpec({ alerting: { strategy: 'mwmbr', burnRates: tiersWith(bad) } })
+      );
+      expect(result.errors['spec.alerting.burnRates[0].forDuration']).toMatch(/positive duration/);
+      expect(result.errors['spec.alerting.burnRates[0].forDuration']).not.toMatch(/required/);
+    }
+  });
+
+  it('distinguishes a missing from a zero noData.forDuration', () => {
+    const missing = validateSloSpec(
+      minimalSpec({
+        alarms: { ...minimalSpec().alarms, noData: { enabled: true, forDuration: '' } },
+      })
+    );
+    expect(missing.errors['spec.alarms.noData.forDuration']).toMatch(/required/);
+
+    const zero = validateSloSpec(
+      minimalSpec({
+        alarms: { ...minimalSpec().alarms, noData: { enabled: true, forDuration: '0m' } },
+      })
+    );
+    expect(zero.errors['spec.alarms.noData.forDuration']).toMatch(/positive duration/);
+  });
+});
+
 describe('validateSloSpec — custom PromQL defensive checks', () => {
   function customSpec(expr: {
     mode: 'events';

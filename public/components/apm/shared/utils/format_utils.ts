@@ -167,3 +167,21 @@ export function buildHttpStatusPplWhere(bucket: string): string {
 export function sanitizeQueryValue(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
+
+/**
+ * Whether a span document is a GenAI span (OTel GenAI semantic conventions:
+ * `gen_ai.operation.name` is set on agent, LLM and tool spans). Handles nested
+ * (`attributes.gen_ai.operation.name` as objects), flattened and dotted-key shapes.
+ */
+export function isGenAiSpan(span: Record<string, unknown> | undefined): boolean {
+  if (!span) return false;
+  const get = (obj: unknown, key: string): unknown =>
+    obj && typeof obj === 'object' ? (obj as Record<string, unknown>)[key] : undefined;
+  const attributes = get(span, 'attributes');
+  const value =
+    get(span, 'attributes.gen_ai.operation.name') ??
+    get(attributes, 'gen_ai.operation.name') ??
+    get(get(get(attributes, 'gen_ai'), 'operation'), 'name') ??
+    get(get(attributes, 'gen_ai.operation'), 'name');
+  return typeof value === 'string' && value.trim() !== '';
+}

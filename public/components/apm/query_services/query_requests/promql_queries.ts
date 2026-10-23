@@ -27,7 +27,7 @@
  * Edge/dependency queries filter with remoteService!="" or remoteService="target" for CLIENT spans.
  */
 
-import { escapePromQLLabel } from './escape_utils';
+import { escapePromQLLabel, escapePromQLRegex } from './escape_utils';
 
 /**
  * Build the SERVER-span label selector for services-home node metrics.
@@ -323,6 +323,150 @@ export const getQueryServiceErrors = (
   window
     ? `sum(sum_over_time(error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"}[${window}]))`
     : `sum(error{environment="${escapePromQLLabel(environment)}",service="${escapePromQLLabel(serviceName)}",remoteService="",namespace="span_derived"})`;
+
+/**
+ * Dependency-node flyout metrics. A dependency node (database / messaging / external)
+ * has no SERVER-span series; its RED lives in the callers' CLIENT spans labeled
+ * remoteService="{node name}" / remoteEnvironment="{node env}". These mirror the
+ * getQueryService* builders but filter by the remote target instead.
+ * @page App Map Node Flyout — Requests/Faults/Errors charts (dependency nodes)
+ */
+/**
+ * Label filter that keeps the calls INTO a dependency. data-prepper tags messaging series with
+ * `spanKind="PRODUCER"|"CONSUMER"`; excluding consumers makes a broker's throughput, latency and
+ * failures reflect publishes, so each message counts once. Database / external series and series
+ * from a data-prepper without the label have no `spanKind`, so they still match.
+ */
+export const DEPENDENCY_CALLS_FILTER = 'spanKind!="CONSUMER"';
+
+/** Consumer-side broker series, used only for brokers with no publish-side series. */
+const CONSUMER_CALLS_FILTER = 'spanKind="CONSUMER"';
+
+/**
+ * Evaluate a dependency expression on the publish side, falling back to the consumer side for
+ * targets with no publish-side series: a broker whose producers are not instrumented (an external
+ * system publishes) would otherwise show zero while its consumers process messages. `or` keeps the
+ * left-hand series and adds right-hand ones only for label sets the left lacks, so brokers with
+ * instrumented producers, databases and external targets (no `spanKind="CONSUMER"` series) are
+ * unchanged.
+ */
+const withConsumerFallback = (build: (callsFilter: string) => string): string =>
+  `(${build(DEPENDENCY_CALLS_FILTER)}) or (${build(CONSUMER_CALLS_FILTER)})`;
+
+const remoteTargetSelector = (environment: string, remoteService: string): string =>
+  `remoteService="${escapePromQLLabel(remoteService)}",remoteEnvironment="${escapePromQLLabel(
+    environment
+  )}",namespace="span_derived"`;
+
+const dependencySelector = (
+  environment: string,
+  remoteService: string,
+  callsFilter: string = DEPENDENCY_CALLS_FILTER
+): string => `${remoteTargetSelector(environment, remoteService)},${callsFilter}`;
+
+const dependencyCount = (
+  metric: string,
+  environment: string,
+  remoteService: string,
+  window?: string
+): string =>
+  withConsumerFallback((f) => {
+    const sel = dependencySelector(environment, remoteService, f);
+    return window ? `sum(sum_over_time(${metric}{${sel}}[${window}]))` : `sum(${metric}{${sel}})`;
+  });
+
+export const getQueryDependencyRequests = (
+  environment: string,
+  remoteService: string,
+  window?: string
+): string => dependencyCount('request', environment, remoteService, window);
+
+export const getQueryDependencyFaults = (
+  environment: string,
+  remoteService: string,
+  window?: string
+): string => dependencyCount('fault', environment, remoteService, window);
+
+export const getQueryDependencyErrors = (
+  environment: string,
+  remoteService: string,
+  window?: string
+): string => dependencyCount('error', environment, remoteService, window);
+
+/**
+ * Dependency-node latency percentiles (P99/P90/P50, milliseconds), keyed by the remote target.
+ * @page App Map Node Flyout — Latency chart (dependency nodes)
+ */
+export const getQueryDependencyLatency = (environment: string, remoteService: string): string => {
+  const q = (p: number, label: string) => `
+label_replace(
+  (${withConsumerFallback(
+    (f) =>
+      `histogram_quantile(${p}, sum by (le) (latency_seconds_bucket{${dependencySelector(
+        environment,
+        remoteService,
+        f
+      )}}))`
+  )}) * 1000,
+  "percentile", "${label}", "", ""
+)`;
+  return `${q(0.99, 'p99')}\nor${q(0.9, 'p90')}\nor${q(0.5, 'p50')}`.trim();
+};
+
+const dependencyRateCard = (metric: string, environment: string, remoteService: string): string =>
+  withConsumerFallback((f) => {
+    const sel = dependencySelector(environment, remoteService, f);
+    return `(sum(${metric}{${sel}}) / clamp_min(sum(request{${sel}}), 1)) * 100`;
+  });
+
+/**
+ * Dependency fault rate (5xx) card — (faults / requests) * 100, keyed by remote target.
+ */
+export const getQueryDependencyFaultRateCard = (
+  environment: string,
+  remoteService: string
+): string => dependencyRateCard('fault', environment, remoteService);
+
+/**
+ * Dependency error rate (4xx) card — (errors / requests) * 100, keyed by remote target.
+ */
+export const getQueryDependencyErrorRateCard = (
+  environment: string,
+  remoteService: string
+): string => dependencyRateCard('error', environment, remoteService);
+
+/**
+ * Dependency latency P99 card (milliseconds), keyed by remote target.
+ */
+export const getQueryDependencyLatencyP99Card = (
+  environment: string,
+  remoteService: string,
+  window?: string
+): string =>
+  withConsumerFallback((f) => {
+    const selector = `latency_seconds_bucket{${dependencySelector(environment, remoteService, f)}}`;
+    const buckets = window ? `sum_over_time(${selector}[${window}])` : selector;
+    return `histogram_quantile(0.99, sum by (le) (${buckets})) * 1000`;
+  });
+
+/** Most rows the Callers table fetches; a shared dependency can have many callers. */
+export const DEPENDENCY_CALLERS_LIMIT = 100;
+
+/**
+ * Dependency callers — services (and their operations) that call this dependency,
+ * with total request counts over the range. Powers the dependency page "Callers" table.
+ * Keeps both messaging directions and groups by `spanKind`, so a broker's producers and
+ * consumers are listed separately (the label is absent for non-messaging series).
+ * Capped at the DEPENDENCY_CALLERS_LIMIT busiest rows.
+ */
+export const getQueryDependencyCallers = (
+  environment: string,
+  remoteService: string,
+  timeRange: string
+): string => {
+  const sel = remoteTargetSelector(environment, remoteService);
+  return `topk(${DEPENDENCY_CALLERS_LIMIT}, sum by (service, remoteOperation, spanKind) (sum_over_time(request{${sel}}[${timeRange}])))`;
+};
 
 /**
  * Service Availability (percentage of non-faulty requests)
@@ -833,6 +977,27 @@ label_replace(
 // ============================================================================
 
 /**
+ * Options for edge queries.
+ * `consumerEdge`: the edge runs broker -> consumer. Its series belong to the consumer
+ * (`service=<consumer>, remoteService=<broker>`), so callers pass the consumer as `service`
+ * and the broker as `remoteService`; producer series of that pair are excluded.
+ * `producerEdge`: the edge runs producer -> broker, so consumer series of that pair (a service
+ * that also consumes the destination it publishes to) are excluded.
+ * Series from a data-prepper without the `spanKind` label still match.
+ */
+export interface EdgeQueryOptions {
+  consumerEdge?: boolean;
+  producerEdge?: boolean;
+}
+
+const edgeDirectionFilter = (options: EdgeQueryOptions): string =>
+  options.consumerEdge
+    ? ',spanKind!="PRODUCER"'
+    : options.producerEdge
+      ? ',spanKind!="CONSUMER"'
+      : '';
+
+/**
  * Get request count for a specific edge (service-to-service connection)
  * Uses sum_over_time to aggregate over the selected time range
  * @param service - Source service name
@@ -845,9 +1010,10 @@ export const getQueryEdgeRequests = (
   service: string,
   environment: string,
   remoteService: string,
-  timeRange: string
+  timeRange: string,
+  options: EdgeQueryOptions = {}
 ): string => `
-sum(sum_over_time(request{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}]))
+sum(sum_over_time(request{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"${edgeDirectionFilter(options)}}[${timeRange}]))
 `;
 
 /**
@@ -864,11 +1030,12 @@ export const getQueryEdgeLatencyP99 = (
   service: string,
   environment: string,
   remoteService: string,
-  timeRange: string
+  timeRange: string,
+  options: EdgeQueryOptions = {}
 ): string => `
 histogram_quantile(0.99,
   sum by (le) (
-    sum_over_time(latency_seconds_bucket{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}])
+    sum_over_time(latency_seconds_bucket{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"${edgeDirectionFilter(options)}}[${timeRange}])
   )
 ) * 1000
 `;
@@ -886,9 +1053,10 @@ export const getQueryEdgeFaults = (
   service: string,
   environment: string,
   remoteService: string,
-  timeRange: string
+  timeRange: string,
+  options: EdgeQueryOptions = {}
 ): string => `
-sum(sum_over_time(fault{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}]))
+sum(sum_over_time(fault{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"${edgeDirectionFilter(options)}}[${timeRange}]))
 `;
 
 /**
@@ -904,9 +1072,10 @@ export const getQueryEdgeErrors = (
   service: string,
   environment: string,
   remoteService: string,
-  timeRange: string
+  timeRange: string,
+  options: EdgeQueryOptions = {}
 ): string => `
-sum(sum_over_time(error{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"}[${timeRange}]))
+sum(sum_over_time(error{namespace="span_derived",service="${escapePromQLLabel(service)}",environment="${escapePromQLLabel(environment)}",remoteService="${escapePromQLLabel(remoteService)}"${edgeDirectionFilter(options)}}[${timeRange}]))
 `;
 
 // ============================================================================
@@ -1043,6 +1212,176 @@ sum by (environment, service) (
   sum_over_time(error{${buildServicesNodeSelector(serviceFilter)}}[${timeRange}])
 )
 `.trim();
+
+// ============================================================================
+// DEPENDENCY-NODE METRICS (database / messaging / external targets)
+// ----------------------------------------------------------------------------
+// Dependency nodes have no SERVER-span metrics of their own; their RED lives in
+// the CLIENT-span series of the callers, labeled remoteService/remoteEnvironment.
+// These queries aggregate that client-side series by the target and relabel
+// remoteService->service and remoteEnvironment->environment so the existing
+// per-node extractor (matching service/environment) and the nodeId key
+// `${name}::${environment}` resolve dependency nodes unchanged.
+// ============================================================================
+
+const relabelRemoteToService = (inner: string): string =>
+  `
+label_replace(
+  label_replace(
+    ${inner},
+    "service", "$1", "remoteService", "(.*)"
+  ),
+  "environment", "$1", "remoteEnvironment", "(.*)"
+)
+`.trim();
+
+/**
+ * Selector for caller-derived dependency series aggregated by target. `remoteFilter` bounds the
+ * targets (e.g. `remoteService=~"a|b"` for the visible page); by default every remote target.
+ */
+const serviceMapDependencySelector = (
+  callsFilter: string,
+  remoteFilter: string = 'remoteService!=""'
+): string => `${remoteFilter},${callsFilter},namespace="span_derived"`;
+
+const BY_TARGET = 'sum by (remoteEnvironment, remoteService)';
+
+/**
+ * Bounded target filter for the dependency queries: `remoteService=~"<names>"`, with each name
+ * escaped for the regex and then for the PromQL string literal.
+ */
+export const dependencyNamesFilter = (names: string[]): string =>
+  `remoteService=~"${names.map(escapePromQLRegex).join('|')}"`;
+
+/**
+ * Dependency-node throughput — client-side request count aggregated by target.
+ * @page Topology Map — dependency node/edge metric (via useServiceMapMetrics hook)
+ */
+export const getQueryServiceMapDependencyThroughput = (timeRange: string): string =>
+  relabelRemoteToService(
+    withConsumerFallback(
+      (f) =>
+        `${BY_TARGET} (sum_over_time(request{${serviceMapDependencySelector(f)}}[${timeRange}]))`
+    )
+  );
+
+/**
+ * Dependency-node faults — client-side fault count aggregated by target.
+ */
+export const getQueryServiceMapDependencyFaults = (timeRange: string): string =>
+  relabelRemoteToService(
+    withConsumerFallback(
+      (f) => `${BY_TARGET} (sum_over_time(fault{${serviceMapDependencySelector(f)}}[${timeRange}]))`
+    )
+  );
+
+/**
+ * Dependency-node errors — client-side error count aggregated by target.
+ */
+export const getQueryServiceMapDependencyErrors = (timeRange: string): string =>
+  relabelRemoteToService(
+    withConsumerFallback(
+      (f) => `${BY_TARGET} (sum_over_time(error{${serviceMapDependencySelector(f)}}[${timeRange}]))`
+    )
+  );
+
+/**
+ * Dependency-node failure ratio (%) over the range, aggregated by target and
+ * relabeled to service/environment for the catalog's per-node extractor.
+ * (Σerror + Σfault) / Σrequest * 100.
+ */
+export const getQueryServiceMapDependencyFailureRatioTotal = (timeRange: string): string =>
+  relabelRemoteToService(
+    withConsumerFallback((f) => {
+      const sel = serviceMapDependencySelector(f);
+      return `(
+      ${BY_TARGET} (sum_over_time(error{${sel}}[${timeRange}]))
+      +
+      ${BY_TARGET} (sum_over_time(fault{${sel}}[${timeRange}]))
+    )
+    /
+    clamp_min(${BY_TARGET} (sum_over_time(request{${sel}}[${timeRange}])), 1)
+    * 100`;
+    })
+  );
+
+/**
+ * Dependency-node latency percentile (milliseconds) over the range, aggregated by
+ * target and relabeled to service/environment for the catalog's per-node extractor.
+ */
+export const getQueryServiceMapDependencyLatencyInstant = (
+  percentile: number,
+  timeRange: string
+): string =>
+  relabelRemoteToService(
+    withConsumerFallback(
+      (f) => `histogram_quantile(${percentile},
+      sum by (remoteEnvironment, remoteService, le) (
+        sum_over_time(latency_seconds_bucket{${serviceMapDependencySelector(f)}}[${timeRange}])
+      )
+    ) * 1000`
+    )
+  );
+
+// ----------------------------------------------------------------------------
+// Dependency-node SPARKLINES (per-step range). Mirror the service sparkline
+// builders but aggregate the callers' CLIENT-span series by the target
+// (remoteEnvironment/remoteService) and relabel to environment/service so the
+// per-node extractor and nodeId key resolve dependency nodes unchanged.
+// `remoteFilter` bounds them to the visible page's dependencies (see
+// dependencyNamesFilter), as the service batch is bounded by `service=~`.
+// ----------------------------------------------------------------------------
+
+/**
+ * Dependency-node throughput over time (sparkline) — client-side request count
+ * aggregated by target.
+ * @page Services Home — dependency-row Throughput sparkline
+ */
+export const getQueryServiceMapDependencyThroughputRange = (remoteFilter?: string): string =>
+  relabelRemoteToService(
+    withConsumerFallback(
+      (f) => `${BY_TARGET} (request{${serviceMapDependencySelector(f, remoteFilter)}})`
+    )
+  );
+
+/**
+ * Dependency-node failure ratio over time (sparkline) — (error + fault) /
+ * request * 100, aggregated by target.
+ * @page Services Home — dependency-row Failure ratio sparkline
+ */
+export const getQueryServiceMapDependencyFailureRatioRange = (remoteFilter?: string): string =>
+  relabelRemoteToService(
+    withConsumerFallback((f) => {
+      const sel = serviceMapDependencySelector(f, remoteFilter);
+      return `(
+      ${BY_TARGET} (error{${sel}})
+      +
+      ${BY_TARGET} (fault{${sel}})
+    )
+    /
+    clamp_min(${BY_TARGET} (request{${sel}}), 1)
+    * 100`;
+    })
+  );
+
+/**
+ * Dependency-node latency percentile over time (sparkline, milliseconds),
+ * aggregated by target.
+ * @page Services Home — dependency-row Latency sparkline
+ */
+export const getQueryServiceMapDependencyLatencyRange = (
+  percentile: number,
+  remoteFilter?: string
+): string =>
+  relabelRemoteToService(
+    withConsumerFallback(
+      (f) => `histogram_quantile(${percentile},
+      sum by (remoteEnvironment, remoteService, le) (
+        latency_seconds_bucket{${serviceMapDependencySelector(f, remoteFilter)}}
+      )
+    ) * 1000`
+    )
+  );
 
 // ============================================================================
 // GROUP METRICS (for Topology Map Group By feature)

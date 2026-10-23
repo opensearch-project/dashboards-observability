@@ -10,6 +10,8 @@ export interface ServiceTableItem {
   serviceName: string;
   environment: string;
   groupByAttributes?: Record<string, any>;
+  /** Node type: service / database / messaging / external. Drives typed catalog rendering. */
+  type?: string;
 }
 
 /**

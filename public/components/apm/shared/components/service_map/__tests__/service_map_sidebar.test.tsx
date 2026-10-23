@@ -158,3 +158,36 @@ describe('ServiceMapSidebar — Environment filter', () => {
     expect(onFiltersChange).toHaveBeenCalledWith(expect.objectContaining({ environments: [] }));
   });
 });
+
+describe('ServiceMapSidebar — Include external dependencies', () => {
+  const renderWith = (dependencies?: { included: boolean; onChange: jest.Mock }) =>
+    render(
+      <ServiceMapSidebar
+        filters={baseFilters}
+        onFiltersChange={jest.fn()}
+        availableGroupByAttributes={{}}
+        availableEnvironments={[]}
+        isLoading={false}
+        onToggle={jest.fn()}
+        dependencies={dependencies}
+      />
+    );
+
+  it('is not shown for a map without dependency nodes', () => {
+    renderWith(undefined);
+    expect(screen.queryByTestId('includeDependenciesCheckbox')).not.toBeInTheDocument();
+  });
+
+  it('sits above Group by and reports changes', () => {
+    const onChange = jest.fn();
+    const { container } = renderWith({ included: true, onChange });
+    const checkbox = screen.getByTestId('includeDependenciesCheckbox') as HTMLInputElement;
+    expect(checkbox.checked).toBe(true);
+    expect(screen.getByText('Include external dependencies')).toBeInTheDocument();
+    // Above the Group by section, in document order.
+    const all = Array.from(container.querySelectorAll('*'));
+    expect(all.indexOf(checkbox)).toBeLessThan(all.indexOf(screen.getByTestId('groupByAccordion')));
+    fireEvent.click(checkbox);
+    expect(onChange).toHaveBeenCalledWith(false);
+  });
+});

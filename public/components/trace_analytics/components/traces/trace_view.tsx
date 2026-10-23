@@ -37,7 +37,12 @@ import { TraceAnalyticsCoreDeps } from '../../home';
 import { handleServiceMapRequest } from '../../requests/services_request_handler';
 import { handlePayloadRequest } from '../../requests/traces_request_handler';
 import { TraceFilter } from '../common/constants';
-import { PanelTitle, filtersToDsl, processTimeStamp } from '../common/helper_functions';
+import {
+  PanelTitle,
+  filtersToDsl,
+  processTimeStamp,
+  shouldFetchTraceData,
+} from '../common/helper_functions';
 import { ServiceMap, ServiceObject } from '../common/plots/service_map';
 import { redirectTraceToLogs } from '../common/redirection_helpers';
 import { ServiceBreakdownPanel } from './service_breakdown_panel';
@@ -322,10 +327,8 @@ export function TraceView(props: TraceViewProps) {
         setFields(overview);
       }
 
-      const {
-        serviceBreakdownData: queryServiceBreakdownData,
-        colorMap: queryColorMap,
-      } = getServiceBreakdownData(parsedPayload, mode);
+      const { serviceBreakdownData: queryServiceBreakdownData, colorMap: queryColorMap } =
+        getServiceBreakdownData(parsedPayload, mode);
       setServiceBreakdownData(queryServiceBreakdownData);
       setColorMap(queryColorMap);
     } catch (error) {
@@ -389,8 +392,14 @@ export function TraceView(props: TraceViewProps) {
       ]
     );
     props.setDataSourceMenuSelectable?.(false);
-    refresh();
-  }, [props.traceId, props.mode, props.setDataSourceMenuSelectable]);
+    if (shouldFetchTraceData(props.dataSourceEnabled, props.dataSourceMDSId[0]?.id)) refresh();
+  }, [
+    props.traceId,
+    props.mode,
+    props.setDataSourceMenuSelectable,
+    props.dataSourceEnabled,
+    props.dataSourceMDSId[0]?.id,
+  ]);
 
   return (
     <>
