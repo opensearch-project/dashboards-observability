@@ -12,46 +12,9 @@
  * to `setupRoutes`, the same way it can pass a Prometheus backend. Without one, the CloudWatch
  * backend, routes and UI stay off even when `observability.cloudwatch.enabled` is set.
  */
-import type {
-  CloudWatchAlarm,
-  CloudWatchAlarmHistoryItem,
-  CloudWatchAlarmState,
-  CloudWatchMetricDataPoint,
-  DescribeAlarmsOptions,
-} from '../../../../common/types/alerting';
+import type { CloudWatchAlarmSource } from '../../../../common/types/alerting';
 import type { OpenSearchDashboardsRequest } from '../../../../../../src/core/server';
 
-export interface CloudWatchCallerIdentity {
-  accountId: string;
-  region: string;
-}
-
-export interface CloudWatchMetricDataQuery {
-  region?: string;
-  namespace: string;
-  metricName: string;
-  dimensions?: Array<{ name: string; value: string }>;
-  statistic?: string;
-  extendedStatistic?: string;
-  period: number;
-  startTimeMs: number;
-  endTimeMs: number;
-}
-
-/** One alarm state change, from the account-wide alarm history. */
-export interface CloudWatchStateChange {
-  alarmName: string;
-  timestamp: number;
-  oldState?: CloudWatchAlarmState;
-  newState?: CloudWatchAlarmState;
-}
-export interface CloudWatchStateChangesQuery {
-  region?: string;
-  startTimeMs: number;
-  endTimeMs: number;
-  /** Page cap; the result says whether it stopped short. */
-  maxPages?: number;
-}
 /**
  * A specific error type the source throws when the request has no usable AWS
  * credentials. Callers translate this into a per-datasource fetch error so a
@@ -73,27 +36,12 @@ export type CloudWatchAlarmSourceFactory = (
   request: OpenSearchDashboardsRequest
 ) => CloudWatchAlarmSource;
 
-export interface CloudWatchAlarmSource {
-  /** The account + region the request's credentials reach. */
-  getCallerIdentity(region?: string): Promise<CloudWatchCallerIdentity>;
-
-  /** List metric + composite alarms (optionally filtered by state). */
-  describeAlarms(options?: DescribeAlarmsOptions): Promise<CloudWatchAlarm[]>;
-
-  /** Fetch a single alarm by exact name (metric or composite). Null if absent. */
-  describeAlarm(alarmName: string, region?: string): Promise<CloudWatchAlarm | null>;
-
-  /** State/config history for one alarm, newest first. */
-  describeAlarmHistory(alarmName: string, region?: string): Promise<CloudWatchAlarmHistoryItem[]>;
-
-  /**
-   * State changes across every alarm in the region within a window, oldest first. One
-   * account-wide history call instead of one per alarm; `complete` is false when the page cap
-   * stopped it short.
-   */
-  describeStateChanges(
-    query: CloudWatchStateChangesQuery
-  ): Promise<{ changes: CloudWatchStateChange[]; complete: boolean }>;
-  /** Metric samples for the alarm's watched series (for the preview chart). */
-  getMetricData(query: CloudWatchMetricDataQuery): Promise<CloudWatchMetricDataPoint[]>;
-}
+// The source contract itself is a plain type in common/ so a deployment's implementation can
+// import it alongside the other alerting types; re-exported here for server callers.
+export type {
+  CloudWatchAlarmSource,
+  CloudWatchCallerIdentity,
+  CloudWatchMetricDataQuery,
+  CloudWatchStateChange,
+  CloudWatchStateChangesQuery,
+} from '../../../../common/types/alerting';

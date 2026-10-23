@@ -184,3 +184,70 @@ export interface DescribeAlarmsOptions {
   stateValue?: CloudWatchAlarmState;
   maxItems?: number;
 }
+
+// ============================================================================
+// The CloudWatch source contract
+// ============================================================================
+// What the alerting plugin needs from CloudWatch. This plugin ships no implementation and no AWS
+// SDK; a deployment that can reach CloudWatch (with the caller's own credentials) provides one,
+// per request, through `setupRoutes({ cloudWatchAlarmSourceFactory })`. Implementations translate
+// CloudWatch's responses into the shapes above, and report failures as errors whose `name` is
+// the AWS error name (e.g. `AccessDeniedException`) so permission handling and classification
+// work.
+
+export interface CloudWatchCallerIdentity {
+  accountId: string;
+  region: string;
+}
+
+export interface CloudWatchMetricDataQuery {
+  region?: string;
+  namespace: string;
+  metricName: string;
+  dimensions?: Array<{ name: string; value: string }>;
+  statistic?: string;
+  extendedStatistic?: string;
+  period: number;
+  startTimeMs: number;
+  endTimeMs: number;
+}
+
+/** One alarm state change, from the account-wide alarm history. */
+export interface CloudWatchStateChange {
+  alarmName: string;
+  timestamp: number;
+  oldState?: CloudWatchAlarmState;
+  newState?: CloudWatchAlarmState;
+}
+export interface CloudWatchStateChangesQuery {
+  region?: string;
+  startTimeMs: number;
+  endTimeMs: number;
+  /** Page cap; the result says whether it stopped short. */
+  maxPages?: number;
+}
+
+export interface CloudWatchAlarmSource {
+  /** The account + region the request's credentials reach. */
+  getCallerIdentity(region?: string): Promise<CloudWatchCallerIdentity>;
+
+  /** List metric + composite alarms (optionally filtered by state). */
+  describeAlarms(options?: DescribeAlarmsOptions): Promise<CloudWatchAlarm[]>;
+
+  /** Fetch a single alarm by exact name (metric or composite). Null if absent. */
+  describeAlarm(alarmName: string, region?: string): Promise<CloudWatchAlarm | null>;
+
+  /** State/config history for one alarm, newest first. */
+  describeAlarmHistory(alarmName: string, region?: string): Promise<CloudWatchAlarmHistoryItem[]>;
+
+  /**
+   * State changes across every alarm in the region within a window, oldest first. One
+   * account-wide history call instead of one per alarm; `complete` is false when the page cap
+   * stopped it short.
+   */
+  describeStateChanges(
+    query: CloudWatchStateChangesQuery
+  ): Promise<{ changes: CloudWatchStateChange[]; complete: boolean }>;
+  /** Metric samples for the alarm's watched series (for the preview chart). */
+  getMetricData(query: CloudWatchMetricDataQuery): Promise<CloudWatchMetricDataPoint[]>;
+}
