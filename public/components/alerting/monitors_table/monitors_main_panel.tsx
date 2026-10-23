@@ -197,6 +197,13 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
 
   // OpenSearch and Prometheus rules report no state history, so the picker only shows when
   // CloudWatch alarms are listed. It doesn't filter rows, so the rule count doesn't change.
+  const rulesTimePickerHelp = i18n.translate(
+    'observability.alerting.monitorsTable.mainPanel.rulesTimePickerHelp',
+    {
+      defaultMessage:
+        "Applies to CloudWatch alarms only: their status, health and state history. It doesn't filter rules, and OpenSearch and Prometheus rules aren't affected.",
+    }
+  );
   const showRulesTimePicker = rules.some(isCloudWatchRule);
   const rulesWindow = useMemo<AlarmTimeWindow>(
     () => ({
@@ -227,23 +234,24 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                 <EuiFlexItem grow={false} data-test-subj="alertManagerRulesTimePicker">
                   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiSuperDatePicker
-                        compressed
-                        start={rulesTime.startTime}
-                        end={rulesTime.endTime}
-                        onTimeChange={rulesTime.onTimeChange}
-                        // Refresh sits right next to it, so no second update button.
-                        showUpdateButton={false}
-                      />
+                      {/* Hovering the picker says what it scopes, so it isn't read as a filter
+                          on every rule. */}
+                      <EuiToolTip position="top" content={rulesTimePickerHelp}>
+                        <EuiSuperDatePicker
+                          compressed
+                          start={rulesTime.startTime}
+                          end={rulesTime.endTime}
+                          onTimeChange={rulesTime.onTimeChange}
+                          // Refresh sits right next to it, so no second update button.
+                          showUpdateButton={false}
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiIconTip
                         type="questionInCircle"
                         color="subdued"
-                        content={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.rulesTimePickerHelp',
-                          { defaultMessage: 'Applies to CloudWatch state and history' }
-                        )}
+                        content={rulesTimePickerHelp}
                         aria-label={i18n.translate(
                           'observability.alerting.monitorsTable.mainPanel.rulesTimePickerHelpAria',
                           { defaultMessage: 'About the time range' }

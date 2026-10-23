@@ -192,7 +192,7 @@ describe('MonitorsTable', () => {
     expect(onCreateMonitor).toHaveBeenCalledWith('forecaster');
   });
 
-  it('shows the CloudWatch time picker only when CloudWatch alarms are listed', () => {
+  it('shows the CloudWatch time picker only when CloudWatch alarms are listed', async () => {
     const { rerender } = render(<MonitorsTable {...defaultProps} onCreateMonitor={jest.fn()} />);
     expect(screen.queryByTestId('alertManagerRulesTimePicker')).toBeNull();
     rerender(
@@ -206,6 +206,11 @@ describe('MonitorsTable', () => {
       />
     );
     expect(screen.getByTestId('alertManagerRulesTimePicker')).toBeInTheDocument();
+    // Hovering the picker says it only applies to CloudWatch alarms.
+    fireEvent.mouseOver(
+      screen.getByTestId('alertManagerRulesTimePicker').querySelector('[class*="ToolTipAnchor"]')!
+    );
+    expect(await screen.findByText(/Applies to CloudWatch alarms only/)).toBeInTheDocument();
     // A lens on state, not a row filter: both rules are still listed.
     expect(screen.getByText('HighCPU')).toBeInTheDocument();
     expect(screen.getByText('checkout-errors-high')).toBeInTheDocument();
