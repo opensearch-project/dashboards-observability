@@ -336,7 +336,7 @@ describe('SloWizardPage — Wave 2 additions', () => {
     // the min-fields helper seeds it, which is fine.
 
     // Ratio mode: each metric is a picker. Selecting metric `good`/`total`
-    // serializes to `sum(rate(<metric>[5m]))` implicitly.
+    // serializes to `sum(rate(<metric>[{{.window}}]))` implicitly.
     const pickMetric = (pickerTestSubj: string, metric: string) => {
       const picker = screen.getByTestId(pickerTestSubj);
       const input = within(picker).getByTestId('comboBoxSearchInput');
@@ -358,8 +358,8 @@ describe('SloWizardPage — Wave 2 additions', () => {
     expect(submitted.spec.sli.definition.type).toBe('custom');
     expect(submitted.spec.sli.definition.customExpr).toEqual({
       mode: 'events',
-      goodQuery: 'sum(rate(good[5m]))',
-      totalQuery: 'sum(rate(total[5m]))',
+      goodQuery: 'sum(rate(good[{{.window}}]))',
+      totalQuery: 'sum(rate(total[{{.window}}]))',
     });
   });
 

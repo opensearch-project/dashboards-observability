@@ -6,7 +6,10 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { CustomPromqlEditor } from '../custom_promql_editor';
-import { SLO_TEMPLATES } from '../../../../../../common/slo/slo_templates';
+import {
+  SLO_TEMPLATES,
+  substituteCustomPromqlDefaults,
+} from '../../../../../../common/slo/slo_templates';
 import type { FormState } from '../wizard_state';
 
 // The `custom` template carries no customPromqlDefaults, so the Advanced
@@ -61,10 +64,13 @@ function renderEditor(
 describe('CustomPromqlEditor — simple view', () => {
   it('shows a plain-language summary and read-only query, builder collapsed, for a template default', () => {
     // apm template default for service=frontend → simple view, Advanced closed.
+    const defaults = substituteCustomPromqlDefaults(APM_TEMPLATE.customPromqlDefaults!, {
+      service: 'frontend',
+    });
+    if (defaults.mode !== 'events') throw new Error('expected an events template');
     const def = customPromql({
-      goodQuery:
-        'sum(request{service="frontend",remoteService="",namespace="span_derived"}) - sum(fault{service="frontend",remoteService="",namespace="span_derived"})',
-      totalQuery: 'sum(request{service="frontend",remoteService="",namespace="span_derived"})',
+      goodQuery: defaults.goodQuery,
+      totalQuery: defaults.totalQuery,
     });
     renderEditor(def, jest.fn(), { template: APM_TEMPLATE, service: 'frontend' });
     expect(screen.getByTestId('slosWizardSliSummary')).toHaveTextContent('frontend');
@@ -104,7 +110,8 @@ describe('CustomPromqlEditor — Ratio / Advanced', () => {
     fireEvent.click(screen.getByRole('option', { name: 'http_requests_total' }));
     expect(dispatch).toHaveBeenCalledWith({
       kind: 'setCustomPromql',
-      patch: { goodQuery: 'sum(rate(http_requests_total[5m]))' },
+      // Window token: each recording rule substitutes its own window.
+      patch: { goodQuery: 'sum(rate(http_requests_total[{{.window}}]))' },
     });
   });
 

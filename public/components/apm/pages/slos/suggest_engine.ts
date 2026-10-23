@@ -42,7 +42,10 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { DEFAULT_MWMBR_TIERS } from '../../../../../common/slo/slo_promql_generator';
+import {
+  DEFAULT_MWMBR_TIERS,
+  SLI_WINDOW_TOKEN,
+} from '../../../../../common/slo/slo_promql_generator';
 import type { PromRule, PromRuleGroup } from '../../../../../common/types/alerting';
 import type {
   BurnRateConfig,
@@ -99,6 +102,25 @@ export interface ServiceDiscoveryInput {
    * `slo_service="<service>"` so callers can avoid dual-writing.
    */
   existingRuleGroups?: PromRuleGroup[];
+  /**
+   * Latency histograms that exist but recorded no observations for a service
+   * (every bucket stuck at 0). Latency drafts on them would never report a
+   * value, so they're skipped.
+   */
+  emptyHistograms?: EmptyHistogram[];
+  /**
+   * Services that have server-side span-derived RED metrics. When provided,
+   * APM drafts are only produced for these — others would sit at "No data".
+   * Omit (undefined) when unknown.
+   */
+  spanDerivedServices?: string[];
+}
+
+/** A latency histogram whose buckets are empty for `label="value"`. */
+export interface EmptyHistogram {
+  metric: string;
+  label: string;
+  value: string;
 }
 
 /** Display-friendly label shown in the card badge. */
@@ -393,23 +415,21 @@ function attachExistingRuleMatches(
 // Detectors — APM span-derived
 // ============================================================================
 
+/** `sum(sum_over_time(<metric>{<selector>}[{{.window}}]))` for a span-derived gauge. */
+function spanWindowSum(metric: string, selector: string): string {
+  return `sum(sum_over_time(${metric}{${selector}}[${SLI_WINDOW_TOKEN}]))`;
+}
+
 function apmDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
+  const withSpanMetrics = input.spanDerivedServices ? new Set(input.spanDerivedServices) : null;
   for (const svc of input.services) {
     if (!svc.serviceName) continue;
+    if (withSpanMetrics && !withSpanMetrics.has(svc.serviceName)) continue;
     const service = svc.serviceName;
     const serverSelector = `service="${service}",remoteService="",namespace="span_derived"`;
     const detected: Record<string, string> = { service };
     if (svc.environment) detected.environment = svc.environment;
 
-    // KNOWN-LIMITATION: span-derived `request` and `fault` are both counters,
-    // and the custom-events path substitutes goodQuery/totalQuery verbatim
-    // (no auto rate-wrapping). The recorded expression `1 - ((sum(request) -
-    // sum(fault)) / sum(request))` will be `NaN` whenever the service is
-    // idle in the window (0/0), and the lifetime-average error fraction
-    // when it isn't. The aggregator now distinguishes the NaN case from
-    // "ruler unreachable" (state=source_idle), but a proper fix needs the
-    // generator to support a window-aware substitution token in custom
-    // expressions — tracked separately from the latency-template fix.
     out.push({
       key: `apm-avail:${service}`,
       kindId: 'apm-availability',
@@ -432,10 +452,16 @@ function apmDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
             backend: 'prometheus',
             type: 'custom',
             calcMethod: 'events',
+            // Span-derived `request` / `fault` are per-interval gauges: sum
+            // them over each recording window. `fault` is guarded so a
+            // service that never faulted reads 100%, not "no data".
             customExpr: {
               mode: 'events',
-              goodQuery: `sum(request{${serverSelector}}) - sum(fault{${serverSelector}})`,
-              totalQuery: `sum(request{${serverSelector}})`,
+              goodQuery: `${spanWindowSum('request', serverSelector)} - (${spanWindowSum(
+                'fault',
+                serverSelector
+              )} or vector(0))`,
+              totalQuery: spanWindowSum('request', serverSelector),
             },
           },
           dimensions: [],
@@ -462,12 +488,11 @@ function apmDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
           name: `${service} — service latency p95 < 500 ms`,
           description: `Auto-suggested from span-derived latency histogram for service="${service}".`,
           service,
-          // latency_threshold (native) wraps each side of the ratio in
-          // sum(rate(metric{...}[window])) per recording window, which the
-          // custom-events code path can't do — it would substitute these
-          // sums into `1 - (good / total)` raw, producing NaN when the
-          // source metric is idle (`1 - (0 / 0)`) and a lifetime-average
-          // burn rather than a windowed one when it isn't.
+          // `namespace="span_derived"` makes the generator treat this as a
+          // delta histogram: good = every non-cumulative bucket <= the
+          // threshold, total = latency_seconds_count, both summed over the
+          // window. Temporality stays implicit so these drafts share recording
+          // rules (fingerprints) with SLOs created before it existed.
           sliDefinition: {
             backend: 'prometheus',
             type: 'latency_threshold',
@@ -892,7 +917,26 @@ export function generateSuggestionsForServices(input: ServiceDiscoveryInput): Su
   messagingDrafts(input, out);
   genAiDrafts(input, out);
   attachExistingRuleMatches(out, input.existingRuleGroups);
-  return out;
+  return dropEmptyHistogramDrafts(out, input.emptyHistograms);
+}
+
+/**
+ * Drop latency drafts whose histogram recorded nothing for their service —
+ * they'd sit at "No data" while the service is clearly reporting traffic.
+ */
+function dropEmptyHistogramDrafts(
+  drafts: Suggestion[],
+  empty: EmptyHistogram[] | undefined
+): Suggestion[] {
+  if (!empty || empty.length === 0) return drafts;
+  const keys = new Set(empty.map((e) => `${e.metric}|${e.label}|${e.value}`));
+  return drafts.filter((d) => {
+    const sli = d.input.spec.sli;
+    if (sli.type !== 'single' || sli.definition.backend !== 'prometheus') return true;
+    if (sli.definition.type !== 'latency_threshold') return true;
+    const metric = sli.definition.metric ?? '';
+    return !sli.dimensions.some((dim) => keys.has(`${metric}|${dim.name}|${dim.value}`));
+  });
 }
 
 /**

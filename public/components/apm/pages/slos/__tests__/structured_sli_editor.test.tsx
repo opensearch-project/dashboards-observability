@@ -124,7 +124,7 @@ describe('StructuredSliEditor', () => {
     renderEditor(HTTP_LATENCY, s);
     const q = screen.getByTestId('slosWizardStructuredSliSummaryQuery').textContent ?? '';
     expect(q).toContain('http_server_request_duration_seconds_bucket');
-    expect(q).toContain('le="0.5"');
+    expect(q).toContain('le=~"0?\\\\.50*"');
     expect(q).not.toContain('le="500"');
   });
 });

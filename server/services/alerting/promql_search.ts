@@ -278,7 +278,7 @@ function buildSearchRequest(
   // result is just `{ body, dataSourceId? }` — `asScoped` tolerates a
   // header-less fake request.
   const request: { dataSourceId?: string; body: Record<string, unknown>; [k: string]: unknown } = {
-    ...((extras.sourceRequest as unknown) as Record<string, unknown>),
+    ...(extras.sourceRequest as unknown as Record<string, unknown>),
     body,
   };
   if (dataSourceId) request.dataSourceId = dataSourceId;
@@ -333,17 +333,30 @@ function rowsFromResponse(response: IDataFrameResponse): VizRow[] | null {
 }
 
 /**
- * `Series` is `formatMetricLabels(metric)` for a single-query response —
- * i.e. `{__name__="...", k="v"}`. We undo the bracket escaping the strategy
- * applies for Vega (`[` / `]`) and pull the `__name__` out. Other labels
- * are read off `row.Labels` directly to avoid re-parsing values that may
- * contain commas / quotes / equals.
+ * Recover the metric name from a row's `Series` field. `Labels` never
+ * carries `__name__`, so this is the only place the name survives — and the
+ * SLO status reader keys fingerprint-named recording rules by it, so a miss
+ * here silently turns every such SLO into `no_data`.
+ *
+ * The strategy has emitted two shapes over time; both are accepted:
+ *   - `name{k="v", ...}` — current: name prefix + labels without `__name__`.
+ *   - `{__name__="name", k="v", ...}` — older: name folded into the labels.
+ * A multi-query response prefixes each series with `<queryLabel>: `, and
+ * `[` / `]` are backslash-escaped for Vega; both are undone first. Metric
+ * names can contain `:` (recording rules) but never whitespace, so the
+ * `<label>: ` prefix is unambiguous.
  */
-function nameFromSeries(series: string): string {
+export function nameFromSeries(series: string): string {
   if (!series) return '';
-  const unescaped = series.replace(/\\\[/g, '[').replace(/\\]/g, ']');
-  const match = unescaped.match(/__name__="([^"]*)"/);
-  return match ? match[1] : '';
+  let unescaped = series.replace(/\\\[/g, '[').replace(/\\]/g, ']');
+  const prefixed = unescaped.match(/^[^\s{]+: (\S.*)$/s);
+  if (prefixed) unescaped = prefixed[1];
+  if (unescaped.startsWith('{')) {
+    const match = unescaped.match(/(?:^\{|,\s*)__name__="((?:\\.|[^"\\])*)"/);
+    return match ? match[1] : '';
+  }
+  const brace = unescaped.indexOf('{');
+  return (brace === -1 ? unescaped : unescaped.slice(0, brace)).trim();
 }
 
 /**

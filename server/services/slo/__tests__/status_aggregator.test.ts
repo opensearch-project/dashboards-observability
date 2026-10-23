@@ -687,8 +687,9 @@ describe('DirectQueryStatusAggregator.aggregate — partial failure', () => {
 
     expect(s1.state).toBe('ok');
     expect(s2.state).toBe('no_data');
-    // Single batched search-strategy call covers both SLOs.
-    expect(searcherMock).toHaveBeenCalledTimes(1);
+    // One batched call covers both SLOs' recorded samples, plus one inline
+    // evaluation for slo-2 — which also came back empty, so no_data stands.
+    expect(searcherMock).toHaveBeenCalledTimes(2);
   });
 });
 

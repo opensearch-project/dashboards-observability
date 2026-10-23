@@ -23,6 +23,11 @@
 import { i18n } from '@osd/i18n';
 import type { PrometheusSliType, SliCalcMethod } from './slo_types';
 import type { PrometheusMetricMetadata } from '../types/alerting';
+import {
+  SLI_WINDOW_TOKEN,
+  SPAN_DERIVED_LATENCY_BUCKETS_SECONDS,
+  leValuePattern,
+} from './slo_promql_generator';
 
 // ============================================================================
 // Template interface
@@ -104,36 +109,54 @@ const DEPENDENCY_SELECTOR =
 /** APM latency histogram bucket bound (seconds). */
 const APM_DEFAULT_LATENCY_SECONDS = 0.5;
 
-function apmServiceAvailabilityDefaults(): SloTemplateCustomDefaults {
+/**
+ * Span-derived `request` / `fault` / `latency_seconds_*` are per-interval
+ * gauges, not counters, so every template sums them over the SLO window
+ * (`{{.window}}`, substituted per recording window). `fault` is guarded with
+ * `or vector(0)` so a service that never faulted isn't "no data".
+ */
+function spanSum(metric: string, selector: string): string {
+  return `sum(sum_over_time(${metric}{${selector}}[${SLI_WINDOW_TOKEN}]))`;
+}
+
+function availabilityDefaults(selector: string): SloTemplateCustomDefaults {
   return {
     mode: 'events',
-    goodQuery: `sum(request{${SERVER_SELECTOR}}) - sum(fault{${SERVER_SELECTOR}})`,
-    totalQuery: `sum(request{${SERVER_SELECTOR}})`,
+    goodQuery: `${spanSum('request', selector)} - (${spanSum('fault', selector)} or vector(0))`,
+    totalQuery: spanSum('request', selector),
   };
+}
+
+/**
+ * The span-derived latency histogram is non-cumulative: each `le` bucket
+ * holds only its own slice, so "under the bound" is the sum of every bucket
+ * at or below it, over `latency_seconds_count`.
+ */
+function latencyDefaults(selector: string): SloTemplateCustomDefaults {
+  const le = SPAN_DERIVED_LATENCY_BUCKETS_SECONDS.filter((b) => b <= APM_DEFAULT_LATENCY_SECONDS)
+    .map(leValuePattern)
+    .join('|');
+  return {
+    mode: 'events',
+    goodQuery: spanSum('latency_seconds_bucket', `${selector},le=~"${le}"`),
+    totalQuery: spanSum('latency_seconds_count', selector),
+  };
+}
+
+function apmServiceAvailabilityDefaults(): SloTemplateCustomDefaults {
+  return availabilityDefaults(SERVER_SELECTOR);
 }
 
 function apmServiceLatencyDefaults(): SloTemplateCustomDefaults {
-  return {
-    mode: 'events',
-    goodQuery: `sum(latency_seconds_bucket{${SERVER_SELECTOR},le="${APM_DEFAULT_LATENCY_SECONDS}"})`,
-    totalQuery: `sum(latency_seconds_bucket{${SERVER_SELECTOR},le="+Inf"})`,
-  };
+  return latencyDefaults(SERVER_SELECTOR);
 }
 
 function apmDependencyAvailabilityDefaults(): SloTemplateCustomDefaults {
-  return {
-    mode: 'events',
-    goodQuery: `sum(request{${DEPENDENCY_SELECTOR}}) - sum(fault{${DEPENDENCY_SELECTOR}})`,
-    totalQuery: `sum(request{${DEPENDENCY_SELECTOR}})`,
-  };
+  return availabilityDefaults(DEPENDENCY_SELECTOR);
 }
 
 function apmDependencyLatencyDefaults(): SloTemplateCustomDefaults {
-  return {
-    mode: 'events',
-    goodQuery: `sum(latency_seconds_bucket{${DEPENDENCY_SELECTOR},le="${APM_DEFAULT_LATENCY_SECONDS}"})`,
-    totalQuery: `sum(latency_seconds_bucket{${DEPENDENCY_SELECTOR},le="+Inf"})`,
-  };
+  return latencyDefaults(DEPENDENCY_SELECTOR);
 }
 
 // ============================================================================

@@ -11,11 +11,23 @@ import {
   serializePromQL,
 } from '../promql_builder';
 
+/** Model with an explicit 5m window — the shape a hand-written query parses to. */
 function model(overrides: Partial<PromQLModel> = {}): PromQLModel {
-  return { ...DEFAULT_MODEL, ...overrides };
+  return { ...DEFAULT_MODEL, window: '5m', ...overrides };
 }
 
 describe('serializePromQL', () => {
+  it('defaults the rate window to the recording-window token', () => {
+    expect(serializePromQL({ ...DEFAULT_MODEL, metric: 'http_requests_total' })).toBe(
+      'sum(rate(http_requests_total[{{.window}}]))'
+    );
+    expect(parsePromQL('sum(rate(http_requests_total[{{.window}}]))')).toEqual({
+      ...DEFAULT_MODEL,
+      metric: 'http_requests_total',
+    });
+    expect(isModelComplete({ ...DEFAULT_MODEL, metric: 'x' })).toBe(true);
+  });
+
   it('returns empty string with no metric', () => {
     expect(serializePromQL(model({ metric: '' }))).toBe('');
   });
@@ -138,6 +150,8 @@ describe('parsePromQL', () => {
       model({
         metric: 'up',
         rate: false,
+        // No rate() → the window keeps its (unused) default.
+        window: DEFAULT_MODEL.window,
         agg: 'none',
         filters: [{ label: 'job', op: '=', value: 'api' }],
       })
@@ -188,6 +202,8 @@ describe('parsePromQL', () => {
       model({
         metric: 'count',
         rate: false,
+        // No rate() → the window keeps its (unused) default.
+        window: DEFAULT_MODEL.window,
         agg: 'none',
         filters: [{ label: 'job', op: '=', value: 'api' }],
       })
