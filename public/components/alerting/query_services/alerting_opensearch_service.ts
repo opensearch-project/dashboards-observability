@@ -116,13 +116,12 @@ export class AlertingOpenSearchService {
     alarmName: string,
     opts?: { startTime?: string; endTime?: string; signal?: AbortSignal }
   ): Promise<CloudWatchAlarmDetail> {
-    const query: Record<string, string> = {};
+    // The name is a query value (alarm names may contain `/`); the client encodes it.
+    const query: Record<string, string> = { name: alarmName };
     if (opts?.startTime) query.startTime = opts.startTime;
     if (opts?.endTime) query.endTime = opts.endTime;
     return (await this.requireHttp().get(
-      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarms/${encodeURIComponent(
-        alarmName
-      )}`,
+      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarm`,
       { query, signal: opts?.signal }
     )) as CloudWatchAlarmDetail;
   }
@@ -149,10 +148,8 @@ export class AlertingOpenSearchService {
     signal?: AbortSignal
   ): Promise<{ items: CloudWatchAlarmHistoryItem[]; accessDenied: boolean }> {
     return (await this.requireHttp().get(
-      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarms/${encodeURIComponent(
-        alarmName
-      )}/history`,
-      { signal }
+      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarm/history`,
+      { query: { name: alarmName }, signal }
     )) as { items: CloudWatchAlarmHistoryItem[]; accessDenied: boolean };
   }
 
@@ -164,10 +161,11 @@ export class AlertingOpenSearchService {
     signal?: AbortSignal
   ): Promise<CloudWatchRelationshipGraph> {
     return (await this.requireHttp().get(
-      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarms/${encodeURIComponent(
-        alarmName
-      )}/relationships`,
-      { query: depth !== undefined ? { depth: String(depth) } : {}, signal }
+      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarm/relationships`,
+      {
+        query: { name: alarmName, ...(depth !== undefined ? { depth: String(depth) } : {}) },
+        signal,
+      }
     )) as CloudWatchRelationshipGraph;
   }
 

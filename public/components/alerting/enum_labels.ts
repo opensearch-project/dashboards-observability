@@ -120,6 +120,9 @@ const MONITOR_STATE_LABELS: Record<string, string> = {
   insufficient_data: i18n.translate('observability.alerting.monitorStateLabel.insufficientData', {
     defaultMessage: 'Insufficient data',
   }),
+  ok: i18n.translate('observability.alerting.monitorStateLabel.ok', {
+    defaultMessage: 'OK',
+  }),
   muted: i18n.translate('observability.alerting.monitorStateLabel.muted', {
     defaultMessage: 'Muted',
   }),

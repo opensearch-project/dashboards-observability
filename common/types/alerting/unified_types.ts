@@ -160,9 +160,9 @@ export interface Datasource {
   url: string;
   enabled: boolean;
   /**
-   * AWS region for a CloudWatch (virtual) datasource. Resolved from
-   * `AWS_REGION`/`AWS_DEFAULT_REGION` → `observability.cloudwatch.defaultRegion`
-   * → `us-east-1`. Unused by OpenSearch/Prometheus datasources.
+   * AWS region for a CloudWatch (virtual) datasource: `observability.cloudwatch.defaultRegion`
+   * when set, else undefined so the CloudWatch source uses its own default. Unused by
+   * OpenSearch/Prometheus datasources.
    */
   region?: string;
   /**
@@ -302,6 +302,8 @@ export type MonitorStatus =
   | 'active'
   | 'pending'
   | 'insufficient_data'
+  /** A CloudWatch alarm in its OK state: evaluating and not firing (not user-muted). */
+  | 'ok'
   | 'muted'
   | 'disabled'
   | 'Running'
@@ -332,6 +334,8 @@ export type UnifiedDefinitionType =
  * badge, the `account · region` Datasource cell, and the alarm flyout dispatch.
  */
 export interface UnifiedCloudWatchMeta {
+  /** The alarm's name (the row `id` is region/account-qualified). */
+  alarmName?: string;
   state: CloudWatchAlarmState;
   alarmType: CloudWatchAlarmType;
   accountId?: string;
@@ -369,8 +373,9 @@ export interface UnifiedRuleSummary {
   status: MonitorStatus;
   healthStatus: MonitorHealthStatus;
   createdBy: string;
-  createdAt: string;
-  lastModified: string;
+  /** Unset when the backend doesn't report it (e.g. CloudWatch alarms). */
+  createdAt?: string;
+  lastModified?: string;
   lastTriggered?: string;
   notificationDestinations: string[];
   evaluationInterval: string;

@@ -473,6 +473,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     isLoading: dataLoading,
     error,
     warnings: rulesWarnings,
+    truncatedDatasourceNames: rulesTruncatedDatasources,
     setRules,
     setRulesTotal,
     refetch: refetchRules,
@@ -1835,6 +1836,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     alertingProbeLoading: alertingAvailability.isLoading,
     datasourceIssues,
     alertsTruncated,
+    rulesTruncatedDatasources,
     fallbackHints: alertsFallbackHints,
   });
 

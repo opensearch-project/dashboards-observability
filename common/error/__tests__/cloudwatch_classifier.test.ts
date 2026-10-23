@@ -81,7 +81,7 @@ describe('cloudWatchClassifier — coverage table', () => {
     });
     expect(out.category).toBe('PERMISSION_DENIED');
     expect(out.code).toBe(CloudWatchErrorCode.ACCESS_DENIED);
-    expect(out.remediation).toContain('cloudwatch:DescribeAlarms');
+    expect(out.remediation).toContain('grant your identity cloudwatch:DescribeAlarms');
   });
 
   it('ThrottlingException → RATE_LIMITED / THROTTLED (retryable)', () => {
@@ -137,5 +137,19 @@ describe('cloudWatchClassifier — coverage table', () => {
     });
     const payload = toClientPayload(classified, { exposeSensitive: false });
     expect(payload.details?.some((d) => d.sensitivity === 'sensitive')).toBeFalsy();
+  });
+});
+
+describe('cloudWatchClassifier — sign-in without AWS credentials', () => {
+  it('names a sign-in method that has no AWS credentials, separately from a missing session', () => {
+    const out = classifyError({
+      operation: 'unified.rules.fetch',
+      sourceType: 'cloudwatch',
+      errorName: 'CloudWatchSignInUnsupported',
+      message: 'no FAS',
+    });
+    expect(out.code).toBe(CloudWatchErrorCode.SIGN_IN_UNSUPPORTED);
+    expect(out.title).toBe("CloudWatch isn't available for this sign-in");
+    expect(out.remediation).not.toContain('Sign in again');
   });
 });

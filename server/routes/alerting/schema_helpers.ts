@@ -72,18 +72,15 @@ export const alertingRuleIdSchema = schema.string({
 });
 
 /**
- * CloudWatch alarm name. CloudWatch allows a broad UTF-8 charset (including
- * spaces, hyphens and dots — e.g. "checkout-errors-high"), so we can't reuse
- * the strict `ID_PATTERN`. We instead reject only the genuinely dangerous
- * shapes for a path-interpolated value: ASCII control chars, the path
- * separators `/` and `\`, and any `..` traversal sequence. Bounded to 255
- * chars (the CloudWatch limit). Callers must URL-encode the name; OSD decodes
- * it before validation. Character checks use charCodeAt (not a regex) to keep
- * the intent unambiguous.
+ * CloudWatch alarm name. CloudWatch allows a broad charset, including spaces, dots and `/`
+ * (generated names such as auto-scaling's `TargetTracking-table/MyTable-AlarmHigh-…`), so we
+ * can't reuse the strict `ID_PATTERN`. The name travels as a query value and reaches the source
+ * as an API value, never a path, so only control characters are rejected. Bounded to 255 chars
+ * (the CloudWatch limit). Character checks use charCodeAt (not a regex) to keep the intent
+ * unambiguous.
  */
 const ALARM_NAME_MAX_LENGTH = 255;
-const FORWARD_SLASH = '/'.charCodeAt(0);
-const BACK_SLASH = '\\'.charCodeAt(0);
+const DEL = 0x7f;
 
 export const cloudWatchAlarmNameSchema = schema.string({
   validate: (value: string) => {
@@ -92,11 +89,8 @@ export const cloudWatchAlarmNameSchema = schema.string({
       return `value has length [${value.length}] but it must have a maximum length of [${ALARM_NAME_MAX_LENGTH}].`;
     for (let i = 0; i < value.length; i++) {
       const code = value.charCodeAt(i);
-      if (code < 0x20 || code === FORWARD_SLASH || code === BACK_SLASH) {
-        return 'contains forbidden characters (control chars or path separators)';
-      }
+      if (code < 0x20 || code === DEL) return 'contains forbidden characters (control chars)';
     }
-    if (value.includes('..')) return 'must not contain ".."';
   },
 });
 

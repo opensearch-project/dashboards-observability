@@ -66,6 +66,7 @@ export const STATUS_COLORS: Record<string, string> = {
   active: 'danger',
   pending: 'warning',
   insufficient_data: 'warning',
+  ok: 'success',
   muted: 'default',
   disabled: 'subdued',
   Running: 'success',
@@ -135,6 +136,9 @@ export const isStandardOpenSearchDatasource = (datasource: Datasource): boolean 
 // Anomaly detection / forecasting lifecycle helpers
 // ============================================================================
 
+/** The virtual CloudWatch datasource id (mirrors the server's `CLOUDWATCH_DATASOURCE_ID`). */
+export const CLOUDWATCH_DATASOURCE_ID = 'cloudwatch';
+
 export const isCloudWatchRule = (rule: UnifiedRuleSummary): boolean =>
   rule.definitionType === 'cloudwatch_alarm' ||
   rule.datasourceType === 'cloudwatch' ||
@@ -148,7 +152,7 @@ export const isCloudWatchRule = (rule: UnifiedRuleSummary): boolean =>
 export function cloudWatchStateToStatus(state: CloudWatchAlarmState): MonitorStatus {
   if (state === 'ALARM') return 'active';
   if (state === 'INSUFFICIENT_DATA') return 'insufficient_data';
-  return 'muted';
+  return 'ok';
 }
 export function cloudWatchStateToHealth(state: CloudWatchAlarmState): MonitorHealthStatus {
   return state === 'INSUFFICIENT_DATA' ? 'no_data' : 'healthy';

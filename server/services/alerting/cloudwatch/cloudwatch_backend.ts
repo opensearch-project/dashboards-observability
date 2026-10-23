@@ -17,6 +17,7 @@ import type {
   CloudWatchAlarm,
   CloudWatchAlarmDetail,
   CloudWatchAlarmHistoryItem,
+  CloudWatchAlarmList,
   CloudWatchAlarmState,
   CloudWatchMetricPreview,
   CloudWatchRelationshipGraph,
@@ -26,23 +27,39 @@ import type {
   Logger,
 } from '../../../../common/types/alerting';
 import { CLOUDWATCH_HISTORY_RETENTION_MS } from '../../../../common/types/alerting';
+import { CLOUDWATCH_ACCESS_DENIED_ERROR_NAMES } from '../../../../common/error';
 import { CloudWatchAlarmSource, CloudWatchCredentialsError } from './types';
-import { createInternalError } from '../errors';
 
 /** Initial descendant depth rendered before the "load deeper" continuation. */
 const DEFAULT_RELATIONSHIP_DEPTH = 2;
 /** Hard cap so a pathological rule graph can't expand unbounded. */
 const MAX_RELATIONSHIP_DEPTH = 8;
 
-/** Recognize AWS "access denied" so history/metric sections degrade to partial. */
+/** Most alarm names `DescribeAlarms` accepts in one call. */
+const ALARM_NAMES_PER_CALL = 100;
+
+/**
+ * Recognize an AWS "access denied" so history/metric sections degrade to partial. By error name
+ * only (the classifier's set): message text is too loose, e.g. any mention of "authorization".
+ */
 function isAccessDenied(err: unknown): boolean {
-  const name = (err as { name?: string })?.name || '';
-  const msg = (err as { message?: string })?.message || '';
-  return (
-    name === 'AccessDenied' ||
-    name === 'AccessDeniedException' ||
-    /access ?denied|not authorized|authorization/i.test(msg)
-  );
+  const name = (err as { name?: string })?.name;
+  return typeof name === 'string' && CLOUDWATCH_ACCESS_DENIED_ERROR_NAMES.has(name);
+}
+
+/**
+ * What a failure may say in a log line: the error name and HTTP status, never the message.
+ * Provider messages can carry principal identifiers and account numbers.
+ */
+export function describeSourceError(err: unknown): string {
+  const e = err as {
+    name?: unknown;
+    statusCode?: unknown;
+    $metadata?: { httpStatusCode?: unknown };
+  };
+  const name = typeof e?.name === 'string' && e.name ? e.name : 'Error';
+  const status = e?.$metadata?.httpStatusCode ?? e?.statusCode;
+  return typeof status === 'number' ? `${name} (HTTP ${status})` : name;
 }
 
 /**
@@ -117,35 +134,40 @@ export class CloudWatchBackend {
         // Rethrow as-is: the fan-out records it as a per-datasource warning.
         throw err;
       }
-      this.logger.warn(`CloudWatch source call failed: ${(err as Error)?.message ?? err}`);
+      this.logger.warn(`CloudWatch source call failed: ${describeSourceError(err)}`);
       throw err;
     }
   }
 
-  /** List all alarms for a CloudWatch datasource, account-id enriched. */
-  async describeAlarms(ds: Datasource): Promise<CloudWatchAlarm[]> {
-    const [alarms, identity] = await Promise.all([
-      this.guarded(() => this.source.describeAlarms({ region: ds.region })),
-      this.getIdentitySafe(ds),
-    ]);
-    return alarms.map((a) => ({
-      ...a,
-      accountId: a.accountId || identity?.accountId,
-      region: a.region || identity?.region || ds.region,
-    }));
+  /**
+   * List all alarms for a CloudWatch datasource, account-id enriched. `truncated` when the source
+   * capped the list (the fan-out reports it on the datasource's status).
+   */
+  async describeAlarms(ds: Datasource): Promise<CloudWatchAlarmList> {
+    return this.listAlarms(ds, {});
   }
 
   /** List alarms currently in ALARM state (for the Alerts tab). */
-  async describeAlarmingAlarms(ds: Datasource): Promise<CloudWatchAlarm[]> {
-    const [alarms, identity] = await Promise.all([
-      this.guarded(() => this.source.describeAlarms({ region: ds.region, stateValue: 'ALARM' })),
+  async describeAlarmingAlarms(ds: Datasource): Promise<CloudWatchAlarmList> {
+    return this.listAlarms(ds, { stateValue: 'ALARM' });
+  }
+
+  private async listAlarms(
+    ds: Datasource,
+    options: { stateValue?: CloudWatchAlarmState }
+  ): Promise<CloudWatchAlarmList> {
+    const [list, identity] = await Promise.all([
+      this.guarded(() => this.source.describeAlarms({ region: ds.region, ...options })),
       this.getIdentitySafe(ds),
     ]);
-    return alarms.map((a) => ({
-      ...a,
-      accountId: a.accountId || identity?.accountId,
-      region: a.region || identity?.region || ds.region,
-    }));
+    return {
+      alarms: list.alarms.map((a) => ({
+        ...a,
+        accountId: a.accountId || identity?.accountId,
+        region: a.region || identity?.region || ds.region,
+      })),
+      truncated: list.truncated,
+    };
   }
 
   /**
@@ -181,7 +203,7 @@ export class CloudWatchBackend {
       return await this.source.getCallerIdentity(ds.region);
     } catch (err) {
       // Identity is best-effort labeling; a failure here shouldn't blank rows.
-      this.logger.debug(`CloudWatch getCallerIdentity failed: ${(err as Error)?.message ?? err}`);
+      this.logger.debug(`CloudWatch getCallerIdentity failed: ${describeSourceError(err)}`);
       return undefined;
     }
   }
@@ -216,9 +238,7 @@ export class CloudWatchBackend {
         historyAccessDenied = true;
         alarm.partialAccess = true;
       } else {
-        this.logger.debug(
-          `CloudWatch alarm history failed for ${alarmName}: ${(err as Error)?.message ?? err}`
-        );
+        this.logger.debug(`CloudWatch alarm history failed: ${describeSourceError(err)}`);
       }
     }
 
@@ -250,10 +270,9 @@ export class CloudWatchBackend {
         }
         const stat = alarm.statistic || alarm.extendedStatistic || 'Average';
         const periodLabel = alarm.period ? `, ${alarm.period}s` : '';
-        // ALARM band: shade where the series actually breaches the threshold so
-        // the band aligns with the visible breach (matches the proposal). Fall
-        // back to reconstructing it from state history when there's no numeric
-        // threshold (e.g. anomaly-detection alarms).
+        // ALARM band: shade where the series breaches the threshold, so the band lines up with
+        // the visible breach. Without a numeric threshold (e.g. anomaly-detection alarms), fall
+        // back to reconstructing it from state history.
         const alarmBands =
           computeThresholdBreachBands(points, alarm.threshold, alarm.comparisonOperator) ||
           computeAlarmBands(history, startTimeMs, endTimeMs);
@@ -266,9 +285,7 @@ export class CloudWatchBackend {
         };
       } catch (err) {
         if (isAccessDenied(err)) alarm.partialAccess = true;
-        this.logger.debug(
-          `CloudWatch metric preview failed for ${alarmName}: ${(err as Error)?.message ?? err}`
-        );
+        this.logger.debug(`CloudWatch metric preview failed: ${describeSourceError(err)}`);
       }
     }
 
@@ -277,9 +294,7 @@ export class CloudWatchBackend {
     try {
       relationships = await this.buildRelationships(ds, alarm, DEFAULT_RELATIONSHIP_DEPTH);
     } catch (err) {
-      this.logger.debug(
-        `CloudWatch relationships failed for ${alarmName}: ${(err as Error)?.message ?? err}`
-      );
+      this.logger.debug(`CloudWatch relationships failed: ${describeSourceError(err)}`);
     }
 
     const causedBy = findCausingAlarm(alarm, relationships);
@@ -306,19 +321,32 @@ export class CloudWatchBackend {
       return { items, accessDenied: false };
     } catch (err) {
       if (isAccessDenied(err)) return { items: [], accessDenied: true };
-      throw createInternalError(
-        `Failed to read CloudWatch alarm history: ${(err as Error)?.message ?? err}`
-      );
+      // Rethrown as-is: the route classifies it by error name and returns the redacted form.
+      throw err;
     }
   }
 
   /**
-   * Build the parents + descendant tree for an alarm. Fetches the full alarm
-   * list once and traverses purely in memory so the graph walk is cycle-safe
-   * and doesn't issue a request per node.
+   * The relationships graph for one alarm, for the "load deeper" route: only the alarm itself
+   * is read first, not its full detail. Null when the alarm doesn't exist.
+   */
+  async getRelationships(
+    ds: Datasource,
+    alarmName: string,
+    depth?: number
+  ): Promise<CloudWatchRelationshipGraph | null> {
+    const alarm = await this.guarded(() => this.source.describeAlarm(alarmName, ds.region));
+    return alarm ? this.buildRelationships(ds, alarm, depth) : null;
+  }
+
+  /**
+   * Build the parents + descendant tree for an alarm, resolving alarms by name rather than from a
+   * full listing (which can be capped, and would then wrongly mark real alarms as deleted).
    *
+   * - Children: each level's referenced names are read in one batched call per 100 names.
+   * - Parents: the composites whose rule references this alarm, asked of the source directly.
    * - Cycle: a name already on the current path terminates with `cycle: true`.
-   * - Tombstone: a referenced name not present in the map → `deleted: true`.
+   * - Tombstone: a referenced name the source has no alarm for → `deleted: true`.
    * - Depth: beyond `depth`, a composite with children is marked `truncated`.
    */
   async buildRelationships(
@@ -327,11 +355,27 @@ export class CloudWatchBackend {
     depth: number = DEFAULT_RELATIONSHIP_DEPTH
   ): Promise<CloudWatchRelationshipGraph> {
     const cappedDepth = Math.min(Math.max(depth, 1), MAX_RELATIONSHIP_DEPTH);
-    const all = await this.guarded(() => this.source.describeAlarms({ region: ds.region }));
-    const byName = new Map<string, CloudWatchAlarm>();
-    for (const a of all) byName.set(a.alarmName, a);
-    // Ensure the focal alarm is present even if the list was filtered/capped.
-    if (!byName.has(alarm.alarmName)) byName.set(alarm.alarmName, alarm);
+    const byName = new Map<string, CloudWatchAlarm>([[alarm.alarmName, alarm]]);
+    const missing = new Set<string>();
+    const childRefsOf = (a: CloudWatchAlarm) =>
+      a.alarmType === 'composite' ? parseAlarmRuleReferences(a.alarmRule) : [];
+
+    // Breadth-first: read each level's unseen children, down to the depth the tree shows.
+    let frontier: CloudWatchAlarm[] = [alarm];
+    for (let level = 0; level < cappedDepth && frontier.length > 0; level++) {
+      const unseen = Array.from(
+        new Set(frontier.flatMap(childRefsOf).filter((n) => !byName.has(n) && !missing.has(n)))
+      );
+      const found: CloudWatchAlarm[] = [];
+      for (let k = 0; k < unseen.length; k += ALARM_NAMES_PER_CALL) {
+        const batch = unseen.slice(k, k + ALARM_NAMES_PER_CALL);
+        const alarms = await this.guarded(() => this.source.describeAlarmsByName(batch, ds.region));
+        found.push(...alarms);
+      }
+      for (const a of found) byName.set(a.alarmName, a);
+      for (const n of unseen) if (!byName.has(n)) missing.add(n);
+      frontier = found;
+    }
 
     let maxDepthReached = false;
 
@@ -343,10 +387,12 @@ export class CloudWatchBackend {
     ): CloudWatchRelationshipNode => {
       const found = byName.get(name);
       if (!found) {
-        return { alarmName: name, role, deleted: true };
+        // Only a name the source was asked for and had no alarm for is a tombstone.
+        return missing.has(name)
+          ? { alarmName: name, role, deleted: true }
+          : { alarmName: name, role };
       }
-      const childRefs =
-        found.alarmType === 'composite' ? parseAlarmRuleReferences(found.alarmRule) : [];
+      const childRefs = childRefsOf(found);
       const node: CloudWatchRelationshipNode = {
         alarmName: found.alarmName,
         alarmType: found.alarmType,
@@ -375,20 +421,17 @@ export class CloudWatchBackend {
     const tree = makeNode(alarm.alarmName, 'self', cappedDepth, new Set());
 
     // Parents: composite alarms whose rule references this alarm.
-    const parents: CloudWatchRelationshipNode[] = [];
-    for (const candidate of all) {
-      if (candidate.alarmType !== 'composite') continue;
-      if (candidate.alarmName === alarm.alarmName) continue;
-      const refs = parseAlarmRuleReferences(candidate.alarmRule);
-      if (refs.includes(alarm.alarmName)) {
-        parents.push({
-          alarmName: candidate.alarmName,
-          alarmType: 'composite',
-          stateValue: candidate.stateValue,
-          role: 'parent',
-        });
-      }
-    }
+    const parentAlarms = await this.guarded(() =>
+      this.source.describeParentAlarms(alarm.alarmName, ds.region)
+    );
+    const parents: CloudWatchRelationshipNode[] = parentAlarms
+      .filter((p) => p.alarmName !== alarm.alarmName)
+      .map((p) => ({
+        alarmName: p.alarmName,
+        alarmType: 'composite',
+        stateValue: p.stateValue,
+        role: 'parent',
+      }));
 
     return { parents, tree, maxDepthReached };
   }

@@ -35,7 +35,11 @@ export { rulerClassifier } from './classifiers/ruler';
 export { upstreamWrappedClassifier } from './classifiers/upstream_wrapped';
 export { httpStatusClassifier } from './classifiers/http_status';
 export { timeoutClassifier } from './classifiers/timeout';
-export { cloudWatchClassifier, CloudWatchErrorCode } from './classifiers/cloudwatch';
+export {
+  CLOUDWATCH_ACCESS_DENIED_ERROR_NAMES,
+  cloudWatchClassifier,
+  CloudWatchErrorCode,
+} from './classifiers/cloudwatch';
 export { rawDetails, stringifyRaw } from './classifiers/util';
 
 import { registerErrorClassifier } from './registry';

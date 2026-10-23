@@ -39,7 +39,10 @@ import {
   DirectQueryPrometheusBackend,
 } from '../services/alerting';
 import { CloudWatchBackend } from '../services/alerting/cloudwatch/cloudwatch_backend';
-import type { CloudWatchAlarmSourceFactory } from '../services/alerting/cloudwatch/types';
+import type {
+  CloudWatchAlarmSourceFactory,
+  CloudWatchFlagResolver,
+} from '../services/alerting/cloudwatch/types';
 
 export function setupRoutes({
   router,
@@ -53,7 +56,11 @@ export function setupRoutes({
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
   logger: Logger;
-  cloudWatch?: { enabled: boolean; region: string };
+  /**
+   * `isEnabled` is the per-request flag (`observability.cloudwatch.enabled`, dynamic config
+   * aware); `region` is the region the source queries (undefined: the source's default).
+   */
+  cloudWatch?: { isEnabled: CloudWatchFlagResolver; region?: string };
   /**
    * Reaches CloudWatch for one request. This plugin ships none: a deployment that can call
    * CloudWatch with the caller's credentials passes one (as it can pass a Prometheus backend).
@@ -110,19 +117,16 @@ export function setupRoutes({
   const rulerClient = new DirectQueryRulerClient(logger);
 
   // CloudWatch backend, built per request over the deployment's source so each call carries
-  // that caller's credentials. Experimental and fail dark: it needs both the config flag and a
-  // source; with either missing the virtual datasource, routes and UI stay off.
-  const cwEnabled = (cloudWatch?.enabled ?? false) && !!cloudWatchAlarmSourceFactory;
-  if ((cloudWatch?.enabled ?? false) && !cloudWatchAlarmSourceFactory) {
-    logger.info(
-      'observability.cloudwatch.enabled is set but no CloudWatch alarm source is available; ' +
-        'CloudWatch alarms stay off.'
-    );
-  }
+  // that caller's credentials. Experimental and fail dark: for each request it needs the flag on
+  // and the deployment's source to return a source; otherwise the virtual datasource, routes and
+  // UI stay off for that request. Resolved lazily, only when the CloudWatch datasource is used.
   const cwBackend =
-    cwEnabled && cloudWatchAlarmSourceFactory
-      ? (request: OpenSearchDashboardsRequest) =>
-          new CloudWatchBackend(logger, cloudWatchAlarmSourceFactory(request))
+    cloudWatch && cloudWatchAlarmSourceFactory
+      ? async (request: OpenSearchDashboardsRequest) => {
+          if (!(await cloudWatch.isEnabled(request))) return undefined;
+          const source = await cloudWatchAlarmSourceFactory(request);
+          return source ? new CloudWatchBackend(logger, source) : undefined;
+        }
       : undefined;
 
   registerAlertingRoutes(router, {
@@ -132,6 +136,6 @@ export function setupRoutes({
     logger,
     rulerClient,
     cwBackend,
-    cloudWatch: cloudWatch ? { enabled: cwEnabled, region: cloudWatch.region } : undefined,
+    cloudWatchRegion: cloudWatch?.region,
   });
 }

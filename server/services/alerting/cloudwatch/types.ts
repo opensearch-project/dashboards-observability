@@ -30,11 +30,17 @@ export class CloudWatchCredentialsError extends Error {
 
 /**
  * Builds a source for one request, so calls carry that caller's credentials and account.
- * Supplied by the deployment; see the file comment.
+ * Supplied by the deployment; see the file comment. It may decide per request: returning
+ * `undefined` (or resolving to it) turns CloudWatch off for that request, on the server (the
+ * virtual datasource, the unified fan-out and the `/api/alerting/cloudwatch/*` routes) and in
+ * the browser (the `cloudWatchAlarmsEnabled` capability).
  */
 export type CloudWatchAlarmSourceFactory = (
   request: OpenSearchDashboardsRequest
-) => CloudWatchAlarmSource;
+) => CloudWatchAlarmSource | undefined | Promise<CloudWatchAlarmSource | undefined>;
+
+/** The per-request CloudWatch flag (`observability.cloudwatch.enabled`, dynamic config aware). */
+export type CloudWatchFlagResolver = (request: OpenSearchDashboardsRequest) => Promise<boolean>;
 
 // The source contract itself is a plain type in common/ so a deployment's implementation can
 // import it alongside the other alerting types; re-exported here for server callers.

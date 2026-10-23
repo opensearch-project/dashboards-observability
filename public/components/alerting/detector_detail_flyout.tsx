@@ -123,7 +123,7 @@ const detectorFromSummary = (summary: UnifiedRuleSummary): ADDetector => ({
   detector_type: summary.labels.detector_type || summary.group,
   indices: summary.labels.indices ? summary.labels.indices.split(',') : undefined,
   time_field: summary.labels.time_field,
-  last_update_time: Date.parse(summary.lastModified),
+  last_update_time: Date.parse(summary.lastModified ?? ''),
   detection_interval: undefined,
   window_delay: undefined,
   feature_attributes: summary.annotations.features

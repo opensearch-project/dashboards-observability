@@ -44,32 +44,49 @@ function setup(extra: Record<string, unknown>) {
 beforeEach(() => jest.clearAllMocks());
 
 describe('setupRoutes CloudWatch alarms', () => {
-  it('stays off with the flag but no source', () => {
-    setup({ cloudWatch: { enabled: true, region: 'us-east-1' } });
+  const request = { headers: {} };
+
+  it('builds no backend without a source', () => {
+    setup({ cloudWatch: { isEnabled: async () => true, region: 'us-east-1' } });
     expect(alertingDeps().cwBackend).toBeUndefined();
-    expect(alertingDeps().cloudWatch).toEqual({ enabled: false, region: 'us-east-1' });
   });
 
-  it('stays off with a source but no flag', () => {
+  it('turns CloudWatch off for a request whose flag is off, without building a source', async () => {
+    const factory = jest.fn();
     setup({
-      cloudWatch: { enabled: false, region: 'us-east-1' },
-      cloudWatchAlarmSourceFactory: jest.fn(),
+      cloudWatch: { isEnabled: async () => false },
+      cloudWatchAlarmSourceFactory: factory,
     });
-    expect(alertingDeps().cwBackend).toBeUndefined();
+    await expect(alertingDeps().cwBackend(request)).resolves.toBeUndefined();
+    expect(factory).not.toHaveBeenCalled();
   });
 
-  it('builds the backend per request over the source when both are present', () => {
+  it('turns CloudWatch off for a request the source declines', async () => {
+    setup({
+      cloudWatch: { isEnabled: async () => true },
+      cloudWatchAlarmSourceFactory: jest.fn().mockResolvedValue(undefined),
+    });
+    await expect(alertingDeps().cwBackend(request)).resolves.toBeUndefined();
+  });
+
+  it('builds the backend per request over the source when the flag and source agree', async () => {
     const source = {} as CloudWatchAlarmSource;
     const factory = jest.fn().mockReturnValue(source);
     setup({
-      cloudWatch: { enabled: true, region: 'us-west-2' },
+      cloudWatch: { isEnabled: async () => true, region: 'us-west-2' },
       cloudWatchAlarmSourceFactory: factory,
     });
-    const { cwBackend, cloudWatch } = alertingDeps();
-    expect(cloudWatch).toEqual({ enabled: true, region: 'us-west-2' });
-    expect(typeof cwBackend).toBe('function');
-    const request = { headers: {} };
-    expect(cwBackend(request)).toBeInstanceOf(CloudWatchBackend);
+    const { cwBackend, cloudWatchRegion } = alertingDeps();
+    expect(cloudWatchRegion).toBe('us-west-2');
+    await expect(cwBackend(request)).resolves.toBeInstanceOf(CloudWatchBackend);
     expect(factory).toHaveBeenCalledWith(request);
+  });
+
+  it('leaves the region to the source when none is configured', () => {
+    setup({
+      cloudWatch: { isEnabled: async () => true },
+      cloudWatchAlarmSourceFactory: jest.fn(),
+    });
+    expect(alertingDeps().cloudWatchRegion).toBeUndefined();
   });
 });

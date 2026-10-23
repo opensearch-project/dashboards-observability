@@ -193,7 +193,17 @@ export interface DescribeAlarmsOptions {
 // per request, through `setupRoutes({ cloudWatchAlarmSourceFactory })`. Implementations translate
 // CloudWatch's responses into the shapes above, and report failures as errors whose `name` is
 // the AWS error name (e.g. `AccessDeniedException`) so permission handling and classification
-// work.
+// work. A request whose sign-in method carries no AWS credentials at all (so retrying can't
+// help) should fail with `CLOUDWATCH_SIGN_IN_UNSUPPORTED_ERROR_NAME`.
+
+/** Error `name` for "this sign-in method can't reach CloudWatch" (no AWS credentials exist). */
+export const CLOUDWATCH_SIGN_IN_UNSUPPORTED_ERROR_NAME = 'CloudWatchSignInUnsupported';
+
+/** A page of `describeAlarms`. `truncated` when more alarms exist than were returned. */
+export interface CloudWatchAlarmList {
+  alarms: CloudWatchAlarm[];
+  truncated: boolean;
+}
 
 export interface CloudWatchCallerIdentity {
   accountId: string;
@@ -228,14 +238,29 @@ export interface CloudWatchStateChangesQuery {
 }
 
 export interface CloudWatchAlarmSource {
-  /** The account + region the request's credentials reach. */
+  /**
+   * The account + region the request's credentials reach. Every `region` parameter below is
+   * optional: without one, the source uses its own default region.
+   */
   getCallerIdentity(region?: string): Promise<CloudWatchCallerIdentity>;
 
-  /** List metric + composite alarms (optionally filtered by state). */
-  describeAlarms(options?: DescribeAlarmsOptions): Promise<CloudWatchAlarm[]>;
+  /**
+   * List metric + composite alarms (optionally filtered by state), up to `maxItems`; `truncated`
+   * says more exist.
+   */
+  describeAlarms(options?: DescribeAlarmsOptions): Promise<CloudWatchAlarmList>;
 
   /** Fetch a single alarm by exact name (metric or composite). Null if absent. */
   describeAlarm(alarmName: string, region?: string): Promise<CloudWatchAlarm | null>;
+
+  /**
+   * The named alarms that exist (metric or composite), in any order; a name with no alarm is
+   * left out. Used to resolve a composite's children without listing every alarm.
+   */
+  describeAlarmsByName(alarmNames: string[], region?: string): Promise<CloudWatchAlarm[]>;
+
+  /** The composite alarms whose rule references `alarmName` (its parents). */
+  describeParentAlarms(alarmName: string, region?: string): Promise<CloudWatchAlarm[]>;
 
   /** State/config history for one alarm, newest first. */
   describeAlarmHistory(alarmName: string, region?: string): Promise<CloudWatchAlarmHistoryItem[]>;

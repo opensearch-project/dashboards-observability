@@ -1050,14 +1050,18 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                         'observability.alerting.monitorDetailFlyout.history.createdAt',
                         { defaultMessage: 'Created At' }
                       ),
-                      description: new Date(monitor.createdAt).toLocaleString(),
+                      description: monitor.createdAt
+                        ? new Date(monitor.createdAt).toLocaleString()
+                        : '—',
                     },
                     {
                       title: i18n.translate(
                         'observability.alerting.monitorDetailFlyout.history.lastModified',
                         { defaultMessage: 'Last Modified' }
                       ),
-                      description: new Date(monitor.lastModified).toLocaleString(),
+                      description: monitor.lastModified
+                        ? new Date(monitor.lastModified).toLocaleString()
+                        : '—',
                     },
                     {
                       title: i18n.translate(

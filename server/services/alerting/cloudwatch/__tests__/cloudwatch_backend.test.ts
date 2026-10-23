@@ -13,6 +13,7 @@
 import type {
   CloudWatchAlarm,
   CloudWatchAlarmHistoryItem,
+  CloudWatchAlarmList,
   CloudWatchMetricDataPoint,
   Datasource,
   DescribeAlarmsOptions,
@@ -76,10 +77,24 @@ class FakeSource implements CloudWatchAlarmSource {
     if (this.failWith.getCallerIdentity) throw this.failWith.getCallerIdentity;
     return this.identity;
   }
-  async describeAlarms(options?: DescribeAlarmsOptions): Promise<CloudWatchAlarm[]> {
+  truncated = false;
+  async describeAlarms(options?: DescribeAlarmsOptions): Promise<CloudWatchAlarmList> {
     if (this.failWith.describeAlarms) throw this.failWith.describeAlarms;
-    if (options?.stateValue) return this.alarms.filter((a) => a.stateValue === options.stateValue);
-    return this.alarms;
+    const alarms = options?.stateValue
+      ? this.alarms.filter((a) => a.stateValue === options.stateValue)
+      : this.alarms;
+    return { alarms, truncated: this.truncated };
+  }
+  async describeAlarmsByName(alarmNames: string[]): Promise<CloudWatchAlarm[]> {
+    if (this.failWith.describeAlarmsByName) throw this.failWith.describeAlarmsByName;
+    return this.alarms.filter((a) => alarmNames.includes(a.alarmName));
+  }
+  async describeParentAlarms(alarmName: string): Promise<CloudWatchAlarm[]> {
+    if (this.failWith.describeParentAlarms) throw this.failWith.describeParentAlarms;
+    return this.alarms.filter(
+      (a) =>
+        a.alarmType === 'composite' && parseAlarmRuleReferences(a.alarmRule).includes(alarmName)
+    );
   }
   async describeAlarm(alarmName: string): Promise<CloudWatchAlarm | null> {
     if (this.failWith.describeAlarm) throw this.failWith.describeAlarm;
@@ -174,9 +189,34 @@ describe('CloudWatchBackend.describeAlarms', () => {
     const source = new FakeSource();
     source.alarms = [alarm({ accountId: undefined, region: undefined })];
     const backend = new CloudWatchBackend(noopLogger, source);
-    const out = await backend.describeAlarms(ds);
+    const { alarms: out, truncated } = await backend.describeAlarms(ds);
     expect(out[0].accountId).toBe('123456789012');
     expect(out[0].region).toBe('us-east-1');
+    expect(truncated).toBe(false);
+  });
+
+  it("passes on the source's truncated flag", async () => {
+    const source = new FakeSource();
+    source.alarms = [alarm()];
+    source.truncated = true;
+    const backend = new CloudWatchBackend(noopLogger, source);
+    expect((await backend.describeAlarms(ds)).truncated).toBe(true);
+    expect((await backend.describeAlarmingAlarms(ds)).truncated).toBe(true);
+  });
+
+  it('logs only the error name and status, never provider text', async () => {
+    const source = new FakeSource();
+    const denied = Object.assign(
+      new Error('User: arn:aws:sts::123456789012:assumed-role/Admin/me is not authorized'),
+      { name: 'AccessDeniedException', $metadata: { httpStatusCode: 403 } }
+    );
+    source.failWith.describeAlarms = denied;
+    const logger = { info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() };
+    const backend = new CloudWatchBackend(logger, source);
+    await expect(backend.describeAlarms(ds)).rejects.toBe(denied);
+    const logged = JSON.stringify(logger.warn.mock.calls);
+    expect(logged).toContain('AccessDeniedException (HTTP 403)');
+    expect(logged).not.toContain('123456789012');
   });
 
   it('still returns rows when identity lookup fails (best-effort labeling)', async () => {
@@ -184,7 +224,7 @@ describe('CloudWatchBackend.describeAlarms', () => {
     source.alarms = [alarm({ accountId: undefined, region: undefined })];
     source.failWith.getCallerIdentity = new Error('sts down');
     const backend = new CloudWatchBackend(noopLogger, source);
-    const out = await backend.describeAlarms(ds);
+    const { alarms: out } = await backend.describeAlarms(ds);
     expect(out).toHaveLength(1);
     expect(out[0].accountId).toBeUndefined();
     expect(out[0].region).toBe('us-east-1'); // falls back to ds.region
@@ -399,6 +439,53 @@ describe('CloudWatchBackend.buildRelationships', () => {
     const aAgain = b?.children?.[0];
     expect(aAgain?.alarmName).toBe('a');
     expect(aAgain?.cycle).toBe(true);
+  });
+
+  it('resolves alarms by name, not from a (possibly capped) listing', async () => {
+    const source = compositeFixture();
+    // A capped listing would leave these out; by-name lookups still find them.
+    source.truncated = true;
+    const listSpy = jest.spyOn(source, 'describeAlarms');
+    const byNameSpy = jest.spyOn(source, 'describeAlarmsByName');
+    const backend = new CloudWatchBackend(noopLogger, source);
+    const graph = await backend.buildRelationships(ds, source.alarms[0], 3);
+    expect(listSpy).not.toHaveBeenCalled();
+    expect(byNameSpy).toHaveBeenNthCalledWith(1, ['mid', 'gone'], ds.region);
+    expect(byNameSpy).toHaveBeenNthCalledWith(2, ['leaf'], ds.region);
+    expect(graph.tree.children?.find((c) => c.alarmName === 'mid')?.deleted).toBeUndefined();
+    expect(graph.tree.children?.find((c) => c.alarmName === 'gone')?.deleted).toBe(true);
+  });
+
+  it('reads at most 100 names per call', async () => {
+    const source = new FakeSource();
+    const names = Array.from({ length: 150 }, (_, i) => `child-${i}`);
+    source.alarms = [
+      alarm({
+        alarmName: 'big',
+        alarmType: 'composite',
+        alarmRule: names.map((n) => `ALARM("${n}")`).join(' OR '),
+      }),
+      ...names.map((n) => alarm({ alarmName: n })),
+    ];
+    const byNameSpy = jest.spyOn(source, 'describeAlarmsByName');
+    const backend = new CloudWatchBackend(noopLogger, source);
+    const graph = await backend.buildRelationships(ds, source.alarms[0], 1);
+    expect(byNameSpy.mock.calls.map(([batch]) => batch.length)).toEqual([100, 50]);
+    expect(graph.tree.children).toHaveLength(150);
+  });
+});
+
+describe('CloudWatchBackend.getRelationships', () => {
+  it('reads only the alarm, not its history or metric data', async () => {
+    const source = new FakeSource();
+    source.alarms = [alarm({ alarmName: 'root', alarmType: 'composite', alarmRule: '' })];
+    const history = jest.spyOn(source, 'describeAlarmHistory');
+    const metric = jest.spyOn(source, 'getMetricData');
+    const backend = new CloudWatchBackend(noopLogger, source);
+    expect((await backend.getRelationships(ds, 'root'))?.tree.alarmName).toBe('root');
+    expect(await backend.getRelationships(ds, 'nope')).toBeNull();
+    expect(history).not.toHaveBeenCalled();
+    expect(metric).not.toHaveBeenCalled();
   });
 });
 

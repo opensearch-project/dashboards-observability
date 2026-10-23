@@ -1134,7 +1134,8 @@ export function cloudWatchStateToMonitorStatus(state: CloudWatchAlarmState): Mon
   // Distinct unified status (not `pending`): insufficient data means the alarm
   // cannot evaluate, which users filter for separately from Prom-style pending.
   if (state === 'INSUFFICIENT_DATA') return 'insufficient_data';
-  return 'muted'; // OK — steady state, rendered subdued like a non-firing rule
+  // OK is a healthy, evaluating alarm, not a user-muted monitor: its own status.
+  return 'ok';
 }
 
 /** Map a CloudWatch alarm state to a unified alert state (Alerts tab). */
@@ -1151,23 +1152,31 @@ export function cloudWatchHealthStatus(alarm: CloudWatchAlarm): MonitorHealthSta
 }
 
 /**
- * Severity for a CloudWatch alarm. CloudWatch has no native severity, so we
- * derive it: ALARM composites/critical-named alarms → critical; ALARM metric
- * alarms → medium unless the name/description hints otherwise; non-ALARM → info.
- * A `severity` hint could later be sourced from alarm tags.
+ * Severity for a CloudWatch alarm. CloudWatch has no native severity, so it is a constant
+ * default (`medium`) unless the alarm's name or description names one (critical / sev1 / p0 →
+ * critical, warn → low). It doesn't depend on the alarm's state, so severity filters stay put
+ * as alarms change state. A severity from alarm tags could later override it.
  */
+export const CLOUDWATCH_DEFAULT_SEVERITY: UnifiedAlertSeverity = 'medium';
+
 export function cloudWatchSeverity(alarm: CloudWatchAlarm): UnifiedAlertSeverity {
   const hint = `${alarm.alarmName} ${alarm.description || ''}`.toLowerCase();
-  if (/\bcritical\b|\bsev1\b|\bsev-1\b|\bp0\b|\bpage\b/.test(hint)) return 'critical';
-  if (alarm.stateValue === 'ALARM') {
-    return alarm.alarmType === 'composite' ? 'critical' : 'medium';
-  }
-  if (/\bwarn/.test(hint)) return 'medium';
-  return 'info';
+  if (/\bcritical\b|\bsev-?1\b|\bp0\b/.test(hint)) return 'critical';
+  if (/\bwarn(ing)?\b/.test(hint)) return 'low';
+  return CLOUDWATCH_DEFAULT_SEVERITY;
+}
+
+/**
+ * A row id that stays unique across regions and accounts: the alarm ARN, else the region and
+ * name. The alarm name itself rides on `cloudWatch.alarmName`.
+ */
+export function cloudWatchRowId(alarm: CloudWatchAlarm): string {
+  return alarm.alarmArn || `${alarm.region ?? ''}:${alarm.alarmName}`;
 }
 
 function cloudWatchMeta(alarm: CloudWatchAlarm): UnifiedCloudWatchMeta {
   return {
+    alarmName: alarm.alarmName,
     state: alarm.stateValue,
     alarmType: alarm.alarmType,
     accountId: alarm.accountId,
@@ -1201,7 +1210,7 @@ export function cloudWatchAlarmToUnifiedRuleSummary(
 ): UnifiedRuleSummary {
   const meta = cloudWatchMeta(alarm);
   return {
-    id: alarm.alarmName,
+    id: cloudWatchRowId(alarm),
     datasourceId: dsId,
     datasourceType: 'cloudwatch',
     definitionType: 'cloudwatch_alarm',
@@ -1224,8 +1233,10 @@ export function cloudWatchAlarmToUnifiedRuleSummary(
     status: cloudWatchStateToMonitorStatus(alarm.stateValue),
     healthStatus: cloudWatchHealthStatus(alarm),
     createdBy: 'cloudwatch',
-    createdAt: alarm.stateUpdatedTimestamp || new Date().toISOString(),
-    lastModified: alarm.stateUpdatedTimestamp || new Date().toISOString(),
+    // CloudWatch doesn't report when an alarm was created or last edited (the state-change time
+    // is neither), so these stay unset rather than wrong.
+    createdAt: undefined,
+    lastModified: undefined,
     lastTriggered: alarm.stateValue === 'ALARM' ? alarm.stateUpdatedTimestamp : undefined,
     notificationDestinations: alarm.alarmActions || [],
     evaluationInterval: alarm.period ? `${alarm.period}s` : '—',
@@ -1245,7 +1256,7 @@ export function cloudWatchAlarmToUnifiedAlertSummary(
   dsId: string
 ): UnifiedAlertSummary {
   return {
-    id: alarm.alarmName,
+    id: cloudWatchRowId(alarm),
     datasourceId: dsId,
     datasourceType: 'cloudwatch',
     alertKind: 'alert',

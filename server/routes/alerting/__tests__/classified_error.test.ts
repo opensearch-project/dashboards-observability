@@ -144,3 +144,35 @@ describe('classifyToHandlerResult', () => {
     expect(exposedDetail.details?.some((d) => d.sensitivity === 'sensitive')).toBe(true);
   });
 });
+
+describe('classifyToHandlerResult for CloudWatch', () => {
+  const providerError = () =>
+    Object.assign(
+      new Error(
+        'User: arn:aws:sts::123456789012:assumed-role/Admin/me is not authorized to perform: cloudwatch:DescribeAlarms'
+      ),
+      { name: 'AccessDeniedException', $metadata: { httpStatusCode: 403 } }
+    );
+
+  it('logs only the error name, status and correlation id, never provider text', () => {
+    classifyToHandlerResult(providerError(), {
+      operation: 'cloudwatch.alarm.detail',
+      logger,
+      sourceType: 'cloudwatch',
+    });
+    const line = (logger.error as jest.Mock).mock.calls[0][0] as string;
+    expect(line).toContain('correlationId=');
+    expect(line).toContain('AccessDeniedException');
+    expect(line).not.toContain('123456789012');
+  });
+
+  it('keeps provider text out of the response even when sensitive detail is exposed', () => {
+    configureErrorExposure(true);
+    const result = classifyToHandlerResult(providerError(), {
+      operation: 'cloudwatch.alarm.detail',
+      logger,
+      sourceType: 'cloudwatch',
+    });
+    expect(JSON.stringify(result.body)).not.toContain('123456789012');
+  });
+});

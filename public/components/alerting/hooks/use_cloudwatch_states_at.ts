@@ -106,7 +106,8 @@ export function useCloudWatchStatesAt({
       if (!result) return undefined;
       if (result.beyondRetention) return { atMs: result.atMs, complete: true };
       // Alarms that haven't changed since the window end are still in their current state.
-      const state = result.states[rule.id] ?? rule.cloudWatch?.state;
+      const name = rule.cloudWatch?.alarmName ?? rule.name;
+      const state = result.states[name] ?? rule.cloudWatch?.state;
       if (!state) return undefined;
       return { state, atMs: result.atMs, complete: result.complete };
     },

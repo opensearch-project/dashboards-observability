@@ -45,7 +45,7 @@ import {
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
 import { parseDateMathMs, computeStep } from '../../../common/services/alerting';
-import { classifyError, toClientPayload, ErrorCode } from '../../../common/error';
+import { classifyError, toClientPayload, ErrorCode, redactForDisplay } from '../../../common/error';
 import type { ClassifiedError } from '../../../common/error';
 import { TimeoutError } from './timeout_error';
 import { extractErrorMessage, isStatusCode } from './errors';
@@ -68,6 +68,7 @@ import {
   promRuleToUnified,
   requireDatasource as requireDatasourceImpl,
 } from './alert_utils';
+import { describeSourceError } from './cloudwatch/cloudwatch_backend';
 import type { CloudWatchBackend } from './cloudwatch/cloudwatch_backend';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
@@ -130,6 +131,30 @@ export function classifyDatasourceFailure(
   if (classified.code === ErrorCode.UNKNOWN_ERROR) return undefined;
   return toClientPayload(classified, { exposeSensitive: false });
 }
+
+/**
+ * The `error` text for a datasource's failed fetch. CloudWatch errors can carry principal
+ * identifiers and account numbers, so for that datasource type it is the classified title (or the
+ * redacted message), never the raw provider text.
+ */
+export function datasourceErrorText(
+  err: unknown,
+  ds: Datasource,
+  errorDetail?: ClassifiedError
+): string {
+  const message = extractErrorMessage(err);
+  if (ds.type !== 'cloudwatch') return message;
+  return errorDetail?.title ?? redactForDisplay(message);
+}
+
+/** What a failed datasource fetch may log: CloudWatch failures by name and status only. */
+function datasourceErrorForLog(err: unknown, ds: Datasource): string {
+  return ds.type === 'cloudwatch' ? describeSourceError(err) : extractErrorMessage(err);
+}
+
+/** The CloudWatch backend for a request: an instance, or resolved lazily on first use. */
+export type CloudWatchBackendProvider =
+  CloudWatchBackend | (() => Promise<CloudWatchBackend | undefined>);
 
 export async function runWithConcurrencyLimit<T>(
   tasks: Array<() => Promise<T>>,
@@ -337,7 +362,8 @@ function resolveRangeMsFromOptions(options?: {
 export class MultiBackendAlertService {
   private osBackend?: OpenSearchBackend;
   private promBackend?: PrometheusBackend;
-  private cwBackend?: CloudWatchBackend;
+  private cwBackendProvider?: CloudWatchBackendProvider;
+  private cwBackendPromise?: Promise<CloudWatchBackend | undefined>;
 
   constructor(
     private readonly datasourceService: DatasourceService,
@@ -362,13 +388,23 @@ export class MultiBackendAlertService {
     this.logger.debug('Registered Prometheus alerting backend');
   }
 
-  /** Access the CloudWatch backend (e.g. for the alarm detail routes). */
-  getCloudWatchBackend(): CloudWatchBackend | undefined {
-    return this.cwBackend;
+  /**
+   * The CloudWatch backend, resolved once per service on first use, so requests that never touch
+   * the CloudWatch datasource never build one.
+   */
+  getCloudWatchBackend(): Promise<CloudWatchBackend | undefined> {
+    if (!this.cwBackendProvider) return Promise.resolve(undefined);
+    if (!this.cwBackendPromise) {
+      const provider = this.cwBackendProvider;
+      this.cwBackendPromise =
+        typeof provider === 'function' ? provider() : Promise.resolve(provider);
+    }
+    return this.cwBackendPromise;
   }
 
-  registerCloudWatch(backend: CloudWatchBackend): void {
-    this.cwBackend = backend;
+  registerCloudWatch(provider: CloudWatchBackendProvider): void {
+    this.cwBackendProvider = provider;
+    this.cwBackendPromise = undefined;
     // `debug` (not `info`): see registerOpenSearch.
     this.logger.debug('Registered CloudWatch alerting backend');
   }
@@ -495,7 +531,13 @@ export class MultiBackendAlertService {
     const isResolver = typeof clientOrResolver === 'function';
     const dsResults = await runWithConcurrencyLimit(
       datasources.map((ds) => async () => {
-        const client = isResolver ? await clientOrResolver(ds.id) : clientOrResolver;
+        // The virtual CloudWatch datasource goes through its own source, not an OpenSearch client.
+        const client =
+          ds.type === 'cloudwatch'
+            ? undefined
+            : isResolver
+              ? await clientOrResolver(ds.id)
+              : clientOrResolver;
         return this.fetchAlertsFromDatasource(
           client,
           ds,
@@ -523,7 +565,6 @@ export class MultiBackendAlertService {
           datasourceType: datasources[i].type,
           status: 'error',
           data: [],
-          error: extractErrorMessage(settled.reason),
           errorDetail: classifyDatasourceFailure(
             settled.reason,
             datasources[i],
@@ -531,6 +572,11 @@ export class MultiBackendAlertService {
           ),
           durationMs: timeoutMs,
         };
+        errResult.error = datasourceErrorText(
+          settled.reason,
+          datasources[i],
+          errResult.errorDetail
+        );
         statusList.push(errResult);
       }
     }
@@ -556,7 +602,13 @@ export class MultiBackendAlertService {
     const isResolver = typeof clientOrResolver === 'function';
     const dsResults = await runWithConcurrencyLimit(
       datasources.map((ds) => async () => {
-        const client = isResolver ? await clientOrResolver(ds.id) : clientOrResolver;
+        // The virtual CloudWatch datasource goes through its own source, not an OpenSearch client.
+        const client =
+          ds.type === 'cloudwatch'
+            ? undefined
+            : isResolver
+              ? await clientOrResolver(ds.id)
+              : clientOrResolver;
         return this.fetchRulesFromDatasource(client, ds, timeoutMs, options?.onProgress);
       })
     );
@@ -576,7 +628,6 @@ export class MultiBackendAlertService {
           datasourceType: datasources[i].type,
           status: 'error',
           data: [],
-          error: extractErrorMessage(settled.reason),
           errorDetail: classifyDatasourceFailure(
             settled.reason,
             datasources[i],
@@ -584,6 +635,11 @@ export class MultiBackendAlertService {
           ),
           durationMs: timeoutMs,
         };
+        errResult.error = datasourceErrorText(
+          settled.reason,
+          datasources[i],
+          errResult.errorDetail
+        );
         statusList.push(errResult);
       }
     }
@@ -655,7 +711,7 @@ export class MultiBackendAlertService {
   // =========================================================================
 
   private async fetchAlertsFromDatasource(
-    client: AlertingOSClient,
+    client: AlertingOSClient | undefined,
     ds: Datasource,
     timeoutMs: number,
     range: ResolvedRange | undefined,
@@ -700,17 +756,23 @@ export class MultiBackendAlertService {
       return result;
     } catch (err) {
       const isTimeout = err instanceof TimeoutError;
-      const result = makeResult(isTimeout ? 'timeout' : 'error', [], extractErrorMessage(err), {
-        errorDetail: classifyDatasourceFailure(err, ds, 'unified.alerts.fetch'),
-      });
-      this.logger.error(`Failed to fetch alerts from ${ds.name}: ${extractErrorMessage(err)}`);
+      const errorDetail = classifyDatasourceFailure(err, ds, 'unified.alerts.fetch');
+      const result = makeResult(
+        isTimeout ? 'timeout' : 'error',
+        [],
+        datasourceErrorText(err, ds, errorDetail),
+        { errorDetail }
+      );
+      this.logger.error(
+        `Failed to fetch alerts from ${ds.name}: ${datasourceErrorForLog(err, ds)}`
+      );
       if (onProgress) onProgress(result);
       return result;
     }
   }
 
   private async fetchRulesFromDatasource(
-    client: AlertingOSClient,
+    client: AlertingOSClient | undefined,
     ds: Datasource,
     timeoutMs: number,
     onProgress?: (result: DatasourceFetchResult<UnifiedRuleSummary>) => void
@@ -720,7 +782,8 @@ export class MultiBackendAlertService {
       status: DatasourceFetchStatus,
       data: UnifiedRuleSummary[],
       error?: string,
-      errorDetail?: ClassifiedError
+      errorDetail?: ClassifiedError,
+      truncated?: boolean
     ): DatasourceFetchResult<UnifiedRuleSummary> => ({
       datasourceId: ds.id,
       datasourceName: ds.name,
@@ -730,26 +793,27 @@ export class MultiBackendAlertService {
       error,
       durationMs: Date.now() - start,
       ...(errorDetail !== undefined ? { errorDetail } : {}),
+      ...(truncated ? { truncated } : {}),
     });
-
     try {
-      const data = await this.withTimeout(
+      const { rules, truncated } = await this.withTimeout(
         this.fetchRulesRaw(client, ds),
         timeoutMs,
         `Datasource ${ds.name} timed out after ${timeoutMs}ms`
       );
-      const result = makeResult('success', data);
+      const result = makeResult('success', rules, undefined, undefined, truncated);
       if (onProgress) onProgress(result);
       return result;
     } catch (err) {
       const isTimeout = err instanceof TimeoutError;
+      const errorDetail = classifyDatasourceFailure(err, ds, 'unified.rules.fetch');
       const result = makeResult(
         isTimeout ? 'timeout' : 'error',
         [],
-        extractErrorMessage(err),
-        classifyDatasourceFailure(err, ds, 'unified.rules.fetch')
+        datasourceErrorText(err, ds, errorDetail),
+        errorDetail
       );
-      this.logger.error(`Failed to fetch rules from ${ds.name}: ${extractErrorMessage(err)}`);
+      this.logger.error(`Failed to fetch rules from ${ds.name}: ${datasourceErrorForLog(err, ds)}`);
       if (onProgress) onProgress(result);
       return result;
     }
@@ -774,12 +838,27 @@ export class MultiBackendAlertService {
    *                            (current-active only).
    */
   private async fetchAlertsRaw(
-    client: AlertingOSClient,
+    maybeClient: AlertingOSClient | undefined,
     ds: Datasource,
     range?: ResolvedRange,
     ctx?: RequestHandlerContext,
     sourceRequest?: OpenSearchDashboardsRequest
   ): Promise<FetchAlertsRawResult> {
+    if (ds.type === 'cloudwatch') {
+      // CloudWatch alarms surface in the Alerts tab only when currently in
+      // ALARM. The range is intentionally ignored: CloudWatch alarm listing is
+      // point-in-time (DescribeAlarms has no historical-firing query), so we
+      // return what is breaching now rather than reconstructing episodes.
+      const cwBackend = await this.getCloudWatchBackend();
+      if (!cwBackend) return { alerts: [] };
+      const { alarms, truncated } = await cwBackend.describeAlarmingAlarms(ds);
+      return {
+        alerts: alarms.map((a) => cloudWatchAlarmToUnifiedAlertSummary(a, ds.id)),
+        ...(truncated ? { truncated } : {}),
+      };
+    }
+    if (!maybeClient) throw new Error(`No OpenSearch client for datasource ${ds.name}`);
+    const client = maybeClient;
     if (ds.type === 'opensearch' && this.osBackend) {
       const partialErrors: string[] = [];
       const [alertSettled, anomalySettled, detectorSettled, monitorSettled] =
@@ -894,15 +973,6 @@ export class MultiBackendAlertService {
       }
       const alerts = await this.promBackend.getAlerts(client, ds);
       return { alerts: alerts.map((a) => promAlertToUnified(a, ds.id)) };
-    }
-
-    if (ds.type === 'cloudwatch' && this.cwBackend) {
-      // CloudWatch alarms surface in the Alerts tab only when currently in
-      // ALARM. The range is intentionally ignored: CloudWatch alarm listing is
-      // point-in-time (DescribeAlarms has no historical-firing query), so we
-      // return what is breaching now rather than reconstructing episodes.
-      const alarms = await this.cwBackend.describeAlarmingAlarms(ds);
-      return { alerts: alarms.map((a) => cloudWatchAlarmToUnifiedAlertSummary(a, ds.id)) };
     }
 
     return { alerts: [] };
@@ -1108,9 +1178,20 @@ export class MultiBackendAlertService {
   }
 
   private async fetchRulesRaw(
-    client: AlertingOSClient,
+    maybeClient: AlertingOSClient | undefined,
     ds: Datasource
-  ): Promise<UnifiedRuleSummary[]> {
+  ): Promise<{ rules: UnifiedRuleSummary[]; truncated?: boolean }> {
+    if (ds.type === 'cloudwatch') {
+      const cwBackend = await this.getCloudWatchBackend();
+      if (!cwBackend) return { rules: [] };
+      const { alarms, truncated } = await cwBackend.describeAlarms(ds);
+      return {
+        rules: alarms.map((a) => cloudWatchAlarmToUnifiedRuleSummary(a, ds.id)),
+        truncated,
+      };
+    }
+    if (!maybeClient) throw new Error(`No OpenSearch client for datasource ${ds.name}`);
+    const client = maybeClient;
     const results: UnifiedRuleSummary[] = [];
     if (ds.type === 'opensearch' && this.osBackend) {
       const monitors = await this.osBackend.getMonitors(client);
@@ -1136,11 +1217,8 @@ export class MultiBackendAlertService {
           if (r.type === 'alerting') results.push(promRuleToUnified(r, g.name, ds.id, g.interval));
         }
       }
-    } else if (ds.type === 'cloudwatch' && this.cwBackend) {
-      const alarms = await this.cwBackend.describeAlarms(ds);
-      for (const a of alarms) results.push(cloudWatchAlarmToUnifiedRuleSummary(a, ds.id));
     }
-    return results;
+    return { rules: results };
   }
 
   private async fetchADDetectors(client: AlertingOSClient): Promise<ADDetector[]> {

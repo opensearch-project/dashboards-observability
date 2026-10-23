@@ -123,15 +123,15 @@ function stateHealthColor(state?: CloudWatchAlarmState): string {
 
 /**
  * Client-side severity for a CloudWatch alarm, mirroring the server mapper
- * (`cloudWatchSeverity`). Used for the header badge when navigating to a
- * related alarm whose severity wasn't carried on the originating row.
+ * (`cloudWatchSeverity`): a constant default unless the name or description names one. Used for
+ * the header badge when navigating to a related alarm whose severity wasn't carried on the
+ * originating row.
  */
 function deriveSeverity(alarm: CloudWatchAlarm): UnifiedAlertSeverity {
   const hint = `${alarm.alarmName} ${alarm.description || ''}`.toLowerCase();
-  if (/\bcritical\b|\bsev1\b|\bsev-1\b|\bp0\b|\bpage\b/.test(hint)) return 'critical';
-  if (alarm.stateValue === 'ALARM') return alarm.alarmType === 'composite' ? 'critical' : 'medium';
-  if (/\bwarn/.test(hint)) return 'medium';
-  return 'info';
+  if (/\bcritical\b|\bsev-?1\b|\bp0\b/.test(hint)) return 'critical';
+  if (/\bwarn(ing)?\b/.test(hint)) return 'low';
+  return 'medium';
 }
 
 // ============================================================================
@@ -139,6 +139,31 @@ function deriveSeverity(alarm: CloudWatchAlarm): UnifiedAlertSeverity {
 // ============================================================================
 
 const METRIC_LINE_COLOR = '#006BB4';
+const THRESHOLD_LABEL = i18n.translate('observability.alerting.cloudwatch.legendThreshold', {
+  defaultMessage: 'Threshold',
+});
+const STATE_BAND_LABEL = i18n.translate('observability.alerting.cloudwatch.legendStateBand', {
+  defaultMessage: 'State band',
+});
+
+/**
+ * "Composite" / "Metric", in theme colors (`accent` follows light and dark themes, unlike a
+ * fixed hex).
+ */
+const AlarmTypeBadge: React.FC<{ alarmType?: CloudWatchAlarmType }> = ({ alarmType }) =>
+  alarmType === 'composite' ? (
+    <EuiBadge color="accent">
+      {i18n.translate('observability.alerting.cloudwatch.alarmTypeComposite', {
+        defaultMessage: 'Composite',
+      })}
+    </EuiBadge>
+  ) : (
+    <EuiBadge color="hollow">
+      {i18n.translate('observability.alerting.cloudwatch.alarmTypeMetric', {
+        defaultMessage: 'Metric',
+      })}
+    </EuiBadge>
+  );
 const STATE_BAND_FILL = 'rgba(189,39,30,0.12)';
 
 function buildMetricPreviewSpec(preview: CloudWatchMetricPreview): echarts.EChartsOption {
@@ -150,7 +175,10 @@ function buildMetricPreviewSpec(preview: CloudWatchMetricPreview): echarts.EChar
           {
             yAxis: preview.threshold,
             label: {
-              formatter: `threshold ${preview.threshold}`,
+              formatter: i18n.translate('observability.alerting.cloudwatch.thresholdLine', {
+                defaultMessage: 'threshold {value}',
+                values: { value: preview.threshold },
+              }),
               position: 'insideStartTop' as const,
             },
             lineStyle: { color: STATE_HEX.ALARM, type: 'dashed' as const, width: 1.5 },
@@ -162,7 +190,7 @@ function buildMetricPreviewSpec(preview: CloudWatchMetricPreview): echarts.EChar
     {
       xAxis: band[0],
       itemStyle: { color: STATE_BAND_FILL },
-      // Label the first band "ALARM" like the proposal; keep the rest unlabeled.
+      // Label only the first band "ALARM", so repeated breaches don't stack labels.
       label:
         i === 0
           ? {
@@ -181,7 +209,7 @@ function buildMetricPreviewSpec(preview: CloudWatchMetricPreview): echarts.EChar
     tooltip: { trigger: 'axis' },
     legend: {
       bottom: 0,
-      data: [seriesName, 'Threshold', 'State band'],
+      data: [seriesName, THRESHOLD_LABEL, STATE_BAND_LABEL],
       icon: 'roundRect',
     },
     xAxis: { type: 'time' },
@@ -204,14 +232,14 @@ function buildMetricPreviewSpec(preview: CloudWatchMetricPreview): echarts.EChar
       // Legend-only phantom series so "Threshold" and "State band" appear in the
       // legend with the correct swatch colors (markLine/markArea can't legend).
       {
-        name: 'Threshold',
+        name: THRESHOLD_LABEL,
         type: 'line',
         data: [],
         lineStyle: { color: STATE_HEX.ALARM, type: 'dashed' },
         itemStyle: { color: STATE_HEX.ALARM },
       },
       {
-        name: 'State band',
+        name: STATE_BAND_LABEL,
         type: 'line',
         data: [],
         lineStyle: { color: STATE_BAND_FILL },
@@ -244,9 +272,7 @@ const RelationshipRow: React.FC<{
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
           {node.alarmType && (
             <EuiFlexItem grow={false}>
-              <EuiBadge color={node.alarmType === 'composite' ? '#E0D6FB' : 'hollow'}>
-                {node.alarmType === 'composite' ? 'Composite' : 'Metric'}
-              </EuiBadge>
+              <AlarmTypeBadge alarmType={node.alarmType} />
             </EuiFlexItem>
           )}
           {/* minWidth 0 + overflowWrap lets long unbroken alarm names wrap
@@ -560,7 +586,8 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
   // entry is the alarm the flyout opened on.
   const [stack, setStack] = useState<CloudWatchAlarmFlyoutRow[]>([rule]);
   const current = stack[stack.length - 1];
-  const alarmName = current.id;
+  // Rows from the tables carry a region/account-qualified id; the alarm name is on the meta.
+  const alarmName = current.cloudWatch?.alarmName ?? current.name;
   const { detail, isLoading, error, classifiedError, retry, windowRejected } =
     useCloudWatchAlarmDetail({
       dsId,
@@ -699,9 +726,7 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
                 </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color={alarmType === 'composite' ? '#E0D6FB' : 'hollow'}>
-                  {alarmType === 'composite' ? 'Composite' : 'Metric'}
-                </EuiBadge>
+                <AlarmTypeBadge alarmType={alarmType} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
@@ -1061,7 +1086,7 @@ function renderMetricBody(
                   </EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="#E0D6FB">Composite</EuiBadge>
+                  <AlarmTypeBadge alarmType="composite" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false} style={{ minWidth: 0, overflowWrap: 'anywhere' }}>
                   <EuiLink onClick={() => onOpen(p)}>{p.alarmName}</EuiLink>

@@ -38,11 +38,11 @@ import {
 import { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
 import { MonitorMutationService } from '../../services/alerting/monitor_mutation_service';
 import { stripTrailingComparison } from '../../services/alerting/alert_utils';
-import type { CloudWatchBackend } from '../../services/alerting/cloudwatch/cloudwatch_backend';
 import {
-  CLOUDWATCH_DATASOURCE_ID,
-  type CloudWatchDatasourceConfig,
-} from '../../services/alerting/saved_object_datasource_service';
+  describeSourceError,
+  type CloudWatchBackend,
+} from '../../services/alerting/cloudwatch/cloudwatch_backend';
+import { TimeoutError } from '../../services/alerting/timeout_error';
 import { registerAlertingMutationRoutes } from './mutations';
 import { classifyToHandlerResult } from './classified_error';
 import { toErrorBody, toHandlerResult } from './route_utils';
@@ -113,15 +113,28 @@ export interface AlertingRoutesDeps {
    */
   rulerClient?: import('../../services/slo/ruler_client').RulerClient;
   /**
-   * CloudWatch alarms backend. When provided, the virtual CloudWatch datasource
-   * is registered on each per-request alert service and the CloudWatch alarm
-   * detail routes are wired. `setupRoutes` passes a per-request factory over
-   * the deployment's `CloudWatchAlarmSourceFactory`, so each call carries that
-   * caller's credentials; a shared instance is accepted for tests.
+   * CloudWatch alarms backend. `setupRoutes` passes a per-request resolver over the
+   * deployment's `CloudWatchAlarmSourceFactory` and the per-request flag, so each call carries
+   * that caller's credentials and the gate is enforced server-side per request (`undefined`:
+   * CloudWatch is off for that request). A shared instance is accepted for tests.
    */
-  cwBackend?: CloudWatchBackend | ((request: OpenSearchDashboardsRequest) => CloudWatchBackend);
-  /** Virtual CloudWatch datasource config (enabled + region). */
-  cloudWatch?: CloudWatchDatasourceConfig;
+  cwBackend?:
+    | CloudWatchBackend
+    | ((request: OpenSearchDashboardsRequest) => Promise<CloudWatchBackend | undefined>);
+  /** The region the CloudWatch source queries; undefined lets the source use its default. */
+  cloudWatchRegion?: string;
+}
+
+/** Upper bound on one CloudWatch detail route; CloudWatch calls themselves have no timeout here. */
+const CLOUDWATCH_DETAIL_TIMEOUT_MS = 30_000;
+
+/** Rejects with a `TimeoutError` (classified as a timeout) when `promise` takes over `ms`. */
+function withRouteTimeout<T>(promise: Promise<T>, ms: number, what: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new TimeoutError(`${what} timed out after ${ms}ms`, ms)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 /**
@@ -264,13 +277,7 @@ export async function getAlertingClient(
   if (dsId === 'local-cluster') {
     return ctx.core.opensearch.client.asCurrentUser;
   }
-  // The virtual CloudWatch datasource does not use an OpenSearch client at all
-  // (the CloudWatch backend goes through its own source). The unified fan-out still
-  // resolves a client per datasource id before dispatch, so return the local
-  // client as a harmless placeholder rather than throwing "not found".
-  if (dsId === CLOUDWATCH_DATASOURCE_ID) {
-    return ctx.core.opensearch.client.asCurrentUser;
-  }
+
   if (dsId && ctx.dataSource) {
     const ds = await resolveOpenSearchDatasource(ctx, dsId);
     if (ds?.mdsId) {
@@ -320,8 +327,24 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
    * shared instance (tests) or a per-request factory (what `setupRoutes` passes,
    * so each call carries the caller's credentials).
    */
-  function resolveCwBackend(request: OpenSearchDashboardsRequest): CloudWatchBackend | undefined {
-    return typeof deps.cwBackend === 'function' ? deps.cwBackend(request) : deps.cwBackend;
+  const cwBackendByRequest = new WeakMap<object, Promise<CloudWatchBackend | undefined>>();
+  function resolveCwBackend(
+    request: OpenSearchDashboardsRequest
+  ): Promise<CloudWatchBackend | undefined> {
+    const provider = deps.cwBackend;
+    if (typeof provider !== 'function') return Promise.resolve(provider);
+    // Once per request: the listing, the fan-out and a detail route all ask.
+    let backend = cwBackendByRequest.get(request);
+    if (!backend) {
+      backend = provider(request).catch((err) => {
+        logger.warn(
+          `CloudWatch gate failed; CloudWatch is off for this request: ${describeSourceError(err)}`
+        );
+        return undefined;
+      });
+      cwBackendByRequest.set(request, backend);
+    }
+    return backend;
   }
 
   function buildRequestServices(
@@ -332,16 +355,22 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     metadataService: PrometheusMetadataService;
     datasourceService: SavedObjectDatasourceService;
   } {
+    // CloudWatch is resolved lazily: only a request that lists datasources or reads CloudWatch
+    // builds the source, and the listing, fan-out and detail routes share one resolution.
     const datasourceService = new SavedObjectDatasourceService(
       ctx.core.savedObjects.client,
       logger,
-      deps.cloudWatch
+      deps.cwBackend
+        ? {
+            enabled: () => resolveCwBackend(request).then((backend) => !!backend),
+            region: deps.cloudWatchRegion,
+          }
+        : undefined
     );
     const alertService = new MultiBackendAlertService(datasourceService, logger);
     alertService.registerOpenSearch(osBackend);
     alertService.registerPrometheus(promBackend);
-    const cwBackend = resolveCwBackend(request);
-    if (cwBackend) alertService.registerCloudWatch(cwBackend);
+    if (deps.cwBackend) alertService.registerCloudWatch(() => resolveCwBackend(request));
     const metadataService = new PrometheusMetadataService(promBackend, datasourceService, logger);
     return { alertService, metadataService, datasourceService };
   }
@@ -887,9 +916,9 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     request: OpenSearchDashboardsRequest,
     dsId: string
   ) => {
-    const cwBackend = resolveCwBackend(request);
+    const cwBackend = await resolveCwBackend(request);
     if (!cwBackend) {
-      throw createNotFoundError('CloudWatch alarms are not enabled on this deployment');
+      throw createNotFoundError('CloudWatch alarms are not enabled for this request');
     }
     const { datasourceService } = buildRequestServices(ctx, request);
     const ds = await datasourceService.get(dsId);
@@ -921,17 +950,26 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           req.params.dsId
         );
         const atMs = parseDateMathMs(req.query.at, /* isEndTime */ true);
-        return { status: 200, body: await cwBackend.getStatesAt(ds, atMs) };
+        const body = await withRouteTimeout(
+          cwBackend.getStatesAt(ds, atMs),
+          CLOUDWATCH_DETAIL_TIMEOUT_MS,
+          'CloudWatch alarm states'
+        );
+        return { status: 200, body };
       })
   );
 
   // Full alarm detail (metadata + summary + history + metric preview + graph).
   router.get(
     {
-      path: '/api/alerting/cloudwatch/{dsId}/alarms/{alarmName}',
+      path: '/api/alerting/cloudwatch/{dsId}/alarm',
       validate: {
-        params: schema.object({ dsId: alertingIdSchema, alarmName: cloudWatchAlarmNameSchema }),
-        query: schema.object(timeRangeQuery, timeRangeObjectOptions),
+        params: schema.object({ dsId: alertingIdSchema }),
+        // The name is a query value, not a path segment: alarm names may contain `/`.
+        query: schema.object(
+          { ...timeRangeQuery, name: cloudWatchAlarmNameSchema },
+          timeRangeObjectOptions
+        ),
       },
     },
     async (ctx, req, res) =>
@@ -942,7 +980,11 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           req.params.dsId
         );
         const range = resolveDetailRange(req.query.startTime, req.query.endTime);
-        const detail = await cwBackend.getAlarmDetail(ds, req.params.alarmName, range);
+        const detail = await withRouteTimeout(
+          cwBackend.getAlarmDetail(ds, req.query.name, range),
+          CLOUDWATCH_DETAIL_TIMEOUT_MS,
+          'CloudWatch alarm detail'
+        );
         if (!detail) return { status: 404, body: { error: 'Alarm not found' } };
         return { status: 200, body: detail };
       })
@@ -951,9 +993,10 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   // Alarm state/config history (partial-permission aware).
   router.get(
     {
-      path: '/api/alerting/cloudwatch/{dsId}/alarms/{alarmName}/history',
+      path: '/api/alerting/cloudwatch/{dsId}/alarm/history',
       validate: {
-        params: schema.object({ dsId: alertingIdSchema, alarmName: cloudWatchAlarmNameSchema }),
+        params: schema.object({ dsId: alertingIdSchema }),
+        query: schema.object({ name: cloudWatchAlarmNameSchema }),
       },
     },
     async (ctx, req, res) =>
@@ -963,17 +1006,25 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           req,
           req.params.dsId
         );
-        return { status: 200, body: await cwBackend.getAlarmHistory(ds, req.params.alarmName) };
+        const body = await withRouteTimeout(
+          cwBackend.getAlarmHistory(ds, req.query.name),
+          CLOUDWATCH_DETAIL_TIMEOUT_MS,
+          'CloudWatch alarm history'
+        );
+        return { status: 200, body };
       })
   );
 
   // Composite-alarm relationships graph (parents + descendant tree).
   router.get(
     {
-      path: '/api/alerting/cloudwatch/{dsId}/alarms/{alarmName}/relationships',
+      path: '/api/alerting/cloudwatch/{dsId}/alarm/relationships',
       validate: {
-        params: schema.object({ dsId: alertingIdSchema, alarmName: cloudWatchAlarmNameSchema }),
-        query: schema.object({ depth: schema.maybe(schema.string()) }),
+        params: schema.object({ dsId: alertingIdSchema }),
+        query: schema.object({
+          name: cloudWatchAlarmNameSchema,
+          depth: schema.maybe(schema.string()),
+        }),
       },
     },
     async (ctx, req, res) =>
@@ -983,11 +1034,15 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           req,
           req.params.dsId
         );
-        const alarm = await cwBackend.getAlarmDetail(ds, req.params.alarmName);
-        if (!alarm) return { status: 404, body: { error: 'Alarm not found' } };
         const rawDepth = req.query.depth ? parseInt(req.query.depth, 10) : undefined;
         const depth = rawDepth && Number.isFinite(rawDepth) ? rawDepth : undefined;
-        const graph = await cwBackend.buildRelationships(ds, alarm.alarm, depth);
+        // Only the alarm and the graph: not the full detail (history, metric data).
+        const graph = await withRouteTimeout(
+          cwBackend.getRelationships(ds, req.query.name, depth),
+          CLOUDWATCH_DETAIL_TIMEOUT_MS,
+          'CloudWatch alarm relationships'
+        );
+        if (!graph) return { status: 404, body: { error: 'Alarm not found' } };
         return { status: 200, body: graph };
       })
   );

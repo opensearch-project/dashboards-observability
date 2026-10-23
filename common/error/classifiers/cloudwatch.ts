@@ -35,6 +35,7 @@ const ID_PREFIX = 'observability.error.cloudwatch';
 /** Stable machine codes for CloudWatch failure classes. */
 export const CloudWatchErrorCode = {
   CREDENTIALS_MISSING: 'CLOUDWATCH_CREDENTIALS_MISSING',
+  SIGN_IN_UNSUPPORTED: 'CLOUDWATCH_SIGN_IN_UNSUPPORTED',
   AUTH_INVALID: 'CLOUDWATCH_AUTH_INVALID',
   AUTH_EXPIRED: 'CLOUDWATCH_AUTH_EXPIRED',
   ACCESS_DENIED: 'CLOUDWATCH_ACCESS_DENIED',
@@ -61,6 +62,12 @@ function messages(
 
 // --- error-name sets (AWS SDK v3 `Error.name` values) ----------------------
 
+/**
+ * The sign-in method carries no AWS credentials at all, so signing in again can't help. Mirrors
+ * `CLOUDWATCH_SIGN_IN_UNSUPPORTED_ERROR_NAME` in the CloudWatch source contract.
+ */
+const SIGN_IN_UNSUPPORTED_NAMES = new Set(['CloudWatchSignInUnsupported']);
+
 /** Credential chain produced nothing (or our typed wrapper for it). */
 const CREDENTIALS_MISSING_NAMES = new Set([
   'CredentialsProviderError',
@@ -83,8 +90,11 @@ const AUTH_EXPIRED_NAMES = new Set([
   'TokenRefreshRequired',
 ]);
 
-/** Authenticated but not authorized for the API (IAM policy). */
-const ACCESS_DENIED_NAMES = new Set([
+/**
+ * Authenticated but not authorized for the API (IAM policy). Exported so callers can tell a
+ * denied call from other failures by name, not by message text.
+ */
+export const CLOUDWATCH_ACCESS_DENIED_ERROR_NAMES: ReadonlySet<string> = new Set([
   'AccessDenied',
   'AccessDeniedException',
   'AuthorizationErrorException',
@@ -132,10 +142,11 @@ export const cloudWatchClassifier: ErrorClassifier = {
   match: (ctx: RawErrorContext): boolean => {
     if (ctx.errorName) {
       if (
+        SIGN_IN_UNSUPPORTED_NAMES.has(ctx.errorName) ||
         CREDENTIALS_MISSING_NAMES.has(ctx.errorName) ||
         AUTH_INVALID_NAMES.has(ctx.errorName) ||
         AUTH_EXPIRED_NAMES.has(ctx.errorName) ||
-        ACCESS_DENIED_NAMES.has(ctx.errorName) ||
+        CLOUDWATCH_ACCESS_DENIED_ERROR_NAMES.has(ctx.errorName) ||
         THROTTLED_NAMES.has(ctx.errorName)
       ) {
         return true;
@@ -150,6 +161,21 @@ export const cloudWatchClassifier: ErrorClassifier = {
     const details = rawDetails(ctx.message);
     const name = ctx.errorName || '';
 
+    if (SIGN_IN_UNSUPPORTED_NAMES.has(name)) {
+      return {
+        category: 'PERMISSION_DENIED',
+        code: CloudWatchErrorCode.SIGN_IN_UNSUPPORTED,
+        retryable: false,
+        httpStatus: 403,
+        details,
+        messages: messages(
+          CloudWatchErrorCode.SIGN_IN_UNSUPPORTED,
+          "CloudWatch isn't available for this sign-in",
+          "This sign-in method doesn't provide AWS credentials, so CloudWatch alarms can't be read.",
+          'Sign in with an identity that has AWS credentials to see CloudWatch alarms, or ask an administrator which sign-in methods support them.'
+        ),
+      };
+    }
     if (isCredentialsMissing(ctx)) {
       return {
         category: 'PERMISSION_DENIED',
@@ -160,8 +186,8 @@ export const cloudWatchClassifier: ErrorClassifier = {
         messages: messages(
           CloudWatchErrorCode.CREDENTIALS_MISSING,
           'CloudWatch credentials missing',
-          'No AWS credentials were found, so CloudWatch could not be queried.',
-          'Sign in again so your AWS credentials are available, or ask an administrator to check the CloudWatch access for this deployment, then retry.'
+          'No AWS credentials were available for this request, so CloudWatch could not be queried.',
+          'Sign in again, then retry. If it keeps happening, ask an administrator to check CloudWatch access for this deployment.'
         ),
       };
     }
@@ -176,7 +202,7 @@ export const cloudWatchClassifier: ErrorClassifier = {
           CloudWatchErrorCode.AUTH_EXPIRED,
           'AWS session expired',
           'The AWS credentials have expired, so CloudWatch rejected the request.',
-          'Refresh the AWS session (new temporary credentials or role re-assumption), then retry.'
+          'Sign in again to get a new session, then retry.'
         ),
       };
     }
@@ -190,12 +216,12 @@ export const cloudWatchClassifier: ErrorClassifier = {
         messages: messages(
           CloudWatchErrorCode.AUTH_INVALID,
           'AWS credentials rejected',
-          'CloudWatch did not recognize the AWS credentials the server presented.',
-          'Verify the access key, secret key, and session token are current and belong to the intended account, then retry.'
+          'CloudWatch did not recognize the AWS credentials for this request.',
+          'Sign in again, then retry. If it keeps happening, ask an administrator to check CloudWatch access for this deployment.'
         ),
       };
     }
-    if (ACCESS_DENIED_NAMES.has(name)) {
+    if (CLOUDWATCH_ACCESS_DENIED_ERROR_NAMES.has(name)) {
       return {
         category: 'PERMISSION_DENIED',
         code: CloudWatchErrorCode.ACCESS_DENIED,
@@ -206,7 +232,7 @@ export const cloudWatchClassifier: ErrorClassifier = {
           CloudWatchErrorCode.ACCESS_DENIED,
           'CloudWatch access denied',
           'The AWS credentials are valid but not authorized for the CloudWatch API that was called.',
-          'Grant the server role cloudwatch:DescribeAlarms (and related read permissions), then retry.'
+          'Ask an administrator to grant your identity cloudwatch:DescribeAlarms, cloudwatch:DescribeAlarmHistory and cloudwatch:GetMetricData, then retry.'
         ),
       };
     }
@@ -236,7 +262,7 @@ export const cloudWatchClassifier: ErrorClassifier = {
         CloudWatchErrorCode.ENDPOINT_UNREACHABLE,
         'CloudWatch endpoint unreachable',
         'The CloudWatch regional endpoint could not be reached. The configured region may be invalid, or there may be a network problem.',
-        'Check the configured AWS region and the server network path to AWS, then retry.'
+        'Retry in a moment. If it keeps happening, ask an administrator to check the CloudWatch region and network access for this deployment.'
       ),
     };
   },

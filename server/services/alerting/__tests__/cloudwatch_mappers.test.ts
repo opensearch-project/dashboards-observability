@@ -53,8 +53,8 @@ describe('cloudWatchStateToMonitorStatus', () => {
   it('maps INSUFFICIENT_DATA → insufficient_data (distinct from pending)', () => {
     expect(cloudWatchStateToMonitorStatus('INSUFFICIENT_DATA')).toBe('insufficient_data');
   });
-  it('maps OK → muted', () => {
-    expect(cloudWatchStateToMonitorStatus('OK')).toBe('muted');
+  it('maps OK → ok (a healthy alarm, not a user-muted monitor)', () => {
+    expect(cloudWatchStateToMonitorStatus('OK')).toBe('ok');
   });
 });
 
@@ -88,21 +88,22 @@ describe('cloudWatchSeverity', () => {
       cloudWatchSeverity(metricAlarm({ alarmName: 'db-critical-cpu', stateValue: 'OK' }))
     ).toBe('critical');
   });
-  it('firing composite → critical', () => {
+  it('defaults to medium, whatever the state or alarm type', () => {
     expect(cloudWatchSeverity(metricAlarm({ alarmType: 'composite', stateValue: 'ALARM' }))).toBe(
-      'critical'
+      'medium'
     );
-  });
-  it('firing metric alarm without hints → medium', () => {
     expect(cloudWatchSeverity(metricAlarm({ stateValue: 'ALARM' }))).toBe('medium');
+    expect(cloudWatchSeverity(metricAlarm({ stateValue: 'OK' }))).toBe('medium');
   });
-  it('non-firing warn-named alarm → medium; plain non-firing → info', () => {
+  it('warn-named alarms → low', () => {
     expect(
-      cloudWatchSeverity(
-        metricAlarm({ alarmName: 'disk-warning', description: undefined, stateValue: 'OK' })
-      )
-    ).toBe('medium');
-    expect(cloudWatchSeverity(metricAlarm({ stateValue: 'OK' }))).toBe('info');
+      cloudWatchSeverity(metricAlarm({ alarmName: 'disk-warning', description: undefined }))
+    ).toBe('low');
+  });
+  it('ignores ordinary words such as "page"', () => {
+    expect(cloudWatchSeverity(metricAlarm({ description: 'Errors on the checkout page' }))).toBe(
+      'medium'
+    );
   });
 });
 
@@ -110,7 +111,9 @@ describe('cloudWatchAlarmToUnifiedRuleSummary', () => {
   it('maps a firing metric alarm to a complete rule row', () => {
     const row = cloudWatchAlarmToUnifiedRuleSummary(metricAlarm(), 'cloudwatch');
     expect(row).toMatchObject({
-      id: 'checkout-errors-high',
+      // Region/account-qualified, so rows can't collide across regions or accounts.
+      id: 'arn:aws:cloudwatch:us-east-1:123456789012:alarm:checkout-errors-high',
+      name: 'checkout-errors-high',
       datasourceId: 'cloudwatch',
       datasourceType: 'cloudwatch',
       definitionType: 'cloudwatch_alarm',
@@ -133,7 +136,22 @@ describe('cloudWatchAlarmToUnifiedRuleSummary', () => {
       account: '123456789012',
       region: 'us-east-1',
     });
-    expect(row.cloudWatch).toMatchObject({ state: 'ALARM', alarmType: 'metric' });
+    expect(row.cloudWatch).toMatchObject({
+      alarmName: 'checkout-errors-high',
+      state: 'ALARM',
+      alarmType: 'metric',
+    });
+    // CloudWatch doesn't report creation or edit times.
+    expect(row.createdAt).toBeUndefined();
+    expect(row.lastModified).toBeUndefined();
+  });
+
+  it('falls back to region and name for the id without an ARN', () => {
+    const row = cloudWatchAlarmToUnifiedRuleSummary(
+      metricAlarm({ alarmArn: undefined }),
+      'cloudwatch'
+    );
+    expect(row.id).toBe('us-east-1:checkout-errors-high');
   });
 
   it('INSUFFICIENT_DATA alarm carries the distinct unified status and no lastTriggered', () => {
@@ -174,7 +192,8 @@ describe('cloudWatchAlarmToUnifiedAlertSummary', () => {
   it('maps a firing alarm to an alert row with the state reason as message', () => {
     const alert = cloudWatchAlarmToUnifiedAlertSummary(metricAlarm(), 'cloudwatch');
     expect(alert).toMatchObject({
-      id: 'checkout-errors-high',
+      id: 'arn:aws:cloudwatch:us-east-1:123456789012:alarm:checkout-errors-high',
+      name: 'checkout-errors-high',
       datasourceType: 'cloudwatch',
       alertKind: 'alert',
       state: 'active',

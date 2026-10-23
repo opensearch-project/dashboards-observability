@@ -47,8 +47,13 @@ interface DataConnectionSOAttributes {
 export const CLOUDWATCH_DATASOURCE_ID = 'cloudwatch';
 
 export interface CloudWatchDatasourceConfig {
-  enabled: boolean;
-  region: string;
+  /**
+   * Whether the virtual datasource exists. A function is asked lazily, only when the listing or
+   * a `get('cloudwatch')` needs it (per request: the flag and the deployment's source).
+   */
+  enabled: boolean | (() => Promise<boolean>);
+  /** The region the source queries; undefined lets the source use its own default. */
+  region?: string;
 }
 
 export class SavedObjectDatasourceService implements DatasourceService {
@@ -62,6 +67,21 @@ export class SavedObjectDatasourceService implements DatasourceService {
      */
     private readonly cloudWatch?: CloudWatchDatasourceConfig
   ) {}
+
+  private async isCloudWatchEnabled(): Promise<boolean> {
+    const enabled = this.cloudWatch?.enabled;
+    if (typeof enabled === 'function') {
+      try {
+        return await enabled();
+      } catch (e) {
+        this.logger?.debug(
+          `SavedObjectDatasourceService: CloudWatch gate failed: ${(e as Error)?.name}`
+        );
+        return false;
+      }
+    }
+    return !!enabled;
+  }
 
   private cloudWatchDatasource(): Datasource {
     return {
@@ -135,15 +155,15 @@ export class SavedObjectDatasourceService implements DatasourceService {
     }
     // Virtual CloudWatch datasource — no saved object; appears automatically
     // when the feature is enabled and a CloudWatch source is available.
-    if (this.cloudWatch?.enabled) {
+    if (await this.isCloudWatchEnabled()) {
       all.push(this.cloudWatchDatasource());
     }
     return all;
   }
 
   async get(id: string): Promise<Datasource | null> {
-    if (id === CLOUDWATCH_DATASOURCE_ID && this.cloudWatch?.enabled) {
-      return this.cloudWatchDatasource();
+    if (id === CLOUDWATCH_DATASOURCE_ID) {
+      return (await this.isCloudWatchEnabled()) ? this.cloudWatchDatasource() : null;
     }
     if (!id || id === 'local-cluster') {
       return {

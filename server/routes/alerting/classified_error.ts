@@ -125,20 +125,33 @@ export function classifyToHandlerResult(e: unknown, opts: ClassifyOptions): Hand
   const ctx = contextFromError(e, opts.operation, correlationId, opts.sourceType);
   const classified: ClassifiedError = { ...classifyError(ctx), correlationId };
 
+  // CloudWatch errors come from the caller's own AWS identity and can name principals and
+  // account numbers, so for that source neither the log nor the response carries provider text.
+  const providerTextIsSensitive = opts.sourceType === 'cloudwatch';
   if (opts.logger) {
-    // Full detail, server-side only, keyed by correlation id — this is where
-    // the true upstream cause is preserved regardless of what the client sees.
-    // Cap the raw body so a large upstream object can't balloon a log line.
-    const raw = stringifyRaw(ctx.rawBody);
-    const rawForLog = raw.length > LOG_RAW_MAX_LEN ? `${raw.slice(0, LOG_RAW_MAX_LEN)}…` : raw;
-    opts.logger.error(
-      `[${opts.operation}] correlationId=${correlationId} ` +
-        `${classified.category}/${classified.code} ` +
-        `(HTTP ${classified.httpStatus ?? '-'}): ${ctx.message ?? ''} ${rawForLog}`.trim()
-    );
+    if (providerTextIsSensitive) {
+      opts.logger.error(
+        `[${opts.operation}] correlationId=${correlationId} ` +
+          `${classified.category}/${classified.code} ` +
+          `(HTTP ${classified.httpStatus ?? '-'}): ${ctx.errorName ?? 'Error'}`
+      );
+    } else {
+      // Full detail, server-side only, keyed by correlation id — this is where
+      // the true upstream cause is preserved regardless of what the client sees.
+      // Cap the raw body so a large upstream object can't balloon a log line.
+      const raw = stringifyRaw(ctx.rawBody);
+      const rawForLog = raw.length > LOG_RAW_MAX_LEN ? `${raw.slice(0, LOG_RAW_MAX_LEN)}…` : raw;
+      opts.logger.error(
+        `[${opts.operation}] correlationId=${correlationId} ` +
+          `${classified.category}/${classified.code} ` +
+          `(HTTP ${classified.httpStatus ?? '-'}): ${ctx.message ?? ''} ${rawForLog}`.trim()
+      );
+    }
   }
 
-  const clientErr = toClientPayload(classified, { exposeSensitive });
+  const clientErr = toClientPayload(classified, {
+    exposeSensitive: exposeSensitive && !providerTextIsSensitive,
+  });
   return {
     status: clientErr.httpStatus ?? 500,
     body: {

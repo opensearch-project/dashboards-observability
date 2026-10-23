@@ -32,9 +32,10 @@ const observabilityConfig = {
       // (mirrors the `alertManager.enabled` / `slo.enabled` pattern). The plugin
       // ships no AWS SDK: CloudWatch is reached through a source the deployment
       // provides (with the caller's own credentials). Without one, the flag has
-      // no effect. `defaultRegion` is the region the virtual datasource queries.
+      // no effect. `defaultRegion` is the region the virtual datasource queries; unset, the
+      // source uses its own default region.
       enabled: schema.boolean({ defaultValue: false }),
-      defaultRegion: schema.string({ defaultValue: 'us-east-1' }),
+      defaultRegion: schema.maybe(schema.string()),
     }),
     errors: schema.object({
       // When true, verbatim upstream error detail (classified as `sensitive`)
