@@ -522,12 +522,13 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
   const [stack, setStack] = useState<CloudWatchAlarmFlyoutRow[]>([rule]);
   const current = stack[stack.length - 1];
   const alarmName = current.id;
-  const { detail, isLoading, error, classifiedError, retry } = useCloudWatchAlarmDetail({
-    dsId,
-    alarmName,
-    startTime: new Date(timeWindow.startMs).toISOString(),
-    endTime: new Date(timeWindow.endMs).toISOString(),
-  });
+  const { detail, isLoading, error, classifiedError, retry, windowRejected } =
+    useCloudWatchAlarmDetail({
+      dsId,
+      alarmName,
+      startTime: new Date(timeWindow.startMs).toISOString(),
+      endTime: new Date(timeWindow.endMs).toISOString(),
+    });
 
   const openAlarm = useCallback<OpenAlarmFn>(
     (node) => {
@@ -755,6 +756,21 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
                     </p>
                   )}
                 </EuiText>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
+            {windowRejected && (
+              <>
+                <EuiCallOut
+                  size="s"
+                  iconType="iInCircle"
+                  data-test-subj="cwAlarmDetailWindowRejected"
+                  title={i18n.translate('observability.alerting.cloudwatch.windowRejected', {
+                    defaultMessage:
+                      "The selected time range couldn't be used, so the metric preview shows recent data.",
+                  })}
+                />
                 <EuiSpacer size="m" />
               </>
             )}

@@ -70,6 +70,36 @@ export const RULES_END_TIME_KEY = 'AlertManagerRulesEndTime';
 export const DEFAULT_START_TIME = 'now-24h';
 export const DEFAULT_END_TIME = 'now';
 
+/** Whether this session has a persisted Alerts range (i.e. the user, or we, already set one). */
+export function hasPersistedTimeRange(key: string = ALERT_MANAGER_START_TIME_KEY): boolean {
+  try {
+    return window.sessionStorage.getItem(key) !== null;
+  } catch (_e) {
+    return false;
+  }
+}
+
+/**
+ * The default range to open the Alerts tab on so its oldest active alert is in view, e.g.
+ * `now-65d` for an alarm active for 63 days. Undefined when every active alert started inside
+ * the default 24h, so the default stays.
+ */
+export function rangeCoveringActiveAlerts(
+  alerts: Array<{ state: string; startTime: string }>,
+  nowMs: number = Date.now()
+): string | undefined {
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  let oldest = nowMs;
+  for (const alert of alerts) {
+    if (alert.state !== 'active') continue;
+    const t = new Date(alert.startTime).getTime();
+    if (Number.isFinite(t) && t < oldest) oldest = t;
+  }
+  if (nowMs - oldest <= DAY_MS) return undefined;
+  // Whole days, plus one so the alert's start isn't on the chart's left edge.
+  return `now-${Math.ceil((nowMs - oldest) / DAY_MS) + 1}d`;
+}
+
 export function loadPersistedStartTime(key: string = ALERT_MANAGER_START_TIME_KEY): string {
   try {
     return window.sessionStorage.getItem(key) || DEFAULT_START_TIME;

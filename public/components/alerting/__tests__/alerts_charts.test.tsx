@@ -24,7 +24,7 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
 }));
 
-import { AlertTimeline, timelineStartMs } from '../alerts_charts';
+import { AlertTimeline } from '../alerts_charts';
 import type { UnifiedAlertSummary } from '../../../../common/types/alerting';
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -282,33 +282,5 @@ describe('alerts_charts', () => {
 
     const option = mockSetOption.mock.calls[0][0] as { yAxis: { name: string } };
     expect(option.yAxis.name).toBe('Alerts');
-  });
-});
-
-describe('timelineStartMs', () => {
-  const DAY = 24 * 60 * 60 * 1000;
-  const end = Date.UTC(2026, 9, 21);
-  const start = end - DAY;
-  const alert = (state: string, startTime: string) => ({ state, startTime }) as unknown as UnifiedAlertSummary;
-  const old = new Date(end - 63 * DAY).toISOString();
-
-  it('widens to a little before the oldest active alert when covering active alerts', () => {
-    const t = timelineStartMs(
-      [alert('active', old), alert('active', new Date(end - DAY / 2).toISOString())],
-      start,
-      end,
-      true
-    );
-    expect(t).toBeLessThan(end - 63 * DAY);
-    expect(t).toBeGreaterThan(end - 65 * DAY);
-  });
-
-  it('keeps the range for resolved alerts, a picked range, or no older active alert', () => {
-    expect(timelineStartMs([alert('resolved', old)], start, end, true)).toBe(start);
-    expect(timelineStartMs([alert('active', old)], start, end, false)).toBe(start);
-    expect(
-      timelineStartMs([alert('active', new Date(end - 60_000).toISOString())], start, end, true)
-    ).toBe(start);
-    expect(timelineStartMs([alert('active', 'not a date')], start, end, true)).toBe(start);
   });
 });

@@ -332,6 +332,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     rules,
     endMs: rulesTime.endMs,
     refreshToken: rulesTime.refreshToken,
+    disabled: rulesTime.isInvalid,
   });
 
   // Build table columns from visible set

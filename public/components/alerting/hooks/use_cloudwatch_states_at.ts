@@ -35,6 +35,8 @@ export interface UseCloudWatchStatesAtParams {
   endMs: number;
   /** Bumped by Refresh to re-read. */
   refreshToken?: number;
+  /** Skip reading (e.g. an inverted range); rows show their current state. */
+  disabled?: boolean;
 }
 
 export interface UseCloudWatchStatesAtResult {
@@ -47,12 +49,13 @@ export function useCloudWatchStatesAt({
   rules,
   endMs,
   refreshToken = 0,
+  disabled = false,
 }: UseCloudWatchStatesAtParams): UseCloudWatchStatesAtResult {
   const service = useMemo(() => new AlertingOpenSearchService(), []);
   const [byDs, setByDs] = useState<Record<string, CloudWatchStatesAt>>({});
   const [loading, setLoading] = useState(false);
 
-  const endsNow = endMs >= Date.now() - NOW_TOLERANCE_MS;
+  const endsNow = disabled || endMs >= Date.now() - NOW_TOLERANCE_MS;
   // Stable key so a rules refetch with the same CloudWatch datasources doesn't refetch states.
   const dsKey = useMemo(
     () =>

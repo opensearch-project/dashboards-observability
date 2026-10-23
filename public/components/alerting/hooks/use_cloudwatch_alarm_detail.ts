@@ -19,6 +19,7 @@ import type { CloudWatchAlarmDetail } from '../../../../common/types/alerting';
 import type { ClassifiedError } from '../../../../common/error';
 import { extractClassifiedError } from '../../common/error';
 import { AlertingOpenSearchService } from '../query_services/alerting_opensearch_service';
+import { extractServerErrorStatus } from '../alarms_page_helpers';
 
 export interface UseCloudWatchAlarmDetailParams {
   dsId: string;
@@ -45,6 +46,11 @@ export interface UseCloudWatchAlarmDetailResult {
   classifiedError: ClassifiedError | null;
   /** Re-run the fetch (Retry button in the flyout's error state). */
   retry: () => void;
+  /**
+   * The server rejected the requested window (400), so the detail was loaded for its default
+   * window instead. The flyout says so rather than showing an error.
+   */
+  windowRejected: boolean;
 }
 
 export function useCloudWatchAlarmDetail({
@@ -58,6 +64,7 @@ export function useCloudWatchAlarmDetail({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [classifiedError, setClassifiedError] = useState<ClassifiedError | null>(null);
+  const [windowRejected, setWindowRejected] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);
@@ -69,18 +76,29 @@ export function useCloudWatchAlarmDetail({
     setIsLoading(true);
     setError(null);
     setClassifiedError(null);
-    service
-      .getCloudWatchAlarmDetail(dsId, alarmName, {
+    setWindowRejected(false);
+    const hasWindow = !!(startTime && endTime);
+    const load = (withWindow: boolean) =>
+      service.getCloudWatchAlarmDetail(dsId, alarmName, {
         // The route rejects one-sided ranges, so send both or neither.
-        ...(startTime && endTime ? { startTime, endTime } : {}),
+        ...(withWindow ? { startTime, endTime } : {}),
         signal: controller.signal,
+      });
+    load(hasWindow)
+      .catch((err: unknown) => {
+        // A window the server won't take (400) isn't a CloudWatch failure: load the alarm for
+        // the default window and let the flyout note it.
+        if (cancelled || !hasWindow || extractServerErrorStatus(err) !== 400) throw err;
+        return load(false).then((data: CloudWatchAlarmDetail) => {
+          if (!cancelled) setWindowRejected(true);
+          return data;
+        });
       })
       .then((data: CloudWatchAlarmDetail) => {
         if (!cancelled && data) setDetail(data);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-
         console.error('Failed to load CloudWatch alarm detail:', err);
         setClassifiedError(extractClassifiedError(err));
         setError(err instanceof Error ? err : new Error(String(err)));
@@ -94,5 +112,5 @@ export function useCloudWatchAlarmDetail({
     };
   }, [dsId, alarmName, startTime, endTime, service, attempt]);
 
-  return { detail, isLoading, error, classifiedError, retry };
+  return { detail, isLoading, error, classifiedError, retry, windowRejected };
 }

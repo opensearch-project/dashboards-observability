@@ -100,44 +100,11 @@ export interface AlertTimelineProps {
   startMs: number;
   /** Range end in epoch ms (resolved by the parent). */
   endMs: number;
-  /**
-   * Widen the chart's start, when needed, to the oldest *active* alert, so a long-running
-   * alarm (e.g. one active for 63 days) is drawn instead of counted as "before this window".
-   * The parent sets it while the page is on its default range, not one the user picked.
-   */
-  coverActiveAlerts?: boolean;
 }
 
-/**
- * The chart's start: `startMs`, or, when covering active alerts, a little before the oldest
- * active alert that started earlier. The padding keeps that alert off the chart's left edge.
- */
-export function timelineStartMs(
-  alerts: UnifiedAlertSummary[],
-  startMs: number,
-  endMs: number,
-  coverActiveAlerts?: boolean
-): number {
-  if (!coverActiveAlerts) return startMs;
-  let oldest = startMs;
-  for (const alert of alerts) {
-    if (alert.state !== 'active') continue;
-    const t = new Date(alert.startTime).getTime();
-    if (!Number.isNaN(t) && t < oldest) oldest = t;
-  }
-  if (oldest >= startMs) return startMs;
-  return oldest - Math.round((endMs - oldest) * 0.02);
-}
-
-export const AlertTimeline: React.FC<AlertTimelineProps> = ({
-  alerts,
-  startMs: pickedStartMs,
-  endMs,
-  coverActiveAlerts,
-}) => {
+export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, endMs }) => {
   const spec = useMemo(() => {
     if (alerts.length === 0) return null;
-    const startMs = timelineStartMs(alerts, pickedStartMs, endMs, coverActiveAlerts);
 
     // Defend against inverted or zero-length ranges — pick a minimum 1ms
     // window so division below doesn't blow up. In practice the parent
@@ -300,7 +267,7 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
         barMaxWidth: 32,
       })),
     };
-  }, [alerts, pickedStartMs, endMs, coverActiveAlerts]);
+  }, [alerts, startMs, endMs]);
 
   if (alerts.length === 0)
     return (

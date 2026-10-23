@@ -205,13 +205,24 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
     }
   );
   const showRulesTimePicker = rules.some(isCloudWatchRule);
-  const rulesWindow = useMemo<AlarmTimeWindow>(
-    () => ({
-      startMs: rulesTime.startMs,
-      endMs: rulesTime.endMs,
-      label: describeTimeRange(rulesTime.startTime, rulesTime.endTime),
-    }),
-    [rulesTime.startMs, rulesTime.endMs, rulesTime.startTime, rulesTime.endTime]
+  // An inverted range (end before start) can't scope anything: the flyout falls back to its
+  // default window rather than asking CloudWatch for it.
+  const rulesWindow = useMemo<AlarmTimeWindow | undefined>(
+    () =>
+      rulesTime.isInvalid
+        ? undefined
+        : {
+            startMs: rulesTime.startMs,
+            endMs: rulesTime.endMs,
+            label: describeTimeRange(rulesTime.startTime, rulesTime.endTime),
+          },
+    [
+      rulesTime.isInvalid,
+      rulesTime.startMs,
+      rulesTime.endMs,
+      rulesTime.startTime,
+      rulesTime.endTime,
+    ]
   );
 
   return (

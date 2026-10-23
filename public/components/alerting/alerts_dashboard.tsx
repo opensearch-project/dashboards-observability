@@ -56,7 +56,6 @@ import { formatTimestamp } from './time_format';
 import { ALERT_KIND_HEX, getStateHex } from './alert_colors';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
 import './alerting.scss';
-import { DEFAULT_END_TIME, DEFAULT_START_TIME } from './alarms_page_helpers';
 
 // ============================================================================
 // Color / label maps
@@ -780,9 +779,6 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   // Lazy initializer so the deep-link query seeds the box exactly once; later
   // renders (e.g. under the resizable container's mouse-move re-renders) must
   // not clobber what the user has typed.
-  // On the page's default range (not one the user picked), the timeline widens to cover any
-  // older active alarm instead of leaving it out as "started before this window".
-  const isDefaultTimeRange = pickerStart === DEFAULT_START_TIME && pickerEnd === DEFAULT_END_TIME;
   const [searchQuery, setSearchQuery] = useState(() => initialSearchQuery ?? '');
   const [filters, setFilters] = useState<AlertFilterState>(emptyAlertFilters());
   const { toggleFacetCollapse, isCollapsed: isFacetCollapsed } = useFacetCollapse();
@@ -1554,12 +1550,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                           }
                         />
                       ) : (
-                        <AlertTimeline
-                          alerts={filteredAlerts}
-                          startMs={startMs}
-                          endMs={endMs}
-                          coverActiveAlerts={isDefaultTimeRange}
-                        />
+                        <AlertTimeline alerts={filteredAlerts} startMs={startMs} endMs={endMs} />
                       )}
                     </EuiPanel>
                   </EuiFlexItem>

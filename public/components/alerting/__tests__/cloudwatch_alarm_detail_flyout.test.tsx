@@ -87,6 +87,7 @@ function mockHook(overrides: Partial<ReturnType<typeof useCloudWatchAlarmDetail>
     error: null,
     classifiedError: null,
     retry: jest.fn(),
+    windowRejected: false,
     ...overrides,
   });
 }
@@ -125,6 +126,13 @@ describe('CloudWatchAlarmDetailFlyout', () => {
     expect(useDetailMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ alarmName: 'checkout-service-degraded' })
     );
+  });
+
+  it('notes a rejected time range instead of failing', () => {
+    mockHook({ detail: detailFixture(), windowRejected: true });
+    renderFlyout();
+    expect(screen.getByTestId('cwAlarmDetailWindowRejected')).toBeInTheDocument();
+    expect(screen.queryByTestId('cwAlarmDetailRetry')).toBeNull();
   });
 
   it('shows no cause line without one', () => {

@@ -18,6 +18,8 @@ import {
   persistSelection,
   persistTimeRange,
   resolveDatasourceTokens,
+  hasPersistedTimeRange,
+  rangeCoveringActiveAlerts,
 } from '../alarms_page_helpers';
 import type { Datasource } from '../../../../common/types/alerting';
 import type { MonitorFormState } from '../create_monitor';
@@ -107,7 +109,7 @@ describe('alarms_page_helpers', () => {
     });
 
     it('skips non-string entries', () => {
-      expect(resolveDatasourceTokens((['ds-1', 5, null] as unknown) as string[], ds)).toEqual([
+      expect(resolveDatasourceTokens(['ds-1', 5, null] as unknown as string[], ds)).toEqual([
         'ds-1',
       ]);
     });
@@ -142,7 +144,7 @@ describe('alarms_page_helpers', () => {
 
   describe('formStateToRule', () => {
     function osForm(): MonitorFormState {
-      return ({
+      return {
         datasourceType: 'opensearch',
         datasourceId: 'ds-os',
         name: 'mon-1',
@@ -159,7 +161,7 @@ describe('alarms_page_helpers', () => {
         monitorType: 'ppl_monitor',
         pplTriggers: [],
         schedule: { interval: 1, unit: 'MINUTES' },
-      } as unknown) as MonitorFormState;
+      } as unknown as MonitorFormState;
     }
 
     it('writes the picked indices into a label and the description', () => {
@@ -172,12 +174,12 @@ describe('alarms_page_helpers', () => {
     it('falls back to fallbackDsId when the form omits datasourceId', () => {
       const f = osForm() as { datasourceId: string };
       f.datasourceId = '';
-      const rule = formStateToRule((f as unknown) as MonitorFormState, 'ds-fallback');
+      const rule = formStateToRule(f as unknown as MonitorFormState, 'ds-fallback');
       expect(rule.datasourceId).toBe('ds-fallback');
     });
 
     it('emits prometheus shape when datasourceType is prometheus', () => {
-      const promForm = ({
+      const promForm = {
         datasourceType: 'prometheus',
         datasourceId: 'ds-prom',
         name: 'cpu',
@@ -190,7 +192,7 @@ describe('alarms_page_helpers', () => {
         firingPeriod: '10m',
         labels: [{ key: 'env', value: 'prod' }],
         annotations: [{ key: 'description', value: 'cpu hot' }],
-      } as unknown) as MonitorFormState;
+      } as unknown as MonitorFormState;
       const rule = formStateToRule(promForm, 'ds-fallback');
       expect(rule.datasourceType).toBe('prometheus');
       expect(rule.monitorType).toBe('metric');
@@ -260,5 +262,42 @@ describe('alarms_page_helpers', () => {
     it('returns null for empty input', () => {
       expect(extractPplValidationError('')).toBeNull();
     });
+  });
+});
+
+describe('rangeCoveringActiveAlerts', () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const now = Date.UTC(2026, 9, 22, 12);
+  const at = (msAgo: number) => new Date(now - msAgo).toISOString();
+
+  it('widens to cover the oldest active alert, with a day of padding', () => {
+    expect(
+      rangeCoveringActiveAlerts(
+        [
+          { state: 'active', startTime: at(63 * DAY + 7 * 60 * 60 * 1000) },
+          { state: 'active', startTime: at(2 * DAY) },
+        ],
+        now
+      )
+    ).toBe('now-65d');
+  });
+
+  it('keeps the default when active alerts are recent, and ignores inactive ones', () => {
+    expect(rangeCoveringActiveAlerts([{ state: 'active', startTime: at(DAY / 2) }], now)).toBe(
+      undefined
+    );
+    expect(
+      rangeCoveringActiveAlerts([{ state: 'resolved', startTime: at(90 * DAY) }], now)
+    ).toBeUndefined();
+    expect(rangeCoveringActiveAlerts([{ state: 'active', startTime: 'bad' }], now)).toBeUndefined();
+  });
+});
+
+describe('hasPersistedTimeRange', () => {
+  beforeEach(() => window.sessionStorage.clear());
+  it('is true only once a range is persisted', () => {
+    expect(hasPersistedTimeRange()).toBe(false);
+    persistTimeRange('now-7d', 'now');
+    expect(hasPersistedTimeRange()).toBe(true);
   });
 });

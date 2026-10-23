@@ -29,6 +29,11 @@ export interface UseTimeRangeResult {
   /** Resolved epoch-ms; falls back to defaults if either side is malformed. */
   startMs: number;
   endMs: number;
+  /**
+   * The end is before the start (e.g. the picker's end was moved before a relative start).
+   * The picker shows the range as invalid; consumers should not query with it.
+   */
+  isInvalid: boolean;
   /** Bumped by the refresh button so consumers can re-trigger their effects. */
   refreshToken: number;
   /**
@@ -119,6 +124,7 @@ export function useTimeRange({
     endTime,
     startMs,
     endMs,
+    isInvalid: endMs < startMs,
     refreshToken,
     onTimeChange,
     onRefresh,

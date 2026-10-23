@@ -79,6 +79,8 @@ import {
   extractServerErrorMessage,
   extractServerErrorStatus,
   formStateToRule,
+  hasPersistedTimeRange,
+  rangeCoveringActiveAlerts,
   resolveDatasourceTokens,
 } from './alarms_page_helpers';
 import { usePendingRules } from './hooks/use_pending_rules';
@@ -391,6 +393,21 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     });
   }, [rawAlerts, ackOverrides]);
   const alertsTotal = alerts.length;
+
+  // Open on a range that shows the active alerts: when nothing set a range yet this session and
+  // an active alert started before the default 24h (e.g. an alarm active for 63 days), move the
+  // picker to cover it, so the timeline isn't empty and the picker says what it shows. Once
+  // only; a range the user picks afterwards stays.
+  const [autoRangePending, setAutoRangePending] = useState(() => !hasPersistedTimeRange());
+  useEffect(() => {
+    // Wait for a loaded, non-empty list (the first fetch can run before datasources resolve).
+    if (!autoRangePending || alertsLoading || rawAlerts.length === 0) return;
+    setAutoRangePending(false);
+    // The user picked a range in the meantime: leave it.
+    if (hasPersistedTimeRange()) return;
+    const start = rangeCoveringActiveAlerts(rawAlerts);
+    if (start) handleTimeChange({ start, end: 'now' });
+  }, [autoRangePending, alertsLoading, rawAlerts, handleTimeChange]);
 
   // Drop overrides whose target alert is now acknowledged on the server
   // (or has fallen out of the result set entirely). Runs after every hook
