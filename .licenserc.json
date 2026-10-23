@@ -35,7 +35,7 @@
     "common/query_manager/antlr/output/",
     "public/components/getting_started/getting_started_artifacts/",
     "server/adaptors/integrations/__data__/",
-    ".cypress/",
+    ".cypress",
     ".husky",
     ".lycheeignore",
     ".DS_Store",
