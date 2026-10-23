@@ -31,6 +31,13 @@ export interface UseOperationMetricsResult {
   error: Error | null;
 }
 
+interface MetricResponses {
+  latency: unknown;
+  errorRate: unknown;
+  availability: unknown;
+  requestCount: unknown;
+}
+
 /**
  * Hook for fetching Prometheus metrics for operation table columns
  *
@@ -44,7 +51,11 @@ export interface UseOperationMetricsResult {
 export const useOperationMetrics = (
   params: UseOperationMetricsParams
 ): UseOperationMetricsResult => {
-  const [metrics, setMetrics] = useState<Map<string, OperationMetrics>>(new Map());
+  // Raw PromQL responses. The queries depend only on the service and time
+  // range, not on the operations list, so the list is joined in at render time (see
+  // `metrics`): a list re-fetch (new array on every PPL response) does not
+  // re-send the queries.
+  const [responses, setResponses] = useState<MetricResponses | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -52,6 +63,8 @@ export const useOperationMetrics = (
   // working pattern in useServiceMapMetrics.
   const { config } = useApmConfig();
   const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
+
+  const hasOperations = (params.operations?.length ?? 0) > 0;
 
   const promqlService = useMemo(() => {
     if (!params.prometheusConnectionId) {
@@ -61,9 +74,8 @@ export const useOperationMetrics = (
   }, [params.prometheusConnectionId, prometheusConnectionMeta]);
 
   useEffect(() => {
-    if (!params.operations || params.operations.length === 0 || !promqlService) {
-      // Only update if not already empty to avoid infinite re-renders
-      setMetrics((prev) => (prev.size === 0 ? prev : new Map()));
+    if (!hasOperations || !promqlService) {
+      setResponses(null);
       setIsLoading(false);
       return;
     }
@@ -87,6 +99,7 @@ export const useOperationMetrics = (
               timeRangeDuration
             ),
             time,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: getQueryAllOperationsErrorRateAvg(
@@ -95,6 +108,7 @@ export const useOperationMetrics = (
               timeRangeDuration
             ),
             time,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: getQueryAllOperationsAvailabilityAvg(
@@ -103,6 +117,7 @@ export const useOperationMetrics = (
               timeRangeDuration
             ),
             time,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: getQueryAllOperationsRequestCountTotal(
@@ -111,35 +126,22 @@ export const useOperationMetrics = (
               timeRangeDuration
             ),
             time,
+            signal: abortController.signal,
           }),
         ]);
 
       if (abortController.signal.aborted) return;
 
-      // Initialize metrics map with default values for all operations
-      const metricsMap = new Map<string, OperationMetrics>();
-      params.operations.forEach((op) => {
-        metricsMap.set(op.operationName, {
-          p50Duration: 0,
-          p90Duration: 0,
-          p99Duration: 0,
-          errorRate: 0,
-          availability: 0,
-          dependencyCount: 0,
-          requestCount: 0,
-        });
-      });
-
       const valueOf = (r: PromiseSettledResult<any>) =>
         r.status === 'fulfilled' ? r.value : undefined;
 
       // Missing (rejected) responses leave the defaulted 0 values in place.
-      extractPercentilesByOperation(valueOf(latencyResult), metricsMap);
-      extractMetricsByOperation(valueOf(errorRateResult), metricsMap, 'errorRate');
-      extractMetricsByOperation(valueOf(availabilityResult), metricsMap, 'availability');
-      extractMetricsByOperation(valueOf(requestCountResult), metricsMap, 'requestCount');
-
-      setMetrics(metricsMap);
+      setResponses({
+        latency: valueOf(latencyResult),
+        errorRate: valueOf(errorRateResult),
+        availability: valueOf(availabilityResult),
+        requestCount: valueOf(requestCountResult),
+      });
 
       const firstRejection = [
         latencyResult,
@@ -165,7 +167,7 @@ export const useOperationMetrics = (
 
     return () => abortController.abort();
   }, [
-    params.operations,
+    hasOperations,
     params.serviceName,
     params.environment,
     params.startTime,
@@ -174,6 +176,28 @@ export const useOperationMetrics = (
     params.refreshTrigger,
     promqlService,
   ]);
+
+  // Join the latest responses onto the current operations list.
+  const metrics = useMemo(() => {
+    const metricsMap = new Map<string, OperationMetrics>();
+    if (!responses) return metricsMap;
+    (params.operations ?? []).forEach((op) => {
+      metricsMap.set(op.operationName, {
+        p50Duration: 0,
+        p90Duration: 0,
+        p99Duration: 0,
+        errorRate: 0,
+        availability: 0,
+        dependencyCount: 0,
+        requestCount: 0,
+      });
+    });
+    extractPercentilesByOperation(responses.latency, metricsMap);
+    extractMetricsByOperation(responses.errorRate, metricsMap, 'errorRate');
+    extractMetricsByOperation(responses.availability, metricsMap, 'availability');
+    extractMetricsByOperation(responses.requestCount, metricsMap, 'requestCount');
+    return metricsMap;
+  }, [params.operations, responses]);
 
   return { metrics, isLoading, error };
 };

@@ -100,6 +100,20 @@ describe('dependency queries and the spanKind label', () => {
     });
   });
 
+  it('dependency instant queries bound every selector to the given targets', () => {
+    const filter = 'remoteService=~"redis"';
+    [
+      getQueryServiceMapDependencyThroughput('15m', filter),
+      getQueryServiceMapDependencyFailureRatioTotal('15m', filter),
+      getQueryServiceMapDependencyLatencyInstant(0.99, '15m', filter),
+    ].forEach((q) => {
+      expect(q).not.toContain('remoteService!=""');
+      const selectors = q.match(/\{[^}]*\}/g) || [];
+      expect(selectors.length).toBeGreaterThan(0);
+      selectors.forEach((sel) => expect(sel).toContain(filter));
+    });
+  });
+
   it('every selector is publish-side, or consumer-side only in the fallback', () => {
     const q = getQueryServiceMapDependencyFailureRatioTotal('15m');
     const [publish, consumer] = q.split(') or (');

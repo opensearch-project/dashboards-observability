@@ -46,6 +46,21 @@ describe('usePersistentTimeRange', () => {
     });
   });
 
+  it('keeps the same object when set to an unchanged range', () => {
+    const { result } = renderHook(() => usePersistentTimeRange());
+    act(() => {
+      result.current[1]({ from: 'now-7d', to: 'now' });
+    });
+    const first = result.current[0];
+
+    act(() => {
+      result.current[1]({ from: 'now-7d', to: 'now' });
+    });
+
+    // Same identity, so consumers keyed on it do not re-parse and refetch.
+    expect(result.current[0]).toBe(first);
+  });
+
   it('syncs the value across two hook instances in the same tab', () => {
     const first = renderHook(() => usePersistentTimeRange());
     const second = renderHook(() => usePersistentTimeRange());

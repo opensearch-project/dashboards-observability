@@ -71,8 +71,16 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
 }) => {
   const { config, loading: configLoading, error: configError } = useApmConfig();
 
-  // State for active tab
-  const [activeTab, setActiveTab] = useState<ServiceDetailsTabId>(initialTab);
+  // State for active tab. Seeded from the URL's `tab` so a deep link to another
+  // tab does not first mount Overview (whose ~11 queries would be sent and then
+  // abandoned, still running in Prometheus) before the mount effect switches.
+  const [activeTab, setActiveTab] = useState<ServiceDetailsTabId>(() => {
+    const { path, params } = splitHash();
+    const urlTab = isServiceDetailsHashPath(path, serviceName, environment)
+      ? (params.get(SERVICE_DETAILS_CONSTANTS.URL_PARAMS.TAB) as ServiceDetailsTabId | null)
+      : null;
+    return urlTab || initialTab;
+  });
 
   // One cursor bus for the whole page. EuiTabbedContent mounts only the active
   // tab, so a single bus scopes the synced crosshair to that tab's charts.

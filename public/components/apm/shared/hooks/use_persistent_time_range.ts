@@ -47,6 +47,8 @@ const isValidTimeRange = (value: unknown): value is TimeRange =>
   isParseableBound((value as TimeRange).from) &&
   isParseableBound((value as TimeRange).to);
 
+const isSameRange = (a: TimeRange, b: TimeRange): boolean => a.from === b.from && a.to === b.to;
+
 /**
  * Read the persisted time range from sessionStorage, falling back to `fallback`
  * when nothing is stored or the stored value is invalid/unreadable.
@@ -93,7 +95,10 @@ export const usePersistentTimeRange = (
     if (!isValidTimeRange(newTimeRange)) {
       return;
     }
-    setTimeRangeState(newTimeRange);
+    // Keep the current object when the range is unchanged (e.g. a page's mount
+    // effect writing back the URL's from/to): a new identity makes every
+    // consumer re-parse the range (`now` has moved) and refetch all its queries.
+    setTimeRangeState((prev) => (isSameRange(prev, newTimeRange) ? prev : newTimeRange));
     try {
       sessionStorage.setItem(APM_TIME_RANGE_STORAGE_KEY, JSON.stringify(newTimeRange));
     } catch {
@@ -114,7 +119,7 @@ export const usePersistentTimeRange = (
     const handleCustomEvent = (event: Event) => {
       const detail = (event as CustomEvent<TimeRange>).detail;
       if (isValidTimeRange(detail)) {
-        setTimeRangeState(detail);
+        setTimeRangeState((prev) => (isSameRange(prev, detail) ? prev : detail));
       }
     };
 

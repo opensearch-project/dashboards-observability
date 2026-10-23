@@ -107,18 +107,22 @@ export const useSelectedEdgeMetrics = (
           promqlService.executeInstantQuery({
             query: getQueryEdgeRequests(qService, qEnvironment, qRemote, timeRange, edgeOptions),
             time: endTimeSec,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: getQueryEdgeLatencyP99(qService, qEnvironment, qRemote, timeRange, edgeOptions),
             time: endTimeSec,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: getQueryEdgeFaults(qService, qEnvironment, qRemote, timeRange, edgeOptions),
             time: endTimeSec,
+            signal: abortController.signal,
           }),
           promqlService.executeInstantQuery({
             query: getQueryEdgeErrors(qService, qEnvironment, qRemote, timeRange, edgeOptions),
             time: endTimeSec,
+            signal: abortController.signal,
           }),
         ]);
 
