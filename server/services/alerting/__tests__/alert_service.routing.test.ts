@@ -4,6 +4,7 @@
  */
 
 import { MultiBackendAlertService } from '../alert_service';
+import { registerDefaultClassifiers } from '../../../../common/error';
 import type { Datasource, Logger } from '../../../../common/types/alerting';
 
 const mockLogger: Logger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
@@ -873,5 +874,71 @@ describe('MultiBackendAlertService — routing & list', () => {
     // @ts-expect-error setDatasourceService was intentionally removed
     const setter = instance.setDatasourceService;
     expect(setter).toBeUndefined();
+  });
+});
+
+describe('MultiBackendAlertService — CloudWatch datasource', () => {
+  const cwDatasource: Datasource = {
+    id: 'cloudwatch',
+    name: 'CloudWatch',
+    type: 'cloudwatch',
+    url: 'cloudwatch',
+    enabled: true,
+  };
+  const cwAlarm = {
+    alarmName: 'cpu-high',
+    alarmArn: 'arn:aws:cloudwatch:us-east-1:123456789012:alarm:cpu-high',
+    alarmType: 'metric' as const,
+    stateValue: 'ALARM' as const,
+    region: 'us-east-1',
+  };
+  const dsSvc = { ...mockDsSvc, list: jest.fn(async () => [cwDatasource]) };
+  beforeAll(() => registerDefaultClassifiers());
+
+  it('falls back to the redacted message when the failure is unclassified', async () => {
+    const providerError = new Error('arn:aws:sts::123456789012:assumed-role/Admin/me broke');
+    const cwBackend = { describeAlarms: jest.fn(async () => Promise.reject(providerError)) };
+    const service = new MultiBackendAlertService(dsSvc as never, mockLogger);
+    service.registerCloudWatch(cwBackend as never);
+    const res = await service.getUnifiedRules(jest.fn() as never, { dsIds: ['cloudwatch'] });
+    expect(res.datasourceStatus[0].error).not.toContain('123456789012');
+  });
+
+  it('reports a capped alarm list as truncated, without resolving an OpenSearch client', async () => {
+    const cwBackend = {
+      describeAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: true })),
+    };
+    const service = new MultiBackendAlertService(dsSvc as never, mockLogger);
+    service.registerCloudWatch(cwBackend as never);
+    const resolveClient = jest.fn();
+    const res = await service.getUnifiedRules(resolveClient as never, { dsIds: ['cloudwatch'] });
+    expect(resolveClient).not.toHaveBeenCalled();
+    expect(res.results.map((r) => r.name)).toEqual(['cpu-high']);
+    expect(res.datasourceStatus[0]).toMatchObject({ status: 'success', truncated: true });
+  });
+
+  it('returns the classified title, never raw provider text, in `error`', async () => {
+    const providerError = Object.assign(
+      new Error('User: arn:aws:sts::123456789012:assumed-role/Admin/me is not authorized'),
+      { name: 'AccessDeniedException' }
+    );
+    const cwBackend = { describeAlarms: jest.fn(async () => Promise.reject(providerError)) };
+    const service = new MultiBackendAlertService(dsSvc as never, mockLogger);
+    service.registerCloudWatch(cwBackend as never);
+    const res = await service.getUnifiedRules(jest.fn() as never, { dsIds: ['cloudwatch'] });
+    expect(res.datasourceStatus[0].error).toBe('CloudWatch access denied');
+    expect(JSON.stringify(res.datasourceStatus)).not.toContain('123456789012');
+    expect(JSON.stringify((mockLogger.error as jest.Mock).mock.calls)).not.toContain(
+      '123456789012'
+    );
+  });
+
+  it('resolves a lazy backend only when the CloudWatch datasource is fetched', async () => {
+    const provider = jest.fn(async () => undefined);
+    const service = new MultiBackendAlertService(mockDsSvc as never, mockLogger);
+    service.registerOpenSearch(mockOsBackend as never);
+    service.registerCloudWatch(provider);
+    await service.getUnifiedRules({} as never, { dsIds: ['ds-os'] });
+    expect(provider).not.toHaveBeenCalled();
   });
 });

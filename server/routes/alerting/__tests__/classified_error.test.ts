@@ -51,6 +51,21 @@ describe('contextFromError', () => {
     const e = Object.assign(new Error('nope'), { statusCode: 404 });
     expect(contextFromError(e, 'op', 'cid').httpStatus).toBe(404);
   });
+
+  it('reads the AWS SDK v3 $metadata.httpStatusCode off a plain Error', () => {
+    const e = Object.assign(new Error('The security token included in the request is invalid.'), {
+      name: 'UnrecognizedClientException',
+      $metadata: { httpStatusCode: 403 },
+    });
+    const ctx = contextFromError(e, 'op', 'cid');
+    expect(ctx.httpStatus).toBe(403);
+    expect(ctx.errorName).toBe('UnrecognizedClientException');
+  });
+
+  it('threads the sourceType hint into the context', () => {
+    const ctx = contextFromError(new Error('x'), 'op', 'cid', 'cloudwatch');
+    expect(ctx.sourceType).toBe('cloudwatch');
+  });
 });
 
 describe('classifyToHandlerResult', () => {
@@ -86,6 +101,23 @@ describe('classifyToHandlerResult', () => {
     expect(result.status).toBe(409);
   });
 
+  it('classifies a CloudWatch auth failure into a named failure class via sourceType', () => {
+    const err = Object.assign(new Error('The security token included in the request is expired'), {
+      name: 'ExpiredTokenException',
+      $metadata: { httpStatusCode: 403 },
+    });
+    const result = classifyToHandlerResult(err, {
+      operation: 'cloudwatch.alarm.detail',
+      logger,
+      sourceType: 'cloudwatch',
+    });
+    const detail = result.body.errorDetail as ClassifiedError;
+    expect(detail.code).toBe('CLOUDWATCH_AUTH_EXPIRED');
+    expect(detail.category).toBe('PERMISSION_DENIED');
+    expect(detail.title).toBe('AWS session expired');
+    expect(result.status).toBe(403);
+  });
+
   it('strips sensitive detail by default but keeps it when exposure is enabled', () => {
     const err = new SloRulerError(
       'RULER_VALIDATION_FAILED',
@@ -110,5 +142,37 @@ describe('classifyToHandlerResult', () => {
     });
     const exposedDetail = exposed.body.errorDetail as ClassifiedError;
     expect(exposedDetail.details?.some((d) => d.sensitivity === 'sensitive')).toBe(true);
+  });
+});
+
+describe('classifyToHandlerResult for CloudWatch', () => {
+  const providerError = () =>
+    Object.assign(
+      new Error(
+        'User: arn:aws:sts::123456789012:assumed-role/Admin/me is not authorized to perform: cloudwatch:DescribeAlarms'
+      ),
+      { name: 'AccessDeniedException', $metadata: { httpStatusCode: 403 } }
+    );
+
+  it('logs only the error name, status and correlation id, never provider text', () => {
+    classifyToHandlerResult(providerError(), {
+      operation: 'cloudwatch.alarm.detail',
+      logger,
+      sourceType: 'cloudwatch',
+    });
+    const line = (logger.error as jest.Mock).mock.calls[0][0] as string;
+    expect(line).toContain('correlationId=');
+    expect(line).toContain('AccessDeniedException');
+    expect(line).not.toContain('123456789012');
+  });
+
+  it('keeps provider text out of the response even when sensitive detail is exposed', () => {
+    configureErrorExposure(true);
+    const result = classifyToHandlerResult(providerError(), {
+      operation: 'cloudwatch.alarm.detail',
+      logger,
+      sourceType: 'cloudwatch',
+    });
+    expect(JSON.stringify(result.body)).not.toContain('123456789012');
   });
 });

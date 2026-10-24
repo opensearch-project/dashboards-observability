@@ -16,9 +16,18 @@
  * per-tenant data can leak between concurrent callers.
  */
 import { schema } from '@osd/config-schema';
-import { IRouter, RequestHandlerContext, SavedObject } from '../../../../../src/core/server';
+import {
+  IRouter,
+  OpenSearchDashboardsRequest,
+  RequestHandlerContext,
+  SavedObject,
+} from '../../../../../src/core/server';
 import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
-import { validateDateMath, validateTimeRangeQuery } from '../../../common/services/alerting';
+import {
+  parseDateMathMs,
+  validateDateMath,
+  validateTimeRangeQuery,
+} from '../../../common/services/alerting';
 import {
   HttpOpenSearchBackend,
   MultiBackendAlertService,
@@ -29,12 +38,19 @@ import {
 import { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
 import { MonitorMutationService } from '../../services/alerting/monitor_mutation_service';
 import { stripTrailingComparison } from '../../services/alerting/alert_utils';
+import {
+  describeSourceError,
+  type CloudWatchBackend,
+} from '../../services/alerting/cloudwatch/cloudwatch_backend';
+import { TimeoutError } from '../../services/alerting/timeout_error';
 import { registerAlertingMutationRoutes } from './mutations';
+import { classifyToHandlerResult } from './classified_error';
 import { toErrorBody, toHandlerResult } from './route_utils';
 import { isAlertManagerError } from '../../services/alerting';
 import {
   alertingIdSchema,
   alertingRuleIdSchema,
+  cloudWatchAlarmNameSchema,
   prometheusLabelNameSchema,
 } from './schema_helpers';
 
@@ -96,6 +112,47 @@ export interface AlertingRoutesDeps {
    * Prometheus rule mutation routes are registered.
    */
   rulerClient?: import('../../services/slo/ruler_client').RulerClient;
+  /**
+   * CloudWatch alarms backend. `setupRoutes` passes a per-request resolver over the
+   * deployment's `CloudWatchAlarmSourceFactory` and the per-request flag, so each call carries
+   * that caller's credentials and the gate is enforced server-side per request (`undefined`:
+   * CloudWatch is off for that request). A shared instance is accepted for tests.
+   */
+  cwBackend?:
+    | CloudWatchBackend
+    | ((request: OpenSearchDashboardsRequest) => Promise<CloudWatchBackend | undefined>);
+  /** The region the CloudWatch source queries; undefined lets the source use its default. */
+  cloudWatchRegion?: string;
+}
+
+/** Upper bound on one CloudWatch detail route. */
+const CLOUDWATCH_DETAIL_TIMEOUT_MS = 30_000;
+
+/**
+ * Runs `work` with an `AbortSignal` that fires when the route gives up (after `ms`) or the client
+ * disconnects, so the source can stop calls nobody is waiting for. Rejects with a `TimeoutError`
+ * (classified as a timeout) when `work` takes over `ms`.
+ */
+export function withRouteTimeout<T>(
+  request: OpenSearchDashboardsRequest,
+  work: (signal: AbortSignal) => Promise<T>,
+  ms: number,
+  what: string
+): Promise<T> {
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      const err = new TimeoutError(`${what} timed out after ${ms}ms`, ms);
+      controller.abort(err);
+      reject(err);
+    }, ms);
+  });
+  const disconnect = request.events?.aborted$?.subscribe(() => controller.abort());
+  return Promise.race([work(controller.signal), timeout]).finally(() => {
+    clearTimeout(timer);
+    disconnect?.unsubscribe();
+  });
 }
 
 /**
@@ -107,6 +164,23 @@ export interface AlertingRoutesDeps {
  * Exported for unit tests; production callers reach this through
  * `getAlertingClient`.
  */
+/**
+ * Convert the optional `startTime`/`endTime` date-math query params into the
+ * `{ startTimeMs, endTimeMs }` shape the CloudWatch backend's metric-preview
+ * window expects. Returns `{}` when either bound is missing so the backend
+ * falls back to its default (last 3h) window.
+ */
+function resolveDetailRange(
+  startTime?: string,
+  endTime?: string
+): { startTimeMs?: number; endTimeMs?: number } {
+  if (!startTime || !endTime) return {};
+  return {
+    startTimeMs: parseDateMathMs(startTime, /* isEndTime */ false),
+    endTimeMs: parseDateMathMs(endTime, /* isEndTime */ true),
+  };
+}
+
 export async function resolveOpenSearchDatasource(
   ctx: AlertingHandlerContext,
   requestedDsId?: string
@@ -221,6 +295,7 @@ export async function getAlertingClient(
   if (dsId === 'local-cluster') {
     return ctx.core.opensearch.client.asCurrentUser;
   }
+
   if (dsId && ctx.dataSource) {
     const ds = await resolveOpenSearchDatasource(ctx, dsId);
     if (ds?.mdsId) {
@@ -265,18 +340,55 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
    * `metadataService` instances are short-lived and die when the handler
    * returns.
    */
-  function buildRequestServices(ctx: AlertingHandlerContext): {
+  /**
+   * Resolve the CloudWatch backend for this request. `cwBackend` may be a
+   * shared instance (tests) or a per-request factory (what `setupRoutes` passes,
+   * so each call carries the caller's credentials).
+   */
+  const cwBackendByRequest = new WeakMap<object, Promise<CloudWatchBackend | undefined>>();
+  function resolveCwBackend(
+    request: OpenSearchDashboardsRequest
+  ): Promise<CloudWatchBackend | undefined> {
+    const provider = deps.cwBackend;
+    if (typeof provider !== 'function') return Promise.resolve(provider);
+    // Once per request: the listing, the fan-out and a detail route all ask.
+    let backend = cwBackendByRequest.get(request);
+    if (!backend) {
+      backend = provider(request).catch((err) => {
+        logger.warn(
+          `CloudWatch gate failed; CloudWatch is off for this request: ${describeSourceError(err)}`
+        );
+        return undefined;
+      });
+      cwBackendByRequest.set(request, backend);
+    }
+    return backend;
+  }
+
+  function buildRequestServices(
+    ctx: AlertingHandlerContext,
+    request: OpenSearchDashboardsRequest
+  ): {
     alertService: MultiBackendAlertService;
     metadataService: PrometheusMetadataService;
     datasourceService: SavedObjectDatasourceService;
   } {
+    // CloudWatch is resolved lazily: only a request that lists datasources or reads CloudWatch
+    // builds the source, and the listing, fan-out and detail routes share one resolution.
     const datasourceService = new SavedObjectDatasourceService(
       ctx.core.savedObjects.client,
-      logger
+      logger,
+      deps.cwBackend
+        ? {
+            enabled: () => resolveCwBackend(request).then((backend) => !!backend),
+            region: deps.cloudWatchRegion,
+          }
+        : undefined
     );
     const alertService = new MultiBackendAlertService(datasourceService, logger);
     alertService.registerOpenSearch(osBackend);
     alertService.registerPrometheus(promBackend);
+    if (deps.cwBackend) alertService.registerCloudWatch(() => resolveCwBackend(request));
     const metadataService = new PrometheusMetadataService(promBackend, datasourceService, logger);
     return { alertService, metadataService, datasourceService };
   }
@@ -319,6 +431,33 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       return sendResult(res, result, okStatus);
     } catch (e: unknown) {
       const result = toHandlerResult(e, logger);
+      return sendResult(res, result, okStatus);
+    }
+  }
+
+  /**
+   * Like `runHandler`, but funnels failures through the error-classification
+   * boundary (`classifyToHandlerResult`) so the response carries a structured
+   * `errorDetail` (failure class + remediation + safe diagnostics) alongside
+   * the legacy `error` string. Used by the CloudWatch detail routes, where an
+   * auth/region failure should surface as a named failure class in the UI
+   * rather than a generic message. `sourceType` is threaded to classifiers so
+   * transport-level failures (DNS, connection refused) can be attributed to
+   * the right provider.
+   */
+  async function runClassifiedHandler(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    res: any,
+    operation: string,
+    sourceType: string,
+    produce: () => Promise<{ status: number; body: any }>,
+    okStatus: number = 200
+  ) {
+    try {
+      const result = await produce();
+      return sendResult(res, result, okStatus);
+    } catch (e: unknown) {
+      const result = classifyToHandlerResult(e, { operation, logger, sourceType });
       return sendResult(res, result, okStatus);
     }
   }
@@ -401,7 +540,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       },
     },
     async (ctx, req, res) => {
-      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext, req);
       const result = await handleGetUnifiedAlerts(
         alertService,
         async (dsId: string) => getAlertingClientCtx(ctx, dsId),
@@ -431,7 +570,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       },
     },
     async (ctx, req, res) => {
-      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
+      const { alertService } = buildRequestServices(ctx as AlertingHandlerContext, req);
       const result = await handleGetUnifiedRules(
         alertService,
         async (dsId: string) => getAlertingClientCtx(ctx, dsId),
@@ -453,7 +592,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     },
     async (ctx, req, res) =>
       runHandler(res, async () => {
-        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
+        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext, req);
         return handleGetOSMonitors(
           alertService,
           await getAlertingClientCtx(ctx, req.params.dsId),
@@ -471,7 +610,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     },
     async (ctx, req, res) =>
       runHandler(res, async () => {
-        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
+        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext, req);
         return handleGetOSMonitor(
           alertService,
           await getAlertingClientCtx(ctx, req.params.dsId),
@@ -494,7 +633,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     },
     async (ctx, req, res) =>
       runHandler(res, async () => {
-        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
+        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext, req);
         return handleGetOSAlerts(
           alertService,
           await getAlertingClientCtx(ctx, req.params.dsId),
@@ -683,7 +822,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     },
     async (ctx, req, res) =>
       runHandler(res, async () => {
-        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
+        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext, req);
         return handleGetPromRuleGroups(
           alertService,
           await getAlertingClientCtx(ctx, req.params.dsId),
@@ -711,7 +850,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     },
     async (ctx, req, res) =>
       runHandler(res, async () => {
-        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
+        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext, req);
         return handleGetPromAlerts(
           alertService,
           await getAlertingClientCtx(ctx, req.params.dsId),
@@ -734,6 +873,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
               schema.literal('prometheus_rule'),
               schema.literal('detector'),
               schema.literal('forecaster'),
+              schema.literal('cloudwatch_alarm'),
             ])
           ),
         }),
@@ -741,7 +881,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     },
     async (ctx, req, res) =>
       runHandler(res, async () => {
-        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
+        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext, req);
         return handleGetRuleDetail(
           alertService,
           await getAlertingClientCtx(ctx, req.params.dsId),
@@ -764,7 +904,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
     },
     async (ctx, req, res) =>
       runHandler(res, async () => {
-        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext);
+        const { alertService } = buildRequestServices(ctx as AlertingHandlerContext, req);
         return handleGetAlertDetail(
           alertService,
           await getAlertingClientCtx(ctx, req.params.dsId),
@@ -772,6 +912,160 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           req.params.alertId,
           req.query.monitorId
         );
+      })
+  );
+
+  // ===========================================================================
+  // CloudWatch alarm detail routes (read-only, fetched via the AWS SDK seam)
+  //
+  // These back the CloudWatch alarm flyout's lazily-loaded sections. The row
+  // data itself flows through the unchanged `/api/alerting/unified/rules` and
+  // `/api/alerting/unified/alerts` fan-out. `dsId` is the virtual datasource
+  // id (`cloudwatch`); the resolved datasource carries the AWS region.
+  // ===========================================================================
+
+  /**
+   * Resolve the CloudWatch backend + datasource for a detail route, or throw a
+   * typed not-found when the feature is disabled or the id isn't a CloudWatch
+   * datasource. Keeps the four routes below terse.
+   */
+  const resolveCloudWatch = async (
+    ctx: AlertingHandlerContext,
+    request: OpenSearchDashboardsRequest,
+    dsId: string
+  ) => {
+    const cwBackend = await resolveCwBackend(request);
+    if (!cwBackend) {
+      throw createNotFoundError('CloudWatch alarms are not enabled for this request');
+    }
+    const { datasourceService } = buildRequestServices(ctx, request);
+    const ds = await datasourceService.get(dsId);
+    if (!ds || ds.type !== 'cloudwatch') {
+      throw createNotFoundError(`CloudWatch datasource not found: ${dsId}`);
+    }
+    return { cwBackend, ds };
+  };
+
+  // Alarm states at a past moment (the end of the Rules tab's window), from one
+  // account-wide history read. Alarms not listed are still in their current state.
+  router.get(
+    {
+      path: '/api/alerting/cloudwatch/{dsId}/alarm-states',
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        query: schema.object({
+          at: schema.string({
+            validate: (v: string) => (validateDateMath(v) ? undefined : `invalid date-math: ${v}`),
+          }),
+        }),
+      },
+    },
+    async (ctx, req, res) =>
+      runClassifiedHandler(res, 'cloudwatch.alarm.statesAt', 'cloudwatch', async () => {
+        const { cwBackend, ds } = await resolveCloudWatch(
+          ctx as AlertingHandlerContext,
+          req,
+          req.params.dsId
+        );
+        const atMs = parseDateMathMs(req.query.at, /* isEndTime */ true);
+        const body = await withRouteTimeout(
+          req,
+          (signal) => cwBackend.getStatesAt(ds, atMs, Date.now(), { signal }),
+          CLOUDWATCH_DETAIL_TIMEOUT_MS,
+          'CloudWatch alarm states'
+        );
+        return { status: 200, body };
+      })
+  );
+
+  // Full alarm detail (metadata + summary + history + metric preview + graph).
+  router.get(
+    {
+      path: '/api/alerting/cloudwatch/{dsId}/alarm',
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        // The name is a query value, not a path segment: alarm names may contain `/`.
+        query: schema.object(
+          { ...timeRangeQuery, name: cloudWatchAlarmNameSchema },
+          timeRangeObjectOptions
+        ),
+      },
+    },
+    async (ctx, req, res) =>
+      runClassifiedHandler(res, 'cloudwatch.alarm.detail', 'cloudwatch', async () => {
+        const { cwBackend, ds } = await resolveCloudWatch(
+          ctx as AlertingHandlerContext,
+          req,
+          req.params.dsId
+        );
+        const range = resolveDetailRange(req.query.startTime, req.query.endTime);
+        const detail = await withRouteTimeout(
+          req,
+          (signal) => cwBackend.getAlarmDetail(ds, req.query.name, { ...range, signal }),
+          CLOUDWATCH_DETAIL_TIMEOUT_MS,
+          'CloudWatch alarm detail'
+        );
+        if (!detail) return { status: 404, body: { error: 'Alarm not found' } };
+        return { status: 200, body: detail };
+      })
+  );
+
+  // Alarm state/config history (partial-permission aware).
+  router.get(
+    {
+      path: '/api/alerting/cloudwatch/{dsId}/alarm/history',
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        query: schema.object({ name: cloudWatchAlarmNameSchema }),
+      },
+    },
+    async (ctx, req, res) =>
+      runClassifiedHandler(res, 'cloudwatch.alarm.history', 'cloudwatch', async () => {
+        const { cwBackend, ds } = await resolveCloudWatch(
+          ctx as AlertingHandlerContext,
+          req,
+          req.params.dsId
+        );
+        const body = await withRouteTimeout(
+          req,
+          (signal) => cwBackend.getAlarmHistory(ds, req.query.name, { signal }),
+          CLOUDWATCH_DETAIL_TIMEOUT_MS,
+          'CloudWatch alarm history'
+        );
+        return { status: 200, body };
+      })
+  );
+
+  // Composite-alarm relationships graph (parents + descendant tree).
+  router.get(
+    {
+      path: '/api/alerting/cloudwatch/{dsId}/alarm/relationships',
+      validate: {
+        params: schema.object({ dsId: alertingIdSchema }),
+        query: schema.object({
+          name: cloudWatchAlarmNameSchema,
+          depth: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (ctx, req, res) =>
+      runClassifiedHandler(res, 'cloudwatch.alarm.relationships', 'cloudwatch', async () => {
+        const { cwBackend, ds } = await resolveCloudWatch(
+          ctx as AlertingHandlerContext,
+          req,
+          req.params.dsId
+        );
+        const rawDepth = req.query.depth ? parseInt(req.query.depth, 10) : undefined;
+        const depth = rawDepth && Number.isFinite(rawDepth) ? rawDepth : undefined;
+        // Only the alarm and the graph: not the full detail (history, metric data).
+        const graph = await withRouteTimeout(
+          req,
+          (signal) => cwBackend.getRelationships(ds, req.query.name, depth, { signal }),
+          CLOUDWATCH_DETAIL_TIMEOUT_MS,
+          'CloudWatch alarm relationships'
+        );
+        if (!graph) return { status: 404, body: { error: 'Alarm not found' } };
+        return { status: 200, body: graph };
       })
   );
 
@@ -859,7 +1153,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       },
       async (ctx, req, res) =>
         runHandler(res, async () => {
-          const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext);
+          const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext, req);
           return handleGetMetricNames(
             metadataService,
             await getAlertingClientCtx(ctx, req.params.dsId),
@@ -880,7 +1174,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       },
       async (ctx, req, res) =>
         runHandler(res, async () => {
-          const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext);
+          const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext, req);
           return handleGetLabelNames(
             metadataService,
             await getAlertingClientCtx(ctx, req.params.dsId),
@@ -901,7 +1195,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       },
       async (ctx, req, res) =>
         runHandler(res, async () => {
-          const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext);
+          const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext, req);
           return handleGetLabelValues(
             metadataService,
             await getAlertingClientCtx(ctx, req.params.dsId),
@@ -922,7 +1216,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       },
       async (ctx, req, res) =>
         runHandler(res, async () => {
-          const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext);
+          const { metadataService } = buildRequestServices(ctx as AlertingHandlerContext, req);
           return handleGetMetricMetadata(
             metadataService,
             await getAlertingClientCtx(ctx, req.params.dsId),

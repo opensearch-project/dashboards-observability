@@ -35,6 +35,7 @@ class CoreRefs {
   public queryAssistEnabled?: boolean;
   public summarizeEnabled?: boolean;
   public sloEnabled?: boolean;
+  public cloudwatchEnabled?: boolean;
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
   public overlays?: OverlayStart;

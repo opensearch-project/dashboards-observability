@@ -1,0 +1,116 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
+ * Fetch the full `CloudWatchAlarmDetail` for the CloudWatch alarm flyout.
+ * Mirrors `useMonitorDetail`: instantiate the service once, re-run on
+ * dsId/alarmName change, guard against stale writes after unmount, and surface
+ * a hard error separately from the (independently-degradable) detail sections.
+ *
+ * The detail endpoint already loads history / metric-preview / relationships
+ * independently server-side and degrades each on partial permission, so the
+ * flyout gets one payload with per-section presence flags — a single slow AWS
+ * call can't blank the flyout.
+ */
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { CloudWatchAlarmDetail } from '../../../../common/types/alerting';
+import type { ClassifiedError } from '../../../../common/error';
+import { extractClassifiedError } from '../../common/error';
+import { AlertingOpenSearchService } from '../query_services/alerting_opensearch_service';
+import { extractServerErrorStatus } from '../alarms_page_helpers';
+
+export interface UseCloudWatchAlarmDetailParams {
+  dsId: string;
+  alarmName: string;
+  /**
+   * Optional window (date-math or ISO) for the metric preview. Omitted: the
+   * server's default window. History always comes back unwindowed so the
+   * flyout knows the last change even when it's outside the window.
+   */
+  startTime?: string;
+  endTime?: string;
+}
+
+export interface UseCloudWatchAlarmDetailResult {
+  detail: CloudWatchAlarmDetail | null;
+  isLoading: boolean;
+  error: Error | null;
+  /**
+   * Structured classification of the failure when the server attached one
+   * (`errorDetail` from the classified CloudWatch routes) — names the failure
+   * class (expired session, missing permission, unreachable region, …) with
+   * remediation and safe diagnostics. Null when the error is unclassified.
+   */
+  classifiedError: ClassifiedError | null;
+  /** Re-run the fetch (Retry button in the flyout's error state). */
+  retry: () => void;
+  /**
+   * The server rejected the requested window (400), so the detail was loaded for its default
+   * window instead. The flyout says so rather than showing an error.
+   */
+  windowRejected: boolean;
+}
+
+export function useCloudWatchAlarmDetail({
+  dsId,
+  alarmName,
+  startTime,
+  endTime,
+}: UseCloudWatchAlarmDetailParams): UseCloudWatchAlarmDetailResult {
+  const service = useMemo(() => new AlertingOpenSearchService(), []);
+  const [detail, setDetail] = useState<CloudWatchAlarmDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const [classifiedError, setClassifiedError] = useState<ClassifiedError | null>(null);
+  const [windowRejected, setWindowRejected] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+
+  const retry = useCallback(() => setAttempt((n) => n + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+    setDetail(null);
+    setIsLoading(true);
+    setError(null);
+    setClassifiedError(null);
+    setWindowRejected(false);
+    const hasWindow = !!(startTime && endTime);
+    const load = (withWindow: boolean) =>
+      service.getCloudWatchAlarmDetail(dsId, alarmName, {
+        // The route rejects one-sided ranges, so send both or neither.
+        ...(withWindow ? { startTime, endTime } : {}),
+        signal: controller.signal,
+      });
+    load(hasWindow)
+      .catch((err: unknown) => {
+        // A window the server won't take (400) isn't a CloudWatch failure: load the alarm for
+        // the default window and let the flyout note it.
+        if (cancelled || !hasWindow || extractServerErrorStatus(err) !== 400) throw err;
+        return load(false).then((data: CloudWatchAlarmDetail) => {
+          if (!cancelled) setWindowRejected(true);
+          return data;
+        });
+      })
+      .then((data: CloudWatchAlarmDetail) => {
+        if (!cancelled && data) setDetail(data);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        console.error('Failed to load CloudWatch alarm detail:', err);
+        setClassifiedError(extractClassifiedError(err));
+        setError(err instanceof Error ? err : new Error(String(err)));
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [dsId, alarmName, startTime, endTime, service, attempt]);
+
+  return { detail, isLoading, error, classifiedError, retry, windowRejected };
+}

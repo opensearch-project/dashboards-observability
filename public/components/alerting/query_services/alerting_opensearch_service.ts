@@ -12,6 +12,10 @@
  */
 import { coreRefs } from '../../../framework/core_refs';
 import type {
+  CloudWatchAlarmDetail,
+  CloudWatchAlarmHistoryItem,
+  CloudWatchRelationshipGraph,
+  CloudWatchStatesAt,
   ProgressiveResponse,
   UnifiedAlert,
   UnifiedAlertSummary,
@@ -100,6 +104,69 @@ export class AlertingOpenSearchService {
       `/api/alerting/rules/${encodeURIComponent(dsId)}/${encodeURIComponent(ruleId)}`,
       definitionType ? { query: { definitionType } } : undefined
     )) as UnifiedRule;
+  }
+
+  /**
+   * Full CloudWatch alarm detail (metadata + summary + history + metric
+   * preview + relationships) for the alarm flyout. `signal` cancels the
+   * request when the flyout closes before it resolves.
+   */
+  async getCloudWatchAlarmDetail(
+    dsId: string,
+    alarmName: string,
+    opts?: { startTime?: string; endTime?: string; signal?: AbortSignal }
+  ): Promise<CloudWatchAlarmDetail> {
+    // The name is a query value (alarm names may contain `/`); the client encodes it.
+    const query: Record<string, string> = { name: alarmName };
+    if (opts?.startTime) query.startTime = opts.startTime;
+    if (opts?.endTime) query.endTime = opts.endTime;
+    return (await this.requireHttp().get(
+      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarm`,
+      { query, signal: opts?.signal }
+    )) as CloudWatchAlarmDetail;
+  }
+
+  /**
+   * CloudWatch alarm states at `at` (date-math or ISO): only the alarms that changed since;
+   * the rest are in their current state.
+   */
+  async getCloudWatchStatesAt(
+    dsId: string,
+    at: string,
+    signal?: AbortSignal
+  ): Promise<CloudWatchStatesAt> {
+    return (await this.requireHttp().get(
+      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarm-states`,
+      { query: { at }, signal }
+    )) as CloudWatchStatesAt;
+  }
+
+  /** CloudWatch alarm history (partial-permission aware). */
+  async getCloudWatchAlarmHistory(
+    dsId: string,
+    alarmName: string,
+    signal?: AbortSignal
+  ): Promise<{ items: CloudWatchAlarmHistoryItem[]; accessDenied: boolean }> {
+    return (await this.requireHttp().get(
+      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarm/history`,
+      { query: { name: alarmName }, signal }
+    )) as { items: CloudWatchAlarmHistoryItem[]; accessDenied: boolean };
+  }
+
+  /** CloudWatch composite-alarm relationships graph (deeper levels on demand). */
+  async getCloudWatchAlarmRelationships(
+    dsId: string,
+    alarmName: string,
+    depth?: number,
+    signal?: AbortSignal
+  ): Promise<CloudWatchRelationshipGraph> {
+    return (await this.requireHttp().get(
+      `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarm/relationships`,
+      {
+        query: { name: alarmName, ...(depth !== undefined ? { depth: String(depth) } : {}) },
+        signal,
+      }
+    )) as CloudWatchRelationshipGraph;
   }
 
   /**

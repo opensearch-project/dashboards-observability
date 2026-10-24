@@ -38,11 +38,61 @@ interface DataConnectionSOAttributes {
   type?: string;
 }
 
+/**
+ * The virtual CloudWatch datasource id. There is no saved object for it — the
+ * CloudWatch integration is a zero-setup virtual datasource for the account the
+ * caller's AWS credentials reach (through the deployment's source). Kept in sync with the
+ * client-side synthetic entry in `use_datasources.ts`.
+ */
+export const CLOUDWATCH_DATASOURCE_ID = 'cloudwatch';
+
+export interface CloudWatchDatasourceConfig {
+  /**
+   * Whether the virtual datasource exists. A function is asked lazily, only when the listing or
+   * a `get('cloudwatch')` needs it (per request: the flag and the deployment's source).
+   */
+  enabled: boolean | (() => Promise<boolean>);
+  /** The region the source queries; undefined lets the source use its own default. */
+  region?: string;
+}
+
 export class SavedObjectDatasourceService implements DatasourceService {
   constructor(
     private readonly savedObjects: SavedObjectsClientContract,
-    private readonly logger?: Logger
+    private readonly logger?: Logger,
+    /**
+     * When present and `enabled`, the virtual CloudWatch datasource is appended
+     * to `list()` and resolvable via `get('cloudwatch')`. Injected from the
+     * `observability.cloudwatch` config so the whole integration ships dark.
+     */
+    private readonly cloudWatch?: CloudWatchDatasourceConfig
   ) {}
+
+  private async isCloudWatchEnabled(): Promise<boolean> {
+    const enabled = this.cloudWatch?.enabled;
+    if (typeof enabled === 'function') {
+      try {
+        return await enabled();
+      } catch (e) {
+        this.logger?.debug(
+          `SavedObjectDatasourceService: CloudWatch gate failed: ${(e as Error)?.name}`
+        );
+        return false;
+      }
+    }
+    return !!enabled;
+  }
+
+  private cloudWatchDatasource(): Datasource {
+    return {
+      id: CLOUDWATCH_DATASOURCE_ID,
+      name: 'CloudWatch',
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+      region: this.cloudWatch?.region,
+    };
+  }
 
   async list(): Promise<Datasource[]> {
     const all: Datasource[] = [];
@@ -103,10 +153,18 @@ export class SavedObjectDatasourceService implements DatasourceService {
         enabled: true,
       });
     }
+    // Virtual CloudWatch datasource — no saved object; appears automatically
+    // when the feature is enabled and a CloudWatch source is available.
+    if (await this.isCloudWatchEnabled()) {
+      all.push(this.cloudWatchDatasource());
+    }
     return all;
   }
 
   async get(id: string): Promise<Datasource | null> {
+    if (id === CLOUDWATCH_DATASOURCE_ID) {
+      return (await this.isCloudWatchEnabled()) ? this.cloudWatchDatasource() : null;
+    }
     if (!id || id === 'local-cluster') {
       return {
         id: 'local-cluster',

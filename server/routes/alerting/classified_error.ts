@@ -44,9 +44,14 @@ export function configureErrorExposure(next: boolean): void {
 export function contextFromError(
   e: unknown,
   operation: string,
-  correlationId: string
+  correlationId: string,
+  sourceType?: string
 ): RawErrorContext {
-  const base: RawErrorContext = { operation, correlationId };
+  const base: RawErrorContext = {
+    operation,
+    correlationId,
+    ...(sourceType ? { sourceType } : {}),
+  };
   if (e instanceof SloRulerError) {
     return {
       ...base,
@@ -69,9 +74,17 @@ export function contextFromError(
   }
   if (e instanceof Error) {
     const statusCode = (e as { statusCode?: unknown }).statusCode;
+    // AWS SDK v3 errors carry their HTTP status on `$metadata.httpStatusCode`.
+    const awsStatus = (e as { $metadata?: { httpStatusCode?: unknown } }).$metadata?.httpStatusCode;
+    const httpStatus =
+      typeof statusCode === 'number'
+        ? statusCode
+        : typeof awsStatus === 'number'
+          ? awsStatus
+          : undefined;
     return {
       ...base,
-      httpStatus: typeof statusCode === 'number' ? statusCode : undefined,
+      httpStatus,
       message: e.message,
       errorName: e.name,
     };
@@ -97,6 +110,8 @@ function stringifyRaw(rawBody: unknown): string {
 export interface ClassifyOptions {
   operation: string;
   logger?: Logger;
+  /** Neutral source hint threaded to classifiers, e.g. 'cloudwatch'. */
+  sourceType?: string;
 }
 
 /**
@@ -107,23 +122,36 @@ export interface ClassifyOptions {
  */
 export function classifyToHandlerResult(e: unknown, opts: ClassifyOptions): HandlerResult {
   const correlationId = randomUUID();
-  const ctx = contextFromError(e, opts.operation, correlationId);
+  const ctx = contextFromError(e, opts.operation, correlationId, opts.sourceType);
   const classified: ClassifiedError = { ...classifyError(ctx), correlationId };
 
+  // CloudWatch errors come from the caller's own AWS identity and can name principals and
+  // account numbers, so for that source neither the log nor the response carries provider text.
+  const providerTextIsSensitive = opts.sourceType === 'cloudwatch';
   if (opts.logger) {
-    // Full detail, server-side only, keyed by correlation id — this is where
-    // the true upstream cause is preserved regardless of what the client sees.
-    // Cap the raw body so a large upstream object can't balloon a log line.
-    const raw = stringifyRaw(ctx.rawBody);
-    const rawForLog = raw.length > LOG_RAW_MAX_LEN ? `${raw.slice(0, LOG_RAW_MAX_LEN)}…` : raw;
-    opts.logger.error(
-      `[${opts.operation}] correlationId=${correlationId} ` +
-        `${classified.category}/${classified.code} ` +
-        `(HTTP ${classified.httpStatus ?? '-'}): ${ctx.message ?? ''} ${rawForLog}`.trim()
-    );
+    if (providerTextIsSensitive) {
+      opts.logger.error(
+        `[${opts.operation}] correlationId=${correlationId} ` +
+          `${classified.category}/${classified.code} ` +
+          `(HTTP ${classified.httpStatus ?? '-'}): ${ctx.errorName ?? 'Error'}`
+      );
+    } else {
+      // Full detail, server-side only, keyed by correlation id — this is where
+      // the true upstream cause is preserved regardless of what the client sees.
+      // Cap the raw body so a large upstream object can't balloon a log line.
+      const raw = stringifyRaw(ctx.rawBody);
+      const rawForLog = raw.length > LOG_RAW_MAX_LEN ? `${raw.slice(0, LOG_RAW_MAX_LEN)}…` : raw;
+      opts.logger.error(
+        `[${opts.operation}] correlationId=${correlationId} ` +
+          `${classified.category}/${classified.code} ` +
+          `(HTTP ${classified.httpStatus ?? '-'}): ${ctx.message ?? ''} ${rawForLog}`.trim()
+      );
+    }
   }
 
-  const clientErr = toClientPayload(classified, { exposeSensitive });
+  const clientErr = toClientPayload(classified, {
+    exposeSensitive: exposeSensitive && !providerTextIsSensitive,
+  });
   return {
     status: clientErr.httpStatus ?? 500,
     body: {

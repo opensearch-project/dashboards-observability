@@ -24,9 +24,11 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiLoadingSpinner,
+  EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import moment from 'moment';
 import {
   MonitorHealthStatus,
   MonitorStatus,
@@ -35,6 +37,8 @@ import {
   UnifiedRuleSummary,
 } from '../../../../common/types/alerting';
 import {
+  cloudWatchStateToHealth,
+  cloudWatchStateToStatus,
   HEALTH_COLORS,
   isDetectorRule,
   isForecasterRule,
@@ -46,6 +50,14 @@ import { TruncatedLabel } from '../../common/truncated_label';
 import { getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
 import { DEFAULT_WIDTHS } from './resizable_columns';
 import { isPending } from './pending_rules';
+import type { CloudWatchWindowState } from '../hooks/use_cloudwatch_states_at';
+
+/** Tint for the `CW: <state>` badge shown alongside the unified status. */
+const CLOUDWATCH_STATE_BADGE_COLOR: Record<string, string> = {
+  ALARM: 'danger',
+  OK: 'success',
+  INSUFFICIENT_DATA: 'warning',
+};
 
 // ============================================================================
 // Column Definitions
@@ -83,6 +95,33 @@ export interface BuildTableColumnsParams {
   toggleSelect: (id: string) => void;
   toggleSelectAll: () => void;
   setSelectedMonitor: (r: UnifiedRuleSummary) => void;
+  /**
+   * A CloudWatch row's state at the end of the Rules tab's window, when that window ends in the
+   * past. Status and Health then show that state instead of the current one.
+   */
+  cloudWatchStateAt?: (r: UnifiedRuleSummary) => CloudWatchWindowState | undefined;
+}
+
+const formatAt = (ms: number) => moment(ms).format('M/D HH:mm');
+
+/** "CloudWatch state at 9/24 14:00" (plus a caveat when the history read stopped short). */
+function stateAtTooltip(at: CloudWatchWindowState): string {
+  if (!at.state) {
+    return i18n.translate('observability.alerting.monitorsTable.columns.cloudWatchStateAtUnknown', {
+      defaultMessage:
+        "CloudWatch keeps 30 days of alarm history, so the state at {time} isn't available.",
+      values: { time: formatAt(at.atMs) },
+    });
+  }
+  const label = i18n.translate('observability.alerting.monitorsTable.columns.cloudWatchStateAt', {
+    defaultMessage: 'CloudWatch state at {time}',
+    values: { time: formatAt(at.atMs) },
+  });
+  if (at.complete) return label;
+  return `${label}. ${i18n.translate(
+    'observability.alerting.monitorsTable.columns.cloudWatchStateAtPartial',
+    { defaultMessage: 'Not all history loaded, so this may be the current state.' }
+  )}`;
 }
 
 export function buildTableColumns({
@@ -94,6 +133,7 @@ export function buildTableColumns({
   toggleSelect,
   toggleSelectAll,
   setSelectedMonitor,
+  cloudWatchStateAt,
 }: BuildTableColumnsParams): Array<Record<string, unknown>> {
   const w = (id: string) => `${columnWidths[id] || DEFAULT_WIDTHS[id] || 120}px`;
   // Pending optimistic rows aren't selectable (their synthetic id would 404),
@@ -147,13 +187,21 @@ export function buildTableColumns({
         name: i18n.translate('observability.alerting.monitorsTable.columns.name', {
           defaultMessage: 'Name',
         }),
-        sortable: true,
+        // Case-insensitive, so "always-in-alarm" sorts above "Observability Stack - …".
+        sortable: (r: UnifiedRuleSummary) => (r.name || '').toLowerCase(),
         truncateText: true,
         width: w('name'),
         render: (name: string, item: UnifiedRuleSummary) => {
           const iconType =
-            item.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
-          const showGroupBadge = item.datasourceType === 'prometheus' && !!item.group;
+            item.datasourceType === 'cloudwatch'
+              ? 'logoAWS'
+              : item.datasourceType === 'prometheus'
+                ? 'logoPrometheus'
+                : 'logoOpenSearch';
+          // Avoid duplicating the group when the dedicated Rule Group column is visible
+          const showGroupBadge =
+            item.datasourceType === 'prometheus' && !!item.group && !visibleColumns.has('group');
+          const showPartialAccess = !!item.cloudWatch?.partialAccess;
           return (
             <div>
               <EuiButtonEmpty
@@ -172,6 +220,13 @@ export function buildTableColumns({
               >
                 <strong>{name}</strong>
               </EuiButtonEmpty>
+              {showPartialAccess && (
+                <EuiBadge color="hollow" style={{ fontSize: 10, marginLeft: 4 }}>
+                  {i18n.translate('observability.alerting.monitorsTable.partialAccessBadge', {
+                    defaultMessage: 'partial access',
+                  })}
+                </EuiBadge>
+              )}
               {showGroupBadge && (
                 <div style={{ marginLeft: 24, marginTop: -2 }}>
                   <EuiBadge color="hollow" style={{ fontSize: 10 }}>
@@ -218,8 +273,74 @@ export function buildTableColumns({
               </EuiToolTip>
             );
           }
+          const at = cloudWatchStateAt?.(item);
+          if (at && !at.state) {
+            // Older than CloudWatch's alarm history: say so instead of guessing.
+            return (
+              <EuiToolTip content={stateAtTooltip(at)}>
+                <EuiTextColor color="subdued" data-test-subj="cloudWatchStatusUnknownAtWindowEnd">
+                  {i18n.translate('observability.alerting.monitorsTable.columns.noHistory', {
+                    defaultMessage: 'No history',
+                  })}
+                </EuiTextColor>
+              </EuiToolTip>
+            );
+          }
+          const atState = at?.state;
+          const cw =
+            item.cloudWatch && atState ? { ...item.cloudWatch, state: atState } : item.cloudWatch;
+          const status = atState ? cloudWatchStateToStatus(atState) : s;
+          const unifiedLabel = getMonitorStateLabel(status);
+          // Long values ("insufficient data", "CW: INSUFFICIENT_DATA") must
+          // not overflow the (user-resizable) status column: both the health
+          // label and the CW badge truncate with an ellipsis, and the full
+          // text stays reachable via tooltip.
+          const truncate: React.CSSProperties = {
+            display: 'block',
+            maxWidth: '100%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          };
           return (
-            <EuiHealth color={STATUS_COLORS[s] || 'subdued'}>{getMonitorStateLabel(s)}</EuiHealth>
+            <EuiFlexGroup
+              gutterSize="xs"
+              alignItems="center"
+              responsive={false}
+              wrap
+              style={{ minWidth: 0 }}
+            >
+              <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
+                <EuiHealth
+                  color={STATUS_COLORS[status] || 'subdued'}
+                  data-test-subj={at ? 'cloudWatchStatusAtWindowEnd' : undefined}
+                >
+                  <span style={truncate} title={at ? stateAtTooltip(at) : unifiedLabel}>
+                    {unifiedLabel}
+                  </span>
+                </EuiHealth>
+              </EuiFlexItem>
+              {cw && (
+                <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
+                  <EuiToolTip content={at ? stateAtTooltip(at) : `CloudWatch state: ${cw.state}`}>
+                    <EuiBadge color={CLOUDWATCH_STATE_BADGE_COLOR[cw.state] || 'hollow'}>
+                      <span style={truncate}>CW: {cw.state}</span>
+                    </EuiBadge>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              {at && (
+                // Visible cue that the row shows the window end, not now.
+                <EuiFlexItem grow={false} style={{ flexBasis: '100%' }}>
+                  <EuiTextColor color="subdued" style={{ fontSize: 11 }}>
+                    {i18n.translate('observability.alerting.monitorsTable.columns.atTime', {
+                      defaultMessage: 'at {time}',
+                      values: { time: formatAt(at.atMs) },
+                    })}
+                  </EuiTextColor>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           );
         },
       });
@@ -253,9 +374,23 @@ export function buildTableColumns({
         }),
         sortable: true,
         width: w('healthStatus'),
-        render: (h: MonitorHealthStatus) => (
-          <EuiHealth color={HEALTH_COLORS[h] || 'subdued'}>{getMonitorStateLabel(h)}</EuiHealth>
-        ),
+        render: (h: MonitorHealthStatus, item: UnifiedRuleSummary) => {
+          const at = cloudWatchStateAt?.(item);
+          if (at && !at.state) {
+            return (
+              <EuiToolTip content={stateAtTooltip(at)}>
+                <EuiTextColor color="subdued">—</EuiTextColor>
+              </EuiToolTip>
+            );
+          }
+          const health = at?.state ? cloudWatchStateToHealth(at.state) : h;
+          const cell = (
+            <EuiHealth color={HEALTH_COLORS[health] || 'subdued'}>
+              {getMonitorStateLabel(health)}
+            </EuiHealth>
+          );
+          return at ? <EuiToolTip content={stateAtTooltip(at)}>{cell}</EuiToolTip> : cell;
+        },
       });
     } else if (colId === 'datasource') {
       cols.push({
@@ -271,7 +406,25 @@ export function buildTableColumns({
         // single-line a plain-text render in this table, so use the shared
         // `TruncatedLabel` (single-line ellipsis + instant full-text tooltip),
         // matching the datasource facet in the filter panel.
-        render: (id: string) => <TruncatedLabel text={dsNameMap.get(id) || id} />,
+        render: (id: string, item: UnifiedRuleSummary) => {
+          const label = dsNameMap.get(id) || id;
+          const cw = item.cloudWatch;
+          // CloudWatch rows show the account · region beneath the name so a
+          // multi-account view is legible at a glance (matches the demo).
+          const accountRegion =
+            cw && (cw.accountId || cw.region)
+              ? [cw.accountId, cw.region].filter(Boolean).join(' · ')
+              : undefined;
+          if (!accountRegion) return <TruncatedLabel text={label} />;
+          return (
+            <div>
+              <TruncatedLabel text={label} />
+              <EuiTextColor color="subdued" style={{ fontSize: 11 }}>
+                {accountRegion}
+              </EuiTextColor>
+            </div>
+          );
+        },
       });
     }
   }

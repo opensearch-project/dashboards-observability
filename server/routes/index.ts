@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ILegacyClusterClient, IRouter, Logger } from '../../../../src/core/server';
+import {
+  ILegacyClusterClient,
+  IRouter,
+  Logger,
+  OpenSearchDashboardsRequest,
+} from '../../../../src/core/server';
 import { DSLFacet } from '../services/facets/dsl_facet';
 import { PPLFacet } from '../services/facets/ppl_facet';
 import SavedObjectFacet from '../services/facets/saved_objects';
@@ -33,17 +38,34 @@ import {
   MonitorMutationService,
   DirectQueryPrometheusBackend,
 } from '../services/alerting';
+import { CloudWatchBackend } from '../services/alerting/cloudwatch/cloudwatch_backend';
+import type {
+  CloudWatchAlarmSourceFactory,
+  CloudWatchFlagResolver,
+} from '../services/alerting/cloudwatch/types';
 
 export function setupRoutes({
   router,
   client,
   dataSourceEnabled,
   logger,
+  cloudWatch,
+  cloudWatchAlarmSourceFactory,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
   dataSourceEnabled: boolean;
   logger: Logger;
+  /**
+   * `isEnabled` is the per-request flag (`observability.cloudwatch.enabled`, dynamic config
+   * aware); `region` is the region the source queries (undefined: the source's default).
+   */
+  cloudWatch?: { isEnabled: CloudWatchFlagResolver; region?: string };
+  /**
+   * Reaches CloudWatch for one request. This plugin ships none: a deployment that can call
+   * CloudWatch with the caller's credentials passes one (as it can pass a Prometheus backend).
+   */
+  cloudWatchAlarmSourceFactory?: CloudWatchAlarmSourceFactory;
 }) {
   PanelsRouter(router);
   VisualizationsRouter(router);
@@ -94,11 +116,26 @@ export function setupRoutes({
   const { DirectQueryRulerClient } = require('../services/slo/ruler_client');
   const rulerClient = new DirectQueryRulerClient(logger);
 
+  // CloudWatch backend, built per request over the deployment's source so each call carries
+  // that caller's credentials. Experimental and fail dark: for each request it needs the flag on
+  // and the deployment's source to return a source; otherwise the virtual datasource, routes and
+  // UI stay off for that request. Resolved lazily, only when the CloudWatch datasource is used.
+  const cwBackend =
+    cloudWatch && cloudWatchAlarmSourceFactory
+      ? async (request: OpenSearchDashboardsRequest) => {
+          if (!(await cloudWatch.isEnabled(request))) return undefined;
+          const source = await cloudWatchAlarmSourceFactory(request);
+          return source ? new CloudWatchBackend(logger, source) : undefined;
+        }
+      : undefined;
+
   registerAlertingRoutes(router, {
     osBackend,
     promBackend,
     mutationSvc,
     logger,
     rulerClient,
+    cwBackend,
+    cloudWatchRegion: cloudWatch?.region,
   });
 }

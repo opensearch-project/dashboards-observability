@@ -64,29 +64,67 @@ export function persistSelection(storageKey: string, names: string[]) {
 
 export const ALERT_MANAGER_START_TIME_KEY = 'AlertManagerStartTime';
 export const ALERT_MANAGER_END_TIME_KEY = 'AlertManagerEndTime';
+/** The Rules tab's own window (CloudWatch state and history), separate from the Alerts tab's. */
+export const RULES_START_TIME_KEY = 'AlertManagerRulesStartTime';
+export const RULES_END_TIME_KEY = 'AlertManagerRulesEndTime';
 export const DEFAULT_START_TIME = 'now-24h';
 export const DEFAULT_END_TIME = 'now';
 
-export function loadPersistedStartTime(): string {
+/** Whether this session has a persisted Alerts range (i.e. the user, or we, already set one). */
+export function hasPersistedTimeRange(key: string = ALERT_MANAGER_START_TIME_KEY): boolean {
   try {
-    return window.sessionStorage.getItem(ALERT_MANAGER_START_TIME_KEY) || DEFAULT_START_TIME;
+    return window.sessionStorage.getItem(key) !== null;
+  } catch (_e) {
+    return false;
+  }
+}
+
+/**
+ * The default range to open the Alerts tab on so its oldest active alert is in view, e.g.
+ * `now-65d` for an alarm active for 63 days. Undefined when every active alert started inside
+ * the default 24h, so the default stays.
+ */
+export function rangeCoveringActiveAlerts(
+  alerts: Array<{ state: string; startTime: string }>,
+  nowMs: number = Date.now()
+): string | undefined {
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  let oldest = nowMs;
+  for (const alert of alerts) {
+    if (alert.state !== 'active') continue;
+    const t = new Date(alert.startTime).getTime();
+    if (Number.isFinite(t) && t < oldest) oldest = t;
+  }
+  if (nowMs - oldest <= DAY_MS) return undefined;
+  // Whole days, plus one so the alert's start isn't on the chart's left edge.
+  return `now-${Math.ceil((nowMs - oldest) / DAY_MS) + 1}d`;
+}
+
+export function loadPersistedStartTime(key: string = ALERT_MANAGER_START_TIME_KEY): string {
+  try {
+    return window.sessionStorage.getItem(key) || DEFAULT_START_TIME;
   } catch (_e) {
     return DEFAULT_START_TIME;
   }
 }
 
-export function loadPersistedEndTime(): string {
+export function loadPersistedEndTime(key: string = ALERT_MANAGER_END_TIME_KEY): string {
   try {
-    return window.sessionStorage.getItem(ALERT_MANAGER_END_TIME_KEY) || DEFAULT_END_TIME;
+    return window.sessionStorage.getItem(key) || DEFAULT_END_TIME;
   } catch (_e) {
     return DEFAULT_END_TIME;
   }
 }
 
-export function persistTimeRange(start: string, end: string) {
+export function persistTimeRange(
+  start: string,
+  end: string,
+  startKey: string = ALERT_MANAGER_START_TIME_KEY,
+  endKey: string = ALERT_MANAGER_END_TIME_KEY
+) {
   try {
-    window.sessionStorage.setItem(ALERT_MANAGER_START_TIME_KEY, start);
-    window.sessionStorage.setItem(ALERT_MANAGER_END_TIME_KEY, end);
+    window.sessionStorage.setItem(startKey, start);
+    window.sessionStorage.setItem(endKey, end);
   } catch (_e) {
     // sessionStorage can be unavailable (SSR / private mode / quota). Not fatal.
   }

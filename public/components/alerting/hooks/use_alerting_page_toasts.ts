@@ -70,6 +70,8 @@ export interface UseAlertingPageToastsParams {
   datasourceIssues: DatasourceIssue[];
   /** True when a backend reported a hard cap on returned alerts. */
   alertsTruncated: boolean;
+  /** Datasources whose rule listing was capped (e.g. a large CloudWatch account). */
+  rulesTruncatedDatasources?: string[];
   /** Per-datasource legacy-fallback hints (Prom empty-matrix → active-only /alerts). */
   fallbackHints: FallbackHint[];
 }
@@ -105,6 +107,7 @@ export function useAlertingPageToasts({
   alertingProbeLoading,
   datasourceIssues,
   alertsTruncated,
+  rulesTruncatedDatasources = [],
   fallbackHints,
 }: UseAlertingPageToastsParams): void {
   const { setToast } = useToast();
@@ -119,6 +122,7 @@ export function useAlertingPageToasts({
   const lastPluginMissingRef = useRef<boolean>(false);
   const lastDsIssuesKeyRef = useRef<string>('');
   const lastTruncatedRef = useRef<boolean>(false);
+  const lastRulesTruncatedKeyRef = useRef<string>('');
   const lastFallbackKeyRef = useRef<string>('');
 
   const onAlertsTab = activeTab === 'alerts';
@@ -223,6 +227,29 @@ export function useAlertingPageToasts({
       lastTruncatedRef.current = true;
     }
   }, [alertsTruncated, onAlertsTab, setToast]);
+
+  // Rules listing capped by a datasource — rules-tab only.
+  const rulesTruncatedKey = [...rulesTruncatedDatasources].sort().join('||');
+  useEffect(() => {
+    if (!rulesTruncatedKey) {
+      lastRulesTruncatedKeyRef.current = '';
+      return;
+    }
+    if (activeTab === 'rules' && rulesTruncatedKey !== lastRulesTruncatedKeyRef.current) {
+      setToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.rulesTruncated.title', {
+          defaultMessage: 'Not all rules are listed',
+        }),
+        'warning',
+        i18n.translate('observability.alerting.alarmsPage.toast.rulesTruncated.body', {
+          defaultMessage:
+            '{names} returned more rules than this page loads. Search or filter to find a specific one.',
+          values: { names: rulesTruncatedKey.split('||').join(', ') },
+        })
+      );
+      lastRulesTruncatedKeyRef.current = rulesTruncatedKey;
+    }
+  }, [rulesTruncatedKey, activeTab, setToast]);
 
   // Legacy-fallback hints (Prometheus empty-matrix → active-only) — alerts-tab only.
   useEffect(() => {

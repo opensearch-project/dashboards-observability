@@ -45,6 +45,7 @@ import { alertMatchesSearch, filterAlerts } from '../../../common/services/alert
 import { AlertTimeline } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import {
+  canAcknowledgeAlert,
   countBy,
   isStandardOpenSearchDatasource,
   SEVERITY_COLORS,
@@ -800,7 +801,12 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const datasourceIconMap = useMemo(() => {
     const map: Record<string, string> = {};
     for (const ds of datasources) {
-      map[ds.name] = ds.type === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
+      map[ds.name] =
+        ds.type === 'cloudwatch'
+          ? 'logoAWS'
+          : ds.type === 'prometheus'
+            ? 'logoPrometheus'
+            : 'logoOpenSearch';
     }
     return map;
   }, [datasources]);
@@ -906,6 +912,29 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     }));
   };
 
+  // Facet options read the same as the table's badges ("Medium", not "medium").
+  const kindDisplayMap = useMemo(
+    () =>
+      Object.fromEntries(
+        uniqueAlertKinds.map((k) => [k, k.charAt(0).toUpperCase() + k.slice(1).replace(/_/g, ' ')])
+      ),
+    [uniqueAlertKinds]
+  );
+  const severityDisplayMap = useMemo(
+    () => Object.fromEntries(uniqueSeverities.map((v) => [v, getSeverityLabel(v)])),
+    [uniqueSeverities]
+  );
+  const stateDisplayMap = useMemo(
+    () =>
+      Object.fromEntries(
+        uniqueStates.map((v) => [
+          v,
+          v === 'anomaly' ? kindDisplayMap.anomaly || 'Anomaly' : getStateLabel(v),
+        ])
+      ),
+    [uniqueStates, kindDisplayMap]
+  );
+
   const renderFacetGroup = (
     id: string,
     label: string,
@@ -915,13 +944,15 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     counts: Record<string, number>,
     colorMap?: Record<string, string>,
     defaultCollapsed = false,
-    showOptionCount = false
+    showOptionCount = false,
+    displayMap?: Record<string, string>
   ) => (
     <FacetFilterGroup
       key={id}
       id={id}
       label={label}
       options={options}
+      displayMap={displayMap}
       selected={selected}
       onChange={onChange}
       counts={counts}
@@ -966,7 +997,11 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           const isGrouped = isGroupedAnomalyRow(alert);
           const isExpanded = Boolean(expandedGroupIds[alert.id]);
           const iconType =
-            alert.datasourceType === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
+            alert.datasourceType === 'cloudwatch'
+              ? 'logoAWS'
+              : alert.datasourceType === 'prometheus'
+                ? 'logoPrometheus'
+                : 'logoOpenSearch';
           const toggleExpandedGroup = () => {
             setExpandedGroupIds((prev) => ({
               ...prev,
@@ -1167,24 +1202,22 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   />
                 </EuiToolTip>
               </EuiFlexItem>
-              {getAlertKind(alert) === 'alert' &&
-                alert.state === 'active' &&
-                alert.datasourceType !== 'prometheus' && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      iconType="check"
-                      size="xs"
-                      color="primary"
-                      style={{ minWidth: 24, minHeight: 24 }}
-                      onClick={() => onAcknowledge(alert.id)}
-                    >
-                      <FormattedMessage
-                        id="observability.alerting.alertsDashboard.ackButton"
-                        defaultMessage="Ack"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                )}
+              {canAcknowledgeAlert(alert) && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="check"
+                    size="xs"
+                    color="primary"
+                    style={{ minWidth: 24, minHeight: 24 }}
+                    onClick={() => onAcknowledge(alert.id)}
+                  >
+                    <FormattedMessage
+                      id="observability.alerting.alertsDashboard.ackButton"
+                      defaultMessage="Ack"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           );
         },
@@ -1327,7 +1360,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   filters.alertKind,
                   (v) => updateFilter('alertKind', v),
                   facetCounts.counts.alertKind,
-                  ALERT_KIND_HEX
+                  ALERT_KIND_HEX,
+                  false,
+                  false,
+                  kindDisplayMap
                 )}
                 {renderFacetGroup(
                   'severity',
@@ -1338,7 +1374,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   filters.severity,
                   (v) => updateFilter('severity', v),
                   facetCounts.counts.severity,
-                  SEVERITY_COLORS
+                  SEVERITY_COLORS,
+                  false,
+                  false,
+                  severityDisplayMap
                 )}
                 {renderFacetGroup(
                   'state',
@@ -1349,7 +1388,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   filters.state,
                   (v) => updateFilter('state', v),
                   facetCounts.counts.state,
-                  stateFacetColorMap
+                  stateFacetColorMap,
+                  false,
+                  false,
+                  stateDisplayMap
                 )}
                 {(() => {
                   const visibleLabelKeys = labelKeys.filter(

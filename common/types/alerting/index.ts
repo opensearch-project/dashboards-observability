@@ -5,4 +5,5 @@
 
 export * from './opensearch_types';
 export * from './prometheus_types';
+export * from './cloudwatch_types';
 export * from './unified_types';

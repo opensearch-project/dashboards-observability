@@ -12,6 +12,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { parseDateMathMs } from '../../../../common/services/alerting/time_range';
 import {
+  ALERT_MANAGER_END_TIME_KEY,
+  ALERT_MANAGER_START_TIME_KEY,
   DEFAULT_END_TIME,
   DEFAULT_START_TIME,
   loadPersistedEndTime,
@@ -27,6 +29,11 @@ export interface UseTimeRangeResult {
   /** Resolved epoch-ms; falls back to defaults if either side is malformed. */
   startMs: number;
   endMs: number;
+  /**
+   * The end is before the start (e.g. the picker's end was moved before a relative start).
+   * The picker shows the range as invalid; consumers should not query with it.
+   */
+  isInvalid: boolean;
   /** Bumped by the refresh button so consumers can re-trigger their effects. */
   refreshToken: number;
   /**
@@ -40,9 +47,18 @@ export interface UseTimeRangeResult {
   bumpRefreshToken: () => void;
 }
 
-export function useTimeRange(): UseTimeRangeResult {
-  const [startTime, setStartTime] = useState<string>(loadPersistedStartTime);
-  const [endTime, setEndTime] = useState<string>(loadPersistedEndTime);
+export interface UseTimeRangeOptions {
+  /** sessionStorage keys; default the Alerts tab's. The Rules tab keeps its own. */
+  startKey?: string;
+  endKey?: string;
+}
+
+export function useTimeRange({
+  startKey = ALERT_MANAGER_START_TIME_KEY,
+  endKey = ALERT_MANAGER_END_TIME_KEY,
+}: UseTimeRangeOptions = {}): UseTimeRangeResult {
+  const [startTime, setStartTime] = useState<string>(() => loadPersistedStartTime(startKey));
+  const [endTime, setEndTime] = useState<string>(() => loadPersistedEndTime(endKey));
   const [refreshToken, setRefreshToken] = useState(0);
 
   // Resolve once per render, guarded.
@@ -74,26 +90,32 @@ export function useTimeRange(): UseTimeRangeResult {
     if (!rangeParseFailed) return;
     setStartTime(DEFAULT_START_TIME);
     setEndTime(DEFAULT_END_TIME);
-    persistTimeRange(DEFAULT_START_TIME, DEFAULT_END_TIME);
-  }, [rangeParseFailed]);
+    persistTimeRange(DEFAULT_START_TIME, DEFAULT_END_TIME, startKey, endKey);
+  }, [rangeParseFailed, startKey, endKey]);
 
   // Always persist on the picker callbacks. sessionStorage writes are cheap
   // and idempotent, so unconditionally calling `persistTimeRange` is simpler
   // and safer than tracking a `didChange` flag inside the functional setState
   // updaters (which would rely on React 18's synchronous batching of those
   // updaters within the callback — fragile across React major versions).
-  const onTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
-    setStartTime(start);
-    setEndTime(end);
-    persistTimeRange(start, end);
-  }, []);
+  const onTimeChange = useCallback(
+    ({ start, end }: { start: string; end: string }) => {
+      setStartTime(start);
+      setEndTime(end);
+      persistTimeRange(start, end, startKey, endKey);
+    },
+    [startKey, endKey]
+  );
 
-  const onRefresh = useCallback(({ start, end }: { start: string; end: string }) => {
-    setStartTime(start);
-    setEndTime(end);
-    persistTimeRange(start, end);
-    setRefreshToken((t) => t + 1);
-  }, []);
+  const onRefresh = useCallback(
+    ({ start, end }: { start: string; end: string }) => {
+      setStartTime(start);
+      setEndTime(end);
+      persistTimeRange(start, end, startKey, endKey);
+      setRefreshToken((t) => t + 1);
+    },
+    [startKey, endKey]
+  );
 
   const bumpRefreshToken = useCallback(() => setRefreshToken((t) => t + 1), []);
 
@@ -102,6 +124,7 @@ export function useTimeRange(): UseTimeRangeResult {
     endTime,
     startMs,
     endMs,
+    isInvalid: endMs < startMs,
     refreshToken,
     onTimeChange,
     onRefresh,

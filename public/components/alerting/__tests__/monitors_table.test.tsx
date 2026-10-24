@@ -65,9 +65,27 @@ describe('MonitorsTable', () => {
   it('renders the table with a rule row', () => {
     render(<MonitorsTable {...defaultProps} />);
     expect(screen.getByText('HighCPU')).toBeInTheDocument();
-    expect(screen.getByText(/rules/)).toBeInTheDocument();
+    expect(screen.getByText(/^rule$/)).toBeInTheDocument();
   });
 
+  it('counts rules in plain words, case-insensitively sorted by name', () => {
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        rules={[
+          sampleRule({ id: 'r1', name: 'Observability Stack - Cluster Health Red' }),
+          sampleRule({ id: 'r2', name: 'always-in-alarm' }),
+        ]}
+      />
+    );
+    expect(screen.getByText(/^2$/).closest('div')).toHaveTextContent('2 rules');
+    const names = screen
+      .getAllByRole('row')
+      .slice(1)
+      .map((r) => r.textContent || '');
+    expect(names[0]).toContain('always-in-alarm');
+    expect(names[1]).toContain('Observability Stack');
+  });
   it('selects a row checkbox', () => {
     render(<MonitorsTable {...defaultProps} />);
     const checkbox = screen.getByLabelText('Select HighCPU');
@@ -192,6 +210,29 @@ describe('MonitorsTable', () => {
     expect(onCreateMonitor).toHaveBeenCalledWith('forecaster');
   });
 
+  it('shows the CloudWatch time picker only when CloudWatch alarms are listed', async () => {
+    const { rerender } = render(<MonitorsTable {...defaultProps} onCreateMonitor={jest.fn()} />);
+    expect(screen.queryByTestId('alertManagerRulesTimePicker')).toBeNull();
+    rerender(
+      <MonitorsTable
+        {...defaultProps}
+        rules={[
+          sampleRule(),
+          sampleRule({ id: 'cw-1', name: 'checkout-errors-high', datasourceType: 'cloudwatch' }),
+        ]}
+        onCreateMonitor={jest.fn()}
+      />
+    );
+    expect(screen.getByTestId('alertManagerRulesTimePicker')).toBeInTheDocument();
+    // Hovering the picker says it only applies to CloudWatch alarms.
+    fireEvent.mouseOver(
+      screen.getByTestId('alertManagerRulesTimePicker').querySelector('[class*="ToolTipAnchor"]')!
+    );
+    expect(await screen.findByText(/Applies to CloudWatch alarms only/)).toBeInTheDocument();
+    // A lens on state, not a row filter: both rules are still listed.
+    expect(screen.getByText('HighCPU')).toBeInTheDocument();
+    expect(screen.getByText('checkout-errors-high')).toBeInTheDocument();
+  });
   it('disables detector and forecaster creation for an AOSS datasource', () => {
     const onCreateMonitor = jest.fn();
     render(

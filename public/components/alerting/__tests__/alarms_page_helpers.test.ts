@@ -18,6 +18,8 @@ import {
   persistSelection,
   persistTimeRange,
   resolveDatasourceTokens,
+  hasPersistedTimeRange,
+  rangeCoveringActiveAlerts,
 } from '../alarms_page_helpers';
 import type { Datasource } from '../../../../common/types/alerting';
 import type { MonitorFormState } from '../create_monitor';
@@ -268,5 +270,42 @@ describe('alarms_page_helpers', () => {
     it('returns null for empty input', () => {
       expect(extractPplValidationError('')).toBeNull();
     });
+  });
+});
+
+describe('rangeCoveringActiveAlerts', () => {
+  const DAY = 24 * 60 * 60 * 1000;
+  const now = Date.UTC(2026, 9, 22, 12);
+  const at = (msAgo: number) => new Date(now - msAgo).toISOString();
+
+  it('widens to cover the oldest active alert, with a day of padding', () => {
+    expect(
+      rangeCoveringActiveAlerts(
+        [
+          { state: 'active', startTime: at(63 * DAY + 7 * 60 * 60 * 1000) },
+          { state: 'active', startTime: at(2 * DAY) },
+        ],
+        now
+      )
+    ).toBe('now-65d');
+  });
+
+  it('keeps the default when active alerts are recent, and ignores inactive ones', () => {
+    expect(rangeCoveringActiveAlerts([{ state: 'active', startTime: at(DAY / 2) }], now)).toBe(
+      undefined
+    );
+    expect(
+      rangeCoveringActiveAlerts([{ state: 'resolved', startTime: at(90 * DAY) }], now)
+    ).toBeUndefined();
+    expect(rangeCoveringActiveAlerts([{ state: 'active', startTime: 'bad' }], now)).toBeUndefined();
+  });
+});
+
+describe('hasPersistedTimeRange', () => {
+  beforeEach(() => window.sessionStorage.clear());
+  it('is true only once a range is persisted', () => {
+    expect(hasPersistedTimeRange()).toBe(false);
+    persistTimeRange('now-7d', 'now');
+    expect(hasPersistedTimeRange()).toBe(true);
   });
 });

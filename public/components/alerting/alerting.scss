@@ -34,6 +34,9 @@
 
 .altFacetErrorPopover {
   max-width: 260px;
+  // Classified error text can carry long unbroken tokens (ARNs, endpoint
+  // hosts in redacted excerpts) — wrap them instead of overflowing the panel.
+  overflow-wrap: anywhere;
 }
 
 .altResizableContainer {

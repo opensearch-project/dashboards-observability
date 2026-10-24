@@ -10,6 +10,7 @@ import {
   CoreStart,
   ILegacyClusterClient,
   Logger,
+  OpenSearchDashboardsRequest,
   Plugin,
   PluginInitializerContext,
   SavedObject,
@@ -51,6 +52,10 @@ import { DirectQueryPrometheusBackend } from './services/alerting/directquery_pr
 import { bindPromQLSearcherFromStartServices } from './services/alerting/promql_search';
 import { AssistantPluginSetup, ObservabilityPluginSetup, ObservabilityPluginStart } from './types';
 import type { DataPluginStart } from '../../../src/plugins/data/server';
+import type {
+  CloudWatchAlarmSourceFactory,
+  CloudWatchFlagResolver,
+} from './services/alerting/cloudwatch/types';
 
 export interface ObservabilityPluginSetupDependencies {
   dataSourceManagement: ReturnType<DataSourceManagementPlugin['setup']>;
@@ -348,6 +353,7 @@ export class ObservabilityPlugin implements Plugin<
     const observabilityConfig = await this.initializerContext.config
       .create<{
         alertManager?: { enabled?: boolean };
+        cloudwatch?: { enabled?: boolean; defaultRegion?: string };
         errors?: { exposeSensitiveErrorDetail?: boolean };
         slo?: {
           enabled?: boolean;
@@ -375,6 +381,34 @@ export class ObservabilityPlugin implements Plugin<
     // dynamic store overrides them per account/application.
     const ymlAlertManagerEnabled = observabilityConfig.alertManager?.enabled ?? false;
     const ymlSloEnabled = observabilityConfig.slo?.enabled ?? false;
+    // CloudWatch alarms (experimental) need, per request, the flag on and a source that reaches
+    // CloudWatch with the caller's credentials. This plugin ships no source (and no AWS SDK), so
+    // here they stay off; a deployment that can reach CloudWatch provides the factory at this
+    // point, the way it can provide a Prometheus backend.
+    // (Asserted, not annotated: an annotated `undefined` would narrow to `never` below.)
+    const cloudWatchAlarmSourceFactory = undefined as CloudWatchAlarmSourceFactory | undefined;
+    const ymlCloudWatchEnabled = observabilityConfig.cloudwatch?.enabled ?? false;
+    // The flag for one request: the dynamic-config value for its tenant/application when there
+    // is one (like `alertManager` and `slo` below), else the yml value. Fails closed to yml.
+    const isCloudWatchFlagOn: CloudWatchFlagResolver = async (request) => {
+      try {
+        const dynamicConfig = await core.dynamicConfigService.getStartService();
+        const store = dynamicConfig.createStoreFromRequest(request);
+        // No per-request store (e.g. no dynamic config for this request): use the yml value.
+        if (!store) return ymlCloudWatchEnabled;
+        const config = await dynamicConfig
+          .getClient()
+          .getConfig({ name: 'observability' }, { asyncLocalStorageContext: store });
+        return config.cloudwatch?.enabled ?? ymlCloudWatchEnabled;
+      } catch {
+        return ymlCloudWatchEnabled;
+      }
+    };
+    // Whether CloudWatch is on for this request: the flag, and the deployment's source agreeing.
+    const isCloudWatchAvailable = async (request: OpenSearchDashboardsRequest) =>
+      !!cloudWatchAlarmSourceFactory &&
+      (await isCloudWatchFlagOn(request)) &&
+      !!(await cloudWatchAlarmSourceFactory(request));
     const ruleDedupEnabled = observabilityConfig.slo?.ruleDedup?.enabled ?? true;
     this.sloReconcilerOpts = {
       enabled: observabilityConfig.slo?.reconciler?.enabled ?? true,
@@ -408,6 +442,14 @@ export class ObservabilityPlugin implements Plugin<
       client: openSearchObservabilityClient,
       dataSourceEnabled,
       logger: this.logger,
+      cloudWatch: {
+        // Experimental — fail dark: absent config reads as disabled, matching
+        // the schema default.
+        isEnabled: isCloudWatchFlagOn,
+        // Unset: the source uses its own default region.
+        region: observabilityConfig.cloudwatch?.defaultRegion,
+      },
+      cloudWatchAlarmSourceFactory,
     });
 
     // SLO service + routes. Starts on `InMemorySloStore` so it's available
@@ -506,6 +548,9 @@ export class ObservabilityPlugin implements Plugin<
         show: true,
         alertManagerEnabled: ymlAlertManagerEnabled,
         sloEnabled: ymlSloEnabled,
+        // Whether the browser shows the virtual CloudWatch datasource; resolved per request by
+        // the switcher below (flag and source), off until then.
+        cloudWatchAlarmsEnabled: false,
       },
     }));
 
@@ -518,7 +563,7 @@ export class ObservabilityPlugin implements Plugin<
     // (`false`). On error, returns capabilities unchanged so the
     // yml-seeded provider defaults survive — a degraded dynamic-config
     // path can't silently flip a feature that operators set in yml.
-    core.capabilities.registerSwitcher(async (_request, capabilities) => {
+    core.capabilities.registerSwitcher(async (request, capabilities) => {
       try {
         const dynamicConfig = await core.dynamicConfigService.getStartService();
         const client = dynamicConfig.getClient();
@@ -533,6 +578,7 @@ export class ObservabilityPlugin implements Plugin<
             ...(capabilities.observability || {}),
             alertManagerEnabled: config.alertManager?.enabled ?? ymlAlertManagerEnabled,
             sloEnabled: config.slo?.enabled ?? ymlSloEnabled,
+            cloudWatchAlarmsEnabled: await isCloudWatchAvailable(request).catch(() => false),
           },
         };
       } catch (error) {

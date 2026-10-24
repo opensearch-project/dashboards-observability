@@ -25,7 +25,7 @@
  *   - `AlertManagerEndTime`   — date-math string for picker end.
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
@@ -33,8 +33,11 @@ import { useToast } from '../common/toast';
 import {
   ClassifiedErrorToastBody,
   classifiedToastColor,
+  classifiedToastText,
   extractClassifiedError,
 } from '../common/error';
+import { localizeClassified } from '../../../common/error';
+import type { ClassifiedError } from '../../../common/error';
 import {
   Datasource,
   UnifiedAlertSummary,
@@ -50,6 +53,7 @@ import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_
 import { AlertsDashboard } from './alerts_dashboard';
 import { AlertDetailFlyout } from './alert_detail_flyout';
 import { AnomalyDetailFlyout } from './anomaly_detail_flyout';
+import { CloudWatchAlarmDetailFlyout } from './cloudwatch_alarm_detail_flyout';
 import { NotificationRoutingPanel } from './notification_routing_panel';
 import type { MonitorBackendType } from './monitor_form_components';
 import { useAlerts } from './hooks/use_alerts';
@@ -69,12 +73,17 @@ import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validato
 import { showMonitorCreatedToast } from './toast_helpers';
 import { isAdResourceRunning, isDetectorRule, isForecasterRule } from './shared_constants';
 import './alerting.scss';
+
+/** sessionStorage key: the CloudWatch experimental banner was dismissed this session. */
+const CW_BANNER_DISMISSED_KEY = 'AlertManagerCloudWatchBannerDismissed';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
 import {
   extractPplValidationError,
   extractServerErrorMessage,
   extractServerErrorStatus,
   formStateToRule,
+  hasPersistedTimeRange,
+  rangeCoveringActiveAlerts,
   resolveDatasourceTokens,
 } from './alarms_page_helpers';
 import { usePendingRules } from './hooks/use_pending_rules';
@@ -388,6 +397,21 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   }, [rawAlerts, ackOverrides]);
   const alertsTotal = alerts.length;
 
+  // Open on a range that shows the active alerts: when nothing set a range yet this session and
+  // an active alert started before the default 24h (e.g. an alarm active for 63 days), move the
+  // picker to cover it, so the timeline isn't empty and the picker says what it shows. Once
+  // only; a range the user picks afterwards stays.
+  const [autoRangePending, setAutoRangePending] = useState(() => !hasPersistedTimeRange());
+  useEffect(() => {
+    // Wait for a loaded, non-empty list (the first fetch can run before datasources resolve).
+    if (!autoRangePending || alertsLoading || rawAlerts.length === 0) return;
+    setAutoRangePending(false);
+    // The user picked a range in the meantime: leave it.
+    if (hasPersistedTimeRange()) return;
+    const start = rangeCoveringActiveAlerts(rawAlerts);
+    if (start) handleTimeChange({ start, end: 'now' });
+  }, [autoRangePending, alertsLoading, rawAlerts, handleTimeChange]);
+
   // Drop overrides whose target alert is now acknowledged on the server
   // (or has fallen out of the result set entirely). Runs after every hook
   // refetch — keeps the override map from leaking memory across many acks.
@@ -418,6 +442,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         i18n.translate('observability.alerting.alarmsPage.unknownError', {
           defaultMessage: 'Unknown error',
         }),
+      errorDetail: s.errorDetail,
     }));
   }, [alertsData]);
   // Backend hints surfaced through the dashboard banner props.
@@ -448,6 +473,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     isLoading: dataLoading,
     error,
     warnings: rulesWarnings,
+    truncatedDatasourceNames: rulesTruncatedDatasources,
     setRules,
     setRulesTotal,
     refetch: refetchRules,
@@ -1691,8 +1717,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   //   - `datasourceErrorsByName` for the FacetFilterGroup indicator (keyed
   //     by option label, which is the datasource name)
   const datasourceIssues = useMemo(() => {
-    const byId = new Map<string, { datasourceId: string; datasourceName: string; error: string }>();
-    const addOnce = (dsName: string, message: string) => {
+    const byId = new Map<
+      string,
+      {
+        datasourceId: string;
+        datasourceName: string;
+        error: string;
+        errorDetail?: ClassifiedError;
+      }
+    >();
+    const addOnce = (dsName: string, message: string, errorDetail?: ClassifiedError) => {
       // Look up id by name — both `alertsWarnings` and `rulesWarnings`
       // carry the display name, not the id. Fall back to name as the key
       // if the datasource list hasn't hydrated yet.
@@ -1703,10 +1737,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           datasourceId: id,
           datasourceName: dsName,
           error: message,
+          errorDetail,
         });
     };
-    for (const w of alertsWarnings) addOnce(w.datasourceName, w.error);
-    for (const w of rulesWarnings) addOnce(w.datasourceName, w.error);
+    for (const w of alertsWarnings) addOnce(w.datasourceName, w.error, w.errorDetail);
+    for (const w of rulesWarnings) addOnce(w.datasourceName, w.error, w.errorDetail);
     // Alerting-plugin probe: only decorate individual DSes when the probe
     // is finished (avoids flashing the indicator during the initial mount)
     // AND we're not already in the "everything failed" state — that latter
@@ -1739,9 +1774,41 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return Array.from(byId.values());
   }, [alertsWarnings, rulesWarnings, alertingAvailability, datasources]);
 
+  // Experimental-feature banner for the opt-in CloudWatch alarms datasource.
+  // Shown only when the operator enabled it (a `cloudwatch` datasource is
+  // present). Dismissal lasts for the browser session, across tabs and reloads, so it isn't
+  // restated on every tab.
+  const [cwBannerDismissed, setCwBannerDismissed] = useState(() => {
+    try {
+      return window.sessionStorage.getItem(CW_BANNER_DISMISSED_KEY) === 'true';
+    } catch (_e) {
+      return false;
+    }
+  });
+  const dismissCloudWatchExperimentalBanner = useCallback(() => {
+    setCwBannerDismissed(true);
+    try {
+      window.sessionStorage.setItem(CW_BANNER_DISMISSED_KEY, 'true');
+    } catch (_e) {
+      // sessionStorage can be unavailable; the banner then stays dismissed for this page only.
+    }
+  }, []);
+  const showCloudWatchExperimentalBanner =
+    !cwBannerDismissed && datasources.some((d) => d.type === 'cloudwatch');
+
   const datasourceErrorMapByName = useMemo(() => {
     const m: Record<string, string> = {};
     for (const issue of datasourceIssues) {
+      // Prefer the structured classification when the server attached one —
+      // it names the failure class (e.g. "AWS session expired") and carries
+      // remediation + safe diagnostics, which reads far better than the raw
+      // transport message. Fall back to the legacy "Could not connect"
+      // framing for unclassified failures.
+      if (issue.errorDetail) {
+        const localized = localizeClassified(issue.errorDetail);
+        m[issue.datasourceName] = `${localized.title} — ${classifiedToastText(localized)}`;
+        continue;
+      }
       // Frame the raw error with the same "Could not connect" language the
       // toast uses so the indicator popover reads as a complete thought
       // (the raw error alone — e.g. "getaddrinfo ENOTFOUND opensearch" — is
@@ -1769,6 +1836,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     alertingProbeLoading: alertingAvailability.isLoading,
     datasourceIssues,
     alertsTruncated,
+    rulesTruncatedDatasources,
     fallbackHints: alertsFallbackHints,
   });
 
@@ -1791,6 +1859,35 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           </EuiTab>
         ))}
       </EuiTabs>
+      {/* CloudWatch alarms are an experimental, opt-in datasource
+          (`observability.cloudwatch.enabled`). Banner renders only when the
+          operator enabled it, and stays dismissed for the session. */}
+      {showCloudWatchExperimentalBanner && (
+        <>
+          <EuiSpacer size="s" />
+          {/* Primary, not warning: OUI only renders the dismiss button on non-warning
+              callouts, and this is a notice, not a problem. */}
+          <EuiCallOut
+            size="s"
+            color="primary"
+            iconType="beaker"
+            data-test-subj="cloudWatchExperimentalCallout"
+            title={i18n.translate(
+              'observability.alerting.alarmsPage.cloudwatchExperimental.title',
+              {
+                defaultMessage: 'CloudWatch alarms support is experimental',
+              }
+            )}
+            dismissible
+            onDismiss={dismissCloudWatchExperimentalBanner}
+          >
+            <FormattedMessage
+              id="observability.alerting.alarmsPage.cloudwatchExperimental.body"
+              defaultMessage="Amazon CloudWatch alarms shown in this view are an experimental feature and may change or be removed in a future release. They're read-only here."
+            />
+          </EuiCallOut>
+        </>
+      )}
 
       <div aria-live="polite" className="euiScreenReaderOnly">
         <FormattedMessage
@@ -1887,7 +1984,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onNavigateToDetectorResults={handleNavigateToDetectorResults}
         />
       )}
-      {selectedAlert && selectedAlert.alertKind !== 'anomaly' && (
+      {selectedAlert && selectedAlert.alertKind !== 'anomaly' && selectedAlert.cloudWatch && (
+        <CloudWatchAlarmDetailFlyout rule={selectedAlert} onClose={() => setSelectedAlert(null)} />
+      )}
+      {selectedAlert && selectedAlert.alertKind !== 'anomaly' && !selectedAlert.cloudWatch && (
         <AlertDetailFlyout
           alert={selectedAlert}
           datasources={datasources}

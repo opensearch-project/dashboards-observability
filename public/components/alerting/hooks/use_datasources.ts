@@ -28,6 +28,7 @@ import { i18n } from '@osd/i18n';
 import type { SavedObject } from '../../../../../../src/core/public';
 import { coreRefs } from '../../../framework/core_refs';
 import type { Datasource } from '../../../../common/types/alerting';
+import { CLOUDWATCH_DATASOURCE_ID } from '../shared_constants';
 
 // Attribute shapes for the two saved-object types we consume.
 // These mirror the server-side types in server/routes/alerting/types.ts so
@@ -108,7 +109,24 @@ export function mapSavedObjectsToDatasources(
       directQueryName: so.attributes.connectionId,
     }));
 
-  return [...localRows, ...osDiscovered, ...promRows];
+  // Virtual CloudWatch datasource — no saved object. It appears automatically
+  // when the feature is enabled, for the account the caller's AWS credentials
+  // reach. Mirrors the server-side synthetic entry in
+  // `SavedObjectDatasourceService` (id `cloudwatch`). The per-row Datasource
+  // cell shows `account · region` carried on each alarm's `cloudWatch` meta.
+  const cloudWatchRows: Datasource[] = coreRefs.cloudwatchEnabled
+    ? [
+        {
+          id: CLOUDWATCH_DATASOURCE_ID,
+          name: 'CloudWatch',
+          type: 'cloudwatch' as const,
+          url: 'cloudwatch',
+          enabled: true,
+        },
+      ]
+    : [];
+
+  return [...localRows, ...osDiscovered, ...promRows, ...cloudWatchRows];
 }
 
 export interface UseDatasourcesResult {

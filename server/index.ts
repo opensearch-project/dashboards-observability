@@ -24,6 +24,19 @@ const observabilityConfig = {
     alertManager: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
+    cloudwatch: schema.object({
+      // Virtual CloudWatch alarms datasource for the unified Alerts view.
+      //
+      // EXPERIMENTAL — ships dark. Operators opt in via
+      // `observability.cloudwatch.enabled: true` in `opensearch_dashboards.yml`
+      // (mirrors the `alertManager.enabled` / `slo.enabled` pattern). The plugin
+      // ships no AWS SDK: CloudWatch is reached through a source the deployment
+      // provides (with the caller's own credentials). Without one, the flag has
+      // no effect. `defaultRegion` is the region the virtual datasource queries; unset, the
+      // source uses its own default region.
+      enabled: schema.boolean({ defaultValue: false }),
+      defaultRegion: schema.maybe(schema.string()),
+    }),
     errors: schema.object({
       // When true, verbatim upstream error detail (classified as `sensitive`)
       // is included in API error responses. Defaults off so open-source /
@@ -70,5 +83,6 @@ export const config: PluginConfigDescriptor<ObservabilityConfig> = {
     summarize: true,
     alertManager: true,
     slo: true,
+    cloudwatch: true,
   },
 };

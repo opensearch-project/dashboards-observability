@@ -12,18 +12,20 @@
  * Like `MonitorsFiltersPanel`, this is a pure render of state + callbacks.
  * All state lives in the `MonitorsTable` parent (index.tsx).
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiSuperDatePicker,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -31,13 +33,16 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedRuleSummary } from '../../../../common/types/alerting';
 import { DeleteModal } from '../../common/helpers/delete_modal';
+import { CloudWatchAlarmDetailFlyout } from '../cloudwatch_alarm_detail_flyout';
 import { DetectorDetailFlyout } from '../detector_detail_flyout';
 import { ForecasterDetailFlyout } from '../forecaster_detail_flyout';
 import { MonitorDetailFlyout } from '../monitor_detail_flyout';
-import { isAdResourceRunning } from '../shared_constants';
+import { isAdResourceRunning, isCloudWatchRule } from '../shared_constants';
 import { isDetectorDefinition, isForecasterDefinition } from './monitors_table_columns';
 import { MonitorsEuiTable } from './monitors_eui_table';
 import type { MonitorsEuiTableProps } from './monitors_eui_table';
+import { AlarmTimeWindow, describeTimeRange } from '../alarm_time_window';
+import type { UseTimeRangeResult } from '../hooks/use_time_range';
 
 export interface MonitorsMainPanelProps {
   // Data
@@ -127,6 +132,12 @@ export interface MonitorsMainPanelProps {
    * flyout shows a loading spinner on the button until it resolves.
    */
   onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
+  /**
+   * The Rules tab's time picker: a lens on CloudWatch alarm state and history (the Status and
+   * Health columns, and the alarm flyout's timeline, metric preview and state history), not a
+   * row filter.
+   */
+  rulesTime: UseTimeRangeResult;
 }
 
 export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
@@ -173,6 +184,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   onStopResources,
   lifecycleActionPending = false,
   onToggleEnabled,
+  rulesTime,
 }) => {
   const selectedRules = filtered.filter((rule) => selectedIds.has(rule.id));
   const selectedAdResources = selectedRules.filter(
@@ -182,6 +194,36 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
     (resource) => !isAdResourceRunning(resource)
   );
   const selectedStoppableResources = selectedAdResources.filter(isAdResourceRunning);
+
+  // OpenSearch and Prometheus rules report no state history, so the picker only shows when
+  // CloudWatch alarms are listed. It doesn't filter rows, so the rule count doesn't change.
+  const rulesTimePickerHelp = i18n.translate(
+    'observability.alerting.monitorsTable.mainPanel.rulesTimePickerHelp',
+    {
+      defaultMessage:
+        "Applies to CloudWatch alarms only: their status, health and state history. It doesn't filter rules, and OpenSearch and Prometheus rules aren't affected.",
+    }
+  );
+  const showRulesTimePicker = rules.some(isCloudWatchRule);
+  // An inverted range (end before start) can't scope anything: the flyout falls back to its
+  // default window rather than asking CloudWatch for it.
+  const rulesWindow = useMemo<AlarmTimeWindow | undefined>(
+    () =>
+      rulesTime.isInvalid
+        ? undefined
+        : {
+            startMs: rulesTime.startMs,
+            endMs: rulesTime.endMs,
+            label: describeTimeRange(rulesTime.startTime, rulesTime.endTime),
+          },
+    [
+      rulesTime.isInvalid,
+      rulesTime.startMs,
+      rulesTime.endMs,
+      rulesTime.startTime,
+      rulesTime.endTime,
+    ]
+  );
 
   return (
     <>
@@ -199,13 +241,48 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               gutterSize="s"
               style={{ marginBottom: 8 }}
             >
+              {showRulesTimePicker && (
+                <EuiFlexItem grow={false} data-test-subj="alertManagerRulesTimePicker">
+                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      {/* Hovering the picker says what it scopes, so it isn't read as a filter
+                          on every rule. */}
+                      <EuiToolTip position="top" content={rulesTimePickerHelp}>
+                        <EuiSuperDatePicker
+                          compressed
+                          start={rulesTime.startTime}
+                          end={rulesTime.endTime}
+                          onTimeChange={rulesTime.onTimeChange}
+                          // Refresh sits right next to it, so no second update button.
+                          showUpdateButton={false}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip
+                        type="questionInCircle"
+                        color="subdued"
+                        content={rulesTimePickerHelp}
+                        aria-label={i18n.translate(
+                          'observability.alerting.monitorsTable.mainPanel.rulesTimePickerHelpAria',
+                          { defaultMessage: 'About the time range' }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
               {onRefresh && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     iconType="refresh"
                     size="s"
                     isLoading={refreshing}
-                    onClick={() => onRefresh()}
+                    onClick={() => {
+                      // Re-resolve a relative window ("now-24h") to the current time too.
+                      rulesTime.bumpRefreshToken();
+                      onRefresh();
+                    }}
                     data-test-subj="alertManagerRefreshRulesButton"
                   >
                     <FormattedMessage
@@ -437,8 +514,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               placeholder={i18n.translate(
                 'observability.alerting.monitorsTable.mainPanel.searchPlaceholder',
                 {
-                  defaultMessage:
-                    'Search rules, detectors, or forecasters by name, labels (team:infra), annotations...',
+                  defaultMessage: 'Search rules by name, labels (team:infra), annotations...',
                 }
               )}
               value={searchQuery}
@@ -454,7 +530,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
               aria-label={i18n.translate(
                 'observability.alerting.monitorsTable.mainPanel.searchAriaLabel',
                 {
-                  defaultMessage: 'Search rules, detectors, or forecasters',
+                  defaultMessage: 'Search rules',
                 }
               )}
             />
@@ -506,8 +582,12 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   <EuiText size="s">
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.monitorsCount"
-                      defaultMessage="{count} rules / detectors / forecasters"
-                      values={{ count: <strong>{filtered.length}</strong> }}
+                      // `plural` needs a number, so the bold count is a separate value.
+                      defaultMessage="{countBold} {count, plural, one {rule} other {rules}}"
+                      values={{
+                        count: filtered.length,
+                        countBold: <strong>{filtered.length}</strong>,
+                      }}
                     />
                     {selectedIds.size > 0 && (
                       <span>
@@ -618,7 +698,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   ) : (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsFoundTitle"
-                      defaultMessage="No rules, detectors, or forecasters found"
+                      defaultMessage="No rules found"
                     />
                   )}
                 </h2>
@@ -636,17 +716,17 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   {noDatasourceSelected ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.selectDatasourcePrompt"
-                      defaultMessage="Select a datasource in the filter panel to see rules, detectors, and forecasters."
+                      defaultMessage="Select a datasource in the filter panel to see rules."
                     />
                   ) : rules.length === 0 ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsConfigured"
-                      defaultMessage="No rules, anomaly detectors, or forecasters configured yet."
+                      defaultMessage="No rules configured yet."
                     />
                   ) : (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noMonitorsMatch"
-                      defaultMessage="No rules, detectors, or forecasters match your current search and filters."
+                      defaultMessage="No rules match your current search and filters."
                     />
                   )}
                 </p>
@@ -694,7 +774,13 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       )}
 
       {/* Rule / detector detail flyout */}
-      {selectedMonitor && isDetectorDefinition(selectedMonitor) ? (
+      {selectedMonitor && isCloudWatchRule(selectedMonitor) ? (
+        <CloudWatchAlarmDetailFlyout
+          rule={selectedMonitor}
+          timeRange={rulesWindow}
+          onClose={() => setSelectedMonitor(null)}
+        />
+      ) : selectedMonitor && isDetectorDefinition(selectedMonitor) ? (
         <DetectorDetailFlyout
           detector={selectedMonitor}
           onClose={() => setSelectedMonitor(null)}
