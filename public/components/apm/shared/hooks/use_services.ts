@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { PPLSearchService } from '../../query_services/ppl_search_service';
 import { ServiceTableItem } from '../../common/types/service_types';
 import { DatasetConfig } from '../../common/types/apm_types';
@@ -78,20 +78,37 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
     [queryIndex, params.startTime, params.endTime, params.environment, dataset]
   );
 
+  // Identity of the current request: a new object whenever the params or a
+  // refetch trigger change. `data` is current only once the response for this
+  // exact request has landed (loadedRequest === request).
+  const request = useMemo(
+    () => ({}),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fetchParams, refetchTrigger, params.refreshTrigger, queryIndex, dataset]
+  );
+  const latestRequest = useRef(request);
+  latestRequest.current = request;
+  const [loadedRequest, setLoadedRequest] = useState<object | null>(null);
+
   useEffect(() => {
     // Skip fetching if config is not ready
     if (!queryIndex || !dataset) {
       setData([]);
       setIsLoading(false);
+      setLoadedRequest(request);
       return;
     }
 
     const fetchServices = async () => {
       setIsLoading(true);
       setError(null);
+      // A superseded request (e.g. the time range changed again mid-flight)
+      // must not overwrite the newer request's results.
+      const isCurrent = () => latestRequest.current === request;
 
       try {
         const response = await pplSearchService.listServices(fetchParams);
+        if (!isCurrent()) return;
 
         // Response is now an object with ServiceSummaries and AvailableGroupByAttributes
         const availableAttributes = response.AvailableGroupByAttributes || {};
@@ -116,20 +133,32 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
 
         setData(services);
       } catch (err) {
+        if (!isCurrent()) return;
         console.error('[useServices] Error fetching services:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setData([]);
-      } finally {
-        setIsLoading(false);
       }
+      setLoadedRequest(request);
+      setIsLoading(false);
     };
 
     fetchServices();
-  }, [pplSearchService, fetchParams, refetchTrigger, params.refreshTrigger, queryIndex, dataset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [request]);
 
   const refetch = () => {
     setRefetchTrigger((prev) => prev + 1);
   };
 
-  return { data, isLoading, error, availableGroupByAttributes, refetch };
+  // Loading from the render the params change in, not only after the effect has
+  // run: consumers keying further queries on `data` (e.g. per-service metrics)
+  // can then wait for the list that matches the current time range instead of
+  // querying with the previous range's list and re-querying when it lands.
+  return {
+    data,
+    isLoading: isLoading || loadedRequest !== request,
+    error,
+    availableGroupByAttributes,
+    refetch,
+  };
 };

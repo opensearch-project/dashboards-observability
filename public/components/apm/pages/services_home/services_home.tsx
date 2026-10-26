@@ -34,6 +34,7 @@ import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 import { useServices } from '../../shared/hooks/use_services';
 import { useServicesRedMetrics, serviceNodeKey } from '../../shared/hooks/use_services_red_metrics';
 import { useControlledPagination } from '../../shared/hooks/use_controlled_pagination';
+import { buildScopeFilters, PageScope } from '../../shared/utils/scope_filters';
 import { useApmConfig } from '../../config/apm_config_context';
 import { SloApiClient } from '../slos/slo_api_client';
 import {
@@ -86,6 +87,15 @@ import { formatThroughput } from '../../common/format_utils';
 import { TruncatedLabel } from '../../../common/truncated_label';
 import '../../shared/styles/apm_common.scss';
 
+const toMetricsNode = (s: ServiceTableItem) => ({
+  serviceName: s.serviceName,
+  environment: s.environment,
+  type: s.type,
+});
+
+// Sort value for a metric that may be unavailable (its query failed): below every real value.
+const UNAVAILABLE_SORT_VALUE = -1;
+
 const LATENCY_PERCENTILE_OPTIONS = [
   { id: 'p99', label: 'P99' },
   { id: 'p90', label: 'P90' },
@@ -108,7 +118,14 @@ interface ServicesTablePanelProps {
   sortField: string;
   sortDirection: 'asc' | 'desc';
   refreshTrigger: number;
-  searchQuery: string;
+  /** The page's filtered scope, so the fault-rate widgets rank within it. */
+  pageScope: PageScope;
+  /** False while the service list for the time range is loading. */
+  scopeReady: boolean;
+  /** A metrics query failed: affected cells show "-". */
+  metricsFailed: boolean;
+  /** The filter was too broad to narrow the metrics queries. */
+  scopeFellBack: boolean;
   latencyPercentile: string;
   setLatencyPercentile: (v: 'p99' | 'p90' | 'p50') => void;
   onServiceClick?: (
@@ -153,7 +170,10 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
   sortField,
   sortDirection,
   refreshTrigger,
-  searchQuery,
+  pageScope,
+  scopeReady,
+  metricsFailed,
+  scopeFellBack,
   latencyPercentile,
   setLatencyPercentile,
   onServiceClick,
@@ -177,7 +197,8 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
           }
         }}
         refreshTrigger={refreshTrigger}
-        searchQuery={searchQuery}
+        scope={pageScope}
+        enabled={scopeReady}
       />
       <TopDependenciesByFaultRate
         timeRange={timeRange}
@@ -194,7 +215,8 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
             timeRange,
           });
         }}
-        searchQuery={searchQuery}
+        scope={pageScope}
+        enabled={scopeReady}
       />
     </EuiFlexGroup>
 
@@ -243,6 +265,35 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
+
+      {metricsFailed && !isTableLoading && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="alert"
+            title={i18nTexts.metricsNotice.failedTitle}
+            data-test-subj="servicesMetricsFailedCallout"
+          >
+            {i18nTexts.metricsNotice.failedBody}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      {scopeFellBack && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="primary"
+            iconType="iInCircle"
+            title={i18nTexts.metricsNotice.broadFilterTitle}
+            data-test-subj="servicesBroadFilterCallout"
+          >
+            {i18nTexts.metricsNotice.broadFilterBody}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
 
       {!isTableLoading && displayedServices.length === 0 ? (
         <EmptyState
@@ -666,22 +717,54 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     selectedGroupByAttributes,
   ]);
 
-  // Fetch RED (Request rate, Error rate, Duration) metrics for ALL services
-  // Fetched separately and before filtering to avoid re-fetching on filter changes
+  // Fetch RED (Request rate, Error rate, Duration) metrics. The instant queries
+  // scan the whole time range, so they are scoped to the rows the search /
+  // environment / type / attribute filters leave (the metric-range filters below
+  // are evaluated on these metrics). Narrowing after the full catalog has loaded
+  // reuses its data with no new request.
+  const catalogNodes = useMemo(() => (services || []).map(toMetricsNode), [services]);
+  const scopeNodes = useMemo(() => fullyFilteredItems.map(toMetricsNode), [fullyFilteredItems]);
+  // Push the environment facet down as a label matcher (short at any scale); search text and
+  // attribute facets can only be expressed as a name list.
+  const selectedPlatformsKey = Object.keys(selectedEnvironments)
+    .filter((k) => selectedEnvironments[k])
+    .sort()
+    .join('|');
+  const needsNameList =
+    !!searchQuery.trim() ||
+    Object.values(selectedGroupByAttributes).some((vals) => Object.values(vals).some(Boolean));
+  const scopeFilters = useMemo(
+    () =>
+      buildScopeFilters({
+        catalog: catalogNodes,
+        scope: scopeNodes,
+        environmentPlatforms: selectedPlatformsKey ? selectedPlatformsKey.split('|') : undefined,
+        needsNameList,
+      }),
+    [catalogNodes, scopeNodes, selectedPlatformsKey, needsNameList]
+  );
+  const pageScope = useMemo<PageScope>(
+    () => ({ filters: scopeFilters, services: scopeNodes }),
+    [scopeFilters, scopeNodes]
+  );
   const {
     metricsMap,
     isLoading: metricsLoading,
+    error: metricsError,
+    scopeFellBack,
     refetch: refetchMetrics,
   } = useServicesRedMetrics({
-    services: (services || []).map((s) => ({
-      serviceName: s.serviceName,
-      environment: s.environment,
-      type: s.type,
-    })),
+    services: catalogNodes,
+    scopeServices: scopeNodes,
+    scopeFilters,
     sparklineServices: visibleServices,
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     latencyPercentile,
+    // Wait for the service list of the current time range; querying with the
+    // previous range's list would be cancelled and re-sent when it lands, and a
+    // cancelled request still runs to completion in Prometheus.
+    enabled: !isLoading,
   });
 
   const handleRefresh = useCallback(() => {
@@ -785,9 +868,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     if (isLatencyFilterActive) {
       filtered = filtered.filter((service) => {
         const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
-        if (!metrics) return false;
-        // Use average latency for filtering
-        const avgLatency = metrics.avgLatency || 0;
+        // An unavailable value (failed query) cannot be placed in the range.
+        if (metrics?.avgLatency === undefined) return false;
+        const avgLatency = metrics.avgLatency;
         return avgLatency >= latencyRange[0] && avgLatency <= latencyRange[1];
       });
     }
@@ -800,9 +883,9 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     if (isThroughputFilterActive) {
       filtered = filtered.filter((service) => {
         const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
-        if (!metrics) return false;
+        if (metrics?.avgThroughput === undefined) return false;
         // Filter by total throughput over the time period
-        const avgThroughput = metrics.avgThroughput || 0;
+        const avgThroughput = metrics.avgThroughput;
         return avgThroughput >= throughputRange[0] && avgThroughput <= throughputRange[1];
       });
     }
@@ -811,9 +894,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     if (selectedFailureRateThresholds.length > 0) {
       filtered = filtered.filter((service) => {
         const metrics = metricsMap.get(serviceNodeKey(service.serviceName, service.environment));
-        if (!metrics) return false;
-        // Use average failure ratio for filtering
-        const avgFailureRatio = metrics.avgFailureRatio || 0;
+        if (metrics?.avgFailureRatio === undefined) return false;
+        const avgFailureRatio = metrics.avgFailureRatio;
         return selectedFailureRateThresholds.some((threshold) =>
           matchesErrorRateThreshold(avgFailureRatio, threshold)
         );
@@ -879,14 +961,14 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     const getSortVal = (item: ServiceTableItem): string | number => {
       const m = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
       switch (tableSortField) {
-        // Missing metrics fall back to 0 to match the column sort comparators,
+        // Unavailable metrics sort below real values, as in the column sort comparators,
         // so this derived visible slice stays in step with the rendered rows.
         case 'latency':
-          return m?.avgLatency || 0;
+          return m?.avgLatency ?? UNAVAILABLE_SORT_VALUE;
         case 'throughput':
-          return m?.avgThroughput || 0;
+          return m?.avgThroughput ?? UNAVAILABLE_SORT_VALUE;
         case 'failureRatio':
-          return m?.avgFailureRatio || 0;
+          return m?.avgFailureRatio ?? UNAVAILABLE_SORT_VALUE;
         case 'environment':
           return item.environment ?? '';
         case 'type':
@@ -1174,14 +1256,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
           const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
-          return metrics?.avgLatency || 0;
+          return metrics?.avgLatency ?? UNAVAILABLE_SORT_VALUE;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
           const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const latencyData = metrics?.latency || [];
           // Use average latency over the time period
-          const avgLatency = metrics?.avgLatency || 0;
-          const latencyMs = avgLatency.toFixed(0);
+          const avgLatency = metrics?.avgLatency;
+          const latencyText =
+            avgLatency === undefined ? i18nTexts.unavailable : `${avgLatency.toFixed(0)} ms`;
 
           return (
             <EuiFlexGroup
@@ -1191,7 +1274,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               responsive={false}
             >
               <EuiFlexItem grow={false} style={{ minWidth: '50px' }}>
-                <EuiText size="s">{latencyMs} ms</EuiText>
+                <EuiText size="s">{latencyText}</EuiText>
               </EuiFlexItem>
               {/* Sparkline grows to fill the cell so wide screens get a
                   longer trend; minWidth keeps it readable when the column
@@ -1227,14 +1310,15 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
           if (!item?.serviceName) return 0;
           const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           // Sort by average throughput over the time period
-          return metrics?.avgThroughput || 0;
+          return metrics?.avgThroughput ?? UNAVAILABLE_SORT_VALUE;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
           const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const throughputData = metrics?.throughput || [];
           // Display average throughput over the time period
-          const avgThroughput = metrics?.avgThroughput || 0;
-          const throughputFormatted = formatThroughput(avgThroughput);
+          const avgThroughput = metrics?.avgThroughput;
+          const throughputFormatted =
+            avgThroughput === undefined ? i18nTexts.unavailable : formatThroughput(avgThroughput);
 
           return (
             <EuiFlexGroup
@@ -1275,14 +1359,17 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
           const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
-          return metrics?.avgFailureRatio || 0;
+          return metrics?.avgFailureRatio ?? UNAVAILABLE_SORT_VALUE;
         },
         render: (_fieldValue: any, item: ServiceTableItem) => {
           const metrics = metricsMap.get(serviceNodeKey(item.serviceName, item.environment));
           const failureData = metrics?.failureRatio || [];
           // Use average failure ratio over the time period
-          const avgFailureRatio = metrics?.avgFailureRatio || 0;
-          const failureFormatted = avgFailureRatio.toFixed(1);
+          const avgFailureRatio = metrics?.avgFailureRatio;
+          const failureFormatted =
+            avgFailureRatio === undefined
+              ? i18nTexts.unavailable
+              : `${avgFailureRatio.toFixed(1)}%`;
 
           return (
             <EuiFlexGroup
@@ -1292,7 +1379,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               responsive={false}
             >
               <EuiFlexItem grow={false} style={{ minWidth: '40px' }}>
-                <EuiText size="s">{failureFormatted}%</EuiText>
+                <EuiText size="s">{failureFormatted}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
                 <MetricSparkline
@@ -1898,7 +1985,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           sortField={tableSortField}
                           sortDirection={tableSortDirection}
                           refreshTrigger={refreshTrigger}
-                          searchQuery={searchQuery}
+                          pageScope={pageScope}
+                          scopeReady={!isLoading}
+                          metricsFailed={!!metricsError}
+                          scopeFellBack={scopeFellBack}
                           latencyPercentile={latencyPercentile}
                           setLatencyPercentile={setLatencyPercentile}
                           onServiceClick={onServiceClick}

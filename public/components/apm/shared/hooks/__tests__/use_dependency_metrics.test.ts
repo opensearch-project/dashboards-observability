@@ -293,7 +293,7 @@ describe('useDependencyMetrics', () => {
   });
 
   describe('parameter changes', () => {
-    it('should refetch when dependencies change', async () => {
+    it('joins a re-fetched dependencies list without re-sending the queries', async () => {
       mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
       const { result, rerender } = renderHook(({ params }) => useDependencyMetrics(params), {
@@ -317,7 +317,10 @@ describe('useDependencyMetrics', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(initialCallCount);
+      // The queries depend only on service + time range; a new list (e.g. the PPL
+      // response for a new range) is joined onto the existing responses.
+      expect(mockExecuteInstantQuery.mock.calls.length).toBe(initialCallCount);
+      expect(result.current.metrics.has('new-service:NewOperation')).toBe(true);
     });
 
     it('should refetch when refreshTrigger changes', async () => {

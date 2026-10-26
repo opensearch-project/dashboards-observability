@@ -302,4 +302,26 @@ describe('useTopDependenciesByFaultRate', () => {
       expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('scoped to the page filters', () => {
+    it('bounds the calling services or the targets', async () => {
+      mockExecuteInstantQuery.mockResolvedValue({ meta: { instantData: { rows: [] } } });
+      renderHook(() =>
+        useTopDependenciesByFaultRate({ ...defaultParams, callerFilter: 'service=~"cart"' })
+      );
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(1));
+      expect(mockExecuteInstantQuery.mock.calls[0][0].query).toContain(
+        'fault{service=~"cart",remoteService!="",namespace="span_derived"}'
+      );
+
+      mockExecuteInstantQuery.mockClear();
+      renderHook(() =>
+        useTopDependenciesByFaultRate({ ...defaultParams, remoteFilter: 'remoteService=~"redis"' })
+      );
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(1));
+      expect(mockExecuteInstantQuery.mock.calls[0][0].query).toContain(
+        'fault{remoteService=~"redis",namespace="span_derived"}'
+      );
+    });
+  });
 });

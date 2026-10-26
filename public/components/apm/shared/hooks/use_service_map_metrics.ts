@@ -37,6 +37,15 @@ export interface UseServiceMapMetricsResult {
   refetch: () => void;
 }
 
+interface MapMetricResponses {
+  throughput: unknown;
+  faults: unknown;
+  errors: unknown;
+  depThroughput: unknown;
+  depFaults: unknown;
+  depErrors: unknown;
+}
+
 /**
  * Hook for batch-fetching RED metrics for service map nodes
  *
@@ -62,7 +71,11 @@ export const useServiceMapMetrics = (
 ): UseServiceMapMetricsResult => {
   const { config } = useApmConfig();
 
-  const [metricsMap, setMetricsMap] = useState<Map<string, ServiceMapNodeMetrics>>(new Map());
+  // Raw PromQL responses. Apart from whether dependency nodes exist, the
+  // queries do not depend on the node list, so the list is joined in at render
+  // time (see `metricsMap`): a new node list for a new time range does not
+  // re-send the queries (an abandoned request still runs in Prometheus).
+  const [responses, setResponses] = useState<MapMetricResponses | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
@@ -102,9 +115,14 @@ export const useServiceMapMetrics = (
     return formatPrometheusDuration(durationSec);
   }, [params.startTime, params.endTime]);
 
+  const hasNodes = params.services.length > 0;
+  // Only query caller-derived series when the map has dependency nodes, so a
+  // service-only map (feature off / older data) issues exactly the service queries.
+  const hasDependencyNodes = params.services.some((s) => isDependencyType(s.type));
+
   useEffect(() => {
-    if (params.services.length === 0 || !promqlService) {
-      setMetricsMap(new Map());
+    if (!hasNodes || !promqlService) {
+      setResponses(null);
       setIsLoading(false);
       return;
     }
@@ -125,10 +143,6 @@ export const useServiceMapMetrics = (
         depFaults: getQueryServiceMapDependencyFaults(timeRange),
         depErrors: getQueryServiceMapDependencyErrors(timeRange),
       };
-      // Only query caller-derived series when the map has dependency nodes, so a
-      // service-only map (feature off / older data) issues exactly the service queries.
-      const hasDependencyNodes = params.services.some((s) => isDependencyType(s.type));
-
       const runQuery = (query: string) =>
         promqlService.executeInstantQuery({
           query,
@@ -169,61 +183,14 @@ export const useServiceMapMetrics = (
       const depFaultsResp = valueOf(depFaultsResult);
       const depErrorsResp = valueOf(depErrorsResult);
 
-      // Build metrics map for each service
-      const newMap = new Map<string, ServiceMapNodeMetrics>();
-
-      params.services.forEach(({ serviceName, environment, type }) => {
-        const nodeId = `${serviceName}::${environment}`;
-
-        // Dependency nodes (database / messaging / external) have no SERVER-span
-        // metrics; they use their client-side series (relabeled to service/environment).
-        // Service nodes keep the SERVER-span series only.
-        const isDependency = isDependencyType(type);
-        const throughputData = extractServiceData(
-          isDependency ? depThroughputResp : throughputResp,
-          serviceName,
-          environment
-        );
-        const faultsData = extractServiceData(
-          isDependency ? depFaultsResp : faultsResp,
-          serviceName,
-          environment
-        );
-        const errorsData = extractServiceData(
-          isDependency ? depErrorsResp : errorsResp,
-          serviceName,
-          environment
-        );
-
-        // Calculate totals and failure ratio client-side
-        const totalRequests = calculateSum(throughputData);
-        const totalFaults = calculateSum(faultsData);
-        const totalErrors = calculateSum(errorsData);
-        const failureRatio =
-          totalRequests > 0 ? ((totalFaults + totalErrors) / totalRequests) * 100 : 0;
-
-        newMap.set(nodeId, {
-          latency: [],
-          avgLatency: 0,
-          latencyP99: [],
-          avgLatencyP99: 0,
-          latencyP90: [],
-          avgLatencyP90: 0,
-          latencyP50: [],
-          avgLatencyP50: 0,
-          throughput: throughputData,
-          avgThroughput: calculateAverage(throughputData),
-          failureRatio: [],
-          avgFailureRatio: failureRatio,
-          faults: faultsData,
-          totalFaults,
-          errors: errorsData,
-          totalErrors,
-          totalRequests,
-        });
+      setResponses({
+        throughput: throughputResp,
+        faults: faultsResp,
+        errors: errorsResp,
+        depThroughput: depThroughputResp,
+        depFaults: depFaultsResp,
+        depErrors: depErrorsResp,
       });
-
-      setMetricsMap(newMap);
 
       const rejected = [
         throughputResult,
@@ -243,9 +210,70 @@ export const useServiceMapMetrics = (
     fetchMetrics();
 
     return () => abortController.abort();
-    // serviceFilter is constant; servicesKey tracks changes to the service set.
+    // serviceFilter is constant; the queries depend on the node list only via
+    // hasNodes / hasDependencyNodes.
+  }, [promqlService, hasNodes, hasDependencyNodes, endTimeSec, timeRange, refetchTrigger]);
+
+  // Join the latest responses onto the current node list.
+  const metricsMap = useMemo(() => {
+    const newMap = new Map<string, ServiceMapNodeMetrics>();
+    if (!responses) return newMap;
+
+    params.services.forEach(({ serviceName, environment, type }) => {
+      const nodeId = `${serviceName}::${environment}`;
+
+      // Dependency nodes (database / messaging / external) have no SERVER-span
+      // metrics; they use their client-side series (relabeled to service/environment).
+      // Service nodes keep the SERVER-span series only.
+      const isDependency = isDependencyType(type);
+      const throughputData = extractServiceData(
+        isDependency ? responses.depThroughput : responses.throughput,
+        serviceName,
+        environment
+      );
+      const faultsData = extractServiceData(
+        isDependency ? responses.depFaults : responses.faults,
+        serviceName,
+        environment
+      );
+      const errorsData = extractServiceData(
+        isDependency ? responses.depErrors : responses.errors,
+        serviceName,
+        environment
+      );
+
+      // Calculate totals and failure ratio client-side
+      const totalRequests = calculateSum(throughputData);
+      const totalFaults = calculateSum(faultsData);
+      const totalErrors = calculateSum(errorsData);
+      const failureRatio =
+        totalRequests > 0 ? ((totalFaults + totalErrors) / totalRequests) * 100 : 0;
+
+      newMap.set(nodeId, {
+        latency: [],
+        avgLatency: 0,
+        latencyP99: [],
+        avgLatencyP99: 0,
+        latencyP90: [],
+        avgLatencyP90: 0,
+        latencyP50: [],
+        avgLatencyP50: 0,
+        throughput: throughputData,
+        avgThroughput: calculateAverage(throughputData),
+        failureRatio: [],
+        avgFailureRatio: failureRatio,
+        faults: faultsData,
+        totalFaults,
+        errors: errorsData,
+        totalErrors,
+        totalRequests,
+      });
+    });
+
+    return newMap;
+    // servicesKey tracks changes to the node set.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [promqlService, servicesKey, endTimeSec, timeRange, refetchTrigger]);
+  }, [servicesKey, responses]);
 
   const refetch = useCallback(() => {
     setRefetchTrigger((prev) => prev + 1);

@@ -281,4 +281,57 @@ describe('useTopServicesByFaultRate', () => {
       expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('scoped to the page filters', () => {
+    const rows = {
+      meta: {
+        instantData: {
+          rows: [
+            { service: 'a', environment: 'prod', Value: '9' },
+            { service: 'b', environment: 'prod', Value: '8' },
+            { service: 'a', environment: 'dev', Value: '7' },
+          ],
+        },
+      },
+    };
+
+    it('bounds the query, sizes topk up and re-checks rows before taking the top limit', async () => {
+      mockExecuteInstantQuery.mockResolvedValue(rows);
+      const { result } = renderHook(() =>
+        useTopServicesByFaultRate({
+          ...defaultParams,
+          limit: 1,
+          serviceFilter: 'service=~"a"',
+          queryLimit: 50,
+          include: (s) => s.environment === 'dev',
+        })
+      );
+
+      await waitFor(() => expect(result.current.data).toHaveLength(1));
+      const query = mockExecuteInstantQuery.mock.calls[0][0].query as string;
+      expect(query).toContain('topk(50,');
+      expect(query).toContain('fault{service=~"a",remoteService=""');
+      // The query matched `a` in two environments; only the scoped one is kept.
+      expect(result.current.data[0]).toMatchObject({ serviceName: 'a', environment: 'dev' });
+    });
+
+    it('queries nothing when the scope has no services', async () => {
+      const { result } = renderHook(() =>
+        useTopServicesByFaultRate({ ...defaultParams, serviceFilter: 'service=~"a"', skip: true })
+      );
+      await new Promise((r) => setTimeout(r, 400));
+      expect(mockExecuteInstantQuery).not.toHaveBeenCalled();
+      expect(result.current.data).toEqual([]);
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    it('waits while disabled', async () => {
+      const { result } = renderHook(() =>
+        useTopServicesByFaultRate({ ...defaultParams, enabled: false })
+      );
+      await new Promise((r) => setTimeout(r, 50));
+      expect(mockExecuteInstantQuery).not.toHaveBeenCalled();
+      expect(result.current.isLoading).toBe(true);
+    });
+  });
 });

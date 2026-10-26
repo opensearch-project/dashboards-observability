@@ -6,6 +6,7 @@
 import moment from 'moment-timezone';
 import dateMath from '@elastic/datemath';
 import { TimeRange, ParsedTimeRange, TimeAxisConfig } from '../../common/types/service_types';
+import { formatPrometheusDuration } from './step_utils';
 
 /**
  * Convert time string to Unix timestamp in seconds
@@ -88,25 +89,26 @@ const HOUR_MS = 60 * MINUTE_MS;
 const DAY_MS = 24 * HOUR_MS;
 
 /**
- * Calculate PromQL time range duration string from start/end times.
- * Returns format like "15m", "1h", "24h", "7d"
+ * PromQL range-selector duration covering exactly the selected time range, in
+ * the largest whole unit (e.g. "15m", "3h", "7d", or "90060s"), at least one minute.
+ *
+ * Exact, not rounded up: rounding (e.g. a 25h range to "2d") made
+ * `sum_over_time` count data from outside the range (inflating totals and the
+ * per-second rates derived from them, so the Services page disagreed with the
+ * Application Map) and scan more samples than needed.
  *
  * @param startTime - Start time of the range
  * @param endTime - End time of the range
- * @returns Duration string for PromQL queries (e.g., "15m", "1h", "7d")
  */
-export const calculateTimeRangeDuration = (startTime: Date, endTime: Date): string => {
-  const durationMs = endTime.getTime() - startTime.getTime();
-  const minutes = Math.ceil(durationMs / (1000 * 60));
+// Floor for the window (the previous minimum). Span-derived metrics are emitted per pipeline
+// flush interval (tens of seconds, deployment-dependent), so a shorter window can hold no sample
+// and show an empty range.
+const MIN_RANGE_SECONDS = 60;
 
-  if (minutes <= 60) return `${minutes}m`;
-
-  const hours = Math.ceil(minutes / 60);
-  if (hours <= 24) return `${hours}h`;
-
-  const days = Math.ceil(hours / 24);
-  return `${days}d`;
-};
+export const calculateTimeRangeDuration = (startTime: Date, endTime: Date): string =>
+  formatPrometheusDuration(
+    Math.max(MIN_RANGE_SECONDS, Math.floor((endTime.getTime() - startTime.getTime()) / 1000))
+  );
 
 /**
  * Get ECharts time axis configuration based on time range duration.

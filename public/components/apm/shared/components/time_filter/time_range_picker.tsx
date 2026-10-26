@@ -33,13 +33,20 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const handleTimeChange = ({ start, end }: OnTimeChangeProps) => {
+    // Re-picking the current range is a refresh gesture: setting an unchanged
+    // range is a no-op (see usePersistentTimeRange), so refresh explicitly to
+    // advance `now` and refetch.
+    if (start === timeRange.from && end === timeRange.to) {
+      refresh();
+      return;
+    }
     onChange({
       from: start,
       to: end,
     });
   };
 
-  const handleRefresh = (_props: OnRefreshProps) => {
+  const refresh = () => {
     if (onRefresh) {
       setIsLoading(true);
       // Call refresh callback
@@ -48,6 +55,8 @@ export const TimeRangePicker: React.FC<TimeRangePickerProps> = ({
       setTimeout(() => setIsLoading(false), 500);
     }
   };
+
+  const handleRefresh = (_props: OnRefreshProps) => refresh();
 
   return (
     <EuiSuperDatePicker
