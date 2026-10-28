@@ -142,6 +142,8 @@ export const APM_CONSTANTS = {
   // any consumer that still passes it — services-home no longer does.
   SPARKLINE_HEIGHT: 20,
   SPARKLINE_WIDTH: 60,
+  // Dot size (px) for a sparkline with a single data point, which cannot draw a line.
+  SPARKLINE_POINT_SYMBOL_SIZE: 3,
 
   // Colors for metrics (using EUI theme variables for dark/light mode support)
   COLORS: {
