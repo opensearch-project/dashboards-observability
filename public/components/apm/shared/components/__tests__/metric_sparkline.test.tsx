@@ -83,13 +83,6 @@ describe('MetricSparkline', () => {
       expect(screen.getByText('-')).toBeInTheDocument();
     });
 
-    it('should render "-" for a single data point, which cannot draw a line', () => {
-      render(<MetricSparkline data={[mockData[0]]} />);
-
-      expect(screen.getByText('-')).toBeInTheDocument();
-      expect(mockedEcharts.init).not.toHaveBeenCalled();
-    });
-
     it('should not initialize echarts when data is empty', () => {
       render(<MetricSparkline data={[]} />);
 
@@ -166,6 +159,26 @@ describe('MetricSparkline', () => {
     });
   });
 
+  describe('single data point', () => {
+    it('should draw the point as a centered dot rather than "-"', () => {
+      render(<MetricSparkline data={[mockData[0]]} />);
+
+      expect(screen.queryByText('-')).not.toBeInTheDocument();
+      const options = mockSetOption.mock.calls[0][0];
+      expect(options.series[0].symbol).toBe('circle');
+      expect(options.series[0].symbolSize).toBe(3);
+      expect(options.xAxis.boundaryGap).toBe(true);
+    });
+
+    it('should draw no symbols for a multi-point line', () => {
+      render(<MetricSparkline data={mockData} />);
+
+      const options = mockSetOption.mock.calls[0][0];
+      expect(options.series[0].symbol).toBe('none');
+      expect(options.xAxis.boundaryGap).toBe(false);
+    });
+  });
+
   describe('custom props', () => {
     it('should use custom color', () => {
       render(<MetricSparkline data={mockData} color="#FF0000" />);
@@ -234,6 +247,24 @@ describe('MetricSparkline', () => {
       rerender(<MetricSparkline data={mockData} />);
 
       expect(mockedEcharts.init).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('refetch (data -> loading -> data)', () => {
+    it('should dispose the chart while loading and init a new one when data returns', () => {
+      const { container, rerender } = render(<MetricSparkline data={mockData} />);
+      const chartDiv = container.firstChild as HTMLElement;
+
+      rerender(<MetricSparkline data={mockData} isLoading />);
+
+      expect(container.querySelector('.euiLoadingChart')).toBeInTheDocument();
+      expect(mockDispose).toHaveBeenCalledTimes(1);
+
+      rerender(<MetricSparkline data={mockData} />);
+
+      expect(container.firstChild).not.toBe(chartDiv);
+      expect(mockedEcharts.init).toHaveBeenCalledTimes(2);
+      expect(mockSetOption).toHaveBeenCalledTimes(2);
     });
   });
 
