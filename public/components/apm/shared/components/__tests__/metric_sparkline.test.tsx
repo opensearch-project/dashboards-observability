@@ -78,9 +78,16 @@ describe('MetricSparkline', () => {
 
     it('should render "-" when data is undefined', () => {
       // Testing undefined data edge case
-      render(<MetricSparkline data={(undefined as unknown) as MetricDataPoint[]} />);
+      render(<MetricSparkline data={undefined as unknown as MetricDataPoint[]} />);
 
       expect(screen.getByText('-')).toBeInTheDocument();
+    });
+
+    it('should render "-" for a single data point, which cannot draw a line', () => {
+      render(<MetricSparkline data={[mockData[0]]} />);
+
+      expect(screen.getByText('-')).toBeInTheDocument();
+      expect(mockedEcharts.init).not.toHaveBeenCalled();
     });
 
     it('should not initialize echarts when data is empty', () => {
@@ -147,10 +154,7 @@ describe('MetricSparkline', () => {
 
       const options = mockSetOption.mock.calls[0][0];
       expect(options.xAxis.data).toEqual([
-        1704067200000,
-        1704070800000,
-        1704074400000,
-        1704078000000,
+        1704067200000, 1704070800000, 1704074400000, 1704078000000,
       ]);
     });
 
@@ -206,6 +210,30 @@ describe('MetricSparkline', () => {
       unmount();
 
       expect(mockDispose).toHaveBeenCalled();
+    });
+  });
+
+  describe('data changing to empty', () => {
+    it('should not reuse the chart element for the "-" placeholder', () => {
+      const { container, rerender } = render(<MetricSparkline data={mockData} />);
+      const chartDiv = container.firstChild as HTMLElement;
+      // Stand-in for the canvas echarts draws outside React.
+      chartDiv.appendChild(document.createElement('canvas'));
+
+      rerender(<MetricSparkline data={[]} />);
+
+      expect(screen.getByText('-')).toBeInTheDocument();
+      expect(container.firstChild).not.toBe(chartDiv);
+      expect(container.querySelector('canvas')).not.toBeInTheDocument();
+      expect(mockDispose).toHaveBeenCalled();
+    });
+
+    it('should init a new chart when data returns', () => {
+      const { rerender } = render(<MetricSparkline data={mockData} />);
+      rerender(<MetricSparkline data={[]} />);
+      rerender(<MetricSparkline data={mockData} />);
+
+      expect(mockedEcharts.init).toHaveBeenCalledTimes(2);
     });
   });
 

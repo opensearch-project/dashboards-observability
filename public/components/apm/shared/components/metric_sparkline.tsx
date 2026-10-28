@@ -22,6 +22,8 @@ interface MetricSparklineProps {
   width?: number;
 }
 
+const MIN_LINE_POINTS = 2;
+
 // Helper to convert hex color to RGB components
 const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -38,7 +40,7 @@ const hexToRgb = (hex: string): { r: number; g: number; b: number } | null => {
  * MetricSparkline - Lightweight inline sparkline chart for metrics
  *
  * Renders a minimal ECharts chart with gradient fill and no axes or interactivity.
- * Shows loading chart, "-" for errors/empty data, or the sparkline.
+ * Shows loading chart, "-" for errors / too little data to draw a line, or the sparkline.
  *
  * @param data - Array of metric data points with timestamp and value
  * @param isLoading - Show loading chart
@@ -57,9 +59,16 @@ export const MetricSparkline: React.FC<MetricSparklineProps> = ({
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstance = useRef<echarts.ECharts | null>(null);
+  // A line needs two points; a single point (e.g. a long range over a few minutes of data,
+  // where one step spans all of it) would render as an empty chart, so it shows "-" instead.
+  const hasLine = !!data && data.length >= MIN_LINE_POINTS;
 
   useEffect(() => {
-    if (!chartRef.current || isLoading || isError || !data || data.length === 0) {
+    if (!chartRef.current || isLoading || isError || !hasLine) {
+      // The chart div is unmounted in these states; drop the instance bound to it so the next
+      // data renders into the new div instead of a detached one.
+      chartInstance.current?.dispose();
+      chartInstance.current = null;
       return;
     }
 
@@ -115,7 +124,7 @@ export const MetricSparkline: React.FC<MetricSparklineProps> = ({
     };
 
     chartInstance.current.setOption(option);
-  }, [data, color, isLoading, isError]);
+  }, [data, hasLine, color, isLoading, isError]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -142,17 +151,20 @@ export const MetricSparkline: React.FC<MetricSparklineProps> = ({
     width: width ? `${width}px` : '100%',
   };
 
+  // Distinct keys per state: echarts draws its canvas into the chart div outside React, so if
+  // React reused that div for the "-" placeholder (e.g. a table row whose service changed after
+  // filtering or paging), the previous service's chart would stay visible next to the "-".
   if (isLoading) {
     return (
-      <div style={containerStyle}>
+      <div key="loading" style={containerStyle}>
         <EuiLoadingChart size="m" mono />
       </div>
     );
   }
 
-  if (isError || !data || data.length === 0) {
+  if (isError || !hasLine) {
     return (
-      <div style={containerStyle}>
+      <div key="empty" style={containerStyle}>
         <EuiText size="xs" color="subdued">
           -
         </EuiText>
@@ -161,6 +173,10 @@ export const MetricSparkline: React.FC<MetricSparklineProps> = ({
   }
 
   return (
-    <div ref={chartRef} style={{ width: width ? `${width}px` : '100%', height: `${height}px` }} />
+    <div
+      key="chart"
+      ref={chartRef}
+      style={{ width: width ? `${width}px` : '100%', height: `${height}px` }}
+    />
   );
 };
