@@ -940,6 +940,10 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     const observations = part('count') ?? 0;
     if (!(observations > 0)) return null;
     const inf = part('inf');
+    const def = doc.spec.sli.definition;
+    // A custom SLI's queries are the user's own: all we know is that the
+    // denominator has data and the ratio doesn't.
+    if (def.backend === 'prometheus' && def.type === 'custom') return { cause: 'unknown' };
     return {
       // The cumulative math divides by `+Inf`; a flat one while `_count` grows
       // means the buckets don't accumulate.

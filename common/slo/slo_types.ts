@@ -423,11 +423,13 @@ export interface ObjectiveStatus {
  *   - `buckets_not_cumulative`: the histogram's `+Inf` bucket stays flat while
  *     `_count` grows — each bucket counts only its own range, so the
  *     cumulative math divides by zero.
+ *   - `unknown`: the SLI's source has data (for a custom SLI, its total query
+ *     is above 0), but the SLI still evaluates to no value.
  *   - `no_threshold_bucket`: observations arrive, but there's no bucket the
  *     SLI can read at the threshold.
  */
 export interface SliUncomputableReason {
-  cause: 'buckets_not_cumulative' | 'no_threshold_bucket';
+  cause: 'buckets_not_cumulative' | 'no_threshold_bucket' | 'unknown';
 }
 
 export interface SloLiveStatus {

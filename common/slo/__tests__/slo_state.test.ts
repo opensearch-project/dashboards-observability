@@ -98,7 +98,7 @@ describe('slo state helpers', () => {
   });
 
   describe('getSliUncomputableExplanation', () => {
-    const status = (cause?: 'buckets_not_cumulative' | 'no_threshold_bucket') => ({
+    const status = (cause?: 'buckets_not_cumulative' | 'no_threshold_bucket' | 'unknown') => ({
       state: 'sli_uncomputable',
       objectives: [
         {
@@ -122,6 +122,10 @@ describe('slo state helpers', () => {
 
     it('falls back to a generic reason, and is undefined for other states', () => {
       expect(getSliUncomputableExplanation(status())).toBe(
+        "The source metric has data, but this SLI can't be calculated from it."
+      );
+      // A custom SLI's cause is `unknown`: the same short generic reason.
+      expect(getSliUncomputableExplanation(status('unknown'))).toBe(
         "The source metric has data, but this SLI can't be calculated from it."
       );
       expect(getSliUncomputableExplanation({ state: 'source_idle' })).toBeUndefined();

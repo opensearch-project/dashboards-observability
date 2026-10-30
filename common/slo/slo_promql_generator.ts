@@ -423,24 +423,34 @@ export function perRangeBoundsUnder(
 export const SOURCE_TRAFFIC_PART_LABEL = 'slo_traffic_part';
 
 /**
- * Traffic on the source metric of a `latency_threshold` SLI over `window`,
- * read when the SLI evaluates to NaN: a NaN with traffic means the SLI can't
- * be computed from this metric, not that the source is idle. Samples are
- * tagged with {@link SOURCE_TRAFFIC_PART_LABEL}: `count` is the number of
- * observations (`<metric>_count`); `inf` — only for a cumulative SLI, whose
- * math divides by it — is the growth of the `+Inf` bucket, which tells a
- * histogram whose buckets don't accumulate (`inf` flat) from one with no
- * bucket at the threshold. Null for SLI types whose NaN can only mean "no
- * traffic".
+ * Traffic on the source of an SLI over `window`, read when the SLI evaluates
+ * to NaN: a NaN with traffic means the SLI can't be computed from its source,
+ * not that the source is idle. Samples are tagged with
+ * {@link SOURCE_TRAFFIC_PART_LABEL}:
+ *   - `count`: for a `latency_threshold` SLI, the observations its histogram
+ *     recorded (`<metric>_count`); for a custom events-mode SLI, its own
+ *     total query (summed), the denominator the error ratio divides by.
+ *   - `inf`: only for a cumulative latency SLI, whose math divides by it —
+ *     the growth of the `+Inf` bucket, which tells a histogram whose buckets
+ *     don't accumulate (`inf` flat) from one with no bucket at the threshold.
+ * Null for SLI types whose NaN can only mean "no traffic" (availability: its
+ * good side is `or vector(0)`, so NaN means the total was 0) and for raw
+ * custom expressions, which have no total to read.
  */
 export function buildSourceTrafficQuery(sli: SingleSli, window: string): string | null {
   const prom = sli.definition;
-  if (prom.backend !== 'prometheus' || prom.type !== 'latency_threshold' || !prom.metric) {
-    return null;
-  }
-  const dims = sli.dimensions.map((d) => `${d.name}="${escapeLabelValue(d.value)}"`);
+  if (prom.backend !== 'prometheus') return null;
   const tag = (expr: string, part: string) =>
     `label_replace(${expr}, "${SOURCE_TRAFFIC_PART_LABEL}", "${part}", "", "")`;
+  if (prom.type === 'custom') {
+    const custom = prom.customExpr;
+    if (!custom || custom.mode !== 'events') return null;
+    const { total } = windowCustomPair(custom.goodQuery, custom.totalQuery, window);
+    // Newline before the closing paren so a trailing `# comment` can't swallow it.
+    return tag(`sum(${total}\n)`, 'count');
+  }
+  if (prom.type !== 'latency_threshold' || !prom.metric) return null;
+  const dims = sli.dimensions.map((d) => `${d.name}="${escapeLabelValue(d.value)}"`);
   const count = `${ensureCountMetric(prom.metric)}{${joinMatchers(...dims)}}`;
   if (effectiveMetricTemporality(sli) === 'delta') {
     return tag(`sum(sum_over_time(${count}[${window}]))`, 'count');

@@ -281,8 +281,31 @@ describe('buildSourceTrafficQuery', () => {
     ).toContain('sum(sum_over_time(latency_seconds_count{');
   });
 
-  it('is null for SLIs whose NaN can only mean no traffic', () => {
+  it("reads a custom events-mode SLI's own total query over the window", () => {
+    const q = buildSourceTrafficQuery(
+      sli({
+        type: 'custom',
+        customExpr: {
+          mode: 'events',
+          goodQuery: 'sum(rate(ok_total[{{.window}}]))',
+          totalQuery: 'sum(rate(req_total[{{.window}}]))',
+        },
+      }),
+      '3d'
+    );
+    expect(q).toBe(
+      'label_replace(sum(sum(rate(req_total[3d]))\n), "slo_traffic_part", "count", "", "")'
+    );
+  });
+
+  it('is null for SLIs whose NaN can only mean no traffic, and for raw custom expressions', () => {
     expect(buildSourceTrafficQuery(sli({ metric: 'x_total' }), '1h')).toBeNull();
+    expect(
+      buildSourceTrafficQuery(
+        sli({ type: 'custom', customExpr: { mode: 'raw', errorRatioQuery: 'vector(0)' } }),
+        '1h'
+      )
+    ).toBeNull();
   });
 });
 

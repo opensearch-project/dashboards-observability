@@ -695,6 +695,43 @@ describe('DirectQueryStatusAggregator.aggregate — SLI uncomputable', () => {
     expect(status.state).toBe('source_idle');
   });
 
+  const customDoc = () =>
+    makeDoc({
+      sli: {
+        type: 'single',
+        definition: {
+          backend: 'prometheus',
+          type: 'custom',
+          calcMethod: 'events',
+          customExpr: {
+            mode: 'events',
+            goodQuery:
+              'sum(rate(ok_total{job="api"}[{{.window}}])) / sum(rate(zero_total[{{.window}}]))',
+            totalQuery: 'sum(rate(req_total{job="api"}[{{.window}}]))',
+          },
+        },
+        dimensions: [],
+      },
+      objectives: [{ name: 'p95', target: 0.95 }],
+    });
+
+  it('a custom SLI whose total query has data but evaluates to NaN → sli_uncomputable, generic cause', async () => {
+    const { client, searcherMock } = mockClient({ query: respond('42') });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([customDoc()], ctxFor(promDatasource(), client));
+    expect(status.state).toBe('sli_uncomputable');
+    expect(status.objectives[0].uncomputable).toEqual({ cause: 'unknown' });
+    const queries = searcherMock.mock.calls.map(([, req]) => JSON.stringify(req));
+    expect(queries.some((q) => q.includes('req_total{job=\\\"api\\\"}[3d]'))).toBe(true);
+  });
+
+  it('a custom SLI whose total query is 0 stays source_idle', async () => {
+    const { client } = mockClient({ query: respond('0') });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([customDoc()], ctxFor(promDatasource(), client));
+    expect(status.state).toBe('source_idle');
+  });
+
   it('an availability SLI never asks for source traffic', async () => {
     const { client, searcherMock } = mockClient({ query: respond('6400') });
     const agg = new DirectQueryStatusAggregator(noopLogger());
