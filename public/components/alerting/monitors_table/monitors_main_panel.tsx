@@ -708,7 +708,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   ) : linkedMonitorId ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.linkedRuleMissingTitle"
-                      defaultMessage="This rule no longer exists"
+                      defaultMessage="No rule with this monitor ID"
                     />
                   ) : (
                     <FormattedMessage
@@ -736,7 +736,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                   ) : linkedMonitorId ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.linkedRuleMissingBody"
-                      defaultMessage="No rule on the selected datasources has monitor ID {monitorId}. The monitor was probably deleted; its alerts are kept for history."
+                      defaultMessage="None of the selected datasources has a rule with monitor ID {monitorId}. The monitor may have been deleted, or it's on a datasource that isn't selected."
                       values={{ monitorId: <EuiCode>{linkedMonitorId}</EuiCode> }}
                     />
                   ) : rules.length === 0 ? (

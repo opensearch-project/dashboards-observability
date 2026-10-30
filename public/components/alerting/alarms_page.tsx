@@ -321,9 +321,13 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // longer describes the page — drop it so a reload doesn't bring back a
   // search they cleared. The `deepLink` state is left alone: the tab already
   // holds the user's own query, and the state is cleared on the next tab click.
+  // Only `q` is dropped: `ds` still names the datasource the link selected, so
+  // a reload keeps it selected.
   const handleLinkedSearchEdited = useCallback(() => {
-    const { tab, q } = parseAlarmsHashRoute(window.location.hash);
-    if (tab && q) window.history.replaceState(null, '', `#/${tab}`);
+    const { tab, q, ds } = parseAlarmsHashRoute(window.location.hash);
+    if (!tab || !q) return;
+    const rest = ds ? `?${new URLSearchParams({ ds }).toString()}` : '';
+    window.history.replaceState(null, '', `#/${tab}${rest}`);
   }, []);
   // The tab a link's `q` was meant for. A link without a tab opens Alerts.
   const linkedSearchFor = (tab: TabId): string | undefined =>
@@ -693,7 +697,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // can say the monitor was deleted instead of linking to an empty Rules tab.
   // Only OpenSearch alerts carry a monitor id that equals a rule id, and the
   // answer is `unknown` unless that datasource's rules loaded completely.
-  const selectedAlertRuleStatus = useMemo<SourceRuleStatus>(() => {
+  const listedRuleStatus = useMemo<SourceRuleStatus>(() => {
     if (!selectedAlert || selectedAlert.datasourceType !== 'opensearch') return 'unknown';
     const monitorId = selectedAlert.monitorId ?? selectedAlert.labels?.monitor_id;
     if (!monitorId || dataLoading || error) return 'unknown';
@@ -721,6 +725,42 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     rulesWarnings,
     visibleRules,
   ]);
+
+  // The rules list can be older than the alerts (it refreshes on Rules-tab
+  // entry, focus and its poll), so a monitor created since it loaded would read
+  // as missing. Confirm "missing" with a lookup of the monitor itself before
+  // the flyout says it was deleted: a 404 confirms it, anything else leaves the
+  // answer `unknown`, and a hit refreshes the list. Results are kept per
+  // monitor for the life of the page — a deleted monitor doesn't come back.
+  const selectedMonitorKey =
+    selectedAlert && listedRuleStatus === 'missing'
+      ? `${selectedAlert.datasourceId}\u0000${
+          selectedAlert.monitorId ?? selectedAlert.labels?.monitor_id
+        }`
+      : undefined;
+  const [monitorLookups, setMonitorLookups] = useState<Record<string, SourceRuleStatus>>({});
+  const monitorLookupsStartedRef = useRef(new Set<string>());
+  useEffect(() => {
+    if (!selectedAlert || !selectedMonitorKey) return;
+    if (monitorLookupsStartedRef.current.has(selectedMonitorKey)) return;
+    monitorLookupsStartedRef.current.add(selectedMonitorKey);
+    const key = selectedMonitorKey;
+    const monitorId = selectedAlert.monitorId ?? selectedAlert.labels?.monitor_id ?? '';
+    osService.getRuleDetail(selectedAlert.datasourceId, monitorId).then(
+      () => {
+        setMonitorLookups((prev) => ({ ...prev, [key]: 'exists' }));
+        backgroundRefetchRules();
+      },
+      (err: unknown) => {
+        const e = err as { response?: { status?: number }; body?: { statusCode?: number } };
+        const status = e?.response?.status ?? e?.body?.statusCode;
+        setMonitorLookups((prev) => ({ ...prev, [key]: status === 404 ? 'missing' : 'unknown' }));
+      }
+    );
+  }, [selectedAlert, selectedMonitorKey, osService, backgroundRefetchRules]);
+  const selectedAlertRuleStatus: SourceRuleStatus = selectedMonitorKey
+    ? (monitorLookups[selectedMonitorKey] ?? 'unknown')
+    : listedRuleStatus;
 
   // Fires when a user tries to select past `maxDatasources`. Pops a warning
   // toast with an in-toast link to the Advanced Settings entry so they can

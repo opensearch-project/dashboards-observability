@@ -663,7 +663,8 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
               {/* Acknowledge: only OpenSearch alerting alerts have an acknowledge API */}
-              {canAcknowledgeAlert(alert) && (
+              {/* The callout says an alert whose monitor is gone can't be acknowledged — keep the button in line with it. */}
+              {canAcknowledgeAlert(alert) && !monitorMissing && (
                 <EuiFlexItem grow={false}>
                   <EuiButton fill size="s" iconType="check" onClick={() => onAcknowledge(alert.id)}>
                     <FormattedMessage

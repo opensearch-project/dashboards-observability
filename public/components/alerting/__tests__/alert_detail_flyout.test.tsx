@@ -456,9 +456,11 @@ describe('AlertDetailFlyout', () => {
     });
 
     it('flags an active alert whose monitor is missing from the rules list', () => {
-      const { getByTestId, queryByTestId } = renderFlyout(osAlert, 'missing');
+      const { getByTestId, queryByTestId, queryByText } = renderFlyout(osAlert, 'missing');
       expect(getByTestId('alertDetailRuleDeletedCallout')).toBeInTheDocument();
       expect(queryByTestId('alertDetailOpenSource')).toBeNull();
+      // The callout says it can't be acknowledged, so no Acknowledge button.
+      expect(queryByText('Acknowledge')).toBeNull();
     });
 
     it('keeps Open rule when only the trigger was deleted', () => {
