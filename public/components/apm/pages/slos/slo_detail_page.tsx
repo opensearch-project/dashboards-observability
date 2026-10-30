@@ -236,7 +236,10 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
               data-test-subj="slosDetailHealthDot"
               aria-label={i18n.translate('observability.apm.slo.detail.healthAriaLabel', {
                 defaultMessage: 'Health: {label}',
-                values: { label: healthExplanation ?? healthLabel },
+                // The label first so the state itself is announced, then the reason.
+                values: {
+                  label: healthExplanation ? `${healthLabel}. ${healthExplanation}` : healthLabel,
+                },
               })}
             >
               <span style={{ fontWeight: 600 }}>{healthLabel}</span>

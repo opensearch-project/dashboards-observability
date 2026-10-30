@@ -330,6 +330,18 @@ describe('deriveTopLevelState — disabled / stale / worst-of', () => {
     ).toBe('source_idle');
   });
 
+  it('ranks sli_uncomputable between no_data and warning, whatever the objective order', () => {
+    const top = (...states: Array<ObjectiveStatus['state']>) =>
+      deriveTopLevelState(true, false, true, states.map(mkObj));
+    // A burning budget on another objective wins in both orders.
+    expect(top('warning', 'sli_uncomputable')).toBe('warning');
+    expect(top('sli_uncomputable', 'warning')).toBe('warning');
+    // …and a broken SLI outranks "no data yet" / a healthy objective.
+    expect(top('no_data', 'sli_uncomputable')).toBe('sli_uncomputable');
+    expect(top('sli_uncomputable', 'no_data')).toBe('sli_uncomputable');
+    expect(top('ok', 'sli_uncomputable')).toBe('sli_uncomputable');
+  });
+
   it('picks the worst per-objective state (breached > warning > no_data > ok)', () => {
     expect(deriveTopLevelState(true, false, true, [mkObj('ok'), mkObj('warning')])).toBe('warning');
     expect(

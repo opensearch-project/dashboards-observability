@@ -1179,8 +1179,11 @@ export function deriveTopLevelState(
     ok: 0,
     no_data: 1,
     source_idle: 1,
-    // A broken SLI on one objective outranks "no data yet" on another.
-    sli_uncomputable: 2,
+    // Its own rank so the result doesn't depend on objective order: a broken
+    // SLI on one objective outranks "no data yet" on another, but a budget
+    // actually burning (warning / breached) on another objective wins — that
+    // one is the signal alerts act on.
+    sli_uncomputable: 1.5,
     warning: 2,
     breached: 3,
     // rules_missing is never set per-objective (it's a top-level overlay

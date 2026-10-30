@@ -184,7 +184,6 @@ export interface SloValidationResult {
   warnings: Record<string, string>;
 }
 
-/** Validate a user-supplied slug ID. Server generates UUIDs otherwise. */
 /**
  * A `per_range` histogram is read by summing every bucket at or under the
  * threshold, so it needs the bucket bounds and their unit, and each latency
@@ -234,6 +233,7 @@ function validateBucketLayout(
   return null;
 }
 
+/** Validate a user-supplied slug ID. Server generates UUIDs otherwise. */
 export function validateSloId(id: string): string | null {
   if (!SLUG_ID_RE.test(id)) {
     return 'Invalid SLO id. 3–63 characters; lowercase letters, digits, single hyphens between segments; must start with a letter.';

@@ -60,6 +60,7 @@ import {
   SkippedSuggestion,
   Suggestion,
   generateSuggestionsWithSkips,
+  latencyThresholdIssue,
 } from './suggest_engine';
 import { buildSuggestSearch, parseSuggestScopeFromSearch } from './slo_suggest_scope';
 import { OverridePatch, OverrideValues } from './suggest_inline_row';
@@ -566,13 +567,19 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
   // against a selection-state race — and, critically, EVERY count surface below
   // derives from this same predicate so the button / modal / preview / toast
   // can never disagree with what `runCreateSelected` actually provisions.
+  // A latency draft whose edited threshold its histogram can't measure is
+  // left out too: it would be created already unable to compute (or rejected
+  // by the server). The row shows why next to the threshold field.
+  // `creatable` takes the override-applied draft so the check sees the
+  // threshold the user typed.
   const creatable = useCallback(
-    (s: Suggestion) => selected.has(s.key) && !isDraftCovered(s),
+    (s: Suggestion) =>
+      selected.has(s.key) && !isDraftCovered(s) && latencyThresholdIssue(s) === null,
     [selected, isDraftCovered]
   );
 
   const runCreateSelected = useCallback(() => {
-    const picks = suggestions.filter(creatable).map(applyOverrides);
+    const picks = suggestions.map(applyOverrides).filter(creatable);
     return runCreate(picks);
   }, [applyOverrides, creatable, runCreate, suggestions]);
 

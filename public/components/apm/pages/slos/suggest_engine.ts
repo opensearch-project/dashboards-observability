@@ -194,6 +194,11 @@ export interface Suggestion {
    */
   estimatedRuleCount: number;
   /**
+   * The probed histogram shape a latency draft was fitted to, so an edited
+   * threshold can be re-checked against the same buckets.
+   */
+  histogramShape?: HistogramShape;
+  /**
    * If set, an existing recording rule already covers this (service, kind).
    * Create-all flows should skip this draft to avoid dual-writing.
    */
@@ -998,13 +1003,7 @@ function applyHistogramShapes(
       def.latencyThresholdUnit === 'milliseconds'
         ? objective.latencyThreshold / 1000
         : objective.latencyThreshold;
-    const thresholdInLe =
-      shape.unit === 'milliseconds' ? thresholdSeconds * 1000 : thresholdSeconds;
-    const usable =
-      shape.layout === 'cumulative'
-        ? shape.bounds.some((b) => Math.abs(b - thresholdInLe) <= 1e-9 * Math.max(1, b))
-        : perRangeBoundsUnder(shape.bounds, shape.unit, thresholdSeconds).some((b) => b > 0);
-    if (!usable) {
+    if (!histogramCanMeasure(shape, thresholdSeconds)) {
       skipped.push({
         key: draft.key,
         name: spec.name,
@@ -1021,12 +1020,15 @@ function applyHistogramShapes(
       });
       continue;
     }
+    // Keep the probed shape so a threshold the user types later is checked
+    // against the same buckets (see `latencyThresholdIssue`).
     if (shape.layout === 'cumulative') {
-      suggestions.push(draft);
+      suggestions.push({ ...draft, histogramShape: shape });
       continue;
     }
     suggestions.push({
       ...draft,
+      histogramShape: shape,
       input: {
         ...draft.input,
         spec: {
@@ -1045,6 +1047,60 @@ function applyHistogramShapes(
     });
   }
   return { suggestions, skipped };
+}
+
+/**
+ * Whether a histogram of this shape can answer "under `thresholdSeconds`": a
+ * cumulative one needs a bucket exactly at the threshold, a per-range one a
+ * positive bound at or under it.
+ */
+function histogramCanMeasure(shape: HistogramShape, thresholdSeconds: number): boolean {
+  if (shape.layout === 'per_range') {
+    return perRangeBoundsUnder(shape.bounds, shape.unit, thresholdSeconds).some((b) => b > 0);
+  }
+  const thresholdInLe = shape.unit === 'milliseconds' ? thresholdSeconds * 1000 : thresholdSeconds;
+  return shape.bounds.some((b) => Math.abs(b - thresholdInLe) <= 1e-9 * Math.max(1, b));
+}
+
+/**
+ * Why a latency draft's current threshold can't be measured by its histogram,
+ * or null when it can (or the histogram wasn't probed). Suggest re-checks this
+ * whenever the user edits a draft's threshold: the draft passed the check at
+ * its default threshold, but a typed one may fall between buckets.
+ */
+export function latencyThresholdIssue(s: Suggestion): string | null {
+  const shape = s.histogramShape;
+  const sli = s.input.spec.sli;
+  const threshold = s.input.spec.objectives[0]?.latencyThreshold;
+  if (
+    !shape ||
+    sli.type !== 'single' ||
+    sli.definition.backend !== 'prometheus' ||
+    typeof threshold !== 'number'
+  ) {
+    return null;
+  }
+  const thresholdSeconds =
+    sli.definition.latencyThresholdUnit === 'milliseconds' ? threshold / 1000 : threshold;
+  if (histogramCanMeasure(shape, thresholdSeconds)) return null;
+  return shape.layout === 'cumulative'
+    ? i18n.translate('observability.apm.slo.suggest.engine.noBucketAtThreshold', {
+        defaultMessage: 'No histogram bucket at {threshold}. Use one of: {bounds} {unit}.',
+        values: {
+          threshold: formatThreshold(thresholdSeconds),
+          bounds: summarizeBounds(shape.bounds.filter((b) => b > 0)),
+          unit: shape.unit === 'milliseconds' ? 'ms' : 's',
+        },
+      })
+    : i18n.translate('observability.apm.slo.suggest.engine.noBucketUnderThreshold', {
+        defaultMessage:
+          'No histogram bucket at or under {threshold}. The smallest is {smallest} {unit}.',
+        values: {
+          threshold: formatThreshold(thresholdSeconds),
+          smallest: shape.bounds.find((b) => b > 0) ?? '—',
+          unit: shape.unit === 'milliseconds' ? 'ms' : 's',
+        },
+      });
 }
 
 /** "0, 5, 10 … 10000" — the first few bounds and the last. */

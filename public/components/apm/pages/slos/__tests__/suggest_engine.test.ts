@@ -13,8 +13,10 @@ import {
   generateSuggestionsForServices,
   generateSuggestionsFromServices,
   generateSuggestionsWithSkips,
+  latencyThresholdIssue,
   metricsToProbe,
 } from '../suggest_engine';
+import type { Suggestion } from '../suggest_engine';
 import type { HistogramShape } from '../histogram_shape';
 
 function getPromSli(
@@ -559,7 +561,11 @@ describe('generateSuggestionsWithSkips — histogram bucket shapes', () => {
   it('leaves a cumulative draft byte-identical when the threshold bucket exists', () => {
     const plain = generateSuggestionsForServices(base);
     const out = generateSuggestionsWithSkips({ ...base, histogramShapes: [shape('cart', {})] });
-    expect(draft(out, 'http-lat:cart')).toEqual(plain.find((s) => s.key === 'http-lat:cart'));
+    // The create payload is unchanged; the draft only gains the probed shape.
+    expect(draft(out, 'http-lat:cart')?.input).toEqual(
+      plain.find((s) => s.key === 'http-lat:cart')?.input
+    );
+    expect(draft(out, 'http-lat:cart')?.histogramShape?.layout).toBe('cumulative');
   });
 
   it('skips a cumulative draft with no bucket at the threshold', () => {
@@ -569,6 +575,37 @@ describe('generateSuggestionsWithSkips — histogram bucket shapes', () => {
     });
     expect(draft(out, 'http-lat:cart')).toBeUndefined();
     expect(out.skipped.map((s) => s.key)).toEqual(['http-lat:cart']);
+  });
+
+  it('re-checks an edited threshold against the probed buckets', () => {
+    const withThreshold = (s: Suggestion, latencyThreshold: number): Suggestion => ({
+      ...s,
+      input: {
+        ...s.input,
+        spec: {
+          ...s.input.spec,
+          objectives: [{ ...s.input.spec.objectives[0], latencyThreshold }],
+        },
+      },
+    });
+    const out = generateSuggestionsWithSkips({
+      ...base,
+      histogramShapes: [
+        shape('cart', {}),
+        shape('flagd', { layout: 'per_range', bounds: OTEL_MS_BOUNDS, unit: 'milliseconds' }),
+      ],
+    });
+    const cart = draft(out, 'http-lat:cart')!;
+    const flagd = draft(out, 'http-lat:flagd')!;
+    expect(latencyThresholdIssue(cart)).toBeNull();
+    // Cumulative: 0.25 s falls between the 0.1 and 0.5 buckets.
+    expect(latencyThresholdIssue(withThreshold(cart, 0.25))).toContain(
+      'No histogram bucket at 250 ms'
+    );
+    expect(latencyThresholdIssue(withThreshold(cart, 1))).toBeNull();
+    // Per-range: any threshold with a positive bound under it works; 2 ms doesn't.
+    expect(latencyThresholdIssue(withThreshold(flagd, 0.3))).toBeNull();
+    expect(latencyThresholdIssue(withThreshold(flagd, 0.002))).toContain('The smallest is 5 ms');
   });
 
   it('leaves drafts alone when the shape is unknown or missing', () => {
