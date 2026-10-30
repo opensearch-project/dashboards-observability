@@ -46,6 +46,8 @@ import { AlertTimeline } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import {
   canAcknowledgeAlert,
+  SEVERITY_SORT_ORDER,
+  sortBySeverity,
   countBy,
   isStandardOpenSearchDatasource,
   SEVERITY_COLORS,
@@ -105,14 +107,6 @@ function formatDuration(startTime: string | number): string {
 // 10 fits the common case (severity / instance / job / namespace / etc.)
 // on screen at once.
 const LABEL_KEY_INITIAL_VISIBLE = 10;
-
-const SEVERITY_SORT_ORDER: Record<string, number> = {
-  critical: 0,
-  high: 1,
-  medium: 2,
-  low: 3,
-  info: 4,
-};
 
 // ============================================================================
 // Alert Filter State
@@ -835,7 +829,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
   // Unique values for facets
   const uniqueSeverities = useMemo(
-    () => collectAlertUniqueValues(alerts, (a) => a.severity),
+    () => sortBySeverity(collectAlertUniqueValues(alerts, (a) => a.severity)),
     [alerts]
   );
   const uniqueStates = useMemo(

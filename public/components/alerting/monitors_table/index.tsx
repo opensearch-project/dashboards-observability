@@ -21,7 +21,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EuiResizableContainer } from '@elastic/eui';
 import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alerting';
 import { useFacetCollapse } from '../facet_filter_panel';
-import { isStandardOpenSearchDatasource } from '../shared_constants';
+import { isStandardOpenSearchDatasource, sortBySeverity } from '../shared_constants';
 import { buildTableColumns, DEFAULT_VISIBLE } from './monitors_table_columns';
 import { isPending } from './pending_rules';
 import {
@@ -376,7 +376,10 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
 
   // Unique values for filter dropdowns
   const uniqueStatuses = useMemo(() => collectUniqueValues(rules, (r) => r.status), [rules]);
-  const uniqueSeverities = useMemo(() => collectUniqueValues(rules, (r) => r.severity), [rules]);
+  const uniqueSeverities = useMemo(
+    () => sortBySeverity(collectUniqueValues(rules, (r) => r.severity)),
+    [rules]
+  );
   const uniqueTypes = useMemo(() => collectUniqueValues(rules, (r) => r.monitorType), [rules]);
   const uniqueHealth = useMemo(() => collectUniqueValues(rules, (r) => r.healthStatus), [rules]);
   const uniqueCreators = useMemo(() => collectUniqueValues(rules, (r) => r.createdBy), [rules]);
