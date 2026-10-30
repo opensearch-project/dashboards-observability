@@ -55,7 +55,12 @@ import { parseTimeRange } from '../../shared/utils/time_utils';
 import { DEFAULT_APM_TIME_RANGE } from '../../common/constants';
 import type { TimeRange } from '../../common/types/service_types';
 import type { SloApiClient } from './slo_api_client';
-import { DiscoveredService, Suggestion, generateSuggestionsForServices } from './suggest_engine';
+import {
+  DiscoveredService,
+  SkippedSuggestion,
+  Suggestion,
+  generateSuggestionsWithSkips,
+} from './suggest_engine';
 import { buildSuggestSearch, parseSuggestScopeFromSearch } from './slo_suggest_scope';
 import { OverridePatch, OverrideValues } from './suggest_inline_row';
 import { ServiceRowShape, ServiceTreeTable } from './suggest_service_tree_table';
@@ -366,6 +371,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     existingRuleGroups,
     rulerFetchFailed,
     emptyHistograms,
+    histogramShapes,
     spanDerivedServices,
     loading: discoveryLoading,
   } = useDiscoveryProbes({
@@ -375,19 +381,25 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     prometheusConnectionMeta: config?.prometheusDataSource?.meta,
   });
 
-  const suggestions = useMemo<Suggestion[]>(() => {
-    if (!datasourceId || !services || services.length === 0) return [];
+  const { suggestions, skipped: skippedSuggestions } = useMemo<{
+    suggestions: Suggestion[];
+    skipped: SkippedSuggestion[];
+  }>(() => {
+    if (!datasourceId || !services || services.length === 0) {
+      return { suggestions: [], skipped: [] };
+    }
     const discovered: DiscoveredService[] = services.map((s) => ({
       serviceName: s.serviceName,
       environment: s.environment,
     }));
-    return generateSuggestionsForServices({
+    return generateSuggestionsWithSkips({
       datasourceId,
       services: discovered,
       metricNames,
       labelValuesByMetric,
       existingRuleGroups,
       emptyHistograms,
+      histogramShapes,
       spanDerivedServices,
     });
   }, [
@@ -397,6 +409,7 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
     labelValuesByMetric,
     existingRuleGroups,
     emptyHistograms,
+    histogramShapes,
     spanDerivedServices,
   ]);
 
@@ -865,6 +878,32 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
                       defaultMessage:
                         'The Prometheus ruler did not respond when this page tried to list its current recording groups. Suggestions and bulk-create still work, but duplicate recording groups may be created if rules already exist for these SLIs.',
                     })}
+                  </EuiText>
+                </EuiCallOut>
+                <EuiSpacer size="m" />
+              </>
+            )}
+
+            {!loading && datasourceId && skippedSuggestions.length > 0 && (
+              <>
+                <EuiCallOut
+                  size="s"
+                  iconType="iInCircle"
+                  title={i18n.translate('observability.apm.slo.suggest.skipped.title', {
+                    defaultMessage:
+                      '{count, plural, one {# latency SLO} other {# latency SLOs}} not suggested',
+                    values: { count: skippedSuggestions.length },
+                  })}
+                  data-test-subj="slosSuggestSkipped"
+                >
+                  <EuiText size="s">
+                    <ul>
+                      {skippedSuggestions.map((skip) => (
+                        <li key={skip.key}>
+                          <strong>{skip.name}</strong>: {skip.reason}
+                        </li>
+                      ))}
+                    </ul>
                   </EuiText>
                 </EuiCallOut>
                 <EuiSpacer size="m" />

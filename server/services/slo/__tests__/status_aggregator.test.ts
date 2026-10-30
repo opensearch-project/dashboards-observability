@@ -626,6 +626,70 @@ describe('DirectQueryStatusAggregator.aggregate — disabled / missing data', ()
   });
 });
 
+describe('DirectQueryStatusAggregator.aggregate — SLI uncomputable', () => {
+  // A per-range histogram read with cumulative math: every window divides by
+  // a flat `+Inf` bucket, so the SLI is NaN while `_count` keeps growing.
+  const latencyDoc = () =>
+    makeDoc({
+      sli: {
+        type: 'single',
+        definition: {
+          backend: 'prometheus',
+          type: 'latency_threshold',
+          calcMethod: 'events',
+          metric: 'http_server_request_duration_seconds_bucket',
+        },
+        dimensions: [{ name: 'service_name', value: 'flagd' }],
+      },
+      objectives: [{ name: 'p95', target: 0.95, latencyThreshold: 0.5 }],
+    });
+  const nanSample = {
+    metric: { slo_id: 'slo-1', slo_objective: 'p95' },
+    value: [Math.floor(Date.now() / 1000), 'NaN'],
+  };
+  const respond = (traffic: string | null) => (body: unknown) => {
+    const text = JSON.stringify(body);
+    if (
+      text.includes('http_server_request_duration_seconds_count') &&
+      !text.includes('label_replace')
+    ) {
+      return {
+        resultType: 'vector',
+        result: traffic === null ? [] : [{ metric: {}, value: [Date.now() / 1000, traffic] }],
+      };
+    }
+    // The recorded sample and the inline fallback both evaluate to NaN.
+    return {
+      resultType: 'vector',
+      result: [{ ...nanSample, metric: { ...nanSample.metric, slo_inline_objective: '0' } }],
+    };
+  };
+
+  it('NaN SLI while the source _count grows → sli_uncomputable, not source_idle', async () => {
+    const { client } = mockClient({ query: respond('6400') });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([latencyDoc()], ctxFor(promDatasource(), client));
+    expect(status.objectives[0].state).toBe('sli_uncomputable');
+    expect(status.state).toBe('sli_uncomputable');
+  });
+
+  it('NaN SLI with no source traffic stays source_idle', async () => {
+    const { client } = mockClient({ query: respond('0') });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([latencyDoc()], ctxFor(promDatasource(), client));
+    expect(status.state).toBe('source_idle');
+  });
+
+  it('an availability SLI never asks for source traffic', async () => {
+    const { client, searcherMock } = mockClient({ query: respond('6400') });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([makeDoc()], ctxFor(promDatasource(), client));
+    expect(status.state).toBe('source_idle');
+    const queries = searcherMock.mock.calls.map(([, req]) => JSON.stringify(req));
+    expect(queries.some((q) => q.includes('increase('))).toBe(false);
+  });
+});
+
 describe('DirectQueryStatusAggregator.aggregate — partial failure', () => {
   it('2 of 3 objectives return samples, one does not → only the missing one is no_data', async () => {
     const doc = makeDoc({

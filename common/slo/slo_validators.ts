@@ -9,9 +9,14 @@
  * boundary and client-side in the wizard.
  */
 
-import type { BurnRateConfig, SloSpec, Objective } from './slo_types';
+import type { BurnRateConfig, SloSpec, Objective, PrometheusSli } from './slo_types';
 import { isSupportedSliBackend } from './slo_types';
-import { MWMBR_MAX_TIERS, parseDurationToMs, RECORDING_WINDOWS } from './slo_promql_generator';
+import {
+  MWMBR_MAX_TIERS,
+  parseDurationToMs,
+  perRangeBoundsUnder,
+  RECORDING_WINDOWS,
+} from './slo_promql_generator';
 
 const METRIC_NAME_RE = /^[a-zA-Z_:][a-zA-Z0-9_:]*$/;
 const LABEL_NAME_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
@@ -180,6 +185,55 @@ export interface SloValidationResult {
 }
 
 /** Validate a user-supplied slug ID. Server generates UUIDs otherwise. */
+/**
+ * A `per_range` histogram is read by summing every bucket at or under the
+ * threshold, so it needs the bucket bounds and their unit, and each latency
+ * objective needs at least one positive bound at or under its threshold —
+ * otherwise "under X" can't be answered from the histogram at all.
+ */
+function validateBucketLayout(
+  prom: PrometheusSli,
+  objectives: Array<Partial<Objective>>
+): { field: string; message: string } | null {
+  if (prom.bucketLayout === undefined) return null;
+  if (prom.bucketLayout !== 'per_range') {
+    return {
+      field: 'spec.sli.definition.bucketLayout',
+      message: `bucketLayout must be 'per_range'`,
+    };
+  }
+  const bounds = prom.bucketBounds ?? [];
+  if (
+    bounds.length === 0 ||
+    bounds.some((b) => typeof b !== 'number' || !Number.isFinite(b) || b < 0)
+  ) {
+    return {
+      field: 'spec.sli.definition.bucketBounds',
+      message: 'bucketBounds must list the histogram bucket bounds (finite, non-negative numbers)',
+    };
+  }
+  if (prom.bucketUnit !== 'seconds' && prom.bucketUnit !== 'milliseconds') {
+    return {
+      field: 'spec.sli.definition.bucketUnit',
+      message: `bucketUnit must be 'seconds' or 'milliseconds'`,
+    };
+  }
+  for (const objective of objectives) {
+    if (typeof objective.latencyThreshold !== 'number') continue;
+    const thresholdSeconds =
+      prom.latencyThresholdUnit === 'milliseconds'
+        ? objective.latencyThreshold / 1000
+        : objective.latencyThreshold;
+    if (perRangeBoundsUnder(bounds, prom.bucketUnit, thresholdSeconds).every((b) => b === 0)) {
+      return {
+        field: 'spec.sli.definition.bucketBounds',
+        message: `No histogram bucket bound is at or under the ${objective.latencyThreshold} threshold`,
+      };
+    }
+  }
+  return null;
+}
+
 export function validateSloId(id: string): string | null {
   if (!SLUG_ID_RE.test(id)) {
     return 'Invalid SLO id. 3–63 characters; lowercase letters, digits, single hyphens between segments; must start with a letter.';
@@ -266,6 +320,8 @@ export function validateSloSpec(input: Partial<SloSpec>): SloValidationResult {
           errors['spec.sli.definition.latencyThresholdUnit'] =
             `latencyThresholdUnit must be 'seconds' or 'milliseconds'`;
         }
+        const layoutErr = validateBucketLayout(prom, input.objectives ?? []);
+        if (layoutErr) errors[layoutErr.field] = layoutErr.message;
       } else if (prom.type === 'custom') {
         if (!prom.customExpr) {
           errors['spec.sli.definition.customExpr'] = 'customExpr is required for custom SLIs';

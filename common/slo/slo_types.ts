@@ -83,6 +83,20 @@ export interface PrometheusSli extends BaseSli {
    * `delta` and everything else as `cumulative`.
    */
   metricTemporality?: 'cumulative' | 'delta';
+  /**
+   * How a `latency_threshold` histogram fills its `le` buckets. Omitted (the
+   * Prometheus norm) means each `le` bucket counts every observation up to
+   * that bound, so `+Inf` equals the total. `per_range` means each bucket
+   * holds only the observations between the previous bound and its own, and
+   * `+Inf` only the overflow — the buckets still grow over time like
+   * counters. Set by the suggestion probe, together with `bucketBounds` and
+   * `bucketUnit`, which the `per_range` math needs.
+   */
+  bucketLayout?: 'per_range';
+  /** The histogram's finite `le` bounds, in `bucketUnit`. Required for `per_range`. */
+  bucketBounds?: number[];
+  /** Unit of the `le` labels. Required for `per_range`. */
+  bucketUnit?: 'seconds' | 'milliseconds';
 }
 
 /** Reserved for P2. Shape fixed now so P0 SLOs don't need migration later. */
@@ -377,6 +391,8 @@ export type SloHealthState =
   | 'ok'
   | 'no_data'
   | 'source_idle'
+  /** The source metric has traffic, but the SLI can't be computed from it. */
+  | 'sli_uncomputable'
   | 'stale'
   | 'disabled'
   | 'rules_missing';

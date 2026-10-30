@@ -44,8 +44,10 @@
 import { i18n } from '@osd/i18n';
 import {
   DEFAULT_MWMBR_TIERS,
+  perRangeBoundsUnder,
   SLI_WINDOW_TOKEN,
 } from '../../../../../common/slo/slo_promql_generator';
+import type { HistogramShape } from './histogram_shape';
 import type { PromRule, PromRuleGroup } from '../../../../../common/types/alerting';
 import type {
   BurnRateConfig,
@@ -109,11 +111,26 @@ export interface ServiceDiscoveryInput {
    */
   emptyHistograms?: EmptyHistogram[];
   /**
+   * Bucket layout, bounds and unit of each latency histogram per service
+   * (see `histogram_shape.ts`). Latency drafts follow the layout and are
+   * skipped when the bounds can't measure their threshold.
+   */
+  histogramShapes?: HistogramShape[];
+  /**
    * Services that have server-side span-derived RED metrics. When provided,
    * APM drafts are only produced for these — others would sit at "No data".
    * Omit (undefined) when unknown.
    */
   spanDerivedServices?: string[];
+}
+
+/** A latency draft left out because its histogram can't measure the threshold. */
+export interface SkippedSuggestion {
+  key: string;
+  /** The draft's SLO name, e.g. "flagd — HTTP latency p95 < 500 ms". */
+  name: string;
+  /** Why it was left out, ready to show. */
+  reason: string;
 }
 
 /** A latency histogram whose buckets are empty for `label="value"`. */
@@ -909,6 +926,18 @@ function genAiDrafts(input: ServiceDiscoveryInput, out: Suggestion[]): void {
  * set so the UI can de-select them by default.
  */
 export function generateSuggestionsForServices(input: ServiceDiscoveryInput): Suggestion[] {
+  return generateSuggestionsWithSkips(input).suggestions;
+}
+
+/**
+ * {@link generateSuggestionsForServices}, plus the latency drafts it left out
+ * because the histogram's bucket bounds can't measure the threshold, so the
+ * page can say why they're missing.
+ */
+export function generateSuggestionsWithSkips(input: ServiceDiscoveryInput): {
+  suggestions: Suggestion[];
+  skipped: SkippedSuggestion[];
+} {
   const out: Suggestion[] = [];
   apmDrafts(input, out);
   httpDrafts(input, out);
@@ -917,7 +946,116 @@ export function generateSuggestionsForServices(input: ServiceDiscoveryInput): Su
   messagingDrafts(input, out);
   genAiDrafts(input, out);
   attachExistingRuleMatches(out, input.existingRuleGroups);
-  return dropEmptyHistogramDrafts(out, input.emptyHistograms);
+  return applyHistogramShapes(
+    dropEmptyHistogramDrafts(out, input.emptyHistograms),
+    input.histogramShapes
+  );
+}
+
+/**
+ * Fit each OTel latency draft to its histogram's probed shape:
+ *   - cumulative: keep the draft as is when a bucket sits exactly at the
+ *     threshold (in the probed unit); otherwise the SLI has no bucket to read.
+ *   - per_range: switch the SLI to the per-range math (sum of the buckets at
+ *     or under the threshold over `_count`) with the probed bounds and unit,
+ *     as long as some positive bound is at or under the threshold.
+ * Drafts with no usable bucket are skipped with a reason, never snapped to a
+ * different threshold. Unknown shapes leave the draft untouched.
+ */
+function applyHistogramShapes(
+  drafts: Suggestion[],
+  shapes: HistogramShape[] | undefined
+): { suggestions: Suggestion[]; skipped: SkippedSuggestion[] } {
+  if (!shapes || shapes.length === 0) return { suggestions: drafts, skipped: [] };
+  const byKey = new Map(shapes.map((sh) => [`${sh.metric}|${sh.label}|${sh.value}`, sh]));
+  const suggestions: Suggestion[] = [];
+  const skipped: SkippedSuggestion[] = [];
+  for (const draft of drafts) {
+    const spec = draft.input.spec;
+    const sli = spec.sli;
+    if (
+      sli.type !== 'single' ||
+      sli.definition.backend !== 'prometheus' ||
+      sli.definition.type !== 'latency_threshold'
+    ) {
+      suggestions.push(draft);
+      continue;
+    }
+    const def = sli.definition;
+    const shape = sli.dimensions
+      .map((dim) => byKey.get(`${def.metric ?? ''}|${dim.name}|${dim.value}`))
+      .find((sh): sh is HistogramShape => !!sh);
+    const objective = spec.objectives[0];
+    if (
+      !shape ||
+      (shape.layout !== 'cumulative' && shape.layout !== 'per_range') ||
+      typeof objective?.latencyThreshold !== 'number'
+    ) {
+      suggestions.push(draft);
+      continue;
+    }
+    const thresholdSeconds =
+      def.latencyThresholdUnit === 'milliseconds'
+        ? objective.latencyThreshold / 1000
+        : objective.latencyThreshold;
+    const thresholdInLe =
+      shape.unit === 'milliseconds' ? thresholdSeconds * 1000 : thresholdSeconds;
+    const usable =
+      shape.layout === 'cumulative'
+        ? shape.bounds.some((b) => Math.abs(b - thresholdInLe) <= 1e-9 * Math.max(1, b))
+        : perRangeBoundsUnder(shape.bounds, shape.unit, thresholdSeconds).some((b) => b > 0);
+    if (!usable) {
+      skipped.push({
+        key: draft.key,
+        name: spec.name,
+        reason: i18n.translate('observability.apm.slo.suggest.engine.boundsTooCoarse', {
+          defaultMessage:
+            "{metric} buckets ({bounds} {unit}) can't measure {threshold}, so this latency SLO wasn't suggested.",
+          values: {
+            metric: def.metric ?? '',
+            bounds: summarizeBounds(shape.bounds),
+            unit: shape.unit === 'milliseconds' ? 'ms' : 's',
+            threshold: formatThreshold(thresholdSeconds),
+          },
+        }),
+      });
+      continue;
+    }
+    if (shape.layout === 'cumulative') {
+      suggestions.push(draft);
+      continue;
+    }
+    suggestions.push({
+      ...draft,
+      input: {
+        ...draft.input,
+        spec: {
+          ...spec,
+          sli: {
+            ...sli,
+            definition: {
+              ...def,
+              bucketLayout: 'per_range',
+              bucketBounds: shape.bounds,
+              bucketUnit: shape.unit,
+            },
+          },
+        },
+      },
+    });
+  }
+  return { suggestions, skipped };
+}
+
+/** "0, 5, 10 … 10000" — the first few bounds and the last. */
+function summarizeBounds(bounds: number[]): string {
+  if (bounds.length <= 4) return bounds.join(', ');
+  return `${bounds.slice(0, 3).join(', ')} … ${bounds[bounds.length - 1]}`;
+}
+
+/** 0.5 → "500 ms", 2 → "2 s". */
+function formatThreshold(seconds: number): string {
+  return seconds < 1 ? `${Math.round(seconds * 1000)} ms` : `${seconds} s`;
 }
 
 /**

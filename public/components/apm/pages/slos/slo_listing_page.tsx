@@ -146,6 +146,7 @@ const SloHealthCell: React.FC<{ row: SloSummary }> = ({ row }) => {
   const isReporting =
     state !== 'no_data' &&
     state !== 'source_idle' &&
+    state !== 'sli_uncomputable' &&
     state !== 'stale' &&
     state !== 'disabled' &&
     state !== 'rules_missing';
@@ -300,6 +301,19 @@ function ruleBadgeSpecFor(state: SloHealthState): RuleBadgeSpec {
       color: 'warning',
       tooltip: i18n.translate('observability.apm.slo.listing.rulesBadge.noData.tooltip', {
         defaultMessage: 'Rule groups exist but no samples have arrived yet.',
+      }),
+    };
+  }
+  if (state === 'sli_uncomputable') {
+    return {
+      kind: 'no-data',
+      label: i18n.translate('observability.apm.slo.listing.rulesBadge.sliUncomputable.label', {
+        defaultMessage: "Can't compute",
+      }),
+      color: 'warning',
+      tooltip: i18n.translate('observability.apm.slo.listing.rulesBadge.sliUncomputable.tooltip', {
+        defaultMessage:
+          "The source metric is receiving traffic, but the SLI can't be computed from it — for example, its histogram buckets don't cover the latency threshold. Check the SLI definition.",
       }),
     };
   }

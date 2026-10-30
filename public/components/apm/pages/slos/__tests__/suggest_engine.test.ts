@@ -12,8 +12,10 @@ import type { PromRule, PromRuleGroup } from '../../../../../../common/types/ale
 import {
   generateSuggestionsForServices,
   generateSuggestionsFromServices,
+  generateSuggestionsWithSkips,
   metricsToProbe,
 } from '../suggest_engine';
+import type { HistogramShape } from '../histogram_shape';
 
 function getPromSli(
   sli: SingleSli | { type: string; definition?: { backend: string } }
@@ -489,6 +491,94 @@ describe('generateSuggestionsForServices — empty latency histograms', () => {
 
   it('keeps every draft when the probe found nothing', () => {
     expect(keys(generateSuggestionsForServices(base))).toContain('http-lat:flagd');
+  });
+});
+
+describe('generateSuggestionsWithSkips — histogram bucket shapes', () => {
+  const bucket = 'http_server_request_duration_seconds_bucket';
+  const count = 'http_server_request_duration_seconds_count';
+  const OTEL_MS_BOUNDS = [0, 5, 10, 25, 50, 75, 100, 250, 500, 750, 1000, 2500, 5000, 7500, 10000];
+  const base = {
+    datasourceId: 'prom-1',
+    services: [{ serviceName: 'flagd' }, { serviceName: 'cart' }],
+    metricNames: [bucket, count],
+    labelValuesByMetric: {
+      [bucket]: { service_name: ['flagd', 'cart'] },
+      [count]: { service_name: ['flagd', 'cart'] },
+    },
+  };
+  const shape = (value: string, extra: Partial<HistogramShape>): HistogramShape => ({
+    metric: bucket,
+    label: 'service_name',
+    value,
+    layout: 'cumulative',
+    bounds: [0.1, 0.5, 1],
+    unit: 'seconds',
+    ...extra,
+  });
+  const draft = (out: ReturnType<typeof generateSuggestionsWithSkips>, key: string) =>
+    out.suggestions.find((s) => s.key === key);
+
+  it('skips a latency draft whose seconds bounds are too coarse, with a reason', () => {
+    // The flagd shape: per-range, seconds, bounds 0, 5, 10 … — nothing under
+    // 500 ms except the 0 bound.
+    const out = generateSuggestionsWithSkips({
+      ...base,
+      histogramShapes: [
+        shape('flagd', { layout: 'per_range', bounds: OTEL_MS_BOUNDS, unit: 'seconds' }),
+      ],
+    });
+    expect(draft(out, 'http-lat:flagd')).toBeUndefined();
+    expect(draft(out, 'http-avail:flagd')).toBeDefined();
+    expect(out.skipped).toEqual([
+      expect.objectContaining({
+        key: 'http-lat:flagd',
+        name: 'flagd — HTTP latency p95 < 500 ms',
+        reason: expect.stringContaining("can't measure 500 ms"),
+      }),
+    ]);
+    expect(out.skipped[0].reason).toContain('0, 5, 10 … 10000 s');
+  });
+
+  it('builds a per-range draft when a bound at or under the threshold exists', () => {
+    const out = generateSuggestionsWithSkips({
+      ...base,
+      histogramShapes: [
+        shape('flagd', { layout: 'per_range', bounds: OTEL_MS_BOUNDS, unit: 'milliseconds' }),
+      ],
+    });
+    const def = getPromSli(getSpec(draft(out, 'http-lat:flagd')!.input).sli);
+    expect(def).toMatchObject({
+      bucketLayout: 'per_range',
+      bucketBounds: OTEL_MS_BOUNDS,
+      bucketUnit: 'milliseconds',
+    });
+    expect(out.skipped).toEqual([]);
+  });
+
+  it('leaves a cumulative draft byte-identical when the threshold bucket exists', () => {
+    const plain = generateSuggestionsForServices(base);
+    const out = generateSuggestionsWithSkips({ ...base, histogramShapes: [shape('cart', {})] });
+    expect(draft(out, 'http-lat:cart')).toEqual(plain.find((s) => s.key === 'http-lat:cart'));
+  });
+
+  it('skips a cumulative draft with no bucket at the threshold', () => {
+    const out = generateSuggestionsWithSkips({
+      ...base,
+      histogramShapes: [shape('cart', { bounds: [0.25, 1, 2.5] })],
+    });
+    expect(draft(out, 'http-lat:cart')).toBeUndefined();
+    expect(out.skipped.map((s) => s.key)).toEqual(['http-lat:cart']);
+  });
+
+  it('leaves drafts alone when the shape is unknown or missing', () => {
+    const plain = generateSuggestionsForServices(base);
+    const out = generateSuggestionsWithSkips({
+      ...base,
+      histogramShapes: [shape('flagd', { layout: 'unknown', bounds: [] })],
+    });
+    expect(out.suggestions).toEqual(plain);
+    expect(out.skipped).toEqual([]);
   });
 });
 

@@ -25,6 +25,7 @@ import { useEffect, useState } from 'react';
 import type { HttpStart } from '../../../../../../../src/core/public';
 import type { PromRuleGroup } from '../../../../../common/types/alerting';
 import type { EmptyHistogram, LabelValuesByMetric, MetricLabelValues } from './suggest_engine';
+import { buildHistogramShape, HistogramIncreases, HistogramShape } from './histogram_shape';
 
 interface OtelProbe {
   metric: string;
@@ -47,8 +48,8 @@ const SPAN_DERIVED_SERVER_SELECTOR =
 
 /**
  * OTel latency histograms and the labels their series are attributed by.
- * Probed for services whose buckets never recorded anything — see
- * `findEmptyHistograms`.
+ * Probed for each service's bucket layout, bounds and unit — see
+ * `probeHistogramShapes`.
  */
 const LATENCY_HISTOGRAMS: OtelProbe[] = [
   { metric: 'http_server_request_duration_seconds_bucket', labels: ['service_name', 'job'] },
@@ -65,6 +66,12 @@ export interface DiscoveryProbesResult {
    * computed. The engine skips latency drafts for these.
    */
   emptyHistograms: EmptyHistogram[];
+  /**
+   * Bucket layout, bounds and unit of each present latency histogram per
+   * service, so latency drafts use math the histogram can answer (or are
+   * skipped when its bounds can't measure the threshold).
+   */
+  histogramShapes: HistogramShape[];
   /**
    * Services with server-side span-derived RED metrics (`request` with
    * `remoteService=""`). A service can appear in the trace service list
@@ -99,6 +106,7 @@ export function useDiscoveryProbes({
   prometheusConnectionMeta,
 }: UseDiscoveryProbesArgs): DiscoveryProbesResult {
   const [emptyHistograms, setEmptyHistograms] = useState<EmptyHistogram[]>([]);
+  const [histogramShapes, setHistogramShapes] = useState<HistogramShape[]>([]);
   const [spanDerivedServices, setSpanDerivedServices] = useState<string[] | undefined>();
   const metaKey = JSON.stringify(prometheusConnectionMeta ?? null);
   const [metricNames, setMetricNames] = useState<string[]>([]);
@@ -110,6 +118,7 @@ export function useDiscoveryProbes({
   useEffect(() => {
     if (!datasourceId) {
       setEmptyHistograms([]);
+      setHistogramShapes([]);
       setSpanDerivedServices(undefined);
       setMetricNames([]);
       setLabelValuesByMetric({});
@@ -198,14 +207,19 @@ export function useDiscoveryProbes({
           labelsByMetric[metric] = existing;
           if (values.length > 0) presentMetrics.add(metric);
         }
-        const empty = await findEmptyHistograms(
+        const shapes = await probeHistogramShapes(
           http,
           datasourceId,
           prometheusConnectionMeta,
           LATENCY_HISTOGRAMS.filter((h) => presentMetrics.has(h.metric))
         );
         if (cancelled) return;
-        setEmptyHistograms(empty);
+        setHistogramShapes(shapes);
+        setEmptyHistograms(
+          shapes
+            .filter((shape) => shape.layout === 'empty')
+            .map(({ metric, label, value }) => ({ metric, label, value }))
+        );
         setSpanDerivedServices(spanServices);
         setMetricNames([...presentMetrics]);
         setLabelValuesByMetric(labelsByMetric);
@@ -225,6 +239,7 @@ export function useDiscoveryProbes({
 
   return {
     emptyHistograms,
+    histogramShapes,
     spanDerivedServices,
     metricNames,
     labelValuesByMetric,
@@ -235,52 +250,115 @@ export function useDiscoveryProbes({
 }
 
 /**
- * For each present latency histogram, find the (label, value) attributions
- * whose buckets recorded nothing over the last hour: `== 0` keeps only those
- * rows, so services without the metric at all never appear. Best effort — a
- * failed probe returns nothing and no draft is skipped.
+ * For each present latency histogram and attribution label, read an hour of
+ * bucket, `_count` and `_sum` increases per label value and derive the
+ * histogram's shape (layout, bounds, unit — see `histogram_shape.ts`). Two
+ * queries per (histogram, label). Best effort — a failed probe returns
+ * nothing for that pair, and its drafts are left as they are.
  */
-async function findEmptyHistograms(
+async function probeHistogramShapes(
   http: HttpStart,
   connectionId: string,
   meta: Record<string, unknown> | undefined,
   histograms: OtelProbe[]
-): Promise<EmptyHistogram[]> {
-  const queries = histograms.flatMap((h) =>
-    h.labels.map((label) => ({
-      metric: h.metric,
-      label,
-      // Every bucket series, not just `+Inf`: a series-wide sum is 0 only
-      // when no bucket recorded anything, whatever the bucket layout.
-      query: `sum by (${label}) (increase(${h.metric}[1h])) == 0`,
-    }))
-  );
+): Promise<HistogramShape[]> {
+  const run = async (query: string) => {
+    const res = await http.post<{ body?: unknown }>('/api/enhancements/search/promql', {
+      body: JSON.stringify({
+        query: {
+          query,
+          language: 'PROMQL',
+          dataset: { id: connectionId, type: 'PROMETHEUS', dataSource: { meta } },
+          format: 'jdbc',
+        },
+        timeRange: { from: 'now-5m', to: 'now' },
+      }),
+    });
+    return seriesFromFrame(res?.body ?? res);
+  };
   const results = await Promise.all(
-    queries.map(async ({ metric, label, query }) => {
-      try {
-        const res = await http.post<{ body?: unknown }>('/api/enhancements/search/promql', {
-          body: JSON.stringify({
-            query: {
-              query,
-              language: 'PROMQL',
-              dataset: { id: connectionId, type: 'PROMETHEUS', dataSource: { meta } },
-              format: 'jdbc',
-            },
-            timeRange: { from: 'now-5m', to: 'now' },
-          }),
-        });
-        return labelValuesFromFrame(res?.body ?? res, label).map((value) => ({
-          metric,
-          label,
-          value,
-        }));
-      } catch (err) {
-        console.warn('[slo-suggest] empty-histogram probe failed for', metric, label, err);
-        return [] as EmptyHistogram[];
-      }
-    })
+    histograms.flatMap((h) =>
+      h.labels.map(async (label) => {
+        const base = h.metric.replace(/_bucket$/, '');
+        try {
+          const [buckets, totals] = await Promise.all([
+            run(`sum by (${label}, le) (increase(${h.metric}[1h]))`),
+            run(
+              `label_replace(sum by (${label}) (increase(${base}_count[1h])), "${PROBE_PART}", "count", "", "")` +
+                ` or label_replace(sum by (${label}) (increase(${base}_sum[1h])), "${PROBE_PART}", "sum", "", "")`
+            ),
+          ]);
+          const byValue = new Map<string, HistogramIncreases>();
+          const entry = (value: string) => {
+            let inc = byValue.get(value);
+            if (!inc) byValue.set(value, (inc = { buckets: new Map() }));
+            return inc;
+          };
+          for (const row of buckets) {
+            const value = row.labels[label];
+            const le = row.labels.le;
+            if (value && le) entry(value).buckets.set(le, row.value);
+          }
+          for (const row of totals) {
+            const value = row.labels[label];
+            if (!value || !byValue.has(value)) continue;
+            if (row.labels[PROBE_PART] === 'count') entry(value).count = row.value;
+            if (row.labels[PROBE_PART] === 'sum') entry(value).sum = row.value;
+          }
+          return [...byValue].map(([value, inc]) =>
+            buildHistogramShape(h.metric, label, value, inc)
+          );
+        } catch (err) {
+          console.warn('[slo-suggest] histogram shape probe failed for', h.metric, label, err);
+          return [] as HistogramShape[];
+        }
+      })
+    )
   );
   return results.flat();
+}
+
+/** Label tagging which half of the `_count` / `_sum` probe a row came from. */
+const PROBE_PART = 'slo_probe_part';
+
+/**
+ * Every series in a PromQL search response with its labels and latest value
+ * — from the instant rows when present, else the last point of each series
+ * in the data frame. Non-finite values are skipped.
+ */
+export function seriesFromFrame(
+  body: unknown
+): Array<{ labels: Record<string, string>; value: number }> {
+  const b = body as {
+    fields?: Array<{ name: string; values: unknown[] }>;
+    meta?: { instantData?: { rows?: Array<Record<string, unknown>> } };
+  };
+  const out: Array<{ labels: Record<string, string>; value: number }> = [];
+  const rows = b?.meta?.instantData?.rows;
+  if (rows && rows.length > 0) {
+    for (const row of rows) {
+      const value = Number(row.Value);
+      if (!Number.isFinite(value)) continue;
+      const labels: Record<string, string> = {};
+      for (const [k, v] of Object.entries(row)) {
+        if (k !== 'Time' && k !== 'Metric' && k !== 'Value' && typeof v === 'string') {
+          labels[k] = v;
+        }
+      }
+      out.push({ labels, value });
+    }
+    return out;
+  }
+  const labelsCol = b?.fields?.find((f) => f.name === 'Labels')?.values ?? [];
+  const valueCol = b?.fields?.find((f) => f.name === 'Value')?.values ?? [];
+  const latest = new Map<string, { labels: Record<string, string>; value: number }>();
+  labelsCol.forEach((l, i) => {
+    const labels = (l ?? {}) as Record<string, string>;
+    const value = Number(valueCol[i]);
+    if (!Number.isFinite(value)) return;
+    latest.set(JSON.stringify(Object.entries(labels).sort()), { labels, value });
+  });
+  return [...latest.values()];
 }
 
 /** Pull one label's values out of a PromQL search response (data frame or instant rows). */

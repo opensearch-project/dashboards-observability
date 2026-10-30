@@ -62,6 +62,7 @@ import type {
 } from '../../../common/slo/slo_types';
 import {
   buildErrorRatioExpr,
+  buildSourceTrafficQuery,
   dedupRecordingRuleName,
   findClosestRecordingWindow,
   parseDurationToMs,
@@ -709,17 +710,29 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       }
     }
 
+    // A NaN SLI usually means the source had no traffic — but when the
+    // source metric did record observations, the SLI just can't be computed
+    // from it (e.g. histogram buckets that don't cover the threshold).
+    // Calling that "Source idle" would tell the user the service is quiet.
+    const uncomputable =
+      sourceIdleObjectives.size > 0 && (await this.sourceHasTraffic(doc, longWindow, ctx, ds));
+
     const staleAfterMs = 2 * parseDurationToMs(longWindow);
     const nowMs = Date.now();
     let lastEvalMs: number | undefined;
     let anyStale = false;
     let anyObjectiveHasData = false;
     let anyObjectiveSourceIdle = false;
+    let anyObjectiveUncomputable = false;
 
     const objectiveStatuses: ObjectiveStatus[] = spec.objectives.map((obj) => {
       const s = byObjective.get(obj.name);
       if (!s) {
         if (sourceIdleObjectives.has(obj.name)) {
+          if (uncomputable) {
+            anyObjectiveUncomputable = true;
+            return { ...sourceIdleObjectiveStatus(obj, doc), state: 'sli_uncomputable' as const };
+          }
           anyObjectiveSourceIdle = true;
           return sourceIdleObjectiveStatus(obj, doc);
         }
@@ -739,7 +752,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       anyStale,
       anyObjectiveHasData,
       objectiveStatuses,
-      anyObjectiveSourceIdle
+      anyObjectiveSourceIdle,
+      anyObjectiveUncomputable
     );
 
     return {
@@ -878,6 +892,41 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       else if (nonFiniteIndexes.has(i)) out.set(objective.name, null);
     });
     return out;
+  }
+
+  /**
+   * True when the SLI's source metric recorded observations over `window`.
+   * Only asked when an objective evaluated to NaN; SLI types whose NaN can
+   * only mean "no traffic" skip the query. Cached like the inline fallback.
+   * Never throws: a failed read answers false, keeping today's `source_idle`.
+   */
+  private async sourceHasTraffic(
+    doc: SloDocument,
+    window: string,
+    ctx: SloStatusAggregationContext,
+    ds: Datasource
+  ): Promise<boolean> {
+    if (doc.spec.sli.type !== 'single') return false;
+    const query = buildSourceTrafficQuery(doc.spec.sli, window);
+    if (!query) return false;
+    const cacheKey = `${ds.id}\u0000${query}`;
+    let parsed: ParsedInstantResponse;
+    const cached = this.inlineCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      parsed = cached.parsed;
+    } else {
+      try {
+        parsed = await this.queryInstant(ctx, ds, query);
+      } catch (err) {
+        this.logger.debug(
+          `StatusAggregator: source traffic read failed for ${doc.id}: ${errMsg(err)}`
+        );
+        return false;
+      }
+      if (this.inlineCache.size >= INLINE_CACHE_MAX_ENTRIES) this.inlineCache.clear();
+      this.inlineCache.set(cacheKey, { parsed, expiresAt: Date.now() + INLINE_CACHE_TTL_MS });
+    }
+    return parsed.samples.some((sample) => sample.value > 0);
   }
 
   // --------------------------------------------------------------------------
@@ -1086,10 +1135,14 @@ export function deriveTopLevelState(
   anyStale: boolean,
   anyObjectiveHasData: boolean,
   objectives: readonly ObjectiveStatus[],
-  anyObjectiveSourceIdle: boolean = false
+  anyObjectiveSourceIdle: boolean = false,
+  anyObjectiveUncomputable: boolean = false
 ): SloHealthState {
   if (!enabled) return 'disabled';
   if (anyStale) return 'stale';
+  // Traffic arrives but the SLI can't be computed: say so rather than
+  // "Source idle" / "No data", which point the user at the wrong place.
+  if (!anyObjectiveHasData && anyObjectiveUncomputable) return 'sli_uncomputable';
   // Distinguish "rule fired NaN/Inf because source metric is idle" from
   // "rule never ran". Both states show "no signal" on the listing, but the
   // source_idle case points users at the upstream metric/Data-Prepper
@@ -1101,6 +1154,8 @@ export function deriveTopLevelState(
     ok: 0,
     no_data: 1,
     source_idle: 1,
+    // A broken SLI on one objective outranks "no data yet" on another.
+    sli_uncomputable: 2,
     warning: 2,
     breached: 3,
     // rules_missing is never set per-objective (it's a top-level overlay

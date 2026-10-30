@@ -14,6 +14,9 @@ export const SLO_HEALTH_COLOR: Record<SloHealthState, string> = {
   // Same neutral color as no_data — both are "no signal yet". The label
   // and tooltip differentiate the two states; color alone shouldn't.
   source_idle: 'subdued',
+  // Traffic is arriving but the SLI can't be computed — a config problem the
+  // user has to act on, not a quiet source.
+  sli_uncomputable: 'warning',
   stale: 'subdued',
   disabled: 'default',
   // Broken rules are as bad as a breach — alerts can't fire when the rule group is gone.
@@ -26,6 +29,7 @@ export const SLO_HEALTH_ORDER: SloHealthState[] = [
   'warning',
   'ok',
   'no_data',
+  'sli_uncomputable',
   'source_idle',
   'stale',
   'disabled',
@@ -55,6 +59,9 @@ const SLO_HEALTH_LABEL: Record<SloHealthState, string> = {
   no_data: i18n.translate('observability.slo.state.label.noData', { defaultMessage: 'No data' }),
   source_idle: i18n.translate('observability.slo.state.label.sourceIdle', {
     defaultMessage: 'Source idle',
+  }),
+  sli_uncomputable: i18n.translate('observability.slo.state.label.sliUncomputable', {
+    defaultMessage: "Can't compute",
   }),
   stale: i18n.translate('observability.slo.state.label.stale', { defaultMessage: 'Stale' }),
   disabled: i18n.translate('observability.slo.state.label.disabled', {

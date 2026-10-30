@@ -160,6 +160,10 @@ const t = {
   currentSourceIdle: i18n.translate('observability.apm.serviceDetails.sloTab.current.sourceIdle', {
     defaultMessage: 'Source idle',
   }),
+  currentSliUncomputable: i18n.translate(
+    'observability.apm.serviceDetails.sloTab.current.sliUncomputable',
+    { defaultMessage: "Can't compute" }
+  ),
   currentStale: i18n.translate('observability.apm.serviceDetails.sloTab.current.stale', {
     defaultMessage: 'Stale',
   }),
@@ -187,6 +191,10 @@ const t = {
       source_idle: i18n.translate('observability.apm.serviceDetails.sloTab.state.sourceIdle', {
         defaultMessage: 'Source idle',
       }),
+      sli_uncomputable: i18n.translate(
+        'observability.apm.serviceDetails.sloTab.state.sliUncomputable',
+        { defaultMessage: "Can't compute" }
+      ),
       stale: i18n.translate('observability.apm.serviceDetails.sloTab.state.stale', {
         defaultMessage: 'Stale',
       }),
@@ -273,6 +281,7 @@ function worstTargetLabel(slo: SloSummary): string {
 function currentPlaceholderLabel(state: SloHealthState): string | null {
   if (state === 'no_data') return t.currentAwaitingData;
   if (state === 'source_idle') return t.currentSourceIdle;
+  if (state === 'sli_uncomputable') return t.currentSliUncomputable;
   if (state === 'stale') return t.currentStale;
   if (state === 'disabled') return t.currentDisabled;
   if (state === 'rules_missing') return t.currentRulesMissing;

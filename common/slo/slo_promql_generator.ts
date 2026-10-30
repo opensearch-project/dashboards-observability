@@ -319,6 +319,11 @@ function errorRatioExpr(sli: SingleSli, window: string, objective: Objective): s
  *     histograms whose `_seconds` name hides millisecond buckets.
  *   - latency_threshold, delta histogram (span-derived): good = every bucket
  *     with a bound <= threshold, total = `<metric>_count`.
+ *   - latency_threshold, `per_range` bucket layout (each bucket holds only its
+ *     own range, `+Inf` only the overflow): good = every discovered bucket
+ *     with a bound <= threshold, total = `<metric>_count`, read with
+ *     `rate`/`increase` since the buckets still grow over time. The bounds
+ *     and their unit come from the SLI, so no unit is guessed.
  *   - custom: the user's queries with `{{.window}}` substituted; the exact
  *     legacy instant span-derived draft/template shapes are upgraded to
  *     windowed sums.
@@ -369,16 +374,69 @@ export function buildSliEventQueries(
       total: over(`${ensureCountMetric(prom.metric || '')}{${joinMatchers(...dims)}}`),
     };
   }
+  if (prom.bucketLayout === 'per_range') {
+    const bounds = perRangeBoundsUnder(prom.bucketBounds ?? [], prom.bucketUnit, boundSeconds);
+    if (bounds.length === 0) return null;
+    const le = `le=~"${bounds.map(leValuePattern).join('|')}"`;
+    return {
+      good: `${over(`${bucketMetric}{${joinMatchers(...dims, le)}}`)} or vector(0)`,
+      total: over(`${ensureCountMetric(prom.metric || '')}{${joinMatchers(...dims)}}`),
+    };
+  }
+  const bucketAt = (le: number) =>
+    over(`${bucketMetric}{${joinMatchers(...dims, `le=~"${leValuePattern(le)}"`)}}`);
+  const inf = over(`${bucketMetric}{${joinMatchers(...dims, 'le="+Inf"')}}`);
+  // A known bucket unit reads the one bucket at the threshold, no guessing.
+  if (prom.bucketUnit) {
+    const le = prom.bucketUnit === 'milliseconds' ? boundSeconds * 1000 : boundSeconds;
+    return { good: bucketAt(le), total: inf };
+  }
   // Some producers export a millisecond histogram under a `_seconds` name
   // (bounds 5, 10, … 10000): there is no `le="0.5"` series, only `le="500"`.
   // Fall back to the bound scaled by 1000 — `or` only takes the right side
   // when the left is empty, so correctly scaled histograms are unaffected.
-  const bucketAt = (le: number) =>
-    over(`${bucketMetric}{${joinMatchers(...dims, `le=~"${leValuePattern(le)}"`)}}`);
+  // Kept for SLIs saved without a `bucketUnit`; suggestions only offer a
+  // cumulative draft when the threshold bucket exists in the probed unit.
   return {
     good: `(${bucketAt(boundSeconds)} or ${bucketAt(boundSeconds * 1000)})`,
-    total: over(`${bucketMetric}{${joinMatchers(...dims, 'le="+Inf"')}}`),
+    total: inf,
   };
+}
+
+/**
+ * The `bounds` (in `unit`) of a `per_range` histogram that sit at or under
+ * `thresholdSeconds`, sorted ascending. A tiny tolerance absorbs float noise
+ * from unit conversion (0.1 s → 100.00000000000001 ms).
+ */
+export function perRangeBoundsUnder(
+  bounds: readonly number[],
+  unit: 'seconds' | 'milliseconds' | undefined,
+  thresholdSeconds: number
+): number[] {
+  const threshold = unit === 'milliseconds' ? thresholdSeconds * 1000 : thresholdSeconds;
+  return [...new Set(bounds)]
+    .filter((b) => Number.isFinite(b) && b >= 0 && b <= threshold * (1 + 1e-9))
+    .sort((a, b) => a - b);
+}
+
+/**
+ * Traffic on the source metric of a `latency_threshold` SLI over `window` —
+ * the number of observations its histogram recorded (`<metric>_count`).
+ * Read when the SLI evaluates to NaN: a NaN with traffic means the SLI can't
+ * be computed from this metric, not that the source is idle. Null for SLI
+ * types whose NaN can only mean "no traffic".
+ */
+export function buildSourceTrafficQuery(sli: SingleSli, window: string): string | null {
+  const prom = sli.definition;
+  if (prom.backend !== 'prometheus' || prom.type !== 'latency_threshold' || !prom.metric) {
+    return null;
+  }
+  const selector = `${ensureCountMetric(prom.metric)}{${joinMatchers(
+    ...sli.dimensions.map((d) => `${d.name}="${escapeLabelValue(d.value)}"`)
+  )}}`;
+  return effectiveMetricTemporality(sli) === 'delta'
+    ? `sum(sum_over_time(${selector}[${window}]))`
+    : `sum(increase(${selector}[${window}]))`;
 }
 
 /**
