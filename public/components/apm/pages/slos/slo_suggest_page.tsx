@@ -663,7 +663,9 @@ export const SloSuggestPage: React.FC<SloSuggestPageProps> = ({
           // Selectable = not covered. Denominator for the master checkbox's
           // "all selected" state, so a partially-covered service can still reach
           // a fully-checked master box.
-          selectableCount: drafts.filter((s) => !isDraftCovered(s)).length,
+          selectableCount: drafts.filter(
+            (s) => !isDraftCovered(s) && latencyThresholdIssue(s) === null
+          ).length,
           totalRules: drafts.filter(creatable).reduce((acc, s) => acc + s.estimatedRuleCount, 0),
           // Union recording-rule + health-rollup coverage, matching the
           // page-level `coveredCount` and the default-unchecking in the seeding

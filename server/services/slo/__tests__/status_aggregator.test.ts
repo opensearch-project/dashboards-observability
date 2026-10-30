@@ -683,6 +683,50 @@ describe('DirectQueryStatusAggregator.aggregate — SLI uncomputable', () => {
       };
     };
 
+  // Recorded sample and inline evaluation both EMPTY (no series): a
+  // cumulative histogram with no bucket at the threshold selects nothing.
+  const respondEmpty = (traffic: string, inf: string) => (body: unknown) => {
+    const text = JSON.stringify(body);
+    if (text.includes('slo_traffic_part')) {
+      const at = Date.now() / 1000;
+      return {
+        resultType: 'vector',
+        result: [
+          { metric: { slo_traffic_part: 'count' }, value: [at, traffic] },
+          { metric: { slo_traffic_part: 'inf' }, value: [at, inf] },
+        ],
+      };
+    }
+    return { resultType: 'vector', result: [] };
+  };
+
+  it('an empty latency SLI with traffic → sli_uncomputable / no_threshold_bucket, not no_data', async () => {
+    const { client } = mockClient({ query: respondEmpty('6400', '6400') });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([latencyDoc()], ctxFor(promDatasource(), client));
+    expect(status.objectives[0].state).toBe('sli_uncomputable');
+    expect(status.objectives[0].uncomputable).toEqual({ cause: 'no_threshold_bucket' });
+    expect(status.state).toBe('sli_uncomputable');
+  });
+
+  it('an empty latency SLI with no traffic stays no_data', async () => {
+    const { client } = mockClient({ query: respondEmpty('0', '0') });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([latencyDoc()], ctxFor(promDatasource(), client));
+    expect(status.state).toBe('no_data');
+  });
+
+  it('an empty availability SLI never asks for traffic and stays no_data', async () => {
+    const { client, searcherMock } = mockClient({
+      query: () => ({ resultType: 'vector', result: [] }),
+    });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([makeDoc()], ctxFor(promDatasource(), client));
+    expect(status.state).toBe('no_data');
+    const queries = searcherMock.mock.calls.map(([, req]) => JSON.stringify(req));
+    expect(queries.some((q) => q.includes('slo_traffic_part'))).toBe(false);
+  });
+
   it('NaN SLI while the source _count grows → sli_uncomputable, not source_idle', async () => {
     const { client } = mockClient({ query: respond('6400') });
     const agg = new DirectQueryStatusAggregator(noopLogger());

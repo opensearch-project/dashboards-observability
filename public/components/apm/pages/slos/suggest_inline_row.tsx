@@ -101,7 +101,11 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
   // Only saved-object coverage disables the checkbox. Disabling here (not just
   // filtering at create time) keeps the checkbox, the counts, and the actual
   // create in agreement.
-  const disableCheckbox = rowStatus === 'creating' || rowStatus === 'success' || isCovered;
+  // A threshold the histogram can't measure keeps the draft out of Create, so
+  // its checkbox reads unchecked and locked until the threshold is fixed (the
+  // selection itself is kept, so a fixed threshold re-checks it).
+  const disableCheckbox =
+    rowStatus === 'creating' || rowStatus === 'success' || isCovered || !!thresholdIssue;
 
   const coveredTooltip = i18n.translate(
     'observability.apm.slo.suggest.inlineRow.coveredHealthTooltip',
@@ -167,7 +171,7 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
           ) : (
             <EuiCheckbox
               id={`slosSuggestSelect-${suggestion.key}`}
-              checked={selected}
+              checked={selected && !thresholdIssue}
               onChange={onToggle}
               disabled={disableCheckbox}
               data-test-subj={`slosSuggestSelect-${suggestion.key}`}

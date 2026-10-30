@@ -242,6 +242,13 @@ describe('SuggestionInlineRow', () => {
     expect(
       screen.getByText('No histogram bucket at 250 ms. Use one of: 0.1, 0.5, 1 s.')
     ).toBeInTheDocument();
+    // Excluded from Create, so the checkbox reads unchecked and locked.
+    const checkbox = screen.getByTestId('slosSuggestSelect-http-lat:cart') as HTMLInputElement;
+    expect(checkbox.checked).toBe(false);
+    expect(checkbox.disabled).toBe(true);
+    rerender(<SuggestionInlineRow suggestion={latencyDraft(0.5)} {...props} />);
+    const fixed = screen.getByTestId('slosSuggestSelect-http-lat:cart') as HTMLInputElement;
+    expect(fixed.checked).toBe(true);
   });
 
   it('forwards override changes via onOverrideChange', () => {

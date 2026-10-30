@@ -712,12 +712,26 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       }
     }
 
-    // A NaN SLI usually means the source had no traffic — but when the
-    // source metric did record observations, the SLI just can't be computed
-    // from it (e.g. histogram buckets that don't cover the threshold).
-    // Calling that "Source idle" would tell the user the service is quiet.
+    // A latency SLI whose direct evaluation came back empty (not NaN) has no
+    // series on its good side — the classic case being a cumulative histogram
+    // with no bucket at the threshold, where the `le` matcher selects nothing.
+    // Without a diagnosis it would read "No data" while traffic flows.
+    const def = spec.sli.type === 'single' ? spec.sli.definition : undefined;
+    const emptyLatencyObjectives = new Set(
+      def?.backend === 'prometheus' && def.type === 'latency_threshold'
+        ? unresolved
+            .filter((o) => !byObjective.has(o.name) && !sourceIdleObjectives.has(o.name))
+            .map((o) => o.name)
+        : []
+    );
+
+    // A NaN (or, for latency, empty) SLI usually means the source had no
+    // traffic — but when the source metric did record observations, the SLI
+    // just can't be computed from it (e.g. histogram buckets that don't cover
+    // the threshold). Calling that "Source idle" / "No data" would tell the
+    // user the service is quiet.
     const uncomputable =
-      sourceIdleObjectives.size > 0
+      sourceIdleObjectives.size > 0 || emptyLatencyObjectives.size > 0
         ? await this.diagnoseUncomputable(doc, longWindow, ctx, ds)
         : null;
 
@@ -743,6 +757,14 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
           }
           anyObjectiveSourceIdle = true;
           return sourceIdleObjectiveStatus(obj, doc);
+        }
+        if (uncomputable && emptyLatencyObjectives.has(obj.name)) {
+          anyObjectiveUncomputable = true;
+          return {
+            ...emptyObjectiveStatus(obj, doc),
+            state: 'sli_uncomputable' as const,
+            uncomputable,
+          };
         }
         return emptyObjectiveStatus(obj, doc);
       }
