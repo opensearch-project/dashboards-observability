@@ -428,9 +428,6 @@ export interface ObjectiveStatus {
  */
 export interface SliUncomputableReason {
   cause: 'buckets_not_cumulative' | 'no_threshold_bucket';
-  /** Observations the source recorded over `window`. */
-  observations: number;
-  window: string;
 }
 
 export interface SloLiveStatus {

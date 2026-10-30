@@ -947,8 +947,6 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         inf !== undefined && inf <= 0.05 * observations
           ? 'buckets_not_cumulative'
           : 'no_threshold_bucket',
-      observations: Math.round(observations),
-      window,
     };
   }
 

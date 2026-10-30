@@ -678,11 +678,7 @@ describe('DirectQueryStatusAggregator.aggregate — SLI uncomputable', () => {
     expect(status.objectives[0].state).toBe('sli_uncomputable');
     expect(status.state).toBe('sli_uncomputable');
     // +Inf stayed flat while _count grew: the buckets don't accumulate.
-    expect(status.objectives[0].uncomputable).toEqual({
-      cause: 'buckets_not_cumulative',
-      observations: 6400,
-      window: '3d',
-    });
+    expect(status.objectives[0].uncomputable).toEqual({ cause: 'buckets_not_cumulative' });
   });
 
   it('a growing +Inf bucket means there is no bucket at the threshold', async () => {

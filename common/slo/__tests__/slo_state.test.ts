@@ -103,26 +103,27 @@ describe('slo state helpers', () => {
       objectives: [
         {
           state: 'sli_uncomputable' as const,
-          uncomputable: cause ? { cause, observations: 12345, window: '3d' } : undefined,
+          uncomputable: cause ? { cause } : undefined,
         },
       ],
     });
 
     it('explains a histogram whose buckets do not accumulate', () => {
-      const text = getSliUncomputableExplanation(status('buckets_not_cumulative'));
-      expect(text).toContain('12,345 observations in the last 3d');
-      expect(text).toContain("+Inf bucket didn't grow");
-      expect(text).toContain('Suggest SLOs');
+      expect(getSliUncomputableExplanation(status('buckets_not_cumulative'))).toBe(
+        "The histogram's buckets don't accumulate, so latency can't be calculated."
+      );
     });
 
     it('explains a histogram with no bucket at the threshold', () => {
-      expect(getSliUncomputableExplanation(status('no_threshold_bucket'))).toContain(
-        'no bucket this SLI can read at the latency threshold'
+      expect(getSliUncomputableExplanation(status('no_threshold_bucket'))).toBe(
+        'The histogram has no bucket at the latency threshold.'
       );
     });
 
     it('falls back to a generic reason, and is undefined for other states', () => {
-      expect(getSliUncomputableExplanation(status())).toContain("this SLI can't be computed");
+      expect(getSliUncomputableExplanation(status())).toBe(
+        "The source metric has data, but this SLI can't be calculated from it."
+      );
       expect(getSliUncomputableExplanation({ state: 'source_idle' })).toBeUndefined();
     });
   });
