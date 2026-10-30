@@ -24,6 +24,7 @@ import {
   EuiButtonEmpty,
   EuiDescriptionList,
   EuiAccordion,
+  EuiCallOut,
   EuiCodeBlock,
   EuiLink,
   EuiLoadingContent,
@@ -36,7 +37,12 @@ import { coreRefs } from '../../framework/core_refs';
 import { AnomalyDetailContent } from './anomaly_detail_flyout';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { LinkifyAnnotation } from './linkify_annotation';
-import { canAcknowledgeAlert, SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
+import {
+  canAcknowledgeAlert,
+  formatDatasourceType,
+  SEVERITY_COLORS,
+  STATE_COLORS,
+} from './shared_constants';
 import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
 import { formatTimestamp } from './time_format';
 
@@ -52,10 +58,18 @@ const INTERNAL_LABEL_KEYS = new Set([
   'datasource_type',
 ]);
 
+/**
+ * Whether the rule behind an alert is in the loaded rules list. `unknown` when
+ * the page can't tell — the list is still loading, failed, or was truncated
+ * for the alert's datasource, or the alert has no monitor id.
+ */
+export type SourceRuleStatus = 'exists' | 'missing' | 'unknown';
+
 export interface AlertDetailFlyoutProps {
   alert: UnifiedAlertSummary;
   datasources: Datasource[];
   allAlerts?: UnifiedAlertSummary[];
+  sourceRuleStatus?: SourceRuleStatus;
   onClose: () => void;
   onAcknowledge: (alertId: string) => void;
 }
@@ -64,6 +78,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   alert,
   datasources,
   allAlerts = [],
+  sourceRuleStatus = 'unknown',
   onClose,
   onAcknowledge,
 }) => {
@@ -230,10 +245,57 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
         defaultMessage: 'Source rule',
       });
 
+  // An alert can outlive its rule: OpenSearch keeps an alert whose monitor or
+  // trigger was deleted (state `deleted`), and an old alert can point at a
+  // monitor that's gone. Opening the rule would land on an empty Rules tab, so
+  // say what happened instead and drop the link when the monitor is gone.
+  const monitorMissing = !sloId && sourceRuleStatus === 'missing';
+  const deletedNotice = (() => {
+    const monitorName = labelRecord?.monitor_name ?? labelRecord?.monitor_id;
+    if (monitorMissing) {
+      return {
+        title: i18n.translate('observability.alerting.alertDetailFlyout.monitorDeletedTitle', {
+          defaultMessage: 'The monitor for this alert no longer exists',
+        }),
+        body: i18n.translate('observability.alerting.alertDetailFlyout.monitorDeletedBody', {
+          defaultMessage:
+            'The monitor "{monitorName}" was deleted, so there is no rule to open and this alert can\'t be acknowledged. The alert is kept for history.',
+          values: { monitorName: monitorName ?? EMPTY_VALUE },
+        }),
+      };
+    }
+    if (alert.state !== 'deleted') return undefined;
+    if (sourceRuleStatus === 'exists') {
+      return {
+        title: i18n.translate('observability.alerting.alertDetailFlyout.triggerDeletedTitle', {
+          defaultMessage: 'The trigger for this alert was deleted',
+        }),
+        body: i18n.translate('observability.alerting.alertDetailFlyout.triggerDeletedBody', {
+          defaultMessage:
+            'The trigger "{triggerName}" was removed from the monitor "{monitorName}", so this alert no longer fires and can\'t be acknowledged. The monitor still exists.',
+          values: {
+            triggerName: labelRecord?.trigger_name ?? EMPTY_VALUE,
+            monitorName: monitorName ?? EMPTY_VALUE,
+          },
+        }),
+      };
+    }
+    return {
+      title: i18n.translate('observability.alerting.alertDetailFlyout.ruleDeletedTitle', {
+        defaultMessage: 'The rule for this alert was deleted',
+      }),
+      body: i18n.translate('observability.alerting.alertDetailFlyout.ruleDeletedBody', {
+        defaultMessage:
+          "The monitor or trigger that created this alert was deleted while the alert was open, so it no longer fires and can't be acknowledged. The alert is kept for history.",
+      }),
+    };
+  })();
+  const openableSourceLink = monitorMissing ? undefined : sourceLink;
+
   const navigateToSource = () => {
-    if (!sourceLink) return;
+    if (!openableSourceLink) return;
     onClose();
-    if (sourceLink.appId) {
+    if (openableSourceLink.appId) {
       // Cross-app navigation: the SLO detail page lives in a different OSD
       // application than the alerting app, so go through
       // `application.navigateToApp` to switch apps (workspace-aware), then
@@ -243,7 +305,9 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
       // it fires after the target app has mounted, not while the source app's
       // router is still active (dispatching synchronously races both routers).
       Promise.resolve(
-        coreRefs?.application?.navigateToApp(sourceLink.appId, { path: sourceLink.path })
+        coreRefs?.application?.navigateToApp(openableSourceLink.appId, {
+          path: openableSourceLink.path,
+        })
       ).then(() => window.dispatchEvent(new HashChangeEvent('hashchange')));
       return;
     }
@@ -251,7 +315,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     // hashchange event so the AlarmsPage listener picks it up. Setting
     // window.location.hash alone doesn't fire the event when called
     // programmatically from within the same page.
-    window.location.hash = sourceLink.path;
+    window.location.hash = openableSourceLink.path;
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   };
 
@@ -293,7 +357,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
               {/* S-m8: Datasource type badge for visual distinction */}
               <EuiFlexItem grow={false}>
                 <EuiBadge color={alert.datasourceType === 'opensearch' ? 'primary' : 'accent'}>
-                  {alert.datasourceType === 'opensearch' ? 'OpenSearch' : 'Prometheus'}
+                  {formatDatasourceType(alert.datasourceType)}
                 </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -310,7 +374,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                   {getSeverityLabel(alert.severity)}
                 </EuiBadge>
               </EuiFlexItem>
-              {sourceLink && (
+              {openableSourceLink && (
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     size="s"
@@ -342,6 +406,20 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {deletedNotice && (
+          <>
+            <EuiCallOut
+              title={deletedNotice.title}
+              color="warning"
+              iconType="alert"
+              size="s"
+              data-test-subj="alertDetailRuleDeletedCallout"
+            >
+              <p>{deletedNotice.body}</p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
         {/* Alert Details */}
         <EuiAccordion
           id={`alertDetails-${alert.id}`}
@@ -382,7 +460,9 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 title: i18n.translate('observability.alerting.alertDetailFlyout.backend', {
                   defaultMessage: 'Backend',
                 }),
-                description: alert.datasourceType || EMPTY_VALUE,
+                description: alert.datasourceType
+                  ? formatDatasourceType(alert.datasourceType)
+                  : EMPTY_VALUE,
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.datasource', {
@@ -415,13 +495,23 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 ? [
                     {
                       title: sourceRowTitle,
-                      description: (
+                      description: openableSourceLink ? (
                         <EuiLink
                           onClick={navigateToSource}
                           data-test-subj="alertDetailSourceRuleLink"
                         >
                           {sourceDisplayName}
                         </EuiLink>
+                      ) : (
+                        <span data-test-subj="alertDetailSourceRuleDeleted">
+                          {i18n.translate(
+                            'observability.alerting.alertDetailFlyout.sourceRuleDeleted',
+                            {
+                              defaultMessage: '{name} (deleted)',
+                              values: { name: sourceDisplayName },
+                            }
+                          )}
+                        </span>
                       ),
                     },
                   ]

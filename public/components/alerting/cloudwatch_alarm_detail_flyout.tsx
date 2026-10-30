@@ -66,7 +66,12 @@ import { useCloudWatchAlarmDetail } from './hooks/use_cloudwatch_alarm_detail';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { SEVERITY_COLORS } from './shared_constants';
 import { formatTimestamp, localizeTimestampsInText } from './time_format';
-import { getSeverityLabel, getStateLabel } from './enum_labels';
+import {
+  getCloudWatchStateLabel,
+  getMonitorStateLabel,
+  getSeverityLabel,
+  getStateLabel,
+} from './enum_labels';
 import {
   AlarmTimeWindow,
   defaultAlarmTimeWindow,
@@ -476,7 +481,9 @@ function segmentTooltip(seg: TimelineSegment): string {
       : span.hours() > 0
         ? `${span.hours()}h ${span.minutes()}m`
         : `${Math.max(1, span.minutes())}m`;
-  return `${seg.state} · ${axisLabel(seg.start)} → ${axisLabel(seg.end)} (${length})`;
+  return `${getCloudWatchStateLabel(seg.state)} · ${axisLabel(seg.start)} → ${axisLabel(
+    seg.end
+  )} (${length})`;
 }
 
 export const StateTimeline: React.FC<{
@@ -539,7 +546,7 @@ export const StateTimeline: React.FC<{
     },
     yAxis: { type: 'category', data: [''], show: false },
     series: segments.map((seg) => ({
-      name: seg.state,
+      name: getCloudWatchStateLabel(seg.state),
       type: 'bar' as const,
       stack: 'timeline',
       barWidth: 16,
@@ -640,7 +647,11 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
               defaultMessage: 'CloudWatch state',
             })}
           </EuiTextColor>{' '}
-          {state ? <EuiBadge color={STATE_HEALTH[state]}>{state}</EuiBadge> : '—'}
+          {state ? (
+            <EuiBadge color={STATE_HEALTH[state]}>{getCloudWatchStateLabel(state)}</EuiBadge>
+          ) : (
+            '—'
+          )}
         </EuiFlexItem>
         {cw?.accountId && (
           <EuiFlexItem grow={false}>
@@ -716,7 +727,7 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
                       ? getStateLabel('active')
                       : state === 'INSUFFICIENT_DATA'
                         ? getStateLabel('insufficient_data')
-                        : 'OK'}
+                        : getMonitorStateLabel('ok')}
                   </EuiHealth>
                 </EuiFlexItem>
               )}
@@ -916,7 +927,8 @@ export function renderStateHistory(
             {(h.oldState || h.newState) && (
               <EuiFlexItem grow={false}>
                 <strong>
-                  {h.oldState || '—'} → {h.newState || '—'}
+                  {h.oldState ? getCloudWatchStateLabel(h.oldState) : '—'} →{' '}
+                  {h.newState ? getCloudWatchStateLabel(h.newState) : '—'}
                 </strong>
               </EuiFlexItem>
             )}

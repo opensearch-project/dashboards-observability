@@ -15,6 +15,7 @@
 import React, { useMemo } from 'react';
 import {
   EuiButton,
+  EuiCode,
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -186,6 +187,12 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   onToggleEnabled,
   rulesTime,
 }) => {
+  // A `monitor_id:<id>` search is what an alert's "Open rule" link and old
+  // bookmarks put in the box. When it matches nothing (and no other filter is
+  // narrowing the list), the monitor is gone — say so instead of the generic
+  // "no rules match" copy.
+  const linkedMonitorId =
+    activeFilterCount === 0 ? /^monitor_id:(\S+)$/i.exec(searchQuery.trim())?.[1] : undefined;
   const selectedRules = filtered.filter((rule) => selectedIds.has(rule.id));
   const selectedAdResources = selectedRules.filter(
     (rule) => isDetectorDefinition(rule) || isForecasterDefinition(rule)
@@ -688,12 +695,20 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
         >
           {!loading && filtered.length === 0 ? (
             <EuiEmptyPrompt
+              data-test-subj={
+                linkedMonitorId ? 'monitorsTableLinkedRuleMissing' : 'monitorsTableEmptyPrompt'
+              }
               title={
                 <h2>
                   {noDatasourceSelected ? (
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.noDatasourceSelectedTitle"
                       defaultMessage="No datasource selected"
+                    />
+                  ) : linkedMonitorId ? (
+                    <FormattedMessage
+                      id="observability.alerting.monitorsTable.mainPanel.linkedRuleMissingTitle"
+                      defaultMessage="This rule no longer exists"
                     />
                   ) : (
                     <FormattedMessage
@@ -717,6 +732,12 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
                     <FormattedMessage
                       id="observability.alerting.monitorsTable.mainPanel.selectDatasourcePrompt"
                       defaultMessage="Select a datasource in the filter panel to see rules."
+                    />
+                  ) : linkedMonitorId ? (
+                    <FormattedMessage
+                      id="observability.alerting.monitorsTable.mainPanel.linkedRuleMissingBody"
+                      defaultMessage="No rule on the selected datasources has monitor ID {monitorId}. The monitor was probably deleted; its alerts are kept for history."
+                      values={{ monitorId: <EuiCode>{linkedMonitorId}</EuiCode> }}
                     />
                   ) : rules.length === 0 ? (
                     <FormattedMessage

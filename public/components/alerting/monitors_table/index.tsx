@@ -86,6 +86,10 @@ interface MonitorsTableProps {
    * without typing it. Empty / undefined leaves the box blank.
    */
   initialSearchQuery?: string;
+  /** Changes on every inbound deep link, so the same query re-applies. */
+  initialSearchQueryKey?: number;
+  /** Called when the user changes the search (typing, clearing, a suggestion, a saved search). */
+  onInitialSearchQueryEdited?: () => void;
 }
 
 // ============================================================================
@@ -114,19 +118,31 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   onDatasourceCapReached,
   datasourceErrorMap,
   initialSearchQuery,
+  initialSearchQueryKey,
+  onInitialSearchQueryEdited,
 }) => {
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
-  // Re-seed the search box whenever the parent supplies a fresh
-  // `initialSearchQuery`. The page propagates a hashchange-driven
-  // `deepLink.q` into this prop so cross-tab deep-links from inside the
-  // alerting app (alert-flyout "Open monitor" — BUG-14) update the
-  // filter live. Falsy values (empty string / undefined) don't clobber
-  // the user's typed query — only an actual deep-link update overrides.
+  const [searchQuery, setSearchQueryState] = useState(initialSearchQuery ?? '');
+  // Re-seed the search box whenever the parent supplies a fresh deep link.
+  // The page propagates a hashchange-driven `deepLink.q` into this prop so
+  // cross-tab deep-links from inside the alerting app (alert-flyout "Open
+  // rule" — BUG-14) update the filter live; the key re-applies a link even
+  // when its query matches the last one. Falsy values (empty string /
+  // undefined) don't clobber the user's typed query — only an actual
+  // deep-link update overrides.
   useEffect(() => {
     if (initialSearchQuery && initialSearchQuery.trim() !== '') {
-      setSearchQuery(initialSearchQuery);
+      setSearchQueryState(initialSearchQuery);
     }
-  }, [initialSearchQuery]);
+  }, [initialSearchQuery, initialSearchQueryKey]);
+  // Every user-driven change goes through here, so the page can drop a
+  // deep link's query from the URL once the user has replaced it.
+  const setSearchQuery = useCallback<React.Dispatch<React.SetStateAction<string>>>(
+    (value) => {
+      setSearchQueryState(value);
+      onInitialSearchQueryEdited?.();
+    },
+    [onInitialSearchQueryEdited]
+  );
   const [filters, setFilters] = useState<FilterState>(emptyFilters());
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);

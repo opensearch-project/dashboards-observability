@@ -94,7 +94,7 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
   it('shows the current state when the window ends now', () => {
     const { getByText } = cell('status');
     expect(getByText('Active')).toBeInTheDocument();
-    expect(getByText('CW: ALARM')).toBeInTheDocument();
+    expect(getByText('CW: In alarm')).toBeInTheDocument();
   });
 
   it('shows the state at the window end in Status and Health', () => {
@@ -105,7 +105,7 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
     };
     const status = cell('status', () => at);
     expect(status.getByText('Insufficient data')).toBeInTheDocument();
-    expect(status.getByText('CW: INSUFFICIENT_DATA')).toBeInTheDocument();
+    expect(status.getByText('CW: Insufficient data')).toBeInTheDocument();
     expect(status.getByTestId('cloudWatchStatusAtWindowEnd')).toBeInTheDocument();
     status.unmount();
     expect(cell('healthStatus', () => at).getByText('No data')).toBeInTheDocument();
@@ -117,7 +117,7 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
     expect(status.getByTestId('cloudWatchStatusUnknownAtWindowEnd')).toHaveTextContent(
       'No history'
     );
-    expect(status.queryByText('CW: ALARM')).toBeNull();
+    expect(status.queryByText('CW: In alarm')).toBeNull();
     status.unmount();
     expect(cell('healthStatus', () => at).getByText('—')).toBeInTheDocument();
   });

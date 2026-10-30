@@ -73,7 +73,13 @@ jest.mock('../create_metrics_monitor', () => ({
   },
 }));
 jest.mock('../create_monitor/edit_monitor', () => ({ EditMonitor: () => null }));
-jest.mock('../alert_detail_flyout', () => ({ AlertDetailFlyout: () => null }));
+const mockAlertFlyout = jest.fn();
+jest.mock('../alert_detail_flyout', () => ({
+  AlertDetailFlyout: (props: unknown) => {
+    mockAlertFlyout(props);
+    return null;
+  },
+}));
 
 const mockGetRuleDetail = jest.fn();
 jest.mock('../query_services/alerting_opensearch_service', () => ({
@@ -123,6 +129,7 @@ const emptyRulesHookResult = {
   isLoading: false,
   error: null,
   warnings: [],
+  truncatedDatasourceNames: [],
   setRules: jest.fn(),
   setRulesTotal: jest.fn(),
   refetch: jest.fn(),
@@ -932,6 +939,102 @@ describe('AlarmsPage', () => {
     fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
     expect(window.history.length).toBe(lengthAfterFirstClick);
     expect(window.location.hash).toBe('#/rules');
+  });
+});
+
+describe('AlarmsPage deep links', () => {
+  const lastProps = (mock: jest.Mock) => mock.mock.calls[mock.mock.calls.length - 1][0];
+
+  it("seeds only the linked tab's search and drops it after a tab click", async () => {
+    window.history.replaceState(null, '', '#/rules?q=monitor_id%3Amon-1');
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    expect(lastProps(mockMonitorsTable).initialSearchQuery).toBe('monitor_id:mon-1');
+
+    // The Rules link must not leak into the Alerts tab…
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-alerts'));
+    });
+    expect(lastProps(mockDashboard).initialSearchQuery).toBeUndefined();
+    expect(window.location.hash).toBe('#/alerts');
+
+    // …or come back when the user returns to Rules.
+    mockMonitorsTable.mockClear();
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    });
+    expect(lastProps(mockMonitorsTable).initialSearchQuery).toBeUndefined();
+    expect(window.location.hash).toBe('#/rules');
+  });
+
+  it('re-applies a repeated link with a new key', async () => {
+    window.history.replaceState(null, '', '#/rules?q=CheckoutErrors');
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    const firstKey = lastProps(mockMonitorsTable).initialSearchQueryKey;
+    await act(async () => {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    });
+    const next = lastProps(mockMonitorsTable);
+    expect(next.initialSearchQuery).toBe('CheckoutErrors');
+    expect(next.initialSearchQueryKey).not.toBe(firstKey);
+  });
+
+  it("drops the link's query from the URL once the user edits the search", async () => {
+    window.history.replaceState(null, '', '#/rules?q=monitor_id%3Amon-1&ds=ds-1');
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    await act(async () => {
+      lastProps(mockMonitorsTable).onInitialSearchQueryEdited();
+    });
+    expect(window.location.hash).toBe('#/rules');
+  });
+
+  it("tells the alert flyout whether the alert's monitor still exists", async () => {
+    const datasources = [
+      { id: 'ds-os', name: 'local', type: 'opensearch', url: '', enabled: true },
+    ] as Datasource[];
+    const alert = {
+      id: 'a1',
+      datasourceId: 'ds-os',
+      datasourceType: 'opensearch',
+      name: 'Gone — t',
+      state: 'deleted',
+      severity: 'high',
+      startTime: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      labels: { monitor_id: 'mon-gone' },
+      annotations: {},
+      monitorId: 'mon-gone',
+    };
+    mockUseRulesData.mockReturnValue({
+      ...emptyRulesHookResult,
+      rules: [{ id: 'mon-live', name: 'Live', datasourceId: 'ds-os' }] as unknown as never,
+    });
+    await act(async () => {
+      render(
+        <AlarmsPage {...defaultProps} datasources={datasources} defaultDatasources={['ds-os']} />
+      );
+    });
+    mockAlertFlyout.mockClear();
+    await act(async () => {
+      lastProps(mockDashboard).onViewDetail(alert);
+    });
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('missing');
+
+    mockAlertFlyout.mockClear();
+    await act(async () => {
+      lastProps(mockDashboard).onViewDetail({
+        ...alert,
+        id: 'a2',
+        monitorId: 'mon-live',
+        labels: { monitor_id: 'mon-live' },
+      });
+    });
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('exists');
   });
 });
 

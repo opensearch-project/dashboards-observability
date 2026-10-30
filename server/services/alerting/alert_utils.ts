@@ -267,6 +267,10 @@ export function osStateToUnified(state: string): UnifiedAlertState {
       return 'resolved';
     case 'ERROR':
       return 'error';
+    // The monitor or trigger behind the alert was deleted while it was open.
+    // Not `active`: it no longer fires and can't be acknowledged.
+    case 'DELETED':
+      return 'deleted';
     default:
       return 'active';
   }

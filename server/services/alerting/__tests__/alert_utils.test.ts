@@ -247,6 +247,18 @@ describe('osAlertToUnified', () => {
     expect(u.datasourceId).toBe('ds-os');
     expect(u.datasourceType).toBe('opensearch');
   });
+
+  it('maps each OpenSearch alert state, keeping a deleted-monitor alert out of active', () => {
+    const stateOf = (state: string) =>
+      osAlertToUnified({ ...baseAlert, state } as never, 'ds').state;
+    expect(stateOf('ACTIVE')).toBe('active');
+    expect(stateOf('ACKNOWLEDGED')).toBe('acknowledged');
+    expect(stateOf('COMPLETED')).toBe('resolved');
+    expect(stateOf('ERROR')).toBe('error');
+    // The monitor or trigger was deleted while the alert was open: it no
+    // longer fires and can't be acknowledged, so it must not read as active.
+    expect(stateOf('DELETED')).toBe('deleted');
+  });
 });
 
 // ============================================================================

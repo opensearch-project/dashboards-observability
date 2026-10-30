@@ -53,6 +53,7 @@ export const STATE_COLORS: Record<string, string> = {
   silenced: 'default',
   resolved: 'success',
   error: 'danger',
+  deleted: 'subdued',
 };
 
 // ============================================================================

@@ -41,6 +41,7 @@ import {
   SEVERITY_COLORS,
   STATUS_COLORS,
 } from './shared_constants';
+import { getMonitorStateLabel, getSeverityLabel } from './enum_labels';
 
 export interface DetectorDetailFlyoutProps {
   detector: UnifiedRuleSummary;
@@ -302,14 +303,18 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                 </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color={STATUS_COLORS[detector.status]}>{detector.status}</EuiBadge>
+                <EuiBadge color={STATUS_COLORS[detector.status]}>
+                  {getMonitorStateLabel(detector.status)}
+                </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color={SEVERITY_COLORS[detector.severity]}>{detector.severity}</EuiBadge>
+                <EuiBadge color={SEVERITY_COLORS[detector.severity]}>
+                  {getSeverityLabel(detector.severity)}
+                </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiHealth color={HEALTH_COLORS[detector.healthStatus]}>
-                  {detector.healthStatus}
+                  {getMonitorStateLabel(detector.healthStatus)}
                 </EuiHealth>
               </EuiFlexItem>
             </EuiFlexGroup>
