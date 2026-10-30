@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import type { SloHealthState } from './slo_types';
+import type { ObjectiveStatus, SloHealthState } from './slo_types';
 
 export const SLO_HEALTH_COLOR: Record<SloHealthState, string> = {
   breached: 'danger',
@@ -77,4 +77,36 @@ export function getSloHealthLabel(state: SloHealthState | string | undefined | n
     return SLO_HEALTH_LABEL[state as SloHealthState];
   }
   return i18n.translate('observability.slo.state.label.unknown', { defaultMessage: 'Unknown' });
+}
+
+/**
+ * Why an SLO in `sli_uncomputable` can't be computed, for the hover text on
+ * its health label. Uses the first objective's diagnosis; undefined for every
+ * other state.
+ */
+export function getSliUncomputableExplanation(status: {
+  state: SloHealthState | string;
+  objectives?: ReadonlyArray<Pick<ObjectiveStatus, 'state' | 'uncomputable'>>;
+}): string | undefined {
+  if (status.state !== 'sli_uncomputable') return undefined;
+  const reason = status.objectives?.find((o) => o.uncomputable)?.uncomputable;
+  if (!reason) {
+    return i18n.translate('observability.slo.state.sliUncomputable.generic', {
+      defaultMessage:
+        "Can't compute: the source metric is receiving traffic, but this SLI can't be computed from it. Check the SLI definition.",
+    });
+  }
+  const values = { observations: reason.observations.toLocaleString(), window: reason.window };
+  if (reason.cause === 'buckets_not_cumulative') {
+    return i18n.translate('observability.slo.state.sliUncomputable.bucketsNotCumulative', {
+      defaultMessage:
+        "Can't compute: the latency histogram recorded {observations} observations in the last {window}, but its +Inf bucket didn't grow. Each bucket only counts its own range, so this SLI divides by zero. Recreate the SLO from Suggest SLOs, which reads the histogram's bucket layout and says when its bounds can't measure the threshold.",
+      values,
+    });
+  }
+  return i18n.translate('observability.slo.state.sliUncomputable.noThresholdBucket', {
+    defaultMessage:
+      "Can't compute: the latency histogram recorded {observations} observations in the last {window}, but it has no bucket this SLI can read at the latency threshold. Use a threshold that matches one of the histogram's bucket bounds.",
+    values,
+  });
 }

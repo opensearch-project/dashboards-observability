@@ -36,7 +36,7 @@ import {
 import { i18n } from '@osd/i18n';
 import type { SloHealthState, SloSummary } from '../../../../../common/slo/slo_types';
 import { formatPct, SLO_PRECISION, TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
-import { getSloHealthColor } from '../../../../../common/slo/state';
+import { getSliUncomputableExplanation, getSloHealthColor } from '../../../../../common/slo/state';
 import { SloHealthAccessError, SloHealthBucket } from '../slos/slo_health_summary';
 import { ChipRow } from '../slos/slo_health_chip_row';
 import { navigateToSloSuggest } from '../../shared/utils/navigation_utils';
@@ -340,9 +340,11 @@ export const ServiceSloTab: React.FC<ServiceSloTabProps> = ({
       {
         name: t.colState,
         render: (row: SloSummary) => (
-          <EuiHealth color={getSloHealthColor(row.status.state)}>
-            {t.stateLabel(row.status.state)}
-          </EuiHealth>
+          <EuiToolTip content={getSliUncomputableExplanation(row.status)}>
+            <EuiHealth color={getSloHealthColor(row.status.state)}>
+              {t.stateLabel(row.status.state)}
+            </EuiHealth>
+          </EuiToolTip>
         ),
       },
       {

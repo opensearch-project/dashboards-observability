@@ -59,11 +59,13 @@ import type {
   SloDocument,
   SloHealthState,
   SloLiveStatus,
+  SliUncomputableReason,
 } from '../../../common/slo/slo_types';
 import {
   buildErrorRatioExpr,
   buildSourceTrafficQuery,
   dedupRecordingRuleName,
+  SOURCE_TRAFFIC_PART_LABEL,
   findClosestRecordingWindow,
   parseDurationToMs,
 } from '../../../common/slo/slo_promql_generator';
@@ -715,7 +717,9 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     // from it (e.g. histogram buckets that don't cover the threshold).
     // Calling that "Source idle" would tell the user the service is quiet.
     const uncomputable =
-      sourceIdleObjectives.size > 0 && (await this.sourceHasTraffic(doc, longWindow, ctx, ds));
+      sourceIdleObjectives.size > 0
+        ? await this.diagnoseUncomputable(doc, longWindow, ctx, ds)
+        : null;
 
     const staleAfterMs = 2 * parseDurationToMs(longWindow);
     const nowMs = Date.now();
@@ -731,7 +735,11 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         if (sourceIdleObjectives.has(obj.name)) {
           if (uncomputable) {
             anyObjectiveUncomputable = true;
-            return { ...sourceIdleObjectiveStatus(obj, doc), state: 'sli_uncomputable' as const };
+            return {
+              ...sourceIdleObjectiveStatus(obj, doc),
+              state: 'sli_uncomputable' as const,
+              uncomputable,
+            };
           }
           anyObjectiveSourceIdle = true;
           return sourceIdleObjectiveStatus(obj, doc);
@@ -895,20 +903,21 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
   }
 
   /**
-   * True when the SLI's source metric recorded observations over `window`.
-   * Only asked when an objective evaluated to NaN; SLI types whose NaN can
-   * only mean "no traffic" skip the query. Cached like the inline fallback.
-   * Never throws: a failed read answers false, keeping today's `source_idle`.
+   * Why a NaN SLI can't be computed, or null when the source simply had no
+   * traffic over `window` (so the objective stays `source_idle`). Only asked
+   * when an objective evaluated to NaN; SLI types whose NaN can only mean "no
+   * traffic" skip the query. Cached like the inline fallback. Never throws: a
+   * failed read answers null, keeping today's `source_idle`.
    */
-  private async sourceHasTraffic(
+  private async diagnoseUncomputable(
     doc: SloDocument,
     window: string,
     ctx: SloStatusAggregationContext,
     ds: Datasource
-  ): Promise<boolean> {
-    if (doc.spec.sli.type !== 'single') return false;
+  ): Promise<SliUncomputableReason | null> {
+    if (doc.spec.sli.type !== 'single') return null;
     const query = buildSourceTrafficQuery(doc.spec.sli, window);
-    if (!query) return false;
+    if (!query) return null;
     const cacheKey = `${ds.id}\u0000${query}`;
     let parsed: ParsedInstantResponse;
     const cached = this.inlineCache.get(cacheKey);
@@ -921,12 +930,26 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         this.logger.debug(
           `StatusAggregator: source traffic read failed for ${doc.id}: ${errMsg(err)}`
         );
-        return false;
+        return null;
       }
       if (this.inlineCache.size >= INLINE_CACHE_MAX_ENTRIES) this.inlineCache.clear();
       this.inlineCache.set(cacheKey, { parsed, expiresAt: Date.now() + INLINE_CACHE_TTL_MS });
     }
-    return parsed.samples.some((sample) => sample.value > 0);
+    const part = (name: string) =>
+      parsed.samples.find((sample) => sample.labels[SOURCE_TRAFFIC_PART_LABEL] === name)?.value;
+    const observations = part('count') ?? 0;
+    if (!(observations > 0)) return null;
+    const inf = part('inf');
+    return {
+      // The cumulative math divides by `+Inf`; a flat one while `_count` grows
+      // means the buckets don't accumulate.
+      cause:
+        inf !== undefined && inf <= 0.05 * observations
+          ? 'buckets_not_cumulative'
+          : 'no_threshold_bucket',
+      observations: Math.round(observations),
+      window,
+    };
   }
 
   // --------------------------------------------------------------------------

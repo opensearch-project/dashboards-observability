@@ -419,24 +419,36 @@ export function perRangeBoundsUnder(
     .sort((a, b) => a - b);
 }
 
+/** Label tagging which part of {@link buildSourceTrafficQuery} a sample came from. */
+export const SOURCE_TRAFFIC_PART_LABEL = 'slo_traffic_part';
+
 /**
- * Traffic on the source metric of a `latency_threshold` SLI over `window` —
- * the number of observations its histogram recorded (`<metric>_count`).
- * Read when the SLI evaluates to NaN: a NaN with traffic means the SLI can't
- * be computed from this metric, not that the source is idle. Null for SLI
- * types whose NaN can only mean "no traffic".
+ * Traffic on the source metric of a `latency_threshold` SLI over `window`,
+ * read when the SLI evaluates to NaN: a NaN with traffic means the SLI can't
+ * be computed from this metric, not that the source is idle. Samples are
+ * tagged with {@link SOURCE_TRAFFIC_PART_LABEL}: `count` is the number of
+ * observations (`<metric>_count`); `inf` — only for a cumulative SLI, whose
+ * math divides by it — is the growth of the `+Inf` bucket, which tells a
+ * histogram whose buckets don't accumulate (`inf` flat) from one with no
+ * bucket at the threshold. Null for SLI types whose NaN can only mean "no
+ * traffic".
  */
 export function buildSourceTrafficQuery(sli: SingleSli, window: string): string | null {
   const prom = sli.definition;
   if (prom.backend !== 'prometheus' || prom.type !== 'latency_threshold' || !prom.metric) {
     return null;
   }
-  const selector = `${ensureCountMetric(prom.metric)}{${joinMatchers(
-    ...sli.dimensions.map((d) => `${d.name}="${escapeLabelValue(d.value)}"`)
-  )}}`;
-  return effectiveMetricTemporality(sli) === 'delta'
-    ? `sum(sum_over_time(${selector}[${window}]))`
-    : `sum(increase(${selector}[${window}]))`;
+  const dims = sli.dimensions.map((d) => `${d.name}="${escapeLabelValue(d.value)}"`);
+  const tag = (expr: string, part: string) =>
+    `label_replace(${expr}, "${SOURCE_TRAFFIC_PART_LABEL}", "${part}", "", "")`;
+  const count = `${ensureCountMetric(prom.metric)}{${joinMatchers(...dims)}}`;
+  if (effectiveMetricTemporality(sli) === 'delta') {
+    return tag(`sum(sum_over_time(${count}[${window}]))`, 'count');
+  }
+  const countPart = tag(`sum(increase(${count}[${window}]))`, 'count');
+  if (prom.bucketLayout === 'per_range') return countPart;
+  const inf = `${ensureBucketMetric(prom.metric)}{${joinMatchers(...dims, 'le="+Inf"')}}`;
+  return `${countPart}\nor\n${tag(`sum(increase(${inf}[${window}]))`, 'inf')}`;
 }
 
 /**

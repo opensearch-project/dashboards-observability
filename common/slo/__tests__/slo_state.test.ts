@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SLO_HEALTH_COLOR, SLO_HEALTH_ORDER, getSloHealthColor, getSloHealthLabel } from '../state';
+import {
+  SLO_HEALTH_COLOR,
+  SLO_HEALTH_ORDER,
+  getSliUncomputableExplanation,
+  getSloHealthColor,
+  getSloHealthLabel,
+} from '../state';
 import type { SloHealthState } from '../slo_types';
 
 describe('slo state helpers', () => {
@@ -88,6 +94,36 @@ describe('slo state helpers', () => {
       expect(breachedIdx).toBeGreaterThanOrEqual(0);
       expect(rulesMissingIdx).toBe(breachedIdx + 1);
       expect(warningIdx).toBe(rulesMissingIdx + 1);
+    });
+  });
+
+  describe('getSliUncomputableExplanation', () => {
+    const status = (cause?: 'buckets_not_cumulative' | 'no_threshold_bucket') => ({
+      state: 'sli_uncomputable',
+      objectives: [
+        {
+          state: 'sli_uncomputable' as const,
+          uncomputable: cause ? { cause, observations: 12345, window: '3d' } : undefined,
+        },
+      ],
+    });
+
+    it('explains a histogram whose buckets do not accumulate', () => {
+      const text = getSliUncomputableExplanation(status('buckets_not_cumulative'));
+      expect(text).toContain('12,345 observations in the last 3d');
+      expect(text).toContain("+Inf bucket didn't grow");
+      expect(text).toContain('Suggest SLOs');
+    });
+
+    it('explains a histogram with no bucket at the threshold', () => {
+      expect(getSliUncomputableExplanation(status('no_threshold_bucket'))).toContain(
+        'no bucket this SLI can read at the latency threshold'
+      );
+    });
+
+    it('falls back to a generic reason, and is undefined for other states', () => {
+      expect(getSliUncomputableExplanation(status())).toContain("this SLI can't be computed");
+      expect(getSliUncomputableExplanation({ state: 'source_idle' })).toBeUndefined();
     });
   });
 });

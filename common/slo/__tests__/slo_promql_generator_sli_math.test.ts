@@ -244,21 +244,41 @@ describe('buildSliEventQueries — explicit bucket unit (cumulative)', () => {
 });
 
 describe('buildSourceTrafficQuery', () => {
-  it('counts observations on a latency SLI source, per temporality', () => {
+  const dims = [{ name: 'job', value: 'api' }];
+  it('reads _count and, for cumulative math, the +Inf bucket', () => {
     expect(
       buildSourceTrafficQuery(
-        sli({ type: 'latency_threshold', metric: 'h_seconds_bucket' }, [
-          { name: 'job', value: 'api' },
-        ]),
+        sli({ type: 'latency_threshold', metric: 'h_seconds_bucket' }, dims),
         '1h'
       )
-    ).toBe('sum(increase(h_seconds_count{job="api"}[1h]))');
+    ).toBe(
+      'label_replace(sum(increase(h_seconds_count{job="api"}[1h])), "slo_traffic_part", "count", "", "")' +
+        '\nor\n' +
+        'label_replace(sum(increase(h_seconds_bucket{job="api", le="+Inf"}[1h])), "slo_traffic_part", "inf", "", "")'
+    );
+  });
+
+  it('skips the +Inf part for per-range and delta SLIs, whose math never divides by it', () => {
+    const perRange = buildSourceTrafficQuery(
+      sli(
+        {
+          type: 'latency_threshold',
+          metric: 'h_seconds_bucket',
+          bucketLayout: 'per_range',
+          bucketBounds: [0.1, 0.5],
+          bucketUnit: 'seconds',
+        },
+        dims
+      ),
+      '1h'
+    );
+    expect(perRange).not.toContain('+Inf');
     expect(
       buildSourceTrafficQuery(
         sli({ type: 'latency_threshold', metric: 'latency_seconds_bucket' }),
         '1h'
       )
-    ).toBe(`sum(sum_over_time(latency_seconds_count{${SEL.replace(/,/g, ', ')}}[1h]))`);
+    ).toContain('sum(sum_over_time(latency_seconds_count{');
   });
 
   it('is null for SLIs whose NaN can only mean no traffic', () => {

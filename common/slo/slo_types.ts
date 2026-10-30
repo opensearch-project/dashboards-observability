@@ -414,6 +414,23 @@ export interface ObjectiveStatus {
    * expression). The value matches what the rule will record.
    */
   evaluatedInline?: boolean;
+  /** Why the SLI can't be computed — set only when `state` is `sli_uncomputable`. */
+  uncomputable?: SliUncomputableReason;
+}
+
+/**
+ * Diagnosis behind an `sli_uncomputable` objective, so the UI can say why.
+ *   - `buckets_not_cumulative`: the histogram's `+Inf` bucket stays flat while
+ *     `_count` grows — each bucket counts only its own range, so the
+ *     cumulative math divides by zero.
+ *   - `no_threshold_bucket`: observations arrive, but there's no bucket the
+ *     SLI can read at the threshold.
+ */
+export interface SliUncomputableReason {
+  cause: 'buckets_not_cumulative' | 'no_threshold_bucket';
+  /** Observations the source recorded over `window`. */
+  observations: number;
+  window: string;
 }
 
 export interface SloLiveStatus {

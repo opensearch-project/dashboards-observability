@@ -647,23 +647,29 @@ describe('DirectQueryStatusAggregator.aggregate — SLI uncomputable', () => {
     metric: { slo_id: 'slo-1', slo_objective: 'p95' },
     value: [Math.floor(Date.now() / 1000), 'NaN'],
   };
-  const respond = (traffic: string | null) => (body: unknown) => {
-    const text = JSON.stringify(body);
-    if (
-      text.includes('http_server_request_duration_seconds_count') &&
-      !text.includes('label_replace')
-    ) {
+  const respond =
+    (traffic: string | null, inf = '0') =>
+    (body: unknown) => {
+      const text = JSON.stringify(body);
+      if (text.includes('slo_traffic_part')) {
+        const at = Date.now() / 1000;
+        return {
+          resultType: 'vector',
+          result:
+            traffic === null
+              ? []
+              : [
+                  { metric: { slo_traffic_part: 'count' }, value: [at, traffic] },
+                  { metric: { slo_traffic_part: 'inf' }, value: [at, inf] },
+                ],
+        };
+      }
+      // The recorded sample and the inline fallback both evaluate to NaN.
       return {
         resultType: 'vector',
-        result: traffic === null ? [] : [{ metric: {}, value: [Date.now() / 1000, traffic] }],
+        result: [{ ...nanSample, metric: { ...nanSample.metric, slo_inline_objective: '0' } }],
       };
-    }
-    // The recorded sample and the inline fallback both evaluate to NaN.
-    return {
-      resultType: 'vector',
-      result: [{ ...nanSample, metric: { ...nanSample.metric, slo_inline_objective: '0' } }],
     };
-  };
 
   it('NaN SLI while the source _count grows → sli_uncomputable, not source_idle', async () => {
     const { client } = mockClient({ query: respond('6400') });
@@ -671,6 +677,19 @@ describe('DirectQueryStatusAggregator.aggregate — SLI uncomputable', () => {
     const [status] = await agg.aggregate([latencyDoc()], ctxFor(promDatasource(), client));
     expect(status.objectives[0].state).toBe('sli_uncomputable');
     expect(status.state).toBe('sli_uncomputable');
+    // +Inf stayed flat while _count grew: the buckets don't accumulate.
+    expect(status.objectives[0].uncomputable).toEqual({
+      cause: 'buckets_not_cumulative',
+      observations: 6400,
+      window: '3d',
+    });
+  });
+
+  it('a growing +Inf bucket means there is no bucket at the threshold', async () => {
+    const { client } = mockClient({ query: respond('6400', '6400') });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([latencyDoc()], ctxFor(promDatasource(), client));
+    expect(status.objectives[0].uncomputable?.cause).toBe('no_threshold_bucket');
   });
 
   it('NaN SLI with no source traffic stays source_idle', async () => {

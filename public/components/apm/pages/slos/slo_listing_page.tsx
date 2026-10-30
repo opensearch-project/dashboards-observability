@@ -59,7 +59,11 @@ import type {
   SloSummary,
 } from '../../../../../common/slo/slo_types';
 import { formatPct, SLO_PRECISION, TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
-import { getSloHealthColor, getSloHealthLabel } from '../../../../../common/slo/state';
+import {
+  getSliUncomputableExplanation,
+  getSloHealthColor,
+  getSloHealthLabel,
+} from '../../../../../common/slo/state';
 import { templateIconFor } from './template_icons';
 import { KIND_LABEL } from './suggest_engine';
 
@@ -173,17 +177,24 @@ const SloHealthCell: React.FC<{ row: SloSummary }> = ({ row }) => {
       >
         <EuiFlexItem grow={false}>
           <EuiToolTip
-            content={i18n.translate('observability.apm.slo.listing.stateTooltip', {
-              defaultMessage: 'State: {state}',
-              // Human, localized label (M3/CLAR7) — never the raw machine enum
-              // (`breached`, `at_risk`, …). Routed through the shared, localized
-              // `getSloHealthLabel` (common/slo/state.ts) — the single source of
-              // truth — which also maps an out-of-union state to "Unknown"
-              // rather than leaking the raw token.
-              values: { state: getSloHealthLabel(state) },
-            })}
+            content={
+              // "Can't compute" says why on hover; every other state names itself.
+              getSliUncomputableExplanation(row.status) ??
+              i18n.translate('observability.apm.slo.listing.stateTooltip', {
+                defaultMessage: 'State: {state}',
+                // Human, localized label (M3/CLAR7) — never the raw machine enum
+                // (`breached`, `at_risk`, …). Routed through the shared, localized
+                // `getSloHealthLabel` (common/slo/state.ts) — the single source of
+                // truth — which also maps an out-of-union state to "Unknown"
+                // rather than leaking the raw token.
+                values: { state: getSloHealthLabel(state) },
+              })
+            }
           >
-            <EuiHealth color={getSloHealthColor(state)}>
+            <EuiHealth
+              color={getSloHealthColor(state)}
+              data-test-subj={`slosHealthLabel-${row.id}`}
+            >
               <span style={{ fontSize: 12 }}>{getSloHealthLabel(state)}</span>
             </EuiHealth>
           </EuiToolTip>
@@ -265,7 +276,7 @@ interface RuleBadgeSpec {
   tooltip: string;
 }
 
-function ruleBadgeSpecFor(state: SloHealthState): RuleBadgeSpec {
+function ruleBadgeSpecFor(state: SloHealthState, explanation?: string): RuleBadgeSpec {
   if (state === 'rules_missing') {
     return {
       kind: 'missing',
@@ -311,10 +322,12 @@ function ruleBadgeSpecFor(state: SloHealthState): RuleBadgeSpec {
         defaultMessage: "Can't compute",
       }),
       color: 'warning',
-      tooltip: i18n.translate('observability.apm.slo.listing.rulesBadge.sliUncomputable.tooltip', {
-        defaultMessage:
-          "The source metric is receiving traffic, but the SLI can't be computed from it — for example, its histogram buckets don't cover the latency threshold. Check the SLI definition.",
-      }),
+      tooltip:
+        explanation ??
+        i18n.translate('observability.apm.slo.listing.rulesBadge.sliUncomputable.tooltip', {
+          defaultMessage:
+            "The source metric is receiving traffic, but the SLI can't be computed from it — for example, its histogram buckets don't cover the latency threshold. Check the SLI definition.",
+        }),
     };
   }
   if (state === 'source_idle') {
@@ -343,7 +356,7 @@ function ruleBadgeSpecFor(state: SloHealthState): RuleBadgeSpec {
 }
 
 const SloRulesBadge: React.FC<{ row: SloSummary }> = ({ row }) => {
-  const spec = ruleBadgeSpecFor(row.status.state);
+  const spec = ruleBadgeSpecFor(row.status.state, getSliUncomputableExplanation(row.status));
   return (
     <EuiToolTip content={spec.tooltip}>
       <EuiBadge
