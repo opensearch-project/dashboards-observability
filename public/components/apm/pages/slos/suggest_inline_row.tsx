@@ -16,6 +16,7 @@ import {
   EuiBadge,
   EuiCheckbox,
   EuiFieldNumber,
+  EuiFormRow,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,6 +29,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { latencyThresholdIssue } from './suggest_engine';
 import type { Suggestion } from './suggest_engine';
 import { suggestionIconType } from './suggest_icon';
 import type { RowStatus } from './suggest_use_batch_create';
@@ -78,6 +80,9 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
   const spec = suggestion.input.spec;
   const objective = spec.objectives[0];
   const isLatency = objective?.latencyThreshold !== undefined;
+  // The suggestion arrives with the user's overrides applied, so this checks
+  // the threshold as typed against the histogram's probed buckets.
+  const thresholdIssue = isLatency ? latencyThresholdIssue(suggestion) : null;
   const unit =
     spec.sli.type === 'single' &&
     spec.sli.definition.backend === 'prometheus' &&
@@ -96,7 +101,11 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
   // Only saved-object coverage disables the checkbox. Disabling here (not just
   // filtering at create time) keeps the checkbox, the counts, and the actual
   // create in agreement.
-  const disableCheckbox = rowStatus === 'creating' || rowStatus === 'success' || isCovered;
+  // A threshold the histogram can't measure keeps the draft out of Create, so
+  // its checkbox reads unchecked and locked until the threshold is fixed (the
+  // selection itself is kept, so a fixed threshold re-checks it).
+  const disableCheckbox =
+    rowStatus === 'creating' || rowStatus === 'success' || isCovered || !!thresholdIssue;
 
   const coveredTooltip = i18n.translate(
     'observability.apm.slo.suggest.inlineRow.coveredHealthTooltip',
@@ -162,7 +171,7 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
           ) : (
             <EuiCheckbox
               id={`slosSuggestSelect-${suggestion.key}`}
-              checked={selected}
+              checked={selected && !thresholdIssue}
               onChange={onToggle}
               disabled={disableCheckbox}
               data-test-subj={`slosSuggestSelect-${suggestion.key}`}
@@ -285,19 +294,28 @@ export const SuggestionInlineRow: React.FC<SuggestionInlineRowProps> = ({
         </EuiFlexItem>
         {isLatency && (
           <EuiFlexItem style={{ minWidth: 120 }}>
-            <EuiFieldNumber
-              compressed
-              prepend="p95 ≤"
-              append={unit === 'milliseconds' ? 'ms' : 's'}
-              value={overrides.latencyThreshold ?? String(objective.latencyThreshold)}
-              onChange={(e) => onOverrideChange({ latencyThreshold: e.target.value })}
-              min={0}
-              step={unit === 'milliseconds' ? 10 : 0.01}
-              aria-label={i18n.translate(
-                'observability.apm.slo.suggest.inlineRow.latencyAriaLabel',
-                { defaultMessage: 'Latency threshold' }
-              )}
-            />
+            <EuiFormRow
+              isInvalid={!!thresholdIssue}
+              error={thresholdIssue ?? undefined}
+              display="rowCompressed"
+              fullWidth
+              data-test-subj={`slosSuggestThresholdIssue-${suggestion.key}`}
+            >
+              <EuiFieldNumber
+                compressed
+                isInvalid={!!thresholdIssue}
+                prepend="p95 ≤"
+                append={unit === 'milliseconds' ? 'ms' : 's'}
+                value={overrides.latencyThreshold ?? String(objective.latencyThreshold)}
+                onChange={(e) => onOverrideChange({ latencyThreshold: e.target.value })}
+                min={0}
+                step={unit === 'milliseconds' ? 10 : 0.01}
+                aria-label={i18n.translate(
+                  'observability.apm.slo.suggest.inlineRow.latencyAriaLabel',
+                  { defaultMessage: 'Latency threshold' }
+                )}
+              />
+            </EuiFormRow>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

@@ -50,6 +50,15 @@ export interface CustomPromqlState {
   errorRatioQuery: string;
 }
 
+/** SLI source-shape fields carried through edit unchanged — see {@link FormState.preservedSliSource}. */
+export interface PreservedSliSource extends Pick<
+  PrometheusSli,
+  'metricTemporality' | 'bucketLayout' | 'bucketBounds' | 'bucketUnit'
+> {
+  /** The metric these fields describe; a different metric drops them. */
+  metric: string;
+}
+
 export interface FormState {
   templateId: string | null;
   datasourceId: string;
@@ -91,6 +100,16 @@ export interface FormState {
    * Re-emitted verbatim by `buildCreateInput`. Always `{}` in create mode.
    */
   preservedArrayLabels: Record<string, string[]>;
+  /**
+   * How the SLI's source metric is read — `metricTemporality` and the
+   * histogram bucket layout (`bucketLayout` / `bucketBounds` / `bucketUnit`)
+   * the suggestion probe detected. The wizard doesn't edit these, so edit mode
+   * carries them out-of-band, tagged with the metric they describe, and
+   * `buildCreateInput` re-emits them while the metric is unchanged. Without
+   * this, saving an edit would replace the spec without them and silently put
+   * a per-range histogram back on cumulative math. Null in create mode.
+   */
+  preservedSliSource: PreservedSliSource | null;
   annotations: KeyValueEntry[];
   shadow: boolean;
 
@@ -260,6 +279,7 @@ export function initialState(): FormState {
     customPromql: { mode: 'events', goodQuery: '', totalQuery: '', errorRatioQuery: '' },
     labels: [],
     preservedArrayLabels: {},
+    preservedSliSource: null,
     annotations: [],
     shadow: false,
     burnRates: defaultBurnRates(),
@@ -779,6 +799,19 @@ export function isSloEditable(doc: SloDocument): boolean {
   return toEditableWindowDuration(window) !== null;
 }
 
+/** The source-shape fields a persisted SLI sets, or null when it sets none. */
+function preservedSliSourceOf(def: PrometheusSli): PreservedSliSource | null {
+  const { metricTemporality, bucketLayout, bucketBounds, bucketUnit } = def;
+  if (!metricTemporality && !bucketLayout && !bucketBounds && !bucketUnit) return null;
+  return {
+    metric: def.metric ?? '',
+    ...(metricTemporality ? { metricTemporality } : {}),
+    ...(bucketLayout ? { bucketLayout } : {}),
+    ...(bucketBounds ? { bucketBounds: [...bucketBounds] } : {}),
+    ...(bucketUnit ? { bucketUnit } : {}),
+  };
+}
+
 export function hydrateFromDoc(doc: SloDocument): EditHydration | null {
   const spec = doc.spec;
   const sli = spec.sli;
@@ -833,6 +866,7 @@ export function hydrateFromDoc(doc: SloDocument): EditHydration | null {
     customPromql: deriveCustomPromqlState(def, fresh.customPromql),
     labels: labelEntries,
     preservedArrayLabels,
+    preservedSliSource: preservedSliSourceOf(def),
     annotations: recordToEntries(spec.annotations ?? {}),
     shadow: spec.mode === 'shadow',
     burnRates: spec.alerting.burnRates.map((b) => ({ ...b })),

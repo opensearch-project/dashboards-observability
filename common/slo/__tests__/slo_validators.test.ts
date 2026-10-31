@@ -159,6 +159,48 @@ describe('validateSloSpec', () => {
     expect(result.warnings['spec.objectives[0].latencyThreshold']).toContain('did you mean');
   });
 
+  describe('per-range bucket layout', () => {
+    const perRange = (extra: Record<string, unknown>, latencyThreshold = 0.5) =>
+      validateSloSpec(
+        minimalSpec({
+          sli: {
+            type: 'single',
+            definition: {
+              backend: 'prometheus',
+              type: 'latency_threshold',
+              calcMethod: 'events',
+              metric: 'x_seconds_bucket',
+              bucketLayout: 'per_range',
+              ...extra,
+            },
+            dimensions: [{ name: 'service', value: 'api' }],
+          } as SloSpec['sli'],
+          objectives: [{ name: 'latency', target: 0.95, latencyThreshold }],
+        })
+      );
+
+    it('accepts bounds and a unit that can measure the threshold', () => {
+      const result = perRange({ bucketBounds: [0, 5, 10, 500], bucketUnit: 'milliseconds' });
+      expect(result.errors).toEqual({});
+    });
+
+    it('requires the bounds and the unit', () => {
+      expect(
+        perRange({ bucketUnit: 'seconds' }).errors['spec.sli.definition.bucketBounds']
+      ).toBeDefined();
+      expect(
+        perRange({ bucketBounds: [0.1] }).errors['spec.sli.definition.bucketUnit']
+      ).toBeDefined();
+    });
+
+    it('rejects bounds with nothing positive at or under the threshold', () => {
+      const result = perRange({ bucketBounds: [0, 5, 10], bucketUnit: 'seconds' });
+      expect(result.errors['spec.sli.definition.bucketBounds']).toContain(
+        'No histogram bucket bound'
+      );
+    });
+  });
+
   it('rejects reserved slo_* label keys', () => {
     const result = validateSloSpec(minimalSpec({ labels: { slo_id: 'hijacked' } }));
     expect(result.errors['spec.labels["slo_id"]']).toBeDefined();

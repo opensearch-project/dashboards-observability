@@ -38,7 +38,12 @@ const actualEngine = jest.requireActual('../suggest_engine');
 const mockGenerateSuggestions = jest.fn();
 jest.mock('../suggest_engine', () => ({
   ...jest.requireActual('../suggest_engine'),
-  generateSuggestionsForServices: (...args: unknown[]) => mockGenerateSuggestions(...args),
+  // The page reads drafts plus skipped drafts; tests return either a bare
+  // draft list or the full `{ suggestions, skipped }` result.
+  generateSuggestionsWithSkips: (...args: unknown[]) => {
+    const result = mockGenerateSuggestions(...args);
+    return Array.isArray(result) ? { suggestions: result, skipped: [] } : result;
+  },
 }));
 
 // Coverage now comes solely from the workspace-scoped SLO health rollup.
@@ -285,6 +290,24 @@ describe('SloSuggestPage', () => {
     expect(screen.queryByTestId('slosSuggestPickServices')).not.toBeInTheDocument();
     // Button reflects the scoped count, not "Select services" or "0 services".
     expect(screen.getByText('Suggest SLOs for 2 services')).toBeInTheDocument();
+  });
+
+  it('says which latency SLOs were not suggested and why', async () => {
+    mockGenerateSuggestions.mockImplementation((input: unknown) => ({
+      suggestions: actualEngine.generateSuggestionsForServices(input),
+      skipped: [
+        {
+          key: 'http-lat:flagd',
+          name: 'flagd — HTTP latency p95 < 500 ms',
+          reason: "buckets (0, 5, 10 … 10000 s) can't measure 500 ms",
+        },
+      ],
+    }));
+    renderPage({ initialEntry: SCOPED_ENTRY });
+    const callout = await screen.findByTestId('slosSuggestSkipped');
+    expect(callout).toHaveTextContent('1 latency SLO not suggested');
+    expect(callout).toHaveTextContent('flagd — HTTP latency p95 < 500 ms');
+    expect(callout).toHaveTextContent("can't measure 500 ms");
   });
 
   it('defaults scoped drafts to selected so the create button is enabled', async () => {

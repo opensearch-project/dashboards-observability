@@ -52,7 +52,11 @@ import type {
   SloLiveStatus,
   SloSummary,
 } from '../../../../../common/slo/slo_types';
-import { getSloHealthColor, getSloHealthLabel } from '../../../../../common/slo/state';
+import {
+  getSliUncomputableExplanation,
+  getSloHealthColor,
+  getSloHealthLabel,
+} from '../../../../../common/slo/state';
 import { formatPct, SLO_PRECISION, TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
 import { templateIconFor } from './template_icons';
 import { isSloEditable } from './wizard_state';
@@ -198,6 +202,7 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
     null;
   const healthColor = getSloHealthColor(doc.liveStatus.state);
   const healthLabel = getSloHealthLabel(doc.liveStatus.state);
+  const healthExplanation = getSliUncomputableExplanation(doc.liveStatus);
   const targetLabel = formatPct(primaryObjective.target, { decimals: SLO_PRECISION.target });
   const attainmentLabel =
     attainment !== null ? formatPct(attainment, { decimals: SLO_PRECISION.attainment }) : '—';
@@ -225,16 +230,21 @@ const DetailHeader: React.FC<DetailHeaderProps> = ({
           boundaries rather than per character. */}
       <EuiFlexGroup alignItems="center" gutterSize="m" wrap>
         <EuiFlexItem grow={false}>
-          <EuiHealth
-            color={healthColor}
-            data-test-subj="slosDetailHealthDot"
-            aria-label={i18n.translate('observability.apm.slo.detail.healthAriaLabel', {
-              defaultMessage: 'Health: {label}',
-              values: { label: healthLabel },
-            })}
-          >
-            <span style={{ fontWeight: 600 }}>{healthLabel}</span>
-          </EuiHealth>
+          <EuiToolTip content={healthExplanation}>
+            <EuiHealth
+              color={healthColor}
+              data-test-subj="slosDetailHealthDot"
+              aria-label={i18n.translate('observability.apm.slo.detail.healthAriaLabel', {
+                defaultMessage: 'Health: {label}',
+                // The label first so the state itself is announced, then the reason.
+                values: {
+                  label: healthExplanation ? `${healthLabel}. ${healthExplanation}` : healthLabel,
+                },
+              })}
+            >
+              <span style={{ fontWeight: 600 }}>{healthLabel}</span>
+            </EuiHealth>
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>
           <EuiText size="m">

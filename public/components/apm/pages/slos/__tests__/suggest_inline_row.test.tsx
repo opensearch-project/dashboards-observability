@@ -197,6 +197,60 @@ describe('SuggestionInlineRow', () => {
     expect(screen.getByLabelText('Latency threshold')).toBeInTheDocument();
   });
 
+  it("flags a threshold the draft's histogram can't measure", () => {
+    const latencyDraft = (latencyThreshold: number) => {
+      const base = makeSuggestion({ key: 'http-lat:cart', kindId: 'http-latency' });
+      const spec = base.input.spec;
+      return {
+        ...base,
+        histogramShape: {
+          metric: 'http_server_request_duration_seconds_bucket',
+          label: 'service_name',
+          value: 'cart',
+          layout: 'cumulative',
+          bounds: [0.1, 0.5, 1],
+          unit: 'seconds',
+        },
+        input: {
+          ...base.input,
+          spec: {
+            ...spec,
+            sli: {
+              ...spec.sli,
+              definition: {
+                backend: 'prometheus',
+                type: 'latency_threshold',
+                calcMethod: 'events',
+                metric: 'http_server_request_duration_seconds_bucket',
+                latencyThresholdUnit: 'seconds',
+              },
+            },
+            objectives: [{ name: 'o', target: 0.95, latencyThreshold }],
+          },
+        },
+      } as Suggestion;
+    };
+    const props = {
+      selected: true,
+      onToggle: jest.fn(),
+      overrides: {},
+      onOverrideChange: jest.fn(),
+    };
+    const { rerender } = render(<SuggestionInlineRow suggestion={latencyDraft(0.5)} {...props} />);
+    expect(screen.queryByText(/No histogram bucket/)).toBeNull();
+    rerender(<SuggestionInlineRow suggestion={latencyDraft(0.25)} {...props} />);
+    expect(
+      screen.getByText('No histogram bucket at 250 ms. Use one of: 0.1, 0.5, 1 s.')
+    ).toBeInTheDocument();
+    // Excluded from Create, so the checkbox reads unchecked and locked.
+    const checkbox = screen.getByTestId('slosSuggestSelect-http-lat:cart') as HTMLInputElement;
+    expect(checkbox.checked).toBe(false);
+    expect(checkbox.disabled).toBe(true);
+    rerender(<SuggestionInlineRow suggestion={latencyDraft(0.5)} {...props} />);
+    const fixed = screen.getByTestId('slosSuggestSelect-http-lat:cart') as HTMLInputElement;
+    expect(fixed.checked).toBe(true);
+  });
+
   it('forwards override changes via onOverrideChange', () => {
     const onOverrideChange = jest.fn();
     render(

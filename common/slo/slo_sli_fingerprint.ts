@@ -67,6 +67,17 @@ export function computeSliFingerprint(
     // pre-existing fingerprint (and the recording rules named after it)
     // stable, and the generator infers the same default either way.
     ...(prom.metricTemporality ? { metricTemporality: prom.metricTemporality } : {}),
+    // Same rule for the bucket layout and unit: only SLIs that set them hash
+    // them (both change the generated math), so existing fingerprints don't move.
+    ...(prom.type === 'latency_threshold' && prom.bucketLayout === 'per_range'
+      ? {
+          bucketLayout: prom.bucketLayout,
+          bucketBounds: [...new Set(prom.bucketBounds ?? [])].sort((a, b) => a - b),
+        }
+      : {}),
+    ...(prom.type === 'latency_threshold' && prom.bucketUnit
+      ? { bucketUnit: prom.bucketUnit }
+      : {}),
     dimensions: normalizeDimensions(sli.dimensions),
   });
 

@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SLO_HEALTH_COLOR, SLO_HEALTH_ORDER, getSloHealthColor, getSloHealthLabel } from '../state';
+import {
+  SLO_HEALTH_COLOR,
+  SLO_HEALTH_ORDER,
+  getSliUncomputableExplanation,
+  getSloHealthColor,
+  getSloHealthLabel,
+} from '../state';
 import type { SloHealthState } from '../slo_types';
 
 describe('slo state helpers', () => {
@@ -88,6 +94,41 @@ describe('slo state helpers', () => {
       expect(breachedIdx).toBeGreaterThanOrEqual(0);
       expect(rulesMissingIdx).toBe(breachedIdx + 1);
       expect(warningIdx).toBe(rulesMissingIdx + 1);
+    });
+  });
+
+  describe('getSliUncomputableExplanation', () => {
+    const status = (cause?: 'buckets_not_cumulative' | 'no_threshold_bucket' | 'unknown') => ({
+      state: 'sli_uncomputable',
+      objectives: [
+        {
+          state: 'sli_uncomputable' as const,
+          uncomputable: cause ? { cause } : undefined,
+        },
+      ],
+    });
+
+    it('explains a histogram whose buckets do not accumulate', () => {
+      expect(getSliUncomputableExplanation(status('buckets_not_cumulative'))).toBe(
+        "The histogram's buckets don't accumulate, so latency can't be calculated."
+      );
+    });
+
+    it('explains a histogram with no bucket at the threshold', () => {
+      expect(getSliUncomputableExplanation(status('no_threshold_bucket'))).toBe(
+        'The histogram has no bucket at the latency threshold.'
+      );
+    });
+
+    it('falls back to a generic reason, and is undefined for other states', () => {
+      expect(getSliUncomputableExplanation(status())).toBe(
+        "The source metric has data, but this SLI can't be calculated from it."
+      );
+      // A custom SLI's cause is `unknown`: the same short generic reason.
+      expect(getSliUncomputableExplanation(status('unknown'))).toBe(
+        "The source metric has data, but this SLI can't be calculated from it."
+      );
+      expect(getSliUncomputableExplanation({ state: 'source_idle' })).toBeUndefined();
     });
   });
 });
