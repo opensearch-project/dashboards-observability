@@ -72,7 +72,7 @@ describe('alerts_charts', () => {
     const option = mockSetOption.mock.calls[0][0] as {
       series: Array<{ name: string; type: string; stack: string }>;
     };
-    expect(option.series.map((s) => s.name)).toEqual(['critical', 'high', 'medium', 'low', 'info']);
+    expect(option.series.map((s) => s.name)).toEqual(['Critical', 'High', 'Medium', 'Low', 'Info']);
     expect(option.series.every((s) => s.type === 'bar' && s.stack === 'severity')).toBe(true);
   });
 
@@ -167,7 +167,7 @@ describe('alerts_charts', () => {
     const option = mockSetOption.mock.calls[0][0] as {
       series: Array<{ name: string; data: number[] }>;
     };
-    const critical = option.series.find((s) => s.name === 'critical');
+    const critical = option.series.find((s) => s.name === 'Critical');
     expect(critical).toBeDefined();
     const total = (critical!.data as number[]).reduce((a, b) => a + b, 0);
     expect(total).toBe(1);
@@ -200,7 +200,7 @@ describe('alerts_charts', () => {
     const option = mockSetOption.mock.calls[0][0] as {
       series: Array<{ name: string; data: number[] }>;
     };
-    const critical = option.series.find((s) => s.name === 'critical');
+    const critical = option.series.find((s) => s.name === 'Critical');
     expect(critical).toBeDefined();
     // Bucket 0 must not be inflated by the pre-window alert. The in-window
     // alert started at END-30m, which lands in a later bucket, so bucket 0 is 0.
@@ -251,7 +251,7 @@ describe('alerts_charts', () => {
       series: Array<{ name: string; data: number[] }>;
     };
     // Only the in-window alert is on the bars.
-    const critical = option.series.find((s) => s.name === 'critical');
+    const critical = option.series.find((s) => s.name === 'Critical');
     const total = (critical!.data as number[]).reduce((a, b) => a + b, 0);
     expect(total).toBe(1);
     // The bad one is reconcilable via the title note.
@@ -269,7 +269,7 @@ describe('alerts_charts', () => {
     const option = mockSetOption.mock.calls[0][0] as {
       series: Array<{ name: string; data: number[] }>;
     };
-    const critical = option.series.find((s) => s.name === 'critical');
+    const critical = option.series.find((s) => s.name === 'Critical');
     const data = critical!.data as number[];
     // Counted, and specifically in the final bucket.
     expect(data.reduce((a, b) => a + b, 0)).toBe(1);

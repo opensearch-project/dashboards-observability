@@ -37,6 +37,22 @@ export const SEVERITY_COLORS: Record<string, string> = {
   info: 'default',
 };
 
+/** Severity rank, most severe first. Unknown values sort after `info`. */
+export const SEVERITY_SORT_ORDER: Record<string, number> = {
+  critical: 0,
+  high: 1,
+  medium: 2,
+  low: 3,
+  info: 4,
+};
+
+/** Severities most severe first, so facets list Critical → Info rather than A → Z. */
+export function sortBySeverity(values: string[]): string[] {
+  return [...values].sort(
+    (a, b) => (SEVERITY_SORT_ORDER[a] ?? 5) - (SEVERITY_SORT_ORDER[b] ?? 5) || a.localeCompare(b)
+  );
+}
+
 // ============================================================================
 // Alert state
 // ============================================================================
@@ -53,6 +69,7 @@ export const STATE_COLORS: Record<string, string> = {
   silenced: 'default',
   resolved: 'success',
   error: 'danger',
+  deleted: 'subdued',
 };
 
 // ============================================================================

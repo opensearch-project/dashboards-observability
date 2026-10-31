@@ -51,7 +51,7 @@ import { CreateAdRuleFlyout, CreateAdRuleType } from './create_ad_rule_flyout';
 import { EditMonitor } from './create_monitor/edit_monitor';
 import { CreateMetricsMonitor, MetricsMonitorFormState } from './create_metrics_monitor';
 import { AlertsDashboard } from './alerts_dashboard';
-import { AlertDetailFlyout } from './alert_detail_flyout';
+import { AlertDetailFlyout, SourceRuleStatus } from './alert_detail_flyout';
 import { AnomalyDetailFlyout } from './anomaly_detail_flyout';
 import { CloudWatchAlarmDetailFlyout } from './cloudwatch_alarm_detail_flyout';
 import { NotificationRoutingPanel } from './notification_routing_panel';
@@ -157,6 +157,9 @@ export function parseAlarmsHashRoute(hash: string): {
   }
   return { tab, q, ds };
 }
+
+/** A parsed deep link plus `seq`, which counts link arrivals. */
+type AlarmsDeepLink = ReturnType<typeof parseAlarmsHashRoute> & { seq: number };
 
 const TAB_LABELS: Record<TabId, string> = {
   alerts: i18n.translate('observability.alerting.alarmsPage.tabLabel.alerts', {
@@ -264,9 +267,18 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // The hash-router lives at
   // `/<basepath>/app/observability-alerting#/rules?q=…`, so the `?q=…` is a
   // tail of `location.hash`, not `location.search`.
-  const [deepLink, setDeepLink] = useState(() => parseAlarmsHashRoute(window.location.hash));
+  //
+  // `seq` counts arrivals so a repeated link (same `q`, same `ds`) still
+  // re-applies. The params belong to the link, not the page: a tab click
+  // clears them (see `handleTabClick`), so they never re-seed a tab after the
+  // user has moved on.
+  const [deepLink, setDeepLink] = useState<AlarmsDeepLink>(() => ({
+    ...parseAlarmsHashRoute(window.location.hash),
+    seq: 0,
+  }));
   useEffect(() => {
-    const onHashChange = () => setDeepLink(parseAlarmsHashRoute(window.location.hash));
+    const onHashChange = () =>
+      setDeepLink((prev) => ({ ...parseAlarmsHashRoute(window.location.hash), seq: prev.seq + 1 }));
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
@@ -287,7 +299,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // Deep-link query params (`q=…&ds=…`) are intentionally not preserved on
   // user-initiated tab clicks — a stale filter from an inbound link
   // shouldn't follow the user into the Alerts / Routing tabs they navigate
-  // to next.
+  // to next, or come back when they return to the tab the link opened. Both
+  // the URL and the `deepLink` state drop them: tabs unmount on switch and
+  // re-seed their search box from `deepLink.q` when they mount again.
   //
   // `replaceState` does NOT fire `hashchange`, which is exactly what we
   // want here: we've already updated `activeTab` directly, and firing the
@@ -296,11 +310,28 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // cheapest path that still updates the URL bar.
   const handleTabClick = useCallback((next: TabId) => {
     setActiveTab(next);
+    setDeepLink((prev) => (prev.tab || prev.q || prev.ds ? { seq: prev.seq } : prev));
     const desiredHash = `#/${next}`;
     if (window.location.hash !== desiredHash) {
       window.history.replaceState(null, '', desiredHash);
     }
   }, []);
+
+  // Once the user edits a search a link seeded, the link's `q` in the URL no
+  // longer describes the page — drop it so a reload doesn't bring back a
+  // search they cleared. The `deepLink` state is left alone: the tab already
+  // holds the user's own query, and the state is cleared on the next tab click.
+  // Only `q` is dropped: `ds` still names the datasource the link selected, so
+  // a reload keeps it selected.
+  const handleLinkedSearchEdited = useCallback(() => {
+    const { tab, q, ds } = parseAlarmsHashRoute(window.location.hash);
+    if (!tab || !q) return;
+    const rest = ds ? `?${new URLSearchParams({ ds }).toString()}` : '';
+    window.history.replaceState(null, '', `#/${tab}${rest}`);
+  }, []);
+  // The tab a link's `q` was meant for. A link without a tab opens Alerts.
+  const linkedSearchFor = (tab: TabId): string | undefined =>
+    (deepLink.tab ?? 'alerts') === tab ? deepLink.q : undefined;
 
   // ---- Datasource selection (priority order + persistence) ----
   const { selectedDsIds, setSelectedDsIds } = useDatasourceSelection({
@@ -319,26 +350,22 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // selection so the user doesn't lose unrelated DS picks; if the cap
   // would be exceeded we slice off the oldest entries.
   //
-  // Tracked via a ref so a single deep-link applies once even though the
-  // effect's deps churn on every selection change. The ref is reset to
-  // the latest `deepLink.ds` whenever a new hashchange brings a fresh
-  // value — that way cross-tab deep-links inside the same app (alert
-  // flyout's "Open monitor") still re-apply.
-  const lastAppliedDsRef = useRef<string | undefined>(undefined);
+  // Tracked by the link's `seq` so each deep-link applies once even though
+  // the effect's deps churn on every selection change, and a later link to
+  // the same datasource (after the user unchecked it) still re-applies.
+  const lastAppliedDsSeqRef = useRef<number | undefined>(undefined);
   useEffect(() => {
     const dsId = deepLink.ds;
     if (!dsId) return;
     if (datasourcesLoading) return;
-    if (lastAppliedDsRef.current === dsId) return;
+    if (lastAppliedDsSeqRef.current === deepLink.seq) return;
     if (!datasources.some((d) => d.id === dsId)) return;
-    if (selectedDsIds.includes(dsId)) {
-      lastAppliedDsRef.current = dsId;
-      return;
-    }
+    lastAppliedDsSeqRef.current = deepLink.seq;
+    if (selectedDsIds.includes(dsId)) return;
     setSelectedDsIds([...selectedDsIds, dsId].slice(0, maxDatasources));
-    lastAppliedDsRef.current = dsId;
   }, [
     deepLink.ds,
+    deepLink.seq,
     datasources,
     datasourcesLoading,
     selectedDsIds,
@@ -665,6 +692,97 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     () => mergedRules.filter((r) => !deletedRuleIds.has(r.id)),
     [mergedRules, deletedRuleIds]
   );
+
+  // Whether the open alert's monitor is still in the rules list, so the flyout
+  // can say the monitor was deleted instead of linking to an empty Rules tab.
+  // Only OpenSearch alerts carry a monitor id that equals a rule id, and the
+  // answer is `unknown` unless that datasource's rules loaded completely.
+  const listedRuleStatus = useMemo<SourceRuleStatus>(() => {
+    if (!selectedAlert || selectedAlert.datasourceType !== 'opensearch') return 'unknown';
+    const monitorId = selectedAlert.monitorId ?? selectedAlert.labels?.monitor_id;
+    if (!monitorId || dataLoading || error) return 'unknown';
+    const dsName = datasources.find((d) => d.id === selectedAlert.datasourceId)?.name;
+    if (
+      !selectedDsIds.includes(selectedAlert.datasourceId) ||
+      (dsName &&
+        (rulesTruncatedDatasources.includes(dsName) ||
+          rulesWarnings.some((w) => w.datasourceName === dsName)))
+    ) {
+      return 'unknown';
+    }
+    return visibleRules.some(
+      (r) => r.datasourceId === selectedAlert.datasourceId && r.id === monitorId
+    )
+      ? 'exists'
+      : 'missing';
+  }, [
+    selectedAlert,
+    dataLoading,
+    error,
+    datasources,
+    selectedDsIds,
+    rulesTruncatedDatasources,
+    rulesWarnings,
+    visibleRules,
+  ]);
+
+  // The rules list can be older than the alerts (it refreshes on Rules-tab
+  // entry, focus and its poll), so a monitor created since it loaded would read
+  // as missing. Confirm "missing" with a lookup of the monitor itself before
+  // the flyout says it was deleted: a 404 confirms it, anything else leaves the
+  // answer `unknown`, and a hit refreshes the list (once per monitor). Only a
+  // confirmed `missing` is kept for the life of the page — a deleted monitor
+  // doesn't come back. `exists` / `unknown` are dropped whenever the rules
+  // list refetches, so a monitor deleted while the page is open is looked up
+  // again rather than keeping its "Open rule".
+  const selectedMonitorKey =
+    selectedAlert && listedRuleStatus === 'missing'
+      ? `${selectedAlert.datasourceId}\u0000${
+          selectedAlert.monitorId ?? selectedAlert.labels?.monitor_id
+        }`
+      : undefined;
+  const [monitorLookups, setMonitorLookups] = useState<Record<string, SourceRuleStatus>>({});
+  const monitorLookupsStartedRef = useRef(new Set<string>());
+  const monitorRefetchedRef = useRef(new Set<string>());
+  useEffect(() => {
+    setMonitorLookups((prev) => {
+      const keep = Object.entries(prev).filter(([, status]) => status === 'missing');
+      if (keep.length === Object.keys(prev).length) return prev;
+      for (const key of Object.keys(prev)) {
+        if (prev[key] !== 'missing') monitorLookupsStartedRef.current.delete(key);
+      }
+      return Object.fromEntries(keep);
+    });
+  }, [rules]);
+  const selectedMonitorLookup = selectedMonitorKey ? monitorLookups[selectedMonitorKey] : undefined;
+  useEffect(() => {
+    if (!selectedAlert || !selectedMonitorKey || selectedMonitorLookup) return;
+    if (monitorLookupsStartedRef.current.has(selectedMonitorKey)) return;
+    monitorLookupsStartedRef.current.add(selectedMonitorKey);
+    const key = selectedMonitorKey;
+    const monitorId = selectedAlert.monitorId ?? selectedAlert.labels?.monitor_id ?? '';
+    // The id is always an OpenSearch monitor id, so say so: the server then
+    // doesn't try other rule types for it.
+    osService.getRuleDetail(selectedAlert.datasourceId, monitorId, 'monitor').then(
+      () => {
+        setMonitorLookups((prev) => ({ ...prev, [key]: 'exists' }));
+        // Refresh the list so it picks the monitor up — once, so a list that
+        // still lacks it can't loop lookup → refetch → lookup.
+        if (!monitorRefetchedRef.current.has(key)) {
+          monitorRefetchedRef.current.add(key);
+          backgroundRefetchRules();
+        }
+      },
+      (err: unknown) => {
+        const e = err as { response?: { status?: number }; body?: { statusCode?: number } };
+        const status = e?.response?.status ?? e?.body?.statusCode;
+        setMonitorLookups((prev) => ({ ...prev, [key]: status === 404 ? 'missing' : 'unknown' }));
+      }
+    );
+  }, [selectedAlert, selectedMonitorKey, selectedMonitorLookup, osService, backgroundRefetchRules]);
+  const selectedAlertRuleStatus: SourceRuleStatus = selectedMonitorKey
+    ? (selectedMonitorLookup ?? 'unknown')
+    : listedRuleStatus;
 
   // Fires when a user tries to select past `maxDatasources`. Pops a warning
   // toast with an in-toast link to the Advanced Settings entry so they can
@@ -1655,7 +1773,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             onTimeChange={handleTimeChange}
             onRefresh={handleRefreshTime}
             datasourceErrorMap={datasourceErrorMapByName}
-            initialSearchQuery={deepLink.q}
+            initialSearchQuery={linkedSearchFor('alerts')}
+            initialSearchQueryKey={deepLink.seq}
+            onInitialSearchQueryEdited={handleLinkedSearchEdited}
           />
         </>
       );
@@ -1693,7 +1813,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           maxDatasources={maxDatasources}
           onDatasourceCapReached={handleDatasourceCapReached}
           datasourceErrorMap={datasourceErrorMapByName}
-          initialSearchQuery={deepLink.q}
+          initialSearchQuery={linkedSearchFor('rules')}
+          initialSearchQueryKey={deepLink.seq}
+          onInitialSearchQueryEdited={handleLinkedSearchEdited}
         />
       );
     }
@@ -1992,6 +2114,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           alert={selectedAlert}
           datasources={datasources}
           allAlerts={alerts}
+          sourceRuleStatus={selectedAlertRuleStatus}
           onClose={() => setSelectedAlert(null)}
           onAcknowledge={(id) => {
             handleAcknowledgeAlert(id);

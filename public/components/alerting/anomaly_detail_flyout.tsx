@@ -42,6 +42,7 @@ import Plotly, { PlotData } from 'plotly.js-dist';
 import plotComponentFactory from 'react-plotly.js/factory';
 import { Datasource, UnifiedAlertSummary } from '../../../common/types/alerting';
 import { SEVERITY_COLORS, STATE_COLORS } from './shared_constants';
+import { getSeverityLabel, getStateLabel } from './enum_labels';
 
 const AD_APP_ID = 'anomaly-detection-dashboards';
 const PlotComponent = plotComponentFactory(Plotly);
@@ -563,12 +564,12 @@ export const AnomalyDetailFlyout: React.FC<AnomalyDetailFlyoutProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiHealth color={STATE_COLORS[anomaly.state] || 'subdued'}>
-                  {anomaly.state}
+                  {getStateLabel(anomaly.state)}
                 </EuiHealth>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge color={SEVERITY_COLORS[anomaly.severity] || 'default'}>
-                  {anomaly.severity}
+                  {getSeverityLabel(anomaly.severity)}
                 </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>

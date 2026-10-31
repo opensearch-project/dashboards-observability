@@ -113,7 +113,8 @@ describe('AlertDetailFlyout', () => {
       />
     );
     expect(getByText('HighErrorRate')).toBeInTheDocument();
-    expect(getByText('OpenSearch')).toBeInTheDocument();
+    // Header badge and the Backend row both read "OpenSearch", not `opensearch`.
+    expect(getAllByText('OpenSearch')).toHaveLength(2);
     // Message appears both in the header and as the `summary` annotation below.
     expect(getAllByText('Error rate above threshold').length).toBeGreaterThan(0);
   });
@@ -413,6 +414,75 @@ describe('AlertDetailFlyout', () => {
       );
       fireEvent.click(getByText('Raw Alert Data'));
       expect(mockGetAlertDetail).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('alerts whose rule was deleted', () => {
+    const osAlert: UnifiedAlertSummary = {
+      ...baseAlert,
+      monitorId: 'mon-1',
+      labels: { monitor_id: 'mon-1', monitor_name: 'Checkout errors', trigger_name: 'Too many' },
+    };
+    const renderFlyout = (
+      alert: UnifiedAlertSummary,
+      sourceRuleStatus?: 'exists' | 'missing' | 'unknown'
+    ) =>
+      render(
+        <AlertDetailFlyout
+          alert={alert}
+          datasources={datasources}
+          sourceRuleStatus={sourceRuleStatus}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+
+    it('says the monitor no longer exists and drops the Open rule link', () => {
+      const { getByTestId, queryByTestId, queryByText } = renderFlyout(
+        { ...osAlert, state: 'deleted' },
+        'missing'
+      );
+      expect(getByTestId('alertDetailRuleDeletedCallout')).toHaveTextContent(
+        'The monitor for this alert no longer exists'
+      );
+      expect(getByTestId('alertDetailRuleDeletedCallout')).toHaveTextContent('Checkout errors');
+      expect(queryByTestId('alertDetailOpenSource')).toBeNull();
+      expect(queryByTestId('alertDetailSourceRuleLink')).toBeNull();
+      expect(getByTestId('alertDetailSourceRuleDeleted')).toHaveTextContent(
+        'Checkout errors (deleted)'
+      );
+      // A deleted-rule alert can't be acknowledged.
+      expect(queryByText('Acknowledge')).toBeNull();
+    });
+
+    it('flags an active alert whose monitor is missing from the rules list', () => {
+      const { getByTestId, queryByTestId, queryByText } = renderFlyout(osAlert, 'missing');
+      expect(getByTestId('alertDetailRuleDeletedCallout')).toBeInTheDocument();
+      expect(queryByTestId('alertDetailOpenSource')).toBeNull();
+      // The callout says it can't be acknowledged, so no Acknowledge button.
+      expect(queryByText('Acknowledge')).toBeNull();
+    });
+
+    it('keeps Open rule when only the trigger was deleted', () => {
+      const { getByTestId } = renderFlyout({ ...osAlert, state: 'deleted' }, 'exists');
+      expect(getByTestId('alertDetailRuleDeletedCallout')).toHaveTextContent(
+        'The trigger for this alert was deleted'
+      );
+      expect(getByTestId('alertDetailRuleDeletedCallout')).toHaveTextContent('Too many');
+      expect(getByTestId('alertDetailOpenSource')).toBeInTheDocument();
+    });
+
+    it('explains a deleted state even when the rules list is unavailable', () => {
+      const { getByTestId } = renderFlyout({ ...osAlert, state: 'deleted' });
+      expect(getByTestId('alertDetailRuleDeletedCallout')).toHaveTextContent(
+        'The rule for this alert was deleted'
+      );
+      expect(getByTestId('alertDetailOpenSource')).toBeInTheDocument();
+    });
+
+    it('shows no notice for a live alert whose rule exists', () => {
+      const { queryByTestId } = renderFlyout(osAlert, 'exists');
+      expect(queryByTestId('alertDetailRuleDeletedCallout')).toBeNull();
     });
   });
 

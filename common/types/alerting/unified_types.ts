@@ -245,8 +245,20 @@ export interface DatasourceService {
 // ============================================================================
 
 export type UnifiedAlertSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
+/**
+ * `deleted` is an alert whose monitor (or trigger) was deleted while the alert
+ * was still open. The backend keeps it for history, but nothing can act on it:
+ * it no longer fires, can't be acknowledged and has no rule to open.
+ */
 export type UnifiedAlertState =
-  'active' | 'pending' | 'insufficient_data' | 'acknowledged' | 'silenced' | 'resolved' | 'error';
+  | 'active'
+  | 'pending'
+  | 'insufficient_data'
+  | 'acknowledged'
+  | 'silenced'
+  | 'resolved'
+  | 'error'
+  | 'deleted';
 export type UnifiedAlertKind = 'alert' | 'anomaly';
 
 /** Lightweight alert representation for list views and tables. */

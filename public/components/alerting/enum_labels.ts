@@ -4,7 +4,11 @@
  */
 
 import { i18n } from '@osd/i18n';
-import type { UnifiedAlertSeverity, UnifiedAlertState } from '../../../common/types/alerting';
+import type {
+  CloudWatchAlarmState,
+  UnifiedAlertSeverity,
+  UnifiedAlertState,
+} from '../../../common/types/alerting';
 
 /**
  * Human-readable, translatable labels for the raw alert enums.
@@ -61,6 +65,9 @@ export const STATE_LABELS: Record<UnifiedAlertState, string> = {
   }),
   error: i18n.translate('observability.alerting.stateLabel.error', {
     defaultMessage: 'Error',
+  }),
+  deleted: i18n.translate('observability.alerting.stateLabel.deleted', {
+    defaultMessage: 'Rule deleted',
   }),
 };
 
@@ -148,4 +155,30 @@ const MONITOR_STATE_LABELS: Record<string, string> = {
 export function getMonitorStateLabel(value?: string | null): string {
   if (!value) return EMPTY_VALUE;
   return MONITOR_STATE_LABELS[value] ?? humanizeUnknown(value);
+}
+
+/**
+ * CloudWatch's own alarm states, worded the way the CloudWatch console shows
+ * them ("In alarm", not the API's `ALARM`), so they read like every other
+ * state in the alert and rule views.
+ */
+const CLOUDWATCH_STATE_LABELS: Record<CloudWatchAlarmState, string> = {
+  ALARM: i18n.translate('observability.alerting.cloudWatchStateLabel.alarm', {
+    defaultMessage: 'In alarm',
+  }),
+  OK: i18n.translate('observability.alerting.cloudWatchStateLabel.ok', {
+    defaultMessage: 'OK',
+  }),
+  INSUFFICIENT_DATA: i18n.translate(
+    'observability.alerting.cloudWatchStateLabel.insufficientData',
+    {
+      defaultMessage: 'Insufficient data',
+    }
+  ),
+};
+
+/** Display label for a CloudWatch alarm state. Returns {@link EMPTY_VALUE} when absent. */
+export function getCloudWatchStateLabel(state?: string | null): string {
+  if (!state) return EMPTY_VALUE;
+  return CLOUDWATCH_STATE_LABELS[state as CloudWatchAlarmState] ?? humanizeUnknown(state);
 }

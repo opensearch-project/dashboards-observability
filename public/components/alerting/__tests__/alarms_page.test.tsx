@@ -73,7 +73,13 @@ jest.mock('../create_metrics_monitor', () => ({
   },
 }));
 jest.mock('../create_monitor/edit_monitor', () => ({ EditMonitor: () => null }));
-jest.mock('../alert_detail_flyout', () => ({ AlertDetailFlyout: () => null }));
+const mockAlertFlyout = jest.fn();
+jest.mock('../alert_detail_flyout', () => ({
+  AlertDetailFlyout: (props: unknown) => {
+    mockAlertFlyout(props);
+    return null;
+  },
+}));
 
 const mockGetRuleDetail = jest.fn();
 jest.mock('../query_services/alerting_opensearch_service', () => ({
@@ -123,6 +129,7 @@ const emptyRulesHookResult = {
   isLoading: false,
   error: null,
   warnings: [],
+  truncatedDatasourceNames: [],
   setRules: jest.fn(),
   setRulesTotal: jest.fn(),
   refetch: jest.fn(),
@@ -932,6 +939,199 @@ describe('AlarmsPage', () => {
     fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
     expect(window.history.length).toBe(lengthAfterFirstClick);
     expect(window.location.hash).toBe('#/rules');
+  });
+});
+
+describe('AlarmsPage deep links', () => {
+  const lastProps = (mock: jest.Mock) => mock.mock.calls[mock.mock.calls.length - 1][0];
+
+  it("seeds only the linked tab's search and drops it after a tab click", async () => {
+    window.history.replaceState(null, '', '#/rules?q=monitor_id%3Amon-1');
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    expect(lastProps(mockMonitorsTable).initialSearchQuery).toBe('monitor_id:mon-1');
+
+    // The Rules link must not leak into the Alerts tab…
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-alerts'));
+    });
+    expect(lastProps(mockDashboard).initialSearchQuery).toBeUndefined();
+    expect(window.location.hash).toBe('#/alerts');
+
+    // …or come back when the user returns to Rules.
+    mockMonitorsTable.mockClear();
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    });
+    expect(lastProps(mockMonitorsTable).initialSearchQuery).toBeUndefined();
+    expect(window.location.hash).toBe('#/rules');
+  });
+
+  it('re-applies a repeated link with a new key', async () => {
+    window.history.replaceState(null, '', '#/rules?q=CheckoutErrors');
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    const firstKey = lastProps(mockMonitorsTable).initialSearchQueryKey;
+    await act(async () => {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    });
+    const next = lastProps(mockMonitorsTable);
+    expect(next.initialSearchQuery).toBe('CheckoutErrors');
+    expect(next.initialSearchQueryKey).not.toBe(firstKey);
+  });
+
+  it("drops the link's query from the URL once the user edits the search", async () => {
+    window.history.replaceState(null, '', '#/rules?q=monitor_id%3Amon-1&ds=ds-1');
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    await act(async () => {
+      lastProps(mockMonitorsTable).onInitialSearchQueryEdited();
+    });
+    // The link's datasource stays so a reload keeps it selected.
+    expect(window.location.hash).toBe('#/rules?ds=ds-1');
+  });
+
+  it("tells the alert flyout whether the alert's monitor still exists", async () => {
+    const datasources = [
+      { id: 'ds-os', name: 'local', type: 'opensearch', url: '', enabled: true },
+    ] as Datasource[];
+    const alert = {
+      id: 'a1',
+      datasourceId: 'ds-os',
+      datasourceType: 'opensearch',
+      name: 'Gone — t',
+      state: 'deleted',
+      severity: 'high',
+      startTime: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      labels: { monitor_id: 'mon-gone' },
+      annotations: {},
+      monitorId: 'mon-gone',
+    };
+    mockUseRulesData.mockReturnValue({
+      ...emptyRulesHookResult,
+      rules: [{ id: 'mon-live', name: 'Live', datasourceId: 'ds-os' }] as unknown as never,
+    });
+    await act(async () => {
+      render(
+        <AlarmsPage {...defaultProps} datasources={datasources} defaultDatasources={['ds-os']} />
+      );
+    });
+    // Not in the rules list: confirmed by looking the monitor up (404).
+    mockGetRuleDetail.mockRejectedValue({ response: { status: 404 } });
+    mockAlertFlyout.mockClear();
+    await act(async () => {
+      lastProps(mockDashboard).onViewDetail(alert);
+    });
+    expect(mockGetRuleDetail).toHaveBeenCalledWith('ds-os', 'mon-gone', 'monitor');
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('missing');
+
+    mockAlertFlyout.mockClear();
+    await act(async () => {
+      lastProps(mockDashboard).onViewDetail({
+        ...alert,
+        id: 'a2',
+        monitorId: 'mon-live',
+        labels: { monitor_id: 'mon-live' },
+      });
+    });
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('exists');
+  });
+
+  it('looks a monitor up again after the rules list refetches, catching a mid-session delete', async () => {
+    const datasources = [
+      { id: 'ds-os', name: 'local', type: 'opensearch', url: '', enabled: true },
+    ] as Datasource[];
+    const alert = {
+      id: 'a-1',
+      datasourceId: 'ds-os',
+      datasourceType: 'opensearch',
+      name: 'Mon — t',
+      state: 'active',
+      severity: 'high',
+      startTime: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      labels: { monitor_id: 'mon-1' },
+      annotations: {},
+      monitorId: 'mon-1',
+    };
+    const backgroundRefetch = jest.fn();
+    mockUseRulesData.mockReturnValue({ ...emptyRulesHookResult, rules: [], backgroundRefetch });
+    mockGetRuleDetail.mockResolvedValue({ id: 'mon-1' });
+    let view: ReturnType<typeof render> | undefined;
+    await act(async () => {
+      view = render(
+        <AlarmsPage {...defaultProps} datasources={datasources} defaultDatasources={['ds-os']} />
+      );
+    });
+    await act(async () => {
+      lastProps(mockDashboard).onViewDetail(alert);
+    });
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('exists');
+    expect(backgroundRefetch).toHaveBeenCalledTimes(1);
+
+    // The monitor is deleted; the rules list refetches (still without it).
+    mockGetRuleDetail.mockRejectedValue({ response: { status: 404 } });
+    mockUseRulesData.mockReturnValue({ ...emptyRulesHookResult, rules: [], backgroundRefetch });
+    await act(async () => {
+      view!.rerender(
+        <AlarmsPage {...defaultProps} datasources={datasources} defaultDatasources={['ds-os']} />
+      );
+    });
+    expect(mockGetRuleDetail).toHaveBeenCalledTimes(2);
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('missing');
+    // The list refresh after a hit happens once per monitor — no refetch loop.
+    expect(backgroundRefetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("doesn't call a monitor deleted until the lookup confirms it", async () => {
+    const datasources = [
+      { id: 'ds-os', name: 'local', type: 'opensearch', url: '', enabled: true },
+    ] as Datasource[];
+    const alertFor = (monitorId: string) => ({
+      id: `a-${monitorId}`,
+      datasourceId: 'ds-os',
+      datasourceType: 'opensearch',
+      name: 'New — t',
+      state: 'active',
+      severity: 'high',
+      startTime: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      labels: { monitor_id: monitorId },
+      annotations: {},
+      monitorId,
+    });
+    const backgroundRefetch = jest.fn();
+    mockUseRulesData.mockReturnValue({ ...emptyRulesHookResult, backgroundRefetch });
+    await act(async () => {
+      render(
+        <AlarmsPage {...defaultProps} datasources={datasources} defaultDatasources={['ds-os']} />
+      );
+    });
+
+    // A monitor created after the rules list loaded: the lookup finds it.
+    let resolveLookup: (v: unknown) => void = () => {};
+    mockGetRuleDetail.mockReturnValue(new Promise((r) => (resolveLookup = r)));
+    await act(async () => {
+      lastProps(mockDashboard).onViewDetail(alertFor('mon-new'));
+    });
+    // Pending → unknown, never "missing".
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('unknown');
+    await act(async () => {
+      resolveLookup({ id: 'mon-new' });
+    });
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('exists');
+    expect(backgroundRefetch).toHaveBeenCalled();
+
+    // A lookup that fails for another reason stays unknown.
+    mockGetRuleDetail.mockRejectedValue({ response: { status: 500 } });
+    await act(async () => {
+      lastProps(mockDashboard).onViewDetail(alertFor('mon-flaky'));
+    });
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('unknown');
   });
 });
 
