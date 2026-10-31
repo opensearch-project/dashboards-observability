@@ -1026,7 +1026,7 @@ describe('AlarmsPage deep links', () => {
     await act(async () => {
       lastProps(mockDashboard).onViewDetail(alert);
     });
-    expect(mockGetRuleDetail).toHaveBeenCalledWith('ds-os', 'mon-gone');
+    expect(mockGetRuleDetail).toHaveBeenCalledWith('ds-os', 'mon-gone', 'monitor');
     expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('missing');
 
     mockAlertFlyout.mockClear();
@@ -1039,6 +1039,52 @@ describe('AlarmsPage deep links', () => {
       });
     });
     expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('exists');
+  });
+
+  it('looks a monitor up again after the rules list refetches, catching a mid-session delete', async () => {
+    const datasources = [
+      { id: 'ds-os', name: 'local', type: 'opensearch', url: '', enabled: true },
+    ] as Datasource[];
+    const alert = {
+      id: 'a-1',
+      datasourceId: 'ds-os',
+      datasourceType: 'opensearch',
+      name: 'Mon — t',
+      state: 'active',
+      severity: 'high',
+      startTime: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      labels: { monitor_id: 'mon-1' },
+      annotations: {},
+      monitorId: 'mon-1',
+    };
+    const backgroundRefetch = jest.fn();
+    mockUseRulesData.mockReturnValue({ ...emptyRulesHookResult, rules: [], backgroundRefetch });
+    mockGetRuleDetail.mockResolvedValue({ id: 'mon-1' });
+    let view: ReturnType<typeof render> | undefined;
+    await act(async () => {
+      view = render(
+        <AlarmsPage {...defaultProps} datasources={datasources} defaultDatasources={['ds-os']} />
+      );
+    });
+    await act(async () => {
+      lastProps(mockDashboard).onViewDetail(alert);
+    });
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('exists');
+    expect(backgroundRefetch).toHaveBeenCalledTimes(1);
+
+    // The monitor is deleted; the rules list refetches (still without it).
+    mockGetRuleDetail.mockRejectedValue({ response: { status: 404 } });
+    mockUseRulesData.mockReturnValue({ ...emptyRulesHookResult, rules: [], backgroundRefetch });
+    await act(async () => {
+      view!.rerender(
+        <AlarmsPage {...defaultProps} datasources={datasources} defaultDatasources={['ds-os']} />
+      );
+    });
+    expect(mockGetRuleDetail).toHaveBeenCalledTimes(2);
+    expect(lastProps(mockAlertFlyout).sourceRuleStatus).toBe('missing');
+    // The list refresh after a hit happens once per monitor — no refetch loop.
+    expect(backgroundRefetch).toHaveBeenCalledTimes(1);
   });
 
   it("doesn't call a monitor deleted until the lookup confirms it", async () => {

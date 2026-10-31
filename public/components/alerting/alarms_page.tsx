@@ -730,8 +730,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // entry, focus and its poll), so a monitor created since it loaded would read
   // as missing. Confirm "missing" with a lookup of the monitor itself before
   // the flyout says it was deleted: a 404 confirms it, anything else leaves the
-  // answer `unknown`, and a hit refreshes the list. Results are kept per
-  // monitor for the life of the page — a deleted monitor doesn't come back.
+  // answer `unknown`, and a hit refreshes the list (once per monitor). Only a
+  // confirmed `missing` is kept for the life of the page — a deleted monitor
+  // doesn't come back. `exists` / `unknown` are dropped whenever the rules
+  // list refetches, so a monitor deleted while the page is open is looked up
+  // again rather than keeping its "Open rule".
   const selectedMonitorKey =
     selectedAlert && listedRuleStatus === 'missing'
       ? `${selectedAlert.datasourceId}\u0000${
@@ -740,16 +743,35 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       : undefined;
   const [monitorLookups, setMonitorLookups] = useState<Record<string, SourceRuleStatus>>({});
   const monitorLookupsStartedRef = useRef(new Set<string>());
+  const monitorRefetchedRef = useRef(new Set<string>());
   useEffect(() => {
-    if (!selectedAlert || !selectedMonitorKey) return;
+    setMonitorLookups((prev) => {
+      const keep = Object.entries(prev).filter(([, status]) => status === 'missing');
+      if (keep.length === Object.keys(prev).length) return prev;
+      for (const key of Object.keys(prev)) {
+        if (prev[key] !== 'missing') monitorLookupsStartedRef.current.delete(key);
+      }
+      return Object.fromEntries(keep);
+    });
+  }, [rules]);
+  const selectedMonitorLookup = selectedMonitorKey ? monitorLookups[selectedMonitorKey] : undefined;
+  useEffect(() => {
+    if (!selectedAlert || !selectedMonitorKey || selectedMonitorLookup) return;
     if (monitorLookupsStartedRef.current.has(selectedMonitorKey)) return;
     monitorLookupsStartedRef.current.add(selectedMonitorKey);
     const key = selectedMonitorKey;
     const monitorId = selectedAlert.monitorId ?? selectedAlert.labels?.monitor_id ?? '';
-    osService.getRuleDetail(selectedAlert.datasourceId, monitorId).then(
+    // The id is always an OpenSearch monitor id, so say so: the server then
+    // doesn't try other rule types for it.
+    osService.getRuleDetail(selectedAlert.datasourceId, monitorId, 'monitor').then(
       () => {
         setMonitorLookups((prev) => ({ ...prev, [key]: 'exists' }));
-        backgroundRefetchRules();
+        // Refresh the list so it picks the monitor up — once, so a list that
+        // still lacks it can't loop lookup → refetch → lookup.
+        if (!monitorRefetchedRef.current.has(key)) {
+          monitorRefetchedRef.current.add(key);
+          backgroundRefetchRules();
+        }
       },
       (err: unknown) => {
         const e = err as { response?: { status?: number }; body?: { statusCode?: number } };
@@ -757,9 +779,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         setMonitorLookups((prev) => ({ ...prev, [key]: status === 404 ? 'missing' : 'unknown' }));
       }
     );
-  }, [selectedAlert, selectedMonitorKey, osService, backgroundRefetchRules]);
+  }, [selectedAlert, selectedMonitorKey, selectedMonitorLookup, osService, backgroundRefetchRules]);
   const selectedAlertRuleStatus: SourceRuleStatus = selectedMonitorKey
-    ? (monitorLookups[selectedMonitorKey] ?? 'unknown')
+    ? (selectedMonitorLookup ?? 'unknown')
     : listedRuleStatus;
 
   // Fires when a user tries to select past `maxDatasources`. Pops a warning
