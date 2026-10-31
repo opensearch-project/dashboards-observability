@@ -1023,7 +1023,25 @@ function applyHistogramShapes(
     // Keep the probed shape so a threshold the user types later is checked
     // against the same buckets (see `latencyThresholdIssue`).
     if (shape.layout === 'cumulative') {
-      suggestions.push({ ...draft, histogramShape: shape });
+      // The generator reads a cumulative SLI's threshold bucket in seconds and
+      // falls back to the bound × 1000 only when that bucket is missing. For a
+      // histogram probed as milliseconds that's wrong whenever a small bound
+      // happens to equal the threshold in seconds (`le="5"` = 5 ms read as
+      // "under 5 s"), so pin the probed unit. Seconds histograms already have
+      // the exact bucket (checked above), so the fallback never fires and those
+      // drafts — and their fingerprints — stay as they were.
+      suggestions.push(
+        shape.unit === 'milliseconds'
+          ? {
+              ...draft,
+              histogramShape: shape,
+              input: {
+                ...draft.input,
+                spec: { ...spec, sli: { ...sli, definition: { ...def, bucketUnit: shape.unit } } },
+              },
+            }
+          : { ...draft, histogramShape: shape }
+      );
       continue;
     }
     suggestions.push({

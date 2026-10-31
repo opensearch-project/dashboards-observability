@@ -18,6 +18,7 @@ import {
 } from '../suggest_engine';
 import type { Suggestion } from '../suggest_engine';
 import type { HistogramShape } from '../histogram_shape';
+import { buildSliEventQueries } from '../../../../../../common/slo/slo_promql_generator';
 
 function getPromSli(
   sli: SingleSli | { type: string; definition?: { backend: string } }
@@ -566,6 +567,36 @@ describe('generateSuggestionsWithSkips — histogram bucket shapes', () => {
       plain.find((s) => s.key === 'http-lat:cart')?.input
     );
     expect(draft(out, 'http-lat:cart')?.histogramShape?.layout).toBe('cumulative');
+  });
+
+  it('pins bucketUnit on a cumulative millisecond draft so its threshold reads the ms bucket only', () => {
+    const msBase = {
+      ...base,
+      services: [{ serviceName: 'cart' }],
+    };
+    const out = generateSuggestionsWithSkips({
+      ...msBase,
+      histogramShapes: [shape('cart', { bounds: OTEL_MS_BOUNDS, unit: 'milliseconds' })],
+    });
+    const d = draft(out, 'http-lat:cart')!;
+    const def = getPromSli(getSpec(d.input).sli);
+    expect(def.bucketUnit).toBe('milliseconds');
+    // At 5 s, the good side must select le="5000" only — never le="5" (5 ms).
+    const spec = getSpec(d.input);
+    const q = buildSliEventQueries(
+      spec.sli as SingleSli,
+      { ...spec.objectives[0], latencyThreshold: 5 },
+      '5m'
+    ) as { good: string };
+    expect(q.good).not.toContain(' or ');
+    const re = new RegExp(`^(?:${q.good.match(/le=~"([^"]*)"/)![1].replace(/\\\\/g, '\\')})$`);
+    expect(re.test('5000')).toBe(true);
+    expect(re.test('5')).toBe(false);
+  });
+
+  it('leaves a cumulative seconds draft without bucketUnit (unchanged fingerprint)', () => {
+    const out = generateSuggestionsWithSkips({ ...base, histogramShapes: [shape('cart', {})] });
+    expect(getPromSli(getSpec(draft(out, 'http-lat:cart')!.input).sli).bucketUnit).toBeUndefined();
   });
 
   it('skips a cumulative draft with no bucket at the threshold', () => {

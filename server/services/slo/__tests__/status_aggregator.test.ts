@@ -709,6 +709,21 @@ describe('DirectQueryStatusAggregator.aggregate — SLI uncomputable', () => {
     expect(status.state).toBe('sli_uncomputable');
   });
 
+  it('a failed inline query keeps no_data instead of blaming the histogram', async () => {
+    const { client } = mockClient({
+      query: (body: unknown) => {
+        const text = JSON.stringify(body);
+        if (text.includes('slo_inline_objective')) throw new Error('query timed out');
+        return respondEmpty('6400', '6400')(body);
+      },
+    });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([latencyDoc()], ctxFor(promDatasource(), client));
+    expect(status.objectives[0].state).toBe('no_data');
+    expect(status.objectives[0].uncomputable).toBeUndefined();
+    expect(status.state).toBe('no_data');
+  });
+
   it('an empty latency SLI with no traffic stays no_data', async () => {
     const { client } = mockClient({ query: respondEmpty('0', '0') });
     const agg = new DirectQueryStatusAggregator(noopLogger());

@@ -694,8 +694,16 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     // empty or non-finite does the objective keep that state.
     const inlineObjectives = new Set<string>();
     const unresolved = spec.objectives.filter((o) => !byObjective.has(o.name));
+    let inlineAnswered = false;
     if (unresolved.length > 0) {
-      const inline = await this.evaluateObjectivesInline(doc, unresolved, longWindow, ctx, ds);
+      const { values: inline, ok } = await this.evaluateObjectivesInline(
+        doc,
+        unresolved,
+        longWindow,
+        ctx,
+        ds
+      );
+      inlineAnswered = ok;
       if (inline.size > 0) {
         byObjective = new Map(byObjective);
         sourceIdleObjectives = new Set(sourceIdleObjectives);
@@ -717,8 +725,10 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     // with no bucket at the threshold, where the `le` matcher selects nothing.
     // Without a diagnosis it would read "No data" while traffic flows.
     const def = spec.sli.type === 'single' ? spec.sli.definition : undefined;
+    // Only when the inline query actually ran: a failed one says nothing about
+    // the SLI, and diagnosing it would blame a histogram that may be fine.
     const emptyLatencyObjectives = new Set(
-      def?.backend === 'prometheus' && def.type === 'latency_threshold'
+      inlineAnswered && def?.backend === 'prometheus' && def.type === 'latency_threshold'
         ? unresolved
             .filter((o) => !byObjective.has(o.name) && !sourceIdleObjectives.has(o.name))
             .map((o) => o.name)
@@ -859,6 +869,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
    * Returns `objectiveName → errorRatio` for objectives that produced a
    * finite sample, `→ null` for ones that only produced NaN/Inf (the source
    * really had no traffic in the window), and omits ones with no sample.
+   * `ok` is false when the query couldn't run or failed, so callers don't
+   * read a missing sample as "the SLI evaluated to nothing".
    *
    * Never throws: a failed fallback leaves the recorded-sample derivation
    * untouched. Results are cached briefly per (datasource, query) because the
@@ -870,9 +882,9 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     window: string,
     ctx: SloStatusAggregationContext,
     ds: Datasource
-  ): Promise<Map<string, number | null>> {
+  ): Promise<{ values: Map<string, number | null>; ok: boolean }> {
     const out = new Map<string, number | null>();
-    if (doc.spec.sli.type !== 'single') return out;
+    if (doc.spec.sli.type !== 'single') return { values: out, ok: false };
     const sli = doc.spec.sli;
     const parts: string[] = [];
     objectives.forEach((objective, i) => {
@@ -882,7 +894,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       if (expr)
         parts.push(`label_replace((${expr}\n), "${INLINE_OBJECTIVE_LABEL}", "${i}", "", "")`);
     });
-    if (parts.length === 0) return out;
+    if (parts.length === 0) return { values: out, ok: false };
     const query = parts.join('\nor\n');
 
     let parsed: ParsedInstantResponse;
@@ -897,7 +909,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         this.logger.debug(
           `StatusAggregator: inline SLI evaluation failed for ${doc.id}: ${errMsg(err)}`
         );
-        return out;
+        return { values: out, ok: false };
       }
       if (this.inlineCache.size >= INLINE_CACHE_MAX_ENTRIES) this.inlineCache.clear();
       this.inlineCache.set(cacheKey, { parsed, expiresAt: Date.now() + INLINE_CACHE_TTL_MS });
@@ -921,7 +933,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       if (value !== undefined) out.set(objective.name, value);
       else if (nonFiniteIndexes.has(i)) out.set(objective.name, null);
     });
-    return out;
+    return { values: out, ok: true };
   }
 
   /**
