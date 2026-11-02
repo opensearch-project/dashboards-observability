@@ -590,6 +590,16 @@ describe('navigateToExploreMetrics (open in Discover metrics)', () => {
     expect(url).toContain('time:(from:now-15m,to:now)');
   });
 
+  it('sends only the UI mode in _a, so Explore uses its defaults for the tab and legacy state', () => {
+    navigateToExploreMetrics('up', 'conn-1', { from: 'now-15m', to: 'now' });
+
+    const url = windowOpenSpy.mock.calls[0][0];
+    expect(url).toContain('&_a=(ui:(metricsPageMode:query))');
+    // An empty section replaces Explore's defaults wholesale (tab.patterns undefined -> crash).
+    expect(url).not.toContain('tab:()');
+    expect(url).not.toContain('legacy:()');
+  });
+
   it('rison-quotes + encodes absolute ISO timestamps in _g', () => {
     navigateToExploreMetrics('up', 'conn-1', {
       from: '2026-09-18T18:11:01.655Z',

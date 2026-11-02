@@ -107,7 +107,10 @@ export function navigateToExploreMetrics(
   // (order matters, handled by escapeRisonString), and finally URL-encode for the hash.
   const risonSafeQuery = escapeRisonString(promqlQuery.replace(/\s+/g, ' ').trim());
   const q = `_q=(${dataset},language:PROMQL,query:'${encodeURIComponent(risonSafeQuery)}')`;
-  const a = `_a=(ui:(metricsPageMode:query),tab:(),legacy:())`;
+  // Only the UI mode is set: Explore fills the other app-state sections (tab, legacy) with its
+  // defaults when they are absent, but takes an empty object as the whole section (an empty
+  // `tab:()` leaves tab.patterns undefined and crashes the Metrics page).
+  const a = `_a=(ui:(metricsPageMode:query))`;
   const path = `metrics/#?${g}&${q}&${a}`;
 
   const fullUrl =
