@@ -47,7 +47,7 @@ import {
   TYPE_LABELS,
 } from '../shared_constants';
 import { TruncatedLabel } from '../../common/truncated_label';
-import { getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
+import { getCloudWatchStateLabel, getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
 import { DEFAULT_WIDTHS } from './resizable_columns';
 import { isPending } from './pending_rules';
 import type { CloudWatchWindowState } from '../hooks/use_cloudwatch_states_at';
@@ -322,9 +322,21 @@ export function buildTableColumns({
               </EuiFlexItem>
               {cw && (
                 <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
-                  <EuiToolTip content={at ? stateAtTooltip(at) : `CloudWatch state: ${cw.state}`}>
+                  <EuiToolTip
+                    content={
+                      at
+                        ? stateAtTooltip(at)
+                        : i18n.translate(
+                            'observability.alerting.monitorsTable.columns.cloudWatchStateTooltip',
+                            {
+                              defaultMessage: 'CloudWatch state: {state}',
+                              values: { state: getCloudWatchStateLabel(cw.state) },
+                            }
+                          )
+                    }
+                  >
                     <EuiBadge color={CLOUDWATCH_STATE_BADGE_COLOR[cw.state] || 'hollow'}>
-                      <span style={truncate}>CW: {cw.state}</span>
+                      <span style={truncate}>CW: {getCloudWatchStateLabel(cw.state)}</span>
                     </EuiBadge>
                   </EuiToolTip>
                 </EuiFlexItem>

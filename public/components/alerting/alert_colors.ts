@@ -44,6 +44,7 @@ export const STATE_HEX: Record<UnifiedAlertState, string> = {
   silenced: euiThemeVars.euiColorMediumShade,
   resolved: euiThemeVars.euiColorSuccess,
   error: euiThemeVars.euiColorDanger,
+  deleted: euiThemeVars.euiColorMediumShade,
 };
 
 /**

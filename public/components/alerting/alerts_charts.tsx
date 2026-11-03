@@ -23,6 +23,7 @@ import { EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
+import { getSeverityLabel } from './enum_labels';
 import { UnifiedAlertSummary } from '../../../common/types/alerting';
 import { uiSettingsService } from '../../../common/utils';
 
@@ -259,7 +260,8 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
         minInterval: 1,
       },
       series: severities.map((s) => ({
-        name: s.key,
+        // Legend and tooltip read "Critical", like the severity badges.
+        name: getSeverityLabel(s.key),
         type: 'bar' as const,
         stack: 'severity',
         data: buckets.map((b) => (b as unknown as Record<string, number>)[s.key]),
