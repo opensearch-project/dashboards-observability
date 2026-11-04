@@ -59,10 +59,13 @@ import type {
   SloDocument,
   SloHealthState,
   SloLiveStatus,
+  SliUncomputableReason,
 } from '../../../common/slo/slo_types';
 import {
   buildErrorRatioExpr,
+  buildSourceTrafficQuery,
   dedupRecordingRuleName,
+  SOURCE_TRAFFIC_PART_LABEL,
   findClosestRecordingWindow,
   parseDurationToMs,
 } from '../../../common/slo/slo_promql_generator';
@@ -691,8 +694,16 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     // empty or non-finite does the objective keep that state.
     const inlineObjectives = new Set<string>();
     const unresolved = spec.objectives.filter((o) => !byObjective.has(o.name));
+    let inlineAnswered = false;
     if (unresolved.length > 0) {
-      const inline = await this.evaluateObjectivesInline(doc, unresolved, longWindow, ctx, ds);
+      const { values: inline, ok } = await this.evaluateObjectivesInline(
+        doc,
+        unresolved,
+        longWindow,
+        ctx,
+        ds
+      );
+      inlineAnswered = ok;
       if (inline.size > 0) {
         byObjective = new Map(byObjective);
         sourceIdleObjectives = new Set(sourceIdleObjectives);
@@ -709,19 +720,61 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       }
     }
 
+    // A latency SLI whose direct evaluation came back empty (not NaN) has no
+    // series on its good side — the classic case being a cumulative histogram
+    // with no bucket at the threshold, where the `le` matcher selects nothing.
+    // Without a diagnosis it would read "No data" while traffic flows.
+    const def = spec.sli.type === 'single' ? spec.sli.definition : undefined;
+    // Only when the inline query actually ran: a failed one says nothing about
+    // the SLI, and diagnosing it would blame a histogram that may be fine.
+    const emptyLatencyObjectives = new Set(
+      inlineAnswered && def?.backend === 'prometheus' && def.type === 'latency_threshold'
+        ? unresolved
+            .filter((o) => !byObjective.has(o.name) && !sourceIdleObjectives.has(o.name))
+            .map((o) => o.name)
+        : []
+    );
+
+    // A NaN (or, for latency, empty) SLI usually means the source had no
+    // traffic — but when the source metric did record observations, the SLI
+    // just can't be computed from it (e.g. histogram buckets that don't cover
+    // the threshold). Calling that "Source idle" / "No data" would tell the
+    // user the service is quiet.
+    const uncomputable =
+      sourceIdleObjectives.size > 0 || emptyLatencyObjectives.size > 0
+        ? await this.diagnoseUncomputable(doc, longWindow, ctx, ds)
+        : null;
+
     const staleAfterMs = 2 * parseDurationToMs(longWindow);
     const nowMs = Date.now();
     let lastEvalMs: number | undefined;
     let anyStale = false;
     let anyObjectiveHasData = false;
     let anyObjectiveSourceIdle = false;
+    let anyObjectiveUncomputable = false;
 
     const objectiveStatuses: ObjectiveStatus[] = spec.objectives.map((obj) => {
       const s = byObjective.get(obj.name);
       if (!s) {
         if (sourceIdleObjectives.has(obj.name)) {
+          if (uncomputable) {
+            anyObjectiveUncomputable = true;
+            return {
+              ...sourceIdleObjectiveStatus(obj, doc),
+              state: 'sli_uncomputable' as const,
+              uncomputable,
+            };
+          }
           anyObjectiveSourceIdle = true;
           return sourceIdleObjectiveStatus(obj, doc);
+        }
+        if (uncomputable && emptyLatencyObjectives.has(obj.name)) {
+          anyObjectiveUncomputable = true;
+          return {
+            ...emptyObjectiveStatus(obj, doc),
+            state: 'sli_uncomputable' as const,
+            uncomputable,
+          };
         }
         return emptyObjectiveStatus(obj, doc);
       }
@@ -739,7 +792,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       anyStale,
       anyObjectiveHasData,
       objectiveStatuses,
-      anyObjectiveSourceIdle
+      anyObjectiveSourceIdle,
+      anyObjectiveUncomputable
     );
 
     return {
@@ -815,6 +869,8 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
    * Returns `objectiveName → errorRatio` for objectives that produced a
    * finite sample, `→ null` for ones that only produced NaN/Inf (the source
    * really had no traffic in the window), and omits ones with no sample.
+   * `ok` is false when the query couldn't run or failed, so callers don't
+   * read a missing sample as "the SLI evaluated to nothing".
    *
    * Never throws: a failed fallback leaves the recorded-sample derivation
    * untouched. Results are cached briefly per (datasource, query) because the
@@ -826,9 +882,9 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
     window: string,
     ctx: SloStatusAggregationContext,
     ds: Datasource
-  ): Promise<Map<string, number | null>> {
+  ): Promise<{ values: Map<string, number | null>; ok: boolean }> {
     const out = new Map<string, number | null>();
-    if (doc.spec.sli.type !== 'single') return out;
+    if (doc.spec.sli.type !== 'single') return { values: out, ok: false };
     const sli = doc.spec.sli;
     const parts: string[] = [];
     objectives.forEach((objective, i) => {
@@ -838,7 +894,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       if (expr)
         parts.push(`label_replace((${expr}\n), "${INLINE_OBJECTIVE_LABEL}", "${i}", "", "")`);
     });
-    if (parts.length === 0) return out;
+    if (parts.length === 0) return { values: out, ok: false };
     const query = parts.join('\nor\n');
 
     let parsed: ParsedInstantResponse;
@@ -853,7 +909,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
         this.logger.debug(
           `StatusAggregator: inline SLI evaluation failed for ${doc.id}: ${errMsg(err)}`
         );
-        return out;
+        return { values: out, ok: false };
       }
       if (this.inlineCache.size >= INLINE_CACHE_MAX_ENTRIES) this.inlineCache.clear();
       this.inlineCache.set(cacheKey, { parsed, expiresAt: Date.now() + INLINE_CACHE_TTL_MS });
@@ -877,7 +933,59 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       if (value !== undefined) out.set(objective.name, value);
       else if (nonFiniteIndexes.has(i)) out.set(objective.name, null);
     });
-    return out;
+    return { values: out, ok: true };
+  }
+
+  /**
+   * Why a NaN SLI can't be computed, or null when the source simply had no
+   * traffic over `window` (so the objective stays `source_idle`). Only asked
+   * when an objective evaluated to NaN; SLI types whose NaN can only mean "no
+   * traffic" skip the query. Cached like the inline fallback. Never throws: a
+   * failed read answers null, keeping today's `source_idle`.
+   */
+  private async diagnoseUncomputable(
+    doc: SloDocument,
+    window: string,
+    ctx: SloStatusAggregationContext,
+    ds: Datasource
+  ): Promise<SliUncomputableReason | null> {
+    if (doc.spec.sli.type !== 'single') return null;
+    const query = buildSourceTrafficQuery(doc.spec.sli, window);
+    if (!query) return null;
+    const cacheKey = `${ds.id}\u0000${query}`;
+    let parsed: ParsedInstantResponse;
+    const cached = this.inlineCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      parsed = cached.parsed;
+    } else {
+      try {
+        parsed = await this.queryInstant(ctx, ds, query);
+      } catch (err) {
+        this.logger.debug(
+          `StatusAggregator: source traffic read failed for ${doc.id}: ${errMsg(err)}`
+        );
+        return null;
+      }
+      if (this.inlineCache.size >= INLINE_CACHE_MAX_ENTRIES) this.inlineCache.clear();
+      this.inlineCache.set(cacheKey, { parsed, expiresAt: Date.now() + INLINE_CACHE_TTL_MS });
+    }
+    const part = (name: string) =>
+      parsed.samples.find((sample) => sample.labels[SOURCE_TRAFFIC_PART_LABEL] === name)?.value;
+    const observations = part('count') ?? 0;
+    if (!(observations > 0)) return null;
+    const inf = part('inf');
+    const def = doc.spec.sli.definition;
+    // A custom SLI's queries are the user's own: all we know is that the
+    // denominator has data and the ratio doesn't.
+    if (def.backend === 'prometheus' && def.type === 'custom') return { cause: 'unknown' };
+    return {
+      // The cumulative math divides by `+Inf`; a flat one while `_count` grows
+      // means the buckets don't accumulate.
+      cause:
+        inf !== undefined && inf <= 0.05 * observations
+          ? 'buckets_not_cumulative'
+          : 'no_threshold_bucket',
+    };
   }
 
   // --------------------------------------------------------------------------
@@ -1086,10 +1194,14 @@ export function deriveTopLevelState(
   anyStale: boolean,
   anyObjectiveHasData: boolean,
   objectives: readonly ObjectiveStatus[],
-  anyObjectiveSourceIdle: boolean = false
+  anyObjectiveSourceIdle: boolean = false,
+  anyObjectiveUncomputable: boolean = false
 ): SloHealthState {
   if (!enabled) return 'disabled';
   if (anyStale) return 'stale';
+  // Traffic arrives but the SLI can't be computed: say so rather than
+  // "Source idle" / "No data", which point the user at the wrong place.
+  if (!anyObjectiveHasData && anyObjectiveUncomputable) return 'sli_uncomputable';
   // Distinguish "rule fired NaN/Inf because source metric is idle" from
   // "rule never ran". Both states show "no signal" on the listing, but the
   // source_idle case points users at the upstream metric/Data-Prepper
@@ -1101,6 +1213,11 @@ export function deriveTopLevelState(
     ok: 0,
     no_data: 1,
     source_idle: 1,
+    // Its own rank so the result doesn't depend on objective order: a broken
+    // SLI on one objective outranks "no data yet" on another, but a budget
+    // actually burning (warning / breached) on another objective wins — that
+    // one is the signal alerts act on.
+    sli_uncomputable: 1.5,
     warning: 2,
     breached: 3,
     // rules_missing is never set per-objective (it's a top-level overlay

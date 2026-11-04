@@ -36,7 +36,7 @@ import {
 import { i18n } from '@osd/i18n';
 import type { SloHealthState, SloSummary } from '../../../../../common/slo/slo_types';
 import { formatPct, SLO_PRECISION, TABULAR_NUMS_STYLE } from '../../../../../common/slo/format';
-import { getSloHealthColor } from '../../../../../common/slo/state';
+import { getSliUncomputableExplanation, getSloHealthColor } from '../../../../../common/slo/state';
 import { SloHealthAccessError, SloHealthBucket } from '../slos/slo_health_summary';
 import { ChipRow } from '../slos/slo_health_chip_row';
 import { navigateToSloSuggest } from '../../shared/utils/navigation_utils';
@@ -160,6 +160,10 @@ const t = {
   currentSourceIdle: i18n.translate('observability.apm.serviceDetails.sloTab.current.sourceIdle', {
     defaultMessage: 'Source idle',
   }),
+  currentSliUncomputable: i18n.translate(
+    'observability.apm.serviceDetails.sloTab.current.sliUncomputable',
+    { defaultMessage: "Can't compute" }
+  ),
   currentStale: i18n.translate('observability.apm.serviceDetails.sloTab.current.stale', {
     defaultMessage: 'Stale',
   }),
@@ -187,6 +191,10 @@ const t = {
       source_idle: i18n.translate('observability.apm.serviceDetails.sloTab.state.sourceIdle', {
         defaultMessage: 'Source idle',
       }),
+      sli_uncomputable: i18n.translate(
+        'observability.apm.serviceDetails.sloTab.state.sliUncomputable',
+        { defaultMessage: "Can't compute" }
+      ),
       stale: i18n.translate('observability.apm.serviceDetails.sloTab.state.stale', {
         defaultMessage: 'Stale',
       }),
@@ -273,6 +281,7 @@ function worstTargetLabel(slo: SloSummary): string {
 function currentPlaceholderLabel(state: SloHealthState): string | null {
   if (state === 'no_data') return t.currentAwaitingData;
   if (state === 'source_idle') return t.currentSourceIdle;
+  if (state === 'sli_uncomputable') return t.currentSliUncomputable;
   if (state === 'stale') return t.currentStale;
   if (state === 'disabled') return t.currentDisabled;
   if (state === 'rules_missing') return t.currentRulesMissing;
@@ -331,9 +340,11 @@ export const ServiceSloTab: React.FC<ServiceSloTabProps> = ({
       {
         name: t.colState,
         render: (row: SloSummary) => (
-          <EuiHealth color={getSloHealthColor(row.status.state)}>
-            {t.stateLabel(row.status.state)}
-          </EuiHealth>
+          <EuiToolTip content={getSliUncomputableExplanation(row.status)}>
+            <EuiHealth color={getSloHealthColor(row.status.state)}>
+              {t.stateLabel(row.status.state)}
+            </EuiHealth>
+          </EuiToolTip>
         ),
       },
       {

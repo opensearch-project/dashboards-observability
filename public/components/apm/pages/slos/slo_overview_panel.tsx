@@ -75,6 +75,12 @@ const STATE_DISPLAY: Record<SloHealthState, { label: string; color: string }> = 
     }),
     color: euiThemeVars.euiColorMediumShade,
   },
+  sli_uncomputable: {
+    label: i18n.translate('observability.apm.slo.overviewPanel.state.sliUncomputable', {
+      defaultMessage: "Can't compute",
+    }),
+    color: euiThemeVars.euiColorWarning,
+  },
   stale: {
     label: i18n.translate('observability.apm.slo.overviewPanel.state.stale', {
       defaultMessage: 'Stale',
@@ -106,7 +112,11 @@ function worstBudgetRemaining(summary: SloSummary): number {
 function isReporting(summary: SloSummary): boolean {
   const state = summary.status.state;
   return (
-    state !== 'no_data' && state !== 'source_idle' && state !== 'stale' && state !== 'disabled'
+    state !== 'no_data' &&
+    state !== 'source_idle' &&
+    state !== 'sli_uncomputable' &&
+    state !== 'stale' &&
+    state !== 'disabled'
   );
 }
 
@@ -427,6 +437,7 @@ export const SloOverviewPanel: React.FC<SloOverviewPanelProps> = ({
           break;
         case 'no_data':
         case 'source_idle':
+        case 'sli_uncomputable':
         case 'stale':
           noData++;
           break;

@@ -13,6 +13,7 @@ import {
   applyTemplate,
 } from '../wizard_state';
 import { buildCreateInput } from '../wizard_builders';
+import { computeSliFingerprint } from '../../../../../../common/slo/slo_sli_fingerprint';
 
 describe('wizard_state reducer', () => {
   it('starts with a single objective and the 28d window default', () => {
@@ -345,6 +346,83 @@ describe('hydrateFromDoc (edit-mode prefill)', () => {
     const state = { ...hydrated.state, ownerTeam: 'oncall' };
     const rebuilt = buildCreateInput(state, hydrated.template);
     expect(rebuilt.spec.owner.teams).toEqual(['oncall']);
+  });
+
+  describe('SLI source shape (bucket layout, temporality)', () => {
+    const perRangeDoc = () => {
+      const doc = makeDoc();
+      doc.spec.sli = {
+        type: 'single',
+        definition: {
+          backend: 'prometheus',
+          type: 'latency_threshold',
+          calcMethod: 'events',
+          metric: 'http_server_request_duration_seconds_bucket',
+          latencyThresholdUnit: 'seconds',
+          bucketLayout: 'per_range',
+          bucketBounds: [0, 5, 10, 25, 50, 100, 250, 500, 1000],
+          bucketUnit: 'milliseconds',
+        },
+        dimensions: [{ name: 'service_name', value: 'checkout' }],
+      };
+      doc.spec.objectives = [{ name: 'p95', target: 0.95, latencyThreshold: 0.5 }];
+      return doc;
+    };
+    const fp = (spec: SloDocument['spec']) =>
+      spec.sli.type === 'single'
+        ? computeSliFingerprint(spec.datasourceId, spec.sli, spec.objectives[0])
+        : '';
+
+    it('round-trips a per-range latency SLI with an unchanged fingerprint', () => {
+      const doc = perRangeDoc();
+      const hydrated = hydrateFromDoc(doc)!;
+      // A rename and a new target must not touch how the histogram is read.
+      const state = {
+        ...hydrated.state,
+        name: 'renamed',
+        objectives: [{ ...hydrated.state.objectives[0], target: '99' }],
+      };
+      const rebuilt = buildCreateInput(state, hydrated.template);
+      const sli = rebuilt.spec.sli;
+      expect(sli.type === 'single' && sli.definition).toMatchObject({
+        bucketLayout: 'per_range',
+        bucketBounds: [0, 5, 10, 25, 50, 100, 250, 500, 1000],
+        bucketUnit: 'milliseconds',
+      });
+      expect(fp(rebuilt.spec)).toBe(fp(doc.spec));
+    });
+
+    it('keeps an explicit metric temporality through an edit', () => {
+      const doc = makeDoc();
+      if (doc.spec.sli.type === 'single' && doc.spec.sli.definition.backend === 'prometheus') {
+        doc.spec.sli.definition.metricTemporality = 'delta';
+      }
+      const hydrated = hydrateFromDoc(doc)!;
+      const rebuilt = buildCreateInput(hydrated.state, hydrated.template);
+      const sli = rebuilt.spec.sli;
+      expect(
+        sli.type === 'single' && sli.definition.backend === 'prometheus'
+          ? sli.definition.metricTemporality
+          : undefined
+      ).toBe('delta');
+      expect(fp(rebuilt.spec)).toBe(fp(doc.spec));
+    });
+
+    it('drops the source shape when the user switches to another metric', () => {
+      const hydrated = hydrateFromDoc(perRangeDoc())!;
+      const state = { ...hydrated.state, metric: 'rpc_server_duration_seconds_bucket' };
+      const rebuilt = buildCreateInput(state, hydrated.template);
+      const sli = rebuilt.spec.sli;
+      const def =
+        sli.type === 'single' && sli.definition.backend === 'prometheus' ? sli.definition : null;
+      expect(def?.bucketLayout).toBeUndefined();
+      expect(def?.bucketBounds).toBeUndefined();
+      expect(def?.bucketUnit).toBeUndefined();
+    });
+
+    it('carries nothing for an SLI without source-shape fields', () => {
+      expect(hydrateFromDoc(makeDoc())!.state.preservedSliSource).toBeNull();
+    });
   });
 
   it('returns null for composite SLIs (cannot be edited in the wizard)', () => {

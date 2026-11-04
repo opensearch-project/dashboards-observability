@@ -304,6 +304,19 @@ describe('SloDetailPage — View alerts pivot (OBS1)', () => {
   });
 });
 
+describe("SloDetailPage — Can't compute health", () => {
+  it('announces the state and its reason in the health label', async () => {
+    const doc = makeDoc({ liveStatusState: 'sli_uncomputable' });
+    doc.liveStatus.objectives[0].uncomputable = { cause: 'no_threshold_bucket' };
+    renderPage({ get: jest.fn().mockResolvedValue(doc) });
+    const dot = await screen.findByTestId('slosDetailHealthDot');
+    expect(dot).toHaveAttribute(
+      'aria-label',
+      "Health: Can't compute. The histogram has no bucket at the latency threshold."
+    );
+  });
+});
+
 describe('SloDetailPage — Edit affordance (BUG-S3)', () => {
   it('renders an Edit action linking to the SLO edit route', async () => {
     renderPage({ get: jest.fn().mockResolvedValue(makeDoc()) });

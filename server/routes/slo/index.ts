@@ -134,6 +134,11 @@ const prometheusSliSchema = schema.object(
     metricTemporality: schema.maybe(
       schema.oneOf([schema.literal('cumulative'), schema.literal('delta')])
     ),
+    bucketLayout: schema.maybe(schema.literal('per_range')),
+    bucketBounds: schema.maybe(schema.arrayOf(schema.number({ min: 0 }), { maxSize: 64 })),
+    bucketUnit: schema.maybe(
+      schema.oneOf([schema.literal('seconds'), schema.literal('milliseconds')])
+    ),
     customExpr: schema.maybe(
       schema.oneOf([
         schema.object({
