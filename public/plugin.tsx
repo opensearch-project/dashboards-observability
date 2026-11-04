@@ -876,10 +876,12 @@ export class ObservabilityPlugin implements Plugin<
     // take effect on the next page load. Components
     // (`apm/pages/services_home`, `apm/pages/service_details`) read this ref.
     const observabilityCapabilities = core.application.capabilities.observability as
-      { alertManagerEnabled?: boolean; sloEnabled?: boolean } | undefined;
+      | { alertManagerEnabled?: boolean; sloEnabled?: boolean; apmInfrastructureEnabled?: boolean }
+      | undefined;
     const sloEnabledFromCapability = !!observabilityCapabilities?.sloEnabled;
     const alertManagerEnabledFromCapability = !!observabilityCapabilities?.alertManagerEnabled;
     coreRefs.sloEnabled = sloEnabledFromCapability;
+    coreRefs.apmInfrastructureEnabled = !!observabilityCapabilities?.apmInfrastructureEnabled;
 
     // Hide nav links whose dynamic capability says off. The apps register
     // unconditionally, so URL access still works for users who type the

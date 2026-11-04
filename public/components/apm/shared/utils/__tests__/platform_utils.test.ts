@@ -4,16 +4,19 @@
  */
 
 import {
-  getPlatformDisplayName,
-  getPlatformTypeFromEnvironment,
-  toPrometheusLabel,
   PLATFORM_TYPE_MAP,
-  isDependencyType,
-  isDependencyPlaceholder,
-  getNodeTypeLabel,
-  normalizeNodeType,
+  getApmPlatform,
   getDependencySystemFromName,
   getNodeIconType,
+  getNodeSubtitle,
+  getNodeTypeLabel,
+  getPlatformDisplayName,
+  getPlatformTypeFromEnvironment,
+  getServicePlatformType,
+  isDependencyPlaceholder,
+  isDependencyType,
+  normalizeNodeType,
+  toPrometheusLabel,
 } from '../platform_utils';
 
 describe('platform_utils', () => {
@@ -203,5 +206,34 @@ describe('platform_utils', () => {
       });
       jest.dontMock('@osd/apm-topology');
     });
+  });
+});
+
+describe('detected platform (apm.platform)', () => {
+  it('reads apm.platform nested, flat or as an array', () => {
+    expect(getApmPlatform({ apm: { platform: ['eks'] } })).toBe('eks');
+    expect(getApmPlatform({ 'apm.platform': 'host' })).toBe('host');
+    expect(getApmPlatform({ name: 'x' })).toBeUndefined();
+    expect(getApmPlatform(undefined)).toBeUndefined();
+  });
+
+  it('prefers the detected platform over the environment string', () => {
+    expect(getServicePlatformType({ apm: { platform: ['eks'] } }, 'poc')).toBe('AWS::EKS');
+    expect(getServicePlatformType({ apm: { platform: ['kubernetes'] } }, 'poc')).toBe('Kubernetes');
+    expect(getServicePlatformType({ apm: { platform: ['host'] } }, 'poc')).toBe('Host');
+    expect(getPlatformDisplayName('Kubernetes')).toBe('Kubernetes');
+  });
+
+  it('falls back to the environment string when detection is off or generic', () => {
+    expect(getServicePlatformType({ name: 'x' }, 'eks:prod/shop')).toBe('AWS::EKS');
+    expect(getServicePlatformType({ apm: { platform: ['generic'] } }, 'ec2:default')).toBe(
+      'AWS::EC2'
+    );
+    expect(getServicePlatformType({ apm: { platform: ['generic'] } }, 'poc')).toBe('Generic');
+  });
+
+  it('uses the platform type for a service node subtitle', () => {
+    expect(getNodeSubtitle('service', 'poc', 'Kubernetes')).toBe('Kubernetes');
+    expect(getNodeSubtitle('database', 'poc', 'Kubernetes')).toBe('Database');
   });
 });

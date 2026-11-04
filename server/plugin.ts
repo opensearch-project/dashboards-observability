@@ -342,7 +342,7 @@ export class ObservabilityPlugin implements Plugin<
     // without an OSD restart.
     //
     // yml flag semantics:
-    //   - `alertManager.enabled` / `slo.enabled` — UI visibility default
+    //   - `alertManager.enabled` / `slo.enabled` / `apmInfrastructure.enabled` — UI visibility default
     //     for environments without a configured DynamicConfigService
     //     (open-source / GitHub OSD). Read once here and used as the
     //     fallback in both the capability provider and the switcher's
@@ -353,6 +353,7 @@ export class ObservabilityPlugin implements Plugin<
     const observabilityConfig = await this.initializerContext.config
       .create<{
         alertManager?: { enabled?: boolean };
+        apmInfrastructure?: { enabled?: boolean };
         cloudwatch?: { enabled?: boolean; defaultRegion?: string };
         errors?: { exposeSensitiveErrorDetail?: boolean };
         slo?: {
@@ -381,6 +382,7 @@ export class ObservabilityPlugin implements Plugin<
     // dynamic store overrides them per account/application.
     const ymlAlertManagerEnabled = observabilityConfig.alertManager?.enabled ?? false;
     const ymlSloEnabled = observabilityConfig.slo?.enabled ?? false;
+    const ymlApmInfrastructureEnabled = observabilityConfig.apmInfrastructure?.enabled ?? false;
     // CloudWatch alarms (experimental) need, per request, the flag on and a source that reaches
     // CloudWatch with the caller's credentials. This plugin ships no source (and no AWS SDK), so
     // here they stay off; a deployment that can reach CloudWatch provides the factory at this
@@ -548,6 +550,7 @@ export class ObservabilityPlugin implements Plugin<
         show: true,
         alertManagerEnabled: ymlAlertManagerEnabled,
         sloEnabled: ymlSloEnabled,
+        apmInfrastructureEnabled: ymlApmInfrastructureEnabled,
         // Whether the browser shows the virtual CloudWatch datasource; resolved per request by
         // the switcher below (flag and source), off until then.
         cloudWatchAlarmsEnabled: false,
@@ -578,6 +581,8 @@ export class ObservabilityPlugin implements Plugin<
             ...(capabilities.observability || {}),
             alertManagerEnabled: config.alertManager?.enabled ?? ymlAlertManagerEnabled,
             sloEnabled: config.slo?.enabled ?? ymlSloEnabled,
+            apmInfrastructureEnabled:
+              config.apmInfrastructure?.enabled ?? ymlApmInfrastructureEnabled,
             cloudWatchAlarmsEnabled: await isCloudWatchAvailable(request).catch(() => false),
           },
         };

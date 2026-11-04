@@ -23,6 +23,7 @@ import { ServiceOverview } from './service_overview';
 import { ServiceOperations } from './service_operations';
 import { ServiceDependencies } from './service_dependencies';
 import { ServiceSloTab, SloTabLabel } from './service_slo_tab';
+import { ServiceInfrastructure } from './service_infrastructure';
 import { SloApiClient } from '../slos/slo_api_client';
 import { toSloHealthAccessError, useServiceSloHealth } from '../slos/slo_health_summary';
 import { coreRefs } from '../../../../framework/core_refs';
@@ -230,6 +231,9 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
   // hidden entirely and the rollup hook short-circuits. Mirrors the existing
   // "no datasource → disabled" path.
   const sloFeatureEnabled = !!coreRefs.sloEnabled;
+  // Feature flag: the Infrastructure tab is hidden unless `observability.apmInfrastructure.enabled`
+  // (dynamic config, then yml) is on. A deep link to it then falls back to the first tab.
+  const infrastructureEnabled = !!coreRefs.apmInfrastructureEnabled;
   const sloHealthDisabled = !sloFeatureEnabled || !sloApiClient || !prometheusConnectionId;
   const tabSloHealth = useServiceSloHealth({
     serviceNames: sloHealthDisabled ? [] : [serviceName],
@@ -297,6 +301,26 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
           />
         ),
       },
+      ...(infrastructureEnabled
+        ? [
+            {
+              id: SERVICE_DETAILS_CONSTANTS.TABS.INFRASTRUCTURE,
+              name: i18n.translate('observability.apm.serviceDetails.tabs.infrastructure', {
+                defaultMessage: 'Infrastructure',
+              }),
+              content: (
+                <ServiceInfrastructure
+                  serviceName={serviceName}
+                  environment={environment}
+                  timeRange={timeRange}
+                  prometheusConnectionId={prometheusConnectionId}
+                  refreshTrigger={refreshTrigger}
+                  onTimeRangeChange={handleTimeRangeChange}
+                />
+              ),
+            },
+          ]
+        : []),
       ...(sloFeatureEnabled
         ? [
             {
@@ -336,6 +360,7 @@ export const ServiceDetails: React.FC<ServiceDetailsProps> = ({
       tabSloHealth.isLoading,
       tabSloHealth.refetch,
       sloFeatureEnabled,
+      infrastructureEnabled,
     ]
   );
 

@@ -1,0 +1,102 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// Metric card grid, the same as the Explore metrics page (breakdownGridStyle).
+.apmInfraGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 8px;
+
+  &--rows {
+    grid-template-columns: 1fr;
+  }
+}
+
+.apmInfraCard {
+  padding: 6px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  &__title {
+    font-weight: 600;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Setup diagram: spans (row 1) and infra metrics (row 2) converge on the tab.
+.apmInfraSetup {
+  &__scroll {
+    overflow-x: auto;
+  }
+
+  &__diagram {
+    display: grid;
+    grid-template-columns:
+      minmax(110px, 1fr) 28px minmax(170px, 1.4fr) 28px minmax(150px, 1.2fr)
+      28px minmax(170px, 1.3fr);
+    grid-template-rows: auto auto;
+    row-gap: 12px;
+    align-items: stretch;
+    min-width: 760px;
+  }
+
+  &__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__node {
+    border: 1px solid $euiBorderColor;
+    border-left-width: 4px;
+    border-radius: 6px;
+    padding: 8px 10px;
+    background: $euiColorEmptyShade;
+
+    &--ok {
+      border-left-color: $euiColorSuccess;
+    }
+
+    &--missing {
+      border-color: $euiColorWarning;
+      background: tintOrShade($euiColorWarning, 90%, 80%);
+    }
+
+    &--optional {
+      border-left-color: $euiColorPrimary;
+    }
+
+    &--pending,
+    &--source {
+      border-style: dashed;
+      border-left-style: solid;
+    }
+  }
+
+  &__nodeTitle {
+    font-weight: 600;
+  }
+
+  &__codes {
+    margin-top: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+}
+
+.apmInfraCard__hint {
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+}

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, act } from '@testing-library/react';
+import { render, act, screen } from '@testing-library/react';
 import { ServiceDetails } from '../service_details';
 
 jest.mock('../../../config/apm_config_context', () => ({
@@ -28,7 +28,13 @@ jest.mock('../../slos/slo_health_summary', () => ({
   }),
   toSloHealthAccessError: () => undefined,
 }));
+jest.mock('../service_infrastructure', () => ({
+  ServiceInfrastructure: () => <div data-test-subj="mockInfrastructureTab" />,
+}));
 jest.mock('../../../../../framework/core_refs', () => ({ coreRefs: {} }));
+const mockCoreRefs: { apmInfrastructureEnabled?: boolean } = jest.requireMock(
+  '../../../../../framework/core_refs'
+).coreRefs;
 
 const setHash = (hash: string) => window.history.replaceState(null, '', hash);
 const hashParams = () => new URLSearchParams(window.location.hash.split('?')[1] ?? '');
@@ -256,5 +262,34 @@ describe('ServiceDetails time range URL sync', () => {
       />
     );
     expect(onTimeChange).toHaveBeenCalledWith({ from: 'now', to: 'now+1h' });
+  });
+});
+
+describe('ServiceDetails Infrastructure tab feature flag', () => {
+  const props = {
+    serviceName: 'checkout',
+    environment: 'prod',
+    onRefresh: jest.fn(),
+    refreshTrigger: 0,
+    timeRange: { from: 'now-15m', to: 'now' },
+    onTimeChange: jest.fn(),
+  };
+  afterEach(() => {
+    mockCoreRefs.apmInfrastructureEnabled = undefined;
+  });
+
+  it('hides the tab by default, and a deep link to it opens the first tab', () => {
+    setHash('#/service-details/checkout/prod?tab=infrastructure&from=now-15m&to=now');
+    render(<ServiceDetails {...props} />);
+    expect(screen.queryByText('Infrastructure')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockInfrastructureTab')).not.toBeInTheDocument();
+  });
+
+  it('shows the tab when observability.apmInfrastructure.enabled is on', () => {
+    mockCoreRefs.apmInfrastructureEnabled = true;
+    setHash('#/service-details/checkout/prod?tab=infrastructure&from=now-15m&to=now');
+    render(<ServiceDetails {...props} />);
+    expect(screen.getByText('Infrastructure')).toBeInTheDocument();
+    expect(screen.getByTestId('mockInfrastructureTab')).toBeInTheDocument();
   });
 });

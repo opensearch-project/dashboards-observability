@@ -291,7 +291,9 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     );
 
     if (matchingNode) {
-      const platformType = getPlatformTypeFromEnvironment(environment);
+      const platformType =
+        matchingNode.AttributeMaps?.[0]?.PlatformType ||
+        getPlatformTypeFromEnvironment(environment);
 
       // Auto-select the node (this triggers the flyout to open)
       setSelectedNode({
@@ -456,7 +458,8 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       }
 
       const node = nodes.find((n) => n.NodeId === nodeId);
-      const platformType = getPlatformTypeFromEnvironment(environment);
+      const platformType =
+        node?.AttributeMaps?.[0]?.PlatformType || getPlatformTypeFromEnvironment(environment);
 
       setSelectedNode({
         nodeId,

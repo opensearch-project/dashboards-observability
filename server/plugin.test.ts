@@ -31,9 +31,19 @@ describe('#setup capability switcher (dynamic feature flags)', () => {
   // tests can invoke it directly. `yml` seeds the yml-derived defaults
   // the switcher uses as its fallback chain.
   async function captureSwitcher(opts: {
-    yml?: { alertManager?: { enabled: boolean }; slo?: { enabled: boolean } };
+    yml?: {
+      alertManager?: { enabled: boolean };
+      slo?: { enabled: boolean };
+      apmInfrastructure?: { enabled: boolean };
+    };
     getConfigBehavior:
-      | { ok: { alertManager?: { enabled: boolean }; slo?: { enabled: boolean } } }
+      | {
+          ok: {
+            alertManager?: { enabled: boolean };
+            slo?: { enabled: boolean };
+            apmInfrastructure?: { enabled: boolean };
+          };
+        }
       | { reject: Error };
   }) {
     const initializerContext = coreMock.createPluginInitializerContext(opts.yml ?? {});
@@ -112,5 +122,40 @@ describe('#setup capability switcher (dynamic feature flags)', () => {
     };
     expect(result.observability.alertManagerEnabled).toBe(true);
     expect(result.observability.sloEnabled).toBe(false);
+  });
+
+  it('resolves the APM Infrastructure tab flag: off by default, yml, then dynamic config', async () => {
+    const off = await captureSwitcher({ getConfigBehavior: { ok: {} } });
+    expect(
+      (
+        (await off.switcher({}, { observability: {} })) as {
+          observability: { apmInfrastructureEnabled: boolean };
+        }
+      ).observability.apmInfrastructureEnabled
+    ).toBe(false);
+
+    const yml = await captureSwitcher({
+      yml: { apmInfrastructure: { enabled: true } },
+      getConfigBehavior: { ok: {} },
+    });
+    expect(
+      (
+        (await yml.switcher({}, { observability: {} })) as {
+          observability: { apmInfrastructureEnabled: boolean };
+        }
+      ).observability.apmInfrastructureEnabled
+    ).toBe(true);
+
+    const dynamic = await captureSwitcher({
+      yml: { apmInfrastructure: { enabled: true } },
+      getConfigBehavior: { ok: { apmInfrastructure: { enabled: false } } },
+    });
+    expect(
+      (
+        (await dynamic.switcher({}, { observability: {} })) as {
+          observability: { apmInfrastructureEnabled: boolean };
+        }
+      ).observability.apmInfrastructureEnabled
+    ).toBe(false);
   });
 });

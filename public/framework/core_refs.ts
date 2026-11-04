@@ -35,6 +35,8 @@ class CoreRefs {
   public queryAssistEnabled?: boolean;
   public summarizeEnabled?: boolean;
   public sloEnabled?: boolean;
+  /** APM service Infrastructure tab (`observability.apmInfrastructure.enabled`). */
+  public apmInfrastructureEnabled?: boolean;
   public cloudwatchEnabled?: boolean;
   public dashboard?: DashboardStart;
   public dashboardProviders?: unknown;
