@@ -75,6 +75,16 @@ export const useServiceMap = (params: UseServiceMapParams): UseServiceMapResult 
 
   const pplSearchService = useMemo(() => new PPLSearchService(), []);
 
+  // Identity of the current request. `isLoading` is true from the render the request changes in
+  // (not only once the effect has run), so consumers keying further queries on the nodes (map
+  // metrics, group totals) never send them for the previous time range's nodes and then cancel.
+  const request = useMemo(
+    () => ({}),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [params.startTime, params.endTime, refetchTrigger, params.refreshTrigger, queryIndex, dataset]
+  );
+  const [loadedRequest, setLoadedRequest] = useState<object | null>(null);
+
   const fetchParams = useMemo(
     () => ({
       queryIndex,
@@ -91,6 +101,7 @@ export const useServiceMap = (params: UseServiceMapParams): UseServiceMapResult 
       setNodes([]);
       setEdges([]);
       setIsLoading(false);
+      setLoadedRequest(request);
       return;
     }
 
@@ -118,18 +129,37 @@ export const useServiceMap = (params: UseServiceMapParams): UseServiceMapResult 
         setEdges([]);
         setTruncated(false);
       } finally {
-        if (!abortController.signal.aborted) setIsLoading(false);
+        if (!abortController.signal.aborted) {
+          setIsLoading(false);
+          setLoadedRequest(request);
+        }
       }
     };
 
     fetchServiceMap();
 
     return () => abortController.abort();
-  }, [pplSearchService, fetchParams, refetchTrigger, params.refreshTrigger, queryIndex, dataset]);
+  }, [
+    pplSearchService,
+    fetchParams,
+    refetchTrigger,
+    params.refreshTrigger,
+    queryIndex,
+    dataset,
+    request,
+  ]);
 
   const refetch = useCallback(() => {
     setRefetchTrigger((prev) => prev + 1);
   }, []);
 
-  return { nodes, edges, isLoading, error, availableGroupByAttributes, truncated, refetch };
+  return {
+    nodes,
+    edges,
+    isLoading: isLoading || loadedRequest !== request,
+    error,
+    availableGroupByAttributes,
+    truncated,
+    refetch,
+  };
 };

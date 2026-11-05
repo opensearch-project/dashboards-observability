@@ -85,9 +85,19 @@ jest.mock('../../../shared/components/service_correlations_flyout', () =>
   stub('ServiceCorrelationsFlyout')
 );
 jest.mock('../../../shared/components/active_filter_badges', () => ({
-  ActiveFilterBadges: ({ filters }: { filters: Array<{ category: string; values: string[] }> }) => (
+  ActiveFilterBadges: ({
+    filters,
+    onClearAll,
+  }: {
+    filters: Array<{ key: string; category: string; values: string[]; onRemove: () => void }>;
+    onClearAll: () => void;
+  }) => (
     <div data-test-subj="stub-ActiveFilterBadges">
       {filters.map((f) => `${f.category}: ${f.values.join(', ')}`).join(' | ')}
+      {filters.map((f) => (
+        <button key={f.key} data-test-subj={`stub-remove-${f.key}`} onClick={f.onRemove} />
+      ))}
+      <button data-test-subj="stub-clearAll" onClick={onClearAll} />
     </div>
   ),
   FilterBadge: () => null,
@@ -127,7 +137,8 @@ const makeService = (environment: string, serviceName: string) => ({
 
 const renderHome = (
   environments: string[],
-  availableGroupByAttributes: Record<string, string[]> = {}
+  availableGroupByAttributes: Record<string, string[]> = {},
+  servicesOverrides: Record<string, unknown> = {}
 ) => {
   mockUseServices.mockReturnValue({
     data: environments.map((env, i) => makeService(env, `svc-${i}`)),
@@ -135,6 +146,7 @@ const renderHome = (
     error: null,
     availableGroupByAttributes,
     refetch: jest.fn(),
+    ...servicesOverrides,
   });
   return render(
     <ServicesHome
@@ -276,13 +288,34 @@ describe('ServicesHome — Node type column and filter', () => {
     ]);
 
     expect(rowNames()).toEqual(['cart']);
-    expect(screen.getByTestId('stub-ActiveFilterBadges')).toHaveTextContent(
-      `${servicesI18nTexts.table.type}: Service`
+    // The default is the baseline, not a removable filter badge.
+    expect(screen.queryByTestId('stub-ActiveFilterBadges')?.textContent ?? '').not.toContain(
+      `${servicesI18nTexts.table.type}:`
     );
     // The (heavy, whole-range) dependency metric queries are not issued.
     const args = mockRedMetricsArgs.mock.calls.slice(-1)[0][0];
     expect(args.scopeFilters.runDependencies).toBe(false);
     expect(args.scopeServices.map((s: { serviceName: string }) => s.serviceName)).toEqual(['cart']);
+  });
+
+  it('removing the Type badge, or Clear all, returns to services only (not every type)', () => {
+    renderTyped([
+      { serviceName: 'cart', type: 'service' },
+      { serviceName: 'postgresql:orders-db', type: 'database' },
+    ]);
+    const group = within(screen.getByTestId('typeCheckboxGroup'));
+    const lastScope = () => mockRedMetricsArgs.mock.calls.slice(-1)[0][0].scopeFilters;
+
+    fireEvent.click(group.getByLabelText('Database'));
+    expect(rowNames()).toEqual(['cart', 'postgresql:orders-db']);
+    fireEvent.click(screen.getByTestId('stub-remove-type'));
+    expect(rowNames()).toEqual(['cart']);
+    expect(lastScope().runDependencies).toBe(false);
+
+    fireEvent.click(group.getByLabelText('Database'));
+    fireEvent.click(screen.getByTestId('stub-clearAll'));
+    expect(rowNames()).toEqual(['cart']);
+    expect(lastScope().runDependencies).toBe(false);
   });
 
   it('with dependency nodes, filters by type and shows a Type badge', () => {
@@ -381,5 +414,13 @@ describe('ServicesHome — metrics notices', () => {
     renderHome(['prod:default']);
     expect(screen.queryByTestId('servicesMetricsFailedCallout')).not.toBeInTheDocument();
     expect(screen.queryByTestId('servicesBroadFilterCallout')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('servicesCatalogPartialCallout')).not.toBeInTheDocument();
+  });
+
+  it('says so when the service list is partial', () => {
+    renderHome(['prod:default'], {}, { truncated: true });
+    expect(screen.getByTestId('servicesCatalogPartialCallout')).toHaveTextContent(
+      'Narrow the time range'
+    );
   });
 });

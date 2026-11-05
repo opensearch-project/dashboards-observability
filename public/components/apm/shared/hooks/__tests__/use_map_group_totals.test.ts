@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import {
-  ALL_GROUPS_KEY,
   groupByPrometheusLabel,
   readGroupValues,
   useMapGroupTotals,
 } from '../use_map_group_totals';
+import { ALL_GROUPS_KEY } from '../../../common/constants';
 import { getQueryMapGroupTotals } from '../../../query_services/query_requests/promql_queries';
 
 const mockExecuteInstantQuery = jest.fn();
@@ -18,8 +18,11 @@ jest.mock('../../../query_services/promql_search_service', () => ({
     executeInstantQuery: mockExecuteInstantQuery,
   })),
 }));
+const mockConfig: { current: Record<string, unknown> } = {
+  current: { prometheusDataSource: { name: 'prom' } },
+};
 jest.mock('../../../config/apm_config_context', () => ({
-  useApmConfig: () => ({ config: { prometheusDataSource: { name: 'prom' } } }),
+  useApmConfig: () => ({ config: mockConfig.current }),
 }));
 
 describe('getQueryMapGroupTotals', () => {
@@ -111,6 +114,57 @@ describe('useMapGroupTotals', () => {
   it('issues nothing when disabled', () => {
     const { result } = renderHook(() => useMapGroupTotals({ ...params, enabled: false }));
     expect(mockExecuteInstantQuery).not.toHaveBeenCalled();
-    expect(result.current).toEqual({ totals: null, isLoading: false });
+    expect(result.current).toEqual(
+      expect.objectContaining({ totals: null, isLoading: false, failed: false })
+    );
+  });
+
+  it('a failed query makes the totals unavailable (not a healthy 0), and retry re-runs them', async () => {
+    mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) =>
+      query.includes('fault{')
+        ? Promise.reject(new Error('timed out'))
+        : Promise.resolve(vector(1, 1))
+    );
+    const { result } = renderHook(() => useMapGroupTotals(params));
+    await waitFor(() => expect(result.current.failed).toBe(true));
+    expect(result.current.totals).toBeNull();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.error?.message).toBe('timed out');
+
+    mockExecuteInstantQuery.mockResolvedValue(vector(1, 1));
+    act(() => result.current.retry());
+    await waitFor(() => expect(result.current.totals).not.toBeNull());
+    expect(result.current.failed).toBe(false);
+  });
+
+  it('a result truncated at the series limit is unavailable too', async () => {
+    mockExecuteInstantQuery.mockResolvedValue({
+      type: 'data_frame',
+      fields: [],
+      meta: { truncation: { tableTruncated: true } },
+    });
+    const { result } = renderHook(() => useMapGroupTotals(params));
+    await waitFor(() => expect(result.current.failed).toBe(true));
+  });
+});
+
+describe('useMapGroupTotals without a Prometheus connection', () => {
+  afterEach(() => {
+    mockConfig.current = { prometheusDataSource: { name: 'prom' } };
+  });
+
+  it('is unavailable rather than loading forever', () => {
+    mockConfig.current = {};
+    const { result } = renderHook(() =>
+      useMapGroupTotals({
+        groupBy: null,
+        startTime: new Date('2026-01-01T00:00:00Z'),
+        endTime: new Date('2026-01-01T00:15:00Z'),
+        enabled: true,
+      })
+    );
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.failed).toBe(true);
+    expect(mockExecuteInstantQuery).not.toHaveBeenCalled();
   });
 });

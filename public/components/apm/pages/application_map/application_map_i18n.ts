@@ -250,6 +250,12 @@ export const applicationMapI18nTexts = {
           'Focused on {service} in {environment} and its {neighbors, plural, one {# connected node} other {# connected nodes}}',
         values: { service, environment, neighbors },
       }),
+    labelCapped: (service: string, environment: string, shown: number, total: number) =>
+      i18n.translate('observability.apm.applicationMap.focus.labelCapped', {
+        defaultMessage:
+          'Focused on {service} in {environment}: showing the nearest {shown, number} of {total, number} connected nodes',
+        values: { service, environment, shown, total },
+      }),
     exit: i18n.translate('observability.apm.applicationMap.focus.exit', {
       defaultMessage: 'Back to full map',
     }),
@@ -272,6 +278,36 @@ export const applicationMapI18nTexts = {
       defaultMessage: 'Full call path',
     }),
   },
+  partial: {
+    title: i18n.translate('observability.apm.applicationMap.partial.title', {
+      defaultMessage: 'Showing a partial topology',
+    }),
+    body: i18n.translate('observability.apm.applicationMap.partial.body', {
+      defaultMessage:
+        'Not every connection in this time range could be loaded, so some services or dependencies are not shown. Narrow the time range to see a complete view.',
+    }),
+  },
+  metrics: {
+    unavailable: i18n.translate('observability.apm.applicationMap.metrics.unavailable', {
+      defaultMessage: 'Metrics unavailable',
+    }),
+    failedTitle: i18n.translate('observability.apm.applicationMap.metrics.failedTitle', {
+      defaultMessage: 'Some metrics could not be loaded',
+    }),
+    failedBody: (nodes: number) =>
+      i18n.translate('observability.apm.applicationMap.metrics.failedBody', {
+        defaultMessage:
+          '{nodes, plural, one {# node shows} other {# nodes show}} "Metrics unavailable" instead of counts. The metrics query failed or timed out.',
+        values: { nodes },
+      }),
+    totalsFailedBody: i18n.translate('observability.apm.applicationMap.metrics.totalsFailedBody', {
+      defaultMessage:
+        'The request and error totals for this view could not be loaded, so they show as unavailable.',
+    }),
+    retry: i18n.translate('observability.apm.applicationMap.metrics.retry', {
+      defaultMessage: 'Retry',
+    }),
+  },
   largeMap: {
     groupedTitle: i18n.translate('observability.apm.applicationMap.largeMap.groupedTitle', {
       defaultMessage: 'Grouped by environment',
@@ -288,13 +324,16 @@ export const applicationMapI18nTexts = {
     tooManyBody: (services: number, limit: number) =>
       i18n.translate('observability.apm.applicationMap.largeMap.tooManyBody', {
         defaultMessage:
-          'This view has {services, number} nodes, too many to draw at once (the limit is {limit, number}). Group the map, narrow the selection with filters, or reduce the time range.',
+          'This view has {services, number} nodes, too many to draw at once (the limit is {limit, number}). Use Focus on to open one service and its connections, hide dependencies, group the map, or reduce the time range.',
         values: { services, limit },
       }),
     groupByEnvironment: i18n.translate(
       'observability.apm.applicationMap.largeMap.groupByEnvironment',
       { defaultMessage: 'Group by environment' }
     ),
+    hideDependencies: i18n.translate('observability.apm.applicationMap.largeMap.hideDependencies', {
+      defaultMessage: 'Hide dependencies',
+    }),
   },
   dependencyStacks: {
     title: i18n.translate('observability.apm.applicationMap.dependencyStacks.title', {

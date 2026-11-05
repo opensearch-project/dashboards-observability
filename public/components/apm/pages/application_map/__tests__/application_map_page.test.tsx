@@ -36,7 +36,14 @@ jest.mock('../../../shared/hooks/use_service_map', () => ({
   })),
 }));
 jest.mock('../../../shared/hooks/use_service_map_metrics', () => ({
-  useServiceMapMetrics: () => ({ metrics: new Map(), isLoading: false, refetch: jest.fn() }),
+  useServiceMapMetrics: () => ({
+    metricsMap: new Map(),
+    pendingNodeIds: new Set(),
+    failedNodeIds: new Set(),
+    retryFailed: jest.fn(),
+    isLoading: false,
+    refetch: jest.fn(),
+  }),
 }));
 jest.mock('../../../shared/hooks/use_selected_edge_metrics', () => ({
   useSelectedEdgeMetrics: () => ({ metrics: null, isLoading: false }),

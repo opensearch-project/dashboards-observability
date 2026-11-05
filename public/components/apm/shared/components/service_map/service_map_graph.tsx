@@ -15,6 +15,7 @@ import {
   EuiCallOut,
   EuiButton,
   EuiButtonEmpty,
+  EuiIcon,
 } from '@elastic/eui';
 import { CelestialMap, getIcon } from '@osd/apm-topology';
 import type { CelestialCardProps, CelestialEdge, Breadcrumb } from '@osd/apm-topology';
@@ -37,12 +38,17 @@ import {
 } from '../../../common/constants';
 import { matchesErrorRateThreshold } from '../filters';
 import { computeDependencyStacks } from '../../utils/dependency_stacking';
+import { isDependencyType } from '../../utils/platform_utils';
 import {
   ENVIRONMENT_GROUP_BY,
   exceedsMapRenderCap,
   getNodeGroupValue,
 } from '../../utils/map_grouping';
-import { ALL_GROUPS_KEY, GroupTotals } from '../../hooks/use_map_group_totals';
+import { ALL_GROUPS_KEY } from '../../../common/constants';
+import { GroupTotals } from '../../../common/types/service_map_types';
+
+/** Group totals as the page provides them: loaded, loading (null), or unavailable. */
+export type MapGroupTotals = Map<string, GroupTotals> | null | 'failed';
 import { applicationMapI18nTexts as i18nTexts } from '../../../pages/application_map/application_map_i18n';
 
 export interface ServiceMapGraphProps {
@@ -51,6 +57,10 @@ export interface ServiceMapGraphProps {
   metricsMap: Map<string, ServiceMapNodeMetrics>;
   /** nodeIds (serviceName::environment) whose metrics are still loading; shown with a spinner. */
   pendingNodeIds?: Set<string>;
+  /** nodeIds whose metrics failed to load; shown as unavailable, never as a healthy 0. */
+  failedNodeIds?: Set<string>;
+  /** Hides dependency nodes; offered when a view is too large to draw and includes them. */
+  onHideDependencies?: () => void;
   /**
    * Where to render the map's notices (large map grouped, dependency stacks, no filter matches),
    * e.g. a slot above the map next to the page's other banners. Without it they float over the
@@ -59,10 +69,10 @@ export interface ServiceMapGraphProps {
   noticesContainer?: HTMLElement | null;
   /**
    * Totals for the Application node (ALL_GROUPS_KEY) or the group nodes, from per-group queries
-   * (useMapGroupTotals); null while loading. When omitted, group totals are summed from
-   * metricsMap.
+   * (useMapGroupTotals); null while loading, 'failed' when unavailable. When omitted, group
+   * totals are summed from metricsMap.
    */
-  groupTotals?: Map<string, GroupTotals> | null;
+  groupTotals?: MapGroupTotals;
   /**
    * Fit the whole graph in view, zooming out as far as needed (e.g. a focused call path wider
    * than the panel). By default the map does not zoom out below 0.6, to keep cards readable.
@@ -106,6 +116,8 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
   edges,
   metricsMap,
   pendingNodeIds = NO_PENDING_NODES,
+  failedNodeIds = NO_PENDING_NODES,
+  onHideDependencies,
   noticesContainer,
   groupTotals,
   fitAll = false,
@@ -205,7 +217,7 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
         groupTotals
       );
     }
-    const built = buildCelestialNodes(levelGraph.nodes, metricsMap, pendingNodeIds);
+    const built = buildCelestialNodes(levelGraph.nodes, metricsMap, pendingNodeIds, failedNodeIds);
     if (dependencyStacks.stacks === 0) return built;
     // The topology package folds nodes sharing an aggregatedNodeId into one expandable stack.
     return built.map((node) => {
@@ -217,6 +229,7 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
     nodes,
     metricsMap,
     pendingNodeIds,
+    failedNodeIds,
     groupTotals,
     navigationState.groupByAttribute,
     dependencyStacks,
@@ -326,18 +339,21 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
 
       groups.forEach((groupNodes, groupValue) => {
         // Aggregate metrics for this group
-        const { totalRequests, totalFaults, totalErrors } = sumGroupMetrics(
+        const { totalRequests, totalFaults, totalErrors, pending, failed, known } = sumGroupMetrics(
           groupNodes,
           metricsMap,
           pendingNodeIds,
           groupTotals,
           groupValue
         );
+        // Totals still loading, failed, or missing: keep the group (as nodes without metrics
+        // are kept) instead of fading everything and flashing "no matches".
+        const metricsUnknown = pending || failed || !known;
 
         let matches = true;
 
         // Apply fault rate threshold filter on aggregate
-        if (filters.faultRateThresholds.length > 0) {
+        if (!metricsUnknown && filters.faultRateThresholds.length > 0) {
           const faultRate = totalRequests > 0 ? (totalFaults / totalRequests) * 100 : 0;
           const faultMatch = filters.faultRateThresholds.some((threshold) =>
             matchesErrorRateThreshold(faultRate, threshold)
@@ -346,7 +362,7 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
         }
 
         // Apply error rate threshold filter on aggregate
-        if (matches && filters.errorRateThresholds.length > 0) {
+        if (matches && !metricsUnknown && filters.errorRateThresholds.length > 0) {
           const errorRate = totalRequests > 0 ? (totalErrors / totalRequests) * 100 : 0;
           const errorMatch = filters.errorRateThresholds.some((threshold) =>
             matchesErrorRateThreshold(errorRate, threshold)
@@ -813,17 +829,32 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
             )}
           </p>
         }
-        actions={
+        actions={[
           onFiltersChange && filters.groupBy !== ENVIRONMENT_GROUP_BY ? (
             <EuiButton
+              key="groupByEnvironment"
               size="s"
               onClick={() => onFiltersChange({ ...filters, groupBy: ENVIRONMENT_GROUP_BY })}
               data-test-subj="serviceMapGroupByEnvironment"
             >
               {i18nTexts.largeMap.groupByEnvironment}
             </EuiButton>
-          ) : undefined
-        }
+          ) : null,
+          // Inside a large environment the environment grouping can't help; dropping the
+          // dependencies often brings the view under the limit.
+          onHideDependencies &&
+          levelGraph.kind === 'graph' &&
+          levelGraph.nodes.some((n) => isDependencyType(n.KeyAttributes.Type)) ? (
+            <EuiButton
+              key="hideDependencies"
+              size="s"
+              onClick={onHideDependencies}
+              data-test-subj="serviceMapHideDependencies"
+            >
+              {i18nTexts.largeMap.hideDependencies}
+            </EuiButton>
+          ) : null,
+        ].filter(Boolean)}
       />
     );
   }
@@ -880,9 +911,6 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
 
 const NO_PENDING_NODES: Set<string> = new Set();
 
-/** Fit-to-view that may zoom out far enough to show every node (see `fitAll`). */
-const FIT_ALL_VIEW_OPTIONS = { minZoom: 0.2, maxZoom: 1, padding: 0.15 };
-
 /**
  * Totals for a group of nodes (or the whole map, ALL_GROUPS_KEY): from the per-group queries
  * when the page provides them (null while they load), else summed from the nodes' metrics.
@@ -891,19 +919,28 @@ function sumGroupMetrics(
   groupNodes: ServiceMapNode[],
   metricsMap: Map<string, ServiceMapNodeMetrics>,
   pendingNodeIds: Set<string>,
-  groupTotals: Map<string, GroupTotals> | null | undefined,
+  groupTotals: MapGroupTotals | undefined,
   groupKey: string
-): GroupTotals & { pending: boolean } {
+): GroupTotals & { pending: boolean; failed: boolean; known: boolean } {
   if (groupTotals !== undefined) {
-    const totals = groupTotals?.get(groupKey);
+    const totals = groupTotals instanceof Map ? groupTotals.get(groupKey) : undefined;
     return {
       totalRequests: totals?.totalRequests ?? 0,
       totalFaults: totals?.totalFaults ?? 0,
       totalErrors: totals?.totalErrors ?? 0,
       pending: groupTotals === null,
+      failed: groupTotals === 'failed',
+      known: !!totals,
     };
   }
-  const sum = { totalRequests: 0, totalFaults: 0, totalErrors: 0, pending: false };
+  const sum = {
+    totalRequests: 0,
+    totalFaults: 0,
+    totalErrors: 0,
+    pending: false,
+    failed: false,
+    known: true,
+  };
   groupNodes.forEach((node) => {
     const nodeId = `${node.KeyAttributes.Name}::${node.KeyAttributes.Environment}`;
     if (pendingNodeIds.has(nodeId)) sum.pending = true;
@@ -925,18 +962,27 @@ const NO_MATCH_FOCUS_NODE = {
   data: { id: '__apmNoFilterMatch__', title: '', keyAttributes: {} },
 } as CelestialMapNode;
 
-/**
- * Tighter spacing for larger maps. The default layout reserves 156px per card plus a 100px gap
- * (cards are ~96-120px tall), which spreads a few hundred services across mostly empty space.
- * Small maps keep the default look.
- */
-const COMPACT_LAYOUT_MIN_NODES = 40;
-const COMPACT_LAYOUT = { nodeHeight: 120, nodeSeparation: 30, rankSeparation: 140 };
+const { COMPACT_LAYOUT_MIN_NODES, COMPACT_LAYOUT, FIT_ALL_VIEW_OPTIONS } =
+  APPLICATION_MAP_CONSTANTS;
 
 /** Shown in a node's donut while its metrics are loading. */
 const NODE_LOADING_ICON = (
   <EuiLoadingSpinner size="l" data-test-subj="serviceMapNodeMetricsLoading" />
 );
+
+/** Shown in a node's donut when its metrics could not be loaded (with a subtitle saying so). */
+const NODE_UNAVAILABLE_ICON = (
+  <EuiIcon
+    type="alert"
+    color="warning"
+    size="l"
+    data-test-subj="serviceMapNodeMetricsUnavailable"
+  />
+);
+
+/** The donut icon for a node or group: loading, unavailable, or its own icon. */
+const metricsIcon = (pending: boolean, failed: boolean, icon: string | JSX.Element) =>
+  pending ? NODE_LOADING_ICON : failed ? NODE_UNAVAILABLE_ICON : icon;
 
 /**
  * Create an aggregated application node representing all services
@@ -945,12 +991,12 @@ function createAggregatedApplicationNode(
   nodes: ServiceMapNode[],
   metricsMap: Map<string, ServiceMapNodeMetrics>,
   pendingNodeIds: Set<string>,
-  groupTotals: Map<string, GroupTotals> | null | undefined
+  groupTotals: MapGroupTotals | undefined
 ): CelestialMapNode | null {
   if (nodes.length === 0) return null;
 
   // Aggregate metrics from all services
-  const { totalRequests, totalFaults, totalErrors, pending } = sumGroupMetrics(
+  const { totalRequests, totalFaults, totalErrors, pending, failed } = sumGroupMetrics(
     nodes,
     metricsMap,
     pendingNodeIds,
@@ -970,7 +1016,8 @@ function createAggregatedApplicationNode(
       id: 'application-root',
       title: i18nTexts.navigation.application,
       // Totals are partial until every node's batch has landed.
-      icon: pending ? NODE_LOADING_ICON : getIcon('Generic'),
+      icon: metricsIcon(pending, failed, getIcon('Generic')),
+      ...(failed && { subtitle: i18nTexts.metrics.unavailable }),
       isGroup: true,
       keyAttributes: {},
       isInstrumented: true,
@@ -999,7 +1046,7 @@ function createGroupByNodes(
   metricsMap: Map<string, ServiceMapNodeMetrics>,
   groupByAttribute: string,
   pendingNodeIds: Set<string>,
-  groupTotals: Map<string, GroupTotals> | null | undefined
+  groupTotals: MapGroupTotals | undefined
 ): CelestialMapNode[] {
   // Get unique values for the group by attribute
   const groupValues = new Map<string, ServiceMapNode[]>();
@@ -1022,6 +1069,7 @@ function createGroupByNodes(
       totalFaults,
       totalErrors,
       pending: groupPending,
+      failed: groupFailed,
     } = sumGroupMetrics(groupNodes, metricsMap, pendingNodeIds, groupTotals, value);
 
     return {
@@ -1031,7 +1079,8 @@ function createGroupByNodes(
       data: {
         id: `group-${value}`,
         title: value,
-        icon: groupPending ? NODE_LOADING_ICON : getIcon('Generic'),
+        icon: metricsIcon(groupPending, groupFailed, getIcon('Generic')),
+        ...(groupFailed && { subtitle: i18nTexts.metrics.unavailable }),
         isGroup: true,
         keyAttributes: { groupByValue: value },
         isInstrumented: true,
@@ -1052,7 +1101,8 @@ function createGroupByNodes(
 function buildCelestialNodes(
   nodes: ServiceMapNode[],
   metricsMap: Map<string, ServiceMapNodeMetrics>,
-  pendingNodeIds: Set<string>
+  pendingNodeIds: Set<string>,
+  failedNodeIds: Set<string>
 ): CelestialMapNode[] {
   return nodes.map((node) => {
     const serviceName = node.KeyAttributes.Name;
@@ -1075,10 +1125,13 @@ function buildCelestialNodes(
       data: {
         id: node.NodeId,
         title: node.Name,
-        subtitle,
+        // A failed node says so: its counts are not a real 0.
+        subtitle: failedNodeIds.has(nodeId)
+          ? `${subtitle} · ${i18nTexts.metrics.unavailable}`
+          : subtitle,
         // While the node's metrics batch is in flight, the donut shows a spinner instead of
         // the type icon (its counts would otherwise read as a misleading 0).
-        icon: pendingNodeIds.has(nodeId) ? NODE_LOADING_ICON : getIcon(iconType),
+        icon: metricsIcon(pendingNodeIds.has(nodeId), failedNodeIds.has(nodeId), getIcon(iconType)),
         isGroup: false,
         keyAttributes: node.KeyAttributes,
         groupByAttributes: node.GroupByAttributes,

@@ -21,6 +21,8 @@ export interface UseServicesResult {
   isLoading: boolean;
   error: Error | null;
   availableGroupByAttributes: Record<string, string[]>;
+  /** The catalog is partial: the connection page cap was reached or a later page failed. */
+  truncated: boolean;
   refetch: () => void;
 }
 
@@ -89,6 +91,7 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
   const latestRequest = useRef(request);
   latestRequest.current = request;
   const [loadedRequest, setLoadedRequest] = useState<object | null>(null);
+  const [truncated, setTruncated] = useState(false);
 
   useEffect(() => {
     // Skip fetching if config is not ready
@@ -99,6 +102,10 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
       return;
     }
 
+    // Abort a superseded request (time range changed again, unmount): the catalog query pages
+    // up to MAX_EDGE_PAGES sequential requests, which would otherwise keep running.
+    const controller = new AbortController();
+
     const fetchServices = async () => {
       setIsLoading(true);
       setError(null);
@@ -107,8 +114,9 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
       const isCurrent = () => latestRequest.current === request;
 
       try {
-        const response = await pplSearchService.listServices(fetchParams);
+        const response = await pplSearchService.listServices(fetchParams, controller.signal);
         if (!isCurrent()) return;
+        setTruncated(!!response.truncated);
 
         // Response is now an object with ServiceSummaries and AvailableGroupByAttributes
         const availableAttributes = response.AvailableGroupByAttributes || {};
@@ -137,12 +145,14 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
         console.error('[useServices] Error fetching services:', err);
         setError(err instanceof Error ? err : new Error('Unknown error'));
         setData([]);
+        setTruncated(false);
       }
       setLoadedRequest(request);
       setIsLoading(false);
     };
 
     fetchServices();
+    return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request]);
 
@@ -159,6 +169,7 @@ export const useServices = (params: UseServicesParams): UseServicesResult => {
     isLoading: isLoading || loadedRequest !== request,
     error,
     availableGroupByAttributes,
+    truncated,
     refetch,
   };
 };

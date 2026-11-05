@@ -9,13 +9,6 @@ import { escapePPLString } from './escape_utils';
 /** Row cap for otherwise-unbounded list/topology PPL queries. */
 export const DEFAULT_ROW_LIMIT = 1000;
 
-/**
- * The topology / catalog edge queries are paged with `head DEFAULT_ROW_LIMIT from <offset>`
- * (ordered by nodeConnectionHash so pages do not overlap) up to this many pages. Large
- * deployments have thousands of connections; a single capped page silently dropped the rest.
- */
-export const MAX_EDGE_PAGES = 10;
-
 /** `| sort nodeConnectionHash | ... | head N from offset` tail shared by the paged edge queries. */
 const pagedEdgeClause = (fields: string, offset: number): string =>
   ` | sort nodeConnectionHash | fields ${fields} | head ${DEFAULT_ROW_LIMIT}${
@@ -74,6 +67,23 @@ function buildTimeFilterClause(
     return ` | where ${field} >= '${startStr}' and ${field} <= '${endStr}'`;
   }
   return '';
+}
+
+/**
+ * Approximate number of distinct connections in the time range (a cardinality aggregation,
+ * which no row limit applies to). Compared with the paged dedup rows to detect an incomplete
+ * result: on the 2.x (v2) PPL engine, `dedup` only sees the first `plugins.query.size_limit`
+ * raw documents, so pages can come back short with connections missing.
+ */
+export function getQueryDistinctEdgeCount(
+  queryIndex: string,
+  startTime?: string | Date,
+  endTime?: string | Date
+): string {
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query += ` | stats distinct_count(nodeConnectionHash) as edges`;
+  return query;
 }
 
 /**

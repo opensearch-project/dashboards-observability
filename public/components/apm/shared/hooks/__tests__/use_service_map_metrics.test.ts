@@ -8,9 +8,13 @@ import {
   useServiceMapMetrics,
   ServiceMapMetricParams,
   chunkNames,
-  MAP_METRICS_BATCH_SIZE,
-  MAP_METRICS_BATCH_MAX_CHARS,
 } from '../use_service_map_metrics';
+import { APPLICATION_MAP_CONSTANTS } from '../../../common/constants';
+
+const {
+  METRICS_BATCH_SIZE: MAP_METRICS_BATCH_SIZE,
+  METRICS_BATCH_MAX_CHARS: MAP_METRICS_BATCH_MAX_CHARS,
+} = APPLICATION_MAP_CONSTANTS;
 
 // Mock the PromQLSearchService
 const mockExecuteInstantQuery = jest.fn();
@@ -215,9 +219,12 @@ describe('useServiceMapMetrics', () => {
       });
 
       expect(result.current.error).toEqual(mockError);
-      // Promise.allSettled keeps sibling metrics flowing: on failure the map is
-      // still populated with zeroed entries rather than going empty.
-      expect(result.current.metricsMap.size).toBeGreaterThan(0);
+      // Failed nodes are unavailable, never a healthy 0, and no longer pending.
+      expect(result.current.metricsMap.size).toBe(0);
+      expect(result.current.failedNodeIds).toEqual(
+        new Set(['api-gateway::generic:default', 'user-service::eks:cluster'])
+      );
+      expect(result.current.pendingNodeIds.size).toBe(0);
     });
 
     it('should wrap non-Error throws', async () => {
@@ -423,8 +430,152 @@ describe('useServiceMapMetrics', () => {
         result.current.metricsMap.get(`svc-${MAP_METRICS_BATCH_SIZE}::generic:default`)
           ?.totalRequests
       ).toBe(7);
-      // The failed batch's nodes are settled (no spinner) with no data.
-      expect(result.current.metricsMap.get('svc-0::generic:default')?.totalRequests).toBe(0);
+      // The failed batch's nodes are unavailable (no spinner, no 0).
+      expect(result.current.metricsMap.has('svc-0::generic:default')).toBe(false);
+      expect(result.current.failedNodeIds.has('svc-0::generic:default')).toBe(true);
+      expect(result.current.failedNodeIds.size).toBe(MAP_METRICS_BATCH_SIZE);
+    });
+
+    it('a partial failure (faults only) marks the batch failed', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) =>
+        query.includes('fault{')
+          ? Promise.reject(new Error('Read timed out'))
+          : Promise.resolve({ data: { result: [] } })
+      );
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.failedNodeIds.size).toBe(2);
+      expect(result.current.metricsMap.size).toBe(0);
+    });
+
+    it('a malformed response fails its batch instead of leaving it pending', async () => {
+      mockExecuteInstantQuery.mockReset();
+      // `fields` without values makes indexing throw.
+      mockExecuteInstantQuery.mockResolvedValue({
+        type: 'data_frame',
+        fields: [{ name: 'Time' }, { name: 'Series' }, { name: 'Value' }],
+      });
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.failedNodeIds.size).toBe(2);
+    });
+
+    it('retryFailed re-fetches only the failed nodes', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockRejectedValueOnce(new Error('timeout'));
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
+      await waitFor(() => expect(result.current.failedNodeIds.size).toBe(2));
+      const callsBefore = mockExecuteInstantQuery.mock.calls.length;
+
+      act(() => result.current.retryFailed());
+      await waitFor(() => expect(result.current.failedNodeIds.size).toBe(0));
+      expect(result.current.metricsMap.size).toBe(2);
+      expect(result.current.error).toBeNull();
+      expect(mockExecuteInstantQuery.mock.calls.length - callsBefore).toBe(3);
+    });
+
+    it('splits a batch the server truncated at the series limit, and retries the halves', async () => {
+      mockExecuteInstantQuery.mockReset();
+      const services = manyServices(4);
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) => {
+        const names = (query.match(/service=~"([^"]+)"/)?.[1] ?? '').split('|');
+        return Promise.resolve(
+          names.length > 2
+            ? { type: 'data_frame', fields: [], meta: { truncation: { tableTruncated: true } } }
+            : { data: { result: [] } }
+        );
+      });
+      const { result } = renderHook(() => useServiceMapMetrics({ ...defaultParams, services }));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      const batchSizes = mockExecuteInstantQuery.mock.calls
+        .filter((c) => (c[0].query as string).includes('request{'))
+        .map((c) => (c[0].query.match(/service=~"([^"]+)"/)?.[1] ?? '').split('|').length);
+      expect(batchSizes).toEqual([4, 2, 2]);
+      expect(result.current.metricsMap.size).toBe(4);
+      expect(result.current.failedNodeIds.size).toBe(0);
+    });
+
+    it('a single name still truncated is unavailable, not partial', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({
+        type: 'data_frame',
+        fields: [],
+        meta: { truncation: { tableTruncated: true } },
+      });
+      const { result } = renderHook(() =>
+        useServiceMapMetrics({ ...defaultParams, services: manyServices(1) })
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(result.current.failedNodeIds).toEqual(new Set(['svc-0::generic:default']));
+    });
+
+    it('holds the concurrency limit across node-list changes, and drops batches that left the screen', async () => {
+      mockExecuteInstantQuery.mockReset();
+      let inFlight = 0;
+      let maxInFlight = 0;
+      const resolvers: Array<() => void> = [];
+      mockExecuteInstantQuery.mockImplementation(() => {
+        inFlight += 1;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+        return new Promise((resolve) =>
+          resolvers.push(() => {
+            inFlight -= 1;
+            resolve({ data: { result: [] } });
+          })
+        );
+      });
+      const group = (prefix: string) =>
+        Array.from({ length: MAP_METRICS_BATCH_SIZE * 2 }, (_, i) => ({
+          serviceName: `${prefix}-${i}`,
+          environment: 'generic:default',
+        }));
+
+      const { result, rerender } = renderHook(
+        (props: ServiceMapMetricParams) => useServiceMapMetrics(props),
+        { initialProps: { ...defaultParams, services: group('a') } }
+      );
+      // Open B, then C, while A's batches are still in flight.
+      rerender({ ...defaultParams, services: group('b') });
+      rerender({ ...defaultParams, services: group('c') });
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(6); // 2 batches x 3 queries
+      expect(maxInFlight).toBe(6);
+
+      // Drain everything.
+      while (resolvers.length > 0) {
+        await act(async () => resolvers.splice(0).forEach((r) => r()));
+      }
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(maxInFlight).toBe(6);
+      const queried = new Set(
+        mockExecuteInstantQuery.mock.calls.flatMap((c) =>
+          (c[0].query.match(/service=~"([^"]+)"/)?.[1] ?? '').split('|')
+        )
+      );
+      // A's two batches had started; B never started and was dropped; C was fetched.
+      expect(queried.has('a-0')).toBe(true);
+      expect(queried.has('b-0')).toBe(false);
+      expect(queried.has('c-0')).toBe(true);
+      expect(result.current.metricsMap.size).toBe(MAP_METRICS_BATCH_SIZE * 2);
+    });
+
+    it('aborts the in-flight batches when the time range changes', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockImplementation(() => new Promise(() => {}));
+      const { rerender } = renderHook(
+        (props: ServiceMapMetricParams) => useServiceMapMetrics(props),
+        { initialProps: defaultParams }
+      );
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(3));
+      const firstSignals = mockExecuteInstantQuery.mock.calls.map((c) => c[0].signal);
+      firstSignals.forEach((sig: AbortSignal) => expect(sig.aborted).toBe(false));
+
+      rerender({ ...defaultParams, endTime: new Date('2024-01-01T02:00:00Z') });
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(6));
+      firstSignals.forEach((sig: AbortSignal) => expect(sig.aborted).toBe(true));
     });
 
     it('refetches everything for a new time range', async () => {

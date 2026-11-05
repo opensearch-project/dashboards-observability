@@ -129,6 +129,8 @@ interface ServicesTablePanelProps {
   metricsFailed: boolean;
   /** The filter was too broad to narrow the metrics queries. */
   scopeFellBack: boolean;
+  /** The service list is partial (connection page cap reached, or a later page failed). */
+  catalogTruncated?: boolean;
   latencyPercentile: string;
   setLatencyPercentile: (v: 'p99' | 'p90' | 'p50') => void;
   onServiceClick?: (
@@ -177,6 +179,7 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
   scopeReady,
   metricsFailed,
   scopeFellBack,
+  catalogTruncated,
   latencyPercentile,
   setLatencyPercentile,
   onServiceClick,
@@ -269,6 +272,20 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
 
+      {catalogTruncated && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="alert"
+            title={i18nTexts.metricsNotice.catalogPartialTitle}
+            data-test-subj="servicesCatalogPartialCallout"
+          >
+            {i18nTexts.metricsNotice.catalogPartialBody}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
       {metricsFailed && !isTableLoading && (
         <>
           <EuiCallOut
@@ -451,6 +468,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     isLoading,
     error,
     availableGroupByAttributes,
+    truncated: catalogTruncated,
     refetch,
   } = useServices({
     startTime: parsedTimeRange.startTime,
@@ -1028,12 +1046,19 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     const selectedTypeValues = Object.entries(selectedTypes)
       .filter(([_, isSelected]) => isSelected)
       .map(([type]) => getNodeTypeLabel(type));
-    if (hasDependencyRows && selectedTypeValues.length > 0) {
+    // The services-only default is the baseline, not an applied filter: no badge for it.
+    const isDefaultTypes =
+      Object.keys(selectedTypes)
+        .filter((k) => selectedTypes[k])
+        .join('|') === Object.keys(DEFAULT_TYPE_FILTER).join('|');
+    if (hasDependencyRows && selectedTypeValues.length > 0 && !isDefaultTypes) {
       badges.push({
         key: 'type',
         category: i18nTexts.table.type,
         values: selectedTypeValues,
-        onRemove: () => setSelectedTypes({}),
+        // Back to the default (services only), not to every type: all types would bring back the
+        // whole-catalog dependency queries.
+        onRemove: () => setSelectedTypes(DEFAULT_TYPE_FILTER),
       });
     }
 
@@ -1120,7 +1145,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   // Clear all filters handler
   const handleClearAllFilters = useCallback(() => {
     setSelectedEnvironments({});
-    setSelectedTypes({});
+    setSelectedTypes(DEFAULT_TYPE_FILTER);
     setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
     setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
     setSelectedFailureRateThresholds([]);
@@ -1995,6 +2020,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           scopeReady={!isLoading}
                           metricsFailed={!!metricsError}
                           scopeFellBack={scopeFellBack}
+                          catalogTruncated={catalogTruncated}
                           latencyPercentile={latencyPercentile}
                           setLatencyPercentile={setLatencyPercentile}
                           onServiceClick={onServiceClick}

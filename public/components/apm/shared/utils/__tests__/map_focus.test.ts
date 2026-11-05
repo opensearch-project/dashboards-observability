@@ -68,3 +68,32 @@ describe('getNeighborhood', () => {
     expect(getNeighborhood(nodes, edges, 'missing', 'direct')).toBeNull();
   });
 });
+
+describe('getNeighborhood cap (hub services)', () => {
+  // hub calls 10 services, each of which calls one more.
+  const hubNodes = [
+    node('hub'),
+    ...Array.from({ length: 10 }, (_, i) => node(`s${i}`)),
+    ...Array.from({ length: 10 }, (_, i) => node(`t${i}`)),
+  ];
+  const hubEdges = [
+    ...Array.from({ length: 10 }, (_, i) => edge('hub', `s${i}`)),
+    ...Array.from({ length: 10 }, (_, i) => edge(`s${i}`, `t${i}`)),
+  ];
+
+  it('keeps the center and the nearest connections up to the cap, and reports the total', () => {
+    const r = getNeighborhood(hubNodes, hubEdges, 'hub', 'path', 6);
+    expect(r?.nodes).toHaveLength(6);
+    expect(r?.totalConnected).toBe(20);
+    // Direct callees come before their callees.
+    expect(ids(r)).toEqual(['hub', 's0', 's1', 's2', 's3', 's4']);
+    // Edges only among the kept nodes.
+    r?.edges.forEach((e) => expect(ids(r)).toContain(e.DestinationNodeId));
+  });
+
+  it('is uncapped below the limit', () => {
+    const r = getNeighborhood(hubNodes, hubEdges, 'hub', 'direct');
+    expect(r?.nodes).toHaveLength(11);
+    expect(r?.totalConnected).toBe(10);
+  });
+});

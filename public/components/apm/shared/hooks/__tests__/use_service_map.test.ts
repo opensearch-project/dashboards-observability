@@ -274,4 +274,27 @@ describe('useServiceMap', () => {
       expect(mockGetServiceMap).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('loading across a time-range change', () => {
+    it('reports loading in the very render the range changes in (not only after the effect)', async () => {
+      mockGetServiceMap.mockResolvedValue({ Nodes: [], Edges: [], AvailableGroupByAttributes: {} });
+      const seen: boolean[] = [];
+      const { result, rerender } = renderHook(
+        (props: typeof defaultParams) => {
+          const r = useServiceMap(props);
+          seen.push(r.isLoading);
+          return r;
+        },
+        { initialProps: defaultParams }
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      seen.length = 0;
+      rerender({ ...defaultParams, endTime: new Date('2024-01-01T02:00:00Z') });
+      // The first render with the new range already says loading, so metrics and totals keyed on
+      // the nodes wait instead of querying the previous range's nodes.
+      expect(seen[0]).toBe(true);
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+    });
+  });
 });

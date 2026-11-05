@@ -22,6 +22,8 @@ import { parseTimeRange } from '../../utils/time_utils';
 import { FaultRateCell, getRelativePercentage } from './fault_rate_cell';
 import { ServiceCell } from './service_cell';
 import { PageScope, SCOPED_TOPK } from '../../utils/scope_filters';
+import { chunkNames } from '../../utils/name_batches';
+import { escapePromQLRegex } from '../../../query_services/query_requests/escape_utils';
 import { isDependencyType } from '../../utils/platform_utils';
 import { serviceNodeKey } from '../../hooks/use_services_red_metrics';
 
@@ -119,6 +121,18 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
           callers.has(serviceNodeKey(d.source, d.environment))
       : (d: { target: string }) => targets.has(d.target);
   }, [scoped, scope, byCaller]);
+  // No single caller name list bounds the query (a type-only filter such as the services-only
+  // default, or no filter): run the topk per batch of the scope's caller names instead of over
+  // every caller in the workspace.
+  const callerBatches = useMemo(() => {
+    if (!byCaller || (filters?.bounded && filters.serviceFilter) || !scope) return undefined;
+    const callers = Array.from(
+      new Set(scope.services.filter((s) => !isDependencyType(s.type)).map((s) => s.serviceName))
+    );
+    return chunkNames(callers).map(
+      (names) => `service=~"${names.map(escapePromQLRegex).join('|')}"`
+    );
+  }, [byCaller, filters, scope]);
   const {
     data: dependencies,
     isLoading,
@@ -129,6 +143,7 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     limit: 5,
     refreshTrigger,
     callerFilter: filters?.bounded && byCaller ? filters.serviceFilter : undefined,
+    callerBatches,
     remoteFilter:
       filters?.bounded && !byCaller && filters.runDependencies
         ? filters.dependencyFilter

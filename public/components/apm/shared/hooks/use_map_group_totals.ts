@@ -9,16 +9,8 @@ import { getQueryMapGroupTotals } from '../../query_services/query_requests/prom
 import { useApmConfig } from '../../config/apm_config_context';
 import { getTimeInSeconds } from '../utils/time_utils';
 import { formatPrometheusDuration } from '../utils/step_utils';
-import { ENVIRONMENT_GROUP_BY } from '../utils/map_grouping';
-
-export interface GroupTotals {
-  totalRequests: number;
-  totalFaults: number;
-  totalErrors: number;
-}
-
-/** Key of the whole-map total (the Application node). */
-export const ALL_GROUPS_KEY = '__all__';
+import { ALL_GROUPS_KEY, ENVIRONMENT_GROUP_BY } from '../../common/constants';
+import { GroupTotals } from '../../common/types/service_map_types';
 
 export interface UseMapGroupTotalsParams {
   /** Group-by attribute, or null for the single Application total. */
@@ -31,9 +23,16 @@ export interface UseMapGroupTotalsParams {
 }
 
 export interface UseMapGroupTotalsResult {
-  /** Totals per group value (or ALL_GROUPS_KEY); null until loaded or when disabled. */
+  /** Totals per group value (or ALL_GROUPS_KEY); null until loaded, when disabled, or failed. */
   totals: Map<string, GroupTotals> | null;
   isLoading: boolean;
+  /**
+   * The totals could not be loaded (a query failed or was truncated, or there is no Prometheus
+   * connection). Group nodes then show as unavailable, never a healthy 0.
+   */
+  failed: boolean;
+  error: Error | null;
+  retry: () => void;
 }
 
 /** Prometheus label for a map group-by attribute (dots become underscores). */
@@ -63,11 +62,14 @@ export const useMapGroupTotals = (params: UseMapGroupTotalsParams): UseMapGroupT
     Math.floor((params.endTime.getTime() - params.startTime.getTime()) / 1000)
   );
   const label = params.groupBy ? groupByPrometheusLabel(params.groupBy) : null;
-  const key = `${prometheusConnectionId}|${label}|${endTimeSec}|${timeRange}|${params.refreshTrigger}`;
+  const [retryTrigger, setRetryTrigger] = useState(0);
+  const key = `${prometheusConnectionId}|${label}|${endTimeSec}|${timeRange}|${params.refreshTrigger}|${retryTrigger}`;
 
-  const [state, setState] = useState<{ key: string; totals: Map<string, GroupTotals> } | null>(
-    null
-  );
+  const [state, setState] = useState<{
+    key: string;
+    totals: Map<string, GroupTotals> | null;
+    error: Error | null;
+  } | null>(null);
 
   useEffect(() => {
     if (!params.enabled || !promqlService) return;
@@ -81,6 +83,24 @@ export const useMapGroupTotals = (params: UseMapGroupTotalsParams): UseMapGroupT
     Promise.allSettled([run('request'), run('fault'), run('error')]).then(
       ([requests, faults, errors]) => {
         if (controller.signal.aborted) return;
+        // All three are needed (the failure rate divides by requests): any failure, or a result
+        // cut at the series limit, makes the totals unavailable rather than a partial 0.
+        const rejected = [requests, faults, errors].find((r) => r.status === 'rejected') as
+          PromiseRejectedResult | undefined;
+        const truncated = [requests, faults, errors].some(
+          (r) => r.status === 'fulfilled' && !!(r.value as any)?.meta?.truncation?.tableTruncated
+        );
+        if (rejected || truncated) {
+          const error = rejected
+            ? rejected.reason instanceof Error
+              ? rejected.reason
+              : new Error('Unknown error')
+            : new Error('Too many groups to total');
+
+          console.error('[useMapGroupTotals] Totals unavailable:', error);
+          setState({ key, totals: null, error });
+          return;
+        }
         const totals = new Map<string, GroupTotals>();
         const entry = (group: string) => {
           let t = totals.get(group);
@@ -99,7 +119,7 @@ export const useMapGroupTotals = (params: UseMapGroupTotalsParams): UseMapGroupT
         add(requests, 'totalRequests');
         add(faults, 'totalFaults');
         add(errors, 'totalErrors');
-        setState({ key, totals });
+        setState({ key, totals, error: null });
       }
     );
     return () => controller.abort();
@@ -107,10 +127,20 @@ export const useMapGroupTotals = (params: UseMapGroupTotalsParams): UseMapGroupT
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, params.enabled, promqlService]);
 
-  const current = state?.key === key ? state.totals : null;
+  const current = state?.key === key ? state : null;
+  const active = params.enabled;
+  // No Prometheus connection (deleted or inaccessible): nothing will load, so not "loading".
+  const noConnection = active && !promqlService;
   return {
-    totals: params.enabled ? current : null,
-    isLoading: params.enabled && !!promqlService && !current,
+    totals: active ? (current?.totals ?? null) : null,
+    isLoading: active && !!promqlService && !current,
+    failed: noConnection || (active && !!current?.error),
+    error: noConnection
+      ? new Error('No Prometheus connection')
+      : active
+        ? (current?.error ?? null)
+        : null,
+    retry: () => setRetryTrigger((n) => n + 1),
   };
 };
 

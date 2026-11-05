@@ -6,6 +6,7 @@
 import { escapePromQLRegex } from '../../query_services/query_requests/escape_utils';
 import { dependencyNamesFilter } from '../../query_services/query_requests/promql_queries';
 import { isDependencyType } from './platform_utils';
+import { chunkNames } from './name_batches';
 
 /**
  * Above this length a name list is not embedded in a query, keeping every query clear of the
@@ -31,6 +32,12 @@ export interface ScopeFilters {
   serviceFilter: string;
   /** `remoteFilter` for caller-derived (dependency) queries; undefined means every target. */
   dependencyFilter?: string;
+  /**
+   * The dependency rows to fetch, as bounded name batches (`remoteService=~"..."`). The
+   * whole-range dependency queries always run per batch, never over every remote target: an
+   * unbounded caller-derived latency query timed out (503) at large scale.
+   */
+  dependencyBatches: Array<{ names: string[]; filter: string }>;
   runServices: boolean;
   runDependencies: boolean;
 }
@@ -71,6 +78,12 @@ export const buildScopeFilters = ({
   environmentPlatforms,
   needsNameList = true,
 }: BuildScopeFiltersParams): ScopeFilters => {
+  const unique = (rows: ScopeNode[]) => Array.from(new Set(rows.map((s) => s.serviceName)));
+  const batchesFor = (rows: ScopeNode[]) =>
+    chunkNames(unique(rows.filter((s) => isDependencyType(s.type)))).map((names) => ({
+      names,
+      filter: dependencyNamesFilter(names),
+    }));
   const unbounded: ScopeFilters = {
     bounded: false,
     fellBack: false,
@@ -78,15 +91,20 @@ export const buildScopeFilters = ({
     dependencyFilter: undefined,
     // Caller-derived (remoteService=) queries run only when the catalog has dependency rows, so
     // a service-only catalog (feature off / older data) issues exactly the service queries.
+    dependencyBatches: batchesFor(catalog),
     runServices: true,
     runDependencies: catalog.some((s) => isDependencyType(s.type)),
   };
   if (scope.length >= catalog.length) return unbounded;
 
-  const unique = (rows: ScopeNode[]) => Array.from(new Set(rows.map((s) => s.serviceName)));
+  const dependencyBatches = batchesFor(scope);
   const serviceNames = unique(scope.filter((s) => !isDependencyType(s.type)));
   const dependencyNames = unique(scope.filter((s) => isDependencyType(s.type)));
-  const run = { runServices: serviceNames.length > 0, runDependencies: dependencyNames.length > 0 };
+  const run = {
+    runServices: serviceNames.length > 0,
+    runDependencies: dependencyNames.length > 0,
+    dependencyBatches,
+  };
 
   // Environment facet as a label matcher: short at any scale, and a superset of the scope (rows
   // are matched by key afterwards), so it is a valid bound even when a name list is also needed.
@@ -118,14 +136,22 @@ export const buildScopeFilters = ({
     return { bounded: true, fellBack: false, serviceFilter, dependencyFilter, ...run };
   }
   if (byEnvironment) return { bounded: true, fellBack: false, ...byEnvironment, ...run };
-  return { ...unbounded, fellBack: true };
+  // The name list is too long for one service query: services run unscoped, but only for the
+  // kinds of rows in scope (a services-only filter still skips the dependency queries), and the
+  // dependency rows still run in bounded batches.
+  return { ...unbounded, fellBack: true, ...run };
 };
 
 /** Stable identity for a ScopeFilters value, for effect dependencies. */
 export const scopeFiltersKey = (f: ScopeFilters): string =>
-  [f.bounded, f.serviceFilter, f.dependencyFilter ?? '', f.runServices, f.runDependencies].join(
-    '|'
-  );
+  [
+    f.bounded,
+    f.serviceFilter,
+    f.dependencyFilter ?? '',
+    f.runServices,
+    f.runDependencies,
+    (f.dependencyBatches ?? []).map((b) => b.filter).join('&'),
+  ].join('|');
 
 /** A page's filtered scope, as passed to widgets that query alongside the page's table. */
 export interface PageScope {

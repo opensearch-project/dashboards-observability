@@ -9,6 +9,7 @@ import { getTimeInSeconds } from '../utils/time_utils';
 import { formatPrometheusDuration } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 import { ServiceMapNodeMetrics, MetricDataPoint } from '../../common/types/service_map_types';
+import { APPLICATION_MAP_CONSTANTS } from '../../common/constants';
 import {
   getQueryServiceMapThroughput,
   getQueryServiceMapFaults,
@@ -20,6 +21,11 @@ import {
 } from '../../query_services/query_requests/promql_queries';
 import { escapePromQLRegex } from '../../query_services/query_requests/escape_utils';
 import { isDependencyType } from '../utils/platform_utils';
+import { chunkNames } from '../utils/name_batches';
+
+export { chunkNames };
+
+const { METRICS_MAX_CONCURRENT_BATCHES } = APPLICATION_MAP_CONSTANTS;
 
 export interface ServiceMapMetricParams {
   /**
@@ -34,93 +40,93 @@ export interface ServiceMapMetricParams {
 }
 
 export interface UseServiceMapMetricsResult {
-  /** Map of nodeId (serviceName::environment) to metrics; nodes still loading have no entry. */
+  /** Map of nodeId (serviceName::environment) to metrics; only nodes whose batch succeeded. */
   metricsMap: Map<string, ServiceMapNodeMetrics>;
-  /** nodeIds (serviceName::environment) whose metrics batch has not landed yet. */
+  /** nodeIds whose metrics batch has not landed yet (shown with a spinner). */
   pendingNodeIds: Set<string>;
+  /**
+   * nodeIds whose batch failed (a query rejected or timed out, or came back truncated at the
+   * series limit even for a single name). Shown as unavailable, never as a healthy 0.
+   */
+  failedNodeIds: Set<string>;
   isLoading: boolean;
   error: Error | null;
+  /** Re-fetch only the failed nodes. */
+  retryFailed: () => void;
   refetch: () => void;
 }
 
-/**
- * Names per metrics batch. Each batch is three instant queries bounded by a
- * `service=~"..."` (or `remoteService=~"..."`) name list, so no single query scans every
- * service in the workspace: an unbounded query over hundreds of services and thousands of
- * dependencies timed out in Prometheus (503) at customer scale.
- */
-export const MAP_METRICS_BATCH_SIZE = 100;
-/**
- * Upper bound on a batch's name-list length. The dependency queries repeat their selector
- * twice (client + consumer calls), so this keeps every query well under the 10,000-char
- * PromQL limit even with long external host names.
- */
-export const MAP_METRICS_BATCH_MAX_CHARS = 3500;
-/** Batches in flight at once (three queries each). */
-export const MAP_METRICS_MAX_CONCURRENT_BATCHES = 2;
-
 type NodeKind = 'svc' | 'dep';
 type BatchStatus = 'pending' | 'done' | 'failed';
-
-interface BatchResult {
-  throughput: Map<string, MetricDataPoint[]>;
-  faults: Map<string, MetricDataPoint[]>;
-  errors: Map<string, MetricDataPoint[]>;
+interface Batch {
+  kind: NodeKind;
+  names: string[];
+}
+interface NodeSeries {
+  throughput: MetricDataPoint[];
+  faults: MetricDataPoint[];
+  errors: MetricDataPoint[];
 }
 
 interface MetricsState {
   /** Generation (time range / connection / refresh) the state belongs to. */
   gen: string;
-  /** Batch status per `${kind}:${name}`. */
+  /** Batch status per `${kind}:${name}`; absent means not requested (or dropped off screen). */
   status: Map<string, BatchStatus>;
   /** Indexed series per `${kind}:${name}::${environment}`. */
-  results: Map<
-    string,
-    { throughput: MetricDataPoint[]; faults: MetricDataPoint[]; errors: MetricDataPoint[] }
-  >;
+  results: Map<string, NodeSeries>;
   error: Error | null;
+}
+
+/**
+ * One request queue for the whole map per generation, so the concurrency limit holds across
+ * node-list changes (opening one group after another), not per effect run.
+ */
+interface QueueState {
+  gen: string;
+  controller: AbortController;
+  queue: Batch[];
+  inFlight: number;
+  /** Names queued, in flight, or settled in this generation. */
+  requested: Set<string>;
+  /** Names currently on screen; queued batches drop names that left. */
+  onScreen: Set<string>;
 }
 
 const nameKey = (kind: NodeKind, name: string) => `${kind}:${name}`;
 const kindOf = (type?: string): NodeKind => (isDependencyType(type) ? 'dep' : 'svc');
 
-/**
- * Split names into batches of at most MAP_METRICS_BATCH_SIZE names and
- * MAP_METRICS_BATCH_MAX_CHARS of escaped regex. Order is preserved, so the caller's
- * priority order decides which nodes fill in first.
- */
-export function chunkNames(names: string[]): string[][] {
-  const batches: string[][] = [];
-  let current: string[] = [];
-  let chars = 0;
-  names.forEach((name) => {
-    const len = escapePromQLRegex(name).length + 1;
-    if (
-      current.length > 0 &&
-      (current.length >= MAP_METRICS_BATCH_SIZE || chars + len > MAP_METRICS_BATCH_MAX_CHARS)
-    ) {
-      batches.push(current);
-      current = [];
-      chars = 0;
-    }
-    current.push(name);
-    chars += len;
-  });
-  if (current.length > 0) batches.push(current);
-  return batches;
-}
+/** Core's PromQL strategy cuts results at 2,000 series and flags it in the frame's meta. */
+const isTruncated = (response: any): boolean => !!response?.meta?.truncation?.tableTruncated;
 
 const serviceNamesFilter = (names: string[]) =>
   `service=~"${names.map(escapePromQLRegex).join('|')}"`;
 
+const batchQueries = ({ kind, names }: Batch, timeRange: string): string[] =>
+  kind === 'svc'
+    ? [
+        getQueryServiceMapThroughput(serviceNamesFilter(names), timeRange),
+        getQueryServiceMapFaults(serviceNamesFilter(names), timeRange),
+        getQueryServiceMapErrors(serviceNamesFilter(names), timeRange),
+      ]
+    : [
+        // Dependency nodes (database / messaging / external) have no SERVER-span series; their
+        // RED comes from the callers' CLIENT-span series aggregated by target.
+        getQueryServiceMapDependencyThroughput(timeRange, dependencyNamesFilter(names)),
+        getQueryServiceMapDependencyFaults(timeRange, dependencyNamesFilter(names)),
+        getQueryServiceMapDependencyErrors(timeRange, dependencyNamesFilter(names)),
+      ];
+
 /**
- * Hook for fetching RED metrics for service map nodes in bounded batches.
+ * RED metrics for service map nodes, in bounded batches.
  *
- * Each batch issues three instant queries (sum_over_time of request / fault / error over the
- * selected range) scoped to the batch's names, at most MAP_METRICS_MAX_CONCURRENT_BATCHES
- * batches at a time. Nodes fill in as their batch lands (`pendingNodeIds` lists the rest), a
- * failed batch only affects its own nodes, and results are reused across node-list changes
- * within the same time range, so revealing dependency nodes fetches only the dependencies.
+ * Each batch is three instant queries (sum_over_time of request / fault / error over the range)
+ * scoped to the batch's names. One queue per generation runs at most
+ * METRICS_MAX_CONCURRENT_BATCHES batches at a time, most important nodes first; batches whose
+ * nodes left the screen before they started are dropped. Nodes fill in as their batch lands
+ * (`pendingNodeIds` lists the rest); a failed batch marks only its own nodes failed
+ * (`failedNodeIds`), and a batch truncated at the series limit is split and retried. Results are
+ * reused across node-list changes within the same time range.
  *
  * Note: request, error, and fault are GAUGE metrics (not counters).
  * Note: Latency metrics are not fetched here (use useServicesRedMetrics for latency).
@@ -131,6 +137,7 @@ export const useServiceMapMetrics = (
   const { config } = useApmConfig();
   const enabled = params.enabled ?? true;
   const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const [retryTrigger, setRetryTrigger] = useState(0);
 
   // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
   const prometheusConnectionId = config?.prometheusDataSource?.name;
@@ -158,15 +165,19 @@ export const useServiceMapMetrics = (
     results: new Map(),
     error: null,
   }));
-  // Batches already queued for the current generation (the state update lags behind).
-  const queuedRef = useRef<{ gen: string; names: Set<string> }>({ gen, names: new Set() });
-  const abortRef = useRef<AbortController | null>(null);
+  const queueRef = useRef<QueueState | null>(null);
 
   // A new generation drops everything from the previous one and aborts its requests.
   useEffect(() => {
     const controller = new AbortController();
-    abortRef.current = controller;
-    queuedRef.current = { gen, names: new Set() };
+    queueRef.current = {
+      gen,
+      controller,
+      queue: [],
+      inFlight: 0,
+      requested: new Set(),
+      onScreen: new Set(),
+    };
     setState({ gen, status: new Map(), results: new Map(), error: null });
     return () => controller.abort();
   }, [gen]);
@@ -178,132 +189,174 @@ export const useServiceMapMetrics = (
     [params.services]
   );
 
-  // Queue batches for names not yet requested in this generation.
+  // Latest values for the queue's callbacks (which outlive a render).
+  const latest = useRef({ promqlService, endTimeSec, timeRange });
+  latest.current = { promqlService, endTimeSec, timeRange };
+
+  const settle = useCallback(
+    (
+      q: QueueState,
+      batch: Batch,
+      outcome: { results?: Map<string, NodeSeries>; error?: Error }
+    ) => {
+      setState((prev) => {
+        if (prev.gen !== q.gen) return prev;
+        const status = new Map(prev.status);
+        const results = new Map(prev.results);
+        batch.names.forEach((n) =>
+          status.set(nameKey(batch.kind, n), outcome.error ? 'failed' : 'done')
+        );
+        outcome.results?.forEach((series, nodeKey) =>
+          results.set(`${batch.kind}:${nodeKey}`, series)
+        );
+        return { ...prev, status, results, error: prev.error ?? outcome.error ?? null };
+      });
+    },
+    []
+  );
+
+  const runBatch = useCallback(
+    async (q: QueueState, batch: Batch) => {
+      const { promqlService: service, endTimeSec: time, timeRange: range } = latest.current;
+      const signal = q.controller.signal;
+      try {
+        if (!service) throw new Error('No Prometheus connection');
+        const settled = await Promise.allSettled(
+          batchQueries(batch, range).map((query) =>
+            service.executeInstantQuery({ query, time, signal })
+          )
+        );
+        if (signal.aborted) return;
+
+        const rejected = settled.find((r) => r.status === 'rejected') as
+          PromiseRejectedResult | undefined;
+        if (rejected) {
+          // All three are needed for correct counts and ratios: any failure is a failure.
+          throw rejected.reason instanceof Error ? rejected.reason : new Error('Unknown error');
+        }
+        const values = settled.map((r) => (r as PromiseFulfilledResult<unknown>).value);
+        if (values.some(isTruncated)) {
+          // Over the series limit (names spanning many environments): split and retry, or give
+          // up on a single name rather than show a partial count.
+          if (batch.names.length > 1) {
+            const mid = Math.ceil(batch.names.length / 2);
+            q.queue.unshift(
+              { kind: batch.kind, names: batch.names.slice(0, mid) },
+              { kind: batch.kind, names: batch.names.slice(mid) }
+            );
+            return;
+          }
+          throw new Error('Too many series for this node; metrics are unavailable');
+        }
+
+        const [throughput, faults, errors] = values.map(indexSeriesByNode);
+        const names = new Set(batch.names);
+        const results = new Map<string, NodeSeries>();
+        new Set([...throughput.keys(), ...faults.keys(), ...errors.keys()]).forEach((nodeKey) => {
+          // A name filter is anchored, so only batch names match; keep that invariant explicit.
+          if (!names.has(nodeKey.slice(0, nodeKey.lastIndexOf('::')))) return;
+          results.set(nodeKey, {
+            throughput: throughput.get(nodeKey) ?? [],
+            faults: faults.get(nodeKey) ?? [],
+            errors: errors.get(nodeKey) ?? [],
+          });
+        });
+        settle(q, batch, { results });
+      } catch (err) {
+        if (signal.aborted) return;
+
+        console.error('[useServiceMapMetrics] Batch failed:', err);
+        settle(q, batch, { error: err instanceof Error ? err : new Error('Unknown error') });
+      }
+    },
+    [settle]
+  );
+
+  const pump = useCallback(
+    (q: QueueState) => {
+      while (
+        !q.controller.signal.aborted &&
+        q.inFlight < METRICS_MAX_CONCURRENT_BATCHES &&
+        q.queue.length > 0
+      ) {
+        const batch = q.queue.shift()!;
+        q.inFlight += 1;
+        runBatch(q, batch).finally(() => {
+          q.inFlight -= 1;
+          pump(q);
+        });
+      }
+    },
+    [runBatch]
+  );
+
+  // Queue batches for names newly on screen; drop queued (not started) names that left it.
   useEffect(() => {
-    if (!enabled || !promqlService || params.services.length === 0) return;
-    const controller = abortRef.current;
-    if (!controller || controller.signal.aborted || queuedRef.current.gen !== gen) return;
-    const signal = controller.signal;
-    const queued = queuedRef.current.names;
+    const q = queueRef.current;
+    if (!q || q.gen !== gen || q.controller.signal.aborted) return;
+    q.onScreen = new Set(params.services.map((s) => nameKey(kindOf(s.type), s.serviceName)));
+    if (!enabled || !promqlService) return;
+
+    const dropped: string[] = [];
+    q.queue = q.queue
+      .map((b) => {
+        const keep = b.names.filter((n) => q.onScreen.has(nameKey(b.kind, n)));
+        b.names
+          .filter((n) => !q.onScreen.has(nameKey(b.kind, n)))
+          .forEach((n) => {
+            const key = nameKey(b.kind, n);
+            q.requested.delete(key);
+            dropped.push(key);
+          });
+        return { ...b, names: keep };
+      })
+      .filter((b) => b.names.length > 0);
 
     const newNames: Record<NodeKind, string[]> = { svc: [], dep: [] };
     params.services.forEach(({ serviceName, type }) => {
       const kind = kindOf(type);
       const key = nameKey(kind, serviceName);
-      if (queued.has(key)) return;
-      queued.add(key);
+      if (q.requested.has(key)) return;
+      q.requested.add(key);
       newNames[kind].push(serviceName);
     });
-    if (newNames.svc.length === 0 && newNames.dep.length === 0) return;
-
-    const batches: Array<{ kind: NodeKind; names: string[] }> = [
+    const added: Batch[] = [
       ...chunkNames(newNames.svc).map((names) => ({ kind: 'svc' as const, names })),
       ...chunkNames(newNames.dep).map((names) => ({ kind: 'dep' as const, names })),
     ];
+    q.queue.push(...added);
 
-    setState((prev) => {
-      if (prev.gen !== gen) return prev;
-      const status = new Map(prev.status);
-      batches.forEach((b) => b.names.forEach((n) => status.set(nameKey(b.kind, n), 'pending')));
-      return { ...prev, status };
-    });
-
-    const runQuery = (query: string) =>
-      promqlService.executeInstantQuery({ query, time: endTimeSec, signal });
-
-    const runBatch = async ({ kind, names }: { kind: NodeKind; names: string[] }) => {
-      const queries =
-        kind === 'svc'
-          ? [
-              getQueryServiceMapThroughput(serviceNamesFilter(names), timeRange),
-              getQueryServiceMapFaults(serviceNamesFilter(names), timeRange),
-              getQueryServiceMapErrors(serviceNamesFilter(names), timeRange),
-            ]
-          : [
-              // Dependency nodes (database / messaging / external) have no SERVER-span series;
-              // their RED comes from the callers' CLIENT-span series aggregated by target.
-              getQueryServiceMapDependencyThroughput(timeRange, dependencyNamesFilter(names)),
-              getQueryServiceMapDependencyFaults(timeRange, dependencyNamesFilter(names)),
-              getQueryServiceMapDependencyErrors(timeRange, dependencyNamesFilter(names)),
-            ];
-      const settled = await Promise.allSettled(queries.map(runQuery));
-      if (signal.aborted) return;
-
-      const valueOf = (r: PromiseSettledResult<unknown>) =>
-        r.status === 'fulfilled' ? r.value : null;
-      const indexed: BatchResult = {
-        throughput: indexSeriesByNode(valueOf(settled[0])),
-        faults: indexSeriesByNode(valueOf(settled[1])),
-        errors: indexSeriesByNode(valueOf(settled[2])),
-      };
-      const rejected = settled.find((r) => r.status === 'rejected') as
-        PromiseRejectedResult | undefined;
-      if (rejected) {
-        console.error('[useServiceMapMetrics] Partial failure fetching metrics:', rejected.reason);
-      }
-      // Only throughput failing leaves the nodes without their primary number.
-      const failed = settled[0].status === 'rejected';
-
+    if (dropped.length > 0 || added.length > 0) {
       setState((prev) => {
         if (prev.gen !== gen) return prev;
         const status = new Map(prev.status);
-        const results = new Map(prev.results);
-        const nameSet = new Set(names);
-        names.forEach((n) => status.set(nameKey(kind, n), failed ? 'failed' : 'done'));
-        const keys = new Set<string>([
-          ...indexed.throughput.keys(),
-          ...indexed.faults.keys(),
-          ...indexed.errors.keys(),
-        ]);
-        keys.forEach((nodeKey) => {
-          // A name filter can match a name outside the batch only via regex; keep batch names.
-          const name = nodeKey.slice(0, nodeKey.lastIndexOf('::'));
-          if (!nameSet.has(name)) return;
-          results.set(`${kind}:${nodeKey}`, {
-            throughput: indexed.throughput.get(nodeKey) ?? [],
-            faults: indexed.faults.get(nodeKey) ?? [],
-            errors: indexed.errors.get(nodeKey) ?? [],
-          });
-        });
-        const error =
-          prev.error ??
-          (rejected
-            ? rejected.reason instanceof Error
-              ? rejected.reason
-              : new Error('Unknown error')
-            : null);
-        return { ...prev, status, results, error };
+        dropped.forEach((key) => status.delete(key));
+        added.forEach((b) => b.names.forEach((n) => status.set(nameKey(b.kind, n), 'pending')));
+        return { ...prev, status };
       });
-    };
-
-    // Small worker pool: MAP_METRICS_MAX_CONCURRENT_BATCHES batches in flight at a time.
-    let next = 0;
-    const worker = async () => {
-      while (next < batches.length && !signal.aborted) {
-        const batch = batches[next++];
-        await runBatch(batch);
-      }
-    };
-    for (let i = 0; i < Math.min(MAP_METRICS_MAX_CONCURRENT_BATCHES, batches.length); i++) {
-      worker();
     }
-    // Batches belong to the generation; a node-list change must not abort in-flight batches
-    // (the generation effect aborts them when the time range changes).
+    pump(q);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gen, servicesKey, enabled, promqlService]);
+  }, [gen, servicesKey, enabled, promqlService, retryTrigger]);
 
   // Join the latest results onto the current node list.
-  const { metricsMap, pendingNodeIds } = useMemo(() => {
+  const { metricsMap, pendingNodeIds, failedNodeIds } = useMemo(() => {
     const map = new Map<string, ServiceMapNodeMetrics>();
     const pending = new Set<string>();
+    const failed = new Set<string>();
     const current = state.gen === gen ? state : null;
 
     params.services.forEach(({ serviceName, environment, type }) => {
       const nodeId = `${serviceName}::${environment}`;
       const kind = kindOf(type);
       const status = current?.status.get(nameKey(kind, serviceName));
-      if (!status || status === 'pending') {
+      if (status === 'failed') {
+        failed.add(nodeId);
+        return;
+      }
+      if (status !== 'done') {
         // Not fetched yet (including while `enabled` waits for the topology): still loading.
+        // Without a Prometheus connection nothing will load, so nothing is pending.
         if (promqlService) pending.add(nodeId);
         return;
       }
@@ -313,10 +366,27 @@ export const useServiceMapMetrics = (
         buildNodeMetrics(data?.throughput ?? [], data?.faults ?? [], data?.errors ?? [])
       );
     });
-    return { metricsMap: map, pendingNodeIds: pending };
+    return { metricsMap: map, pendingNodeIds: pending, failedNodeIds: failed };
     // servicesKey tracks changes to the node set.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [servicesKey, state, gen, promqlService]);
+
+  const retryFailed = useCallback(() => {
+    const q = queueRef.current;
+    if (!q) return;
+    setState((prev) => {
+      if (prev.gen !== q.gen) return prev;
+      const status = new Map(prev.status);
+      status.forEach((value, key) => {
+        if (value === 'failed') {
+          status.delete(key);
+          q.requested.delete(key);
+        }
+      });
+      return { ...prev, status, error: null };
+    });
+    setRetryTrigger((n) => n + 1);
+  }, []);
 
   const refetch = useCallback(() => {
     setRefetchTrigger((prev) => prev + 1);
@@ -325,8 +395,10 @@ export const useServiceMapMetrics = (
   return {
     metricsMap,
     pendingNodeIds,
+    failedNodeIds,
     isLoading: pendingNodeIds.size > 0,
     error: state.gen === gen ? state.error : null,
+    retryFailed,
     refetch,
   };
 };

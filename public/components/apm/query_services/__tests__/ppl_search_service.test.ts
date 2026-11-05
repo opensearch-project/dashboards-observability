@@ -26,14 +26,22 @@ jest.mock('../query_requests/response_processor', () => ({
 }));
 
 // Mock PPL queries
+jest.mock('../../common/constants', () => {
+  const actual = jest.requireActual('../../common/constants');
+  return {
+    ...actual,
+    APPLICATION_MAP_CONSTANTS: { ...actual.APPLICATION_MAP_CONSTANTS, MAX_EDGE_PAGES: 3 },
+  };
+});
+
 jest.mock('../query_requests/ppl_queries', () => ({
   DEFAULT_ROW_LIMIT: 2,
-  MAX_EDGE_PAGES: 3,
   getQueryListServices: jest.fn(() => 'source = index | fields service.name'),
   getQueryGetService: jest.fn(() => 'source = index | where service.name = "test"'),
   getQueryListServiceOperations: jest.fn(() => 'source = index | stats count()'),
   getQueryListServiceDependencies: jest.fn(() => 'source = index | where remote'),
   getQueryGetServiceMap: jest.fn(() => 'source = index | fields service, remote'),
+  getQueryDistinctEdgeCount: jest.fn(() => 'COUNT'),
 }));
 
 import { coreRefs } from '../../../../framework/core_refs';
@@ -230,14 +238,30 @@ describe('PPLSearchService', () => {
       dataset: mockDataset,
     };
 
+    // Routes the distinct-count query (mocked as 'COUNT') apart from the paged queries.
+    const post = () => coreRefs.http!.post as jest.Mock;
+    const isCount = (call: any[]) => JSON.parse(call[1].body).query.query === 'COUNT';
+    const routePosts = (pages: unknown[], count: number | Error = NaN) => {
+      let i = 0;
+      post().mockImplementation((_url: string, opts: { body: string }) => {
+        if (JSON.parse(opts.body).query.query === 'COUNT') {
+          return count instanceof Error
+            ? Promise.reject(count)
+            : Promise.resolve({ body: { fields: [{ name: 'edges', values: [count] }], size: 1 } });
+        }
+        const next = pages[Math.min(i++, pages.length - 1)];
+        if (typeof next === 'function') return (next as () => Promise<unknown>)();
+        return next instanceof Error ? Promise.reject(next) : Promise.resolve(next);
+      });
+    };
+    const pageCalls = () => post().mock.calls.filter((c) => !isCount(c));
+
     it('pages the edge query until a short page and merges the rows', async () => {
-      (coreRefs.http!.post as jest.Mock)
-        .mockResolvedValueOnce(page(['a', 'b']))
-        .mockResolvedValueOnce(page(['c']));
+      routePosts([page(['a', 'b']), page(['c'])], 3);
 
       const result = await service.getServiceMap(params);
 
-      expect(coreRefs.http!.post).toHaveBeenCalledTimes(2);
+      expect(pageCalls()).toHaveLength(2);
       expect(getQueryGetServiceMap).toHaveBeenNthCalledWith(1, 'test-index', 1000, 2000, 0);
       expect(getQueryGetServiceMap).toHaveBeenNthCalledWith(2, 'test-index', 1000, 2000, 2);
       expect(result.jsonData.map((r: any) => r['sourceNode.keyAttributes'])).toEqual([
@@ -250,21 +274,72 @@ describe('PPLSearchService', () => {
     });
 
     it('stops at the page cap and reports the map as truncated', async () => {
-      (coreRefs.http!.post as jest.Mock).mockResolvedValue(page(['a', 'b']));
+      routePosts([page(['a', 'b'])]);
 
       const result = await service.getServiceMap(params);
 
-      expect(coreRefs.http!.post).toHaveBeenCalledTimes(3);
+      expect(pageCalls()).toHaveLength(3);
       expect(result.size).toBe(6);
       expect(result.truncated).toBe(true);
     });
 
-    it('issues one query when the first page is short', async () => {
-      (coreRefs.http!.post as jest.Mock).mockResolvedValue(page(['a']));
+    it('marks a result the engine cut short (rows well below the distinct count) truncated', async () => {
+      // e.g. the 2.x PPL engine deduping only the first size_limit raw documents.
+      routePosts([page(['a', 'b']), page(['c'])], 100);
+      const result = await service.getServiceMap(params);
+      expect(result.size).toBe(3);
+      expect(result.truncated).toBe(true);
+    });
+
+    it('allows for the approximate count, and ignores a failed count', async () => {
+      routePosts([page(['a', 'b']), page(['c'])], 3.05);
+      expect((await service.getServiceMap(params)).truncated).toBe(false);
+      routePosts([page(['a', 'b']), page(['c'])], new Error('no stats'));
+      expect((await service.getServiceMap(params)).truncated).toBe(false);
+    });
+
+    it('keeps the pages already loaded when a later page fails, marked truncated', async () => {
+      routePosts([page(['a', 'b']), new Error('timed out')]);
 
       const result = await service.getServiceMap(params);
 
-      expect(coreRefs.http!.post).toHaveBeenCalledTimes(1);
+      expect(result.size).toBe(2);
+      expect(result.truncated).toBe(true);
+      expect(result.partialError?.message).toBe('timed out');
+    });
+
+    it('still fails when the first page fails, and on abort', async () => {
+      routePosts([new Error('timed out')]);
+      await expect(service.getServiceMap(params)).rejects.toThrow('timed out');
+
+      const controller = new AbortController();
+      routePosts([
+        page(['a', 'b']),
+        () => {
+          controller.abort();
+          return Promise.reject(new Error('aborted'));
+        },
+      ]);
+      await expect(service.getServiceMap(params, controller.signal)).rejects.toThrow('aborted');
+    });
+
+    it('listServices pages too, passes the signal, and reports truncation', async () => {
+      routePosts([page(['a', 'b'])]);
+      const controller = new AbortController();
+
+      const result = await service.listServices(params as any, controller.signal);
+
+      expect(pageCalls()).toHaveLength(3);
+      post().mock.calls.forEach((c) => expect(c[1].signal).toBe(controller.signal));
+      expect(result.truncated).toBe(true);
+    });
+
+    it('issues one page query when the first page is short', async () => {
+      routePosts([page(['a'])], 1);
+
+      const result = await service.getServiceMap(params);
+
+      expect(pageCalls()).toHaveLength(1);
       expect(result.truncated).toBe(false);
     });
   });

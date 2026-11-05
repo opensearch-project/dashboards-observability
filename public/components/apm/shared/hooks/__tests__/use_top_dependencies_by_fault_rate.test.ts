@@ -324,4 +324,35 @@ describe('useTopDependenciesByFaultRate', () => {
       );
     });
   });
+
+  describe('caller batches', () => {
+    it('runs the topk once per caller batch and merges the overall top N', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) => {
+        const first = query.includes('service=~"a|b"');
+        return Promise.resolve({
+          data: {
+            result: [
+              {
+                metric: { service: first ? 'a' : 'c', remoteService: 'db', environment: 'prod' },
+                value: [1, first ? '5' : '9'],
+              },
+            ],
+          },
+        });
+      });
+      const { result } = renderHook(() =>
+        useTopDependenciesByFaultRate({
+          ...defaultParams,
+          limit: 5,
+          callerBatches: ['service=~"a|b"', 'service=~"c"'],
+        })
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
+      mockExecuteInstantQuery.mock.calls.forEach((c) => expect(c[0].query).toMatch(/service=~"/));
+      expect(result.current.data.map((d) => d.source)).toEqual(['c', 'a']);
+    });
+  });
 });

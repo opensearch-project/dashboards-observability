@@ -4,15 +4,10 @@
  */
 
 import { ServiceMapEdge, ServiceMapNode } from '../../common/types/service_map_types';
-import { APPLICATION_MAP_CONSTANTS } from '../../common/constants';
+import { APPLICATION_MAP_CONSTANTS, ENVIRONMENT_GROUP_BY } from '../../common/constants';
 import { computeDependencyStacks } from './dependency_stacking';
 
-/**
- * Built-in map group-by: the node's environment (a key attribute, so it is available for every
- * node, unlike the configured groupByAttributes). Also the Prometheus label name, so group
- * metrics (useGroupMetrics) resolve it unchanged.
- */
-export const ENVIRONMENT_GROUP_BY = 'environment';
+export { ENVIRONMENT_GROUP_BY };
 
 /** The value a node is grouped under for a group-by attribute, if it has one. */
 export function getNodeGroupValue(node: ServiceMapNode, groupBy: string): string | undefined {

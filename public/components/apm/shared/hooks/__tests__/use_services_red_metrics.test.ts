@@ -324,6 +324,27 @@ describe('useServicesRedMetrics', () => {
       ]);
     });
 
+    it('never sends an unbounded caller-derived query, even for the whole catalog', async () => {
+      mockExecuteInstantQuery.mockResolvedValue({ type: 'data_frame', fields: [] });
+      const deps = Array.from({ length: 150 }, (_, i) => ({
+        serviceName: `db-${i}`,
+        environment: 'prod',
+        type: 'database',
+      }));
+      const { result } = renderHook(() =>
+        useServicesRedMetrics({ ...defaultParams, services: [catalog[0], ...deps] })
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      const depQueries = instantQueries().filter(isDependencyQuery);
+      // 2 name batches (100 + 50) x (throughput, failure ratio, latency).
+      expect(depQueries).toHaveLength(6);
+      depQueries.forEach((q) => {
+        expect(q).toContain('remoteService=~"db-');
+        expect(q).not.toContain('remoteService!=""');
+      });
+    });
+
     it('bounds the caller-derived queries to the scoped dependencies only', async () => {
       const { result } = renderHook(() =>
         useServicesRedMetrics({
@@ -404,7 +425,9 @@ describe('useServicesRedMetrics', () => {
           useServicesRedMetrics({ ...defaultParams, services: catalog, ...props }),
         { initialProps: {} }
       );
-      await waitFor(() => expect(pending).toHaveLength(6));
+      // The 3 service queries stay open; the caller-derived dependency queries always run in
+      // bounded name batches (remoteService=~), so they answer right away.
+      await waitFor(() => expect(pending).toHaveLength(3));
       const catalogCalls = mockExecuteInstantQuery.mock.calls.slice();
 
       // Type a search while the catalog scan runs: scoped queries go out, the scan survives.

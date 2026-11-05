@@ -9,9 +9,13 @@ import {
   getQueryListServiceOperations,
   getQueryListServiceDependencies,
   getQueryGetServiceMap,
+  getQueryDistinctEdgeCount,
   DEFAULT_ROW_LIMIT,
-  MAX_EDGE_PAGES,
 } from './query_requests/ppl_queries';
+import { APPLICATION_MAP_CONSTANTS } from '../common/constants';
+
+/** Paged rows below this share of the distinct-connection count mean the result was cut short. */
+const EDGE_COUNT_TOLERANCE = 0.97;
 import { ResponseProcessor } from './query_requests/response_processor';
 import { coreRefs } from '../../../framework/core_refs';
 import {
@@ -40,19 +44,27 @@ export class PPLSearchService {
   /**
    * List all services in the time range
    */
-  async listServices(params: ListServicesRequest): Promise<any> {
+  async listServices(params: ListServicesRequest, signal?: AbortSignal): Promise<any> {
     const { queryIndex, startTime, endTime, dataset } = params;
 
-    const { response: searchResponse } = await this.executePagedEdgeQuery(
+    const {
+      response: searchResponse,
+      truncated,
+      partialError,
+    } = await this.executePagedEdgeQuery(
       (offset) => getQueryListServices(queryIndex, startTime, endTime, offset),
-      dataset
+      dataset,
+      signal,
+      getQueryDistinctEdgeCount(queryIndex, startTime, endTime)
     );
 
-    // Transform the response
-    const transformedResponse = ResponseProcessor.transformListServices(searchResponse);
-
-    // Return the full transformed response including AvailableGroupByAttributes
-    return transformedResponse;
+    // The full transformed response including AvailableGroupByAttributes, plus whether the
+    // catalog is partial (page cap reached, or a later page failed).
+    return {
+      ...ResponseProcessor.transformListServices(searchResponse),
+      truncated,
+      partialError,
+    };
   }
 
   /**
@@ -127,44 +139,81 @@ export class PPLSearchService {
   async getServiceMap(params: GetServiceMapRequest, signal?: AbortSignal): Promise<any> {
     const { queryIndex, startTime, endTime, dataset } = params;
 
-    const { response: searchResponse, truncated } = await this.executePagedEdgeQuery(
+    const {
+      response: searchResponse,
+      truncated,
+      partialError,
+    } = await this.executePagedEdgeQuery(
       (offset) => getQueryGetServiceMap(queryIndex, startTime, endTime, offset),
       dataset,
-      signal
+      signal,
+      getQueryDistinctEdgeCount(queryIndex, startTime, endTime)
     );
 
-    // `truncated`: every page came back full, so connections past the page cap are not shown
-    // and the UI should say so.
-    return { ...ResponseProcessor.transformGetServiceMap(searchResponse), truncated };
+    // `truncated`: connections are missing (page cap reached, or a later page failed), so the
+    // UI should say so.
+    return {
+      ...ResponseProcessor.transformGetServiceMap(searchResponse),
+      truncated,
+      partialError,
+    };
   }
 
   /**
    * Run a paged edge query (`head DEFAULT_ROW_LIMIT from <offset>`) page by page until a page
-   * comes back short or MAX_EDGE_PAGES is reached, and merge the rows into one response.
+   * comes back short or APPLICATION_MAP_CONSTANTS.MAX_EDGE_PAGES is reached, and merge the rows into one response.
    * Pages run sequentially: each is a full dedup over the time range, so running them in
    * parallel would multiply the cluster load for the common single-page case.
+   *
+   * A failure after the first page keeps the rows already loaded and reports the result as
+   * truncated (with the error), rather than discarding thousands of connections; an abort
+   * (superseded time range, unmount) always rethrows.
+   *
+   * `countQuery` (a distinct-connection count, run alongside the first page) catches results the
+   * engine cut short without a full page: on the 2.x PPL engine `dedup` only sees the first
+   * `plugins.query.size_limit` raw documents. Paged rows clearly below the (approximate) count
+   * mark the result truncated.
    */
   private async executePagedEdgeQuery(
     buildQuery: (offset: number) => string,
     dataset: DatasetConfig,
-    signal?: AbortSignal
-  ): Promise<{ response: any; truncated: boolean }> {
+    signal?: AbortSignal,
+    countQuery?: string
+  ): Promise<{ response: any; truncated: boolean; partialError?: Error }> {
     const rows: Array<Record<string, any>> = [];
     let first: any;
-    for (let page = 0; page < MAX_EDGE_PAGES; page++) {
-      const response = await this.executePPLQuery(
-        buildQuery(page * DEFAULT_ROW_LIMIT),
-        dataset,
-        signal
-      );
+    // The count is a hint: if it fails, paging alone decides.
+    const expected = countQuery
+      ? this.executePPLQuery(countQuery, dataset, signal)
+          .then((r) => Number(r?.jsonData?.[0]?.edges))
+          .catch(() => NaN)
+      : Promise.resolve(NaN);
+    for (let page = 0; page < APPLICATION_MAP_CONSTANTS.MAX_EDGE_PAGES; page++) {
+      let response: any;
+      try {
+        response = await this.executePPLQuery(
+          buildQuery(page * DEFAULT_ROW_LIMIT),
+          dataset,
+          signal
+        );
+      } catch (err) {
+        if (page === 0 || signal?.aborted) throw err;
+        return {
+          response: { ...first, jsonData: rows, size: rows.length },
+          truncated: true,
+          partialError: err instanceof Error ? err : new Error('Unknown error'),
+        };
+      }
       if (page === 0) first = response;
       const pageRows: Array<Record<string, any>> = response?.jsonData ?? [];
       rows.push(...pageRows);
       const pageSize = response?.size ?? pageRows.length;
       if (pageSize < DEFAULT_ROW_LIMIT) {
+        const count = await expected;
         return {
           response: page === 0 ? response : { ...first, jsonData: rows, size: rows.length },
-          truncated: false,
+          // distinct_count is approximate (within ~1% in testing), so allow a margin.
+          truncated: Number.isFinite(count) && rows.length < count * EDGE_COUNT_TOLERANCE,
         };
       }
     }

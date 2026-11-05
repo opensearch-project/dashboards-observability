@@ -119,6 +119,19 @@ export const servicesI18nTexts = {
     }),
   },
   metricsNotice: {
+    catalogPartialTitle: i18n.translate(
+      'observability.apm.services.metricsNotice.catalogPartialTitle',
+      {
+        defaultMessage: 'Showing a partial service list',
+      }
+    ),
+    catalogPartialBody: i18n.translate(
+      'observability.apm.services.metricsNotice.catalogPartialBody',
+      {
+        defaultMessage:
+          'Not every service connection in this time range could be read, so some services may be missing. Narrow the time range to see a complete list.',
+      }
+    ),
     failedTitle: i18n.translate('observability.apm.services.metricsNotice.failedTitle', {
       defaultMessage: 'Some metrics could not be loaded',
     }),

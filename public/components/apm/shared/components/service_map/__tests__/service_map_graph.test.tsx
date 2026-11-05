@@ -442,3 +442,93 @@ describe('ServiceMapGraph fitAll', () => {
     expect(lastProps().refitOnResize).toBe(true);
   });
 });
+
+describe('ServiceMapGraph unavailable metrics', () => {
+  const lastProps = () => mockCelestialProps.mock.calls.slice(-1)[0][0];
+  const servicesLevel = { ...baseProps.navigationState, level: 'services' as const };
+  const groupLevel = {
+    level: 'groupBy' as const,
+    breadcrumbs: [],
+    groupByAttribute: 'environment',
+    groupByValue: null,
+  };
+
+  it('a failed node says "Metrics unavailable" with a warning icon, not a healthy 0', () => {
+    render(
+      <ServiceMapGraph
+        {...baseProps}
+        navigationState={servicesLevel}
+        failedNodeIds={new Set(['checkout::generic:default'])}
+      />
+    );
+    const card = lastProps().map.root.nodes[0].data;
+    expect(card.subtitle).toContain('Metrics unavailable');
+    expect(render(<>{card.icon}</>).getByTestId('serviceMapNodeMetricsUnavailable')).toBeTruthy();
+  });
+
+  it('failed group totals render the groups as unavailable', () => {
+    render(
+      <ServiceMapGraph
+        {...baseProps}
+        filters={{ ...baseProps.filters, groupBy: 'environment' }}
+        navigationState={groupLevel}
+        groupTotals="failed"
+      />
+    );
+    const group = lastProps().map.root.nodes[0].data;
+    expect(group.subtitle).toBe('Metrics unavailable');
+  });
+
+  it('group rate filters keep groups whose totals are loading or failed (no false "no matches")', () => {
+    const { queryByTestId, rerender } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        filters={{
+          ...baseProps.filters,
+          groupBy: 'environment',
+          faultRateThresholds: [ErrorRateThreshold.HIGH],
+        }}
+        navigationState={groupLevel}
+        groupTotals={null}
+      />
+    );
+    expect(queryByTestId('serviceMapNoFilterMatches')).toBeNull();
+    expect(lastProps().nodesInFocus.map((n: { id: string }) => n.id)).toEqual([
+      'group-generic:default',
+    ]);
+    rerender(
+      <ServiceMapGraph
+        {...baseProps}
+        filters={{
+          ...baseProps.filters,
+          groupBy: 'environment',
+          faultRateThresholds: [ErrorRateThreshold.HIGH],
+        }}
+        navigationState={groupLevel}
+        groupTotals="failed"
+      />
+    );
+    expect(queryByTestId('serviceMapNoFilterMatches')).toBeNull();
+  });
+
+  it('a too-large view with dependencies offers to hide them', () => {
+    const many = [...Array(510)].map((_, i) => ({
+      ...node,
+      NodeId: `d${i}`,
+      Name: `d${i}`,
+      KeyAttributes: { Environment: 'dev', Name: `d${i}`, Type: 'external' },
+    }));
+    const onHide = jest.fn();
+    const { getByTestId } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={many}
+        navigationState={servicesLevel}
+        stackDependencies={false}
+        onHideDependencies={onHide}
+      />
+    );
+    getByTestId('serviceMapHideDependencies').click();
+    expect(onHide).toHaveBeenCalled();
+  });
+});

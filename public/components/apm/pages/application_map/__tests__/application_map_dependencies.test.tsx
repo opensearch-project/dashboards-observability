@@ -58,16 +58,20 @@ jest.mock('../../../shared/hooks/use_map_group_totals', () => ({
   ALL_GROUPS_KEY: '__all__',
   useMapGroupTotals: (params: unknown) => {
     mockGroupTotalsHook(params);
-    return { totals: null, isLoading: false };
+    return { totals: null, isLoading: false, failed: false, error: null, retry: jest.fn() };
   },
 }));
 const mockMetricsHook = jest.fn();
+const mockFailedNodeIds: { current: Set<string> } = { current: new Set() };
+const mockRetryFailed = jest.fn();
 jest.mock('../../../shared/hooks/use_service_map_metrics', () => ({
   useServiceMapMetrics: (params: unknown) => {
     mockMetricsHook(params);
     return {
       metricsMap: new Map(),
       pendingNodeIds: new Set(),
+      failedNodeIds: mockFailedNodeIds.current,
+      retryFailed: mockRetryFailed,
       isLoading: false,
       refetch: jest.fn(),
     };
@@ -450,5 +454,65 @@ describe('ApplicationMapPage service search scope', () => {
     openList();
     expect(listedGroups()).toEqual(['dev', 'generic:default']);
     expect(screen.getByRole('option', { name: 'checkout' })).toBeInTheDocument();
+  });
+});
+
+describe('ApplicationMapPage review fixes', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sessionStorage.setItem(APM_INCLUDE_DEPENDENCIES_STORAGE_KEY, 'true');
+    window.history.replaceState(null, '', '#/application-map');
+  });
+  afterEach(() => {
+    sessionStorage.clear();
+    mockFailedNodeIds.current = new Set();
+    mockExceedsCap.mockReturnValue(false);
+  });
+
+  it('focus ignores the Environment filter (cross-environment neighbors are not faded) and restores it on exit', () => {
+    render(<ApplicationMapPage {...props} />);
+    act(() =>
+      last(mockSidebar).onFiltersChange({ ...last(mockSidebar).filters, environments: ['dev'] })
+    );
+    act(() => last(mockGraph).onNodeClick('checkout', 'checkout', 'generic:default'));
+    expect(last(mockGraph).filters.environments).toEqual([]);
+    expect(last(mockSidebar).filters.environments).toEqual(['dev']);
+
+    act(() => screen.getByTestId('mapFocusExit').click());
+    expect(last(mockGraph).filters.environments).toEqual(['dev']);
+  });
+
+  it('says when node metrics failed, and Retry re-fetches them', () => {
+    mockFailedNodeIds.current = new Set(['checkout::generic:default']);
+    render(<ApplicationMapPage {...props} />);
+    expect(screen.getByTestId('mapMetricsFailedCallout')).toHaveTextContent('1 node shows');
+    expect(last(mockGraph).failedNodeIds).toEqual(new Set(['checkout::generic:default']));
+    act(() => screen.getByTestId('mapMetricsRetry').click());
+    expect(mockRetryFailed).toHaveBeenCalled();
+  });
+
+  it('fetches no node metrics for an opened group that is too large to draw', () => {
+    render(<ApplicationMapPage {...props} />);
+    act(() =>
+      last(mockSidebar).onFiltersChange({ ...last(mockSidebar).filters, groupBy: 'environment' })
+    );
+    mockExceedsCap.mockReturnValue(true);
+    act(() =>
+      last(mockGraph).onNavigationStateChange({
+        level: 'groupByValue',
+        breadcrumbs: [],
+        groupByAttribute: 'environment',
+        groupByValue: 'generic:default',
+      })
+    );
+    expect(last(mockMetricsHook).services).toEqual([]);
+  });
+
+  it('offers hiding dependencies to the graph only while they are shown', () => {
+    render(<ApplicationMapPage {...props} />);
+    expect(typeof last(mockGraph).onHideDependencies).toBe('function');
+    act(() => last(mockGraph).onHideDependencies());
+    expect(last(mockSidebar).dependencies.included).toBe(false);
+    expect(last(mockGraph).onHideDependencies).toBeUndefined();
   });
 });
