@@ -24,6 +24,8 @@ export interface ApmPageHeaderProps {
   prepend?: React.ReactNode;
   /** Overrides the search bar placeholder (default: "Filter by service name or environment"). */
   searchPlaceholder?: string;
+  /** Shows the search bar disabled (e.g. when there is nothing on screen to search). */
+  searchDisabled?: boolean;
 }
 
 /**
@@ -41,6 +43,7 @@ export const ApmPageHeader: React.FC<ApmPageHeaderProps> = ({
   showSearchBar = true,
   prepend,
   searchPlaceholder: placeholder = searchPlaceholder,
+  searchDisabled = false,
 }) => {
   return (
     <EuiFlexGroup
@@ -60,6 +63,7 @@ export const ApmPageHeader: React.FC<ApmPageHeaderProps> = ({
             isClearable
             fullWidth
             compressed
+            disabled={searchDisabled}
             data-test-subj="servicesSearchBar"
           />
         </EuiFlexItem>

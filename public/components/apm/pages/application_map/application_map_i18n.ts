@@ -17,11 +17,16 @@ export const applicationMapI18nTexts = {
   pageTitle: i18n.translate('observability.apm.applicationMap.pageTitle', {
     defaultMessage: 'Topology Map',
   }),
-  // On the map the search highlights matches in place (non-matching nodes fade); Focus on a
-  // service is what narrows the map.
+  // On the map the search finds matches in what is on screen (zooms to them, others fade);
+  // Focus on (any service) is what moves the map.
   searchPlaceholder: i18n.translate('observability.apm.applicationMap.search.placeholder', {
-    defaultMessage: 'Search by service name or environment',
+    defaultMessage: 'Find in this view by service or environment',
   }),
+  // At the Application level (one card) there is nothing to find.
+  searchDisabledPlaceholder: i18n.translate(
+    'observability.apm.applicationMap.search.disabledPlaceholder',
+    { defaultMessage: 'Open an environment to find services' }
+  ),
 
   // Navigation breadcrumbs
   navigation: {
@@ -255,6 +260,12 @@ export const applicationMapI18nTexts = {
         defaultMessage:
           'Focused on {service} in {environment}: showing the nearest {shown, number} of {total, number} connected nodes',
         values: { service, environment, shown, total },
+      }),
+    labelPathCut: (service: string, environment: string, shown: number, hops: number) =>
+      i18n.translate('observability.apm.applicationMap.focus.labelPathCut', {
+        defaultMessage:
+          'Focused on {service} in {environment}: showing {shown, number} connected nodes within {hops, number} hops (the call path continues)',
+        values: { service, environment, shown, hops },
       }),
     exit: i18n.translate('observability.apm.applicationMap.focus.exit', {
       defaultMessage: 'Back to full map',

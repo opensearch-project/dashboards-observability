@@ -42,11 +42,19 @@ jest.mock('../query_requests/ppl_queries', () => ({
   getQueryListServiceDependencies: jest.fn(() => 'source = index | where remote'),
   getQueryGetServiceMap: jest.fn(() => 'source = index | fields service, remote'),
   getQueryDistinctEdgeCount: jest.fn(() => 'COUNT'),
+  getQueryServiceMapNodes: jest.fn((_i: string, side: string) => `NODES ${side}`),
+  getQueryGroupByAttributeSample: jest.fn(() => 'SAMPLE'),
+  getQueryServiceMapSlice: jest.fn(() => 'SLICE'),
+  getQuerySliceDistinctEdgeCount: jest.fn(() => 'COUNT'),
 }));
 
 import { coreRefs } from '../../../../framework/core_refs';
 import { ResponseProcessor } from '../query_requests/response_processor';
-import { getQueryGetServiceMap } from '../query_requests/ppl_queries';
+import {
+  getQueryGetServiceMap,
+  getQueryServiceMapNodes,
+  getQueryServiceMapSlice,
+} from '../query_requests/ppl_queries';
 
 describe('PPLSearchService', () => {
   let service: PPLSearchService;
@@ -452,6 +460,95 @@ describe('PPLSearchService', () => {
       const body = JSON.parse(callArg.body);
 
       expect(body.query.dataset.dataSource).toBeUndefined();
+    });
+  });
+  describe('large-map queries', () => {
+    const params = {
+      queryIndex: 'test-index',
+      startTime: 1000,
+      endTime: 2000,
+      dataset: mockDataset,
+    };
+    const post = () => coreRefs.http!.post as jest.Mock;
+    const respond = (byQuery: Record<string, Array<Record<string, unknown>>>) =>
+      post().mockImplementation((_url: string, opts: { body: string }) => {
+        const rows = byQuery[JSON.parse(opts.body).query.query] ?? [];
+        const names = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
+        return Promise.resolve({
+          body: {
+            fields: names.map((name) => ({ name, values: rows.map((r) => r[name]) })),
+            size: rows.length,
+          },
+        });
+      });
+
+    it('builds the overview from the node-list aggregations, with the connection count', async () => {
+      respond({
+        'NODES source': [
+          {
+            'sourceNode.keyAttributes.environment': 'dev',
+            'sourceNode.keyAttributes.name': 'a',
+            'sourceNode.type': 'Service',
+            'sourceNode.groupByAttributes.team.name': 'pay',
+          },
+        ],
+        'NODES target': [
+          {
+            'targetNode.keyAttributes.environment': 'dev',
+            'targetNode.keyAttributes.name': 'db',
+            'targetNode.type': 'AWS::DynamoDB',
+            'targetNode.groupByAttributes.team.name': null,
+          },
+        ],
+      });
+
+      const result = await service.getServiceMapOverview({
+        ...params,
+        groupByAttribute: 'team.name',
+      } as any);
+
+      expect(getQueryServiceMapNodes).toHaveBeenCalledWith(
+        'test-index',
+        'source',
+        1000,
+        2000,
+        'team.name'
+      );
+      expect(
+        post()
+          .mock.calls.map((c) => JSON.parse(c[1].body).query.query)
+          .sort()
+      ).toEqual(['NODES source', 'NODES target', 'SAMPLE']);
+      const rows = (ResponseProcessor.transformGetServiceMap as jest.Mock).mock.calls[0][0]
+        .jsonData;
+      expect(rows).toEqual([
+        {
+          'sourceNode.keyAttributes': { name: 'a', environment: 'dev' },
+          'sourceNode.type': 'Service',
+          'sourceNode.groupByAttributes': { team: { name: 'pay' } },
+        },
+        {
+          'targetNode.keyAttributes': { name: 'db', environment: 'dev' },
+          'targetNode.type': 'AWS::DynamoDB',
+          'targetNode.groupByAttributes': {},
+        },
+      ]);
+    });
+
+    it('returns no nodes for an empty range', async () => {
+      respond({});
+      const result = await service.getServiceMapOverview(params as any);
+      expect(result.Nodes).toEqual([]);
+    });
+
+    it('pages a slice with its filter and reports truncation from the slice count', async () => {
+      respond({ SLICE: [{ 'sourceNode.keyAttributes': 'a' }], COUNT: [{ edges: 50 }] });
+      const filter = { kind: 'environment', environment: 'dev' } as const;
+
+      const result = await service.getServiceMapSlice(params as any, filter);
+
+      expect(getQueryServiceMapSlice).toHaveBeenCalledWith('test-index', filter, 1000, 2000, 0);
+      expect(result.truncated).toBe(true);
     });
   });
 });

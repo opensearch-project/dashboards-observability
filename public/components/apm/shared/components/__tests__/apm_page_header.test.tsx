@@ -30,14 +30,19 @@ describe('ApmPageHeader', () => {
     render(
       <ApmPageHeader
         {...props}
-        searchPlaceholder="Search by service name or environment"
+        searchPlaceholder="Find in this view by service or environment"
         prepend={<div data-test-subj="prepended" />}
       />
     );
     expect(screen.getByTestId('servicesSearchBar')).toHaveAttribute(
       'placeholder',
-      'Search by service name or environment'
+      'Find in this view by service or environment'
     );
     expect(screen.getByTestId('prepended')).toBeInTheDocument();
+  });
+
+  it('can show the search bar disabled', () => {
+    render(<ApmPageHeader {...props} searchDisabled />);
+    expect(screen.getByTestId('servicesSearchBar')).toBeDisabled();
   });
 });

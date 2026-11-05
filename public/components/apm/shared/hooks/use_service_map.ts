@@ -17,6 +17,8 @@ export interface UseServiceMapParams {
   startTime: Date;
   endTime: Date;
   refreshTrigger?: number;
+  /** When false nothing is fetched (a large map loads as an overview instead). */
+  enabled?: boolean;
 }
 
 export interface UseServiceMapResult {
@@ -95,9 +97,10 @@ export const useServiceMap = (params: UseServiceMapParams): UseServiceMapResult 
     [queryIndex, params.startTime, params.endTime, dataset]
   );
 
+  const enabled = params.enabled ?? true;
   useEffect(() => {
-    // Skip fetching if config is not ready
-    if (!queryIndex || !dataset) {
+    // Skip fetching if config is not ready (or the map loads as an overview)
+    if (!queryIndex || !dataset || !enabled) {
       setNodes([]);
       setEdges([]);
       setIsLoading(false);
@@ -147,6 +150,7 @@ export const useServiceMap = (params: UseServiceMapParams): UseServiceMapResult 
     queryIndex,
     dataset,
     request,
+    enabled,
   ]);
 
   const refetch = useCallback(() => {

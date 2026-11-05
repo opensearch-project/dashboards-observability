@@ -12,6 +12,29 @@ import { TimeRange } from '../../../common/types/service_types';
 let mockSetPageTimeRange: (range: TimeRange) => void = () => {};
 let mockCurrentRange: TimeRange | undefined;
 const mockLatestTimeRange = () => mockCurrentRange;
+const mockOverview = jest.fn();
+const mockSlices = jest.fn();
+const mockNeighborhood = jest.fn();
+jest.mock('../../../shared/hooks/use_service_map_slices', () => ({
+  // A small map (the default in these tests) loads its whole topology via useServiceMap.
+  useServiceMapOverview: (params: unknown) =>
+    mockOverview(params) ?? {
+      ready: true,
+      nodes: [],
+      availableGroupByAttributes: {},
+      isLoading: false,
+      error: null,
+    },
+  useServiceMapSlices: (params: unknown) =>
+    mockSlices(params) ?? { active: null, activeStatus: null, status: new Map() },
+  useFocusNeighborhood: (params: unknown) =>
+    mockNeighborhood(params) ?? {
+      neighborhood: null,
+      isLoading: false,
+      truncated: false,
+      error: null,
+    },
+}));
 jest.mock('../../../shared/hooks/use_persistent_time_range', () => ({
   usePersistentTimeRange: (fallback: TimeRange) => {
     const [range, setRange] = jest.requireActual('react').useState(fallback);
@@ -145,5 +168,59 @@ describe('ApplicationMapPage time range URL sync', () => {
     const params = hashParams();
     expect(params.get('from')).not.toBe('<script>');
     expect(params.get('from')).toBeTruthy();
+  });
+});
+
+describe('ApplicationMapPage large-map mode', () => {
+  const props = {
+    chrome: { setBreadcrumbs: jest.fn() } as unknown as any,
+    notifications: { toasts: { addDanger: jest.fn() } } as unknown as any,
+  };
+  const { useServiceMap } = jest.requireMock('../../../shared/hooks/use_service_map');
+  const overviewWith = (count: number, extra: Record<string, unknown> = {}) => ({
+    ready: true,
+    nodes: Array.from({ length: count }, (_, i) => ({
+      NodeId: `n${i}`,
+      Name: `svc-${i}`,
+      KeyAttributes: { Name: `svc-${i}`, Environment: `env-${i % 3}`, Type: 'Service' },
+    })),
+    availableGroupByAttributes: {},
+    isLoading: false,
+    error: null,
+    ...extra,
+  });
+  const lastEnabled = () =>
+    useServiceMap.mock.calls[useServiceMap.mock.calls.length - 1][0].enabled;
+  const lastSlices = () => mockSlices.mock.calls[mockSlices.mock.calls.length - 1][0];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    window.history.replaceState(null, '', '#/application-map?from=now-15m&to=now');
+  });
+  afterEach(() => mockOverview.mockReset());
+
+  it('loads the whole topology for a small map', () => {
+    mockOverview.mockReturnValue(overviewWith(10));
+    render(<ApplicationMapPage {...props} />);
+    expect(lastEnabled()).toBe(true);
+    expect(lastSlices().enabled).toBe(false);
+  });
+
+  it('skips the whole topology for a map over the render cap and prefetches its environments', () => {
+    mockOverview.mockReturnValue(overviewWith(600));
+    render(<ApplicationMapPage {...props} />);
+    expect(useServiceMap.mock.calls.every((c: any[]) => c[0].enabled === false)).toBe(true);
+    expect(lastSlices().enabled).toBe(true);
+    expect(lastSlices().active).toBeNull();
+  });
+
+  it('decides nothing until the overview has loaded, and falls back to the whole map on error', () => {
+    mockOverview.mockReturnValue(overviewWith(600, { isLoading: true }));
+    const { rerender } = render(<ApplicationMapPage {...props} />);
+    expect(lastEnabled()).toBe(false);
+
+    mockOverview.mockReturnValue(overviewWith(600, { error: new Error('boom') }));
+    rerender(<ApplicationMapPage {...props} />);
+    expect(lastEnabled()).toBe(true);
   });
 });

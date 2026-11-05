@@ -10,6 +10,12 @@ import {
   getQueryListServiceDependencies,
   getQueryGetServiceMap,
   getQueryDistinctEdgeCount,
+  getQueryServiceMapNodes,
+  getQueryGroupByAttributeSample,
+  getQueryServiceMapSlice,
+  getQuerySliceDistinctEdgeCount,
+  ServiceMapSide,
+  ServiceMapSliceFilter,
   DEFAULT_ROW_LIMIT,
 } from './query_requests/ppl_queries';
 import { APPLICATION_MAP_CONSTANTS } from '../common/constants';
@@ -157,6 +163,77 @@ export class PPLSearchService {
       truncated,
       partialError,
     };
+  }
+
+  /**
+   * Overview of a large map without reading its topology: every node (from two node-list
+   * aggregations, one per connection side) and the
+   * attributes the map can group by (from a sample). `groupByAttribute` adds that attribute's
+   * value to each node, for grouping the overview by it.
+   */
+  async getServiceMapOverview(
+    params: GetServiceMapRequest & { groupByAttribute?: string },
+    signal?: AbortSignal
+  ): Promise<{
+    Nodes: any[];
+    AvailableGroupByAttributes: Record<string, string[]>;
+  }> {
+    const { queryIndex, startTime, endTime, dataset, groupByAttribute } = params;
+    const run = (q: string) => this.executePPLQuery(q, dataset, signal);
+    const [sources, targets, sample] = await Promise.all([
+      run(getQueryServiceMapNodes(queryIndex, 'source', startTime, endTime, groupByAttribute)),
+      run(getQueryServiceMapNodes(queryIndex, 'target', startTime, endTime, groupByAttribute)),
+      run(getQueryGroupByAttributeSample(queryIndex, startTime, endTime)),
+    ]);
+
+    // Node-list rows in the shape of service-map rows (one side set), so the map transform
+    // builds the same node objects as for a full topology.
+    const asRows = (response: any, side: ServiceMapSide) =>
+      (response?.jsonData ?? []).map((row: Record<string, any>) => {
+        const n = `${side}Node`;
+        const value = groupByAttribute
+          ? row[`${n}.groupByAttributes.${groupByAttribute}`]
+          : undefined;
+        return {
+          [`${n}.keyAttributes`]: {
+            name: row[`${n}.keyAttributes.name`],
+            environment: row[`${n}.keyAttributes.environment`],
+          },
+          [`${n}.type`]: row[`${n}.type`],
+          [`${n}.groupByAttributes`]:
+            groupByAttribute && value !== null && value !== undefined
+              ? nestAttribute(groupByAttribute, value)
+              : {},
+        };
+      });
+    const { Nodes } = ResponseProcessor.transformGetServiceMap({
+      jsonData: [...asRows(sources, 'source'), ...asRows(targets, 'target')],
+    } as any);
+    const { AvailableGroupByAttributes } = ResponseProcessor.transformGetServiceMap(sample);
+    return {
+      Nodes: Nodes ?? [],
+      AvailableGroupByAttributes: AvailableGroupByAttributes ?? {},
+    };
+  }
+
+  /**
+   * The exact topology of a slice of a large map: the connections whose source or target is in
+   * an environment, has a group-by attribute value, or is one of some names (a neighborhood).
+   * Paged and truncation-checked like getServiceMap.
+   */
+  async getServiceMapSlice(
+    params: GetServiceMapRequest,
+    filter: ServiceMapSliceFilter,
+    signal?: AbortSignal
+  ): Promise<any> {
+    const { queryIndex, startTime, endTime, dataset } = params;
+    const { response, truncated, partialError } = await this.executePagedEdgeQuery(
+      (offset) => getQueryServiceMapSlice(queryIndex, filter, startTime, endTime, offset),
+      dataset,
+      signal,
+      getQuerySliceDistinctEdgeCount(queryIndex, filter, startTime, endTime)
+    );
+    return { ...ResponseProcessor.transformGetServiceMap(response), truncated, partialError };
   }
 
   /**
@@ -344,4 +421,12 @@ export class PPLSearchService {
       throw error;
     }
   }
+}
+
+/** `a.b.c` = v as `{ a: { b: { c: v } } }`, the shape of groupByAttributes in service-map docs. */
+function nestAttribute(path: string, value: unknown): Record<string, unknown> {
+  return path
+    .split('.')
+    .reverse()
+    .reduce<unknown>((inner, key) => ({ [key]: inner }), value) as Record<string, unknown>;
 }

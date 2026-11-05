@@ -32,6 +32,29 @@ const mockMap = {
 
 // A stable setter, like the real hook's: the page's URL-param effect depends on it.
 const mockSetTimeRange = jest.fn();
+const mockOverview = jest.fn();
+const mockSlices = jest.fn();
+const mockNeighborhood = jest.fn();
+jest.mock('../../../shared/hooks/use_service_map_slices', () => ({
+  // A small map (the default in these tests) loads its whole topology via useServiceMap.
+  useServiceMapOverview: (params: unknown) =>
+    mockOverview(params) ?? {
+      ready: true,
+      nodes: mockMap.nodes,
+      availableGroupByAttributes: {},
+      isLoading: false,
+      error: null,
+    },
+  useServiceMapSlices: (params: unknown) =>
+    mockSlices(params) ?? { active: null, activeStatus: null, status: new Map() },
+  useFocusNeighborhood: (params: unknown) =>
+    mockNeighborhood(params) ?? {
+      neighborhood: null,
+      isLoading: false,
+      truncated: false,
+      error: null,
+    },
+}));
 jest.mock('../../../shared/hooks/use_persistent_time_range', () => ({
   usePersistentTimeRange: (fallback: unknown) => [fallback, mockSetTimeRange],
 }));

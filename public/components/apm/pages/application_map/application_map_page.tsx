@@ -30,6 +30,14 @@ import { HeaderControlledComponentsWrapper } from '../../../../plugin_helpers/pl
 import { ApmPageHeader } from '../../shared/components/apm_page_header';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
 import { useServiceMap } from '../../shared/hooks/use_service_map';
+import { filterFocusOptions } from '../../shared/utils/focus_search_options';
+import {
+  NEIGHBORHOOD_MAX_ROUNDS,
+  useFocusNeighborhood,
+  useServiceMapOverview,
+  useServiceMapSlices,
+} from '../../shared/hooks/use_service_map_slices';
+import { ServiceMapSliceFilter } from '../../query_services/query_requests/ppl_queries';
 import { useServiceMapMetrics } from '../../shared/hooks/use_service_map_metrics';
 import { useSelectedEdgeMetrics } from '../../shared/hooks/use_selected_edge_metrics';
 import { useGroupMetrics } from '../../shared/hooks/use_group_metrics';
@@ -132,6 +140,8 @@ function environmentFilterId(nodes: ServiceMapNode[], environment: string): stri
       ?.KeyAttributes.Environment ?? environment
   );
 }
+
+const NO_EDGES: ServiceMapEdge[] = [];
 
 /** Navigation state that renders the focused neighborhood as a plain graph. */
 const FOCUS_NAVIGATION_STATE: MapNavigationState = {
@@ -274,19 +284,57 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     [timeRange, refreshTrigger]
   );
 
-  // Fetch service map topology data
-  const {
-    nodes,
-    edges,
-    isLoading: mapLoading,
-    error: mapError,
-    availableGroupByAttributes,
-    truncated: mapTruncated,
-  } = useServiceMap({
+  // Overview first: every node from aggregations (about a second even on long ranges, no row
+  // cap). A map too large to draw whole (more than MAX_RENDERED_NODES nodes on screen) never
+  // needs its whole topology: its Application / group levels come from the overview, an opened
+  // environment or group from its exact slice, and focus from the neighborhood. A map that fits
+  // loads its whole topology as before.
+  const overviewGroupBy =
+    filters.groupBy && filters.groupBy !== ENVIRONMENT_GROUP_BY ? filters.groupBy : null;
+  const overview = useServiceMapOverview({
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     refreshTrigger,
+    groupByAttribute: overviewGroupBy,
   });
+  const overviewNodesShown = useMemo(
+    () =>
+      includeDependencies
+        ? overview.nodes
+        : overview.nodes.filter((n) => !isDependencyType(n.KeyAttributes.Type)),
+    [overview.nodes, includeDependencies]
+  );
+  // Decided per time range (not re-decided while an attribute regroups the overview), so the
+  // view does not flip modes mid-load. An overview failure falls back to the whole topology.
+  const rangeId = `${parsedTimeRange.startTime.getTime()}|${parsedTimeRange.endTime.getTime()}|${refreshTrigger}|${includeDependencies}`;
+  const [largeByRange, setLargeByRange] = useState<{ rangeId: string; large: boolean } | null>(
+    null
+  );
+  useEffect(() => {
+    // Undecided until the overview has loaded for this range (not while the config loads).
+    if (!overview.ready || overview.isLoading) return;
+    const large =
+      !overview.error && overviewNodesShown.length > APPLICATION_MAP_CONSTANTS.MAX_RENDERED_NODES;
+    setLargeByRange((prev) =>
+      prev?.rangeId === rangeId && prev.large === large ? prev : { rangeId, large }
+    );
+  }, [overview.ready, overview.isLoading, overview.error, overviewNodesShown, rangeId]);
+  const modeKnown = largeByRange?.rangeId === rangeId;
+  const isLargeMap = modeKnown && largeByRange!.large;
+
+  const full = useServiceMap({
+    startTime: parsedTimeRange.startTime,
+    endTime: parsedTimeRange.endTime,
+    refreshTrigger,
+    enabled: modeKnown && !isLargeMap,
+  });
+  const nodes = isLargeMap ? overview.nodes : full.nodes;
+  const edges = isLargeMap ? NO_EDGES : full.edges;
+  const mapLoading = !modeKnown || (isLargeMap ? overview.isLoading : full.isLoading);
+  const mapError = isLargeMap ? overview.error : full.error;
+  const availableGroupByAttributes = isLargeMap
+    ? overview.availableGroupByAttributes
+    : full.availableGroupByAttributes;
 
   // Dependency nodes exist only with a data-prepper that synthesizes them; without them the
   // checkbox is not shown and the map renders as before.
@@ -295,17 +343,98 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     [nodes]
   );
   const mapGraph = useMemo(
-    () => (includeDependencies ? { nodes, edges } : removeDependencies(nodes, edges)),
-    [includeDependencies, nodes, edges]
+    () =>
+      isLargeMap
+        ? { nodes: overviewNodesShown, edges: NO_EDGES }
+        : includeDependencies
+          ? { nodes, edges }
+          : removeDependencies(nodes, edges),
+    [isLargeMap, overviewNodesShown, includeDependencies, nodes, edges]
   );
   // The focused neighborhood, from the whole map (so callers / callees in other environments
   // or groups are included), dependencies included even when the map hides them: a focused view
   // is small, and a service's connections are often mostly databases / topics / externals.
   // Null when not focused or the node is no longer on the map.
-  const focusGraph = useMemo(
-    () => (focus ? getNeighborhood(nodes, edges, focus.nodeId, focus.mode) : null),
-    [focus, nodes, edges]
+  const focusCenter = useMemo(() => {
+    const node = focus ? nodes.find((n) => n.NodeId === focus.nodeId) : undefined;
+    return node ? { nodeId: node.NodeId, name: node.KeyAttributes.Name } : null;
+  }, [focus, nodes]);
+  const neighborhood = useFocusNeighborhood({
+    startTime: parsedTimeRange.startTime,
+    endTime: parsedTimeRange.endTime,
+    refreshTrigger,
+    enabled: isLargeMap,
+    center: isLargeMap ? focusCenter : null,
+    mode: focus?.mode ?? 'direct',
+  });
+  const localFocusGraph = useMemo(
+    () => (focus && !isLargeMap ? getNeighborhood(nodes, edges, focus.nodeId, focus.mode) : null),
+    [focus, isLargeMap, nodes, edges]
   );
+  // While a large map's neighborhood loads, the focused view shows just the center.
+  const focusGraph = useMemo(
+    () =>
+      isLargeMap
+        ? focusCenter
+          ? (neighborhood.neighborhood ?? {
+              nodes: nodes.filter((n) => n.NodeId === focusCenter.nodeId),
+              edges: NO_EDGES,
+              totalConnected: 0,
+            })
+          : null
+        : localFocusGraph,
+    [isLargeMap, focusCenter, neighborhood.neighborhood, nodes, localFocusGraph]
+  );
+
+  // A large map's opened environment / group: its exact slice (prefetched, largest first).
+  const groupBy = navigationState.groupByAttribute;
+  const sliceFor = useCallback(
+    (attribute: string, value: string): ServiceMapSliceFilter =>
+      attribute === ENVIRONMENT_GROUP_BY
+        ? { kind: 'environment', environment: value }
+        : { kind: 'attribute', attribute, value },
+    []
+  );
+  const activeSlice = useMemo(
+    () =>
+      isLargeMap &&
+      navigationState.level === 'groupByValue' &&
+      groupBy &&
+      navigationState.groupByValue
+        ? sliceFor(groupBy, navigationState.groupByValue)
+        : null,
+    [isLargeMap, navigationState, groupBy, sliceFor]
+  );
+  const prefetchSlices = useMemo(() => {
+    if (!isLargeMap || !groupBy) return [];
+    const sizes = new Map<string, number>();
+    mapGraph.nodes.forEach((n) => {
+      const v = getNodeGroupValue(n, groupBy);
+      if (v) sizes.set(v, (sizes.get(v) ?? 0) + 1);
+    });
+    return Array.from(sizes.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([value]) => sliceFor(groupBy, value));
+  }, [isLargeMap, groupBy, mapGraph.nodes, sliceFor]);
+  const slices = useServiceMapSlices({
+    startTime: parsedTimeRange.startTime,
+    endTime: parsedTimeRange.endTime,
+    refreshTrigger,
+    enabled: isLargeMap && !mapLoading,
+    active: activeSlice,
+    prefetch: prefetchSlices,
+  });
+  const sliceLoading = !!activeSlice && slices.activeStatus === 'pending';
+  // What the graph draws: an opened slice on a large map, else the map.
+  const viewGraph = useMemo(() => {
+    if (!activeSlice) return mapGraph;
+    const slice = slices.active ?? { nodes: [], edges: NO_EDGES };
+    return includeDependencies ? slice : removeDependencies(slice.nodes, slice.edges);
+  }, [activeSlice, slices.active, mapGraph, includeDependencies]);
+  const mapTruncated = isLargeMap
+    ? (!!activeSlice && (!!slices.active?.truncated || slices.activeStatus === 'failed')) ||
+      (!!focus && neighborhood.truncated)
+    : full.truncated;
 
   // Auto-select node from URL params once nodes are loaded
   useEffect(() => {
@@ -359,21 +488,21 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         : graph.nodes;
     if (focusGraph) return drawable(focusGraph);
     if (navigationState.level === 'groupByValue' && navigationState.groupByAttribute) {
-      const groupNodes = mapGraph.nodes.filter(
+      const groupNodes = viewGraph.nodes.filter(
         (n) =>
           getNodeGroupValue(n, navigationState.groupByAttribute!) === navigationState.groupByValue
       );
       const ids = new Set(groupNodes.map((n) => n.NodeId));
       return drawable({
         nodes: groupNodes,
-        edges: mapGraph.edges.filter(
+        edges: viewGraph.edges.filter(
           (e) => ids.has(e.SourceNodeId) && ids.has(e.DestinationNodeId)
         ),
       });
     }
     if (navigationState.level === 'services') return drawable(mapGraph);
     return [];
-  }, [focusGraph, navigationState, mapGraph, showDependenciesIndividually]);
+  }, [focusGraph, navigationState, mapGraph, viewGraph, showDependenciesIndividually]);
 
   // Totals for the Application node / group nodes when that level is on screen.
   const showsGroupTotals =
@@ -397,7 +526,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   const servicesList = useMemo(() => {
     const onScreen = new Set(onScreenNodes.map((n) => n.NodeId));
     const degree = new Map<string, number>();
-    mapGraph.edges.forEach((e) => {
+    [...viewGraph.edges, ...(focusGraph?.edges ?? [])].forEach((e) => {
       if (!onScreen.has(e.SourceNodeId) || !onScreen.has(e.DestinationNodeId)) return;
       degree.set(e.SourceNodeId, (degree.get(e.SourceNodeId) ?? 0) + 1);
       degree.set(e.DestinationNodeId, (degree.get(e.DestinationNodeId) ?? 0) + 1);
@@ -409,7 +538,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         environment: node.KeyAttributes.Environment,
         type: node.KeyAttributes.Type,
       }));
-  }, [onScreenNodes, mapGraph]);
+  }, [onScreenNodes, viewGraph, focusGraph]);
 
   // Extract unique environments from nodes (sorted alphabetically by display name).
   // Dedupe on the display name rather than the raw env string: the map filters by
@@ -815,6 +944,14 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       }
     : undefined;
   const focusNode = focusGraph ? nodes.find((n) => n.NodeId === focus?.nodeId) : undefined;
+  // The Application level is a single card: nothing to find. A query typed deeper is cleared on
+  // the way back, rather than left hidden in a disabled box.
+  const searchUnavailable = !focusGraph && navigationState.level === 'application';
+  useEffect(() => {
+    if (searchUnavailable && filters.searchQuery) {
+      setFilters((prev) => ({ ...prev, searchQuery: '' }));
+    }
+  }, [searchUnavailable, filters.searchQuery, setFilters]);
   const focusFilters = useMemo(() => ({ ...filters, environments: [] }), [filters]);
 
   // Leave focus mode back to the view that contains the service, with it still selected (flyout
@@ -823,19 +960,19 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   const exitFocus = useCallback(() => {
     const node = focus ? nodes.find((n) => n.NodeId === focus.nodeId) : undefined;
     const onMap = !!node && mapGraph.nodes.some((n) => n.NodeId === node.NodeId);
-    const groupBy = filters.groupBy;
+    const filterGroupBy = filters.groupBy;
     let target: ExitFocusTarget = { kind: 'stay' };
-    if (node && onMap && groupBy) {
-      const value = getNodeGroupValue(node, groupBy);
+    if (node && onMap && filterGroupBy) {
+      const value = getNodeGroupValue(node, filterGroupBy);
       const alreadyThere =
         navigationState.level === 'groupByValue' && navigationState.groupByValue === value;
       if (value && !alreadyThere) {
         target = {
           kind: 'group',
-          groupBy,
+          groupBy: filterGroupBy,
           value,
           environmentFilterId:
-            groupBy === ENVIRONMENT_GROUP_BY ? environmentFilterId(nodes, value) : undefined,
+            filterGroupBy === ENVIRONMENT_GROUP_BY ? environmentFilterId(nodes, value) : undefined,
         };
       }
     } else if (node && onMap && navigationState.level === 'application') {
@@ -864,16 +1001,26 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     },
     [mapGraph.nodes, handleNodeClick]
   );
+  const [serviceSearchValue, setServiceSearchValue] = useState('');
+  const matchingServiceSearchOptions = useMemo(
+    () => filterFocusOptions(serviceSearchOptions, serviceSearchValue),
+    [serviceSearchOptions, serviceSearchValue]
+  );
   const serviceSearch = (
     <div style={{ width: 340 }}>
       <EuiComboBox
         compressed
         fullWidth
         prepend={i18nTexts.focus.searchPrepend}
+        // Filtered here (`async` turns off the combo box's own filtering), keeping the
+        // environment groups: its startsWith sort flattens them, separating each service from
+        // its environment header.
+        async
+        onSearchChange={setServiceSearchValue}
         singleSelection={{ asPlainText: true }}
         placeholder={i18nTexts.focus.searchPlaceholder}
         aria-label={i18nTexts.focus.searchAriaLabel}
-        options={serviceSearchOptions}
+        options={matchingServiceSearchOptions}
         selectedOptions={focusedOption ? [focusedOption] : []}
         onChange={handleServiceSearchChange}
         isClearable
@@ -966,7 +1113,12 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
               searchQuery={filters.searchQuery}
               onSearchChange={(query) => setFilters((prev) => ({ ...prev, searchQuery: query }))}
               prepend={serviceSearch}
-              searchPlaceholder={i18nTexts.searchPlaceholder}
+              searchPlaceholder={
+                searchUnavailable
+                  ? i18nTexts.searchDisabledPlaceholder
+                  : i18nTexts.searchPlaceholder
+              }
+              searchDisabled={searchUnavailable}
             />
 
             {/* Active filter badges */}
@@ -1061,11 +1213,18 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                               focusGraph.nodes.length - 1,
                               focusGraph.totalConnected
                             )
-                          : i18nTexts.focus.label(
-                              focusNode?.Name ?? '',
-                              focusNode?.KeyAttributes.Environment ?? '',
-                              focusGraph.nodes.length - 1
-                            )}
+                          : isLargeMap && neighborhood.pathCut
+                            ? i18nTexts.focus.labelPathCut(
+                                focusNode?.Name ?? '',
+                                focusNode?.KeyAttributes.Environment ?? '',
+                                focusGraph.nodes.length - 1,
+                                NEIGHBORHOOD_MAX_ROUNDS
+                              )
+                            : i18nTexts.focus.label(
+                                focusNode?.Name ?? '',
+                                focusNode?.KeyAttributes.Environment ?? '',
+                                focusGraph.nodes.length - 1
+                              )}
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -1131,8 +1290,8 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                     style={{ padding: '8px 0px 0px 8px' }}
                   >
                     <ServiceMapGraph
-                      nodes={focusGraph ? focusGraph.nodes : mapGraph.nodes}
-                      edges={focusGraph ? focusGraph.edges : mapGraph.edges}
+                      nodes={focusGraph ? focusGraph.nodes : viewGraph.nodes}
+                      edges={focusGraph ? focusGraph.edges : viewGraph.edges}
                       stackDependencies={!showDependenciesIndividually}
                       onShowDependenciesIndividually={() => setShowDependenciesIndividually(true)}
                       metricsMap={metricsMap}
@@ -1155,7 +1314,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                       navigationState={focusGraph ? FOCUS_NAVIGATION_STATE : navigationState}
                       onNavigationStateChange={handleNavigationStateChange}
                       onNodeClick={handleNodeClick}
-                      isLoading={isLoading}
+                      isLoading={isLoading || sliceLoading || (!!focus && neighborhood.isLoading)}
                       selectedEdge={selectedEdge}
                       onEdgeSelect={handleEdgeSelect}
                       // In focus mode the map fits the whole neighborhood; a selected node would

@@ -571,3 +571,117 @@ export function getQueryDependencySpans(
   query += ` | fields ${DEPENDENCY_SPAN_COLUMNS.join(', ')}`;
   return query;
 }
+
+// ============================================================================
+// Large-map queries: overview aggregations, topology slices, neighborhoods.
+// Instead of reading the whole topology (a dedup over every raw service-map doc, re-run per
+// page and capped at MAX_EDGE_PAGES), a large map reads aggregations for the Application /
+// group levels, and an exact topology only for the slice on screen (an opened environment or
+// group, or a focused service's neighborhood). Local measurements, 3 days / 8.2M docs: full
+// topology 31s and partial; node-list aggregations ~0.5s; one environment 0.4s; one service's
+// neighborhood 0.07s.
+// ============================================================================
+
+/** Map node sides in the service-map document. */
+export type ServiceMapSide = 'source' | 'target';
+
+/** A group-by attribute path is embedded in a query field name, so only plain paths are allowed. */
+const isSafeAttributePath = (attribute: string) => /^[A-Za-z0-9_.-]+$/.test(attribute);
+
+/** `sourceNode.groupByAttributes.<attribute>`, backquoted (attributes are dotted paths). */
+export const groupByAttributeField = (side: ServiceMapSide, attribute: string): string => {
+  if (!isSafeAttributePath(attribute)) throw new Error(`Invalid group-by attribute: ${attribute}`);
+  return `\`${side}Node.groupByAttributes.${attribute}\``;
+};
+
+/**
+ * Every node on one side of the connections in the range (an aggregation: one pass, no row
+ * paging), optionally with one group-by attribute's value per node.
+ *
+ * source=idx | where <time> | stats count() by sourceNode.keyAttributes.environment,
+ *   sourceNode.keyAttributes.name, sourceNode.type[, `sourceNode.groupByAttributes.<attr>`]
+ */
+export function getQueryServiceMapNodes(
+  queryIndex: string,
+  side: ServiceMapSide,
+  startTime?: string | Date,
+  endTime?: string | Date,
+  groupByAttribute?: string
+): string {
+  const n = `${side}Node`;
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query += ` | stats count() by ${n}.keyAttributes.environment, ${n}.keyAttributes.name, ${n}.type`;
+  if (groupByAttribute) query += `, ${groupByAttributeField(side, groupByAttribute)}`;
+  return query;
+}
+
+/** A sample of group-by attributes, to list the attributes the map can group by. */
+export function getQueryGroupByAttributeSample(
+  queryIndex: string,
+  startTime?: string | Date,
+  endTime?: string | Date
+): string {
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query +=
+    ' | fields sourceNode.keyAttributes, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.groupByAttributes';
+  query += ` | head ${DEFAULT_ROW_LIMIT * 2}`;
+  return query;
+}
+
+/** Which connections a topology slice holds (either end matching). */
+export type ServiceMapSliceFilter =
+  | { kind: 'environment'; environment: string }
+  | { kind: 'attribute'; attribute: string; value: string }
+  | { kind: 'names'; names: string[] };
+
+/** `where` clause for a slice: connections whose source or target matches. */
+export function serviceMapSliceWhere(filter: ServiceMapSliceFilter): string {
+  if (filter.kind === 'environment') {
+    const env = escapePPLString(filter.environment);
+    return ` | where sourceNode.keyAttributes.environment = '${env}' or targetNode.keyAttributes.environment = '${env}'`;
+  }
+  if (filter.kind === 'attribute') {
+    const value = escapePPLString(filter.value);
+    return ` | where ${groupByAttributeField('source', filter.attribute)} = '${value}' or ${groupByAttributeField(
+      'target',
+      filter.attribute
+    )} = '${value}'`;
+  }
+  const list = filter.names.map((n) => `'${escapePPLString(n)}'`).join(', ');
+  return ` | where sourceNode.keyAttributes.name in (${list}) or targetNode.keyAttributes.name in (${list})`;
+}
+
+/** The exact topology of a slice, paged like getQueryGetServiceMap. */
+export function getQueryServiceMapSlice(
+  queryIndex: string,
+  filter: ServiceMapSliceFilter,
+  startTime?: string | Date,
+  endTime?: string | Date,
+  offset: number = 0
+): string {
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query += serviceMapSliceWhere(filter);
+  query += ` | dedup nodeConnectionHash`;
+  query += pagedEdgeClause(
+    'sourceNode.keyAttributes, sourceNode.type, targetNode.keyAttributes, targetNode.type, sourceNode.groupByAttributes, targetNode.groupByAttributes',
+    offset
+  );
+  return query;
+}
+
+/** Distinct connections in a slice (see getQueryDistinctEdgeCount). */
+export function getQuerySliceDistinctEdgeCount(
+  queryIndex: string,
+  filter: ServiceMapSliceFilter,
+  startTime?: string | Date,
+  endTime?: string | Date
+): string {
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query += serviceMapSliceWhere(filter);
+  query += ` | stats distinct_count(nodeConnectionHash) as edges`;
+  return query;
+}
