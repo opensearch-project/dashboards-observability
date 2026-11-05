@@ -17,8 +17,10 @@ export const applicationMapI18nTexts = {
   pageTitle: i18n.translate('observability.apm.applicationMap.pageTitle', {
     defaultMessage: 'Topology Map',
   }),
+  // On the map the search highlights matches in place (non-matching nodes fade); Focus on a
+  // service is what narrows the map.
   searchPlaceholder: i18n.translate('observability.apm.applicationMap.search.placeholder', {
-    defaultMessage: 'Filter by service name',
+    defaultMessage: 'Search by service name or environment',
   }),
 
   // Navigation breadcrumbs
@@ -252,7 +254,7 @@ export const applicationMapI18nTexts = {
       defaultMessage: 'Back to full map',
     }),
     searchPlaceholder: i18n.translate('observability.apm.applicationMap.focus.searchPlaceholder', {
-      defaultMessage: 'Find a service',
+      defaultMessage: 'Focus on a service',
     }),
     modeLegend: i18n.translate('observability.apm.applicationMap.focus.modeLegend', {
       defaultMessage: 'Connections to show',

@@ -22,6 +22,8 @@ export interface ApmPageHeaderProps {
   showSearchBar?: boolean; // default true - set to false to hide search bar
   /** Extra controls before the search bar (e.g. the topology map's service picker). */
   prepend?: React.ReactNode;
+  /** Overrides the search bar placeholder (default: "Filter by service name or environment"). */
+  searchPlaceholder?: string;
 }
 
 /**
@@ -38,6 +40,7 @@ export const ApmPageHeader: React.FC<ApmPageHeaderProps> = ({
   onSearchChange,
   showSearchBar = true,
   prepend,
+  searchPlaceholder: placeholder = searchPlaceholder,
 }) => {
   return (
     <EuiFlexGroup
@@ -51,7 +54,7 @@ export const ApmPageHeader: React.FC<ApmPageHeaderProps> = ({
       {showSearchBar && (
         <EuiFlexItem grow={true}>
           <EuiFieldSearch
-            placeholder={searchPlaceholder}
+            placeholder={placeholder}
             value={searchQuery}
             onChange={(e) => onSearchChange?.(e.target.value)}
             isClearable

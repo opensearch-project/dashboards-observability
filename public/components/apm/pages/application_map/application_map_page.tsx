@@ -1063,6 +1063,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
               searchQuery={filters.searchQuery}
               onSearchChange={(query) => setFilters((prev) => ({ ...prev, searchQuery: query }))}
               prepend={serviceSearch}
+              searchPlaceholder={i18nTexts.searchPlaceholder}
             />
 
             {/* Active filter badges */}
