@@ -880,24 +880,33 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
 
   // Service search on the map: picking a service focuses it (as clicking it, or arriving from the
   // Services page, does); clearing it returns to the full map.
+  // Grouped by environment (OUI combo box groups): the environment is the group header, so each
+  // option is just the service name, and names shared across environments stay distinct. Lists
+  // every service regardless of the sidebar filters: focusing works from anywhere on the map.
   const serviceSearchOptions = useMemo(() => {
-    const nameCounts = new Map<string, number>();
-    mapGraph.nodes.forEach((n) => nameCounts.set(n.Name, (nameCounts.get(n.Name) ?? 0) + 1));
-    return mapGraph.nodes
-      .map((n) => ({
-        // Names shared across environments are told apart by the environment.
-        label:
-          (nameCounts.get(n.Name) ?? 0) > 1
-            ? `${n.Name} (${getEnvironmentDisplayName(n.KeyAttributes.Environment)})`
-            : n.Name,
-        value: n.NodeId,
-      }))
-      .sort((x, y) => x.label.localeCompare(y.label));
+    const byEnvironment = new Map<string, Array<{ label: string; value: string }>>();
+    mapGraph.nodes.forEach((n) => {
+      const env = n.KeyAttributes.Environment;
+      const list = byEnvironment.get(env) ?? [];
+      list.push({ label: n.Name, value: n.NodeId });
+      byEnvironment.set(env, list);
+    });
+    return Array.from(byEnvironment.entries())
+      .sort(([x], [y]) => x.localeCompare(y))
+      .map(([env, options]) => ({
+        label: env,
+        options: options.sort((x, y) => x.label.localeCompare(y.label)),
+      }));
   }, [mapGraph.nodes]);
   // The search shows the focused service, or the selected one after leaving focus, until cleared.
+  // Shown with its environment, since the selection is outside the group headers.
   const searchNodeId = focusGraph ? focus?.nodeId : selectedNode?.nodeId;
-  const focusedOption = searchNodeId
-    ? serviceSearchOptions.find((o) => o.value === searchNodeId)
+  const searchNode = searchNodeId ? nodes.find((n) => n.NodeId === searchNodeId) : undefined;
+  const focusedOption = searchNode
+    ? {
+        label: `${searchNode.Name} (${searchNode.KeyAttributes.Environment})`,
+        value: searchNode.NodeId,
+      }
     : undefined;
   const focusNode = focusGraph ? nodes.find((n) => n.NodeId === focus?.nodeId) : undefined;
 
@@ -963,13 +972,14 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     [mapGraph.nodes, handleNodeClick]
   );
   const serviceSearch = (
-    <div style={{ width: 280 }}>
+    <div style={{ width: 340 }}>
       <EuiComboBox
         compressed
         fullWidth
+        prepend={i18nTexts.focus.searchPrepend}
         singleSelection={{ asPlainText: true }}
         placeholder={i18nTexts.focus.searchPlaceholder}
-        aria-label={i18nTexts.focus.searchPlaceholder}
+        aria-label={i18nTexts.focus.searchAriaLabel}
         options={serviceSearchOptions}
         selectedOptions={focusedOption ? [focusedOption] : []}
         onChange={handleServiceSearchChange}

@@ -253,7 +253,13 @@ export const applicationMapI18nTexts = {
     exit: i18n.translate('observability.apm.applicationMap.focus.exit', {
       defaultMessage: 'Back to full map',
     }),
+    searchPrepend: i18n.translate('observability.apm.applicationMap.focus.searchPrepend', {
+      defaultMessage: 'Focus on',
+    }),
     searchPlaceholder: i18n.translate('observability.apm.applicationMap.focus.searchPlaceholder', {
+      defaultMessage: 'Select a service',
+    }),
+    searchAriaLabel: i18n.translate('observability.apm.applicationMap.focus.searchAriaLabel', {
       defaultMessage: 'Focus on a service',
     }),
     modeLegend: i18n.translate('observability.apm.applicationMap.focus.modeLegend', {

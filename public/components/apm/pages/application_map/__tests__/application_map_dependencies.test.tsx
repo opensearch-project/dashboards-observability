@@ -8,11 +8,11 @@ import { render, act, screen, fireEvent, within } from '@testing-library/react';
 import { ApplicationMapPage } from '../application_map_page';
 import { APM_INCLUDE_DEPENDENCIES_STORAGE_KEY } from '../../../common/constants';
 
-const node = (name: string, type: string) => ({
+const node = (name: string, type: string, environment = 'generic:default') => ({
   NodeId: name,
   Name: name,
   Type: 'AWS::CloudWatch::Service',
-  KeyAttributes: { Environment: 'generic:default', Name: name, Type: type },
+  KeyAttributes: { Environment: environment, Name: name, Type: type },
   AttributeMaps: [],
   GroupByAttributes: {},
   StatisticReferences: {},
@@ -345,9 +345,13 @@ describe('ApplicationMapPage focus mode', () => {
     fireEvent.change(within(search).getByTestId('comboBoxSearchInput'), {
       target: { value: 'postg' },
     });
+    // Options are grouped under their environment.
+    expect(document.querySelector('.euiComboBoxTitle')).toHaveTextContent('generic:default');
     fireEvent.click(screen.getByRole('option', { name: 'postgresql' }));
 
     expect(isFocused()).toBe(true);
+    // The selection carries its environment (it is outside the group headers).
+    expect(searchText()).toContain('postgresql (generic:default)');
     expect(
       last(mockGraph)
         .nodes.map((n: { NodeId: string }) => n.NodeId)
@@ -409,5 +413,42 @@ describe('ApplicationMapPage environment grouping and the Environment filter', (
       last(mockSidebar).onFiltersChange({ ...last(mockSidebar).filters, environments: [] })
     );
     expect(last(mockGraph).navigationState.level).toBe('groupBy');
+  });
+});
+
+describe('ApplicationMapPage service search scope', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sessionStorage.setItem(APM_INCLUDE_DEPENDENCIES_STORAGE_KEY, 'true');
+    window.history.replaceState(null, '', '#/application-map');
+  });
+  afterEach(() => {
+    sessionStorage.clear();
+    mockMap.nodes.pop();
+  });
+
+  const openList = () => {
+    const toggle = within(screen.getByTestId('mapServiceSearch')).getByTestId(
+      'comboBoxToggleListButton'
+    );
+    // Close (if open) and reopen, so the list reflects the current options.
+    if (document.querySelector('.euiComboBoxTitle')) fireEvent.click(toggle);
+    fireEvent.click(toggle);
+  };
+  const listedGroups = () =>
+    Array.from(document.querySelectorAll('.euiComboBoxTitle')).map((t) => t.textContent);
+
+  it('lists every environment regardless of the Environment filter', () => {
+    mockMap.nodes.push(node('billing', 'service', 'dev'));
+    render(<ApplicationMapPage {...props} />);
+    openList();
+    expect(listedGroups()).toEqual(['dev', 'generic:default']);
+
+    act(() =>
+      last(mockSidebar).onFiltersChange({ ...last(mockSidebar).filters, environments: ['dev'] })
+    );
+    openList();
+    expect(listedGroups()).toEqual(['dev', 'generic:default']);
+    expect(screen.getByRole('option', { name: 'checkout' })).toBeInTheDocument();
   });
 });
