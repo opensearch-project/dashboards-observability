@@ -48,6 +48,7 @@ import {
   SLI_WINDOW_TOKEN,
 } from '../../../../../common/slo/slo_promql_generator';
 import type { HistogramShape } from './histogram_shape';
+import { MAX_BUCKET_BOUNDS } from '../../../../../common/slo/slo_types';
 import type { PromRule, PromRuleGroup } from '../../../../../common/types/alerting';
 import type {
   BurnRateConfig,
@@ -1016,6 +1017,20 @@ function applyHistogramShapes(
             unit: shape.unit === 'milliseconds' ? 'ms' : 's',
             threshold: formatThreshold(thresholdSeconds),
           },
+        }),
+      });
+      continue;
+    }
+    // A per-range SLI carries every bound, and the server caps how many. Skip
+    // rather than offer a draft that would be rejected on create.
+    if (shape.layout === 'per_range' && shape.bounds.length > MAX_BUCKET_BOUNDS) {
+      skipped.push({
+        key: draft.key,
+        name: spec.name,
+        reason: i18n.translate('observability.apm.slo.suggest.engine.tooManyBuckets', {
+          defaultMessage:
+            "{metric} has {count} buckets; latency SLOs on this kind of histogram support up to {max}, so this latency SLO wasn't suggested.",
+          values: { metric: def.metric ?? '', count: shape.bounds.length, max: MAX_BUCKET_BOUNDS },
         }),
       });
       continue;

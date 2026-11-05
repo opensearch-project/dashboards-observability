@@ -5,6 +5,7 @@
 
 import { validateSloSpec, validateSloId } from '../slo_validators';
 import { DEFAULT_MWMBR_TIERS } from '../slo_promql_generator';
+import { MAX_BUCKET_BOUNDS } from '../slo_types';
 import type { SloSpec } from '../slo_types';
 
 function minimalSpec(overrides: Partial<SloSpec> = {}): Partial<SloSpec> {
@@ -191,6 +192,16 @@ describe('validateSloSpec', () => {
       expect(
         perRange({ bucketBounds: [0.1] }).errors['spec.sli.definition.bucketUnit']
       ).toBeDefined();
+    });
+
+    it('rejects more bounds than the per-range limit', () => {
+      const bounds = Array.from({ length: MAX_BUCKET_BOUNDS + 1 }, (_, i) => i);
+      const tooMany = perRange({ bucketBounds: bounds, bucketUnit: 'milliseconds' });
+      expect(tooMany.errors['spec.sli.definition.bucketBounds']).toContain(
+        `at most ${MAX_BUCKET_BOUNDS} bounds`
+      );
+      const atLimit = perRange({ bucketBounds: bounds.slice(1), bucketUnit: 'milliseconds' });
+      expect(atLimit.errors).toEqual({});
     });
 
     it('rejects bounds with nothing positive at or under the threshold', () => {

@@ -10,7 +10,7 @@
  */
 
 import type { BurnRateConfig, SloSpec, Objective, PrometheusSli } from './slo_types';
-import { isSupportedSliBackend } from './slo_types';
+import { isSupportedSliBackend, MAX_BUCKET_BOUNDS } from './slo_types';
 import {
   MWMBR_MAX_TIERS,
   parseDurationToMs,
@@ -209,6 +209,12 @@ function validateBucketLayout(
     return {
       field: 'spec.sli.definition.bucketBounds',
       message: 'bucketBounds must list the histogram bucket bounds (finite, non-negative numbers)',
+    };
+  }
+  if (bounds.length > MAX_BUCKET_BOUNDS) {
+    return {
+      field: 'spec.sli.definition.bucketBounds',
+      message: `bucketBounds can list at most ${MAX_BUCKET_BOUNDS} bounds (got ${bounds.length})`,
     };
   }
   if (prom.bucketUnit !== 'seconds' && prom.bucketUnit !== 'milliseconds') {

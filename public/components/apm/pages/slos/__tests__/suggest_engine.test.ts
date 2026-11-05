@@ -18,6 +18,7 @@ import {
 } from '../suggest_engine';
 import type { Suggestion } from '../suggest_engine';
 import type { HistogramShape } from '../histogram_shape';
+import { MAX_BUCKET_BOUNDS } from '../../../../../../common/slo/slo_types';
 import { buildSliEventQueries } from '../../../../../../common/slo/slo_promql_generator';
 
 function getPromSli(
@@ -541,6 +542,37 @@ describe('generateSuggestionsWithSkips — histogram bucket shapes', () => {
       }),
     ]);
     expect(out.skipped[0].reason).toContain('0, 5, 10 … 10000 s');
+  });
+
+  it('skips a per-range draft with more bounds than an SLI can carry', () => {
+    const manyBounds = Array.from({ length: MAX_BUCKET_BOUNDS + 1 }, (_, i) => i * 10);
+    const out = generateSuggestionsWithSkips({
+      ...base,
+      histogramShapes: [
+        shape('flagd', { layout: 'per_range', bounds: manyBounds, unit: 'milliseconds' }),
+      ],
+    });
+    expect(draft(out, 'http-lat:flagd')).toBeUndefined();
+    expect(out.skipped).toEqual([
+      expect.objectContaining({
+        key: 'http-lat:flagd',
+        reason: expect.stringContaining(`has ${MAX_BUCKET_BOUNDS + 1} buckets`),
+      }),
+    ]);
+    // At the limit it's still suggested, carrying every bound.
+    const atLimit = generateSuggestionsWithSkips({
+      ...base,
+      histogramShapes: [
+        shape('flagd', {
+          layout: 'per_range',
+          bounds: manyBounds.slice(0, MAX_BUCKET_BOUNDS),
+          unit: 'milliseconds',
+        }),
+      ],
+    });
+    expect(
+      getPromSli(getSpec(draft(atLimit, 'http-lat:flagd')!.input).sli).bucketBounds
+    ).toHaveLength(MAX_BUCKET_BOUNDS);
   });
 
   it('builds a per-range draft when a bound at or under the threshold exists', () => {
