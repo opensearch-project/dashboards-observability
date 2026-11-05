@@ -51,9 +51,19 @@ interface DataConnectionSOAttributes {
  * Alert Manager UI code already consumes. Mirrors server-side mapping in
  * `server/services/alerting/datasource_discovery.ts`.
  */
+export interface MapDatasourcesOptions {
+  /**
+   * The data source plugin's `data_source.hideLocalCluster`: the deployment has no usable local
+   * cluster (e.g. a managed service), so the "Local Cluster" placeholder is never offered. Discover,
+   * index patterns and data import follow the same setting.
+   */
+  hideLocalCluster?: boolean;
+}
+
 export function mapSavedObjectsToDatasources(
   osSavedObjects: Array<SavedObject<DataSourceSOAttributes>>,
-  dcSavedObjects: Array<SavedObject<DataConnectionSOAttributes>>
+  dcSavedObjects: Array<SavedObject<DataConnectionSOAttributes>>,
+  { hideLocalCluster = false }: MapDatasourcesOptions = {}
 ): Datasource[] {
   // Local-cluster representation:
   //   - If the user registered any MDS data sources, surface them all with
@@ -63,7 +73,8 @@ export function mapSavedObjectsToDatasources(
   //     hostnames) and produced false positives in practice.
   //   - If no MDS rows exist, emit the default "Local Cluster" placeholder
   //     so the alert-manager UI still has at least one OpenSearch target to
-  //     bind to on a non-MDS deployment.
+  //     bind to on a non-MDS deployment — unless the deployment hides the
+  //     local cluster, where it would only ever fail to connect.
   const osDiscovered: Datasource[] = osSavedObjects.map((so) => ({
     id: so.id,
     name: so.attributes.title || so.id,
@@ -74,7 +85,7 @@ export function mapSavedObjectsToDatasources(
     engineType: so.attributes.dataSourceEngineType,
   }));
   const localRows: Datasource[] =
-    osDiscovered.length > 0
+    osDiscovered.length > 0 || hideLocalCluster
       ? []
       : [
           {
@@ -180,7 +191,8 @@ export function useDatasources(): UseDatasourcesResult {
 
         const merged = mapSavedObjectsToDatasources(
           osResult.savedObjects as Array<SavedObject<DataSourceSOAttributes>>,
-          dcResult.savedObjects as Array<SavedObject<DataConnectionSOAttributes>>
+          dcResult.savedObjects as Array<SavedObject<DataConnectionSOAttributes>>,
+          { hideLocalCluster: !!coreRefs.dataSource?.hideLocalCluster }
         );
 
         setDatasources(merged);
