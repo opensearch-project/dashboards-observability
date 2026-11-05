@@ -10,6 +10,7 @@ import {
   getQueryListServiceDependencies,
   getQueryGetServiceMap,
   DEFAULT_ROW_LIMIT,
+  MAX_EDGE_PAGES,
 } from './query_requests/ppl_queries';
 import { ResponseProcessor } from './query_requests/response_processor';
 import { coreRefs } from '../../../framework/core_refs';
@@ -42,9 +43,10 @@ export class PPLSearchService {
   async listServices(params: ListServicesRequest): Promise<any> {
     const { queryIndex, startTime, endTime, dataset } = params;
 
-    const pplQuery = getQueryListServices(queryIndex, startTime, endTime);
-
-    const searchResponse = await this.executePPLQuery(pplQuery, dataset);
+    const { response: searchResponse } = await this.executePagedEdgeQuery(
+      (offset) => getQueryListServices(queryIndex, startTime, endTime, offset),
+      dataset
+    );
 
     // Transform the response
     const transformedResponse = ResponseProcessor.transformListServices(searchResponse);
@@ -125,17 +127,48 @@ export class PPLSearchService {
   async getServiceMap(params: GetServiceMapRequest, signal?: AbortSignal): Promise<any> {
     const { queryIndex, startTime, endTime, dataset } = params;
 
-    const pplQuery = getQueryGetServiceMap(queryIndex, startTime, endTime);
+    const { response: searchResponse, truncated } = await this.executePagedEdgeQuery(
+      (offset) => getQueryGetServiceMap(queryIndex, startTime, endTime, offset),
+      dataset,
+      signal
+    );
 
-    const searchResponse = await this.executePPLQuery(pplQuery, dataset, signal);
-
-    // The edge query is capped with `| head DEFAULT_ROW_LIMIT`; if it comes back
-    // full, the topology is truncated and the UI should say so.
-    const rowCount = searchResponse?.size ?? searchResponse?.jsonData?.length ?? 0;
-    const truncated = rowCount >= DEFAULT_ROW_LIMIT;
-
-    // Transform the response
+    // `truncated`: every page came back full, so connections past the page cap are not shown
+    // and the UI should say so.
     return { ...ResponseProcessor.transformGetServiceMap(searchResponse), truncated };
+  }
+
+  /**
+   * Run a paged edge query (`head DEFAULT_ROW_LIMIT from <offset>`) page by page until a page
+   * comes back short or MAX_EDGE_PAGES is reached, and merge the rows into one response.
+   * Pages run sequentially: each is a full dedup over the time range, so running them in
+   * parallel would multiply the cluster load for the common single-page case.
+   */
+  private async executePagedEdgeQuery(
+    buildQuery: (offset: number) => string,
+    dataset: DatasetConfig,
+    signal?: AbortSignal
+  ): Promise<{ response: any; truncated: boolean }> {
+    const rows: Array<Record<string, any>> = [];
+    let first: any;
+    for (let page = 0; page < MAX_EDGE_PAGES; page++) {
+      const response = await this.executePPLQuery(
+        buildQuery(page * DEFAULT_ROW_LIMIT),
+        dataset,
+        signal
+      );
+      if (page === 0) first = response;
+      const pageRows: Array<Record<string, any>> = response?.jsonData ?? [];
+      rows.push(...pageRows);
+      const pageSize = response?.size ?? pageRows.length;
+      if (pageSize < DEFAULT_ROW_LIMIT) {
+        return {
+          response: page === 0 ? response : { ...first, jsonData: rows, size: rows.length },
+          truncated: false,
+        };
+      }
+    }
+    return { response: { ...first, jsonData: rows, size: rows.length }, truncated: true };
   }
 
   /**

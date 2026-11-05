@@ -269,6 +269,22 @@ describe('ServicesHome — Node type column and filter', () => {
     expect(rowNames()).toEqual(['cart', 'checkout']);
   });
 
+  it('with dependency nodes, shows services only by default and does not scope in dependencies', () => {
+    renderTyped([
+      { serviceName: 'cart', type: 'service' },
+      { serviceName: 'postgresql:orders-db', type: 'database' },
+    ]);
+
+    expect(rowNames()).toEqual(['cart']);
+    expect(screen.getByTestId('stub-ActiveFilterBadges')).toHaveTextContent(
+      `${servicesI18nTexts.table.type}: Service`
+    );
+    // The (heavy, whole-range) dependency metric queries are not issued.
+    const args = mockRedMetricsArgs.mock.calls.slice(-1)[0][0];
+    expect(args.scopeFilters.runDependencies).toBe(false);
+    expect(args.scopeServices.map((s: { serviceName: string }) => s.serviceName)).toEqual(['cart']);
+  });
+
   it('with dependency nodes, filters by type and shows a Type badge', () => {
     renderTyped([
       { serviceName: 'cart', type: 'service' },
@@ -277,7 +293,9 @@ describe('ServicesHome — Node type column and filter', () => {
     ]);
 
     expect(typeHeader()).toBeDefined();
-    fireEvent.click(within(screen.getByTestId('typeCheckboxGroup')).getByLabelText('Database'));
+    const group = within(screen.getByTestId('typeCheckboxGroup'));
+    fireEvent.click(group.getByLabelText('Service'));
+    fireEvent.click(group.getByLabelText('Database'));
 
     expect(rowNames()).toEqual(['postgresql:orders-db']);
     expect(screen.getByTestId('stub-ActiveFilterBadges')).toHaveTextContent(
@@ -292,7 +310,7 @@ describe('ServicesHome — Node type column and filter', () => {
     ]);
 
     const group = within(screen.getByTestId('typeCheckboxGroup'));
-    fireEvent.click(group.getByLabelText('Service'));
+    // "Service" is selected by default.
     expect(rowNames()).toEqual(['cart']);
     fireEvent.click(group.getByLabelText('Service'));
     fireEvent.click(group.getByLabelText('Other dependency'));
@@ -324,6 +342,8 @@ describe('ServicesHome — Node type column and filter', () => {
       { serviceName: 'c-db', type: 'database' },
     ]);
 
+    // Show every type (the default is services only), then sort by Type.
+    fireEvent.click(within(screen.getByTestId('typeCheckboxGroup')).getByLabelText('Service'));
     const header = typeHeader();
     expect(header).toBeDefined();
     fireEvent.click(within(header as HTMLElement).getByRole('button'));

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { getTimeInSeconds } from '../utils/time_utils';
 import { formatPrometheusDuration } from '../utils/step_utils';
@@ -16,71 +16,122 @@ import {
   getQueryServiceMapDependencyThroughput,
   getQueryServiceMapDependencyFaults,
   getQueryServiceMapDependencyErrors,
+  dependencyNamesFilter,
 } from '../../query_services/query_requests/promql_queries';
+import { escapePromQLRegex } from '../../query_services/query_requests/escape_utils';
 import { isDependencyType } from '../utils/platform_utils';
 
 export interface ServiceMapMetricParams {
   /**
-   * Array of services with name and environment. `type` (service / database /
-   * messaging / external) routes inferred dependency nodes to caller-derived metrics.
+   * Nodes to fetch metrics for, in priority order (earlier nodes are fetched first). `type`
+   * (service / database / messaging / external) routes dependency nodes to caller-derived metrics.
    */
   services: Array<{ serviceName: string; environment: string; type?: string }>;
   startTime: Date;
   endTime: Date;
+  /** Hold off fetching (e.g. while the topology for a new time range is still loading). */
+  enabled?: boolean;
 }
 
 export interface UseServiceMapMetricsResult {
-  /** Map of nodeId (serviceName::environment) to metrics */
+  /** Map of nodeId (serviceName::environment) to metrics; nodes still loading have no entry. */
   metricsMap: Map<string, ServiceMapNodeMetrics>;
+  /** nodeIds (serviceName::environment) whose metrics batch has not landed yet. */
+  pendingNodeIds: Set<string>;
   isLoading: boolean;
   error: Error | null;
   refetch: () => void;
 }
 
-interface MapMetricResponses {
-  throughput: unknown;
-  faults: unknown;
-  errors: unknown;
-  depThroughput: unknown;
-  depFaults: unknown;
-  depErrors: unknown;
+/**
+ * Names per metrics batch. Each batch is three instant queries bounded by a
+ * `service=~"..."` (or `remoteService=~"..."`) name list, so no single query scans every
+ * service in the workspace: an unbounded query over hundreds of services and thousands of
+ * dependencies timed out in Prometheus (503) at customer scale.
+ */
+export const MAP_METRICS_BATCH_SIZE = 100;
+/**
+ * Upper bound on a batch's name-list length. The dependency queries repeat their selector
+ * twice (client + consumer calls), so this keeps every query well under the 10,000-char
+ * PromQL limit even with long external host names.
+ */
+export const MAP_METRICS_BATCH_MAX_CHARS = 3500;
+/** Batches in flight at once (three queries each). */
+export const MAP_METRICS_MAX_CONCURRENT_BATCHES = 2;
+
+type NodeKind = 'svc' | 'dep';
+type BatchStatus = 'pending' | 'done' | 'failed';
+
+interface BatchResult {
+  throughput: Map<string, MetricDataPoint[]>;
+  faults: Map<string, MetricDataPoint[]>;
+  errors: Map<string, MetricDataPoint[]>;
 }
 
+interface MetricsState {
+  /** Generation (time range / connection / refresh) the state belongs to. */
+  gen: string;
+  /** Batch status per `${kind}:${name}`. */
+  status: Map<string, BatchStatus>;
+  /** Indexed series per `${kind}:${name}::${environment}`. */
+  results: Map<
+    string,
+    { throughput: MetricDataPoint[]; faults: MetricDataPoint[]; errors: MetricDataPoint[] }
+  >;
+  error: Error | null;
+}
+
+const nameKey = (kind: NodeKind, name: string) => `${kind}:${name}`;
+const kindOf = (type?: string): NodeKind => (isDependencyType(type) ? 'dep' : 'svc');
+
 /**
- * Hook for batch-fetching RED metrics for service map nodes
+ * Split names into batches of at most MAP_METRICS_BATCH_SIZE names and
+ * MAP_METRICS_BATCH_MAX_CHARS of escaped regex. Order is preserved, so the caller's
+ * priority order decides which nodes fill in first.
+ */
+export function chunkNames(names: string[]): string[][] {
+  const batches: string[][] = [];
+  let current: string[] = [];
+  let chars = 0;
+  names.forEach((name) => {
+    const len = escapePromQLRegex(name).length + 1;
+    if (
+      current.length > 0 &&
+      (current.length >= MAP_METRICS_BATCH_SIZE || chars + len > MAP_METRICS_BATCH_MAX_CHARS)
+    ) {
+      batches.push(current);
+      current = [];
+      chars = 0;
+    }
+    current.push(name);
+    chars += len;
+  });
+  if (current.length > 0) batches.push(current);
+  return batches;
+}
+
+const serviceNamesFilter = (names: string[]) =>
+  `service=~"${names.map(escapePromQLRegex).join('|')}"`;
+
+/**
+ * Hook for fetching RED metrics for service map nodes in bounded batches.
  *
- * Fetches metrics for all services in parallel using sum_over_time
- * to aggregate counts over the selected time range:
- * - Throughput: sum_over_time of request gauge
- * - Faults: sum_over_time of fault gauge
- * - Errors: sum_over_time of error gauge
- * - Failure Ratio: calculated client-side as (faults + errors) / requests * 100
+ * Each batch issues three instant queries (sum_over_time of request / fault / error over the
+ * selected range) scoped to the batch's names, at most MAP_METRICS_MAX_CONCURRENT_BATCHES
+ * batches at a time. Nodes fill in as their batch lands (`pendingNodeIds` lists the rest), a
+ * failed batch only affects its own nodes, and results are reused across node-list changes
+ * within the same time range, so revealing dependency nodes fetches only the dependencies.
  *
- * Note: request, error, and fault are GAUGE metrics (not counters)
- * Note: Latency metrics are not fetched here (use useServicesRedMetrics for latency)
- *
- * @example
- * const { metricsMap, isLoading } = useServiceMapMetrics({
- *   services: [{ serviceName: 'service1', environment: 'generic:default' }],
- *   startTime: new Date(Date.now() - 3600000),
- *   endTime: new Date(),
- * });
+ * Note: request, error, and fault are GAUGE metrics (not counters).
+ * Note: Latency metrics are not fetched here (use useServicesRedMetrics for latency).
  */
 export const useServiceMapMetrics = (
   params: ServiceMapMetricParams
 ): UseServiceMapMetricsResult => {
   const { config } = useApmConfig();
-
-  // Raw PromQL responses. Apart from whether dependency nodes exist, the
-  // queries do not depend on the node list, so the list is joined in at render
-  // time (see `metricsMap`): a new node list for a new time range does not
-  // re-send the queries (an abandoned request still runs in Prometheus).
-  const [responses, setResponses] = useState<MapMetricResponses | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const enabled = params.enabled ?? true;
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
-  // Get config values
   // Use .name (connectionId) for PromQL queries, not .id (saved object ID)
   const prometheusConnectionId = config?.prometheusDataSource?.name;
   const prometheusConnectionMeta = config?.prometheusDataSource?.meta;
@@ -92,306 +143,311 @@ export const useServiceMapMetrics = (
     return new PromQLSearchService(prometheusConnectionId, prometheusConnectionMeta);
   }, [prometheusConnectionId, prometheusConnectionMeta]);
 
-  // Rely on `sum by (service)` grouping rather than a service=~"..." filter,
-  // which grew past the 10,000-char PromQL limit on large topologies.
-  const serviceFilter = '';
+  const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
+  const timeRange = useMemo(() => {
+    const durationMs = params.endTime.getTime() - params.startTime.getTime();
+    return formatPrometheusDuration(Math.floor(durationMs / 1000));
+  }, [params.startTime, params.endTime]);
 
-  // Stable key over the service set; retriggers the fetch when the set changes.
-  // Keyed on name+environment so an environment-only change still refetches
-  // (nodes are identified by serviceName::environment).
+  // Results are valid for one time range / connection / refresh generation.
+  const gen = `${prometheusConnectionId}|${endTimeSec}|${timeRange}|${refetchTrigger}`;
+
+  const [state, setState] = useState<MetricsState>(() => ({
+    gen,
+    status: new Map(),
+    results: new Map(),
+    error: null,
+  }));
+  // Batches already queued for the current generation (the state update lags behind).
+  const queuedRef = useRef<{ gen: string; names: Set<string> }>({ gen, names: new Set() });
+  const abortRef = useRef<AbortController | null>(null);
+
+  // A new generation drops everything from the previous one and aborts its requests.
+  useEffect(() => {
+    const controller = new AbortController();
+    abortRef.current = controller;
+    queuedRef.current = { gen, names: new Set() };
+    setState({ gen, status: new Map(), results: new Map(), error: null });
+    return () => controller.abort();
+  }, [gen]);
+
+  // Stable key over the node set (name + environment + type), in priority order.
   const servicesKey = useMemo(
     () =>
       params.services.map((s) => `${s.serviceName}::${s.environment}::${s.type || ''}`).join('|'),
     [params.services]
   );
 
-  // Memoize time value to avoid unnecessary re-fetches
-  const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
-
-  // Calculate time range string for sum_over_time queries
-  const timeRange = useMemo(() => {
-    const durationMs = params.endTime.getTime() - params.startTime.getTime();
-    const durationSec = Math.floor(durationMs / 1000);
-    return formatPrometheusDuration(durationSec);
-  }, [params.startTime, params.endTime]);
-
-  const hasNodes = params.services.length > 0;
-  // Only query caller-derived series when the map has dependency nodes, so a
-  // service-only map (feature off / older data) issues exactly the service queries.
-  const hasDependencyNodes = params.services.some((s) => isDependencyType(s.type));
-
+  // Queue batches for names not yet requested in this generation.
   useEffect(() => {
-    if (!hasNodes || !promqlService) {
-      setResponses(null);
-      setIsLoading(false);
-      return;
-    }
+    if (!enabled || !promqlService || params.services.length === 0) return;
+    const controller = abortRef.current;
+    if (!controller || controller.signal.aborted || queuedRef.current.gen !== gen) return;
+    const signal = controller.signal;
+    const queued = queuedRef.current.names;
 
-    const abortController = new AbortController();
+    const newNames: Record<NodeKind, string[]> = { svc: [], dep: [] };
+    params.services.forEach(({ serviceName, type }) => {
+      const kind = kindOf(type);
+      const key = nameKey(kind, serviceName);
+      if (queued.has(key)) return;
+      queued.add(key);
+      newNames[kind].push(serviceName);
+    });
+    if (newNames.svc.length === 0 && newNames.dep.length === 0) return;
 
-    const fetchMetrics = async () => {
-      setIsLoading(true);
-      setError(null);
+    const batches: Array<{ kind: NodeKind; names: string[] }> = [
+      ...chunkNames(newNames.svc).map((names) => ({ kind: 'svc' as const, names })),
+      ...chunkNames(newNames.dep).map((names) => ({ kind: 'dep' as const, names })),
+    ];
 
-      const queries = {
-        throughput: getQueryServiceMapThroughput(serviceFilter, timeRange),
-        faults: getQueryServiceMapFaults(serviceFilter, timeRange),
-        errors: getQueryServiceMapErrors(serviceFilter, timeRange),
-        // Dependency-node (database / messaging / external) metrics come from the
-        // callers' CLIENT-span series, aggregated by the remote target.
-        depThroughput: getQueryServiceMapDependencyThroughput(timeRange),
-        depFaults: getQueryServiceMapDependencyFaults(timeRange),
-        depErrors: getQueryServiceMapDependencyErrors(timeRange),
-      };
-      const runQuery = (query: string) =>
-        promqlService.executeInstantQuery({
-          query,
-          time: endTimeSec,
-          signal: abortController.signal,
-        });
+    setState((prev) => {
+      if (prev.gen !== gen) return prev;
+      const status = new Map(prev.status);
+      batches.forEach((b) => b.names.forEach((n) => status.set(nameKey(b.kind, n), 'pending')));
+      return { ...prev, status };
+    });
 
-      // Settle independently so one failed query doesn't blank the whole map.
-      const [
-        throughputResult,
-        faultsResult,
-        errorsResult,
-        depThroughputResult,
-        depFaultsResult,
-        depErrorsResult,
-      ] = await Promise.allSettled([
-        runQuery(queries.throughput),
-        runQuery(queries.faults),
-        runQuery(queries.errors),
-        ...(hasDependencyNodes
+    const runQuery = (query: string) =>
+      promqlService.executeInstantQuery({ query, time: endTimeSec, signal });
+
+    const runBatch = async ({ kind, names }: { kind: NodeKind; names: string[] }) => {
+      const queries =
+        kind === 'svc'
           ? [
-              runQuery(queries.depThroughput),
-              runQuery(queries.depFaults),
-              runQuery(queries.depErrors),
+              getQueryServiceMapThroughput(serviceNamesFilter(names), timeRange),
+              getQueryServiceMapFaults(serviceNamesFilter(names), timeRange),
+              getQueryServiceMapErrors(serviceNamesFilter(names), timeRange),
             ]
-          : []),
-      ]);
+          : [
+              // Dependency nodes (database / messaging / external) have no SERVER-span series;
+              // their RED comes from the callers' CLIENT-span series aggregated by target.
+              getQueryServiceMapDependencyThroughput(timeRange, dependencyNamesFilter(names)),
+              getQueryServiceMapDependencyFaults(timeRange, dependencyNamesFilter(names)),
+              getQueryServiceMapDependencyErrors(timeRange, dependencyNamesFilter(names)),
+            ];
+      const settled = await Promise.allSettled(queries.map(runQuery));
+      if (signal.aborted) return;
 
-      // Drop stale results if params changed while this fetch was in flight.
-      if (abortController.signal.aborted) return;
-
-      const valueOf = (r: PromiseSettledResult<any> | undefined) =>
-        r?.status === 'fulfilled' ? r.value : null;
-      const throughputResp = valueOf(throughputResult);
-      const faultsResp = valueOf(faultsResult);
-      const errorsResp = valueOf(errorsResult);
-      const depThroughputResp = valueOf(depThroughputResult);
-      const depFaultsResp = valueOf(depFaultsResult);
-      const depErrorsResp = valueOf(depErrorsResult);
-
-      setResponses({
-        throughput: throughputResp,
-        faults: faultsResp,
-        errors: errorsResp,
-        depThroughput: depThroughputResp,
-        depFaults: depFaultsResp,
-        depErrors: depErrorsResp,
-      });
-
-      const rejected = [
-        throughputResult,
-        faultsResult,
-        errorsResult,
-        depThroughputResult,
-        depFaultsResult,
-        depErrorsResult,
-      ].find((r) => r?.status === 'rejected') as PromiseRejectedResult | undefined;
+      const valueOf = (r: PromiseSettledResult<unknown>) =>
+        r.status === 'fulfilled' ? r.value : null;
+      const indexed: BatchResult = {
+        throughput: indexSeriesByNode(valueOf(settled[0])),
+        faults: indexSeriesByNode(valueOf(settled[1])),
+        errors: indexSeriesByNode(valueOf(settled[2])),
+      };
+      const rejected = settled.find((r) => r.status === 'rejected') as
+        PromiseRejectedResult | undefined;
       if (rejected) {
         console.error('[useServiceMapMetrics] Partial failure fetching metrics:', rejected.reason);
-        setError(rejected.reason instanceof Error ? rejected.reason : new Error('Unknown error'));
       }
-      setIsLoading(false);
+      // Only throughput failing leaves the nodes without their primary number.
+      const failed = settled[0].status === 'rejected';
+
+      setState((prev) => {
+        if (prev.gen !== gen) return prev;
+        const status = new Map(prev.status);
+        const results = new Map(prev.results);
+        const nameSet = new Set(names);
+        names.forEach((n) => status.set(nameKey(kind, n), failed ? 'failed' : 'done'));
+        const keys = new Set<string>([
+          ...indexed.throughput.keys(),
+          ...indexed.faults.keys(),
+          ...indexed.errors.keys(),
+        ]);
+        keys.forEach((nodeKey) => {
+          // A name filter can match a name outside the batch only via regex; keep batch names.
+          const name = nodeKey.slice(0, nodeKey.lastIndexOf('::'));
+          if (!nameSet.has(name)) return;
+          results.set(`${kind}:${nodeKey}`, {
+            throughput: indexed.throughput.get(nodeKey) ?? [],
+            faults: indexed.faults.get(nodeKey) ?? [],
+            errors: indexed.errors.get(nodeKey) ?? [],
+          });
+        });
+        const error =
+          prev.error ??
+          (rejected
+            ? rejected.reason instanceof Error
+              ? rejected.reason
+              : new Error('Unknown error')
+            : null);
+        return { ...prev, status, results, error };
+      });
     };
 
-    fetchMetrics();
+    // Small worker pool: MAP_METRICS_MAX_CONCURRENT_BATCHES batches in flight at a time.
+    let next = 0;
+    const worker = async () => {
+      while (next < batches.length && !signal.aborted) {
+        const batch = batches[next++];
+        await runBatch(batch);
+      }
+    };
+    for (let i = 0; i < Math.min(MAP_METRICS_MAX_CONCURRENT_BATCHES, batches.length); i++) {
+      worker();
+    }
+    // Batches belong to the generation; a node-list change must not abort in-flight batches
+    // (the generation effect aborts them when the time range changes).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gen, servicesKey, enabled, promqlService]);
 
-    return () => abortController.abort();
-    // serviceFilter is constant; the queries depend on the node list only via
-    // hasNodes / hasDependencyNodes.
-  }, [promqlService, hasNodes, hasDependencyNodes, endTimeSec, timeRange, refetchTrigger]);
-
-  // Join the latest responses onto the current node list.
-  const metricsMap = useMemo(() => {
-    const newMap = new Map<string, ServiceMapNodeMetrics>();
-    if (!responses) return newMap;
+  // Join the latest results onto the current node list.
+  const { metricsMap, pendingNodeIds } = useMemo(() => {
+    const map = new Map<string, ServiceMapNodeMetrics>();
+    const pending = new Set<string>();
+    const current = state.gen === gen ? state : null;
 
     params.services.forEach(({ serviceName, environment, type }) => {
       const nodeId = `${serviceName}::${environment}`;
-
-      // Dependency nodes (database / messaging / external) have no SERVER-span
-      // metrics; they use their client-side series (relabeled to service/environment).
-      // Service nodes keep the SERVER-span series only.
-      const isDependency = isDependencyType(type);
-      const throughputData = extractServiceData(
-        isDependency ? responses.depThroughput : responses.throughput,
-        serviceName,
-        environment
+      const kind = kindOf(type);
+      const status = current?.status.get(nameKey(kind, serviceName));
+      if (!status || status === 'pending') {
+        // Not fetched yet (including while `enabled` waits for the topology): still loading.
+        if (promqlService) pending.add(nodeId);
+        return;
+      }
+      const data = current?.results.get(`${kind}:${nodeId}`);
+      map.set(
+        nodeId,
+        buildNodeMetrics(data?.throughput ?? [], data?.faults ?? [], data?.errors ?? [])
       );
-      const faultsData = extractServiceData(
-        isDependency ? responses.depFaults : responses.faults,
-        serviceName,
-        environment
-      );
-      const errorsData = extractServiceData(
-        isDependency ? responses.depErrors : responses.errors,
-        serviceName,
-        environment
-      );
-
-      // Calculate totals and failure ratio client-side
-      const totalRequests = calculateSum(throughputData);
-      const totalFaults = calculateSum(faultsData);
-      const totalErrors = calculateSum(errorsData);
-      const failureRatio =
-        totalRequests > 0 ? ((totalFaults + totalErrors) / totalRequests) * 100 : 0;
-
-      newMap.set(nodeId, {
-        latency: [],
-        avgLatency: 0,
-        latencyP99: [],
-        avgLatencyP99: 0,
-        latencyP90: [],
-        avgLatencyP90: 0,
-        latencyP50: [],
-        avgLatencyP50: 0,
-        throughput: throughputData,
-        avgThroughput: calculateAverage(throughputData),
-        failureRatio: [],
-        avgFailureRatio: failureRatio,
-        faults: faultsData,
-        totalFaults,
-        errors: errorsData,
-        totalErrors,
-        totalRequests,
-      });
     });
-
-    return newMap;
+    return { metricsMap: map, pendingNodeIds: pending };
     // servicesKey tracks changes to the node set.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [servicesKey, responses]);
+  }, [servicesKey, state, gen, promqlService]);
 
   const refetch = useCallback(() => {
     setRefetchTrigger((prev) => prev + 1);
   }, []);
 
-  return { metricsMap, isLoading, error, refetch };
+  return {
+    metricsMap,
+    pendingNodeIds,
+    isLoading: pendingNodeIds.size > 0,
+    error: state.gen === gen ? state.error : null,
+    refetch,
+  };
 };
 
-/**
- * Calculate average of data points
- */
-function calculateAverage(data: MetricDataPoint[]): number {
-  if (data.length === 0) return 0;
-  const sum = data.reduce((acc, point) => acc + point.value, 0);
-  return sum / data.length;
+function buildNodeMetrics(
+  throughputData: MetricDataPoint[],
+  faultsData: MetricDataPoint[],
+  errorsData: MetricDataPoint[]
+): ServiceMapNodeMetrics {
+  const totalRequests = calculateSum(throughputData);
+  const totalFaults = calculateSum(faultsData);
+  const totalErrors = calculateSum(errorsData);
+  const failureRatio = totalRequests > 0 ? ((totalFaults + totalErrors) / totalRequests) * 100 : 0;
+  return {
+    latency: [],
+    avgLatency: 0,
+    latencyP99: [],
+    avgLatencyP99: 0,
+    latencyP90: [],
+    avgLatencyP90: 0,
+    latencyP50: [],
+    avgLatencyP50: 0,
+    throughput: throughputData,
+    avgThroughput: calculateAverage(throughputData),
+    failureRatio: [],
+    avgFailureRatio: failureRatio,
+    faults: faultsData,
+    totalFaults,
+    errors: errorsData,
+    totalErrors,
+    totalRequests,
+  };
 }
 
-/**
- * Calculate sum of data points (for totals)
- */
-function calculateSum(data: MetricDataPoint[]): number {
+function calculateAverage(data: MetricDataPoint[]): number {
   if (data.length === 0) return 0;
+  return calculateSum(data) / data.length;
+}
+
+function calculateSum(data: MetricDataPoint[]): number {
   return data.reduce((acc, point) => acc + point.value, 0);
 }
 
 /**
- * Extract metric data for a specific service from Prometheus response
- * Handles data frame format, range query, and instant query formats
+ * Index a Prometheus response by node (`service::environment`) in one pass.
+ * Handles the query-enhancements data frame, its instantData rows, and the standard
+ * Prometheus range / instant formats.
  */
-function extractServiceData(
-  response: any,
-  serviceName: string,
-  environment?: string
-): MetricDataPoint[] {
-  if (!response) {
-    return [];
-  }
+export function indexSeriesByNode(response: any): Map<string, MetricDataPoint[]> {
+  const index = new Map<string, MetricDataPoint[]>();
+  if (!response) return index;
+  const push = (service: unknown, environment: unknown, point: MetricDataPoint) => {
+    if (typeof service !== 'string' || !service) return;
+    const key = `${service}::${typeof environment === 'string' ? environment : ''}`;
+    const list = index.get(key);
+    if (list) list.push(point);
+    else index.set(key, [point]);
+  };
 
-  // Check for data frame format (query enhancements plugin)
-  if (response?.type === 'data_frame' && response?.fields && Array.isArray(response.fields)) {
+  // Data frame format (query enhancements plugin)
+  if (response?.type === 'data_frame' && Array.isArray(response?.fields)) {
     const timeField = response.fields.find((f: any) => f.name === 'Time');
     const seriesField = response.fields.find((f: any) => f.name === 'Series');
+    const labelsField = response.fields.find((f: any) => f.name === 'Labels');
     const valueField = response.fields.find((f: any) => f.name === 'Value');
-
-    if (timeField && seriesField && valueField) {
-      const dataPoints: MetricDataPoint[] = [];
-
-      // Iterate through all data points and filter by service (and environment,
-      // so nodes that share a name across environments get distinct metrics).
-      for (let i = 0; i < seriesField.values.length; i++) {
-        const seriesLabel = seriesField.values[i];
-        // Parse series label: {environment="prod", service="ad"} -> match both
-        const svcMatch = seriesLabel.match(/service="([^"]+)"/);
-        const envMatch = seriesLabel.match(/environment="([^"]*)"/);
-        const service = svcMatch ? svcMatch[1] : null;
-        const env = envMatch ? envMatch[1] : undefined;
-
-        if (service === serviceName && (environment === undefined || env === environment)) {
-          dataPoints.push({
-            timestamp: timeField.values[i] / 1000, // Convert ms to seconds
-            value: parseFloat(valueField.values[i]) || 0,
-          });
+    if (timeField && valueField && (seriesField || labelsField)) {
+      const count = valueField.values.length;
+      for (let i = 0; i < count; i++) {
+        let service: unknown;
+        let environment: unknown;
+        const labels = labelsField?.values?.[i];
+        if (labels && typeof labels === 'object') {
+          service = labels.service;
+          environment = labels.environment;
+        } else {
+          const seriesLabel: string = seriesField?.values?.[i] ?? '';
+          service = seriesLabel.match(/service="([^"]+)"/)?.[1];
+          environment = seriesLabel.match(/environment="([^"]*)"/)?.[1];
         }
+        push(service, environment, {
+          timestamp: timeField.values[i] / 1000, // ms -> s
+          value: parseFloat(valueField.values[i]) || 0,
+        });
       }
-
-      if (dataPoints.length > 0) {
-        return dataPoints;
-      }
+      if (index.size > 0) return index;
     }
   }
 
-  // Check for instantData format (fallback for instant queries)
-  if (response?.meta?.instantData?.rows && Array.isArray(response.meta.instantData.rows)) {
-    const rows = response.meta.instantData.rows.filter(
-      (row: any) =>
-        row.service === serviceName &&
-        (environment === undefined || row.environment === environment)
-    );
-
-    if (rows.length > 0) {
-      return rows.map((row: any) => ({
-        timestamp: row.Time / 1000, // Convert ms to seconds
+  // instantData rows (fallback for instant queries)
+  if (Array.isArray(response?.meta?.instantData?.rows)) {
+    response.meta.instantData.rows.forEach((row: any) =>
+      push(row.service, row.environment, {
+        timestamp: row.Time / 1000,
         value: parseFloat(row.Value) || 0,
-      }));
-    }
+      })
+    );
+    if (index.size > 0) return index;
   }
 
   // Standard Prometheus response format
   const result = response?.data?.result || response?.result || [];
-
-  const serviceResult = result.find(
-    (r: any) =>
-      r.metric?.service === serviceName &&
-      (environment === undefined || r.metric?.environment === environment)
-  );
-
-  if (!serviceResult) {
-    return [];
+  if (Array.isArray(result)) {
+    result.forEach((r: any) => {
+      // Only the first series per node counts (as before: one series per (service, environment)).
+      const key = `${r.metric?.service}::${r.metric?.environment ?? ''}`;
+      if (index.has(key)) return;
+      if (Array.isArray(r.values)) {
+        r.values.forEach(([timestamp, value]: [number, string]) =>
+          push(r.metric?.service, r.metric?.environment, {
+            timestamp,
+            value: parseFloat(value) || 0,
+          })
+        );
+      } else if (Array.isArray(r.value)) {
+        const [timestamp, value] = r.value;
+        push(r.metric?.service, r.metric?.environment, {
+          timestamp,
+          value: parseFloat(value) || 0,
+        });
+      }
+    });
   }
-
-  // Handle range query format (values array)
-  if (serviceResult.values && Array.isArray(serviceResult.values)) {
-    return serviceResult.values.map(([timestamp, value]: [number, string]) => ({
-      timestamp,
-      value: parseFloat(value) || 0,
-    }));
-  }
-
-  // Handle instant query format (value array)
-  if (serviceResult.value && Array.isArray(serviceResult.value)) {
-    const [timestamp, value] = serviceResult.value;
-    return [
-      {
-        timestamp,
-        value: parseFloat(value) || 0,
-      },
-    ];
-  }
-
-  return [];
+  return index;
 }

@@ -8,9 +8,28 @@
   display: flex;
   flex-direction: column;
 
+  // Pass the page's height down to the map container: without a flex chain (and min-height: 0)
+  // the container sized to its content and its bottom was clipped by the page's
+  // overflow: hidden whenever the filter badges / notices row took vertical space.
+  > .euiPageBody,
+  > .euiPageBody > .euiPageContent,
+  > .euiPageBody > .euiPageContent > .euiPageContentBody {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  // Everything else in that chain (header controls, search bar, badges, notices) keeps its
+  // natural height; only the map container grows.
+  > .euiPageBody > *:not(.euiPageContent),
+  > .euiPageBody > .euiPageContent > .euiPageContentBody > *:not(.apm-application-map__container) {
+    flex: 0 0 auto;
+  }
+
   &__container {
-    flex: 1;
-    min-height: 400px;
+    flex: 1 1 0;
+    min-height: 0;
     overflow: hidden;
     margin-top: 8px;
   }
@@ -92,3 +111,10 @@ li:has([class*='_breached_']),
 li:has([class*='_recovered_']) {
   display: none !important;
 }
+
+// Map notices rendered into the page's banner slot (above the map), spaced like the
+// partial-topology banner.
+.apmMapNotices > * {
+  margin-top: $euiSizeS;
+}
+

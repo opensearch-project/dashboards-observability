@@ -25,6 +25,7 @@ import { ApplicationMapFilters } from '../../../common/types/service_map_types';
 import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../../common/constants';
 import { applicationMapI18nTexts as i18nTexts } from '../../../pages/application_map/application_map_i18n';
 import { TruncatedLabel } from '../../../../common/truncated_label';
+import { ENVIRONMENT_GROUP_BY } from '../../utils/map_grouping';
 import '../../styles/apm_common.scss';
 
 export interface ServiceMapSidebarProps {
@@ -73,10 +74,12 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
   }, [filters.groupBy]);
 
   // Build group by options from available attributes (EuiComboBox format)
+  // Environment is always offered (every node has one), ahead of the configured attributes.
   const groupByOptions = useMemo(() => {
-    return Object.keys(availableGroupByAttributes).map((attrPath) => ({
-      label: attrPath,
-    }));
+    return [
+      ENVIRONMENT_GROUP_BY,
+      ...Object.keys(availableGroupByAttributes).filter((a) => a !== ENVIRONMENT_GROUP_BY),
+    ].map((attrPath) => ({ label: attrPath }));
   }, [availableGroupByAttributes]);
 
   // Environments narrowed by the per-filter search box (matches the display name).
@@ -164,7 +167,9 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
   }, [filters, onFiltersChange]);
 
   return (
-    <EuiPanel style={{ height: '100%' }}>
+    // Scrolls inside its own panel: the map area is sized to the page, so on a short window the
+    // filters are taller than the panel and would otherwise spill out below it.
+    <EuiPanel style={{ height: '100%', overflowY: 'auto' }} data-test-subj="serviceMapSidebarPanel">
       {/* Header */}
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>

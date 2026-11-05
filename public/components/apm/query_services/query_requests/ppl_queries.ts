@@ -10,6 +10,19 @@ import { escapePPLString } from './escape_utils';
 export const DEFAULT_ROW_LIMIT = 1000;
 
 /**
+ * The topology / catalog edge queries are paged with `head DEFAULT_ROW_LIMIT from <offset>`
+ * (ordered by nodeConnectionHash so pages do not overlap) up to this many pages. Large
+ * deployments have thousands of connections; a single capped page silently dropped the rest.
+ */
+export const MAX_EDGE_PAGES = 10;
+
+/** `| sort nodeConnectionHash | ... | head N from offset` tail shared by the paged edge queries. */
+const pagedEdgeClause = (fields: string, offset: number): string =>
+  ` | sort nodeConnectionHash | fields ${fields} | head ${DEFAULT_ROW_LIMIT}${
+    offset > 0 ? ` from ${offset}` : ''
+  }`;
+
+/**
  * PPL queries for APM topology data
  *
  * Data comes from otel-apm-service-map index with a unified document structure.
@@ -83,13 +96,16 @@ function buildTimeFilterClause(
 export function getQueryListServices(
   queryIndex: string,
   startTime?: string | Date,
-  endTime?: string | Date
+  endTime?: string | Date,
+  offset: number = 0
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
   query += ` | dedup nodeConnectionHash`;
-  query += ` | fields sourceNode.keyAttributes, sourceNode.type, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.type, targetNode.groupByAttributes`;
-  query += ` | head ${DEFAULT_ROW_LIMIT}`;
+  query += pagedEdgeClause(
+    'sourceNode.keyAttributes, sourceNode.type, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.type, targetNode.groupByAttributes',
+    offset
+  );
   return query;
 }
 
@@ -285,13 +301,16 @@ export function getQueryListServiceDependencies(
 export function getQueryGetServiceMap(
   queryIndex: string,
   startTime?: string | Date,
-  endTime?: string | Date
+  endTime?: string | Date,
+  offset: number = 0
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
   query += ` | dedup nodeConnectionHash`;
-  query += ` | fields sourceNode.keyAttributes, sourceNode.type, targetNode.keyAttributes, targetNode.type, sourceNode.groupByAttributes, targetNode.groupByAttributes`;
-  query += ` | head ${DEFAULT_ROW_LIMIT}`;
+  query += pagedEdgeClause(
+    'sourceNode.keyAttributes, sourceNode.type, targetNode.keyAttributes, targetNode.type, sourceNode.groupByAttributes, targetNode.groupByAttributes',
+    offset
+  );
   return query;
 }
 

@@ -29,6 +29,15 @@ describe('ppl_queries', () => {
         expect(q).not.toContain('dependencyAttributes');
       });
     });
+
+    it('pages the edge queries in a stable order', () => {
+      [getQueryListServices, getQueryGetServiceMap].forEach((build) => {
+        const first = build('svcmap', start, end);
+        expect(first).toContain('| dedup nodeConnectionHash | sort nodeConnectionHash | fields ');
+        expect(first).toMatch(/\| head 1000$/);
+        expect(build('svcmap', start, end, 2000)).toMatch(/\| head 1000 from 2000$/);
+      });
+    });
   });
 
   describe('getQueryDependencyAttributes', () => {

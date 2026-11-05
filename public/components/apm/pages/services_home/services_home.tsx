@@ -96,6 +96,9 @@ const toMetricsNode = (s: ServiceTableItem) => ({
 // Sort value for a metric that may be unavailable (its query failed): below every real value.
 const UNAVAILABLE_SORT_VALUE = -1;
 
+/** Initial node-type filter: services only (see selectedTypes). */
+const DEFAULT_TYPE_FILTER: Record<string, boolean> = { service: true };
+
 const LATENCY_PERCENTILE_OPTIONS = [
   { id: 'p99', label: 'P99' },
   { id: 'p90', label: 'P90' },
@@ -367,8 +370,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   const [flyoutState, setFlyoutState] = useState<FlyoutState | null>(null);
 
   const [selectedEnvironments, setSelectedEnvironments] = useState<Record<string, boolean>>({});
-  // Node-type filter (service / database / messaging / external).
-  const [selectedTypes, setSelectedTypes] = useState<Record<string, boolean>>({});
+  // Node-type filter (service / database / messaging / external). Defaults to services only:
+  // large deployments have many more dependencies than services, and the whole-range
+  // dependency metric queries (caller-derived, over every remote target) are the heaviest on
+  // the page. Selecting a dependency type (or clearing the filter) brings them in.
+  const [selectedTypes, setSelectedTypes] = useState<Record<string, boolean>>(DEFAULT_TYPE_FILTER);
   const [selectedGroupByAttributes, setSelectedGroupByAttributes] = useState<
     Record<string, Record<string, boolean>>
   >({});

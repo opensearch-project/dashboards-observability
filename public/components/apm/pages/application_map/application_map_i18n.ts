@@ -42,19 +42,15 @@ export const applicationMapI18nTexts = {
     toggleAriaLabel: i18n.translate('observability.apm.applicationMap.filters.toggleAriaLabel', {
       defaultMessage: 'Toggle filter sidebar',
     }),
+    noMatches: i18n.translate('observability.apm.applicationMap.filters.noMatches', {
+      defaultMessage: 'No nodes in this view match the selected filters',
+    }),
     groupBy: i18n.translate('observability.apm.applicationMap.filters.groupBy', {
       defaultMessage: 'Group by',
     }),
     includeDependencies: i18n.translate(
       'observability.apm.applicationMap.filters.includeDependencies',
       { defaultMessage: 'Include external dependencies' }
-    ),
-    dependencies: i18n.translate('observability.apm.applicationMap.filters.dependencies', {
-      defaultMessage: 'Dependencies',
-    }),
-    dependenciesHidden: i18n.translate(
-      'observability.apm.applicationMap.filters.dependenciesHidden',
-      { defaultMessage: 'Hidden' }
     ),
     noGrouping: i18n.translate('observability.apm.applicationMap.filters.noGrouping', {
       defaultMessage: 'No grouping',
@@ -243,6 +239,53 @@ export const applicationMapI18nTexts = {
       {
         defaultMessage: 'View service details',
       }
+    ),
+  },
+  focus: {
+    label: (service: string, environment: string, neighbors: number) =>
+      i18n.translate('observability.apm.applicationMap.focus.label', {
+        defaultMessage:
+          'Focused on {service} in {environment} and its {neighbors, plural, one {# connected node} other {# connected nodes}}',
+        values: { service, environment, neighbors },
+      }),
+    exit: i18n.translate('observability.apm.applicationMap.focus.exit', {
+      defaultMessage: 'Back to full map',
+    }),
+    searchPlaceholder: i18n.translate('observability.apm.applicationMap.focus.searchPlaceholder', {
+      defaultMessage: 'Find a service',
+    }),
+    modeLegend: i18n.translate('observability.apm.applicationMap.focus.modeLegend', {
+      defaultMessage: 'Connections to show',
+    }),
+    direct: i18n.translate('observability.apm.applicationMap.focus.direct', {
+      defaultMessage: 'Direct connections',
+    }),
+    path: i18n.translate('observability.apm.applicationMap.focus.path', {
+      defaultMessage: 'Full call path',
+    }),
+  },
+  largeMap: {
+    groupedTitle: i18n.translate('observability.apm.applicationMap.largeMap.groupedTitle', {
+      defaultMessage: 'Grouped by environment',
+    }),
+    groupedBody: (services: number, limit: number) =>
+      i18n.translate('observability.apm.applicationMap.largeMap.groupedBody', {
+        defaultMessage:
+          'This map has {services, number} nodes, too many to draw at once (the limit is {limit, number}), so it is grouped by environment. Open an environment to see its services, or pick another grouping.',
+        values: { services, limit },
+      }),
+    tooManyTitle: i18n.translate('observability.apm.applicationMap.largeMap.tooManyTitle', {
+      defaultMessage: 'Too many services to display',
+    }),
+    tooManyBody: (services: number, limit: number) =>
+      i18n.translate('observability.apm.applicationMap.largeMap.tooManyBody', {
+        defaultMessage:
+          'This view has {services, number} nodes, too many to draw at once (the limit is {limit, number}). Group the map, narrow the selection with filters, or reduce the time range.',
+        values: { services, limit },
+      }),
+    groupByEnvironment: i18n.translate(
+      'observability.apm.applicationMap.largeMap.groupByEnvironment',
+      { defaultMessage: 'Group by environment' }
     ),
   },
   dependencyStacks: {

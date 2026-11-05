@@ -4,7 +4,13 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useServiceMapMetrics, ServiceMapMetricParams } from '../use_service_map_metrics';
+import {
+  useServiceMapMetrics,
+  ServiceMapMetricParams,
+  chunkNames,
+  MAP_METRICS_BATCH_SIZE,
+  MAP_METRICS_BATCH_MAX_CHARS,
+} from '../use_service_map_metrics';
 
 // Mock the PromQLSearchService
 const mockExecuteInstantQuery = jest.fn();
@@ -139,7 +145,8 @@ describe('useServiceMapMetrics', () => {
   });
 
   describe('dependency nodes (database / messaging / external)', () => {
-    const isDependencyQuery = (q: string) => q.includes('remoteService!=""');
+    // Dependency batches are bounded by remoteService=~"..."; service batches by service=~"...".
+    const isDependencyQuery = (q: string) => q.includes('remoteService=~');
     const series = (serviceName: string, value: number) => ({
       metric: { service: serviceName, environment: 'generic:default' },
       values: [[1704067200, String(value)]],
@@ -254,7 +261,7 @@ describe('useServiceMapMetrics', () => {
   });
 
   describe('node list changes', () => {
-    it('joins a new node list without re-sending the queries', async () => {
+    it('fetches only the names that are new to the current time range', async () => {
       mockExecuteInstantQuery.mockReset();
       mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
 
@@ -275,10 +282,19 @@ describe('useServiceMapMetrics', () => {
           { serviceName: 'cart', environment: 'generic:default' },
         ],
       });
-      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      await waitFor(() =>
+        expect(result.current.metricsMap.has('cart::generic:default')).toBe(true)
+      );
 
-      expect(mockExecuteInstantQuery.mock.calls.length).toBe(initialCallCount);
-      expect(result.current.metricsMap.has('cart::generic:default')).toBe(true);
+      // One more batch (three queries), bounded to the new name only.
+      const newQueries = mockExecuteInstantQuery.mock.calls
+        .slice(initialCallCount)
+        .map((c) => c[0].query as string);
+      expect(newQueries).toHaveLength(3);
+      newQueries.forEach((q) => {
+        expect(q).toContain('service=~"cart"');
+        expect(q).not.toContain('api-gateway');
+      });
     });
 
     it('fetches the caller-derived queries once dependency nodes appear', async () => {
@@ -301,7 +317,130 @@ describe('useServiceMapMetrics', () => {
           { serviceName: 'redis', environment: 'generic:default', type: 'database' },
         ],
       });
-      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(9));
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(6));
+      const depQueries = mockExecuteInstantQuery.mock.calls.slice(3).map((c) => c[0].query);
+      depQueries.forEach((q: string) => expect(q).toContain('remoteService=~"redis"'));
+    });
+  });
+
+  describe('batching', () => {
+    const manyServices = (n: number) =>
+      Array.from({ length: n }, (_, i) => ({
+        serviceName: `svc-${i}`,
+        environment: 'generic:default',
+      }));
+
+    it('splits names by count and by regex length, preserving order', () => {
+      const names = Array.from({ length: MAP_METRICS_BATCH_SIZE + 5 }, (_, i) => `n${i}`);
+      const batches = chunkNames(names);
+      expect(batches.map((b) => b.length)).toEqual([MAP_METRICS_BATCH_SIZE, 5]);
+      expect(batches.flat()).toEqual(names);
+
+      const long = Array.from({ length: 10 }, (_, i) => `${'x'.repeat(1000)}${i}`);
+      chunkNames(long).forEach((b) =>
+        expect(b.reduce((n, s) => n + s.length + 1, 0)).toBeLessThanOrEqual(
+          MAP_METRICS_BATCH_MAX_CHARS
+        )
+      );
+    });
+
+    it('bounds every query to a batch of names and covers every node', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
+      const services = manyServices(MAP_METRICS_BATCH_SIZE * 2 + 1);
+
+      const { result } = renderHook(() => useServiceMapMetrics({ ...defaultParams, services }));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      const queries = mockExecuteInstantQuery.mock.calls.map((c) => c[0].query as string);
+      expect(queries).toHaveLength(9); // 3 batches x (throughput, faults, errors)
+      queries.forEach((q) => expect(q).toMatch(/service=~"/));
+      expect(result.current.metricsMap.size).toBe(services.length);
+      expect(result.current.pendingNodeIds.size).toBe(0);
+    });
+
+    it('reports nodes as pending until their batch lands', async () => {
+      mockExecuteInstantQuery.mockReset();
+      const resolvers: Array<() => void> = [];
+      mockExecuteInstantQuery.mockImplementation(
+        () => new Promise((resolve) => resolvers.push(() => resolve({ data: { result: [] } })))
+      );
+
+      const { result } = renderHook(() => useServiceMapMetrics(defaultParams));
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(3));
+      expect(result.current.pendingNodeIds).toEqual(
+        new Set(['api-gateway::generic:default', 'user-service::eks:cluster'])
+      );
+      expect(result.current.metricsMap.size).toBe(0);
+
+      await act(async () => resolvers.forEach((r) => r()));
+      await waitFor(() => expect(result.current.pendingNodeIds.size).toBe(0));
+      expect(result.current.metricsMap.size).toBe(2);
+    });
+
+    it('waits while disabled, reporting the nodes as pending', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
+
+      const { result, rerender } = renderHook(
+        (props: ServiceMapMetricParams) => useServiceMapMetrics(props),
+        { initialProps: { ...defaultParams, enabled: false } }
+      );
+      expect(mockExecuteInstantQuery).not.toHaveBeenCalled();
+      expect(result.current.pendingNodeIds.size).toBe(2);
+
+      rerender({ ...defaultParams, enabled: true });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(3);
+    });
+
+    it('a failed batch does not blank the nodes of other batches', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) =>
+        query.includes('svc-0|')
+          ? Promise.reject(new Error('Read timed out'))
+          : Promise.resolve({
+              data: {
+                result: [
+                  {
+                    metric: {
+                      service: `svc-${MAP_METRICS_BATCH_SIZE}`,
+                      environment: 'generic:default',
+                    },
+                    value: [1, '7'],
+                  },
+                ],
+              },
+            })
+      );
+      const services = manyServices(MAP_METRICS_BATCH_SIZE + 1);
+
+      const { result } = renderHook(() => useServiceMapMetrics({ ...defaultParams, services }));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(result.current.error?.message).toBe('Read timed out');
+      expect(
+        result.current.metricsMap.get(`svc-${MAP_METRICS_BATCH_SIZE}::generic:default`)
+          ?.totalRequests
+      ).toBe(7);
+      // The failed batch's nodes are settled (no spinner) with no data.
+      expect(result.current.metricsMap.get('svc-0::generic:default')?.totalRequests).toBe(0);
+    });
+
+    it('refetches everything for a new time range', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockResolvedValue({ data: { result: [] } });
+
+      const { result, rerender } = renderHook(
+        (props: ServiceMapMetricParams) => useServiceMapMetrics(props),
+        { initialProps: defaultParams }
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(3);
+
+      rerender({ ...defaultParams, endTime: new Date('2024-01-01T02:00:00Z') });
+      await waitFor(() => expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(6));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
     });
   });
 

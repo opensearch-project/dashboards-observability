@@ -27,6 +27,8 @@ jest.mock('../query_requests/response_processor', () => ({
 
 // Mock PPL queries
 jest.mock('../query_requests/ppl_queries', () => ({
+  DEFAULT_ROW_LIMIT: 2,
+  MAX_EDGE_PAGES: 3,
   getQueryListServices: jest.fn(() => 'source = index | fields service.name'),
   getQueryGetService: jest.fn(() => 'source = index | where service.name = "test"'),
   getQueryListServiceOperations: jest.fn(() => 'source = index | stats count()'),
@@ -36,6 +38,7 @@ jest.mock('../query_requests/ppl_queries', () => ({
 
 import { coreRefs } from '../../../../framework/core_refs';
 import { ResponseProcessor } from '../query_requests/response_processor';
+import { getQueryGetServiceMap } from '../query_requests/ppl_queries';
 
 describe('PPLSearchService', () => {
   let service: PPLSearchService;
@@ -214,6 +217,55 @@ describe('PPLSearchService', () => {
       });
 
       expect(ResponseProcessor.transformGetServiceMap).toHaveBeenCalled();
+    });
+
+    // DEFAULT_ROW_LIMIT is mocked to 2 and MAX_EDGE_PAGES to 3.
+    const page = (names: string[]) => ({
+      body: { fields: [{ name: 'sourceNode.keyAttributes', values: names }], size: names.length },
+    });
+    const params = {
+      queryIndex: 'test-index',
+      startTime: 1000,
+      endTime: 2000,
+      dataset: mockDataset,
+    };
+
+    it('pages the edge query until a short page and merges the rows', async () => {
+      (coreRefs.http!.post as jest.Mock)
+        .mockResolvedValueOnce(page(['a', 'b']))
+        .mockResolvedValueOnce(page(['c']));
+
+      const result = await service.getServiceMap(params);
+
+      expect(coreRefs.http!.post).toHaveBeenCalledTimes(2);
+      expect(getQueryGetServiceMap).toHaveBeenNthCalledWith(1, 'test-index', 1000, 2000, 0);
+      expect(getQueryGetServiceMap).toHaveBeenNthCalledWith(2, 'test-index', 1000, 2000, 2);
+      expect(result.jsonData.map((r: any) => r['sourceNode.keyAttributes'])).toEqual([
+        'a',
+        'b',
+        'c',
+      ]);
+      expect(result.size).toBe(3);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('stops at the page cap and reports the map as truncated', async () => {
+      (coreRefs.http!.post as jest.Mock).mockResolvedValue(page(['a', 'b']));
+
+      const result = await service.getServiceMap(params);
+
+      expect(coreRefs.http!.post).toHaveBeenCalledTimes(3);
+      expect(result.size).toBe(6);
+      expect(result.truncated).toBe(true);
+    });
+
+    it('issues one query when the first page is short', async () => {
+      (coreRefs.http!.post as jest.Mock).mockResolvedValue(page(['a']));
+
+      const result = await service.getServiceMap(params);
+
+      expect(coreRefs.http!.post).toHaveBeenCalledTimes(1);
+      expect(result.truncated).toBe(false);
     });
   });
 
