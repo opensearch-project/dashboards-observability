@@ -556,7 +556,7 @@ describe('generateSuggestionsWithSkips — histogram bucket shapes', () => {
     expect(out.skipped).toEqual([
       expect.objectContaining({
         key: 'http-lat:flagd',
-        reason: expect.stringContaining(`has ${MAX_BUCKET_BOUNDS + 1} buckets`),
+        reason: expect.stringContaining(`has ${MAX_BUCKET_BOUNDS + 1} bucket bounds`),
       }),
     ]);
     // At the limit it's still suggested, carrying every bound.

@@ -1027,9 +1027,11 @@ function applyHistogramShapes(
       skipped.push({
         key: draft.key,
         name: spec.name,
-        reason: i18n.translate('observability.apm.slo.suggest.engine.tooManyBuckets', {
+        // Counts the finite `le` bounds the SLI stores (the +Inf bucket is one
+        // more), matching the validator's "bounds" wording for the same limit.
+        reason: i18n.translate('observability.apm.slo.suggest.engine.tooManyBucketBounds', {
           defaultMessage:
-            "{metric} has {count} buckets; latency SLOs on this kind of histogram support up to {max}, so this latency SLO wasn't suggested.",
+            "{metric} has {count} bucket bounds; latency SLOs on this kind of histogram support up to {max}, so this latency SLO wasn't suggested.",
           values: { metric: def.metric ?? '', count: shape.bounds.length, max: MAX_BUCKET_BOUNDS },
         }),
       });
