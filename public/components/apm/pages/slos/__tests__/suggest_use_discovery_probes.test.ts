@@ -7,11 +7,44 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useDiscoveryProbes } from '../suggest_use_discovery_probes';
 import type { HttpStart } from '../../../../../../../../src/core/public';
 
+interface HistogramFixture {
+  buckets: Record<string, number>;
+  count?: number;
+  sum?: number;
+}
+
+/** OTel SDK default explicit bounds, as `le` labels. */
+const OTEL_DEFAULT_LE = [
+  '0',
+  '5',
+  '10',
+  '25',
+  '50',
+  '75',
+  '100',
+  '250',
+  '500',
+  '750',
+  '1000',
+  '2500',
+  '5000',
+  '7500',
+  '10000',
+];
+
+/** Per-range buckets: each `le` holds only its own slice, `+Inf` only the overflow. */
+function perRange(slices: Record<string, number>, sum: number): HistogramFixture {
+  const buckets: Record<string, number> = { '+Inf': 0 };
+  for (const le of OTEL_DEFAULT_LE) buckets[le] = slices[le] ?? 0;
+  const count = Object.values(buckets).reduce((a, b) => a + b, 0);
+  return { buckets, count, sum };
+}
+
 function makeHttp(implementations: {
   labelValues?: Record<string, Record<string, string[]> | Error>;
   ruler?: { groups: unknown[] } | Error;
-  /** metric → label → values whose `+Inf` bucket stayed at 0. */
-  emptyHistograms?: Record<string, Record<string, string[]> | Error>;
+  /** `_bucket` metric → label → value → hour increases of its buckets, `_count` and `_sum`. */
+  histograms?: Record<string, Record<string, Record<string, HistogramFixture>> | Error>;
 }): HttpStart {
   const get = jest.fn(async (url: string, opts?: { query?: { selector?: string } }) => {
     if (url.includes('/metadata/label-values/')) {
@@ -31,16 +64,33 @@ function makeHttp(implementations: {
   });
   const post = jest.fn(async (_url: string, opts?: { body?: string }) => {
     const q: string = JSON.parse(opts?.body ?? '{}')?.query?.query ?? '';
-    const metric = /increase\((\w+)[\[{]/.exec(q)?.[1] ?? '';
-    const label = /sum by \((\w+)\)/.exec(q)?.[1] ?? '';
-    const slot = implementations.emptyHistograms?.[metric];
+    // `sum by (L, le) (increase(M[1h]))` or the `_count` / `_sum` pair.
+    const bucketProbe = /^sum by \((\w+), le\) \(increase\((\w+)\[/.exec(q);
+    const totalsProbe = /^label_replace\(sum by \((\w+)\) \(increase\((\w+)_count\[/.exec(q);
+    const metric = bucketProbe?.[2] ?? (totalsProbe ? `${totalsProbe[2]}_bucket` : '');
+    const label = (bucketProbe ?? totalsProbe)?.[1] ?? '';
+    const slot = implementations.histograms?.[metric];
     if (slot instanceof Error) throw slot;
-    const values = slot?.[label] ?? [];
+    const rows: Array<{ labels: Record<string, string>; value: number }> = [];
+    for (const [value, h] of Object.entries(slot?.[label] ?? {})) {
+      if (bucketProbe) {
+        for (const [le, v] of Object.entries(h.buckets)) {
+          rows.push({ labels: { [label]: value, le }, value: v });
+        }
+        continue;
+      }
+      if (h.count !== undefined) {
+        rows.push({ labels: { [label]: value, slo_probe_part: 'count' }, value: h.count });
+      }
+      if (h.sum !== undefined) {
+        rows.push({ labels: { [label]: value, slo_probe_part: 'sum' }, value: h.sum });
+      }
+    }
     return {
       body: {
         fields: [
-          { name: 'Labels', values: values.map((v) => ({ [label]: v })) },
-          { name: 'Value', values: values.map(() => 0) },
+          { name: 'Labels', values: rows.map((r) => r.labels) },
+          { name: 'Value', values: rows.map((r) => r.value) },
         ],
       },
     };
@@ -149,8 +199,13 @@ describe('useDiscoveryProbes', () => {
       labelValues: {
         http_server_request_duration_seconds_bucket: { service_name: ['flagd', 'cart'] },
       },
-      emptyHistograms: {
-        http_server_request_duration_seconds_bucket: { service_name: ['flagd'] },
+      histograms: {
+        http_server_request_duration_seconds_bucket: {
+          service_name: {
+            flagd: { buckets: { '0.5': 0, '+Inf': 0 }, count: 0 },
+            cart: { buckets: { '0.5': 90, '+Inf': 100 }, count: 100, sum: 12 },
+          },
+        },
       },
     });
     const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
@@ -174,12 +229,52 @@ describe('useDiscoveryProbes', () => {
       labelValues: {
         http_server_request_duration_seconds_bucket: { service_name: ['flagd'] },
       },
-      emptyHistograms: { http_server_request_duration_seconds_bucket: new Error('timeout') },
+      histograms: { http_server_request_duration_seconds_bucket: new Error('timeout') },
     });
     const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.emptyHistograms).toEqual([]);
+    expect(result.current.histogramShapes).toEqual([]);
     expect(result.current.metricNames).toContain('http_server_request_duration_seconds_bucket');
+  });
+
+  it('reads each service histogram layout, bounds and unit', async () => {
+    const http = makeHttp({
+      labelValues: {
+        http_server_request_duration_seconds_bucket: {
+          service_name: ['flagd', 'cart', 'checkout'],
+        },
+      },
+      histograms: {
+        http_server_request_duration_seconds_bucket: {
+          service_name: {
+            // Seconds observations against millisecond-style bounds: per-range
+            // slices, almost everything in the first bucket, +Inf flat.
+            flagd: perRange({ '5': 575, '750': 25 }, 600 * 22.9),
+            // Real milliseconds: spread across buckets, mean ~120.
+            checkout: perRange(
+              { '25': 100, '50': 200, '100': 300, '250': 300, '500': 100 },
+              1000 * 120
+            ),
+            // Classic cumulative seconds histogram.
+            cart: { buckets: { '0.1': 40, '0.5': 90, '1': 99, '+Inf': 100 }, count: 100, sum: 20 },
+          },
+        },
+      },
+    });
+    const { result } = renderHook(() => useDiscoveryProbes({ http, datasourceId: 'prom-1' }));
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    const shapeOf = (value: string) =>
+      result.current.histogramShapes.find((sh) => sh.value === value);
+    expect(shapeOf('flagd')).toMatchObject({ layout: 'per_range', unit: 'seconds' });
+    expect(shapeOf('flagd')?.bounds.slice(0, 3)).toEqual([0, 5, 10]);
+    expect(shapeOf('checkout')).toMatchObject({ layout: 'per_range', unit: 'milliseconds' });
+    expect(shapeOf('cart')).toMatchObject({
+      layout: 'cumulative',
+      unit: 'seconds',
+      bounds: [0.1, 0.5, 1],
+    });
+    expect(result.current.emptyHistograms).toEqual([]);
   });
 
   it('reports services with server-side span-derived metrics', async () => {

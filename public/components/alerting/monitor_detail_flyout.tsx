@@ -54,7 +54,7 @@ import { coreRefs } from '../../framework/core_refs';
 import { isPending } from './monitors_table/pending_rules';
 
 import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
-import { getMonitorStateLabel, getStateLabel } from './enum_labels';
+import { getMonitorStateLabel, getSeverityLabel, getStateLabel } from './enum_labels';
 import { stateHistoryUnavailableMessage } from './alarm_time_window';
 
 // Cap for the alert-history table in the flyout. `EuiBasicTable` doesn't
@@ -347,11 +347,13 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                   </EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={SEVERITY_COLORS[monitor.severity]}>{monitor.severity}</EuiBadge>
+                  <EuiBadge color={SEVERITY_COLORS[monitor.severity]}>
+                    {getSeverityLabel(monitor.severity)}
+                  </EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiHealth color={HEALTH_COLORS[monitor.healthStatus]}>
-                    {monitor.healthStatus}
+                    {getMonitorStateLabel(monitor.healthStatus)}
                   </EuiHealth>
                 </EuiFlexItem>
               </EuiFlexGroup>

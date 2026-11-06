@@ -27,6 +27,7 @@ const STATES = new Set<SloHealthState>([
   'ok',
   'no_data',
   'source_idle',
+  'sli_uncomputable',
   'stale',
   'disabled',
   'rules_missing',

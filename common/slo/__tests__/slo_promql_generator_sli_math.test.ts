@@ -20,10 +20,12 @@ import {
   buildErrorRatioExpr,
   buildProbeQueries,
   buildSliEventQueries,
+  buildSourceTrafficQuery,
   effectiveMetricTemporality,
   generateRecordingGroupForFingerprint,
   generateSloRuleGroup,
   leValuePattern,
+  perRangeBoundsUnder,
 } from '../slo_promql_generator';
 import { computeSliFingerprint } from '../slo_sli_fingerprint';
 import type { Objective, PrometheusSli, SingleSli, SloDocument } from '../slo_types';
@@ -145,6 +147,165 @@ describe('buildSliEventQueries — cumulative metrics', () => {
       total: string;
     };
     expect(q.total).toBe('sum(rate(x_total{}[5m]))');
+  });
+});
+
+describe('buildSliEventQueries — per-range bucket layout', () => {
+  const dims = [{ name: 'service_name', value: 'checkout' }];
+  const OTEL_MS_BOUNDS = [0, 5, 10, 25, 50, 75, 100, 250, 500, 750, 1000, 2500, 5000, 7500, 10000];
+  const perRangeSli = (extra: Partial<PrometheusSli>) =>
+    sli(
+      {
+        type: 'latency_threshold',
+        metric: 'http_server_request_duration_seconds_bucket',
+        bucketLayout: 'per_range',
+        bucketBounds: OTEL_MS_BOUNDS,
+        ...extra,
+      },
+      dims
+    );
+
+  it('sums every bucket at or under the threshold over _count, with rate()', () => {
+    const q = buildSliEventQueries(perRangeSli({ bucketUnit: 'milliseconds' }), lat, '5m') as {
+      good: string;
+      total: string;
+    };
+    // 500 ms threshold on millisecond bounds: 0 … 500 are good, 750 is not.
+    for (const le of ['0', '5.0', '100', '250.0', '500']) expect(leMatches(q.good, le)).toBe(true);
+    for (const le of ['750', '1000', '+Inf']) expect(leMatches(q.good, le)).toBe(false);
+    expect(q.good.startsWith('sum(rate(http_server_request_duration_seconds_bucket{')).toBe(true);
+    expect(q.good.endsWith(' or vector(0)')).toBe(true);
+    expect(q.total).toBe(
+      'sum(rate(http_server_request_duration_seconds_count{service_name="checkout"}[5m]))'
+    );
+  });
+
+  it('reads counts with increase() in count mode', () => {
+    const q = buildSliEventQueries(
+      perRangeSli({ bucketUnit: 'milliseconds' }),
+      lat,
+      '1h',
+      'count'
+    ) as { total: string };
+    expect(q.total).toBe(
+      'sum(increase(http_server_request_duration_seconds_count{service_name="checkout"}[1h]))'
+    );
+  });
+
+  it('takes the bounds as seconds when the probe says so — never as milliseconds', () => {
+    // The flagd shape: seconds observations, bounds 0, 5, 10 … — only 0 is
+    // under 0.5 s, and 500 (seconds) must never be read as 500 ms.
+    expect(perRangeBoundsUnder(OTEL_MS_BOUNDS, 'seconds', 0.5)).toEqual([0]);
+    const q = buildSliEventQueries(perRangeSli({ bucketUnit: 'seconds' }), lat, '5m') as {
+      good: string;
+    };
+    expect(leMatches(q.good, '0')).toBe(true);
+    expect(leMatches(q.good, '500')).toBe(false);
+    expect(leMatches(q.good, '5')).toBe(false);
+  });
+
+  it('a delta (span-derived) SLI keeps the delta math', () => {
+    const q = buildSliEventQueries(
+      sli({
+        type: 'latency_threshold',
+        metric: 'latency_seconds_bucket',
+        bucketLayout: 'per_range',
+        bucketBounds: [0.1, 0.5],
+        bucketUnit: 'seconds',
+      }),
+      lat,
+      '5m'
+    ) as { good: string };
+    expect(q.good).toContain('sum_over_time(');
+  });
+});
+
+describe('buildSliEventQueries — explicit bucket unit (cumulative)', () => {
+  const dims = [{ name: 'job', value: 'api' }];
+  it('reads the one bucket at the threshold in that unit, without the millisecond fallback', () => {
+    const seconds = buildSliEventQueries(
+      sli({ type: 'latency_threshold', metric: 'x_seconds_bucket', bucketUnit: 'seconds' }, dims),
+      lat,
+      '5m'
+    ) as { good: string };
+    expect(seconds.good).not.toContain(' or ');
+    expect(leMatches(seconds.good, '0.5')).toBe(true);
+    const ms = buildSliEventQueries(
+      sli(
+        { type: 'latency_threshold', metric: 'x_seconds_bucket', bucketUnit: 'milliseconds' },
+        dims
+      ),
+      lat,
+      '5m'
+    ) as { good: string };
+    expect(leMatches(ms.good, '500')).toBe(true);
+    expect(leMatches(ms.good, '0.5')).toBe(false);
+  });
+});
+
+describe('buildSourceTrafficQuery', () => {
+  const dims = [{ name: 'job', value: 'api' }];
+  it('reads _count and, for cumulative math, the +Inf bucket', () => {
+    expect(
+      buildSourceTrafficQuery(
+        sli({ type: 'latency_threshold', metric: 'h_seconds_bucket' }, dims),
+        '1h'
+      )
+    ).toBe(
+      'label_replace(sum(increase(h_seconds_count{job="api"}[1h])), "slo_traffic_part", "count", "", "")' +
+        '\nor\n' +
+        'label_replace(sum(increase(h_seconds_bucket{job="api", le="+Inf"}[1h])), "slo_traffic_part", "inf", "", "")'
+    );
+  });
+
+  it('skips the +Inf part for per-range and delta SLIs, whose math never divides by it', () => {
+    const perRange = buildSourceTrafficQuery(
+      sli(
+        {
+          type: 'latency_threshold',
+          metric: 'h_seconds_bucket',
+          bucketLayout: 'per_range',
+          bucketBounds: [0.1, 0.5],
+          bucketUnit: 'seconds',
+        },
+        dims
+      ),
+      '1h'
+    );
+    expect(perRange).not.toContain('+Inf');
+    expect(
+      buildSourceTrafficQuery(
+        sli({ type: 'latency_threshold', metric: 'latency_seconds_bucket' }),
+        '1h'
+      )
+    ).toContain('sum(sum_over_time(latency_seconds_count{');
+  });
+
+  it("reads a custom events-mode SLI's own total query over the window", () => {
+    const q = buildSourceTrafficQuery(
+      sli({
+        type: 'custom',
+        customExpr: {
+          mode: 'events',
+          goodQuery: 'sum(rate(ok_total[{{.window}}]))',
+          totalQuery: 'sum(rate(req_total[{{.window}}]))',
+        },
+      }),
+      '3d'
+    );
+    expect(q).toBe(
+      'label_replace(sum(sum(rate(req_total[3d]))\n), "slo_traffic_part", "count", "", "")'
+    );
+  });
+
+  it('is null for SLIs whose NaN can only mean no traffic, and for raw custom expressions', () => {
+    expect(buildSourceTrafficQuery(sli({ metric: 'x_total' }), '1h')).toBeNull();
+    expect(
+      buildSourceTrafficQuery(
+        sli({ type: 'custom', customExpr: { mode: 'raw', errorRatioQuery: 'vector(0)' } }),
+        '1h'
+      )
+    ).toBeNull();
   });
 });
 
@@ -368,5 +529,27 @@ describe('fingerprint stability', () => {
     expect(computeSliFingerprint('ds', explicit, lat)).not.toBe(
       computeSliFingerprint('ds', base, lat)
     );
+  });
+  it('a per-range layout (or explicit unit) changes the fingerprint; an unset one does not', () => {
+    const cumulative = sli({ type: 'latency_threshold', metric: 'h_seconds_bucket' });
+    const perRange = sli({
+      type: 'latency_threshold',
+      metric: 'h_seconds_bucket',
+      bucketLayout: 'per_range',
+      bucketBounds: [0.1, 0.5, 1],
+      bucketUnit: 'seconds',
+    });
+    const fp = (x: SingleSli) => computeSliFingerprint('ds', x, lat);
+    expect(fp(perRange)).not.toBe(fp(cumulative));
+    // Bound order and duplicates don't matter; the bounds themselves do.
+    expect(
+      fp(sli({ ...perRange.definition, bucketBounds: [1, 0.5, 0.1, 0.5] } as PrometheusSli))
+    ).toBe(fp(perRange));
+    expect(fp(sli({ ...perRange.definition, bucketBounds: [0.1, 0.5] } as PrometheusSli))).not.toBe(
+      fp(perRange)
+    );
+    expect(
+      fp(sli({ type: 'latency_threshold', metric: 'h_seconds_bucket', bucketUnit: 'seconds' }))
+    ).not.toBe(fp(cumulative));
   });
 });

@@ -64,6 +64,16 @@ function buildSli(state: FormState, template: SloTemplate): SingleSli {
     latencyThresholdUnit:
       template.sli.type === 'latency_threshold' ? state.latencyThresholdUnit : undefined,
   };
+  // Re-emit how the source metric is read (temporality, histogram bucket
+  // layout) while the user keeps the metric it was detected for. A different
+  // metric drops it: the old shape says nothing about the new metric.
+  const source = state.preservedSliSource;
+  if (source && template.sli.type !== 'custom' && source.metric === state.metric) {
+    if (source.metricTemporality) prom.metricTemporality = source.metricTemporality;
+    if (source.bucketLayout) prom.bucketLayout = source.bucketLayout;
+    if (source.bucketBounds) prom.bucketBounds = [...source.bucketBounds];
+    if (source.bucketUnit) prom.bucketUnit = source.bucketUnit;
+  }
   if (template.sli.type === 'custom') {
     // Custom SLIs carry the user's own PromQL. `metric` is omitted — the
     // generator reads `customExpr` instead.

@@ -41,6 +41,7 @@ import {
   SEVERITY_COLORS,
   STATUS_COLORS,
 } from './shared_constants';
+import { getMonitorStateLabel, getSeverityLabel } from './enum_labels';
 
 export interface ForecasterDetailFlyoutProps {
   forecaster: UnifiedRuleSummary;
@@ -317,16 +318,18 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                 </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color={STATUS_COLORS[forecaster.status]}>{forecaster.status}</EuiBadge>
+                <EuiBadge color={STATUS_COLORS[forecaster.status]}>
+                  {getMonitorStateLabel(forecaster.status)}
+                </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge color={SEVERITY_COLORS[forecaster.severity]}>
-                  {forecaster.severity}
+                  {getSeverityLabel(forecaster.severity)}
                 </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiHealth color={HEALTH_COLORS[forecaster.healthStatus]}>
-                  {forecaster.healthStatus}
+                  {getMonitorStateLabel(forecaster.healthStatus)}
                 </EuiHealth>
               </EuiFlexItem>
             </EuiFlexGroup>

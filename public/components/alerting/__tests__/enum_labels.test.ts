@@ -7,6 +7,7 @@ import {
   EMPTY_VALUE,
   SEVERITY_LABELS,
   STATE_LABELS,
+  getCloudWatchStateLabel,
   getMonitorStateLabel,
   getSeverityLabel,
   getStateLabel,
@@ -25,6 +26,7 @@ const ALL_STATES: UnifiedAlertState[] = [
   'silenced',
   'resolved',
   'error',
+  'deleted',
 ];
 
 describe('enum_labels', () => {
@@ -113,5 +115,22 @@ describe('enum_labels', () => {
       expect(getMonitorStateLabel(null)).toBe(EMPTY_VALUE);
       expect(getMonitorStateLabel('')).toBe(EMPTY_VALUE);
     });
+  });
+
+  describe('getCloudWatchStateLabel', () => {
+    it('words CloudWatch states the way the CloudWatch console does', () => {
+      expect(getCloudWatchStateLabel('ALARM')).toBe('In alarm');
+      expect(getCloudWatchStateLabel('OK')).toBe('OK');
+      expect(getCloudWatchStateLabel('INSUFFICIENT_DATA')).toBe('Insufficient data');
+    });
+
+    it('humanizes an unknown state and returns the placeholder when absent', () => {
+      expect(getCloudWatchStateLabel('NEW_STATE')).toBe('New state');
+      expect(getCloudWatchStateLabel(undefined)).toBe(EMPTY_VALUE);
+    });
+  });
+
+  it('labels a deleted-rule alert so it does not read as a deleted alert', () => {
+    expect(getStateLabel('deleted')).toBe('Rule deleted');
   });
 });

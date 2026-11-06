@@ -23,6 +23,7 @@ import type {
   SloStatusAggregationContext,
 } from '../../../common/slo/slo_service';
 import { SloService, SloValidationError, WORKSPACE_ID_RE } from '../../../common/slo/slo_service';
+import { MAX_BUCKET_BOUNDS } from '../../../common/slo/slo_types';
 import type { SloDocument } from '../../../common/slo/slo_types';
 import type { AlertingOSClient, Datasource } from '../../../common/types/alerting';
 import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
@@ -133,6 +134,13 @@ const prometheusSliSchema = schema.object(
     ),
     metricTemporality: schema.maybe(
       schema.oneOf([schema.literal('cumulative'), schema.literal('delta')])
+    ),
+    bucketLayout: schema.maybe(schema.literal('per_range')),
+    bucketBounds: schema.maybe(
+      schema.arrayOf(schema.number({ min: 0 }), { maxSize: MAX_BUCKET_BOUNDS })
+    ),
+    bucketUnit: schema.maybe(
+      schema.oneOf([schema.literal('seconds'), schema.literal('milliseconds')])
     ),
     customExpr: schema.maybe(
       schema.oneOf([

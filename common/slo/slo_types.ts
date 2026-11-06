@@ -62,6 +62,13 @@ export type CustomPromQLExpr =
   | { mode: 'events'; goodQuery: string; totalQuery: string }
   | { mode: 'raw'; errorRatioQuery: string };
 
+/**
+ * Most `le` bounds a `per_range` SLI may carry. Enforced by the route schema
+ * and the validator, and Suggest skips a histogram with more bounds rather
+ * than offer a draft the server would reject.
+ */
+export const MAX_BUCKET_BOUNDS = 64;
+
 export interface PrometheusSli extends BaseSli {
   backend: 'prometheus';
   type: PrometheusSliType;
@@ -83,6 +90,23 @@ export interface PrometheusSli extends BaseSli {
    * `delta` and everything else as `cumulative`.
    */
   metricTemporality?: 'cumulative' | 'delta';
+  /**
+   * How a `latency_threshold` histogram fills its `le` buckets. Omitted (the
+   * Prometheus norm) means each `le` bucket counts every observation up to
+   * that bound, so `+Inf` equals the total. `per_range` means each bucket
+   * holds only the observations between the previous bound and its own, and
+   * `+Inf` only the overflow — the buckets still grow over time like
+   * counters. Set by the suggestion probe, together with `bucketBounds` and
+   * `bucketUnit`, which the `per_range` math needs.
+   */
+  bucketLayout?: 'per_range';
+  /**
+   * The histogram's finite `le` bounds, in `bucketUnit`. Required for
+   * `per_range`; at most {@link MAX_BUCKET_BOUNDS} entries.
+   */
+  bucketBounds?: number[];
+  /** Unit of the `le` labels. Required for `per_range`. */
+  bucketUnit?: 'seconds' | 'milliseconds';
 }
 
 /** Reserved for P2. Shape fixed now so P0 SLOs don't need migration later. */
@@ -377,6 +401,8 @@ export type SloHealthState =
   | 'ok'
   | 'no_data'
   | 'source_idle'
+  /** The source metric has traffic, but the SLI can't be computed from it. */
+  | 'sli_uncomputable'
   | 'stale'
   | 'disabled'
   | 'rules_missing';
@@ -398,6 +424,22 @@ export interface ObjectiveStatus {
    * expression). The value matches what the rule will record.
    */
   evaluatedInline?: boolean;
+  /** Why the SLI can't be computed — set only when `state` is `sli_uncomputable`. */
+  uncomputable?: SliUncomputableReason;
+}
+
+/**
+ * Diagnosis behind an `sli_uncomputable` objective, so the UI can say why.
+ *   - `buckets_not_cumulative`: the histogram's `+Inf` bucket stays flat while
+ *     `_count` grows — each bucket counts only its own range, so the
+ *     cumulative math divides by zero.
+ *   - `unknown`: the SLI's source has data (for a custom SLI, its total query
+ *     is above 0), but the SLI still evaluates to no value.
+ *   - `no_threshold_bucket`: observations arrive, but there's no bucket the
+ *     SLI can read at the threshold.
+ */
+export interface SliUncomputableReason {
+  cause: 'buckets_not_cumulative' | 'no_threshold_bucket' | 'unknown';
 }
 
 export interface SloLiveStatus {
