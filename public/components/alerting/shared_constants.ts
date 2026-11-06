@@ -107,16 +107,12 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 /**
- * Rules-table status color. `active` means different things per source: an
- * enabled OpenSearch monitor (not an alarm, so primary), but a firing
- * Prometheus rule or a CloudWatch alarm in ALARM state, which keep danger red
- * because they need attention. Every other status uses `STATUS_COLORS`.
+ * `STATUS_COLORS` for an `EuiBadge`. `subdued` is an `EuiHealth` color but not
+ * a badge color, so badges use `default` for those statuses instead.
  */
-export function getRuleStatusColor(status: string, datasourceType?: string): string {
-  if (status === 'active' && datasourceType && datasourceType !== 'opensearch') {
-    return 'danger';
-  }
-  return STATUS_COLORS[status] || 'subdued';
+export function getStatusBadgeColor(status?: string | null): string {
+  const color = (status && STATUS_COLORS[status]) || 'default';
+  return color === 'subdued' ? 'default' : color;
 }
 
 // ============================================================================

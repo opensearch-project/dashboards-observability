@@ -39,7 +39,7 @@ import {
   HEALTH_COLORS,
   isAdResourceRunning,
   SEVERITY_COLORS,
-  STATUS_COLORS,
+  getStatusBadgeColor,
 } from './shared_constants';
 import { getMonitorStateLabel, getSeverityLabel } from './enum_labels';
 
@@ -303,7 +303,7 @@ export const DetectorDetailFlyout: React.FC<DetectorDetailFlyoutProps> = ({
                 </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color={STATUS_COLORS[detector.status]}>
+                <EuiBadge color={getStatusBadgeColor(detector.status)}>
                   {getMonitorStateLabel(detector.status)}
                 </EuiBadge>
               </EuiFlexItem>

@@ -9,7 +9,7 @@ import {
   SEVERITY_COLORS,
   STATE_COLORS,
   STATUS_COLORS,
-  getRuleStatusColor,
+  getStatusBadgeColor,
 } from '../shared_constants';
 
 // Palette rules for the Alerts and Rules tabs: one severity palette from the
@@ -30,15 +30,18 @@ describe('alerting palette rules', () => {
     });
   });
 
-  it('an enabled OpenSearch monitor is not red', () => {
-    expect(STATUS_COLORS.active).not.toBe('danger');
-    expect(getRuleStatusColor('active', 'opensearch')).toBe('primary');
+  it('red never means "Active", whatever source the row comes from', () => {
+    expect(STATUS_COLORS.active).toBe('primary');
+    expect(getStatusBadgeColor('active')).toBe('primary');
   });
 
-  it('a firing Prometheus rule or an alarming CloudWatch alarm keeps red', () => {
-    expect(getRuleStatusColor('active', 'prometheus')).toBe('danger');
-    expect(getRuleStatusColor('active', 'cloudwatch')).toBe('danger');
-    expect(getRuleStatusColor('pending', 'prometheus')).toBe('warning');
+  it('status badges only get named EuiBadge colors', () => {
+    const badgeColors = ['default', 'hollow', 'primary', 'success', 'accent', 'warning', 'danger'];
+    Object.keys(STATUS_COLORS).forEach((status) => {
+      expect(badgeColors).toContain(getStatusBadgeColor(status));
+    });
+    expect(getStatusBadgeColor('insufficient_data')).toBe('default');
+    expect(getStatusBadgeColor('unknown-status')).toBe('default');
   });
 
   it('severity slots stay apart: Critical is not the High hue', () => {

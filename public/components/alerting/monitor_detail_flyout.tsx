@@ -57,7 +57,7 @@ import {
   SEVERITY_COLORS,
   STATE_COLORS,
   HEALTH_COLORS,
-  getRuleStatusColor,
+  getStatusBadgeColor,
 } from './shared_constants';
 import { getMonitorStateLabel, getSeverityLabel, getStateLabel } from './enum_labels';
 import { stateHistoryUnavailableMessage } from './alarm_time_window';
@@ -347,7 +347,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={getRuleStatusColor(monitor.status, monitor.datasourceType)}>
+                  <EuiBadge color={getStatusBadgeColor(monitor.status)}>
                     {getMonitorStateLabel(monitor.status)}
                   </EuiBadge>
                 </EuiFlexItem>

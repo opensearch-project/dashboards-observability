@@ -39,7 +39,7 @@ import {
   HEALTH_COLORS,
   isAdResourceRunning,
   SEVERITY_COLORS,
-  STATUS_COLORS,
+  getStatusBadgeColor,
 } from './shared_constants';
 import { getMonitorStateLabel, getSeverityLabel } from './enum_labels';
 
@@ -318,7 +318,7 @@ export const ForecasterDetailFlyout: React.FC<ForecasterDetailFlyoutProps> = ({
                 </EuiBadge>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color={STATUS_COLORS[forecaster.status]}>
+                <EuiBadge color={getStatusBadgeColor(forecaster.status)}>
                   {getMonitorStateLabel(forecaster.status)}
                 </EuiBadge>
               </EuiFlexItem>
