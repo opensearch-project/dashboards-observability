@@ -195,12 +195,11 @@ export class PPLSearchService {
           environments
         )
       );
-    // One aggregation per side first: complete unless it returns exactly the 2.x bucket cap
-    // (fewer rows is everything; more means the engine has no cap). At the cap, batch by
-    // environment instead.
+    // One aggregation per side first: complete unless it reaches a limit (exactly the 2.x
+    // bucket cap, or the `head` row limit on 3.x). At a limit, batch by environment instead.
     const sideParts = async (side: ServiceMapSide) => {
       const whole = await nodeQuery(side);
-      if ((whole?.jsonData ?? []).length !== cap) return [whole];
+      if (!isAtAggregationLimit((whole?.jsonData ?? []).length)) return [whole];
       return batchedParts(side);
     };
     const batchedParts = async (side: ServiceMapSide) => {
@@ -209,7 +208,7 @@ export class PPLSearchService {
         getQueryServiceMapEnvironmentSizes(queryIndex, side, startTime, endTime)
       );
       const sizeRows: Array<Record<string, any>> = sizes?.jsonData ?? [];
-      if (sizeRows.length >= cap) truncated = true;
+      if (sizeRows.length >= cap || isAtAggregationLimit(sizeRows.length)) truncated = true;
       const batches = packEnvironments(
         sizeRows.map((r) => ({
           environment: r[`${n}.keyAttributes.environment`] ?? null,
@@ -227,7 +226,7 @@ export class PPLSearchService {
       const parts = await sideParts(side);
       return parts.flatMap((part) => {
         const rows: Array<Record<string, any>> = part?.jsonData ?? [];
-        if (rows.length === cap) truncated = true;
+        if (isAtAggregationLimit(rows.length)) truncated = true;
         return rows.map((row) => {
           const value = groupByAttribute
             ? row[`${n}.groupByAttributes.${groupByAttribute}`]
@@ -308,7 +307,7 @@ export class PPLSearchService {
     names?: string[]
   ): Promise<any> {
     const { queryIndex, startTime, endTime, dataset } = params;
-    const { AGGREGATION_BUCKET_CAP: cap, NAME_CHUNK_SIZE } = APPLICATION_MAP_CONSTANTS;
+    const { NAME_CHUNK_SIZE } = APPLICATION_MAP_CONSTANTS;
     const run = (chunk?: { side: ServiceMapSide; names: string[] }) =>
       this.executePPLQuery(
         getQueryServiceMapSliceEdges(queryIndex, filter, startTime, endTime, chunk),
@@ -318,7 +317,7 @@ export class PPLSearchService {
 
     let rows = await run();
     let truncated = false;
-    if (rows.length === cap) {
+    if (isAtAggregationLimit(rows.length)) {
       if (!names?.length) {
         truncated = true;
       } else {
@@ -332,7 +331,7 @@ export class PPLSearchService {
           APPLICATION_MAP_CONSTANTS.MAX_CONCURRENT_AGGREGATIONS,
           signal
         );
-        truncated = parts.some((p) => p.length === cap);
+        truncated = parts.some((p) => isAtAggregationLimit(p.length));
         rows = parts.flat();
       }
     }
@@ -548,6 +547,15 @@ function nestAttribute(path: string, value: unknown): Record<string, unknown> {
     .split('.')
     .reverse()
     .reduce<unknown>((inner, key) => ({ [key]: inner }), value) as Record<string, unknown>;
+}
+
+/**
+ * Whether an aggregation's result may have been cut: exactly the 2.x engine's bucket cap, or the
+ * `head` every large-map aggregation ends in (AGGREGATION_ROW_LIMIT, which 3.x can reach).
+ */
+export function isAtAggregationLimit(rows: number): boolean {
+  const { AGGREGATION_BUCKET_CAP, AGGREGATION_ROW_LIMIT } = APPLICATION_MAP_CONSTANTS;
+  return rows === AGGREGATION_BUCKET_CAP || rows >= AGGREGATION_ROW_LIMIT;
 }
 
 /**

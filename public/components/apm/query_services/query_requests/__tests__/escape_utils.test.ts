@@ -52,8 +52,10 @@ describe('escape_utils', () => {
       expect(escapePPLString("a''b")).toBe("a''''b");
     });
 
-    it('leaves backslashes literal (neither engine needs them escaped)', () => {
-      expect(escapePPLString('a\\b')).toBe('a\\b');
+    it('escapes backslashes, so a value cannot end the string early or leave it open', () => {
+      expect(escapePPLString('a\\b')).toBe('a\\\\b');
+      expect(escapePPLString('x\\')).toBe('x\\\\');
+      expect(escapePPLString("x\\' or name = 'y")).toBe("x\\\\'' or name = ''y");
     });
 
     it('leaves double quotes untouched', () => {

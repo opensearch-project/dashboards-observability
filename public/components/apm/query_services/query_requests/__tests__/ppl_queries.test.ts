@@ -53,7 +53,7 @@ describe('ppl_queries', () => {
 
     it('escapes quotes and backslashes in the name', () => {
       const q = getQueryDependencyAttributes('svcmap', "a'b\\c", 'env');
-      expect(q).toContain("targetNode.keyAttributes.name = 'a''b\\c'");
+      expect(q).toContain("targetNode.keyAttributes.name = 'a''b\\\\c'");
     });
   });
 

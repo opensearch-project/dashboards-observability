@@ -68,7 +68,12 @@ import {
   getQueryServiceMapNodes,
   getQueryServiceMapSliceEdges,
 } from '../query_requests/ppl_queries';
-import { groupByAttributeKeys, isShortOfCount, packEnvironments } from '../ppl_search_service';
+import {
+  groupByAttributeKeys,
+  isAtAggregationLimit,
+  isShortOfCount,
+  packEnvironments,
+} from '../ppl_search_service';
 
 describe('PPLSearchService', () => {
   let service: PPLSearchService;
@@ -600,6 +605,17 @@ describe('PPLSearchService', () => {
       expect((await service.getServiceMapOverview(params as any)).truncated).toBe(true);
     });
 
+    it('a node list at the 10,000-row head (3.x) is re-read per environment, and flagged if a batch still hits it', async () => {
+      respond({
+        'NODES source': rows(10000),
+        'SIZES source': [{ 'sourceNode.keyAttributes.environment': 'huge', nodes: 12000 }],
+        'NODES source ["huge"]': rows(10000, 'source', 'huge'),
+      });
+      const result = await service.getServiceMapOverview(params as any);
+      expect(sent()).toContain('SIZES source');
+      expect(result.truncated).toBe(true);
+    });
+
     it('fails the overview when a node list fails', async () => {
       respond({ 'NODES target': new Error('timed out') });
       await expect(service.getServiceMapOverview(params as any)).rejects.toThrow('timed out');
@@ -705,7 +721,67 @@ describe('PPLSearchService', () => {
     });
   });
 
+  describe('large-map row limit on slices', () => {
+    const params = {
+      queryIndex: 'test-index',
+      startTime: 1000,
+      endTime: 2000,
+      dataset: mockDataset,
+    };
+    const filter = { kind: 'environment', environment: 'dev' } as const;
+    const edges = (n: number) =>
+      Array.from({ length: n }, (_, i) => ({
+        'sourceNode.keyAttributes.environment': 'dev',
+        'sourceNode.keyAttributes.name': `a${i}`,
+        'sourceNode.type': 'Service',
+        'targetNode.keyAttributes.environment': 'dev',
+        'targetNode.keyAttributes.name': 'b',
+        'targetNode.type': 'Service',
+      }));
+    const asResponse = (r: Array<Record<string, unknown>>) => {
+      const names = Array.from(new Set(r.flatMap((x) => Object.keys(x))));
+      return {
+        body: {
+          fields: names.map((name) => ({ name, values: r.map((x) => x[name]) })),
+          size: r.length,
+        },
+      };
+    };
+    const respond = (byQuery: Record<string, Array<Record<string, unknown>>>) =>
+      (coreRefs.http!.post as jest.Mock).mockImplementation((_u: string, o: { body: string }) =>
+        Promise.resolve(asResponse(byQuery[JSON.parse(o.body).query.query] ?? []))
+      );
+
+    it('flags an aggregation at the 10,000-row head (3.x) without names to split by', async () => {
+      respond({ EDGES: edges(10000) });
+      expect((await service.getServiceMapSliceAggregated(params as any, filter)).truncated).toBe(
+        true
+      );
+    });
+
+    it('splits a slice at the row head into name chunks, and flags a chunk still at it', async () => {
+      respond({ EDGES: edges(10000), 'EDGES source a': edges(500), 'EDGES target a': [] });
+      expect(
+        (await service.getServiceMapSliceAggregated(params as any, filter, undefined, ['a']))
+          .truncated
+      ).toBe(false);
+      respond({ EDGES: edges(10000), 'EDGES source a': edges(10000), 'EDGES target a': [] });
+      expect(
+        (await service.getServiceMapSliceAggregated(params as any, filter, undefined, ['a']))
+          .truncated
+      ).toBe(true);
+    });
+  });
+
   describe('large-map helpers', () => {
+    it('isAtAggregationLimit: the 2.x bucket cap exactly, or the row head and above', () => {
+      expect(isAtAggregationLimit(999)).toBe(false);
+      expect(isAtAggregationLimit(1000)).toBe(true);
+      expect(isAtAggregationLimit(1001)).toBe(false);
+      expect(isAtAggregationLimit(9999)).toBe(false);
+      expect(isAtAggregationLimit(10000)).toBe(true);
+    });
+
     it('isShortOfCount: exact below the cardinality threshold, a margin above it', () => {
       expect(isShortOfCount(1999, 2000)).toBe(true);
       expect(isShortOfCount(2000, 2000)).toBe(false);
