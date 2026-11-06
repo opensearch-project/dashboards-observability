@@ -5,6 +5,8 @@
 
 import { i18n } from '@osd/i18n';
 import * as apmTopology from '@osd/apm-topology';
+import { coreRefs } from '../../../../framework/core_refs';
+import { APM_PLATFORM_TYPE } from '../../common/infra_constants';
 
 /**
  * Icon key for a dependency's system, from @osd/apm-topology (OpenSearch-Dashboards#12771):
@@ -52,8 +54,48 @@ export const PLATFORM_TYPE_MAP: Record<string, string> = {
   'AWS::EKS': 'EKS',
   'AWS::ECS': 'ECS',
   'AWS::EC2': 'EC2',
+  'AWS::ElasticBeanstalk': 'Elastic Beanstalk',
+  Kubernetes: 'Kubernetes',
+  Host: 'Host',
   Generic: 'Generic',
 };
+
+/**
+ * The `apm.platform` value on a service-map node's keyAttributes, as written by Data Prepper
+ * platform detection. PPL returns it nested (`apm: { platform: ['eks'] }`); a flat
+ * `'apm.platform'` key and a plain string are accepted too.
+ */
+export function getApmPlatform(keyAttributes: unknown): string | undefined {
+  if (!keyAttributes || typeof keyAttributes !== 'object') return undefined;
+  const ka = keyAttributes as Record<string, unknown>;
+  const raw =
+    ka['apm.platform'] ??
+    (ka.apm && typeof ka.apm === 'object'
+      ? (ka.apm as Record<string, unknown>).platform
+      : undefined);
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return typeof value === 'string' && value ? value : undefined;
+}
+
+/** Platform type from the detected `apm.platform` value; undefined for an unknown value. */
+export function getPlatformTypeFromApmPlatform(apmPlatform?: string): string | undefined {
+  return apmPlatform ? APM_PLATFORM_TYPE[apmPlatform.toLowerCase()] : undefined;
+}
+
+/**
+ * A service node's platform type: Data Prepper's detected `apm.platform` when present (and not
+ * generic), else parsed from the environment string (`eks:cluster/namespace`), as before. The
+ * detected platform is part of the Infrastructure feature, so it is only used when
+ * `observability.apmInfrastructure.enabled` is on.
+ */
+export function getServicePlatformType(keyAttributes: unknown, environment?: string): string {
+  if (!coreRefs.apmInfrastructureEnabled) {
+    return environment ? getPlatformTypeFromEnvironment(environment) : 'Generic';
+  }
+  const detected = getPlatformTypeFromApmPlatform(getApmPlatform(keyAttributes));
+  if (detected && detected !== 'Generic') return detected;
+  return environment ? getPlatformTypeFromEnvironment(environment) : (detected ?? 'Generic');
+}
 
 /**
  * Get platform display name from platform type
@@ -202,11 +244,16 @@ export function getNodeIconType(
  * nodes, otherwise the environment-derived platform type.
  * @param nodeType - The node's KeyAttributes.Type
  * @param environment - Environment string, used for the service fallback
+ * @param platformType - The node's platform type (e.g. from `apm.platform`), when known
  * @returns Display subtitle
  */
-export function getNodeSubtitle(nodeType: string | undefined, environment: string): string {
+export function getNodeSubtitle(
+  nodeType: string | undefined,
+  environment: string,
+  platformType?: string
+): string {
   const key = (nodeType || '').toLowerCase();
-  return NODE_TYPE_LABEL_MAP[key] || getPlatformTypeFromEnvironment(environment);
+  return NODE_TYPE_LABEL_MAP[key] || platformType || getPlatformTypeFromEnvironment(environment);
 }
 
 /**

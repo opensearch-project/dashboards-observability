@@ -5,6 +5,7 @@
 
 import {
   getPlatformTypeFromEnvironment,
+  getServicePlatformType,
   isDependencyPlaceholder,
 } from '../../shared/utils/platform_utils';
 
@@ -386,9 +387,7 @@ export function transformListServicesResponse(pplResponse: PPLDataFrame): ListSe
 
     const serviceName = parsedKeyAttributes?.name || fallbackName;
     const environmentType = parsedKeyAttributes?.environment;
-    const platformType = environmentType
-      ? getPlatformTypeFromEnvironment(environmentType)
-      : 'Generic';
+    const platformType = getServicePlatformType(parsedKeyAttributes, environmentType);
 
     if (!serviceName || !environmentType) {
       return;
@@ -518,9 +517,7 @@ export function transformGetServiceResponse(pplResponse: PPLDataFrame): any {
     };
   }
 
-  const platformType = environmentType
-    ? getPlatformTypeFromEnvironment(environmentType)
-    : 'Generic';
+  const platformType = getServicePlatformType(serviceKeyAttributes, environmentType);
   const envDetails = parseEnvironmentType(environmentType);
   const attributeMaps = buildAttributeMaps(platformType, envDetails, serviceName);
 
@@ -752,9 +749,7 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
     // Handle both nested keyAttributes format and flat field format
     const serviceName = serviceKeyAttributes?.name || row['sourceNode.name'];
     const environmentType = serviceKeyAttributes?.environment || row.environment;
-    const platformType = environmentType
-      ? getPlatformTypeFromEnvironment(environmentType)
-      : 'Generic';
+    const platformType = getServicePlatformType(serviceKeyAttributes, environmentType);
 
     if (serviceName && environmentType) {
       const nodeKey = `${serviceName}::${environmentType}`;
@@ -802,6 +797,11 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
       } else {
         // Node already exists, merge new groupByAttributes without overwriting existing keys
         const existingNode = nodeMap.get(nodeKey);
+        // A node first added as another service's target has no detected platform; take it
+        // from the service's own document.
+        if (platformType !== 'Generic' && existingNode.AttributeMaps?.[0]) {
+          existingNode.AttributeMaps[0].PlatformType = platformType;
+        }
         if (serviceGroupByAttributes && Object.keys(serviceGroupByAttributes).length > 0) {
           existingNode.GroupByAttributes = mergeGroupByAttributes(
             existingNode.GroupByAttributes,
@@ -828,7 +828,10 @@ export function transformGetServiceMapResponse(pplResponse: PPLDataFrame): any {
       const depNodeKey = `${remoteServiceName}::${remoteEnvironment}`;
 
       if (!nodeMap.has(depNodeKey)) {
-        const depPlatformType = getPlatformTypeFromEnvironment(remoteEnvironment);
+        const depPlatformType = getServicePlatformType(
+          remoteServiceKeyAttributes,
+          remoteEnvironment
+        );
         const depEnvDetails = parseEnvironmentType(remoteEnvironment);
         const depAttributeMaps = buildAttributeMaps(
           depPlatformType,

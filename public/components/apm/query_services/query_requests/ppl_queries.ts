@@ -50,7 +50,7 @@ function toDate(timestamp: string | Date): Date {
  * @param endTime - End time as Date object or ISO string
  * @returns PPL WHERE clause filtering by timestamp, or empty string if either time is missing
  */
-function buildTimeFilterClause(
+export function buildTimeFilterClause(
   startTime?: string | Date,
   endTime?: string | Date,
   field = 'timestamp'
