@@ -49,6 +49,29 @@
   min-height: 0;
 }
 
+/* Alerts tab: the page scrolls and pagination limits the rows, so there is no
+ * inner table scroller (which clipped the first row under the header and ran
+ * alongside pagination). The container grows with its content instead of being
+ * capped to the viewport. */
+.altResizableContainer--pageScroll {
+  height: auto;
+  min-height: calc(100vh - 140px);
+}
+
+/* 40px standard row height for the Alerts and Rules tables. Cell padding drops
+ * to 4px so single-line rows fit; `height` on the row sets the floor, so every
+ * single-line row is exactly 40px. */
+@mixin altStandardRows {
+  .euiTableRowCell .euiTableCellContent {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .euiTableRow:not(.euiTableRow-isExpandedRow) {
+    height: 40px;
+  }
+}
+
 .altFiltersPanel {
   padding-top: 8px;
   padding-right: 8px;
@@ -91,11 +114,7 @@
 }
 
 .altTablePanel {
-  flex: 1;
-  min-height: 0;
-
-  /* Column so the title/search/count stay fixed and the table fills the rest
-   * and scrolls internally — one scroll region, page doesn't overflow.
+  /* Sized by its content: the page scrolls (see `.altResizableContainer--pageScroll`).
    * (Alerts-tab only; the Rules tab uses .altContentPanel + its own wrapper.) */
   display: flex;
   flex-direction: column;
@@ -103,12 +122,32 @@
 
 .altAlertsTable {
   min-width: 0;
+  /* Horizontal scroll only when the table's min-width doesn't fit. No vertical
+   * scroller: `hidden` (not `auto`) so the pagination footer's negative-margin
+   * bleed (see `padding-right` below) can't produce a few-pixel inner scroll. */
   overflow-x: auto;
-  overflow-y: auto;
+  overflow-y: hidden;
 
-  /* Fill the remaining panel height so the table body — not the page — scrolls. */
-  flex: 1;
-  min-height: 0;
+  @include altStandardRows;
+
+  /* One line per message; the cell's tooltip shows the full text. The cell and
+   * the tooltip anchor are bounded to the column so the line truncates instead
+   * of widening the table. */
+  .altAlertMessageColumn .euiTableCellContent {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .altAlertMessageColumn .euiToolTipAnchor {
+    display: block;
+    max-width: 100%;
+  }
+
+  .altAlertMessageText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
   .euiTable {
     table-layout: fixed;
@@ -313,6 +352,8 @@
 // inside the resizable panel and removes the trailing header-cell border so
 // the right edge sits flush with the panel edge.
 .monitors-table-wrapper {
+  @include altStandardRows;
+
   .euiTable {
     table-layout: auto;
     min-width: 100%;

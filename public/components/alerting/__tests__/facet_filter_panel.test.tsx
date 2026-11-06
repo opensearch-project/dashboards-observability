@@ -299,3 +299,29 @@ describe('FacetFilterGroup — search matches both display label and raw value',
     expect(queryByText('Alpha')).not.toBeInTheDocument();
   });
 });
+
+describe('FacetFilterGroup — color styles', () => {
+  it('renders a swatch in the given color instead of a health dot for colorStyle="swatch"', () => {
+    const { getByTestId, container } = render(
+      <FacetFilterGroup
+        {...defaultProps}
+        id="severity"
+        options={['critical']}
+        counts={{ critical: 1 }}
+        colorMap={{ critical: '#E7664C' }}
+        colorStyle="swatch"
+      />
+    );
+    expect(getByTestId('facetGroup-severity-swatch-critical')).toHaveStyle({
+      backgroundColor: '#E7664C',
+    });
+    expect(container.querySelector('.euiHealth')).toBeNull();
+  });
+
+  it('keeps the health dot by default', () => {
+    const { container } = render(
+      <FacetFilterGroup {...defaultProps} colorMap={{ active: 'primary' }} />
+    );
+    expect(container.querySelector('.euiHealth')).not.toBeNull();
+  });
+});

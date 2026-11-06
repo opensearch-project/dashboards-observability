@@ -12,6 +12,7 @@ import type {
   UnifiedAlertSummary,
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
+import { SEVERITY_HEX } from './alert_colors';
 
 /**
  * Shared color maps, formatting utilities, and style constants
@@ -26,16 +27,12 @@ import type {
 // ============================================================================
 
 /**
- * Maps UnifiedAlertSeverity values to OUI semantic badge color names.
+ * Maps UnifiedAlertSeverity values to the one severity palette (`SEVERITY_HEX`),
+ * so badges, filter swatches and the timeline share a color per severity.
+ * `EuiBadge` takes the hex and picks a readable text color itself.
  * Usage: <EuiBadge color={SEVERITY_COLORS[severity]}>{severity}</EuiBadge>
  */
-export const SEVERITY_COLORS: Record<string, string> = {
-  critical: 'danger',
-  high: 'warning',
-  medium: 'primary',
-  low: 'subdued',
-  info: 'default',
-};
+export const SEVERITY_COLORS: Record<string, string> = { ...SEVERITY_HEX };
 
 /** Severity rank, most severe first. Unknown values sort after `info`. */
 export const SEVERITY_SORT_ORDER: Record<string, number> = {
@@ -64,7 +61,8 @@ export function sortBySeverity(values: string[]): string[] {
 export const STATE_COLORS: Record<string, string> = {
   active: 'danger',
   pending: 'warning',
-  insufficient_data: 'warning',
+  // Absence of data is neutral, never warning yellow.
+  insufficient_data: 'subdued',
   acknowledged: 'primary',
   silenced: 'default',
   resolved: 'success',
@@ -77,12 +75,14 @@ export const STATE_COLORS: Record<string, string> = {
 // ============================================================================
 
 /**
- * Maps MonitorStatus values to OUI semantic badge color names.
+ * Maps MonitorStatus values to the status palette (OUI semantic Health names).
+ * Red is for failures only, never for a rule that is merely active, and yellow
+ * never means "no data": absence of data is neutral.
  */
 export const STATUS_COLORS: Record<string, string> = {
-  active: 'danger',
+  active: 'primary',
   pending: 'warning',
-  insufficient_data: 'warning',
+  insufficient_data: 'subdued',
   ok: 'success',
   muted: 'default',
   disabled: 'subdued',
@@ -96,8 +96,8 @@ export const STATUS_COLORS: Record<string, string> = {
   Failed: 'danger',
   'Inactive stopped': 'subdued',
   'Inactive not started': 'subdued',
-  'Awaiting data to init': 'warning',
-  'Awaiting data to restart': 'warning',
+  'Awaiting data to init': 'subdued',
+  'Awaiting data to restart': 'subdued',
   'Initializing test': 'primary',
   'Initializing forecast': 'primary',
   'Test complete': 'success',

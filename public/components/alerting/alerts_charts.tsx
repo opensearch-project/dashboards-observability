@@ -24,20 +24,12 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
 import { getSeverityLabel } from './enum_labels';
+import { SEVERITY_HEX } from './alert_colors';
 import { UnifiedAlertSummary } from '../../../common/types/alerting';
 import { uiSettingsService } from '../../../common/utils';
 
-// ============================================================================
-// Color map (kept for AlertTimeline severity bars)
-// ============================================================================
-
-const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#BD271E',
-  high: '#F5A700',
-  medium: '#006BB4',
-  low: '#98A2B3',
-  info: '#D3DAE6',
-};
+// Timeline series use the same severity palette as the table badges and filter swatches.
+const SEVERITY_COLORS = SEVERITY_HEX;
 
 // ============================================================================
 // AlertTimeline — stacked bar chart by time buckets

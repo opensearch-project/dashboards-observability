@@ -26,20 +26,27 @@ import type {
  * prefer the semantic maps in `shared_constants.ts` instead.
  */
 
-/** Severity → theme color. Ramps danger → warning → primary → subdued. */
+/**
+ * The one severity palette: table badges, filter-panel swatches and the
+ * timeline series all read it, so a severity looks the same everywhere on the
+ * page. Slots come from the OUI vis palette (not the status colors and not the
+ * UI primary), so severity never reads as a process state. The hues are
+ * placeholders pending the final scheme; change them here only.
+ */
 export const SEVERITY_HEX: Record<UnifiedAlertSeverity, string> = {
-  critical: euiThemeVars.euiColorDanger,
-  high: euiThemeVars.euiColorWarning,
-  medium: euiThemeVars.euiColorPrimary,
-  low: euiThemeVars.euiColorMediumShade,
-  info: euiThemeVars.euiColorLightShade,
+  critical: euiThemeVars.euiColorVis9,
+  high: euiThemeVars.euiColorVis7,
+  medium: euiThemeVars.euiColorVis5,
+  low: euiThemeVars.euiColorVis1,
+  info: euiThemeVars.euiColorVis6,
 };
 
 /** Alert state → theme color. */
 export const STATE_HEX: Record<UnifiedAlertState, string> = {
   active: euiThemeVars.euiColorDanger,
   pending: euiThemeVars.euiColorWarning,
-  insufficient_data: euiThemeVars.euiColorWarning,
+  // Absence of data is neutral, never warning yellow.
+  insufficient_data: euiThemeVars.euiColorMediumShade,
   acknowledged: euiThemeVars.euiColorPrimary,
   silenced: euiThemeVars.euiColorMediumShade,
   resolved: euiThemeVars.euiColorSuccess,
