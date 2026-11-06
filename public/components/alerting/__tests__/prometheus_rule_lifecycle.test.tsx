@@ -106,7 +106,10 @@ import { AlarmsPage } from '../alarms_page';
 import type { Datasource } from '../../../../common/types/alerting';
 
 const defaultProps = {
-  datasources: [] as Datasource[],
+  // At least one data source: with none, the page shows only the "No data sources" prompt.
+  datasources: [
+    { id: 'ds-1', name: 'Cluster 1', type: 'opensearch', url: 'ds-1', enabled: true },
+  ] as Datasource[],
   datasourcesLoading: false,
   defaultDatasources: [] as string[],
   maxDatasources: 5,

@@ -25,7 +25,15 @@
  *   - `AlertManagerEndTime`   — date-math string for picker end.
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
@@ -1961,6 +1969,51 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     rulesTruncatedDatasources,
     fallbackHints: alertsFallbackHints,
   });
+
+  // Nothing to read alerts or rules from: no data source in this workspace (and, where the
+  // deployment hides the local cluster, no "Local Cluster" placeholder either). Same prompt as
+  // Explore's logs page: point the user at associating a data source instead of empty tabs.
+  if (!datasourcesLoading && datasources.length === 0) {
+    return (
+      <div data-test-subj="alertManagerPage" className="altPageRoot">
+        <EuiEmptyPrompt
+          iconType="database"
+          data-test-subj="alertManagerNoDatasources"
+          title={
+            <h2>
+              {i18n.translate('observability.alerting.alarmsPage.noDatasources.title', {
+                defaultMessage: 'No data sources available',
+              })}
+            </h2>
+          }
+          body={
+            <p>
+              {i18n.translate('observability.alerting.alarmsPage.noDatasources.body', {
+                defaultMessage:
+                  'This workspace has no data sources associated with it. Associate a data source to view alerts and manage rules.',
+              })}
+            </p>
+          }
+          actions={
+            coreRefs.application
+              ? [
+                  <EuiButton
+                    key="associate"
+                    fill
+                    onClick={() => coreRefs.application?.navigateToApp('dataSources')}
+                    data-test-subj="alertManagerAssociateDatasource"
+                  >
+                    {i18n.translate('observability.alerting.alarmsPage.noDatasources.associate', {
+                      defaultMessage: 'Associate a data source',
+                    })}
+                  </EuiButton>,
+                ]
+              : undefined
+          }
+        />
+      </div>
+    );
+  }
 
   return (
     <div data-test-subj="alertManagerPage" className="altPageRoot">
