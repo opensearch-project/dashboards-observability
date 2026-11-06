@@ -33,10 +33,12 @@ import type {
  * UI primary), so severity never reads as a process state. The hues are
  * placeholders pending the final scheme; change them here only.
  */
+// Slots chosen so every pair stays distinguishable, including with
+// deuteranopia (closest pair CIEDE2000 >= 14), and Critical is the darkest.
 export const SEVERITY_HEX: Record<UnifiedAlertSeverity, string> = {
-  critical: euiThemeVars.euiColorVis9,
-  high: euiThemeVars.euiColorVis7,
-  medium: euiThemeVars.euiColorVis5,
+  critical: euiThemeVars.euiColorVis8,
+  high: euiThemeVars.euiColorVis5,
+  medium: euiThemeVars.euiColorVis4,
   low: euiThemeVars.euiColorVis1,
   info: euiThemeVars.euiColorVis6,
 };

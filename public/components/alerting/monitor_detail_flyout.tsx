@@ -53,7 +53,12 @@ import { observabilityAlertingID } from '../../../common/constants/shared';
 import { coreRefs } from '../../framework/core_refs';
 import { isPending } from './monitors_table/pending_rules';
 
-import { SEVERITY_COLORS, STATE_COLORS, STATUS_COLORS, HEALTH_COLORS } from './shared_constants';
+import {
+  SEVERITY_COLORS,
+  STATE_COLORS,
+  HEALTH_COLORS,
+  getRuleStatusColor,
+} from './shared_constants';
 import { getMonitorStateLabel, getSeverityLabel, getStateLabel } from './enum_labels';
 import { stateHistoryUnavailableMessage } from './alarm_time_window';
 
@@ -342,7 +347,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={STATUS_COLORS[monitor.status]}>
+                  <EuiBadge color={getRuleStatusColor(monitor.status, monitor.datasourceType)}>
                     {getMonitorStateLabel(monitor.status)}
                   </EuiBadge>
                 </EuiFlexItem>

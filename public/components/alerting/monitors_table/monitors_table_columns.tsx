@@ -43,7 +43,7 @@ import {
   isDetectorRule,
   isForecasterRule,
   SEVERITY_COLORS,
-  STATUS_COLORS,
+  getRuleStatusColor,
   TYPE_LABELS,
 } from '../shared_constants';
 import { TruncatedLabel } from '../../common/truncated_label';
@@ -312,7 +312,7 @@ export function buildTableColumns({
             >
               <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
                 <EuiHealth
-                  color={STATUS_COLORS[status] || 'subdued'}
+                  color={getRuleStatusColor(status, item.datasourceType)}
                   data-test-subj={at ? 'cloudWatchStatusAtWindowEnd' : undefined}
                 >
                   <span style={truncate} title={at ? stateAtTooltip(at) : unifiedLabel}>

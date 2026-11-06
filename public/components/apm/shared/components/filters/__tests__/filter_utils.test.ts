@@ -23,9 +23,9 @@ jest.mock('@osd/ui-shared-deps/theme', () => ({
     euiColorSuccess: '#00FF00',
     euiColorMediumShade: '#888888',
     // Severity palette slots (alert_colors SEVERITY_HEX): critical, high, medium, low, info.
-    euiColorVis9: '#FF0000',
-    euiColorVis7: '#FF8800',
-    euiColorVis5: '#FFFF00',
+    euiColorVis8: '#FF0000',
+    euiColorVis5: '#FF8800',
+    euiColorVis4: '#FFFF00',
     euiColorVis1: '#00FF00',
     euiColorVis6: '#AAAAAA',
   },
