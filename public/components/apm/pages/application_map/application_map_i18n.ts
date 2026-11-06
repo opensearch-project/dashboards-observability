@@ -220,6 +220,20 @@ export const applicationMapI18nTexts = {
   },
 
   // Error state
+  loadFailed: {
+    sliceTitle: (group: string) =>
+      i18n.translate('observability.apm.applicationMap.loadFailed.sliceTitle', {
+        defaultMessage: 'Could not load the services in {group}',
+        values: { group },
+      }),
+    focusTitle: i18n.translate('observability.apm.applicationMap.loadFailed.focusTitle', {
+      defaultMessage: "Could not load this service's connections",
+    }),
+    focusPartialTitle: i18n.translate(
+      'observability.apm.applicationMap.loadFailed.focusPartialTitle',
+      { defaultMessage: "Some of this service's connections could not be loaded" }
+    ),
+  },
   error: {
     title: i18n.translate('observability.apm.applicationMap.error.title', {
       defaultMessage:
@@ -260,6 +274,12 @@ export const applicationMapI18nTexts = {
         defaultMessage:
           'Focused on {service} in {environment}: showing the nearest {shown, number} of {total, number} connected nodes',
         values: { service, environment, shown, total },
+      }),
+    labelCappedOpen: (service: string, environment: string, shown: number) =>
+      i18n.translate('observability.apm.applicationMap.focus.labelCappedOpen', {
+        defaultMessage:
+          'Focused on {service} in {environment}: showing the nearest {shown, number} connected nodes (more are not shown)',
+        values: { service, environment, shown },
       }),
     labelPathCut: (service: string, environment: string, shown: number, hops: number) =>
       i18n.translate('observability.apm.applicationMap.focus.labelPathCut', {
@@ -338,6 +358,15 @@ export const applicationMapI18nTexts = {
           'This view has {services, number} nodes, too many to draw at once (the limit is {limit, number}). Use Focus on to open one service and its connections, hide dependencies, group the map, or reduce the time range.',
         values: { services, limit },
       }),
+    tooManyBodyInGroup: (services: number, limit: number) =>
+      i18n.translate('observability.apm.applicationMap.largeMap.tooManyBodyInGroup', {
+        defaultMessage:
+          'This group has {services, number} nodes, too many to draw at once (the limit is {limit, number}). Focus on one service to see its connections, hide dependencies, or reduce the time range.',
+        values: { services, limit },
+      }),
+    focusService: i18n.translate('observability.apm.applicationMap.largeMap.focusService', {
+      defaultMessage: 'Focus on a service',
+    }),
     groupByEnvironment: i18n.translate(
       'observability.apm.applicationMap.largeMap.groupByEnvironment',
       { defaultMessage: 'Group by environment' }

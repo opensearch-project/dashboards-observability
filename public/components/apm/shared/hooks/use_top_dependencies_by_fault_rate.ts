@@ -7,7 +7,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { PromQLSearchService } from '../../query_services/promql_search_service';
 import { getTimeInSeconds, calculateTimeRangeDuration } from '../utils/time_utils';
 import { getQueryTopDependenciesByFaultRateAvg } from '../../query_services/query_requests/promql_queries';
-import { runBatched } from '../utils/name_batches';
+import { BatchLimiter, runBatched, servicesPageBatchLimiter } from '../utils/name_batches';
 import { useApmConfig } from '../../config/apm_config_context';
 
 export interface DependencyFaultRateItem {
@@ -35,6 +35,15 @@ export interface UseTopDependenciesByFaultRateParams {
    * within the per-batch top Ns, so the merge is exact.
    */
   callerBatches?: string[];
+  /**
+   * Target selector fragments (e.g. `remoteService=~"a|b"`), one per dependency name batch, used
+   * when no caller list bounds the query (a dependency-type filter). The topk runs once per batch
+   * and the results are merged; the batches partition the targets and the query groups by
+   * `remoteService`, so the merge is exact. Ignored when `callerBatches` is given.
+   */
+  remoteBatches?: string[];
+  /** Limiter shared with the page's other batched queries (see BatchLimiter). */
+  limiter?: BatchLimiter;
   /**
    * Keep only rows in the page's scope, applied before the top `limit` are taken. Needed when
    * the query filter is broader than the scope (see `queryLimit`).
@@ -94,6 +103,7 @@ export const useTopDependenciesByFaultRate = (
   const limit = params.limit || 5;
   // Identity of the caller batches (the array itself is rebuilt by the caller on every render).
   const callerBatchesKey = (params.callerBatches ?? []).join('&');
+  const remoteBatchesKey = (params.remoteBatches ?? []).join('&');
   const fetchParams = useMemo(
     () => ({
       endTime: getTimeInSeconds(params.endTime),
@@ -103,6 +113,7 @@ export const useTopDependenciesByFaultRate = (
       callerFilter: params.callerFilter ?? '',
       remoteFilter: params.remoteFilter,
       callerBatchesKey,
+      remoteBatchesKey,
     }),
     [
       params.startTime,
@@ -112,17 +123,23 @@ export const useTopDependenciesByFaultRate = (
       params.callerFilter,
       params.remoteFilter,
       callerBatchesKey,
+      remoteBatchesKey,
     ]
   );
   const callerBatchesRef = useRef(params.callerBatches);
   callerBatchesRef.current = params.callerBatches;
+  const remoteBatchesRef = useRef(params.remoteBatches);
+  remoteBatchesRef.current = params.remoteBatches;
+  const limiterRef = useRef(params.limiter ?? servicesPageBatchLimiter);
+  limiterRef.current = params.limiter ?? servicesPageBatchLimiter;
   const includeRef = useRef(params.include);
   includeRef.current = params.include;
   const enabled = params.enabled ?? true;
   const filtered =
     !!fetchParams.callerFilter ||
     fetchParams.remoteFilter !== undefined ||
-    !!fetchParams.callerBatchesKey;
+    !!fetchParams.callerBatchesKey ||
+    !!fetchParams.remoteBatchesKey;
 
   useEffect(() => {
     // Skip fetching if no Prometheus connection is configured
@@ -145,28 +162,44 @@ export const useTopDependenciesByFaultRate = (
 
       try {
         // Use sum_over_time query for accurate total rate calculation. One query, or one per
-        // caller batch (see `callerBatches`), merged below.
-        const runFor = (callerFilter?: string) =>
+        // caller batch (see `callerBatches`) or target batch (see `remoteBatches`), merged below.
+        const runFor = (callerFilter?: string, remoteFilter?: string) =>
           promqlSearchService.executeInstantQuery({
             query: getQueryTopDependenciesByFaultRateAvg(
               fetchParams.timeRange,
               fetchParams.queryLimit,
               callerFilter,
-              fetchParams.remoteFilter
+              remoteFilter
             ),
             time: fetchParams.endTime,
             signal: abortController.signal,
           });
-        const batches = callerBatchesRef.current ?? [];
+        const callerBatches = callerBatchesRef.current ?? [];
+        const remoteBatches = remoteBatchesRef.current ?? [];
+        const batches: Array<{ callerFilter?: string; remoteFilter?: string }> =
+          callerBatches.length > 0
+            ? callerBatches.map((c) => ({
+                callerFilter: c,
+                remoteFilter: fetchParams.remoteFilter,
+              }))
+            : remoteBatches.map((r) => ({
+                callerFilter: fetchParams.callerFilter,
+                remoteFilter: r,
+              }));
         let responses: any[];
         if (batches.length > 0) {
-          const settled = await runBatched(batches, (b) => runFor(b));
+          // All-or-nothing: the first failed batch stops the rest from being sent.
+          const settled = await runBatched(batches, (b) => runFor(b.callerFilter, b.remoteFilter), {
+            signal: abortController.signal,
+            failFast: true,
+            limiter: limiterRef.current,
+          });
           const rejected = settled.find((r) => r.status === 'rejected') as
             PromiseRejectedResult | undefined;
           if (rejected) throw rejected.reason;
           responses = settled.map((r) => (r as PromiseFulfilledResult<unknown>).value);
         } else {
-          responses = [await runFor(fetchParams.callerFilter)];
+          responses = [await runFor(fetchParams.callerFilter, fetchParams.remoteFilter)];
         }
         if (abortController.signal.aborted) return;
 
@@ -217,10 +250,12 @@ export const useTopDependenciesByFaultRate = (
           }
         });
 
-        // Sort by fault rate descending and filter out 0% rates
+        // Sort by fault rate descending and filter out 0% rates. Batched results are first cut
+        // to the top `queryLimit` overall, the same rows one unbatched topk would return.
         const sortedAndFiltered = dependencies
-          .filter((dep) => dep.faultRate > 0 && (includeRef.current?.(dep) ?? true))
           .sort((a, b) => b.faultRate - a.faultRate)
+          .slice(0, batches.length > 0 ? fetchParams.queryLimit : dependencies.length)
+          .filter((dep) => dep.faultRate > 0 && (includeRef.current?.(dep) ?? true))
           .slice(0, fetchParams.limit);
 
         setData(sortedAndFiltered);

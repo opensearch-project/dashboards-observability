@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback, useMemo, useEffect, useReducer } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useReducer, useRef } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -12,6 +12,7 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiResizableContainer,
+  EuiButton,
   EuiButtonEmpty,
   EuiLoadingSpinner,
   EuiFlexGroup,
@@ -32,10 +33,10 @@ import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_
 import { useServiceMap } from '../../shared/hooks/use_service_map';
 import { filterFocusOptions } from '../../shared/utils/focus_search_options';
 import {
-  NEIGHBORHOOD_MAX_ROUNDS,
   useFocusNeighborhood,
   useServiceMapOverview,
   useServiceMapSlices,
+  SliceRequest,
 } from '../../shared/hooks/use_service_map_slices';
 import { ServiceMapSliceFilter } from '../../query_services/query_requests/ppl_queries';
 import { useServiceMapMetrics } from '../../shared/hooks/use_service_map_metrics';
@@ -304,23 +305,37 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         : overview.nodes.filter((n) => !isDependencyType(n.KeyAttributes.Type)),
     [overview.nodes, includeDependencies]
   );
-  // Decided per time range (not re-decided while an attribute regroups the overview), so the
-  // view does not flip modes mid-load. An overview failure falls back to the whole topology.
-  const rangeId = `${parsedTimeRange.startTime.getTime()}|${parsedTimeRange.endTime.getTime()}|${refreshTrigger}|${includeDependencies}`;
-  const [largeByRange, setLargeByRange] = useState<{ rangeId: string; large: boolean } | null>(
-    null
-  );
+  // The node counts are latched per time range from the first overview that loads, so an
+  // attribute regroup (which reloads the overview) cannot flip the mode mid-session; the
+  // dependencies toggle picks between the two counts at once, without an undecided render that
+  // would refetch or blank the map. An overview failure is an error with Retry, not a fallback
+  // to the whole-topology load this mode avoids.
+  const rangeId = `${parsedTimeRange.startTime.getTime()}|${parsedTimeRange.endTime.getTime()}|${refreshTrigger}`;
+  const [sizeByRange, setSizeByRange] = useState<{
+    rangeId: string;
+    all: number;
+    services: number;
+  } | null>(null);
   useEffect(() => {
     // Undecided until the overview has loaded for this range (not while the config loads).
-    if (!overview.ready || overview.isLoading) return;
-    const large =
-      !overview.error && overviewNodesShown.length > APPLICATION_MAP_CONSTANTS.MAX_RENDERED_NODES;
-    setLargeByRange((prev) =>
-      prev?.rangeId === rangeId && prev.large === large ? prev : { rangeId, large }
+    if (!overview.ready || overview.isLoading || overview.error) return;
+    setSizeByRange((prev) =>
+      prev?.rangeId === rangeId
+        ? prev
+        : {
+            rangeId,
+            all: overview.nodes.length,
+            services: overview.nodes.filter((n) => !isDependencyType(n.KeyAttributes.Type)).length,
+          }
     );
-  }, [overview.ready, overview.isLoading, overview.error, overviewNodesShown, rangeId]);
-  const modeKnown = largeByRange?.rangeId === rangeId;
-  const isLargeMap = modeKnown && largeByRange!.large;
+  }, [overview.ready, overview.isLoading, overview.error, overview.nodes, rangeId]);
+  const latched = sizeByRange?.rangeId === rangeId ? sizeByRange : null;
+  const modeKnown = !!latched;
+  const isLargeMap =
+    !!latched &&
+    (includeDependencies ? latched.all : latched.services) >
+      APPLICATION_MAP_CONSTANTS.MAX_RENDERED_NODES;
+  const overviewFailed = !latched && !!overview.error;
 
   const full = useServiceMap({
     startTime: parsedTimeRange.startTime,
@@ -330,8 +345,11 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   });
   const nodes = isLargeMap ? overview.nodes : full.nodes;
   const edges = isLargeMap ? NO_EDGES : full.edges;
-  const mapLoading = !modeKnown || (isLargeMap ? overview.isLoading : full.isLoading);
-  const mapError = isLargeMap ? overview.error : full.error;
+  const mapLoading = overviewFailed
+    ? false
+    : !modeKnown || (isLargeMap ? overview.isLoading : full.isLoading);
+  const mapError = overviewFailed ? overview.error : isLargeMap ? overview.error : full.error;
+  const retryMap = overviewFailed || isLargeMap ? overview.retry : full.refetch;
   const availableGroupByAttributes = isLargeMap
     ? overview.availableGroupByAttributes
     : full.availableGroupByAttributes;
@@ -395,45 +413,91 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         : { kind: 'attribute', attribute, value },
     []
   );
+  // Each group's node names (dependencies included: a slice holds their connections too), for
+  // splitting a slice that reaches the 2.x bucket cap, and the groups by size.
+  const groupNames = useMemo(() => {
+    const byValue = new Map<string, Set<string>>();
+    if (isLargeMap && groupBy) {
+      overview.nodes.forEach((n) => {
+        const v = getNodeGroupValue(n, groupBy);
+        if (!v) return;
+        const names = byValue.get(v) ?? new Set<string>();
+        names.add(n.KeyAttributes.Name);
+        byValue.set(v, names);
+      });
+    }
+    return byValue;
+  }, [isLargeMap, groupBy, overview.nodes]);
+  const sliceRequest = useCallback(
+    (value: string): SliceRequest => ({
+      filter: sliceFor(groupBy ?? ENVIRONMENT_GROUP_BY, value),
+      names: Array.from(groupNames.get(value) ?? []),
+    }),
+    [groupBy, groupNames, sliceFor]
+  );
   const activeSlice = useMemo(
     () =>
       isLargeMap &&
       navigationState.level === 'groupByValue' &&
       groupBy &&
       navigationState.groupByValue
-        ? sliceFor(groupBy, navigationState.groupByValue)
+        ? sliceRequest(navigationState.groupByValue)
         : null,
-    [isLargeMap, navigationState, groupBy, sliceFor]
+    [isLargeMap, navigationState, groupBy, sliceRequest]
   );
-  const prefetchSlices = useMemo(() => {
-    if (!isLargeMap || !groupBy) return [];
-    const sizes = new Map<string, number>();
-    mapGraph.nodes.forEach((n) => {
-      const v = getNodeGroupValue(n, groupBy);
-      if (v) sizes.set(v, (sizes.get(v) ?? 0) + 1);
-    });
-    return Array.from(sizes.entries())
-      .sort((a, b) => b[1] - a[1])
-      .map(([value]) => sliceFor(groupBy, value));
-  }, [isLargeMap, groupBy, mapGraph.nodes, sliceFor]);
+  const prefetchSlices = useMemo(
+    () =>
+      Array.from(groupNames.entries())
+        .sort((a, b) => b[1].size - a[1].size)
+        .map(([value]) => sliceRequest(value)),
+    [groupNames, sliceRequest]
+  );
+  // Prefetch only where a group is likely to be opened next (the group cards or an opened
+  // group, not focused), and not for a Refresh: that reloads what is open, not every group.
+  const [refreshAtRangeChange, setRefreshAtRangeChange] = useState(refreshTrigger);
+  useEffect(() => {
+    setRefreshAtRangeChange(refreshTrigger);
+    // Only a new time range resets it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parsedTimeRange.startTime.getTime(), parsedTimeRange.endTime.getTime()]);
   const slices = useServiceMapSlices({
     startTime: parsedTimeRange.startTime,
     endTime: parsedTimeRange.endTime,
     refreshTrigger,
     enabled: isLargeMap && !mapLoading,
+    prefetchEnabled:
+      !focus &&
+      (navigationState.level === 'groupBy' || navigationState.level === 'groupByValue') &&
+      refreshTrigger === refreshAtRangeChange,
     active: activeSlice,
     prefetch: prefetchSlices,
   });
   const sliceLoading = !!activeSlice && slices.activeStatus === 'pending';
-  // What the graph draws: an opened slice on a large map, else the map.
+  const sliceFailed = !!activeSlice && slices.activeStatus === 'failed';
+  // What the graph draws: an opened slice on a large map, else the map. Slice nodes take the
+  // overview's group-by values (the slice aggregation reads only the nodes' keys).
+  const overviewById = useMemo(
+    () => new Map(overview.nodes.map((n) => [n.NodeId, n])),
+    [overview.nodes]
+  );
   const viewGraph = useMemo(() => {
     if (!activeSlice) return mapGraph;
-    const slice = slices.active ?? { nodes: [], edges: NO_EDGES };
+    const loaded = slices.active ?? { nodes: [], edges: NO_EDGES };
+    const slice = {
+      nodes: loaded.nodes.map((n) => {
+        const known = overviewById.get(n.NodeId);
+        return known
+          ? { ...n, GroupByAttributes: { ...known.GroupByAttributes, ...n.GroupByAttributes } }
+          : n;
+      }),
+      edges: loaded.edges,
+    };
     return includeDependencies ? slice : removeDependencies(slice.nodes, slice.edges);
-  }, [activeSlice, slices.active, mapGraph, includeDependencies]);
+  }, [activeSlice, slices.active, mapGraph, includeDependencies, overviewById]);
   const mapTruncated = isLargeMap
-    ? (!!activeSlice && (!!slices.active?.truncated || slices.activeStatus === 'failed')) ||
-      (!!focus && neighborhood.truncated)
+    ? overview.truncated ||
+      (!!activeSlice && !!slices.active?.truncated) ||
+      (!!focus && neighborhood.truncated && !neighborhood.error)
     : full.truncated;
 
   // Auto-select node from URL params once nodes are loaded
@@ -1006,6 +1070,8 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     () => filterFocusOptions(serviceSearchOptions, serviceSearchValue),
     [serviceSearchOptions, serviceSearchValue]
   );
+  const serviceSearchInput = useRef<HTMLInputElement | null>(null);
+  const openServiceSearch = useCallback(() => serviceSearchInput.current?.focus(), []);
   const serviceSearch = (
     <div style={{ width: 340 }}>
       <EuiComboBox
@@ -1017,6 +1083,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         // its environment header.
         async
         onSearchChange={setServiceSearchValue}
+        inputRef={(el: HTMLInputElement | null) => (serviceSearchInput.current = el)}
         singleSelection={{ asPlainText: true }}
         placeholder={i18nTexts.focus.searchPlaceholder}
         aria-label={i18nTexts.focus.searchAriaLabel}
@@ -1082,6 +1149,14 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
             <EuiPageContentBody>
               <EuiCallOut title={i18nTexts.error.title} color="danger" iconType="alert">
                 <p>{mapError.message}</p>
+                <EuiButton
+                  size="s"
+                  color="danger"
+                  onClick={retryMap}
+                  data-test-subj="mapErrorRetry"
+                >
+                  {i18nTexts.error.retryButton}
+                </EuiButton>
               </EuiCallOut>
             </EuiPageContentBody>
           </EuiPageContent>
@@ -1150,6 +1225,36 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
               </>
             )}
 
+            {/* A large map's opened group or focused neighborhood that could not be loaded. */}
+            {(sliceFailed || (isLargeMap && !!focus && !!neighborhood.error)) && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  title={
+                    sliceFailed
+                      ? i18nTexts.loadFailed.sliceTitle(navigationState.groupByValue ?? '')
+                      : neighborhood.neighborhood
+                        ? i18nTexts.loadFailed.focusPartialTitle
+                        : i18nTexts.loadFailed.focusTitle
+                  }
+                  color="danger"
+                  iconType="alert"
+                  size="s"
+                  data-test-subj="mapLoadFailedCallout"
+                >
+                  <p>{(sliceFailed ? slices.activeError : neighborhood.error)?.message}</p>
+                  <EuiButton
+                    size="s"
+                    color="danger"
+                    onClick={sliceFailed ? slices.retryActive : neighborhood.retry}
+                    data-test-subj="mapLoadFailedRetry"
+                  >
+                    {i18nTexts.error.retryButton}
+                  </EuiButton>
+                </EuiCallOut>
+              </>
+            )}
+
             {/* Metrics that could not be loaded: unavailable on the map, with a retry. */}
             {(failedNodeIds.size > 0 || (showsGroupTotals && groupTotalsFailed)) && (
               <>
@@ -1205,26 +1310,33 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="s">
-                        {focusGraph.totalConnected > focusGraph.nodes.length - 1
-                          ? // A hub's connections are capped (FOCUS_MAX_NODES), nearest first.
-                            i18nTexts.focus.labelCapped(
+                        {isLargeMap && neighborhood.capped
+                          ? // Expansion stopped at FOCUS_MAX_NODES: the total is unknown.
+                            i18nTexts.focus.labelCappedOpen(
                               focusNode?.Name ?? '',
                               focusNode?.KeyAttributes.Environment ?? '',
-                              focusGraph.nodes.length - 1,
-                              focusGraph.totalConnected
+                              focusGraph.nodes.length - 1
                             )
-                          : isLargeMap && neighborhood.pathCut
-                            ? i18nTexts.focus.labelPathCut(
+                          : focusGraph.totalConnected > focusGraph.nodes.length - 1
+                            ? // A hub's connections are capped (FOCUS_MAX_NODES), nearest first.
+                              i18nTexts.focus.labelCapped(
                                 focusNode?.Name ?? '',
                                 focusNode?.KeyAttributes.Environment ?? '',
                                 focusGraph.nodes.length - 1,
-                                NEIGHBORHOOD_MAX_ROUNDS
+                                focusGraph.totalConnected
                               )
-                            : i18nTexts.focus.label(
-                                focusNode?.Name ?? '',
-                                focusNode?.KeyAttributes.Environment ?? '',
-                                focusGraph.nodes.length - 1
-                              )}
+                            : isLargeMap && neighborhood.pathCut
+                              ? i18nTexts.focus.labelPathCut(
+                                  focusNode?.Name ?? '',
+                                  focusNode?.KeyAttributes.Environment ?? '',
+                                  focusGraph.nodes.length - 1,
+                                  APPLICATION_MAP_CONSTANTS.FOCUS_MAX_HOPS
+                                )
+                              : i18nTexts.focus.label(
+                                  focusNode?.Name ?? '',
+                                  focusNode?.KeyAttributes.Environment ?? '',
+                                  focusGraph.nodes.length - 1
+                                )}
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -1290,6 +1402,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                     style={{ padding: '8px 0px 0px 8px' }}
                   >
                     <ServiceMapGraph
+                      onFocusServiceSearch={openServiceSearch}
                       nodes={focusGraph ? focusGraph.nodes : viewGraph.nodes}
                       edges={focusGraph ? focusGraph.edges : viewGraph.edges}
                       stackDependencies={!showDependenciesIndividually}

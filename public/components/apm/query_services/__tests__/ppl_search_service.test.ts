@@ -42,10 +42,23 @@ jest.mock('../query_requests/ppl_queries', () => ({
   getQueryListServiceDependencies: jest.fn(() => 'source = index | where remote'),
   getQueryGetServiceMap: jest.fn(() => 'source = index | fields service, remote'),
   getQueryDistinctEdgeCount: jest.fn(() => 'COUNT'),
-  getQueryServiceMapNodes: jest.fn((_i: string, side: string) => `NODES ${side}`),
-  getQueryGroupByAttributeSample: jest.fn(() => 'SAMPLE'),
+  getQueryServiceMapEnvironmentSizes: jest.fn((_i: string, side: string) => `SIZES ${side}`),
+  getQueryServiceMapNodes: jest.fn(
+    (_i: string, side: string, _s: unknown, _e: unknown, _a: unknown, envs?: unknown[]) =>
+      `NODES ${side}${envs ? ` ${JSON.stringify(envs)}` : ''}`
+  ),
+  getQueryServiceMapFields: jest.fn(() => 'FIELDS'),
   getQueryServiceMapSlice: jest.fn(() => 'SLICE'),
-  getQuerySliceDistinctEdgeCount: jest.fn(() => 'COUNT'),
+  getQuerySliceDistinctEdgeCount: jest.fn(() => 'SLICE COUNT'),
+  getQueryServiceMapSliceEdges: jest.fn(
+    (
+      _i: string,
+      _f: unknown,
+      _s: unknown,
+      _e: unknown,
+      chunk?: { side: string; names: string[] }
+    ) => (chunk ? `EDGES ${chunk.side} ${chunk.names.join(',')}` : 'EDGES')
+  ),
 }));
 
 import { coreRefs } from '../../../../framework/core_refs';
@@ -53,8 +66,9 @@ import { ResponseProcessor } from '../query_requests/response_processor';
 import {
   getQueryGetServiceMap,
   getQueryServiceMapNodes,
-  getQueryServiceMapSlice,
+  getQueryServiceMapSliceEdges,
 } from '../query_requests/ppl_queries';
+import { groupByAttributeKeys, isShortOfCount, packEnvironments } from '../ppl_search_service';
 
 describe('PPLSearchService', () => {
   let service: PPLSearchService;
@@ -299,9 +313,11 @@ describe('PPLSearchService', () => {
       expect(result.truncated).toBe(true);
     });
 
-    it('allows for the approximate count, and ignores a failed count', async () => {
-      routePosts([page(['a', 'b']), page(['c'])], 3.05);
+    it('matches an exact count, and ignores a failed count', async () => {
+      routePosts([page(['a', 'b']), page(['c'])], 3);
       expect((await service.getServiceMap(params)).truncated).toBe(false);
+      routePosts([page(['a', 'b']), page(['c'])], 4);
+      expect((await service.getServiceMap(params)).truncated).toBe(true);
       routePosts([page(['a', 'b']), page(['c'])], new Error('no stats'));
       expect((await service.getServiceMap(params)).truncated).toBe(false);
     });
@@ -470,35 +486,46 @@ describe('PPLSearchService', () => {
       dataset: mockDataset,
     };
     const post = () => coreRefs.http!.post as jest.Mock;
-    const respond = (byQuery: Record<string, Array<Record<string, unknown>>>) =>
+    const asResponse = (rows: Array<Record<string, unknown>>) => {
+      const names = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
+      return {
+        body: {
+          fields: names.map((name) => ({ name, values: rows.map((r) => r[name]) })),
+          size: rows.length,
+        },
+      };
+    };
+    const respond = (byQuery: Record<string, Array<Record<string, unknown>> | Error>) =>
       post().mockImplementation((_url: string, opts: { body: string }) => {
         const rows = byQuery[JSON.parse(opts.body).query.query] ?? [];
-        const names = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
-        return Promise.resolve({
-          body: {
-            fields: names.map((name) => ({ name, values: rows.map((r) => r[name]) })),
-            size: rows.length,
-          },
-        });
+        return rows instanceof Error ? Promise.reject(rows) : Promise.resolve(asResponse(rows));
       });
+    const sent = () => post().mock.calls.map((c) => JSON.parse(c[1].body).query.query as string);
+    const nodeRow = (side: string, env: string | null, name: string, extra = {}) => ({
+      [`${side}Node.keyAttributes.environment`]: env,
+      [`${side}Node.keyAttributes.name`]: name,
+      [`${side}Node.type`]: 'Service',
+      ...extra,
+    });
+    const rows = (n: number, side = 'source', env = 'dev') =>
+      Array.from({ length: n }, (_, i) => nodeRow(side, env, `s${i}`));
+    const transformRows = () =>
+      (ResponseProcessor.transformGetServiceMap as jest.Mock).mock.calls[0][0].jsonData;
 
-    it('builds the overview from the node-list aggregations, with the connection count', async () => {
+    it('builds the overview from one node list per side and the mapping, attribute nested', async () => {
       respond({
         'NODES source': [
-          {
-            'sourceNode.keyAttributes.environment': 'dev',
-            'sourceNode.keyAttributes.name': 'a',
-            'sourceNode.type': 'Service',
-            'sourceNode.groupByAttributes.team.name': 'pay',
-          },
+          nodeRow('source', 'dev', 'a', { 'sourceNode.groupByAttributes.team.name': 'pay' }),
         ],
         'NODES target': [
-          {
-            'targetNode.keyAttributes.environment': 'dev',
-            'targetNode.keyAttributes.name': 'db',
-            'targetNode.type': 'AWS::DynamoDB',
-            'targetNode.groupByAttributes.team.name': null,
-          },
+          nodeRow('target', 'dev', 'db', { 'targetNode.groupByAttributes.team.name': null }),
+        ],
+        FIELDS: [
+          { COLUMN_NAME: 'sourceNode.groupByAttributes' },
+          { COLUMN_NAME: 'sourceNode.groupByAttributes.team' },
+          { COLUMN_NAME: 'sourceNode.groupByAttributes.team.name' },
+          { COLUMN_NAME: 'targetNode.groupByAttributes.k8s-namespace' },
+          { COLUMN_NAME: 'timestamp' },
         ],
       });
 
@@ -507,21 +534,16 @@ describe('PPLSearchService', () => {
         groupByAttribute: 'team.name',
       } as any);
 
+      expect(sent().sort()).toEqual(['FIELDS', 'NODES source', 'NODES target']);
       expect(getQueryServiceMapNodes).toHaveBeenCalledWith(
         'test-index',
         'source',
         1000,
         2000,
-        'team.name'
+        'team.name',
+        undefined
       );
-      expect(
-        post()
-          .mock.calls.map((c) => JSON.parse(c[1].body).query.query)
-          .sort()
-      ).toEqual(['NODES source', 'NODES target', 'SAMPLE']);
-      const rows = (ResponseProcessor.transformGetServiceMap as jest.Mock).mock.calls[0][0]
-        .jsonData;
-      expect(rows).toEqual([
+      expect(transformRows()).toEqual([
         {
           'sourceNode.keyAttributes': { name: 'a', environment: 'dev' },
           'sourceNode.type': 'Service',
@@ -529,26 +551,190 @@ describe('PPLSearchService', () => {
         },
         {
           'targetNode.keyAttributes': { name: 'db', environment: 'dev' },
-          'targetNode.type': 'AWS::DynamoDB',
+          'targetNode.type': 'Service',
           'targetNode.groupByAttributes': {},
         },
       ]);
+      expect(result.AvailableGroupByAttributes).toEqual({ 'k8s-namespace': [], 'team.name': [] });
+      expect(result.truncated).toBe(false);
     });
 
-    it('returns no nodes for an empty range', async () => {
-      respond({});
+    it('a node list larger than the bucket cap (3.x) is complete as is', async () => {
+      respond({ 'NODES source': rows(2500) });
       const result = await service.getServiceMapOverview(params as any);
-      expect(result.Nodes).toEqual([]);
+      expect(sent()).not.toContain('SIZES source');
+      expect(transformRows()).toHaveLength(2500);
+      expect(result.truncated).toBe(false);
     });
 
-    it('pages a slice with its filter and reports truncation from the slice count', async () => {
-      respond({ SLICE: [{ 'sourceNode.keyAttributes': 'a' }], COUNT: [{ edges: 50 }] });
-      const filter = { kind: 'environment', environment: 'dev' } as const;
+    it('a node list at the 2.x bucket cap is re-read in environment batches under it', async () => {
+      respond({
+        'NODES source': rows(1000),
+        'SIZES source': [
+          { 'sourceNode.keyAttributes.environment': 'big', nodes: 700 },
+          { 'sourceNode.keyAttributes.environment': 'mid', nodes: 300 },
+          { 'sourceNode.keyAttributes.environment': 'small', nodes: 90 },
+          { 'sourceNode.keyAttributes.environment': null, nodes: 5 },
+        ],
+        'NODES source ["big"]': rows(700, 'source', 'big'),
+        'NODES source ["mid","small",null]': rows(395, 'source', 'mid'),
+      });
 
+      const result = await service.getServiceMapOverview(params as any);
+
+      expect(
+        sent()
+          .filter((q) => q.startsWith('NODES source '))
+          .sort()
+      ).toEqual(['NODES source ["big"]', 'NODES source ["mid","small",null]']);
+      expect(transformRows()).toHaveLength(1095);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('flags the overview when a batch (one environment over the cap, on 2.x) still hits it', async () => {
+      respond({
+        'NODES source': rows(1000),
+        'SIZES source': [{ 'sourceNode.keyAttributes.environment': 'huge', nodes: 1500 }],
+        'NODES source ["huge"]': rows(1000, 'source', 'huge'),
+      });
+      expect((await service.getServiceMapOverview(params as any)).truncated).toBe(true);
+    });
+
+    it('fails the overview when a node list fails', async () => {
+      respond({ 'NODES target': new Error('timed out') });
+      await expect(service.getServiceMapOverview(params as any)).rejects.toThrow('timed out');
+    });
+
+    const edgeRow = (src: string, dst: string | null) => ({
+      'sourceNode.keyAttributes.environment': 'dev',
+      'sourceNode.keyAttributes.name': src,
+      'sourceNode.type': 'Service',
+      'targetNode.keyAttributes.environment': dst ? 'dev' : null,
+      'targetNode.keyAttributes.name': dst,
+      'targetNode.type': dst ? 'Service' : null,
+    });
+    const edgeRows = (n: number) => Array.from({ length: n }, (_, i) => edgeRow(`a${i}`, 'b'));
+    const filter = { kind: 'environment', environment: 'dev' } as const;
+
+    it('reads a slice with the paged dedup when it is complete (3.x)', async () => {
+      respond({
+        SLICE: [{ 'sourceNode.keyAttributes': { name: 'a', environment: 'dev' } }],
+        'SLICE COUNT': [{ edges: 1 }],
+      });
       const result = await service.getServiceMapSlice(params as any, filter);
+      expect(sent().sort()).toEqual(['SLICE', 'SLICE COUNT']);
+      expect(result.truncated).toBe(false);
+    });
 
-      expect(getQueryServiceMapSlice).toHaveBeenCalledWith('test-index', filter, 1000, 2000, 0);
-      expect(result.truncated).toBe(true);
+    it('re-reads a slice as an aggregation when the dedup comes back short (2.x)', async () => {
+      respond({
+        SLICE: [{ 'sourceNode.keyAttributes': { name: 'a', environment: 'dev' } }],
+        'SLICE COUNT': [{ edges: 40 }],
+        EDGES: [edgeRow('a', 'b')],
+      });
+      const result = await service.getServiceMapSlice(params as any, filter, undefined, ['a']);
+      expect(sent()).toContain('EDGES');
+      expect(result.truncated).toBe(false);
+    });
+
+    it('aggregates a slice as service-map rows (leaf rows without a target)', async () => {
+      respond({ EDGES: [edgeRow('a', 'b'), edgeRow('c', null)] });
+
+      const result = await service.getServiceMapSliceAggregated(params as any, filter);
+
+      expect(getQueryServiceMapSliceEdges).toHaveBeenCalledWith(
+        'test-index',
+        filter,
+        1000,
+        2000,
+        undefined
+      );
+      expect(transformRows()).toEqual([
+        {
+          'sourceNode.keyAttributes': { name: 'a', environment: 'dev' },
+          'sourceNode.type': 'Service',
+          'sourceNode.groupByAttributes': {},
+          'targetNode.keyAttributes': { name: 'b', environment: 'dev' },
+          'targetNode.type': 'Service',
+          'targetNode.groupByAttributes': {},
+        },
+        {
+          'sourceNode.keyAttributes': { name: 'c', environment: 'dev' },
+          'sourceNode.type': 'Service',
+          'sourceNode.groupByAttributes': {},
+        },
+      ]);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('splits a slice at the bucket cap into name chunks per side', async () => {
+      const names = Array.from({ length: 150 }, (_, i) => `n${i}`);
+      const first = names.slice(0, 100).join(',');
+      const second = names.slice(100).join(',');
+      respond({
+        EDGES: edgeRows(1000),
+        [`EDGES source ${first}`]: edgeRows(600),
+        [`EDGES target ${first}`]: edgeRows(10),
+        [`EDGES source ${second}`]: edgeRows(400),
+        [`EDGES target ${second}`]: [],
+      });
+
+      const result = await service.getServiceMapSliceAggregated(
+        params as any,
+        filter,
+        undefined,
+        names
+      );
+
+      expect(sent().filter((q) => q !== 'EDGES')).toHaveLength(4);
+      expect(transformRows()).toHaveLength(1010);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('marks a slice truncated at the cap without names to split by, or when a chunk hits it', async () => {
+      respond({ EDGES: edgeRows(1000) });
+      expect((await service.getServiceMapSliceAggregated(params as any, filter)).truncated).toBe(
+        true
+      );
+
+      respond({ EDGES: edgeRows(1000), 'EDGES source a': edgeRows(1000), 'EDGES target a': [] });
+      expect(
+        (await service.getServiceMapSliceAggregated(params as any, filter, undefined, ['a']))
+          .truncated
+      ).toBe(true);
+    });
+  });
+
+  describe('large-map helpers', () => {
+    it('isShortOfCount: exact below the cardinality threshold, a margin above it', () => {
+      expect(isShortOfCount(1999, 2000)).toBe(true);
+      expect(isShortOfCount(2000, 2000)).toBe(false);
+      expect(isShortOfCount(9800, 10000)).toBe(false);
+      expect(isShortOfCount(9000, 10000)).toBe(true);
+      expect(isShortOfCount(5, NaN)).toBe(false);
+    });
+
+    it('packEnvironments: largest first, under the batch size, big ones alone', () => {
+      expect(
+        packEnvironments([
+          { environment: 'a', nodes: 100 },
+          { environment: 'b', nodes: 900 },
+          { environment: 'c', nodes: 700 },
+          { environment: null, nodes: 50 },
+        ])
+      ).toEqual([['b'], ['c', 'a'], [null]]);
+      expect(packEnvironments([])).toEqual([]);
+    });
+
+    it('groupByAttributeKeys: leaf attribute fields of either side', () => {
+      expect(
+        groupByAttributeKeys([
+          'sourceNode.groupByAttributes.telemetry',
+          'sourceNode.groupByAttributes.telemetry.sdk.language',
+          'targetNode.groupByAttributes.telemetry.sdk.language',
+          'sourceNode.keyAttributes.name',
+        ])
+      ).toEqual({ 'telemetry.sdk.language': [] });
     });
   });
 });

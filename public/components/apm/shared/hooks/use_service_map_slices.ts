@@ -9,6 +9,7 @@ import { ServiceMapSliceFilter } from '../../query_services/query_requests/ppl_q
 import { useApmConfig } from '../../config/apm_config_context';
 import { DatasetConfig } from '../../common/types/apm_types';
 import { FocusMode, ServiceMapEdge, ServiceMapNode } from '../../common/types/service_map_types';
+import { APPLICATION_MAP_CONSTANTS } from '../../common/constants';
 import { getNeighborhood, Neighborhood } from '../utils/map_focus';
 
 /** A topology: nodes and the connections among them. */
@@ -22,6 +23,15 @@ interface Range {
   endTime: Date;
   refreshTrigger?: number;
 }
+
+/** Service-map rows as the PPL search service returns them. */
+interface ServiceMapResult {
+  Nodes?: ServiceMapNode[];
+  Edges?: ServiceMapEdge[];
+  truncated?: boolean;
+}
+
+const toError = (err: unknown) => (err instanceof Error ? err : new Error('Unknown error'));
 
 /** The service-map dataset from the APM config, shared by the large-map hooks. */
 function useServiceMapDataset() {
@@ -39,11 +49,13 @@ function useServiceMapDataset() {
         : undefined,
     [ds]
   );
-  return { queryIndex, dataset };
+  // The data source and dataset ids too: the same index name on another cluster is other data.
+  const datasetKey = `${dataset?.dataSource?.id ?? ''}|${dataset?.id ?? ''}|${queryIndex}`;
+  return { queryIndex, dataset, datasetKey };
 }
 
-const rangeKey = (r: Range, queryIndex: string) =>
-  `${queryIndex}|${r.startTime.getTime()}|${r.endTime.getTime()}|${r.refreshTrigger ?? 0}`;
+const rangeKey = (r: Range, datasetKey: string) =>
+  `${datasetKey}|${r.startTime.getTime()}|${r.endTime.getTime()}|${r.refreshTrigger ?? 0}`;
 
 /** Merge topologies, keying connections by their ends (edge ids are per response). */
 export function mergeGraphs(graphs: MapGraph[]): MapGraph {
@@ -61,6 +73,18 @@ export function mergeGraphs(graphs: MapGraph[]): MapGraph {
   return { nodes: Array.from(nodes.values()), edges: Array.from(edges.values()) };
 }
 
+/** Whether the page is visible (background prefetch pauses while it isn't). */
+function usePageVisible(): boolean {
+  const [visible, setVisible] = useState(() => typeof document === 'undefined' || !document.hidden);
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const onChange = () => setVisible(!document.hidden);
+    document.addEventListener('visibilitychange', onChange);
+    return () => document.removeEventListener('visibilitychange', onChange);
+  }, []);
+  return visible;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Overview
 // ---------------------------------------------------------------------------------------------
@@ -70,25 +94,28 @@ export interface UseServiceMapOverviewResult {
   ready: boolean;
   nodes: ServiceMapNode[];
   availableGroupByAttributes: Record<string, string[]>;
+  /** A node-list aggregation may have been cut (see getServiceMapOverview). */
+  truncated: boolean;
   isLoading: boolean;
   error: Error | null;
+  retry: () => void;
 }
 
 /**
- * Every node of the map, from aggregations (seconds even on long
- * ranges, no row cap), without reading the topology. `groupByAttribute` adds that attribute's
- * value to the nodes (for grouping by it).
+ * Every node of the map, from aggregations (seconds even on long ranges), without reading the
+ * topology. `groupByAttribute` adds that attribute's value to the nodes (for grouping by it).
  */
 export function useServiceMapOverview(
   params: Range & { groupByAttribute?: string | null }
 ): UseServiceMapOverviewResult {
-  const { queryIndex, dataset } = useServiceMapDataset();
+  const { queryIndex, dataset, datasetKey } = useServiceMapDataset();
   const service = useMemo(() => new PPLSearchService(), []);
   const attribute = params.groupByAttribute || undefined;
-  const key = `${rangeKey(params, queryIndex)}|${attribute ?? ''}`;
+  const [attempt, setAttempt] = useState(0);
+  const key = `${rangeKey(params, datasetKey)}|${attribute ?? ''}|${attempt}`;
   const [state, setState] = useState<{
     key: string;
-    result: Omit<UseServiceMapOverviewResult, 'isLoading' | 'error' | 'ready'> | null;
+    result: { nodes: ServiceMapNode[]; attributes: Record<string, string[]>; truncated: boolean };
     error: Error | null;
   } | null>(null);
 
@@ -112,7 +139,8 @@ export function useServiceMapOverview(
           key,
           result: {
             nodes: r.Nodes,
-            availableGroupByAttributes: r.AvailableGroupByAttributes,
+            attributes: r.AvailableGroupByAttributes,
+            truncated: r.truncated,
           },
           error: null,
         });
@@ -123,22 +151,25 @@ export function useServiceMapOverview(
         console.error('[useServiceMapOverview] Error:', err);
         setState({
           key,
-          result: null,
-          error: err instanceof Error ? err : new Error('Unknown error'),
+          result: { nodes: [], attributes: {}, truncated: false },
+          error: toError(err),
         });
       });
     return () => controller.abort();
-    // `key` covers the range, index and attribute.
+    // `key` covers the range, dataset, attribute and retries.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, dataset, service]);
 
+  const retry = useCallback(() => setAttempt((a) => a + 1), []);
   const current = state?.key === key ? state : null;
   return {
     ready: !!queryIndex && !!dataset,
-    nodes: current?.result?.nodes ?? [],
-    availableGroupByAttributes: current?.result?.availableGroupByAttributes ?? {},
+    nodes: current?.result.nodes ?? [],
+    availableGroupByAttributes: current?.result.attributes ?? {},
+    truncated: current?.result.truncated ?? false,
     isLoading: !!queryIndex && !!dataset && !current,
     error: current?.error ?? null,
+    retry,
   };
 }
 
@@ -150,6 +181,11 @@ export type SliceStatus = 'pending' | 'done' | 'failed';
 export interface SliceResult extends MapGraph {
   truncated: boolean;
 }
+/** A slice to load: its filter, and its nodes' names (to split it if it reaches the cap). */
+export interface SliceRequest {
+  filter: ServiceMapSliceFilter;
+  names?: string[];
+}
 
 export const sliceKey = (filter: ServiceMapSliceFilter): string => JSON.stringify(filter);
 
@@ -157,129 +193,163 @@ export interface UseServiceMapSlicesResult {
   /** The active slice's topology, once loaded. */
   active: SliceResult | null;
   activeStatus: SliceStatus | null;
-  /** Status per slice key (active and prefetched). */
-  status: Map<string, SliceStatus>;
+  activeError: Error | null;
+  /** Load the active slice again after a failure. */
+  retryActive: () => void;
 }
 
 /**
- * Exact topologies of large-map slices, one request at a time per time range: the `active`
- * slice first, then `prefetch` (most important first) in the background, so opening one is often
- * instant. Results are kept for the time range; a new range aborts and starts over.
+ * Exact topologies of large-map slices, kept for the time range (a new range or data source
+ * drops them and aborts). The `active` slice loads at once, in its own slot. `prefetch` (most
+ * important first, at most PREFETCH_MAX_SLICES) loads one at a time behind it while enabled,
+ * `prefetchEnabled` and the page is visible; the queue follows the current list, so slices no
+ * longer listed (e.g. after switching Group by) are dropped. A failed prefetch is tried again
+ * when opened; a failed opened slice waits for `retryActive`.
  */
 export function useServiceMapSlices(
   params: Range & {
     enabled: boolean;
-    active: ServiceMapSliceFilter | null;
-    prefetch: ServiceMapSliceFilter[];
+    prefetchEnabled: boolean;
+    active: SliceRequest | null;
+    prefetch: SliceRequest[];
   }
 ): UseServiceMapSlicesResult {
-  const { queryIndex, dataset } = useServiceMapDataset();
+  const { queryIndex, dataset, datasetKey } = useServiceMapDataset();
   const service = useMemo(() => new PPLSearchService(), []);
-  const gen = rangeKey(params, queryIndex);
+  const visible = usePageVisible();
+  const gen = rangeKey(params, datasetKey);
   const [results, setResults] = useState<{
     gen: string;
     slices: Map<string, SliceResult>;
-    status: Map<string, SliceStatus>;
+    status: Map<string, { status: SliceStatus; error?: Error }>;
   }>({ gen, slices: new Map(), status: new Map() });
-  const queue = useRef<{
+  // Per generation: the abort for everything, the slices in flight, the prefetch queue.
+  const run = useRef<{
     gen: string;
     controller: AbortController;
-    pending: ServiceMapSliceFilter[];
-    requested: Set<string>;
-    running: boolean;
+    inFlight: Set<string>;
+    settled: Set<string>;
+    queue: SliceRequest[];
+    prefetching: boolean;
   } | null>(null);
 
-  // New time range: drop everything and abort.
   useEffect(() => {
     const controller = new AbortController();
-    queue.current = { gen, controller, pending: [], requested: new Set(), running: false };
+    run.current = {
+      gen,
+      controller,
+      inFlight: new Set(),
+      settled: new Set(),
+      queue: [],
+      prefetching: false,
+    };
     setResults({ gen, slices: new Map(), status: new Map() });
     return () => controller.abort();
   }, [gen]);
 
-  const pump = useCallback(() => {
-    const q = queue.current;
-    if (!q || q.running || q.controller.signal.aborted || !dataset) return;
-    const next = q.pending.shift();
-    if (!next) return;
-    q.running = true;
-    const key = sliceKey(next);
-    setResults((prev) =>
-      prev.gen !== q.gen ? prev : { ...prev, status: new Map(prev.status).set(key, 'pending') }
-    );
-    service
-      .getServiceMapSlice(
-        { queryIndex, startTime: params.startTime, endTime: params.endTime, dataset } as any,
-        next,
-        q.controller.signal
-      )
-      .then(
-        (r: any) => {
-          if (q.controller.signal.aborted) return;
-          setResults((prev) =>
-            prev.gen !== q.gen
-              ? prev
-              : {
-                  ...prev,
-                  slices: new Map(prev.slices).set(key, {
-                    nodes: r.Nodes ?? [],
-                    edges: r.Edges ?? [],
-                    truncated: !!r.truncated,
-                  }),
-                  status: new Map(prev.status).set(key, 'done'),
-                }
-          );
-        },
-        (err: unknown) => {
-          if (q.controller.signal.aborted) return;
+  const load = useCallback(
+    (request: SliceRequest, opened: boolean): Promise<void> => {
+      const r = run.current;
+      if (!r || !dataset) return Promise.resolve();
+      const key = sliceKey(request.filter);
+      r.inFlight.add(key);
+      const setStatus = (status: SliceStatus, extra?: Partial<SliceResult>, error?: Error) =>
+        setResults((prev) => {
+          if (prev.gen !== r.gen) return prev;
+          const slices = extra ? new Map(prev.slices).set(key, extra as SliceResult) : prev.slices;
+          return { ...prev, slices, status: new Map(prev.status).set(key, { status, error }) };
+        });
+      setStatus('pending');
+      return service
+        .getServiceMapSlice(
+          { queryIndex, startTime: params.startTime, endTime: params.endTime, dataset } as any,
+          request.filter,
+          r.controller.signal,
+          request.names
+        )
+        .then(
+          (res: ServiceMapResult) => {
+            if (r.controller.signal.aborted) return;
+            r.settled.add(key);
+            setStatus('done', {
+              nodes: res.Nodes ?? [],
+              edges: res.Edges ?? [],
+              truncated: !!res.truncated,
+            });
+          },
+          (err: unknown) => {
+            if (r.controller.signal.aborted) return;
 
-          console.error('[useServiceMapSlices] Slice failed:', err);
-          setResults((prev) =>
-            prev.gen !== q.gen ? prev : { ...prev, status: new Map(prev.status).set(key, 'failed') }
-          );
-        }
-      )
-      .finally(() => {
-        q.running = false;
-        pump();
-      });
-    // Range params are read through `gen` (the queue is per generation).
+            console.error('[useServiceMapSlices] Slice failed:', err);
+            // An opened slice waits for Retry; a failed prefetch is tried again when opened.
+            if (opened) r.settled.add(key);
+            setStatus('failed', undefined, toError(err));
+          }
+        )
+        .finally(() => r.inFlight.delete(key));
+    },
+    // Range params are read through `gen` (one run per generation).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataset, queryIndex, service, gen]);
+    [dataset, queryIndex, service, gen]
+  );
 
-  const activeKey = params.active ? sliceKey(params.active) : null;
-  const prefetchKey = params.prefetch.map(sliceKey).join('&');
+  // The active slice: right away, in its own slot (not behind a running prefetch).
+  const activeKey = params.active ? sliceKey(params.active.filter) : null;
+  const [activeAttempt, setActiveAttempt] = useState(0);
+  const activeRequest = useRef(params.active);
+  activeRequest.current = params.active;
   useEffect(() => {
-    const q = queue.current;
-    if (!params.enabled || !q || q.gen !== gen) return;
-    // The active slice goes to the front: newly, or moved up if it is still waiting.
-    if (params.active) {
-      const key = sliceKey(params.active);
-      if (!q.requested.has(key)) {
-        q.requested.add(key);
-        q.pending.unshift(params.active);
-      } else {
-        const i = q.pending.findIndex((f) => sliceKey(f) === key);
-        if (i > 0) q.pending.unshift(...q.pending.splice(i, 1));
-      }
-    }
-    // Prefetch behind it, each slice once.
-    params.prefetch.forEach((f) => {
-      const key = sliceKey(f);
-      if (q.requested.has(key)) return;
-      q.requested.add(key);
-      q.pending.push(f);
+    const r = run.current;
+    const request = activeRequest.current;
+    if (!params.enabled || !r || r.gen !== gen || !request || !activeKey) return;
+    if (r.inFlight.has(activeKey) || r.settled.has(activeKey)) return;
+    load(request, true);
+  }, [gen, params.enabled, activeKey, activeAttempt, load]);
+
+  const retryActive = useCallback(() => {
+    const r = run.current;
+    if (!r || !activeKey) return;
+    r.settled.delete(activeKey);
+    setActiveAttempt((a) => a + 1);
+  }, [activeKey]);
+
+  // Prefetch: the queue is rebuilt from the current list, and runs one at a time while allowed.
+  const prefetchKey = params.prefetch.map((p) => sliceKey(p.filter)).join('&');
+  const prefetchRequests = useRef(params.prefetch);
+  prefetchRequests.current = params.prefetch;
+  const allowed = params.enabled && params.prefetchEnabled && visible;
+  const allowedRef = useRef(allowed);
+  allowedRef.current = allowed;
+  const pump = useCallback(() => {
+    const r = run.current;
+    if (!r || r.prefetching || r.controller.signal.aborted || !allowedRef.current) return;
+    const next = r.queue.shift();
+    if (!next) return;
+    r.prefetching = true;
+    load(next, false).finally(() => {
+      r.prefetching = false;
+      pump();
     });
-    pump();
-    // `activeKey` / `prefetchKey` stand for the filters.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gen, params.enabled, activeKey, prefetchKey, pump]);
+  }, [load]);
+  useEffect(() => {
+    const r = run.current;
+    if (!r || r.gen !== gen) return;
+    r.queue = prefetchRequests.current
+      .slice(0, APPLICATION_MAP_CONSTANTS.PREFETCH_MAX_SLICES)
+      .filter((p) => {
+        const key = sliceKey(p.filter);
+        return !r.inFlight.has(key) && !r.settled.has(key);
+      });
+    if (allowed) pump();
+  }, [gen, allowed, prefetchKey, pump]);
 
   const current = results.gen === gen ? results : null;
+  const status = activeKey ? current?.status.get(activeKey) : undefined;
   return {
     active: activeKey ? (current?.slices.get(activeKey) ?? null) : null,
-    activeStatus: activeKey ? (current?.status.get(activeKey) ?? 'pending') : null,
-    status: current?.status ?? new Map(),
+    activeStatus: activeKey ? (status?.status ?? 'pending') : null,
+    activeError: status?.error ?? null,
+    retryActive,
   };
 }
 
@@ -287,26 +357,30 @@ export function useServiceMapSlices(
 // Focus neighborhood
 // ---------------------------------------------------------------------------------------------
 
-const NEIGHBORHOOD_NAME_CHUNK = 100;
-/** Hops a Full call path follows on a large map (one query round per hop). */
-export const NEIGHBORHOOD_MAX_ROUNDS = 12;
-
 export interface UseFocusNeighborhoodResult {
+  /** The neighborhood found (from the rounds that completed, if a later one failed). */
   neighborhood: Neighborhood | null;
   isLoading: boolean;
-  /** A query came back partial (the connections of some names were cut). */
+  /** Part of it is missing: a query came back at the bucket cap, or a round failed. */
   truncated: boolean;
-  /** The call path continues beyond NEIGHBORHOOD_MAX_ROUNDS hops (not shown). */
+  /** The call path continues beyond FOCUS_MAX_HOPS hops (not shown). */
   pathCut: boolean;
+  /**
+   * Expansion stopped at FOCUS_MAX_NODES, so `neighborhood.totalConnected` counts the nodes
+   * found so far, not all of them.
+   */
+  capped: boolean;
   error: Error | null;
+  retry: () => void;
 }
 
 /**
  * A focused service's neighborhood on a large map, fetched directly instead of from a loaded
- * topology: the connections of the center (Direct connections), expanded round by round along
- * the call path (Full call path) until it is complete, reaches FOCUS_MAX_NODES, or runs out of
- * rounds (NEIGHBORHOOD_MAX_ROUNDS hops; reported as `pathCut`). Each round
- * queries the connections of the newly reached names only.
+ * topology: the connections of the center (Direct connections), then for Full call path one
+ * round per hop along call direction: the callees of the newly reached downstream nodes
+ * (`source` in the frontier) and the callers of the newly reached upstream ones (`target` in
+ * the frontier), so a shared database's other callers are not pulled in. Stops when the path
+ * is complete, reaches FOCUS_MAX_NODES (`capped`) or FOCUS_MAX_HOPS (`pathCut`).
  */
 export function useFocusNeighborhood(
   params: Range & {
@@ -315,14 +389,18 @@ export function useFocusNeighborhood(
     mode: FocusMode;
   }
 ): UseFocusNeighborhoodResult {
-  const { queryIndex, dataset } = useServiceMapDataset();
+  const { queryIndex, dataset, datasetKey } = useServiceMapDataset();
   const service = useMemo(() => new PPLSearchService(), []);
-  const key = `${rangeKey(params, queryIndex)}|${params.center?.nodeId ?? ''}|${params.mode}`;
+  const [attempt, setAttempt] = useState(0);
+  const key = `${rangeKey(params, datasetKey)}|${params.center?.nodeId ?? ''}|${
+    params.mode
+  }|${attempt}`;
   const [state, setState] = useState<{
     key: string;
     neighborhood: Neighborhood | null;
     truncated: boolean;
     pathCut: boolean;
+    capped: boolean;
     error: Error | null;
   } | null>(null);
 
@@ -330,79 +408,121 @@ export function useFocusNeighborhood(
     if (!params.enabled || !params.center || !queryIndex || !dataset) return;
     const controller = new AbortController();
     const center = params.center;
+    const mode = params.mode;
     const base = {
       queryIndex,
       startTime: params.startTime,
       endTime: params.endTime,
       dataset,
     } as any;
-    (async () => {
-      let graph: MapGraph = { nodes: [], edges: [] };
-      let truncated = false;
-      const fetched = new Set<string>();
-      let toFetch = [center.name];
-      for (let round = 0; round < NEIGHBORHOOD_MAX_ROUNDS && toFetch.length > 0; round++) {
-        const chunks: string[][] = [];
-        for (let i = 0; i < toFetch.length; i += NEIGHBORHOOD_NAME_CHUNK) {
-          chunks.push(toFetch.slice(i, i + NEIGHBORHOOD_NAME_CHUNK));
-        }
-        toFetch.forEach((n) => fetched.add(n));
-        const parts = await Promise.all(
-          chunks.map((names) =>
-            service.getServiceMapSlice(base, { kind: 'names', names }, controller.signal)
-          )
-        );
-        if (controller.signal.aborted) return;
-        parts.forEach((p: any) => (truncated = truncated || !!p.truncated));
-        graph = mergeGraphs([
-          graph,
-          ...parts.map((p: any) => ({ nodes: p.Nodes ?? [], edges: p.Edges ?? [] })),
-        ]);
-        if (params.mode === 'direct') {
-          toFetch = [];
-          break;
-        }
-        const reached = getNeighborhood(graph.nodes, graph.edges, center.nodeId, params.mode);
-        if (!reached || reached.totalConnected > reached.nodes.length - 1) {
-          toFetch = []; // capped at FOCUS_MAX_NODES (reported by the neighborhood itself)
-          break;
-        }
-        toFetch = Array.from(new Set(reached.nodes.map((n) => n.KeyAttributes.Name))).filter(
-          (n) => !fetched.has(n)
-        );
+    const { NAME_CHUNK_SIZE, FOCUS_MAX_HOPS, FOCUS_MAX_NODES } = APPLICATION_MAP_CONSTANTS;
+    let graph: MapGraph = { nodes: [], edges: [] };
+    let truncated = false;
+    let pathCut = false;
+    let capped = false;
+    let rounds = 0;
+
+    const fetchNames = async (names: string[], side?: 'source' | 'target') => {
+      const chunks: string[][] = [];
+      for (let i = 0; i < names.length; i += NAME_CHUNK_SIZE) {
+        chunks.push(names.slice(i, i + NAME_CHUNK_SIZE));
       }
-      // Out of rounds with names still to follow: the call path goes on beyond what is shown.
-      const pathCut = toFetch.length > 0;
+      const parts: ServiceMapResult[] = await Promise.all(
+        chunks.map((chunk) =>
+          service.getServiceMapSlice(base, { kind: 'names', names: chunk, side }, controller.signal)
+        )
+      );
+      parts.forEach((p) => (truncated = truncated || !!p.truncated));
+      graph = mergeGraphs([
+        graph,
+        ...parts.map((p) => ({ nodes: p.Nodes ?? [], edges: p.Edges ?? [] })),
+      ]);
+    };
+    const nameOf = (id: string) => graph.nodes.find((n) => n.NodeId === id)?.KeyAttributes.Name;
+    const neighbors = (ids: Set<string>, dir: 'callees' | 'callers') =>
+      graph.edges
+        .filter((e) => ids.has(dir === 'callees' ? e.SourceNodeId : e.DestinationNodeId))
+        .map((e) => (dir === 'callees' ? e.DestinationNodeId : e.SourceNodeId));
+
+    (async () => {
+      await fetchNames([center.name]);
+      rounds = 1;
+      if (mode === 'path') {
+        const seen = new Set([center.nodeId]);
+        const fresh = (ids: string[]) => {
+          const out = new Set(ids.filter((id) => !seen.has(id)));
+          out.forEach((id) => seen.add(id));
+          return out;
+        };
+        let down = fresh(neighbors(new Set([center.nodeId]), 'callees'));
+        let up = fresh(neighbors(new Set([center.nodeId]), 'callers'));
+        while (down.size > 0 || up.size > 0) {
+          if (seen.size >= FOCUS_MAX_NODES) {
+            capped = true;
+            break;
+          }
+          if (rounds >= FOCUS_MAX_HOPS) {
+            pathCut = true;
+            break;
+          }
+          const names = (ids: Set<string>) =>
+            Array.from(
+              new Set(
+                Array.from(ids)
+                  .map(nameOf)
+                  .filter((n): n is string => !!n)
+              )
+            );
+          await Promise.all([
+            down.size ? fetchNames(names(down), 'source') : Promise.resolve(),
+            up.size ? fetchNames(names(up), 'target') : Promise.resolve(),
+          ]);
+          if (controller.signal.aborted) return;
+          rounds++;
+          const nextDown = fresh(neighbors(down, 'callees'));
+          const nextUp = fresh(neighbors(up, 'callers'));
+          down = nextDown;
+          up = nextUp;
+        }
+      }
+      if (controller.signal.aborted) return;
       setState({
         key,
-        neighborhood: getNeighborhood(graph.nodes, graph.edges, center.nodeId, params.mode),
+        neighborhood: getNeighborhood(graph.nodes, graph.edges, center.nodeId, mode),
         truncated,
         pathCut,
+        capped,
         error: null,
       });
     })().catch((err) => {
       if (controller.signal.aborted) return;
 
       console.error('[useFocusNeighborhood] Error:', err);
+      // Keep what the completed rounds found, marked partial.
       setState({
         key,
-        neighborhood: null,
-        truncated: false,
+        neighborhood:
+          rounds > 0 ? getNeighborhood(graph.nodes, graph.edges, center.nodeId, mode) : null,
+        truncated: rounds > 0,
         pathCut: false,
-        error: err instanceof Error ? err : new Error('Unknown error'),
+        capped: false,
+        error: toError(err),
       });
     });
     return () => controller.abort();
-    // `key` covers the range, center and mode.
+    // `key` covers the range, dataset, center, mode and retries.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, params.enabled, dataset, service]);
 
+  const retry = useCallback(() => setAttempt((a) => a + 1), []);
   const current = state?.key === key ? state : null;
   return {
     neighborhood: current?.neighborhood ?? null,
     isLoading: params.enabled && !!params.center && !current,
     truncated: current?.truncated ?? false,
     pathCut: current?.pathCut ?? false,
+    capped: current?.capped ?? false,
     error: current?.error ?? null,
+    retry,
   };
 }

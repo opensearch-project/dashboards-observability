@@ -96,4 +96,21 @@ describe('getNeighborhood cap (hub services)', () => {
     expect(r?.nodes).toHaveLength(11);
     expect(r?.totalConnected).toBe(10);
   });
+
+  it('keeps callers and callees both when a hub has many of one', () => {
+    // 20 callers, 3 callees (databases): a cap of 7 keeps all 3 callees.
+    const hubWithCallers = [
+      node('hub'),
+      ...Array.from({ length: 20 }, (_, i) => node(`c${i}`)),
+      ...['db0', 'db1', 'db2'].map((d) => node(d)),
+    ];
+    const callerEdges = [
+      ...Array.from({ length: 20 }, (_, i) => edge(`c${i}`, 'hub')),
+      ...['db0', 'db1', 'db2'].map((d) => edge('hub', d)),
+    ];
+    const r = getNeighborhood(hubWithCallers, callerEdges, 'hub', 'direct', 7);
+    expect(ids(r)).toEqual(expect.arrayContaining(['db0', 'db1', 'db2']));
+    expect(r?.nodes).toHaveLength(7);
+    expect(r?.totalConnected).toBe(23);
+  });
 });

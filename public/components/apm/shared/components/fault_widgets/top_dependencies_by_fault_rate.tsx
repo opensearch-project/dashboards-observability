@@ -133,6 +133,13 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
       (names) => `service=~"${names.map(escapePromQLRegex).join('|')}"`
     );
   }, [byCaller, filters, scope]);
+  // Dependency rows only (e.g. a Database / Messaging / External type filter): run the topk once
+  // per batch of the scope's dependency names (one batch when the list is short) rather than over
+  // every caller and target, where the top 50 could all be paths to targets outside the scope.
+  const remoteBatches = useMemo(() => {
+    if (!scoped || byCaller || !filters?.runDependencies) return undefined;
+    return filters.dependencyBatches.map((b) => b.filter);
+  }, [scoped, byCaller, filters]);
   const {
     data: dependencies,
     isLoading,
@@ -144,10 +151,7 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
     refreshTrigger,
     callerFilter: filters?.bounded && byCaller ? filters.serviceFilter : undefined,
     callerBatches,
-    remoteFilter:
-      filters?.bounded && !byCaller && filters.runDependencies
-        ? filters.dependencyFilter
-        : undefined,
+    remoteBatches,
     queryLimit: scoped ? SCOPED_TOPK : undefined,
     include: scopeMatch ?? undefined,
     skip: scoped && !filters!.runServices && !filters!.runDependencies,

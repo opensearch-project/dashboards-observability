@@ -39,6 +39,17 @@ describe('getQueryMapGroupTotals', () => {
     expect(groupByPrometheusLabel('environment')).toBe('environment');
     expect(groupByPrometheusLabel('telemetry.sdk.language')).toBe('telemetry_sdk_language');
   });
+
+  it('sanitizes keys that are valid attributes but not valid Prometheus labels', () => {
+    expect(groupByPrometheusLabel('k8s-namespace')).toBe('k8s_namespace');
+    expect(groupByPrometheusLabel('team/owner name')).toBe('team_owner_name');
+    expect(groupByPrometheusLabel('9tier')).toBe('_9tier');
+    expect(groupByPrometheusLabel('a"){} or vector(1)')).toBe('a_____or_vector_1_');
+    ['k8s-namespace', '9tier', 'service.version', 'ünïcode'].forEach((key) =>
+      expect(groupByPrometheusLabel(key)).toMatch(/^[a-zA-Z_][a-zA-Z0-9_]*$/)
+    );
+    expect(groupByPrometheusLabel('')).toBeNull();
+  });
 });
 
 describe('readGroupValues', () => {
@@ -67,6 +78,18 @@ describe('readGroupValues', () => {
     expect(readGroupValues({ data: { result: [{ metric: {}, value: [1, '42'] }] } }, null)).toEqual(
       new Map([[ALL_GROUPS_KEY, 42]])
     );
+  });
+
+  it('matches the whole label name in a series string', () => {
+    const series = {
+      type: 'data_frame',
+      fields: [
+        { name: 'Series', values: ['{deployment_environment="x", environment="dev"}'] },
+        { name: 'Value', values: ['3'] },
+      ],
+    };
+    expect(readGroupValues(series, 'environment')).toEqual(new Map([['dev', 3]]));
+    expect(readGroupValues(series, 'deployment_environment')).toEqual(new Map([['x', 3]]));
   });
 });
 
@@ -145,6 +168,32 @@ describe('useMapGroupTotals', () => {
     });
     const { result } = renderHook(() => useMapGroupTotals(params));
     await waitFor(() => expect(result.current.failed).toBe(true));
+  });
+
+  it('a malformed response fails the totals instead of leaving them loading', async () => {
+    // A value field without `values` makes reading the frame throw.
+    mockExecuteInstantQuery.mockResolvedValue({
+      type: 'data_frame',
+      fields: [{ name: 'Series' }, { name: 'Value' }],
+    });
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    const { result } = renderHook(() => useMapGroupTotals(params));
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.failed).toBe(true);
+    expect(result.current.totals).toBeNull();
+    expect(result.current.error).toBeInstanceOf(Error);
+  });
+
+  it('groups by the sanitized label', async () => {
+    mockExecuteInstantQuery.mockResolvedValue({
+      data: { result: [{ metric: { k8s_namespace: 'shop' }, value: [1, '4'] }] },
+    });
+    const { result } = renderHook(() => useMapGroupTotals({ ...params, groupBy: 'k8s-namespace' }));
+    await waitFor(() => expect(result.current.totals).not.toBeNull());
+    mockExecuteInstantQuery.mock.calls.forEach((c) =>
+      expect(c[0].query).toMatch(/^sum by \(k8s_namespace\) /)
+    );
+    expect(result.current.totals?.get('shop')?.totalRequests).toBe(4);
   });
 });
 

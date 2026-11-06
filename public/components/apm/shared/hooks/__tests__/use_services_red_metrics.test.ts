@@ -538,6 +538,51 @@ describe('useServicesRedMetrics', () => {
       expect(m.avgFailureRatio).toBe(36);
       expect(result.current.error?.message).toBe('Read timed out');
     });
+
+    it('leaves rows missing from a truncated service response unavailable, not 0', async () => {
+      // The catalog query hit the server's row limit: api-gateway came back, user-service was cut.
+      mockExecuteInstantQuery.mockResolvedValue({
+        ...dataFrame('{environment="prod", service="api-gateway"}', 12),
+        meta: { truncation: { tableTruncated: true } },
+      });
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const { result } = renderHook(() => useServicesRedMetrics(defaultParams));
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      const covered = result.current.metricsMap.get(serviceNodeKey('api-gateway', 'prod'))!;
+      expect(covered.avgThroughput).toBeCloseTo(12 / 3600, 5);
+      expect(covered.avgFailureRatio).toBe(12);
+      expect(covered.avgLatency).toBe(12);
+      // Not a real 0: the row may be among the series the server cut.
+      expect(result.current.metricsMap.get(serviceNodeKey('user-service', 'prod'))).toBeUndefined();
+      expect(result.current.error?.message).toMatch(/Too many services/);
+    });
+
+    it('does not reuse a truncated catalog fetch for a narrower scope', async () => {
+      mockExecuteInstantQuery.mockResolvedValue({
+        ...dataFrame('{environment="prod", service="api-gateway"}', 12),
+        meta: { truncation: { tableTruncated: true } },
+      });
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { result, rerender } = renderHook((p) => useServicesRedMetrics(p), {
+        initialProps: defaultParams as Parameters<typeof useServicesRedMetrics>[0],
+      });
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      const callsBefore = mockExecuteInstantQuery.mock.calls.length;
+
+      mockExecuteInstantQuery.mockResolvedValue(
+        dataFrame('{environment="prod", service="user-service"}', 3)
+      );
+      rerender({ ...defaultParams, scopeServices: [defaultParams.services[1]] });
+      await waitFor(() =>
+        expect(
+          result.current.metricsMap.get(serviceNodeKey('user-service', 'prod'))?.avgFailureRatio
+        ).toBe(3)
+      );
+      expect(mockExecuteInstantQuery.mock.calls.length).toBeGreaterThan(callsBefore);
+      expect(result.current.error).toBeNull();
+    });
   });
 
   describe('refetch', () => {

@@ -355,4 +355,74 @@ describe('useTopDependenciesByFaultRate', () => {
       expect(result.current.data.map((d) => d.source)).toEqual(['c', 'a']);
     });
   });
+
+  describe('target batches', () => {
+    const row = (service: string, remoteService: string, value: string) => ({
+      metric: { service, remoteService, environment: 'prod' },
+      value: [1, value],
+    });
+
+    it('runs the topk once per target batch and merges the top queryLimit overall', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) =>
+        Promise.resolve({
+          data: {
+            result: query.includes('remoteService=~"db1|db2"')
+              ? [row('a', 'db1', '4'), row('b', 'db2', '2')]
+              : [row('c', 'queue', '7'), row('d', 'queue', '1')],
+          },
+        })
+      );
+      const { result } = renderHook(() =>
+        useTopDependenciesByFaultRate({
+          ...defaultParams,
+          limit: 3,
+          queryLimit: 3,
+          include: (d) => d.source !== 'c',
+          remoteBatches: ['remoteService=~"db1|db2"', 'remoteService=~"queue"'],
+        })
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
+      const queries = mockExecuteInstantQuery.mock.calls.map((c) => c[0].query);
+      expect(queries[0]).toContain('fault{remoteService=~"db1|db2",namespace="span_derived"}');
+      expect(queries[1]).toContain('fault{remoteService=~"queue",namespace="span_derived"}');
+      queries.forEach((q) => expect(q).not.toContain('remoteService!=""'));
+      // Union of the batches cut to the top 3 overall (c, a, b; d is 4th), as one topk(3)
+      // would return, then the scope check drops c.
+      expect(result.current.data.map((d) => `${d.source}->${d.target}`)).toEqual([
+        'a->db1',
+        'b->db2',
+      ]);
+    });
+
+    it('stops sending batches after the first one fails', async () => {
+      mockExecuteInstantQuery.mockReset();
+      mockExecuteInstantQuery.mockImplementation(({ query }: { query: string }) =>
+        query.includes('remoteService=~"t1"')
+          ? Promise.reject(new Error('timeout'))
+          : new Promise((resolve) => setTimeout(() => resolve({ data: { result: [] } }), 20))
+      );
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      const { result } = renderHook(() =>
+        useTopDependenciesByFaultRate({
+          ...defaultParams,
+          remoteBatches: [
+            'remoteService=~"t1"',
+            'remoteService=~"t2"',
+            'remoteService=~"t3"',
+            'remoteService=~"t4"',
+          ],
+        })
+      );
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(result.current.error?.message).toBe('timeout');
+      expect(result.current.data).toEqual([]);
+      // The first two start together (cap 2); after t1 fails, t3 and t4 are never sent.
+      expect(mockExecuteInstantQuery).toHaveBeenCalledTimes(2);
+    });
+  });
 });

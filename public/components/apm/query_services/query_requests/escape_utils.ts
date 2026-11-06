@@ -22,6 +22,10 @@ export const escapePromQLLabel = (value: string): string =>
 export const escapePromQLRegex = (value: string): string =>
   escapePromQLLabel(value.replace(/[\\.+*?()[\]{}|^$]/g, (ch) => `\\${ch}`));
 
-/** Escape a value for use inside a single-quoted PPL string literal. */
-export const escapePPLString = (value: string): string =>
-  value.replace(/[\\']/g, (ch) => `\\${ch}`);
+/**
+ * Escape a value for use inside a single-quoted PPL string literal: a quote is doubled (`''`),
+ * the one escape both PPL engines unescape. A backslash escape (`\'`) is kept literally by the
+ * 2.x engine, so `O\'Brien` matched nothing there; a lone backslash is literal on both, so it is
+ * left as is.
+ */
+export const escapePPLString = (value: string): string => value.replace(/'/g, "''");

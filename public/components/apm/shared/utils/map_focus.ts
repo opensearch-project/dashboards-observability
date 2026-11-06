@@ -56,7 +56,6 @@ export function getNeighborhood(
         (graph.get(id) ?? []).forEach((n) => {
           if (!seen.has(n)) {
             seen.add(n);
-            order.push(n);
             next.push(n);
           }
         })
@@ -65,6 +64,12 @@ export function getNeighborhood(
     };
     up = step(up, callers);
     down = step(down, callees);
+    // Callers and callees alternate within a depth, so the cap keeps both sides of a hub
+    // (a gateway with hundreds of callers still shows its databases and downstream services).
+    for (let i = 0; i < Math.max(up.length, down.length); i++) {
+      if (i < down.length) order.push(down[i]);
+      if (i < up.length) order.push(up[i]);
+    }
     if (mode === 'direct') break;
   }
 

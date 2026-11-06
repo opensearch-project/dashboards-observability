@@ -214,12 +214,18 @@ describe('ApplicationMapPage large-map mode', () => {
     expect(lastSlices().active).toBeNull();
   });
 
-  it('decides nothing until the overview has loaded, and falls back to the whole map on error', () => {
+  it('decides nothing until the overview has loaded, and never falls back to the whole map', () => {
     mockOverview.mockReturnValue(overviewWith(600, { isLoading: true }));
     const { rerender } = render(<ApplicationMapPage {...props} />);
     expect(lastEnabled()).toBe(false);
 
+    // A failed overview is an error (with Retry), not a switch to the whole-topology load.
     mockOverview.mockReturnValue(overviewWith(600, { error: new Error('boom') }));
+    rerender(<ApplicationMapPage {...props} />);
+    expect(lastEnabled()).toBe(false);
+
+    // A retry that loads a small map decides small.
+    mockOverview.mockReturnValue(overviewWith(10));
     rerender(<ApplicationMapPage {...props} />);
     expect(lastEnabled()).toBe(true);
   });

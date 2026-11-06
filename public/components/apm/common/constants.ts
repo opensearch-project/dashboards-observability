@@ -404,6 +404,45 @@ export const APPLICATION_MAP_CONSTANTS = {
    */
   MAX_EDGE_PAGES: 10,
   /**
+   * The paged edge count check: below this many connections `distinct_count` is exact
+   * (OpenSearch's cardinality precision threshold), so any shortfall means truncation; above it
+   * the count is approximate and EDGE_COUNT_TOLERANCE allows for that.
+   */
+  EDGE_COUNT_EXACT_BELOW: 3000,
+  /** Share of an approximate distinct-connection count paged rows must reach. */
+  EDGE_COUNT_TOLERANCE: 0.97,
+  /**
+   * Large-map aggregations (`stats ... by`) end in `| head` this high so core's PPL strategy
+   * doesn't cap them at `discover:aggregationSampleSize` (2,000 by default).
+   */
+  AGGREGATION_ROW_LIMIT: 10000,
+  /**
+   * The 2.x PPL engine returns at most this many buckets per aggregation, whatever the `head`.
+   * Large-map aggregations are split to stay under it, and a result of exactly this many rows is
+   * treated as possibly cut (on 3.x, a larger result means no cap applied).
+   */
+  AGGREGATION_BUCKET_CAP: 1000,
+  /**
+   * Node-list aggregations batch environments up to this many nodes per query (per the
+   * per-environment counts), leaving headroom under AGGREGATION_BUCKET_CAP for approximate
+   * counts and nodes with more than one type.
+   */
+  NODE_LIST_BATCH_NODES: 800,
+  /** Node-list / slice aggregations in flight at once. */
+  MAX_CONCURRENT_AGGREGATIONS: 3,
+  /**
+   * Names per `name in (...)` query: a focus round's frontier, or a slice split into name
+   * chunks after hitting AGGREGATION_BUCKET_CAP.
+   */
+  NAME_CHUNK_SIZE: 100,
+  /** Hops a large map's Full call path follows (one query round per hop). */
+  FOCUS_MAX_HOPS: 12,
+  /**
+   * Environments / groups a large map prefetches in the background (largest first), so the
+   * ones most likely to be opened are instant without querying every group on every range.
+   */
+  PREFETCH_MAX_SLICES: 10,
+  /**
    * Most nodes a focused view shows (the center first, then the nearest connections). A hub's
    * direct connections or a gateway's full call path can reach hundreds of nodes, which would
    * freeze the layout; past this the focus bar says "showing N of M".

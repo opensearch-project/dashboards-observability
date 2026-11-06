@@ -53,7 +53,7 @@ describe('ppl_queries', () => {
 
     it('escapes quotes and backslashes in the name', () => {
       const q = getQueryDependencyAttributes('svcmap', "a'b\\c", 'env');
-      expect(q).toContain("targetNode.keyAttributes.name = 'a\\'b\\\\c'");
+      expect(q).toContain("targetNode.keyAttributes.name = 'a''b\\c'");
     });
   });
 
@@ -311,7 +311,7 @@ describe('ppl_queries', () => {
 
     it('escapes attribute values', () => {
       expect(buildDependencySpanCondition('messaging', "kafka:o'rders")).toEqual([
-        "attributes.messaging.destination.name = 'o\\'rders'",
+        "attributes.messaging.destination.name = 'o''rders'",
         "attributes.messaging.system = 'kafka'",
       ]);
     });
@@ -358,7 +358,7 @@ describe('ppl_queries', () => {
   describe('getQueryNodeType', () => {
     it('reads the node type from a document where it is the target', () => {
       expect(getQueryNodeType('svcmap', "o'rders", 'generic:default')).toBe(
-        "source=svcmap | where targetNode.keyAttributes.name = 'o\\'rders'" +
+        "source=svcmap | where targetNode.keyAttributes.name = 'o''rders'" +
           " and targetNode.keyAttributes.environment = 'generic:default' | head 1 | fields targetNode.type"
       );
       expect(getQueryNodeType('svcmap', 'checkout')).toBe(

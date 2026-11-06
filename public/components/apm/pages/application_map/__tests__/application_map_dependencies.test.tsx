@@ -539,3 +539,180 @@ describe('ApplicationMapPage review fixes', () => {
     expect(last(mockGraph).onHideDependencies).toBeUndefined();
   });
 });
+
+describe('ApplicationMapPage large-map mode', () => {
+  const { useServiceMap } = jest.requireMock('../../../shared/hooks/use_service_map');
+  // 600 services over three environments (sizes 300 / 200 / 100), plus 100 dependencies.
+  const service = (i: number) => {
+    const env = i < 300 ? 'env-a' : i < 500 ? 'env-b' : 'env-c';
+    return {
+      NodeId: `svc-${i}|${env}`,
+      Name: `svc-${i}`,
+      KeyAttributes: { Name: `svc-${i}`, Environment: env, Type: 'Service' },
+      GroupByAttributes: { team: 'pay' },
+    };
+  };
+  const dependency = (i: number) => ({
+    NodeId: `db-${i}`,
+    Name: `db-${i}`,
+    KeyAttributes: { Name: `db-${i}`, Environment: 'env-a', Type: 'Database' },
+    GroupByAttributes: {},
+  });
+  const overview = (extra: Record<string, unknown> = {}, count = 600) => ({
+    ready: true,
+    nodes: [
+      ...Array.from({ length: count }, (_, i) => service(i)),
+      ...Array.from({ length: 100 }, (_, i) => dependency(i)),
+    ],
+    availableGroupByAttributes: {},
+    truncated: false,
+    isLoading: false,
+    error: null,
+    retry: jest.fn(),
+    ...extra,
+  });
+  const slices = (extra: Record<string, unknown> = {}) => ({
+    active: null,
+    activeStatus: null,
+    activeError: null,
+    retryActive: jest.fn(),
+    ...extra,
+  });
+  const openEnvironment = (value: string) =>
+    act(() =>
+      last(mockGraph).onNavigationStateChange({
+        level: 'groupByValue',
+        breadcrumbs: [],
+        groupByAttribute: 'environment',
+        groupByValue: value,
+      })
+    );
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sessionStorage.clear();
+    window.history.replaceState(null, '', '#/application-map');
+  });
+  afterEach(() => {
+    mockOverview.mockReset();
+    mockSlices.mockReset();
+    mockNeighborhood.mockReset();
+  });
+
+  it('shows an overview failure as an error with Retry, without loading the whole topology', () => {
+    const retry = jest.fn();
+    mockOverview.mockReturnValue(overview({ nodes: [], error: new Error('timed out'), retry }));
+    render(<ApplicationMapPage {...props} />);
+
+    expect(useServiceMap.mock.calls.every((c: any[]) => c[0].enabled === false)).toBe(true);
+    expect(screen.getByText('timed out')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('mapErrorRetry'));
+    expect(retry).toHaveBeenCalled();
+  });
+
+  it('keeps large mode while an attribute regroup reloads the overview', () => {
+    mockOverview.mockReturnValue(overview());
+    const { rerender } = render(<ApplicationMapPage {...props} />);
+    mockOverview.mockReturnValue(overview({ nodes: [], isLoading: true }));
+    rerender(<ApplicationMapPage {...props} />);
+    expect(last(useServiceMap).enabled).toBe(false);
+    expect(last(mockSlices).enabled).toBe(false); // the overview is loading, not small mode
+  });
+
+  it('switches modes at once when dependencies are toggled, without an undecided render', () => {
+    // 450 services + 100 dependencies: large only with dependencies shown.
+    mockOverview.mockReturnValue(overview({}, 450));
+    sessionStorage.setItem(APM_INCLUDE_DEPENDENCIES_STORAGE_KEY, 'true');
+    render(<ApplicationMapPage {...props} />);
+    expect(last(useServiceMap).enabled).toBe(false);
+
+    const before = useServiceMap.mock.calls.length;
+    act(() => last(mockSidebar).dependencies.onChange(false));
+    const after = useServiceMap.mock.calls.slice(before).map((c: any[]) => c[0].enabled);
+    expect(after.length).toBeGreaterThan(0);
+    expect(after.every((enabled: boolean) => enabled)).toBe(true);
+  });
+
+  it("opens an environment's slice with its names and the overview's group values", () => {
+    mockOverview.mockReturnValue(overview());
+    mockSlices.mockImplementation((p: { active: unknown }) =>
+      p.active
+        ? slices({
+            activeStatus: 'done',
+            active: {
+              nodes: [{ ...service(320), GroupByAttributes: {} }],
+              edges: [],
+              truncated: false,
+            },
+          })
+        : slices()
+    );
+    render(<ApplicationMapPage {...props} />);
+    // Nothing prefetches at the Application level (a single card).
+    expect(last(mockSlices).prefetchEnabled).toBe(false);
+    act(() =>
+      last(mockGraph).onNavigationStateChange({
+        level: 'groupBy',
+        breadcrumbs: [],
+        groupByAttribute: 'environment',
+        groupByValue: null,
+      })
+    );
+    // The environment cards: prefetch largest first (dependencies count toward a group).
+    const prefetch = last(mockSlices).prefetch;
+    expect(prefetch.map((p: any) => p.filter.environment)).toEqual(['env-a', 'env-b', 'env-c']);
+    expect(prefetch[0].names).toHaveLength(400);
+    expect(last(mockSlices).prefetchEnabled).toBe(true);
+
+    openEnvironment('env-b');
+    expect(last(mockSlices).active.filter).toEqual({ kind: 'environment', environment: 'env-b' });
+    expect(last(mockSlices).active.names).toHaveLength(200);
+    expect(last(mockGraph).nodes).toEqual([
+      expect.objectContaining({ NodeId: 'svc-320|env-b', GroupByAttributes: { team: 'pay' } }),
+    ]);
+  });
+
+  it('shows a failed slice as could-not-load with Retry, not the partial banner', () => {
+    const retryActive = jest.fn();
+    mockOverview.mockReturnValue(overview());
+    mockSlices.mockImplementation((p: { active: unknown }) =>
+      p.active
+        ? slices({ activeStatus: 'failed', activeError: new Error('503'), retryActive })
+        : slices()
+    );
+    render(<ApplicationMapPage {...props} />);
+    openEnvironment('env-b');
+
+    expect(screen.getByTestId('mapLoadFailedCallout')).toHaveTextContent('env-b');
+    expect(screen.queryByTestId('mapPartialTopologyCallout')).toBeNull();
+    fireEvent.click(screen.getByTestId('mapLoadFailedRetry'));
+    expect(retryActive).toHaveBeenCalled();
+  });
+
+  it('stops prefetching while focused', () => {
+    mockOverview.mockReturnValue(overview());
+    render(<ApplicationMapPage {...props} />);
+    act(() => last(mockGraph).onNodeClick('svc-1|env-a', 'svc-1', 'env-a'));
+    expect(last(mockSlices).prefetchEnabled).toBe(false);
+  });
+
+  it('shows a failed focus query with Retry instead of "0 connected nodes"', () => {
+    const retry = jest.fn();
+    mockOverview.mockReturnValue(overview());
+    mockNeighborhood.mockReturnValue({
+      neighborhood: null,
+      isLoading: false,
+      truncated: false,
+      pathCut: false,
+      capped: false,
+      error: new Error('timed out'),
+      retry,
+    });
+    render(<ApplicationMapPage {...props} />);
+    act(() => last(mockGraph).onNodeClick('svc-1|env-a', 'svc-1', 'env-a'));
+
+    expect(screen.getByTestId('mapLoadFailedCallout')).toHaveTextContent('timed out');
+    fireEvent.click(screen.getByTestId('mapLoadFailedRetry'));
+    expect(retry).toHaveBeenCalled();
+  });
+});

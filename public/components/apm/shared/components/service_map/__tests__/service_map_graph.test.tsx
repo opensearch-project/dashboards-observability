@@ -463,6 +463,8 @@ describe('ServiceMapGraph unavailable metrics', () => {
     );
     const card = lastProps().map.root.nodes[0].data;
     expect(card.subtitle).toContain('Metrics unavailable');
+    // No counts at all (not a real 0) for the card to show.
+    expect(card.metrics).toBeUndefined();
     expect(render(<>{card.icon}</>).getByTestId('serviceMapNodeMetricsUnavailable')).toBeTruthy();
   });
 
@@ -509,6 +511,36 @@ describe('ServiceMapGraph unavailable metrics', () => {
       />
     );
     expect(queryByTestId('serviceMapNoFilterMatches')).toBeNull();
+  });
+
+  it('a too-large view offers Focus on, and inside a group does not suggest grouping', () => {
+    const many = [...Array(510)].map((_, i) => ({
+      ...node,
+      NodeId: `s${i}`,
+      Name: `s${i}`,
+      KeyAttributes: { Environment: 'dev', Name: `s${i}`, Type: 'Service' },
+      GroupByAttributes: { team: 'pay' },
+    }));
+    const onFocusServiceSearch = jest.fn();
+    const { getByTestId, queryByTestId, getByText } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={many}
+        filters={{ ...baseProps.filters, groupBy: 'team' }}
+        navigationState={{
+          level: 'groupByValue',
+          breadcrumbs: [],
+          groupByAttribute: 'team',
+          groupByValue: 'pay',
+        }}
+        onFiltersChange={jest.fn()}
+        onFocusServiceSearch={onFocusServiceSearch}
+      />
+    );
+    getByTestId('serviceMapFocusService').click();
+    expect(onFocusServiceSearch).toHaveBeenCalled();
+    expect(queryByTestId('serviceMapGroupByEnvironment')).toBeNull();
+    expect(getByText(/This group has 510 nodes/)).toBeTruthy();
   });
 
   it('a too-large view with dependencies offers to hide them', () => {

@@ -59,6 +59,8 @@ export interface ServiceMapGraphProps {
   pendingNodeIds?: Set<string>;
   /** nodeIds whose metrics failed to load; shown as unavailable, never as a healthy 0. */
   failedNodeIds?: Set<string>;
+  /** Opens the page's "Focus on" service picker (offered when a view is too large to draw). */
+  onFocusServiceSearch?: () => void;
   /** Hides dependency nodes; offered when a view is too large to draw and includes them. */
   onHideDependencies?: () => void;
   /**
@@ -117,6 +119,7 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
   metricsMap,
   pendingNodeIds = NO_PENDING_NODES,
   failedNodeIds = NO_PENDING_NODES,
+  onFocusServiceSearch,
   onHideDependencies,
   noticesContainer,
   groupTotals,
@@ -823,14 +826,30 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
         title={<h2>{i18nTexts.largeMap.tooManyTitle}</h2>}
         body={
           <p>
-            {i18nTexts.largeMap.tooManyBody(
+            {(navigationState.level === 'groupByValue'
+              ? i18nTexts.largeMap.tooManyBodyInGroup
+              : i18nTexts.largeMap.tooManyBody)(
               visibleNodeCount,
               APPLICATION_MAP_CONSTANTS.MAX_RENDERED_NODES
             )}
           </p>
         }
         actions={[
-          onFiltersChange && filters.groupBy !== ENVIRONMENT_GROUP_BY ? (
+          // Always available: a focused service is small enough to draw.
+          onFocusServiceSearch ? (
+            <EuiButton
+              key="focusService"
+              size="s"
+              fill
+              onClick={onFocusServiceSearch}
+              data-test-subj="serviceMapFocusService"
+            >
+              {i18nTexts.largeMap.focusService}
+            </EuiButton>
+          ) : null,
+          onFiltersChange &&
+          filters.groupBy !== ENVIRONMENT_GROUP_BY &&
+          navigationState.level !== 'groupByValue' ? (
             <EuiButton
               key="groupByEnvironment"
               size="s"
@@ -1142,11 +1161,14 @@ function buildCelestialNodes(
           total: 1,
           status: healthStatus,
         },
-        metrics: {
-          requests: Math.round(metrics?.totalRequests || 0),
-          faults5xx: Math.round(metrics?.totalFaults || 0),
-          errors4xx: Math.round(metrics?.totalErrors || 0),
-        },
+        // A failed node has no counts (not a real 0), so the card can show them as missing.
+        metrics: failedNodeIds.has(nodeId)
+          ? undefined
+          : {
+              requests: Math.round(metrics?.totalRequests || 0),
+              faults5xx: Math.round(metrics?.totalFaults || 0),
+              errors4xx: Math.round(metrics?.totalErrors || 0),
+            },
       },
     };
   });
