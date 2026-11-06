@@ -167,6 +167,36 @@ describe('ServiceDependencies - percentile switch does not remount the table (#2
     });
   });
 
+  it('shows an unresolved remote service as plain text, not a link', () => {
+    const dependencies = buildDependencies().map((d, i) =>
+      i === 0 ? { ...d, serviceName: 'UnknownRemoteService', type: 'external' } : d
+    );
+    (useDependencies as jest.Mock).mockReturnValue({
+      data: dependencies,
+      groupedData: dependencies,
+      isLoading: false,
+      error: null,
+      refetch: jest.fn(),
+    });
+    (useDependencyMetrics as jest.Mock).mockReturnValue({
+      metrics: new Map(
+        dependencies.map((d) => [
+          `${d.serviceName}:${d.remoteOperation}`,
+          { requestCount: d.requestCount, faultRate: 0, errorRate: 0, availability: 1 },
+        ])
+      ),
+      isLoading: false,
+      error: null,
+    });
+    render(<ServiceDependencies {...props} />);
+    expect(screen.getByTestId('dependencyServiceName-UnknownRemoteService')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('dependencyServiceLink-UnknownRemoteService')
+    ).not.toBeInTheDocument();
+    // Other dependencies still link.
+    expect(screen.getByTestId(`dependencyServiceLink-${svc(1)}`)).toBeInTheDocument();
+  });
+
   it('should not reload the expanded-row charts when the latency percentile changes', async () => {
     render(<ServiceDependencies {...props} />);
 
