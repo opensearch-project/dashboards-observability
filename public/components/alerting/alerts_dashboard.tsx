@@ -973,6 +973,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       onChange={onChange}
       counts={counts}
       colorMap={colorMap}
+      colorStyle={id === 'severity' ? 'swatch' : 'health'}
       showOptionCount={showOptionCount}
       isCollapsed={isFacetCollapsed(id, defaultCollapsed)}
       onToggleCollapse={(facetId) => toggleFacetCollapse(facetId, defaultCollapsed)}
@@ -1111,6 +1112,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           defaultMessage: 'Message',
         }),
         truncateText: true,
+        className: 'altAlertMessageColumn',
         // The cell truncates, so wrap it in a tooltip that exposes the full
         // message on hover / focus. The span is focusable (tabIndex) so
         // keyboard users can reach the tooltip too. The row's "View details"
@@ -1204,7 +1206,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                         defaultMessage: 'View',
                       }
                     )}
-                    size="s"
+                    // `xs` (24px) keeps the row at the 40px standard; the
+                    // min size below still guarantees the 24px target.
+                    size="xs"
                     // Guarantee a >=24x24 pointer target (WCAG 2.5.8). Inline
                     // styles win over OUI's compressed button stylesheet.
                     style={{
@@ -1276,7 +1280,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
             });
 
   return (
-    <EuiResizableContainer className="altResizableContainer">
+    <EuiResizableContainer className="altResizableContainer altResizableContainer--pageScroll">
       {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
         <>
           <EuiResizablePanel

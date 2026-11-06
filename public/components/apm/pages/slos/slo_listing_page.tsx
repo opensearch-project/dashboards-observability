@@ -357,6 +357,22 @@ function ruleBadgeSpecFor(state: SloHealthState, explanation?: string): RuleBadg
 
 const SloRulesBadge: React.FC<{ row: SloSummary }> = ({ row }) => {
   const spec = ruleBadgeSpecFor(row.status.state, getSliUncomputableExplanation(row.status));
+  // Absence of data is neutral: plain gray text, not a warning-yellow badge.
+  if (spec.kind === 'no-data') {
+    return (
+      <EuiToolTip content={spec.tooltip}>
+        <EuiText
+          size="xs"
+          color="subdued"
+          tabIndex={0}
+          data-test-subj={`slosRulesBadge-${row.id}`}
+          data-test-rule-state={spec.kind}
+        >
+          {spec.label}
+        </EuiText>
+      </EuiToolTip>
+    );
+  }
   return (
     <EuiToolTip content={spec.tooltip}>
       <EuiBadge

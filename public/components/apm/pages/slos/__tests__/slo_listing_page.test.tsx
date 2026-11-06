@@ -368,7 +368,7 @@ describe('SloListingPage — Rules column badge', () => {
     expect(badge).toHaveAttribute('data-test-rule-state', 'healthy');
   });
 
-  it('renders "No data" badge for no_data rows', async () => {
+  it('renders "No data" as neutral gray text, not a warning badge, for no_data rows', async () => {
     const summary = makeSummary({
       id: 'slo-nodata',
       status: { ...makeSummary().status, sloId: 'slo-nodata', state: 'no_data' },
@@ -379,6 +379,9 @@ describe('SloListingPage — Rules column badge', () => {
     const badge = await screen.findByTestId('slosRulesBadge-slo-nodata');
     expect(badge).toHaveTextContent('No data');
     expect(badge).toHaveAttribute('data-test-rule-state', 'no-data');
+    expect(badge).not.toHaveClass('euiBadge');
+    expect(badge.querySelector('.euiTextColor--subdued')).not.toBeNull();
+    expect(badge.closest('.euiBadge')).toBeNull();
   });
 
   it('places the Rules column between Traits and Health', async () => {

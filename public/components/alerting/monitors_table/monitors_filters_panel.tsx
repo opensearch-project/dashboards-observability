@@ -185,6 +185,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
       counts={counts}
       displayMap={displayMap}
       colorMap={colorMap}
+      colorStyle={id === 'severity' ? 'swatch' : 'health'}
       showOptionCount={showOptionCount}
       isCollapsed={isFacetCollapsed(id, defaultCollapsed)}
       onToggleCollapse={(facetId) => toggleFacetCollapse(facetId, defaultCollapsed)}

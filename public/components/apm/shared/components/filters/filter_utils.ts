@@ -11,6 +11,7 @@ import {
   AVAILABILITY_THRESHOLD_OPTIONS,
   ERROR_RATE_THRESHOLD_OPTIONS,
 } from '../../../common/constants';
+import { SEVERITY_HEX } from '../../../../alerting/alert_colors';
 
 // Re-export for convenience (consumers can import from filter_utils or constants)
 export {
@@ -22,28 +23,28 @@ export {
 };
 
 /**
- * Get theme-aware color for threshold filters using semantic enum keys
- * Supports both availability and error rate thresholds with proper dark/light mode colors
- * Uses euiThemeVars which automatically adapts to the current theme
+ * Color for a threshold filter option, from the Alert Manager severity palette
+ * (`SEVERITY_HEX`) so topology thresholds don't introduce a third palette: the
+ * worst bucket uses the Critical slot, the middle one Medium, the best one Low.
  *
  * @param threshold - The semantic threshold enum value (e.g., AvailabilityThreshold.LOW)
  * @param type - The type of threshold ('availability' or 'errorRate')
- * @returns The appropriate color from the theme
+ * @returns The severity-palette color for that bucket
  */
 export const getThemeAwareThresholdColor = (
   threshold: AvailabilityThreshold | ErrorRateThreshold,
   type: 'availability' | 'errorRate'
 ): string => {
   if (type === 'availability') {
-    // For availability, high is good (green), low is bad (red)
-    if (threshold === AvailabilityThreshold.LOW) return euiThemeVars.euiColorDanger;
-    if (threshold === AvailabilityThreshold.MEDIUM) return euiThemeVars.euiColorWarning;
-    if (threshold === AvailabilityThreshold.HIGH) return euiThemeVars.euiColorSuccess;
+    // For availability, low is the worst bucket.
+    if (threshold === AvailabilityThreshold.LOW) return SEVERITY_HEX.critical;
+    if (threshold === AvailabilityThreshold.MEDIUM) return SEVERITY_HEX.medium;
+    if (threshold === AvailabilityThreshold.HIGH) return SEVERITY_HEX.low;
   } else {
-    // For error rates, low is good (green), high is bad (red)
-    if (threshold === ErrorRateThreshold.HIGH) return euiThemeVars.euiColorDanger;
-    if (threshold === ErrorRateThreshold.MEDIUM) return euiThemeVars.euiColorWarning;
-    if (threshold === ErrorRateThreshold.LOW) return euiThemeVars.euiColorSuccess;
+    // For error rates, high is the worst bucket.
+    if (threshold === ErrorRateThreshold.HIGH) return SEVERITY_HEX.critical;
+    if (threshold === ErrorRateThreshold.MEDIUM) return SEVERITY_HEX.medium;
+    if (threshold === ErrorRateThreshold.LOW) return SEVERITY_HEX.low;
   }
   return euiThemeVars.euiColorMediumShade;
 };

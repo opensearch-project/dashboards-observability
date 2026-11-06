@@ -30,6 +30,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TruncatedLabel } from '../common/truncated_label';
+import { UNKNOWN_HEX } from './alert_colors';
 // Note: `.altFacetErrorBtn` / `.altFacetErrorPopover` (and the pre-existing
 // `altFacet*` classes) live in `alerting.scss`, which the alerting pages that
 // render this component already import. This shared component deliberately
@@ -49,6 +50,12 @@ export interface FacetGroupConfig {
   counts: Record<string, number>;
   displayMap?: Record<string, string>;
   colorMap?: Record<string, string>;
+  /**
+   * How `colorMap` renders: `health` (default) is the status dot, reserved for
+   * process states; `swatch` is a small badge-shaped square for values shown as
+   * badges in the table (severity), so the filter matches the badge color.
+   */
+  colorStyle?: 'health' | 'swatch';
   /** Optional per-option leading icon (e.g. logoOpenSearch / logoPrometheus). */
   iconMap?: Record<string, string>;
   /**
@@ -174,6 +181,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
   counts,
   displayMap,
   colorMap,
+  colorStyle = 'health',
   iconMap,
   errorMap,
   searchable,
@@ -438,7 +446,21 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
                     minWidth: 0,
                   }}
                 >
-                  {colorMap && (
+                  {colorMap && colorStyle === 'swatch' && (
+                    <span
+                      aria-hidden="true"
+                      data-test-subj={`facetGroup-${id}-swatch-${opt}`}
+                      style={{
+                        display: 'inline-block',
+                        width: 12,
+                        height: 12,
+                        borderRadius: 2,
+                        flexShrink: 0,
+                        backgroundColor: colorMap[opt] || UNKNOWN_HEX,
+                      }}
+                    />
+                  )}
+                  {colorMap && colorStyle === 'health' && (
                     <EuiHealth color={colorMap[opt] || 'subdued'} style={{ marginRight: 0 }} />
                   )}
                   {iconMap?.[opt] && (
