@@ -250,6 +250,7 @@ export const SERVICE_DETAILS_CONSTANTS = {
     OVERVIEW: 'overview',
     OPERATIONS: 'operations',
     DEPENDENCIES: 'dependencies',
+    INFRASTRUCTURE: 'infrastructure',
     SLOS: 'slos',
   } as const,
 

@@ -10,6 +10,7 @@ import {
   getQueryDependencySpans,
   getQueryNodeType,
   getQueryGetServiceMap,
+  getQueryListServiceDependencies,
   getQueryListServices,
 } from '../ppl_queries';
 
@@ -18,6 +19,13 @@ describe('ppl_queries', () => {
   const end = new Date('2026-09-27T20:15:00.000Z');
 
   describe('service map projections', () => {
+    it("projects the target node type in a service's dependencies, for the dependency link", () => {
+      const q = getQueryListServiceDependencies('svcmap', start, end, 'prod', 'checkout');
+      expect(q).toContain(
+        '| fields sourceNode.keyAttributes, sourceOperation.name, targetNode.keyAttributes, targetNode.type, targetOperation.name'
+      );
+    });
+
     it('projects the node type alongside keyAttributes for list and map queries', () => {
       [
         getQueryListServices('svcmap', start, end),

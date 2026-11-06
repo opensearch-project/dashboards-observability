@@ -424,8 +424,17 @@ export class PPLSearchService {
    * @param pplQuery The PPL query string
    * @param dataset The dataset configuration
    */
-  async executeQuery(pplQuery: string, dataset: DatasetConfig, signal?: AbortSignal): Promise<any> {
-    return this.executePPLQuery(pplQuery, dataset, signal);
+  /**
+   * @param options.strict - Throw on authorization / missing-index errors instead of returning an
+   *   empty result, for callers that must tell "no data" from "no access".
+   */
+  async executeQuery(
+    pplQuery: string,
+    dataset: DatasetConfig,
+    signal?: AbortSignal,
+    options?: { strict?: boolean }
+  ): Promise<any> {
+    return this.executePPLQuery(pplQuery, dataset, signal, options);
   }
 
   /**
@@ -491,7 +500,8 @@ export class PPLSearchService {
   private async executePPLQuery(
     pplQuery: string,
     dataset: DatasetConfig,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    options?: { strict?: boolean }
   ): Promise<any> {
     // Build request body matching query enhancements API format
     const requestBody = {
@@ -522,9 +532,10 @@ export class PPLSearchService {
 
       // Handle index not found / unauthorized errors more gracefully
       if (
-        error.message?.includes('Unauthorized') ||
-        error.message?.includes('index_not_found_exception') ||
-        error.message?.includes('no such index')
+        !options?.strict &&
+        (error.message?.includes('Unauthorized') ||
+          error.message?.includes('index_not_found_exception') ||
+          error.message?.includes('no such index'))
       ) {
         console.warn(
           '[PPLSearchService] Index may not exist or user lacks permissions. Returning empty result.'

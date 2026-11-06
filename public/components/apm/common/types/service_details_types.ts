@@ -53,6 +53,8 @@ export interface ServiceDependency {
   remoteOperation: string;
   environment: string;
   callCount: number;
+  /** Node type of the dependency (service / database / messaging / external) */
+  type?: string;
 }
 
 /**
@@ -74,6 +76,8 @@ export interface EnrichedDependency extends ServiceDependency {
 export interface GroupedDependency {
   serviceName: string;
   environment: string;
+  /** Node type of the dependency (service / database / messaging / external) */
+  type?: string;
   remoteOperation: string;
   serviceOperations: string[];
   callCount: number; // From PPL (document count)
@@ -115,7 +119,8 @@ export interface PromQLChartData {
 /**
  * Tab IDs for service details page
  */
-export type ServiceDetailsTabId = 'overview' | 'operations' | 'dependencies' | 'slos';
+export type ServiceDetailsTabId =
+  'overview' | 'operations' | 'dependencies' | 'infrastructure' | 'slos';
 
 /**
  * URL parameters for service details page

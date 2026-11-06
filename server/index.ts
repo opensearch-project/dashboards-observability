@@ -24,6 +24,13 @@ const observabilityConfig = {
     alertManager: schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
+    apmInfrastructure: schema.object({
+      // Infrastructure tab on the APM service details page (RFC
+      // opensearch-project/dashboards-observability#2940). Ships dark — operators opt in via
+      // `observability.apmInfrastructure.enabled: true` in `opensearch_dashboards.yml`.
+      // Mirrors the `alertManager.enabled` pattern.
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
     cloudwatch: schema.object({
       // Virtual CloudWatch alarms datasource for the unified Alerts view.
       //

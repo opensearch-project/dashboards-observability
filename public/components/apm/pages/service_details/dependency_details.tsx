@@ -48,6 +48,7 @@ import {
   getQueryDependencySpans,
 } from '../../query_services/query_requests/ppl_queries';
 import { getMappedFieldNames } from '../../query_services/field_mapping_service';
+import { toPplDataset } from '../../shared/utils/dataset_utils';
 
 export interface DependencyDetailsProps {
   dependencyName: string;
@@ -188,11 +189,7 @@ export const DependencyDetails: React.FC<DependencyDetailsProps> = ({
       return;
     }
     const serviceMapDataset = config?.serviceMapDataset;
-    const toDataset = (ds: { id: string; title: string; datasourceId?: string }) => ({
-      id: ds.id,
-      title: ds.title,
-      ...(ds.datasourceId && { dataSource: { id: ds.datasourceId, type: 'DATA_SOURCE' } }),
-    });
+    const toDataset = toPplDataset;
     const abortController = new AbortController();
     const { signal } = abortController;
     const fetchSpans = async () => {

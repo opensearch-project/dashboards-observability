@@ -526,7 +526,9 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
           nodeId: matchingNode.NodeId,
           serviceName,
           environment,
-          platformType: getPlatformTypeFromEnvironment(environment),
+          platformType:
+            matchingNode.AttributeMaps?.[0]?.PlatformType ||
+            getPlatformTypeFromEnvironment(environment),
           nodeType: matchingNode.KeyAttributes?.Type,
           groupByAttributes: matchingNode.GroupByAttributes,
         },
@@ -763,7 +765,8 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
         nodeId,
         serviceName,
         environment,
-        platformType: getPlatformTypeFromEnvironment(environment),
+        platformType:
+          node?.AttributeMaps?.[0]?.PlatformType || getPlatformTypeFromEnvironment(environment),
         nodeType: node?.KeyAttributes?.Type,
         groupByAttributes: node?.GroupByAttributes,
       };
