@@ -15,6 +15,7 @@ import {
   getK8sPodTableQueries,
   getQueryHostRanking,
   getQueryInfraLabelStyleProbe,
+  getQueryInfraLastSample,
   getQueryK8sServicePods,
   getQueryServiceInfraKeys,
   getQueryServiceMapInfraKeys,
@@ -400,7 +401,19 @@ export function useServiceInfrastructure(
       const grace = Math.max(INFRA_DATA_END_GRACE_SECONDS, infraProbeStepSeconds(rangeSeconds));
       const dataEndsAt =
         lastSample > 0 && lastSample < time - grace ? Math.floor(lastSample) : undefined;
-      if (dataEndsAt) at = dataEndsAt;
+      if (dataEndsAt) {
+        at = dataEndsAt;
+      } else if (labelStyle) {
+        // Read instant values as of the newest sample, not the range end: a receiver that reports
+        // less often (k8s_cluster) can otherwise fall just outside the lookback.
+        const newest = Math.max(
+          0,
+          ...(await instant(getQueryInfraLastSample(labelStyle, { scopes, hostIds }))).map(
+            (r) => Number(r.Value) || 0
+          )
+        );
+        if (newest > 0 && newest < time) at = Math.floor(newest);
+      }
       const base: ServiceInfrastructure = {
         ...EMPTY,
         platform,

@@ -259,8 +259,8 @@ export const InfraToolbar: React.FC<InfraToolbarProps> = (props) => (
         <ActiveFilterBadges
           filters={props.filters.map((f, i) => ({
             key: `infraLabel-${i}`,
-            category: `${f.name} ${f.operator}`,
-            values: [f.value],
+            category: f.name,
+            values: [f.operator === '=' ? f.value : `${f.operator} ${f.value}`],
             onRemove: () => props.onFiltersChange(props.filters.filter((_, j) => j !== i)),
           }))}
           onClearAll={() => props.onFiltersChange([])}

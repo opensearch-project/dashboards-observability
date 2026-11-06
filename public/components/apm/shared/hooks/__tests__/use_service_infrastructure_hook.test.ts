@@ -169,6 +169,20 @@ describe('useServiceInfrastructure', () => {
     ]);
   });
 
+  it('reads instant values as of the newest sample, not the range end', async () => {
+    const newest = nowSeconds() - 200; // inside the grace: no "data ends" note
+    mockInstant.mockImplementation(({ query }: { query: string }) => {
+      if (query.includes('timestamp(')) return Promise.resolve(rows([{ Value: newest }]));
+      if (query.startsWith('count(')) return Promise.resolve(rows([{ Value: '1' }]));
+      return Promise.resolve(rows([]));
+    });
+    const { result } = render();
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.dataEndsAt).toBeUndefined();
+    const presence = mockInstant.mock.calls.find(([a]) => a.query.startsWith('count('));
+    expect(presence?.[0].time).toBe(newest);
+  });
+
   it('serves a complete result from the cache, and refetches on Refresh', async () => {
     const first = render(1);
     await waitFor(() => expect(first.result.current.isLoading).toBe(false));

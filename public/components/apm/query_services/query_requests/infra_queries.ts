@@ -117,6 +117,22 @@ export function getQueryInfraLabelStyleProbe(
   return lastSeen(`system_cpu_time_seconds_total{${hostMatcher(scope.hostIds, style)}}`);
 }
 
+/**
+ * Instant query (at the range end) for the timestamp of this service's newest infra sample within
+ * the lookback. Instant values are read as of it: collectors report on different intervals, so at
+ * the range end one receiver's last sample can be inside the lookback and another's just outside.
+ */
+export function getQueryInfraLastSample(
+  style: InfraLabelStyle,
+  scope: { scopes: K8sWorkloadScope[]; hostIds: string[] }
+): string {
+  const sel =
+    scope.scopes.length > 0
+      ? selectAll('k8s_pod_memory_working_set_bytes', scope.scopes, style)
+      : `system_cpu_time_seconds_total{${hostMatcher(scope.hostIds, style)}}`;
+  return `max(timestamp(${sel}))`;
+}
+
 const WORKLOAD_ATTRIBUTE: Record<K8sWorkloadKind, string> = {
   deployment: 'k8s.deployment.name',
   statefulset: 'k8s.statefulset.name',
