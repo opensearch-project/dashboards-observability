@@ -260,7 +260,7 @@ export function getQueryListServiceDependencies(
   }
 
   query += ` | dedup operationConnectionHash`;
-  query += ` | fields sourceNode.keyAttributes, sourceOperation.name, targetNode.keyAttributes, targetOperation.name`;
+  query += ` | fields sourceNode.keyAttributes, sourceOperation.name, targetNode.keyAttributes, targetNode.type, targetOperation.name`;
   query += ` | head ${DEFAULT_ROW_LIMIT}`;
   return query;
 }

@@ -609,6 +609,8 @@ export function transformListServiceDependenciesResponse(pplResponse: PPLDataFra
     serviceOperation: string;
     remoteOperation: string;
     callCount: number;
+    /** service / database / messaging / external, from the target node */
+    type?: string;
   }
 
   const dependencyMap = new Map<string, DependencyData>();
@@ -636,6 +638,7 @@ export function transformListServiceDependenciesResponse(pplResponse: PPLDataFra
           serviceOperation,
           remoteOperation,
           callCount: 1,
+          type: row['targetNode.type'],
         });
       }
     }
@@ -647,6 +650,7 @@ export function transformListServiceDependenciesResponse(pplResponse: PPLDataFra
     ServiceOperation: dep.serviceOperation,
     RemoteOperation: dep.remoteOperation,
     CallCount: dep.callCount,
+    Type: dep.type,
   }));
 
   const timestamps = rows

@@ -683,11 +683,28 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
 
   // Handle resize
   useEffect(() => {
+    // One resize per frame: a window resize also triggers the observer below.
+    let frame = 0;
     const handleResize = () => {
-      chartInstance.current?.resize();
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        chartInstance.current?.resize();
+      });
     };
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    // The container can change width without a window resize (a grid / rows layout switch,
+    // a collapsing side panel), so watch the element itself too.
+    const observer =
+      typeof ResizeObserver !== 'undefined' && chartRef.current
+        ? new ResizeObserver(handleResize)
+        : null;
+    if (observer && chartRef.current) observer.observe(chartRef.current);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      observer?.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   const hasData = showChart && !isLoading && !error && series.length > 0;

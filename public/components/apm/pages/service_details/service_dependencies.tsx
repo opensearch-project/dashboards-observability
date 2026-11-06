@@ -21,10 +21,12 @@ import {
   EuiSuperSelect,
   EuiIcon,
   EuiResizableContainer,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TimeRange, GroupedDependency } from '../../common/types/service_details_types';
 import { PromQLLineChart } from '../../shared/components/promql_line_chart';
+import { navigateToServiceDetails } from '../../shared/utils/navigation_utils';
 import {
   SERVICE_DETAILS_CONSTANTS,
   AvailabilityThreshold,
@@ -773,7 +775,18 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         sortable: true,
         width: '18%',
         truncateText: true,
-        render: (name: string) => <strong>{name}</strong>,
+        // Opens the dependency's own page, keeping the time range, so an investigation can
+        // follow the slow or failing call downstream.
+        render: (name: string, row: GroupedDependency) => (
+          <EuiLink
+            onClick={() =>
+              navigateToServiceDetails(name, row.environment, { timeRange, nodeType: row.type })
+            }
+            data-test-subj={`dependencyServiceLink-${name}`}
+          >
+            <strong>{name}</strong>
+          </EuiLink>
+        ),
       },
       {
         field: 'remoteOperation',
@@ -891,7 +904,7 @@ export const ServiceDependencies: React.FC<ServiceDependenciesProps> = ({
         render: formatAvailability,
       },
     ],
-    [toggleRowExpand, latencyPercentile]
+    [toggleRowExpand, latencyPercentile, timeRange]
   );
 
   // Create expanded row content
