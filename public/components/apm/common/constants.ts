@@ -384,7 +384,93 @@ export const APPLICATION_MAP_CONSTANTS = {
    * a mid-range laptop (4x CPU slowdown), at 200 it takes ~12 s to lay out with ~2 s freezes.
    */
   DEPENDENCY_STACK_THRESHOLD: 150,
+
+  /**
+   * Node metrics are fetched in batches of at most this many names, each three instant queries
+   * bounded by a `service=~` / `remoteService=~` name list, so no single query scans every
+   * service in the workspace (an unbounded query timed out, 503, at large scale).
+   */
+  METRICS_BATCH_SIZE: 100,
+  /**
+   * Upper bound on a batch's escaped name-list length. Dependency queries repeat their selector
+   * twice (client + consumer calls), so this keeps every query well under the 10,000-char
+   * PromQL limit even with long external host names.
+   */
+  METRICS_BATCH_MAX_CHARS: 3500,
+  /** Metric batches in flight at once for the whole map (three queries each). */
+  METRICS_MAX_CONCURRENT_BATCHES: 2,
+  /**
+   * The topology / catalog edge queries are paged (`head 1000 from <offset>`, ordered by
+   * nodeConnectionHash) up to this many pages; beyond it the map is marked partial.
+   */
+  MAX_EDGE_PAGES: 10,
+  /**
+   * The paged edge count check: below this many connections `distinct_count` is exact
+   * (OpenSearch's cardinality precision threshold), so any shortfall means truncation; above it
+   * the count is approximate and EDGE_COUNT_TOLERANCE allows for that.
+   */
+  EDGE_COUNT_EXACT_BELOW: 3000,
+  /** Share of an approximate distinct-connection count paged rows must reach. */
+  EDGE_COUNT_TOLERANCE: 0.97,
+  /**
+   * Large-map aggregations (`stats ... by`) end in `| head` this high so core's PPL strategy
+   * doesn't cap them at `discover:aggregationSampleSize` (2,000 by default).
+   */
+  AGGREGATION_ROW_LIMIT: 10000,
+  /**
+   * The 2.x PPL engine returns at most this many buckets per aggregation, whatever the `head`.
+   * Large-map aggregations are split to stay under it, and a result of exactly this many rows is
+   * treated as possibly cut (on 3.x, a larger result means no cap applied).
+   */
+  AGGREGATION_BUCKET_CAP: 1000,
+  /**
+   * Node-list aggregations batch environments up to this many nodes per query (per the
+   * per-environment counts), leaving headroom under AGGREGATION_BUCKET_CAP for approximate
+   * counts and nodes with more than one type.
+   */
+  NODE_LIST_BATCH_NODES: 800,
+  /** Node-list / slice aggregations in flight at once. */
+  MAX_CONCURRENT_AGGREGATIONS: 3,
+  /**
+   * Names per `name in (...)` query: a focus round's frontier, or a slice split into name
+   * chunks after hitting AGGREGATION_BUCKET_CAP.
+   */
+  NAME_CHUNK_SIZE: 100,
+  /** Hops a large map's Full call path follows (one query round per hop). */
+  FOCUS_MAX_HOPS: 12,
+  /**
+   * Environments / groups a large map prefetches in the background (largest first), so the
+   * ones most likely to be opened are instant without querying every group on every range.
+   */
+  PREFETCH_MAX_SLICES: 10,
+  /**
+   * Most nodes a focused view shows (the center first, then the nearest connections). A hub's
+   * direct connections or a gateway's full call path can reach hundreds of nodes, which would
+   * freeze the layout; past this the focus bar says "showing N of M".
+   */
+  FOCUS_MAX_NODES: 150,
+  /** Maps above this many nodes use COMPACT_LAYOUT; small maps keep the default spacing. */
+  COMPACT_LAYOUT_MIN_NODES: 40,
+  /**
+   * Tighter spacing for larger maps. The default layout reserves 156px per card plus a 100px
+   * gap (cards are ~96-120px tall), which spreads a few hundred services over empty space.
+   */
+  COMPACT_LAYOUT: { nodeHeight: 120, nodeSeparation: 30, rankSeparation: 140 },
+  /**
+   * Fit-to-view for focused views: may zoom out below the usual 0.6 minimum so a call path
+   * wider than the panel fits.
+   */
+  FIT_ALL_VIEW_OPTIONS: { minZoom: 0.2, maxZoom: 1, padding: 0.15 },
 } as const;
+
+/**
+ * Built-in map group-by: the node's environment (a key attribute, so every node has one, unlike
+ * the configured groupByAttributes). Also the Prometheus label name used for group metrics.
+ */
+export const ENVIRONMENT_GROUP_BY = 'environment';
+
+/** Key of the whole-map total (the Application node) in the map's group totals. */
+export const ALL_GROUPS_KEY = '__all__';
 
 // Platform utility functions moved to shared/utils/platform_utils.ts
 export {

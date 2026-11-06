@@ -313,6 +313,23 @@ export type PlatformIconType =
 /**
  * Initial filter state
  */
+/**
+ * Focus mode connections:
+ * - `direct`: the node's direct callers and callees.
+ * - `path`: its full call path: everything upstream (callers, their callers, ...) and everything
+ *   downstream (callees, their callees, ...), following call direction. Unlike counting hops in
+ *   both directions, this never wanders up to a shared caller or topic and back down to its
+ *   unrelated callees (siblings).
+ */
+export type FocusMode = 'direct' | 'path';
+
+/** Request / fault / error totals for a map group (or the whole map). */
+export interface GroupTotals {
+  totalRequests: number;
+  totalFaults: number;
+  totalErrors: number;
+}
+
 export const DEFAULT_FILTERS: ApplicationMapFilters = {
   faultRateThresholds: [],
   errorRateThresholds: [],

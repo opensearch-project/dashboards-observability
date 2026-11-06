@@ -5,9 +5,16 @@
 
 import { formatPPLTimestamp } from '../../shared/utils/time_utils';
 import { escapePPLString } from './escape_utils';
+import { APPLICATION_MAP_CONSTANTS } from '../../common/constants';
 
 /** Row cap for otherwise-unbounded list/topology PPL queries. */
 export const DEFAULT_ROW_LIMIT = 1000;
+
+/** `| sort nodeConnectionHash | ... | head N from offset` tail shared by the paged edge queries. */
+const pagedEdgeClause = (fields: string, offset: number): string =>
+  ` | sort nodeConnectionHash | fields ${fields} | head ${DEFAULT_ROW_LIMIT}${
+    offset > 0 ? ` from ${offset}` : ''
+  }`;
 
 /**
  * PPL queries for APM topology data
@@ -64,6 +71,23 @@ export function buildTimeFilterClause(
 }
 
 /**
+ * Approximate number of distinct connections in the time range (a cardinality aggregation,
+ * which no row limit applies to). Compared with the paged dedup rows to detect an incomplete
+ * result: on the 2.x (v2) PPL engine, `dedup` only sees the first `plugins.query.size_limit`
+ * raw documents, so pages can come back short with connections missing.
+ */
+export function getQueryDistinctEdgeCount(
+  queryIndex: string,
+  startTime?: string | Date,
+  endTime?: string | Date
+): string {
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query += ` | stats distinct_count(nodeConnectionHash) as edges`;
+  return query;
+}
+
+/**
  * Query to list all services in the time range
  * Fetches unique connections and extracts services from both source and target nodes
  *
@@ -83,13 +107,16 @@ export function buildTimeFilterClause(
 export function getQueryListServices(
   queryIndex: string,
   startTime?: string | Date,
-  endTime?: string | Date
+  endTime?: string | Date,
+  offset: number = 0
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
   query += ` | dedup nodeConnectionHash`;
-  query += ` | fields sourceNode.keyAttributes, sourceNode.type, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.type, targetNode.groupByAttributes`;
-  query += ` | head ${DEFAULT_ROW_LIMIT}`;
+  query += pagedEdgeClause(
+    'sourceNode.keyAttributes, sourceNode.type, sourceNode.groupByAttributes, targetNode.keyAttributes, targetNode.type, targetNode.groupByAttributes',
+    offset
+  );
   return query;
 }
 
@@ -285,13 +312,16 @@ export function getQueryListServiceDependencies(
 export function getQueryGetServiceMap(
   queryIndex: string,
   startTime?: string | Date,
-  endTime?: string | Date
+  endTime?: string | Date,
+  offset: number = 0
 ): string {
   let query = `source=${queryIndex}`;
   query += buildTimeFilterClause(startTime, endTime);
   query += ` | dedup nodeConnectionHash`;
-  query += ` | fields sourceNode.keyAttributes, sourceNode.type, targetNode.keyAttributes, targetNode.type, sourceNode.groupByAttributes, targetNode.groupByAttributes`;
-  query += ` | head ${DEFAULT_ROW_LIMIT}`;
+  query += pagedEdgeClause(
+    'sourceNode.keyAttributes, sourceNode.type, targetNode.keyAttributes, targetNode.type, sourceNode.groupByAttributes, targetNode.groupByAttributes',
+    offset
+  );
   return query;
 }
 
@@ -541,4 +571,167 @@ export function getQueryDependencySpans(
   query += ` | sort - startTime | head ${limit}`;
   query += ` | fields ${DEPENDENCY_SPAN_COLUMNS.join(', ')}`;
   return query;
+}
+
+// ============================================================================
+// Large-map queries: overview aggregations, topology slices, neighborhoods.
+// Instead of reading the whole topology (a dedup over every raw service-map doc, re-run per
+// page and capped at MAX_EDGE_PAGES), a large map reads aggregations only: node lists for the
+// Application / group levels, and per-connection aggregations for the slice on screen (an
+// opened environment or group, or a focused service's neighborhood). Every aggregation ends in
+// `head AGGREGATION_ROW_LIMIT` (otherwise core's PPL strategy caps it at
+// `discover:aggregationSampleSize`), and callers keep each under AGGREGATION_BUCKET_CAP (the
+// 2.x engine's per-aggregation bucket limit) by batching or splitting.
+// ============================================================================
+
+const aggregationHead = () => ` | head ${APPLICATION_MAP_CONSTANTS.AGGREGATION_ROW_LIMIT}`;
+
+/** Map node sides in the service-map document. */
+export type ServiceMapSide = 'source' | 'target';
+
+/** A group-by attribute path is embedded in a query field name, so only plain paths are allowed. */
+const isSafeAttributePath = (attribute: string) => /^[A-Za-z0-9_.-]+$/.test(attribute);
+
+/** `sourceNode.groupByAttributes.<attribute>`, backquoted (attributes are dotted paths). */
+export const groupByAttributeField = (side: ServiceMapSide, attribute: string): string => {
+  if (!isSafeAttributePath(attribute)) throw new Error(`Invalid group-by attribute: ${attribute}`);
+  return `\`${side}Node.groupByAttributes.${attribute}\``;
+};
+
+const quoteList = (values: string[]) => values.map((v) => `'${escapePPLString(v)}'`).join(', ');
+
+/**
+ * Nodes per environment on one side of the connections (approximate distinct names), to batch
+ * the node-list aggregations under AGGREGATION_BUCKET_CAP. A null environment comes back as a
+ * null row.
+ */
+export function getQueryServiceMapEnvironmentSizes(
+  queryIndex: string,
+  side: ServiceMapSide,
+  startTime?: string | Date,
+  endTime?: string | Date
+): string {
+  const n = `${side}Node`;
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query += ` | stats distinct_count(${n}.keyAttributes.name) as nodes by ${n}.keyAttributes.environment`;
+  return query + aggregationHead();
+}
+
+/**
+ * The nodes on one side of the connections in some environments (an aggregation: one pass, no
+ * row paging), optionally with one group-by attribute's value per node. `environments` lists
+ * the environments to include; null stands for nodes without one.
+ *
+ * source=idx | where <time> | where sourceNode.keyAttributes.environment in ('a', 'b')
+ *   | stats count() by sourceNode.keyAttributes.environment, sourceNode.keyAttributes.name,
+ *     sourceNode.type[, `sourceNode.groupByAttributes.<attr>`] | head 10000
+ */
+export function getQueryServiceMapNodes(
+  queryIndex: string,
+  side: ServiceMapSide,
+  startTime?: string | Date,
+  endTime?: string | Date,
+  groupByAttribute?: string,
+  environments?: Array<string | null>
+): string {
+  const n = `${side}Node`;
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  if (environments) {
+    const named = environments.filter((e): e is string => e !== null);
+    const clauses = [
+      ...(named.length ? [`${n}.keyAttributes.environment in (${quoteList(named)})`] : []),
+      ...(named.length < environments.length ? [`isnull(${n}.keyAttributes.environment)`] : []),
+    ];
+    query += ` | where ${clauses.join(' or ')}`;
+  }
+  query += ` | stats count() by ${n}.keyAttributes.environment, ${n}.keyAttributes.name, ${n}.type`;
+  if (groupByAttribute) query += `, ${groupByAttributeField(side, groupByAttribute)}`;
+  return query + aggregationHead();
+}
+
+/** The index's fields (`describe`): the group-by attribute keys come from the mapping. */
+export function getQueryServiceMapFields(queryIndex: string): string {
+  return `describe ${queryIndex} | fields COLUMN_NAME`;
+}
+
+/** Which connections a topology slice holds (either end matching, or `side`'s end only). */
+export type ServiceMapSliceFilter =
+  | { kind: 'environment'; environment: string }
+  | { kind: 'attribute'; attribute: string; value: string }
+  | { kind: 'names'; names: string[]; side?: ServiceMapSide };
+
+/** `where` clause for a slice: connections whose source or target matches. */
+export function serviceMapSliceWhere(filter: ServiceMapSliceFilter): string {
+  if (filter.kind === 'environment') {
+    const env = escapePPLString(filter.environment);
+    return ` | where sourceNode.keyAttributes.environment = '${env}' or targetNode.keyAttributes.environment = '${env}'`;
+  }
+  if (filter.kind === 'attribute') {
+    const value = escapePPLString(filter.value);
+    return ` | where ${groupByAttributeField('source', filter.attribute)} = '${value}' or ${groupByAttributeField(
+      'target',
+      filter.attribute
+    )} = '${value}'`;
+  }
+  const list = quoteList(filter.names);
+  const sides: ServiceMapSide[] = filter.side ? [filter.side] : ['source', 'target'];
+  return ` | where ${sides.map((side) => `${side}Node.keyAttributes.name in (${list})`).join(' or ')}`;
+}
+
+/** A slice's topology, paged like getQueryGetServiceMap (fast on 3.x; see getServiceMapSlice). */
+export function getQueryServiceMapSlice(
+  queryIndex: string,
+  filter: ServiceMapSliceFilter,
+  startTime?: string | Date,
+  endTime?: string | Date,
+  offset: number = 0
+): string {
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query += serviceMapSliceWhere(filter);
+  query += ` | dedup nodeConnectionHash`;
+  query += pagedEdgeClause(
+    'sourceNode.keyAttributes, sourceNode.type, targetNode.keyAttributes, targetNode.type, sourceNode.groupByAttributes, targetNode.groupByAttributes',
+    offset
+  );
+  return query;
+}
+
+/** Distinct connections in a slice (see getQueryDistinctEdgeCount). */
+export function getQuerySliceDistinctEdgeCount(
+  queryIndex: string,
+  filter: ServiceMapSliceFilter,
+  startTime?: string | Date,
+  endTime?: string | Date
+): string {
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query += serviceMapSliceWhere(filter);
+  query += ` | stats distinct_count(nodeConnectionHash) as edges`;
+  return query;
+}
+
+/**
+ * The connections of a slice as an aggregation over both ends' keys: exact (every doc in the
+ * range counts, no dedup row limit) and one pass, unlike paging a dedup. `chunk` narrows it to
+ * the connections whose `side` end is one of some names, to split a slice that reached
+ * AGGREGATION_BUCKET_CAP.
+ */
+export function getQueryServiceMapSliceEdges(
+  queryIndex: string,
+  filter: ServiceMapSliceFilter,
+  startTime?: string | Date,
+  endTime?: string | Date,
+  chunk?: { side: ServiceMapSide; names: string[] }
+): string {
+  let query = `source=${queryIndex}`;
+  query += buildTimeFilterClause(startTime, endTime);
+  query += serviceMapSliceWhere(filter);
+  if (chunk)
+    query += ` | where ${chunk.side}Node.keyAttributes.name in (${quoteList(chunk.names)})`;
+  query +=
+    ' | stats count() by sourceNode.keyAttributes.environment, sourceNode.keyAttributes.name, sourceNode.type, targetNode.keyAttributes.environment, targetNode.keyAttributes.name, targetNode.type';
+  return query + aggregationHead();
 }

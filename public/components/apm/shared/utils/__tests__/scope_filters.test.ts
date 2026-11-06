@@ -97,4 +97,27 @@ describe('buildScopeFilters', () => {
     expect(f.serviceFilter.length).toBeLessThan(MAX_SCOPED_FILTER_CHARS);
     expect(f).toMatchObject({ bounded: false, fellBack: true, serviceFilter: '' });
   });
+
+  it('keeps the kinds of rows in scope in the fallback (a services-only search skips dependencies)', () => {
+    const many = Array.from({ length: 200 }, (_, i) => svc(`service-with-a-long-name-${i}`));
+    const f = buildScopeFilters({ catalog: [...many, dep('postgres')], scope: many });
+    expect(f).toMatchObject({ fellBack: true, runServices: true, runDependencies: false });
+    expect(f.dependencyBatches).toEqual([]);
+  });
+
+  it('always lists dependency rows as bounded name batches, scoped or not', () => {
+    const deps = Array.from({ length: 250 }, (_, i) => dep(`db-${i}`));
+    const unscoped = buildScopeFilters({
+      catalog: [svc('a'), ...deps],
+      scope: [svc('a'), ...deps],
+    });
+    expect(unscoped.bounded).toBe(false);
+    expect(unscoped.dependencyBatches.map((b) => b.names.length)).toEqual([100, 100, 50]);
+    expect(unscoped.dependencyBatches[0].filter).toMatch(/^remoteService=~"db-0\|db-1\|/);
+
+    const scoped = buildScopeFilters({ catalog: [svc('a'), ...deps], scope: deps.slice(0, 3) });
+    expect(scoped.dependencyBatches).toEqual([
+      { names: ['db-0', 'db-1', 'db-2'], filter: 'remoteService=~"db-0|db-1|db-2"' },
+    ]);
+  });
 });

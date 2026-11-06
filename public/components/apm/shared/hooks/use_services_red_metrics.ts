@@ -26,6 +26,7 @@ import { getTimeInSeconds, calculateTimeRangeDuration } from '../utils/time_util
 import { calculateStep, RESOLUTION_LOW } from '../utils/step_utils';
 import { useApmConfig } from '../../config/apm_config_context';
 import { isDependencyType } from '../utils/platform_utils';
+import { BatchLimiter, runBatched, servicesPageBatchLimiter } from '../utils/name_batches';
 
 // Debounce for the visible-page sparkline fetch: skimming past pages within
 // this window will not fire a request for each intermediate page.
@@ -98,6 +99,11 @@ export interface UseServicesRedMetricsParams {
    * range's list and again when the new list lands. Defaults to true.
    */
   enabled?: boolean;
+  /**
+   * Limiter for the batched dependency queries, shared with the page's other batched queries
+   * (see BatchLimiter). Defaults to the Services page's shared limiter.
+   */
+  limiter?: BatchLimiter;
 }
 
 export interface UseServicesRedMetricsResult {
@@ -215,6 +221,7 @@ export const useServicesRedMetrics = (
   const endTimeSec = useMemo(() => getTimeInSeconds(params.endTime), [params.endTime]);
 
   const ready = params.services.length > 0 && !!promqlService;
+  const limiter = params.limiter ?? servicesPageBatchLimiter;
   // Reuse key: what the whole-catalog results depend on.
   const catalogGen = `${prometheusConnectionId}|${catalogKey}|${startTimeSec}|${endTimeSec}|${refetchAllTrigger}`;
   // Rows a fetch fills: the scope when bounded, else the whole catalog (what reuse relies on).
@@ -234,12 +241,13 @@ export const useServicesRedMetrics = (
       setFailureRatioInstantMap(new Map());
     },
     run: async (signal) => {
-      const { bounded, serviceFilter, dependencyFilter, runServices, runDependencies } =
+      const { bounded, serviceFilter, dependencyBatches, runServices, runDependencies } =
         instantFilters;
       const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
       const runInstant = (query: string) =>
         promqlService!.executeInstantQuery({ query, time: endTimeSec, signal });
       const skipped = Promise.resolve(null);
+      const noBatches = Promise.resolve(NO_DEPENDENCY_RESULTS);
       const [total, failureRatio, depTotal, depFailureRatio] = await Promise.allSettled([
         runServices
           ? runInstant(getQueryServicesThroughputTotal(serviceFilter, timeRangeDuration))
@@ -248,16 +256,26 @@ export const useServicesRedMetrics = (
           ? runInstant(getQueryServicesFailureRatioTotal(serviceFilter, timeRangeDuration))
           : skipped,
         // Dependency (database / messaging / external) rows have no SERVER-span series; these
-        // caller-derived (remoteService=) queries fill them in.
+        // caller-derived (remoteService=) queries fill them in, one bounded name batch at a time.
         runDependencies
-          ? runInstant(getQueryServiceMapDependencyThroughput(timeRangeDuration, dependencyFilter))
-          : skipped,
-        runDependencies
-          ? runInstant(
-              getQueryServiceMapDependencyFailureRatioTotal(timeRangeDuration, dependencyFilter)
+          ? runDependencyBatches(
+              dependencyBatches,
+              runInstant,
+              (f) => getQueryServiceMapDependencyThroughput(timeRangeDuration, f),
+              { signal, limiter }
             )
-          : skipped,
+          : noBatches,
+        runDependencies
+          ? runDependencyBatches(
+              dependencyBatches,
+              runInstant,
+              (f) => getQueryServiceMapDependencyFailureRatioTotal(timeRangeDuration, f),
+              { signal, limiter }
+            )
+          : noBatches,
       ]);
+      const depTotals = valueOrEmpty(depTotal);
+      const depFailureRatios = valueOrEmpty(depFailureRatio);
 
       const newTotalMap = new Map<string, number>();
       const newFailureRatioMap = new Map<string, number>();
@@ -265,11 +283,17 @@ export const useServicesRedMetrics = (
         const key = serviceNodeKey(serviceName, environment);
         // Dependency rows use caller-derived metrics; service rows the SERVER-span series.
         const isDependency = isDependencyType(type);
-        setFromResult(newTotalMap, key, isDependency ? depTotal : total, serviceName, environment);
+        setFromResult(
+          newTotalMap,
+          key,
+          isDependency ? depTotals.resultFor(serviceName) : total,
+          serviceName,
+          environment
+        );
         setFromResult(
           newFailureRatioMap,
           key,
-          isDependency ? depFailureRatio : failureRatio,
+          isDependency ? depFailureRatios.resultFor(serviceName) : failureRatio,
           serviceName,
           environment
         );
@@ -279,7 +303,11 @@ export const useServicesRedMetrics = (
           setTotalCountMap(newTotalMap);
           setFailureRatioInstantMap(newFailureRatioMap);
         },
-        error: firstRejection([total, failureRatio, depTotal, depFailureRatio], 'instant metrics'),
+        error:
+          firstRejection(
+            [total, failureRatio, ...depTotals.all, ...depFailureRatios.all],
+            'instant metrics'
+          ) ?? truncationError([total, failureRatio], 'instant metrics'),
       };
     },
   });
@@ -295,44 +323,48 @@ export const useServicesRedMetrics = (
     filtersKey,
     onReset: () => setLatencyInstantMap(new Map()),
     run: async (signal) => {
-      const { bounded, serviceFilter, dependencyFilter, runServices, runDependencies } =
+      const { bounded, serviceFilter, dependencyBatches, runServices, runDependencies } =
         instantFilters;
       const percentileValue = toPercentileValue(params.latencyPercentile);
       const timeRangeDuration = calculateTimeRangeDuration(params.startTime, params.endTime);
       const runInstant = (query: string) =>
         promqlService!.executeInstantQuery({ query, time: endTimeSec, signal });
       const skipped = Promise.resolve(null);
-      const [svcLatency, depLatency] = await Promise.allSettled([
+      const [svcLatency, depLatencyResult] = await Promise.allSettled([
         runServices
           ? runInstant(
               getQueryServicesLatencyInstant(serviceFilter, percentileValue, timeRangeDuration)
             )
           : skipped,
-        // Caller-derived latency for dependency nodes (no server-span buckets).
+        // Caller-derived latency for dependency nodes (no server-span buckets), per name batch:
+        // this histogram_quantile over every remote target is the query that timed out at scale.
         runDependencies
-          ? runInstant(
-              getQueryServiceMapDependencyLatencyInstant(
-                percentileValue,
-                timeRangeDuration,
-                dependencyFilter
-              )
+          ? runDependencyBatches(
+              dependencyBatches,
+              runInstant,
+              (f) =>
+                getQueryServiceMapDependencyLatencyInstant(percentileValue, timeRangeDuration, f),
+              { signal, limiter }
             )
-          : skipped,
+          : Promise.resolve(NO_DEPENDENCY_RESULTS),
       ]);
+      const depLatency = valueOrEmpty(depLatencyResult);
 
       const newLatencyMap = new Map<string, number>();
       rowsFor(bounded).forEach(({ serviceName, environment, type }) => {
         setFromResult(
           newLatencyMap,
           serviceNodeKey(serviceName, environment),
-          isDependencyType(type) ? depLatency : svcLatency,
+          isDependencyType(type) ? depLatency.resultFor(serviceName) : svcLatency,
           serviceName,
           environment
         );
       });
       return {
         apply: () => setLatencyInstantMap(newLatencyMap),
-        error: firstRejection([svcLatency, depLatency], 'latency metrics'),
+        error:
+          firstRejection([svcLatency, ...depLatency.all], 'latency metrics') ??
+          truncationError([svcLatency], 'latency metrics'),
       };
     },
   });
@@ -715,6 +747,69 @@ const toError = (reason: unknown): Error =>
   reason instanceof Error ? reason : new Error('Unknown error');
 
 /** First rejected result as an Error (logged), or null. */
+interface DependencyResults {
+  /** The settled result of the batch that holds `name`. */
+  resultFor: (name: string) => PromiseSettledResult<unknown>;
+  all: Array<PromiseSettledResult<unknown>>;
+}
+
+const NOT_QUERIED: PromiseSettledResult<unknown> = {
+  status: 'rejected',
+  reason: new Error('Not queried'),
+};
+const NO_DEPENDENCY_RESULTS: DependencyResults = { resultFor: () => NOT_QUERIED, all: [] };
+
+const valueOrEmpty = (r: PromiseSettledResult<DependencyResults>): DependencyResults =>
+  r.status === 'fulfilled' ? r.value : NO_DEPENDENCY_RESULTS;
+
+/**
+ * Run a caller-derived dependency query once per name batch (bounded concurrency) and index the
+ * results by dependency name. A batch that came back truncated at the server's series limit
+ * counts as failed, so its rows read as unavailable rather than partial.
+ */
+async function runDependencyBatches(
+  batches: Array<{ names: string[]; filter: string }>,
+  runInstant: (query: string) => Promise<unknown>,
+  build: (remoteFilter: string) => string,
+  options: { signal: AbortSignal; limiter: BatchLimiter }
+): Promise<DependencyResults> {
+  // Per-batch results (a failed batch blanks only its rows), so not fail-fast; an abort stops
+  // the batches not yet started.
+  const all = await runBatched(
+    batches ?? [],
+    async (b) => {
+      const value = await runInstant(build(b.filter));
+      if (isTruncated(value)) {
+        throw new Error('Too many series for one batch');
+      }
+      return value;
+    },
+    options
+  );
+  const byName = new Map<string, PromiseSettledResult<unknown>>();
+  (batches ?? []).forEach((b, i) => b.names.forEach((n) => byName.set(n, all[i])));
+  return { resultFor: (name) => byName.get(name) ?? NOT_QUERIED, all };
+}
+
+/** The response was cut at the server's row limit (e.g. 2,000 series), so it is partial. */
+const isTruncated = (value: unknown): boolean =>
+  !!(value as { meta?: { truncation?: { tableTruncated?: boolean } } } | null)?.meta?.truncation
+    ?.tableTruncated;
+
+/**
+ * An Error (logged) when a fulfilled service query came back truncated: its missing rows are left
+ * unavailable (see setFromResult), and the fetch is not treated as covering every row.
+ */
+function truncationError(
+  results: Array<PromiseSettledResult<unknown>>,
+  what: string
+): Error | null {
+  if (!results.some((r) => r.status === 'fulfilled' && isTruncated(r.value))) return null;
+  const error = new Error(`Too many services to load ${what} in one query`);
+  console.error(`[useServicesRedMetrics] Truncated response fetching ${what}:`, error);
+  return error;
+}
+
 function firstRejection(results: Array<PromiseSettledResult<unknown>>, what: string): Error | null {
   const rejected = results.find((r) => r.status === 'rejected') as
     PromiseRejectedResult | undefined;
@@ -725,7 +820,8 @@ function firstRejection(results: Array<PromiseSettledResult<unknown>>, what: str
 
 /**
  * Set a row's instant value from a settled query. A rejected query leaves the row unset, so it
- * reads as unavailable rather than 0; a fulfilled query with no series for the row is a real 0.
+ * reads as unavailable rather than 0; a fulfilled query with no series for the row is a real 0,
+ * unless the response was truncated (the row may be among the series cut), then it is unset too.
  */
 function setFromResult(
   map: Map<string, number>,
@@ -736,6 +832,7 @@ function setFromResult(
 ): void {
   if (result.status !== 'fulfilled') return;
   const data = extractServiceData(result.value, serviceName, environment);
+  if (data.length === 0 && isTruncated(result.value)) return;
   map.set(key, data.length > 0 ? data[0].value : 0);
 }
 

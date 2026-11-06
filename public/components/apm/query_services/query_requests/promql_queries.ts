@@ -1291,21 +1291,37 @@ export const getQueryServiceMapDependencyThroughput = (
 
 /**
  * Dependency-node faults — client-side fault count aggregated by target.
+ * `remoteFilter` optionally bounds the targets (see dependencyNamesFilter).
  */
-export const getQueryServiceMapDependencyFaults = (timeRange: string): string =>
+export const getQueryServiceMapDependencyFaults = (
+  timeRange: string,
+  remoteFilter?: string
+): string =>
   relabelRemoteToService(
     withConsumerFallback(
-      (f) => `${BY_TARGET} (sum_over_time(fault{${serviceMapDependencySelector(f)}}[${timeRange}]))`
+      (f) =>
+        `${BY_TARGET} (sum_over_time(fault{${serviceMapDependencySelector(
+          f,
+          remoteFilter
+        )}}[${timeRange}]))`
     )
   );
 
 /**
  * Dependency-node errors — client-side error count aggregated by target.
+ * `remoteFilter` optionally bounds the targets (see dependencyNamesFilter).
  */
-export const getQueryServiceMapDependencyErrors = (timeRange: string): string =>
+export const getQueryServiceMapDependencyErrors = (
+  timeRange: string,
+  remoteFilter?: string
+): string =>
   relabelRemoteToService(
     withConsumerFallback(
-      (f) => `${BY_TARGET} (sum_over_time(error{${serviceMapDependencySelector(f)}}[${timeRange}]))`
+      (f) =>
+        `${BY_TARGET} (sum_over_time(error{${serviceMapDependencySelector(
+          f,
+          remoteFilter
+        )}}[${timeRange}]))`
     )
   );
 
@@ -1417,6 +1433,24 @@ export const getQueryServiceMapDependencyLatencyRange = (
 // ============================================================================
 // GROUP METRICS (for Topology Map Group By feature)
 // ============================================================================
+
+/**
+ * Map group totals: request / fault / error counts over the range for every group at once,
+ * `sum by (<label>)` (or one total with no label), from SERVER-span series. One series per
+ * group, so the grouped map's cards need three small queries instead of per-node metrics for
+ * every service in the workspace.
+ * @param metric - `request`, `fault` or `error`
+ * @param groupLabel - Prometheus label to group by (e.g. `environment`), or null for one total
+ * @page Topology Map — Application / group node totals (via useMapGroupTotals hook)
+ */
+export const getQueryMapGroupTotals = (
+  metric: 'request' | 'fault' | 'error',
+  groupLabel: string | null,
+  timeRange: string
+): string =>
+  `${groupLabel ? `sum by (${groupLabel})` : 'sum'} (sum_over_time(${metric}{${buildServicesNodeSelector(
+    ''
+  )}}[${timeRange}]))`;
 
 /**
  * Group aggregated throughput

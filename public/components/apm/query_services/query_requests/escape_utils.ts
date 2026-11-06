@@ -22,6 +22,13 @@ export const escapePromQLLabel = (value: string): string =>
 export const escapePromQLRegex = (value: string): string =>
   escapePromQLLabel(value.replace(/[\\.+*?()[\]{}|^$]/g, (ch) => `\\${ch}`));
 
-/** Escape a value for use inside a single-quoted PPL string literal. */
+/**
+ * Escape a value for use inside a single-quoted PPL string literal: `\` as `\\` and `'` as
+ * `''`. The lexer treats a backslash as an escape, so an unescaped one could end the string
+ * early (`x\'` followed by PPL) or leave it unterminated (a trailing `\`). Doubling the quote
+ * is the quote escape both engines unescape (2.x keeps `\'` as written). Verified on 2.19 and
+ * 3.9: injection-shaped values match only themselves; on 2.x, which keeps `\\` as written,
+ * a name containing a backslash matches nothing rather than something else.
+ */
 export const escapePPLString = (value: string): string =>
-  value.replace(/[\\']/g, (ch) => `\\${ch}`);
+  value.replace(/\\/g, '\\\\').replace(/'/g, "''");

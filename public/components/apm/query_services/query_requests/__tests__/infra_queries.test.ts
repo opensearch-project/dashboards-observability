@@ -67,7 +67,7 @@ describe('infra_queries', () => {
 
     it('escapes the service name', () => {
       expect(getQueryServiceInfraKeys('idx', "o'brien", ['host.id'], start, end)).toContain(
-        "'o\\'brien'"
+        "'o''brien'"
       );
     });
   });

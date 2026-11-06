@@ -96,6 +96,9 @@ const toMetricsNode = (s: ServiceTableItem) => ({
 // Sort value for a metric that may be unavailable (its query failed): below every real value.
 const UNAVAILABLE_SORT_VALUE = -1;
 
+/** Initial node-type filter: services only (see selectedTypes). */
+const DEFAULT_TYPE_FILTER: Record<string, boolean> = { service: true };
+
 const LATENCY_PERCENTILE_OPTIONS = [
   { id: 'p99', label: 'P99' },
   { id: 'p90', label: 'P90' },
@@ -126,6 +129,8 @@ interface ServicesTablePanelProps {
   metricsFailed: boolean;
   /** The filter was too broad to narrow the metrics queries. */
   scopeFellBack: boolean;
+  /** The service list is partial (connection page cap reached, or a later page failed). */
+  catalogTruncated?: boolean;
   latencyPercentile: string;
   setLatencyPercentile: (v: 'p99' | 'p90' | 'p50') => void;
   onServiceClick?: (
@@ -174,6 +179,7 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
   scopeReady,
   metricsFailed,
   scopeFellBack,
+  catalogTruncated,
   latencyPercentile,
   setLatencyPercentile,
   onServiceClick,
@@ -266,6 +272,20 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size="s" />
 
+      {catalogTruncated && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="alert"
+            title={i18nTexts.metricsNotice.catalogPartialTitle}
+            data-test-subj="servicesCatalogPartialCallout"
+          >
+            {i18nTexts.metricsNotice.catalogPartialBody}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
       {metricsFailed && !isTableLoading && (
         <>
           <EuiCallOut
@@ -367,8 +387,11 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   const [flyoutState, setFlyoutState] = useState<FlyoutState | null>(null);
 
   const [selectedEnvironments, setSelectedEnvironments] = useState<Record<string, boolean>>({});
-  // Node-type filter (service / database / messaging / external).
-  const [selectedTypes, setSelectedTypes] = useState<Record<string, boolean>>({});
+  // Node-type filter (service / database / messaging / external). Defaults to services only:
+  // large deployments have many more dependencies than services, and the whole-range
+  // dependency metric queries (caller-derived, over every remote target) are the heaviest on
+  // the page. Selecting a dependency type (or clearing the filter) brings them in.
+  const [selectedTypes, setSelectedTypes] = useState<Record<string, boolean>>(DEFAULT_TYPE_FILTER);
   const [selectedGroupByAttributes, setSelectedGroupByAttributes] = useState<
     Record<string, Record<string, boolean>>
   >({});
@@ -445,6 +468,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     isLoading,
     error,
     availableGroupByAttributes,
+    truncated: catalogTruncated,
     refetch,
   } = useServices({
     startTime: parsedTimeRange.startTime,
@@ -1022,12 +1046,19 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     const selectedTypeValues = Object.entries(selectedTypes)
       .filter(([_, isSelected]) => isSelected)
       .map(([type]) => getNodeTypeLabel(type));
-    if (hasDependencyRows && selectedTypeValues.length > 0) {
+    // The services-only default is the baseline, not an applied filter: no badge for it.
+    const isDefaultTypes =
+      Object.keys(selectedTypes)
+        .filter((k) => selectedTypes[k])
+        .join('|') === Object.keys(DEFAULT_TYPE_FILTER).join('|');
+    if (hasDependencyRows && selectedTypeValues.length > 0 && !isDefaultTypes) {
       badges.push({
         key: 'type',
         category: i18nTexts.table.type,
         values: selectedTypeValues,
-        onRemove: () => setSelectedTypes({}),
+        // Back to the default (services only), not to every type: all types would bring back the
+        // whole-catalog dependency queries.
+        onRemove: () => setSelectedTypes(DEFAULT_TYPE_FILTER),
       });
     }
 
@@ -1114,7 +1145,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   // Clear all filters handler
   const handleClearAllFilters = useCallback(() => {
     setSelectedEnvironments({});
-    setSelectedTypes({});
+    setSelectedTypes(DEFAULT_TYPE_FILTER);
     setLatencyRange([metricRanges.latencyMin, metricRanges.latencyMax]);
     setThroughputRange([metricRanges.throughputMin, metricRanges.throughputMax]);
     setSelectedFailureRateThresholds([]);
@@ -1989,6 +2020,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                           scopeReady={!isLoading}
                           metricsFailed={!!metricsError}
                           scopeFellBack={scopeFellBack}
+                          catalogTruncated={catalogTruncated}
                           latencyPercentile={latencyPercentile}
                           setLatencyPercentile={setLatencyPercentile}
                           onServiceClick={onServiceClick}

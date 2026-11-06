@@ -47,9 +47,15 @@ describe('escape_utils', () => {
   });
 
   describe('escapePPLString', () => {
-    it('escapes single quotes and backslashes for single-quoted literals', () => {
-      expect(escapePPLString("a'b")).toBe("a\\'b");
+    it('doubles single quotes, which both the 2.x and 3.x engines unescape', () => {
+      expect(escapePPLString("O'Brien")).toBe("O''Brien");
+      expect(escapePPLString("a''b")).toBe("a''''b");
+    });
+
+    it('escapes backslashes, so a value cannot end the string early or leave it open', () => {
       expect(escapePPLString('a\\b')).toBe('a\\\\b');
+      expect(escapePPLString('x\\')).toBe('x\\\\');
+      expect(escapePPLString("x\\' or name = 'y")).toBe("x\\\\'' or name = ''y");
     });
 
     it('leaves double quotes untouched', () => {

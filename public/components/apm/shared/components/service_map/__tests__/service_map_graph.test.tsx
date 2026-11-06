@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
 
 // Count CelestialMap mounts: a remount on refetch is what caused the flicker.
 const mockCelestialMount = jest.fn();
@@ -24,7 +24,8 @@ jest.mock('@osd/apm-topology', () => {
 });
 
 import { ServiceMapGraph, ServiceMapGraphProps } from '../service_map_graph';
-import { ServiceMapNode } from '../../../../common/types/service_map_types';
+import { ServiceMapNode, ServiceMapNodeMetrics } from '../../../../common/types/service_map_types';
+import { ErrorRateThreshold } from '../../../../common/constants';
 
 const node: ServiceMapNode = {
   NodeId: 'checkout',
@@ -90,6 +91,50 @@ describe('ServiceMapGraph loading states', () => {
     rerender(<ServiceMapGraph {...baseProps} nodes={[{ ...node }]} isLoading={false} />);
     expect(queryByTestId('serviceMapRefetchProgress')).not.toBeInTheDocument();
     expect(mockCelestialMount).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ServiceMapGraph per-node metrics loading', () => {
+  const servicesLevel = {
+    ...baseProps.navigationState,
+    level: 'services' as const,
+    breadcrumbs: [{ id: 'services', label: 'Services' }],
+  };
+  const other: ServiceMapNode = {
+    ...node,
+    NodeId: 'cart',
+    Name: 'cart',
+    KeyAttributes: { ...node.KeyAttributes, Name: 'cart' },
+  };
+  const iconsById = () => {
+    const props = mockCelestialProps.mock.calls.slice(-1)[0][0];
+    return Object.fromEntries(
+      props.map.root.nodes.map((n: { id: string; data: { icon: unknown } }) => [n.id, n.data.icon])
+    );
+  };
+
+  it('shows a spinner on nodes whose metrics are pending, the type icon on the rest', () => {
+    render(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={[node, other]}
+        navigationState={servicesLevel}
+        pendingNodeIds={new Set(['cart::generic:default'])}
+      />
+    );
+    const icons = iconsById();
+    expect(icons.checkout).toBe('icon');
+    expect(icons.cart).not.toBe('icon');
+    expect(render(<>{icons.cart}</>).getByTestId('serviceMapNodeMetricsLoading')).toBeTruthy();
+  });
+
+  it('shows a spinner on the application node until every node has loaded', () => {
+    const { rerender } = render(
+      <ServiceMapGraph {...baseProps} pendingNodeIds={new Set(['checkout::generic:default'])} />
+    );
+    expect(iconsById()['application-root']).not.toBe('icon');
+    rerender(<ServiceMapGraph {...baseProps} pendingNodeIds={new Set()} />);
+    expect(iconsById()['application-root']).toBe('icon');
   });
 });
 
@@ -179,5 +224,343 @@ describe('ServiceMapGraph dependency stacks on large maps', () => {
     const selected = lastMapNodes().find((n) => n.id === 'pg-3');
     expect(selected.data.aggregatedNodeId).toBeUndefined();
     expect(lastMapNodes().filter((n) => n.data.aggregatedNodeId)).toHaveLength(9);
+  });
+});
+
+describe('ServiceMapGraph on maps too large to draw whole', () => {
+  const svc = (name: string, environment: string): ServiceMapNode => ({
+    ...node,
+    NodeId: name,
+    Name: name,
+    KeyAttributes: { Environment: environment, Name: name, Type: 'Service' },
+  });
+  // 600 services across 3 environments: above the 500-node cap, ~200 per environment.
+  const envs = ['dev', 'stage', 'prod'];
+  const large = [...Array(600)].map((_, i) => svc(`svc-${i}`, envs[i % 3]));
+  const lastProps = () => mockCelestialProps.mock.calls.slice(-1)[0][0];
+
+  beforeEach(() => mockCelestialProps.mockClear());
+
+  it('drilling into the application opens the map grouped by environment', () => {
+    const onFiltersChange = jest.fn();
+    const onNavigationStateChange = jest.fn();
+    render(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={large}
+        onFiltersChange={onFiltersChange}
+        onNavigationStateChange={onNavigationStateChange}
+      />
+    );
+    act(() => lastProps().addBreadcrumb('Application', { isGroup: true }));
+    expect(onFiltersChange).toHaveBeenCalledWith({ ...baseProps.filters, groupBy: 'environment' });
+    expect(onNavigationStateChange).not.toHaveBeenCalled();
+  });
+
+  it('drilling into a small application still opens the services view', () => {
+    const onFiltersChange = jest.fn();
+    const onNavigationStateChange = jest.fn();
+    render(
+      <ServiceMapGraph
+        {...baseProps}
+        onFiltersChange={onFiltersChange}
+        onNavigationStateChange={onNavigationStateChange}
+      />
+    );
+    act(() => lastProps().addBreadcrumb('Application', { isGroup: true }));
+    expect(onFiltersChange).not.toHaveBeenCalled();
+    expect(onNavigationStateChange).toHaveBeenCalledWith(
+      expect.objectContaining({ level: 'services' })
+    );
+  });
+
+  it('groups by environment with a notice, and an environment opens its services', () => {
+    const groupByEnv = {
+      level: 'groupBy' as const,
+      breadcrumbs: [{ id: 'groupBy', label: 'environment' }],
+      groupByAttribute: 'environment',
+      groupByValue: null,
+    };
+    const { getByTestId, rerender } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={large}
+        filters={{ ...baseProps.filters, groupBy: 'environment' }}
+        navigationState={groupByEnv}
+      />
+    );
+    const groups = lastProps().map.root.nodes;
+    expect(groups.map((n: { id: string }) => n.id).sort()).toEqual([
+      'group-dev',
+      'group-prod',
+      'group-stage',
+    ]);
+    expect(groups[0].data.numberOfServices).toBe('200');
+    expect(getByTestId('largeMapGroupedNotice')).toHaveTextContent(
+      'This map has 600 nodes, too many to draw at once (the limit is 500)'
+    );
+
+    rerender(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={large}
+        filters={{ ...baseProps.filters, groupBy: 'environment' }}
+        navigationState={{ ...groupByEnv, level: 'groupByValue', groupByValue: 'dev' }}
+      />
+    );
+    expect(lastProps().map.root.nodes).toHaveLength(200);
+  });
+
+  it('the too-many notice offers grouping by environment', () => {
+    const onFiltersChange = jest.fn();
+    const { getByTestId } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={large}
+        navigationState={{ ...baseProps.navigationState, level: 'services' }}
+        onFiltersChange={onFiltersChange}
+      />
+    );
+    getByTestId('serviceMapGroupByEnvironment').click();
+    expect(onFiltersChange).toHaveBeenCalledWith({ ...baseProps.filters, groupBy: 'environment' });
+  });
+});
+
+describe('ServiceMapGraph map notices', () => {
+  it('places the dependency-stacks notice clear of the breadcrumb and lets it be dismissed', () => {
+    const svc = (name: string): ServiceMapNode => ({
+      ...node,
+      NodeId: name,
+      Name: name,
+      KeyAttributes: { Environment: 'generic:default', Name: name, Type: 'Service' },
+    });
+    const db = (name: string): ServiceMapNode => ({
+      ...svc(name),
+      KeyAttributes: { Environment: 'generic:default', Name: name, Type: 'database' },
+    });
+    const services = [...Array(150)].map((_, i) => svc(`svc-${i}`));
+    const dbs = [...Array(10)].map((_, i) => db(`pg-${i}`));
+    const edges = dbs.map((d) => ({
+      EdgeId: `svc-0->${d.NodeId}`,
+      SourceNodeId: 'svc-0',
+      DestinationNodeId: d.NodeId,
+      StatisticReferences: {},
+    }));
+    const { getByTestId, queryByTestId } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={[...services, ...dbs]}
+        edges={edges}
+        navigationState={{ ...baseProps.navigationState, level: 'services' }}
+      />
+    );
+    const notice = getByTestId('dependencyStacksNotice');
+    // Notices sit at the bottom of the map, clear of the breadcrumb at the top.
+    expect(getByTestId('serviceMapNotices').style.bottom).toBe('8px');
+    expect(getByTestId('serviceMapNotices').contains(notice)).toBe(true);
+    act(() => (notice.querySelector('button[aria-label]') as HTMLButtonElement).click());
+    expect(queryByTestId('dependencyStacksNotice')).toBeNull();
+  });
+});
+
+describe('ServiceMapGraph filters that match nothing', () => {
+  const servicesLevel = { ...baseProps.navigationState, level: 'services' as const };
+  const healthy = new Map([
+    [
+      'checkout::generic:default',
+      { totalRequests: 100, totalErrors: 0, totalFaults: 0 } as ServiceMapNodeMetrics,
+    ],
+  ]);
+  const lastProps = () => mockCelestialProps.mock.calls.slice(-1)[0][0];
+
+  it('fades every node and says so, instead of looking unfiltered', () => {
+    const { getByTestId } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        navigationState={servicesLevel}
+        metricsMap={healthy}
+        filters={{ ...baseProps.filters, errorRateThresholds: [ErrorRateThreshold.HIGH] }}
+      />
+    );
+    const focus = lastProps().nodesInFocus;
+    expect(focus).toHaveLength(1);
+    expect(focus[0].id).not.toBe('checkout');
+    expect(getByTestId('serviceMapNoFilterMatches')).toBeInTheDocument();
+  });
+
+  it('focuses the matching nodes when there are some', () => {
+    const { queryByTestId } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        navigationState={servicesLevel}
+        metricsMap={healthy}
+        filters={{ ...baseProps.filters, errorRateThresholds: [ErrorRateThreshold.LOW] }}
+      />
+    );
+    expect(lastProps().nodesInFocus.map((n: { id: string }) => n.id)).toEqual(['checkout']);
+    expect(queryByTestId('serviceMapNoFilterMatches')).toBeNull();
+  });
+});
+
+describe('ServiceMapGraph notices slot', () => {
+  it('renders its notices into the given container (above the map) instead of over the map', () => {
+    const slot = document.createElement('div');
+    document.body.appendChild(slot);
+    render(
+      <ServiceMapGraph
+        {...baseProps}
+        navigationState={{ ...baseProps.navigationState, level: 'services' }}
+        metricsMap={
+          new Map([
+            [
+              'checkout::generic:default',
+              { totalRequests: 100, totalErrors: 0, totalFaults: 0 } as ServiceMapNodeMetrics,
+            ],
+          ])
+        }
+        filters={{ ...baseProps.filters, errorRateThresholds: [ErrorRateThreshold.HIGH] }}
+        noticesContainer={slot}
+      />
+    );
+    expect(slot.querySelector('[data-test-subj="serviceMapNoFilterMatches"]')).not.toBeNull();
+    expect(
+      slot.querySelector('[data-test-subj="serviceMapNotices"]')?.getAttribute('style')
+    ).toBeNull();
+    slot.remove();
+  });
+});
+
+describe('ServiceMapGraph fitAll', () => {
+  const lastProps = () => mockCelestialProps.mock.calls.slice(-1)[0][0];
+  it('lets a focused view zoom out to fit everything and re-fit on resize', () => {
+    const servicesLevel = { ...baseProps.navigationState, level: 'services' as const };
+    const { rerender } = render(<ServiceMapGraph {...baseProps} navigationState={servicesLevel} />);
+    expect(lastProps().fitViewOptions).toBeUndefined();
+    expect(lastProps().refitOnResize).toBe(false);
+    rerender(<ServiceMapGraph {...baseProps} navigationState={servicesLevel} fitAll />);
+    expect(lastProps().fitViewOptions.minZoom).toBeLessThan(0.6);
+    expect(lastProps().refitOnResize).toBe(true);
+  });
+});
+
+describe('ServiceMapGraph unavailable metrics', () => {
+  const lastProps = () => mockCelestialProps.mock.calls.slice(-1)[0][0];
+  const servicesLevel = { ...baseProps.navigationState, level: 'services' as const };
+  const groupLevel = {
+    level: 'groupBy' as const,
+    breadcrumbs: [],
+    groupByAttribute: 'environment',
+    groupByValue: null,
+  };
+
+  it('a failed node says "Metrics unavailable" with a warning icon, not a healthy 0', () => {
+    render(
+      <ServiceMapGraph
+        {...baseProps}
+        navigationState={servicesLevel}
+        failedNodeIds={new Set(['checkout::generic:default'])}
+      />
+    );
+    const card = lastProps().map.root.nodes[0].data;
+    expect(card.subtitle).toContain('Metrics unavailable');
+    // No counts at all (not a real 0) for the card to show.
+    expect(card.metrics).toBeUndefined();
+    expect(render(<>{card.icon}</>).getByTestId('serviceMapNodeMetricsUnavailable')).toBeTruthy();
+  });
+
+  it('failed group totals render the groups as unavailable', () => {
+    render(
+      <ServiceMapGraph
+        {...baseProps}
+        filters={{ ...baseProps.filters, groupBy: 'environment' }}
+        navigationState={groupLevel}
+        groupTotals="failed"
+      />
+    );
+    const group = lastProps().map.root.nodes[0].data;
+    expect(group.subtitle).toBe('Metrics unavailable');
+  });
+
+  it('group rate filters keep groups whose totals are loading or failed (no false "no matches")', () => {
+    const { queryByTestId, rerender } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        filters={{
+          ...baseProps.filters,
+          groupBy: 'environment',
+          faultRateThresholds: [ErrorRateThreshold.HIGH],
+        }}
+        navigationState={groupLevel}
+        groupTotals={null}
+      />
+    );
+    expect(queryByTestId('serviceMapNoFilterMatches')).toBeNull();
+    expect(lastProps().nodesInFocus.map((n: { id: string }) => n.id)).toEqual([
+      'group-generic:default',
+    ]);
+    rerender(
+      <ServiceMapGraph
+        {...baseProps}
+        filters={{
+          ...baseProps.filters,
+          groupBy: 'environment',
+          faultRateThresholds: [ErrorRateThreshold.HIGH],
+        }}
+        navigationState={groupLevel}
+        groupTotals="failed"
+      />
+    );
+    expect(queryByTestId('serviceMapNoFilterMatches')).toBeNull();
+  });
+
+  it('a too-large view offers Focus on, and inside a group does not suggest grouping', () => {
+    const many = [...Array(510)].map((_, i) => ({
+      ...node,
+      NodeId: `s${i}`,
+      Name: `s${i}`,
+      KeyAttributes: { Environment: 'dev', Name: `s${i}`, Type: 'Service' },
+      GroupByAttributes: { team: 'pay' },
+    }));
+    const onFocusServiceSearch = jest.fn();
+    const { getByTestId, queryByTestId, getByText } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={many}
+        filters={{ ...baseProps.filters, groupBy: 'team' }}
+        navigationState={{
+          level: 'groupByValue',
+          breadcrumbs: [],
+          groupByAttribute: 'team',
+          groupByValue: 'pay',
+        }}
+        onFiltersChange={jest.fn()}
+        onFocusServiceSearch={onFocusServiceSearch}
+      />
+    );
+    getByTestId('serviceMapFocusService').click();
+    expect(onFocusServiceSearch).toHaveBeenCalled();
+    expect(queryByTestId('serviceMapGroupByEnvironment')).toBeNull();
+    expect(getByText(/This group has 510 nodes/)).toBeTruthy();
+  });
+
+  it('a too-large view with dependencies offers to hide them', () => {
+    const many = [...Array(510)].map((_, i) => ({
+      ...node,
+      NodeId: `d${i}`,
+      Name: `d${i}`,
+      KeyAttributes: { Environment: 'dev', Name: `d${i}`, Type: 'external' },
+    }));
+    const onHide = jest.fn();
+    const { getByTestId } = render(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={many}
+        navigationState={servicesLevel}
+        stackDependencies={false}
+        onHideDependencies={onHide}
+      />
+    );
+    getByTestId('serviceMapHideDependencies').click();
+    expect(onHide).toHaveBeenCalled();
   });
 });

@@ -17,9 +17,16 @@ export const applicationMapI18nTexts = {
   pageTitle: i18n.translate('observability.apm.applicationMap.pageTitle', {
     defaultMessage: 'Topology Map',
   }),
+  // On the map the search finds matches in what is on screen (zooms to them, others fade);
+  // Focus on (any service) is what moves the map.
   searchPlaceholder: i18n.translate('observability.apm.applicationMap.search.placeholder', {
-    defaultMessage: 'Filter by service name',
+    defaultMessage: 'Find in this view by service or environment',
   }),
+  // At the Application level (one card) there is nothing to find.
+  searchDisabledPlaceholder: i18n.translate(
+    'observability.apm.applicationMap.search.disabledPlaceholder',
+    { defaultMessage: 'Open an environment to find services' }
+  ),
 
   // Navigation breadcrumbs
   navigation: {
@@ -42,19 +49,15 @@ export const applicationMapI18nTexts = {
     toggleAriaLabel: i18n.translate('observability.apm.applicationMap.filters.toggleAriaLabel', {
       defaultMessage: 'Toggle filter sidebar',
     }),
+    noMatches: i18n.translate('observability.apm.applicationMap.filters.noMatches', {
+      defaultMessage: 'No nodes in this view match the selected filters',
+    }),
     groupBy: i18n.translate('observability.apm.applicationMap.filters.groupBy', {
       defaultMessage: 'Group by',
     }),
     includeDependencies: i18n.translate(
       'observability.apm.applicationMap.filters.includeDependencies',
       { defaultMessage: 'Include external dependencies' }
-    ),
-    dependencies: i18n.translate('observability.apm.applicationMap.filters.dependencies', {
-      defaultMessage: 'Dependencies',
-    }),
-    dependenciesHidden: i18n.translate(
-      'observability.apm.applicationMap.filters.dependenciesHidden',
-      { defaultMessage: 'Hidden' }
     ),
     noGrouping: i18n.translate('observability.apm.applicationMap.filters.noGrouping', {
       defaultMessage: 'No grouping',
@@ -217,6 +220,20 @@ export const applicationMapI18nTexts = {
   },
 
   // Error state
+  loadFailed: {
+    sliceTitle: (group: string) =>
+      i18n.translate('observability.apm.applicationMap.loadFailed.sliceTitle', {
+        defaultMessage: 'Could not load the services in {group}',
+        values: { group },
+      }),
+    focusTitle: i18n.translate('observability.apm.applicationMap.loadFailed.focusTitle', {
+      defaultMessage: "Could not load this service's connections",
+    }),
+    focusPartialTitle: i18n.translate(
+      'observability.apm.applicationMap.loadFailed.focusPartialTitle',
+      { defaultMessage: "Some of this service's connections could not be loaded" }
+    ),
+  },
   error: {
     title: i18n.translate('observability.apm.applicationMap.error.title', {
       defaultMessage:
@@ -244,6 +261,119 @@ export const applicationMapI18nTexts = {
         defaultMessage: 'View service details',
       }
     ),
+  },
+  focus: {
+    label: (service: string, environment: string, neighbors: number) =>
+      i18n.translate('observability.apm.applicationMap.focus.label', {
+        defaultMessage:
+          'Focused on {service} in {environment} and its {neighbors, plural, one {# connected node} other {# connected nodes}}',
+        values: { service, environment, neighbors },
+      }),
+    labelCapped: (service: string, environment: string, shown: number, total: number) =>
+      i18n.translate('observability.apm.applicationMap.focus.labelCapped', {
+        defaultMessage:
+          'Focused on {service} in {environment}: showing the nearest {shown, number} of {total, number} connected nodes',
+        values: { service, environment, shown, total },
+      }),
+    labelCappedOpen: (service: string, environment: string, shown: number) =>
+      i18n.translate('observability.apm.applicationMap.focus.labelCappedOpen', {
+        defaultMessage:
+          'Focused on {service} in {environment}: showing the nearest {shown, number} connected nodes (more are not shown)',
+        values: { service, environment, shown },
+      }),
+    labelPathCut: (service: string, environment: string, shown: number, hops: number) =>
+      i18n.translate('observability.apm.applicationMap.focus.labelPathCut', {
+        defaultMessage:
+          'Focused on {service} in {environment}: showing {shown, number} connected nodes within {hops, number} hops (the call path continues)',
+        values: { service, environment, shown, hops },
+      }),
+    exit: i18n.translate('observability.apm.applicationMap.focus.exit', {
+      defaultMessage: 'Back to full map',
+    }),
+    searchPrepend: i18n.translate('observability.apm.applicationMap.focus.searchPrepend', {
+      defaultMessage: 'Focus on',
+    }),
+    searchPlaceholder: i18n.translate('observability.apm.applicationMap.focus.searchPlaceholder', {
+      defaultMessage: 'Select a service',
+    }),
+    searchAriaLabel: i18n.translate('observability.apm.applicationMap.focus.searchAriaLabel', {
+      defaultMessage: 'Focus on a service',
+    }),
+    modeLegend: i18n.translate('observability.apm.applicationMap.focus.modeLegend', {
+      defaultMessage: 'Connections to show',
+    }),
+    direct: i18n.translate('observability.apm.applicationMap.focus.direct', {
+      defaultMessage: 'Direct connections',
+    }),
+    path: i18n.translate('observability.apm.applicationMap.focus.path', {
+      defaultMessage: 'Full call path',
+    }),
+  },
+  partial: {
+    title: i18n.translate('observability.apm.applicationMap.partial.title', {
+      defaultMessage: 'Showing a partial topology',
+    }),
+    body: i18n.translate('observability.apm.applicationMap.partial.body', {
+      defaultMessage:
+        'Not every connection in this time range could be loaded, so some services or dependencies are not shown. Narrow the time range to see a complete view.',
+    }),
+  },
+  metrics: {
+    unavailable: i18n.translate('observability.apm.applicationMap.metrics.unavailable', {
+      defaultMessage: 'Metrics unavailable',
+    }),
+    failedTitle: i18n.translate('observability.apm.applicationMap.metrics.failedTitle', {
+      defaultMessage: 'Some metrics could not be loaded',
+    }),
+    failedBody: (nodes: number) =>
+      i18n.translate('observability.apm.applicationMap.metrics.failedBody', {
+        defaultMessage:
+          '{nodes, plural, one {# node shows} other {# nodes show}} "Metrics unavailable" instead of counts. The metrics query failed or timed out.',
+        values: { nodes },
+      }),
+    totalsFailedBody: i18n.translate('observability.apm.applicationMap.metrics.totalsFailedBody', {
+      defaultMessage:
+        'The request and error totals for this view could not be loaded, so they show as unavailable.',
+    }),
+    retry: i18n.translate('observability.apm.applicationMap.metrics.retry', {
+      defaultMessage: 'Retry',
+    }),
+  },
+  largeMap: {
+    groupedTitle: i18n.translate('observability.apm.applicationMap.largeMap.groupedTitle', {
+      defaultMessage: 'Grouped by environment',
+    }),
+    groupedBody: (services: number, limit: number) =>
+      i18n.translate('observability.apm.applicationMap.largeMap.groupedBody', {
+        defaultMessage:
+          'This map has {services, number} nodes, too many to draw at once (the limit is {limit, number}), so it is grouped by environment. Open an environment to see its services, or pick another grouping.',
+        values: { services, limit },
+      }),
+    tooManyTitle: i18n.translate('observability.apm.applicationMap.largeMap.tooManyTitle', {
+      defaultMessage: 'Too many services to display',
+    }),
+    tooManyBody: (services: number, limit: number) =>
+      i18n.translate('observability.apm.applicationMap.largeMap.tooManyBody', {
+        defaultMessage:
+          'This view has {services, number} nodes, too many to draw at once (the limit is {limit, number}). Use Focus on to open one service and its connections, hide dependencies, group the map, or reduce the time range.',
+        values: { services, limit },
+      }),
+    tooManyBodyInGroup: (services: number, limit: number) =>
+      i18n.translate('observability.apm.applicationMap.largeMap.tooManyBodyInGroup', {
+        defaultMessage:
+          'This group has {services, number} nodes, too many to draw at once (the limit is {limit, number}). Focus on one service to see its connections, hide dependencies, or reduce the time range.',
+        values: { services, limit },
+      }),
+    focusService: i18n.translate('observability.apm.applicationMap.largeMap.focusService', {
+      defaultMessage: 'Focus on a service',
+    }),
+    groupByEnvironment: i18n.translate(
+      'observability.apm.applicationMap.largeMap.groupByEnvironment',
+      { defaultMessage: 'Group by environment' }
+    ),
+    hideDependencies: i18n.translate('observability.apm.applicationMap.largeMap.hideDependencies', {
+      defaultMessage: 'Hide dependencies',
+    }),
   },
   dependencyStacks: {
     title: i18n.translate('observability.apm.applicationMap.dependencyStacks.title', {

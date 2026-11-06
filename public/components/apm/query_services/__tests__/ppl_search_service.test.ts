@@ -26,16 +26,54 @@ jest.mock('../query_requests/response_processor', () => ({
 }));
 
 // Mock PPL queries
+jest.mock('../../common/constants', () => {
+  const actual = jest.requireActual('../../common/constants');
+  return {
+    ...actual,
+    APPLICATION_MAP_CONSTANTS: { ...actual.APPLICATION_MAP_CONSTANTS, MAX_EDGE_PAGES: 3 },
+  };
+});
+
 jest.mock('../query_requests/ppl_queries', () => ({
+  DEFAULT_ROW_LIMIT: 2,
   getQueryListServices: jest.fn(() => 'source = index | fields service.name'),
   getQueryGetService: jest.fn(() => 'source = index | where service.name = "test"'),
   getQueryListServiceOperations: jest.fn(() => 'source = index | stats count()'),
   getQueryListServiceDependencies: jest.fn(() => 'source = index | where remote'),
   getQueryGetServiceMap: jest.fn(() => 'source = index | fields service, remote'),
+  getQueryDistinctEdgeCount: jest.fn(() => 'COUNT'),
+  getQueryServiceMapEnvironmentSizes: jest.fn((_i: string, side: string) => `SIZES ${side}`),
+  getQueryServiceMapNodes: jest.fn(
+    (_i: string, side: string, _s: unknown, _e: unknown, _a: unknown, envs?: unknown[]) =>
+      `NODES ${side}${envs ? ` ${JSON.stringify(envs)}` : ''}`
+  ),
+  getQueryServiceMapFields: jest.fn(() => 'FIELDS'),
+  getQueryServiceMapSlice: jest.fn(() => 'SLICE'),
+  getQuerySliceDistinctEdgeCount: jest.fn(() => 'SLICE COUNT'),
+  getQueryServiceMapSliceEdges: jest.fn(
+    (
+      _i: string,
+      _f: unknown,
+      _s: unknown,
+      _e: unknown,
+      chunk?: { side: string; names: string[] }
+    ) => (chunk ? `EDGES ${chunk.side} ${chunk.names.join(',')}` : 'EDGES')
+  ),
 }));
 
 import { coreRefs } from '../../../../framework/core_refs';
 import { ResponseProcessor } from '../query_requests/response_processor';
+import {
+  getQueryGetServiceMap,
+  getQueryServiceMapNodes,
+  getQueryServiceMapSliceEdges,
+} from '../query_requests/ppl_queries';
+import {
+  groupByAttributeKeys,
+  isAtAggregationLimit,
+  isShortOfCount,
+  packEnvironments,
+} from '../ppl_search_service';
 
 describe('PPLSearchService', () => {
   let service: PPLSearchService;
@@ -215,6 +253,124 @@ describe('PPLSearchService', () => {
 
       expect(ResponseProcessor.transformGetServiceMap).toHaveBeenCalled();
     });
+
+    // DEFAULT_ROW_LIMIT is mocked to 2 and MAX_EDGE_PAGES to 3.
+    const page = (names: string[]) => ({
+      body: { fields: [{ name: 'sourceNode.keyAttributes', values: names }], size: names.length },
+    });
+    const params = {
+      queryIndex: 'test-index',
+      startTime: 1000,
+      endTime: 2000,
+      dataset: mockDataset,
+    };
+
+    // Routes the distinct-count query (mocked as 'COUNT') apart from the paged queries.
+    const post = () => coreRefs.http!.post as jest.Mock;
+    const isCount = (call: any[]) => JSON.parse(call[1].body).query.query === 'COUNT';
+    const routePosts = (pages: unknown[], count: number | Error = NaN) => {
+      let i = 0;
+      post().mockImplementation((_url: string, opts: { body: string }) => {
+        if (JSON.parse(opts.body).query.query === 'COUNT') {
+          return count instanceof Error
+            ? Promise.reject(count)
+            : Promise.resolve({ body: { fields: [{ name: 'edges', values: [count] }], size: 1 } });
+        }
+        const next = pages[Math.min(i++, pages.length - 1)];
+        if (typeof next === 'function') return (next as () => Promise<unknown>)();
+        return next instanceof Error ? Promise.reject(next) : Promise.resolve(next);
+      });
+    };
+    const pageCalls = () => post().mock.calls.filter((c) => !isCount(c));
+
+    it('pages the edge query until a short page and merges the rows', async () => {
+      routePosts([page(['a', 'b']), page(['c'])], 3);
+
+      const result = await service.getServiceMap(params);
+
+      expect(pageCalls()).toHaveLength(2);
+      expect(getQueryGetServiceMap).toHaveBeenNthCalledWith(1, 'test-index', 1000, 2000, 0);
+      expect(getQueryGetServiceMap).toHaveBeenNthCalledWith(2, 'test-index', 1000, 2000, 2);
+      expect(result.jsonData.map((r: any) => r['sourceNode.keyAttributes'])).toEqual([
+        'a',
+        'b',
+        'c',
+      ]);
+      expect(result.size).toBe(3);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('stops at the page cap and reports the map as truncated', async () => {
+      routePosts([page(['a', 'b'])]);
+
+      const result = await service.getServiceMap(params);
+
+      expect(pageCalls()).toHaveLength(3);
+      expect(result.size).toBe(6);
+      expect(result.truncated).toBe(true);
+    });
+
+    it('marks a result the engine cut short (rows well below the distinct count) truncated', async () => {
+      // e.g. the 2.x PPL engine deduping only the first size_limit raw documents.
+      routePosts([page(['a', 'b']), page(['c'])], 100);
+      const result = await service.getServiceMap(params);
+      expect(result.size).toBe(3);
+      expect(result.truncated).toBe(true);
+    });
+
+    it('matches an exact count, and ignores a failed count', async () => {
+      routePosts([page(['a', 'b']), page(['c'])], 3);
+      expect((await service.getServiceMap(params)).truncated).toBe(false);
+      routePosts([page(['a', 'b']), page(['c'])], 4);
+      expect((await service.getServiceMap(params)).truncated).toBe(true);
+      routePosts([page(['a', 'b']), page(['c'])], new Error('no stats'));
+      expect((await service.getServiceMap(params)).truncated).toBe(false);
+    });
+
+    it('keeps the pages already loaded when a later page fails, marked truncated', async () => {
+      routePosts([page(['a', 'b']), new Error('timed out')]);
+
+      const result = await service.getServiceMap(params);
+
+      expect(result.size).toBe(2);
+      expect(result.truncated).toBe(true);
+      expect(result.partialError?.message).toBe('timed out');
+    });
+
+    it('still fails when the first page fails, and on abort', async () => {
+      routePosts([new Error('timed out')]);
+      await expect(service.getServiceMap(params)).rejects.toThrow('timed out');
+
+      const controller = new AbortController();
+      routePosts([
+        page(['a', 'b']),
+        () => {
+          controller.abort();
+          return Promise.reject(new Error('aborted'));
+        },
+      ]);
+      await expect(service.getServiceMap(params, controller.signal)).rejects.toThrow('aborted');
+    });
+
+    it('listServices pages too, passes the signal, and reports truncation', async () => {
+      routePosts([page(['a', 'b'])]);
+      const controller = new AbortController();
+
+      const result = await service.listServices(params as any, controller.signal);
+
+      expect(pageCalls()).toHaveLength(3);
+      post().mock.calls.forEach((c) => expect(c[1].signal).toBe(controller.signal));
+      expect(result.truncated).toBe(true);
+    });
+
+    it('issues one page query when the first page is short', async () => {
+      routePosts([page(['a'])], 1);
+
+      const result = await service.getServiceMap(params);
+
+      expect(pageCalls()).toHaveLength(1);
+      expect(result.truncated).toBe(false);
+    });
   });
 
   describe('executeQuery', () => {
@@ -325,6 +481,336 @@ describe('PPLSearchService', () => {
       const body = JSON.parse(callArg.body);
 
       expect(body.query.dataset.dataSource).toBeUndefined();
+    });
+  });
+  describe('large-map queries', () => {
+    const params = {
+      queryIndex: 'test-index',
+      startTime: 1000,
+      endTime: 2000,
+      dataset: mockDataset,
+    };
+    const post = () => coreRefs.http!.post as jest.Mock;
+    const asResponse = (rows: Array<Record<string, unknown>>) => {
+      const names = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
+      return {
+        body: {
+          fields: names.map((name) => ({ name, values: rows.map((r) => r[name]) })),
+          size: rows.length,
+        },
+      };
+    };
+    const respond = (byQuery: Record<string, Array<Record<string, unknown>> | Error>) =>
+      post().mockImplementation((_url: string, opts: { body: string }) => {
+        const rows = byQuery[JSON.parse(opts.body).query.query] ?? [];
+        return rows instanceof Error ? Promise.reject(rows) : Promise.resolve(asResponse(rows));
+      });
+    const sent = () => post().mock.calls.map((c) => JSON.parse(c[1].body).query.query as string);
+    const nodeRow = (side: string, env: string | null, name: string, extra = {}) => ({
+      [`${side}Node.keyAttributes.environment`]: env,
+      [`${side}Node.keyAttributes.name`]: name,
+      [`${side}Node.type`]: 'Service',
+      ...extra,
+    });
+    const rows = (n: number, side = 'source', env = 'dev') =>
+      Array.from({ length: n }, (_, i) => nodeRow(side, env, `s${i}`));
+    const transformRows = () =>
+      (ResponseProcessor.transformGetServiceMap as jest.Mock).mock.calls[0][0].jsonData;
+
+    it('builds the overview from one node list per side and the mapping, attribute nested', async () => {
+      respond({
+        'NODES source': [
+          nodeRow('source', 'dev', 'a', { 'sourceNode.groupByAttributes.team.name': 'pay' }),
+        ],
+        'NODES target': [
+          nodeRow('target', 'dev', 'db', { 'targetNode.groupByAttributes.team.name': null }),
+        ],
+        FIELDS: [
+          { COLUMN_NAME: 'sourceNode.groupByAttributes' },
+          { COLUMN_NAME: 'sourceNode.groupByAttributes.team' },
+          { COLUMN_NAME: 'sourceNode.groupByAttributes.team.name' },
+          { COLUMN_NAME: 'targetNode.groupByAttributes.k8s-namespace' },
+          { COLUMN_NAME: 'timestamp' },
+        ],
+      });
+
+      const result = await service.getServiceMapOverview({
+        ...params,
+        groupByAttribute: 'team.name',
+      } as any);
+
+      expect(sent().sort()).toEqual(['FIELDS', 'NODES source', 'NODES target']);
+      expect(getQueryServiceMapNodes).toHaveBeenCalledWith(
+        'test-index',
+        'source',
+        1000,
+        2000,
+        'team.name',
+        undefined
+      );
+      expect(transformRows()).toEqual([
+        {
+          'sourceNode.keyAttributes': { name: 'a', environment: 'dev' },
+          'sourceNode.type': 'Service',
+          'sourceNode.groupByAttributes': { team: { name: 'pay' } },
+        },
+        {
+          'targetNode.keyAttributes': { name: 'db', environment: 'dev' },
+          'targetNode.type': 'Service',
+          'targetNode.groupByAttributes': {},
+        },
+      ]);
+      expect(result.AvailableGroupByAttributes).toEqual({ 'k8s-namespace': [], 'team.name': [] });
+      expect(result.truncated).toBe(false);
+    });
+
+    it('a node list larger than the bucket cap (3.x) is complete as is', async () => {
+      respond({ 'NODES source': rows(2500) });
+      const result = await service.getServiceMapOverview(params as any);
+      expect(sent()).not.toContain('SIZES source');
+      expect(transformRows()).toHaveLength(2500);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('a node list at the 2.x bucket cap is re-read in environment batches under it', async () => {
+      respond({
+        'NODES source': rows(1000),
+        'SIZES source': [
+          { 'sourceNode.keyAttributes.environment': 'big', nodes: 700 },
+          { 'sourceNode.keyAttributes.environment': 'mid', nodes: 300 },
+          { 'sourceNode.keyAttributes.environment': 'small', nodes: 90 },
+          { 'sourceNode.keyAttributes.environment': null, nodes: 5 },
+        ],
+        'NODES source ["big"]': rows(700, 'source', 'big'),
+        'NODES source ["mid","small",null]': rows(395, 'source', 'mid'),
+      });
+
+      const result = await service.getServiceMapOverview(params as any);
+
+      expect(
+        sent()
+          .filter((q) => q.startsWith('NODES source '))
+          .sort()
+      ).toEqual(['NODES source ["big"]', 'NODES source ["mid","small",null]']);
+      expect(transformRows()).toHaveLength(1095);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('flags the overview when a batch (one environment over the cap, on 2.x) still hits it', async () => {
+      respond({
+        'NODES source': rows(1000),
+        'SIZES source': [{ 'sourceNode.keyAttributes.environment': 'huge', nodes: 1500 }],
+        'NODES source ["huge"]': rows(1000, 'source', 'huge'),
+      });
+      expect((await service.getServiceMapOverview(params as any)).truncated).toBe(true);
+    });
+
+    it('a node list at the 10,000-row head (3.x) is re-read per environment, and flagged if a batch still hits it', async () => {
+      respond({
+        'NODES source': rows(10000),
+        'SIZES source': [{ 'sourceNode.keyAttributes.environment': 'huge', nodes: 12000 }],
+        'NODES source ["huge"]': rows(10000, 'source', 'huge'),
+      });
+      const result = await service.getServiceMapOverview(params as any);
+      expect(sent()).toContain('SIZES source');
+      expect(result.truncated).toBe(true);
+    });
+
+    it('fails the overview when a node list fails', async () => {
+      respond({ 'NODES target': new Error('timed out') });
+      await expect(service.getServiceMapOverview(params as any)).rejects.toThrow('timed out');
+    });
+
+    const edgeRow = (src: string, dst: string | null) => ({
+      'sourceNode.keyAttributes.environment': 'dev',
+      'sourceNode.keyAttributes.name': src,
+      'sourceNode.type': 'Service',
+      'targetNode.keyAttributes.environment': dst ? 'dev' : null,
+      'targetNode.keyAttributes.name': dst,
+      'targetNode.type': dst ? 'Service' : null,
+    });
+    const edgeRows = (n: number) => Array.from({ length: n }, (_, i) => edgeRow(`a${i}`, 'b'));
+    const filter = { kind: 'environment', environment: 'dev' } as const;
+
+    it('reads a slice with the paged dedup when it is complete (3.x)', async () => {
+      respond({
+        SLICE: [{ 'sourceNode.keyAttributes': { name: 'a', environment: 'dev' } }],
+        'SLICE COUNT': [{ edges: 1 }],
+      });
+      const result = await service.getServiceMapSlice(params as any, filter);
+      expect(sent().sort()).toEqual(['SLICE', 'SLICE COUNT']);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('re-reads a slice as an aggregation when the dedup comes back short (2.x)', async () => {
+      respond({
+        SLICE: [{ 'sourceNode.keyAttributes': { name: 'a', environment: 'dev' } }],
+        'SLICE COUNT': [{ edges: 40 }],
+        EDGES: [edgeRow('a', 'b')],
+      });
+      const result = await service.getServiceMapSlice(params as any, filter, undefined, ['a']);
+      expect(sent()).toContain('EDGES');
+      expect(result.truncated).toBe(false);
+    });
+
+    it('aggregates a slice as service-map rows (leaf rows without a target)', async () => {
+      respond({ EDGES: [edgeRow('a', 'b'), edgeRow('c', null)] });
+
+      const result = await service.getServiceMapSliceAggregated(params as any, filter);
+
+      expect(getQueryServiceMapSliceEdges).toHaveBeenCalledWith(
+        'test-index',
+        filter,
+        1000,
+        2000,
+        undefined
+      );
+      expect(transformRows()).toEqual([
+        {
+          'sourceNode.keyAttributes': { name: 'a', environment: 'dev' },
+          'sourceNode.type': 'Service',
+          'sourceNode.groupByAttributes': {},
+          'targetNode.keyAttributes': { name: 'b', environment: 'dev' },
+          'targetNode.type': 'Service',
+          'targetNode.groupByAttributes': {},
+        },
+        {
+          'sourceNode.keyAttributes': { name: 'c', environment: 'dev' },
+          'sourceNode.type': 'Service',
+          'sourceNode.groupByAttributes': {},
+        },
+      ]);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('splits a slice at the bucket cap into name chunks per side', async () => {
+      const names = Array.from({ length: 150 }, (_, i) => `n${i}`);
+      const first = names.slice(0, 100).join(',');
+      const second = names.slice(100).join(',');
+      respond({
+        EDGES: edgeRows(1000),
+        [`EDGES source ${first}`]: edgeRows(600),
+        [`EDGES target ${first}`]: edgeRows(10),
+        [`EDGES source ${second}`]: edgeRows(400),
+        [`EDGES target ${second}`]: [],
+      });
+
+      const result = await service.getServiceMapSliceAggregated(
+        params as any,
+        filter,
+        undefined,
+        names
+      );
+
+      expect(sent().filter((q) => q !== 'EDGES')).toHaveLength(4);
+      expect(transformRows()).toHaveLength(1010);
+      expect(result.truncated).toBe(false);
+    });
+
+    it('marks a slice truncated at the cap without names to split by, or when a chunk hits it', async () => {
+      respond({ EDGES: edgeRows(1000) });
+      expect((await service.getServiceMapSliceAggregated(params as any, filter)).truncated).toBe(
+        true
+      );
+
+      respond({ EDGES: edgeRows(1000), 'EDGES source a': edgeRows(1000), 'EDGES target a': [] });
+      expect(
+        (await service.getServiceMapSliceAggregated(params as any, filter, undefined, ['a']))
+          .truncated
+      ).toBe(true);
+    });
+  });
+
+  describe('large-map row limit on slices', () => {
+    const params = {
+      queryIndex: 'test-index',
+      startTime: 1000,
+      endTime: 2000,
+      dataset: mockDataset,
+    };
+    const filter = { kind: 'environment', environment: 'dev' } as const;
+    const edges = (n: number) =>
+      Array.from({ length: n }, (_, i) => ({
+        'sourceNode.keyAttributes.environment': 'dev',
+        'sourceNode.keyAttributes.name': `a${i}`,
+        'sourceNode.type': 'Service',
+        'targetNode.keyAttributes.environment': 'dev',
+        'targetNode.keyAttributes.name': 'b',
+        'targetNode.type': 'Service',
+      }));
+    const asResponse = (r: Array<Record<string, unknown>>) => {
+      const names = Array.from(new Set(r.flatMap((x) => Object.keys(x))));
+      return {
+        body: {
+          fields: names.map((name) => ({ name, values: r.map((x) => x[name]) })),
+          size: r.length,
+        },
+      };
+    };
+    const respond = (byQuery: Record<string, Array<Record<string, unknown>>>) =>
+      (coreRefs.http!.post as jest.Mock).mockImplementation((_u: string, o: { body: string }) =>
+        Promise.resolve(asResponse(byQuery[JSON.parse(o.body).query.query] ?? []))
+      );
+
+    it('flags an aggregation at the 10,000-row head (3.x) without names to split by', async () => {
+      respond({ EDGES: edges(10000) });
+      expect((await service.getServiceMapSliceAggregated(params as any, filter)).truncated).toBe(
+        true
+      );
+    });
+
+    it('splits a slice at the row head into name chunks, and flags a chunk still at it', async () => {
+      respond({ EDGES: edges(10000), 'EDGES source a': edges(500), 'EDGES target a': [] });
+      expect(
+        (await service.getServiceMapSliceAggregated(params as any, filter, undefined, ['a']))
+          .truncated
+      ).toBe(false);
+      respond({ EDGES: edges(10000), 'EDGES source a': edges(10000), 'EDGES target a': [] });
+      expect(
+        (await service.getServiceMapSliceAggregated(params as any, filter, undefined, ['a']))
+          .truncated
+      ).toBe(true);
+    });
+  });
+
+  describe('large-map helpers', () => {
+    it('isAtAggregationLimit: the 2.x bucket cap exactly, or the row head and above', () => {
+      expect(isAtAggregationLimit(999)).toBe(false);
+      expect(isAtAggregationLimit(1000)).toBe(true);
+      expect(isAtAggregationLimit(1001)).toBe(false);
+      expect(isAtAggregationLimit(9999)).toBe(false);
+      expect(isAtAggregationLimit(10000)).toBe(true);
+    });
+
+    it('isShortOfCount: exact below the cardinality threshold, a margin above it', () => {
+      expect(isShortOfCount(1999, 2000)).toBe(true);
+      expect(isShortOfCount(2000, 2000)).toBe(false);
+      expect(isShortOfCount(9800, 10000)).toBe(false);
+      expect(isShortOfCount(9000, 10000)).toBe(true);
+      expect(isShortOfCount(5, NaN)).toBe(false);
+    });
+
+    it('packEnvironments: largest first, under the batch size, big ones alone', () => {
+      expect(
+        packEnvironments([
+          { environment: 'a', nodes: 100 },
+          { environment: 'b', nodes: 900 },
+          { environment: 'c', nodes: 700 },
+          { environment: null, nodes: 50 },
+        ])
+      ).toEqual([['b'], ['c', 'a'], [null]]);
+      expect(packEnvironments([])).toEqual([]);
+    });
+
+    it('groupByAttributeKeys: leaf attribute fields of either side', () => {
+      expect(
+        groupByAttributeKeys([
+          'sourceNode.groupByAttributes.telemetry',
+          'sourceNode.groupByAttributes.telemetry.sdk.language',
+          'targetNode.groupByAttributes.telemetry.sdk.language',
+          'sourceNode.keyAttributes.name',
+        ])
+      ).toEqual({ 'telemetry.sdk.language': [] });
     });
   });
 });
