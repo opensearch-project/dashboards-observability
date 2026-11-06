@@ -112,6 +112,7 @@ export const useDependencies = (params: UseDependenciesParams): UseDependenciesR
           serviceOperation: dep.ServiceOperation || dep.serviceOperation || 'unknown',
           remoteOperation: dep.RemoteOperation || dep.remoteOperation || 'unknown',
           callCount: parseInt(dep.CallCount || dep.callCount, 10) || 0,
+          type: dep.Type || dep.type,
         }));
 
         setData(dependencies);
@@ -147,6 +148,7 @@ export const useDependencies = (params: UseDependenciesParams): UseDependenciesR
         groupMap.set(key, {
           serviceName: dep.serviceName,
           environment: dep.environment,
+          type: dep.type,
           remoteOperation: dep.remoteOperation,
           serviceOperations: [dep.serviceOperation],
           callCount: dep.callCount,

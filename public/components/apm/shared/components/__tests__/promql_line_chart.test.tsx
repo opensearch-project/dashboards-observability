@@ -715,4 +715,94 @@ describe('PromQLLineChart', () => {
       expect(mockDispose).toHaveBeenCalled();
     });
   });
+
+  describe('resize', () => {
+    let frames: Map<number, FrameRequestCallback>;
+    let nextFrame: number;
+    let observers: Array<{
+      callback: ResizeObserverCallback;
+      observe: jest.Mock;
+      disconnect: jest.Mock;
+    }>;
+    const originals = {
+      raf: window.requestAnimationFrame,
+      caf: window.cancelAnimationFrame,
+      ro: (window as any).ResizeObserver,
+    };
+    const flushFrames = () => {
+      const pending = Array.from(frames.values());
+      frames.clear();
+      pending.forEach((cb) => cb(0));
+    };
+
+    beforeEach(() => {
+      mockUsePromQLChartData.mockReturnValue({
+        series: mockSeriesData,
+        isLoading: false,
+        error: null,
+      });
+      frames = new Map();
+      nextFrame = 1;
+      observers = [];
+      window.requestAnimationFrame = jest.fn((cb: FrameRequestCallback) => {
+        const id = nextFrame++;
+        frames.set(id, cb);
+        return id;
+      });
+      window.cancelAnimationFrame = jest.fn((id: number) => {
+        frames.delete(id);
+      });
+      (window as any).ResizeObserver = jest.fn((callback: ResizeObserverCallback) => {
+        const o = { callback, observe: jest.fn(), disconnect: jest.fn() };
+        observers.push(o);
+        return o;
+      });
+    });
+
+    afterEach(() => {
+      window.requestAnimationFrame = originals.raf;
+      window.cancelAnimationFrame = originals.caf;
+      (window as any).ResizeObserver = originals.ro;
+    });
+
+    const triggerObserver = () =>
+      observers.forEach((o) =>
+        o.callback([] as ResizeObserverEntry[], o as unknown as ResizeObserver)
+      );
+
+    it('observes its container and resizes once per frame for a window resize plus the observer', () => {
+      render(<PromQLLineChart {...defaultProps} />);
+      expect(observers).toHaveLength(1);
+      expect(observers[0].observe).toHaveBeenCalledTimes(1);
+      flushFrames();
+      mockResize.mockClear();
+
+      fireEvent(window, new Event('resize'));
+      triggerObserver();
+      expect(mockResize).not.toHaveBeenCalled();
+      flushFrames();
+      expect(mockResize).toHaveBeenCalledTimes(1);
+
+      // A later resize gets its own frame.
+      triggerObserver();
+      flushFrames();
+      expect(mockResize).toHaveBeenCalledTimes(2);
+    });
+
+    it('disconnects the observer and cancels a pending frame on unmount', () => {
+      const { unmount } = render(<PromQLLineChart {...defaultProps} />);
+      flushFrames();
+      mockResize.mockClear();
+      triggerObserver();
+      unmount();
+      expect(observers[0].disconnect).toHaveBeenCalledTimes(1);
+      expect(window.cancelAnimationFrame).toHaveBeenCalled();
+      flushFrames();
+      expect(mockResize).not.toHaveBeenCalled();
+      // The window listener is gone too.
+      fireEvent(window, new Event('resize'));
+      flushFrames();
+      expect(mockResize).not.toHaveBeenCalled();
+    });
+  });
 });
