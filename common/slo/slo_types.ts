@@ -62,6 +62,13 @@ export type CustomPromQLExpr =
   | { mode: 'events'; goodQuery: string; totalQuery: string }
   | { mode: 'raw'; errorRatioQuery: string };
 
+/**
+ * Most `le` bounds a `per_range` SLI may carry. Enforced by the route schema
+ * and the validator, and Suggest skips a histogram with more bounds rather
+ * than offer a draft the server would reject.
+ */
+export const MAX_BUCKET_BOUNDS = 64;
+
 export interface PrometheusSli extends BaseSli {
   backend: 'prometheus';
   type: PrometheusSliType;
@@ -93,7 +100,10 @@ export interface PrometheusSli extends BaseSli {
    * `bucketUnit`, which the `per_range` math needs.
    */
   bucketLayout?: 'per_range';
-  /** The histogram's finite `le` bounds, in `bucketUnit`. Required for `per_range`. */
+  /**
+   * The histogram's finite `le` bounds, in `bucketUnit`. Required for
+   * `per_range`; at most {@link MAX_BUCKET_BOUNDS} entries.
+   */
   bucketBounds?: number[];
   /** Unit of the `le` labels. Required for `per_range`. */
   bucketUnit?: 'seconds' | 'milliseconds';
