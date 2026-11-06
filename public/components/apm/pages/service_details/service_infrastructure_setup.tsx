@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { ServiceInfrastructure as InfraState } from '../../shared/hooks/use_service_infrastructure';
+import { ServiceInfrastructure as InfraState } from '../../common/types/infra_types';
 
 const t = (id: string, defaultMessage: string, values?: Record<string, string | number>) =>
   i18n.translate(`observability.apm.serviceInfrastructure.setup.${id}`, {
@@ -235,7 +235,11 @@ export const SetupDiagram: React.FC<{ state: InfraState; statuses: SetupStatuses
   );
 };
 
-const Fix: React.FC<{ title: string; testSubj: string }> = ({ title, testSubj, children }) => (
+const Fix: React.FC<{ title: string; testSubj: string; children?: React.ReactNode }> = ({
+  title,
+  testSubj,
+  children,
+}) => (
   <EuiFlexItem>
     <EuiPanel hasBorder paddingSize="m" data-test-subj={testSubj}>
       <EuiTitle size="xxs">

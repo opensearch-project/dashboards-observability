@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { ServiceInfrastructure as InfraState } from '../../../shared/hooks/use_service_infrastructure';
+import { ServiceInfrastructure as InfraState } from '../../../common/types/infra_types';
 
 const mockLineChart = jest.fn();
 jest.mock('../../../shared/components/promql_line_chart', () => ({
@@ -16,13 +16,24 @@ jest.mock('../../../shared/components/promql_line_chart', () => ({
 }));
 
 const mockNavigateToExploreMetrics = jest.fn();
+const mockOpenApmSettings = jest.fn();
 jest.mock('../../../shared/utils/navigation_utils', () => ({
   navigateToExploreMetrics: (...args: unknown[]) => mockNavigateToExploreMetrics(...args),
+  openApmSettings: (...args: unknown[]) => mockOpenApmSettings(...args),
 }));
 
 let mockState: InfraState;
+/** Fills what the hook derives (charted pods / hosts, totals) unless a test sets it. */
+const derive = (s: InfraState): InfraState => ({
+  ...s,
+  chartPods: s.chartPods.length ? s.chartPods : s.pods.filter((p) => !p.replaced).slice(0, 20),
+  chartHostIds: s.chartHostIds.length ? s.chartHostIds : s.hostIds.slice(0, 20),
+  totalPods: s.totalPods || s.pods.length,
+  totalHosts: s.totalHosts || s.hostIds.length,
+  totalOtherMetrics: s.totalOtherMetrics || s.otherMetrics.length,
+});
 jest.mock('../../../shared/hooks/use_service_infrastructure', () => ({
-  useServiceInfrastructure: () => mockState,
+  useServiceInfrastructure: () => derive(mockState),
 }));
 
 import { ServiceInfrastructure } from '../service_infrastructure';
@@ -31,18 +42,24 @@ import { getSetupStatuses } from '../service_infrastructure_setup';
 const base: InfraState = {
   isLoading: false,
   error: null,
+  warnings: [],
   platform: 'none',
   scopes: [],
   namespaceOnly: false,
   hostIds: [],
+  totalHosts: 0,
+  chartHostIds: [],
   mappedKeys: [],
   keySource: null,
   detectionEnabled: false,
   labelStyle: null,
   pods: [],
+  totalPods: 0,
+  chartPods: [],
   nodes: [],
   missingMetrics: [],
   otherMetrics: [],
+  totalOtherMetrics: 0,
 };
 
 const props = {
@@ -161,7 +178,7 @@ describe('ServiceInfrastructure', () => {
     expect(chartTitles()).toEqual([
       'CPU usage (cores) vs limit',
       'Memory working set vs limit',
-      'Container restarts',
+      'Container restarts (total)',
       'Pod network',
       'Replicas ready vs desired',
       'Autoscaler replicas vs max',
@@ -170,7 +187,10 @@ describe('ServiceInfrastructure', () => {
       'Nodes ready vs total',
     ]);
     const cpu = mockLineChart.mock.calls.find(([p]) => p.title === 'CPU usage (cores) vs limit')[0];
-    expect(cpu.promqlQuery).toContain('k8s_deployment_name="pricing"');
+    // Charts select the charted pods by cluster, namespace and name.
+    expect(cpu.promqlQuery).toContain(
+      'k8s_cluster_name="prod-1",k8s_namespace_name="retail",k8s_pod_name=~"pricing-a"'
+    );
     expect(cpu.labelField).toBe('k8s_pod_name');
     expect(cpu.prometheusConnectionId).toBe('prom');
     expect(cpu.showOpenInMetrics).toBe(false);
@@ -258,7 +278,7 @@ describe('ServiceInfrastructure', () => {
     )[0];
     // Counters are rated, gauges averaged, per host (the Explore metrics page's defaults).
     expect(ops.promqlQuery).toBe(
-      'topk(20, sum by (host_id) (rate(system_disk_operations_total{host_id=~"h1"}[2m])))'
+      'sum by (host_id) (rate(system_disk_operations_total{host_id=~"h1"}[2m]))'
     );
     expect(ops.labelField).toBe('host_id');
     fireEvent.change(screen.getByTestId('serviceInfrastructureSearch'), {
@@ -404,6 +424,95 @@ describe('ServiceInfrastructure', () => {
       'Network errors and drops',
     ]);
     expect(mockLineChart.mock.calls[0][0].promqlQuery).toContain('resource_host_id=~"i-1|i-2"');
+  });
+});
+
+describe('ServiceInfrastructure review states', () => {
+  const host: InfraState = { ...base, platform: 'host', labelStyle: 'plain', hostIds: ['h1'] };
+  beforeEach(() => {
+    mockLineChart.mockClear();
+    mockOpenApmSettings.mockClear();
+  });
+
+  it('points to the APM settings when no Prometheus data source is configured', () => {
+    mockState = { ...base, notConfigured: 'prometheus' };
+    render(<ServiceInfrastructure {...props} />);
+    expect(screen.getByTestId('serviceInfrastructureNotConfigured')).toHaveTextContent(
+      'No Prometheus data source is configured for APM'
+    );
+    expect(screen.queryByTestId('serviceInfrastructureEmpty')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('openApmSettings'));
+    expect(mockOpenApmSettings).toHaveBeenCalled();
+  });
+
+  it('shows the error rather than the setup diagram', () => {
+    mockState = { ...base, error: new Error('Unauthorized'), mappedKeys: ['host.id'] };
+    render(<ServiceInfrastructure {...props} />);
+    expect(screen.getByTestId('serviceInfrastructureError')).toHaveTextContent('Unauthorized');
+    expect(screen.queryByTestId('serviceInfrastructureEmpty')).not.toBeInTheDocument();
+  });
+
+  it('lists partial failures above what did load', () => {
+    mockState = { ...host, warnings: ['serviceMap', 'otherMetrics'] };
+    render(<ServiceInfrastructure {...props} />);
+    const w = screen.getByTestId('serviceInfrastructureWarnings');
+    expect(w).toHaveTextContent("The service map couldn't be read");
+    expect(w).toHaveTextContent('Some metric sources could not be listed');
+    expect(screen.getByTestId('serviceInfrastructureMetrics')).toBeInTheDocument();
+  });
+
+  it('keeps the previous view with a progress bar while reloading', () => {
+    mockState = { ...host, isLoading: true };
+    const { container } = render(<ServiceInfrastructure {...props} />);
+    expect(container.querySelector('.euiProgress')).toBeInTheDocument();
+    expect(screen.getByTestId('serviceInfrastructureMetrics')).toBeInTheDocument();
+  });
+
+  it('says how many hosts are listed and charted when there are more than the caps', () => {
+    const hostIds = Array.from({ length: 50 }, (_, i) => `h${i}`);
+    mockState = {
+      ...host,
+      hostIds,
+      totalHosts: 80,
+      chartHostIds: hostIds.slice(0, 20),
+      otherMetrics: [{ name: 'system_paging_usage_bytes', matchers: 'x', kind: 'host' }],
+      totalOtherMetrics: 250,
+    };
+    render(<ServiceInfrastructure {...props} />);
+    expect(screen.getByTestId('serviceInfrastructureHostsCapped')).toHaveTextContent(
+      'Showing 50 of 80 hosts'
+    );
+    expect(screen.getByTestId('serviceInfrastructureHosts')).toHaveTextContent('Hosts: 80');
+    const note = screen.getByTestId('serviceInfrastructureChartsLimited');
+    expect(note).toHaveTextContent('Charts show the top 20 hosts by CPU.');
+    expect(note).toHaveTextContent('1 of 250 other metrics are listed');
+    // The charts query only the charted hosts.
+    expect(mockLineChart.mock.calls[0][0].promqlQuery).not.toContain('h20');
+  });
+
+  it('says how many pods were found when the pod list is capped', () => {
+    const pods = Array.from({ length: 50 }, (_, i) => ({
+      namespace: 'shop',
+      pod: `p-${i}`,
+      node: 'n1',
+      phase: 2,
+    }));
+    mockState = {
+      ...base,
+      platform: 'kubernetes',
+      labelStyle: 'plain',
+      scopes: [{ namespace: 'shop', kind: 'deployment', workload: 'catalog' }],
+      pods,
+      totalPods: 70,
+      nodes: ['n1'],
+    };
+    render(<ServiceInfrastructure {...props} />);
+    expect(screen.getByTestId('serviceInfrastructurePodsCapped')).toHaveTextContent(
+      'Showing 50 of 70 pods'
+    );
+    expect(screen.getByTestId('serviceInfrastructureChartsLimited')).toHaveTextContent(
+      'Charts show the top 20 pods by CPU.'
+    );
   });
 });
 

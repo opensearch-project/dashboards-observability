@@ -5,6 +5,8 @@
 
 import { i18n } from '@osd/i18n';
 import * as apmTopology from '@osd/apm-topology';
+import { coreRefs } from '../../../../framework/core_refs';
+import { APM_PLATFORM_TYPE } from '../../common/infra_constants';
 
 /**
  * Icon key for a dependency's system, from @osd/apm-topology (OpenSearch-Dashboards#12771):
@@ -58,18 +60,6 @@ export const PLATFORM_TYPE_MAP: Record<string, string> = {
   Generic: 'Generic',
 };
 
-/** Platform type for each `apm.platform` value Data Prepper platform detection writes. */
-const APM_PLATFORM_TYPE: Record<string, string> = {
-  eks: 'AWS::EKS',
-  ecs: 'AWS::ECS',
-  ec2: 'AWS::EC2',
-  lambda: 'AWS::Lambda',
-  elastic_beanstalk: 'AWS::ElasticBeanstalk',
-  kubernetes: 'Kubernetes',
-  host: 'Host',
-  generic: 'Generic',
-};
-
 /**
  * The `apm.platform` value on a service-map node's keyAttributes, as written by Data Prepper
  * platform detection. PPL returns it nested (`apm: { platform: ['eks'] }`); a flat
@@ -94,9 +84,14 @@ export function getPlatformTypeFromApmPlatform(apmPlatform?: string): string | u
 
 /**
  * A service node's platform type: Data Prepper's detected `apm.platform` when present (and not
- * generic), else parsed from the environment string (`eks:cluster/namespace`), as before.
+ * generic), else parsed from the environment string (`eks:cluster/namespace`), as before. The
+ * detected platform is part of the Infrastructure feature, so it is only used when
+ * `observability.apmInfrastructure.enabled` is on.
  */
 export function getServicePlatformType(keyAttributes: unknown, environment?: string): string {
+  if (!coreRefs.apmInfrastructureEnabled) {
+    return environment ? getPlatformTypeFromEnvironment(environment) : 'Generic';
+  }
   const detected = getPlatformTypeFromApmPlatform(getApmPlatform(keyAttributes));
   if (detected && detected !== 'Generic') return detected;
   return environment ? getPlatformTypeFromEnvironment(environment) : (detected ?? 'Generic');

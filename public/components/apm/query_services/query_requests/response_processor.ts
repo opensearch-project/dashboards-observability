@@ -1069,10 +1069,7 @@ export function transformListServicesStatsResponse(pplResponse: PPLDataFrame): a
         return null;
       }
 
-      const platformType = getServicePlatformType(
-        { apm: { platform: row['sourceNode.keyAttributes.apm.platform'] } },
-        environment
-      );
+      const platformType = getPlatformTypeFromEnvironment(environment);
       const envDetails = parseEnvironmentType(environment);
       const attributeMaps = buildAttributeMaps(platformType, envDetails, serviceName);
 

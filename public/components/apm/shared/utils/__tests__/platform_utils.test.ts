@@ -18,6 +18,7 @@ import {
   normalizeNodeType,
   toPrometheusLabel,
 } from '../platform_utils';
+import { coreRefs } from '../../../../../framework/core_refs';
 
 describe('platform_utils', () => {
   describe('getPlatformDisplayName', () => {
@@ -210,6 +211,19 @@ describe('platform_utils', () => {
 });
 
 describe('detected platform (apm.platform)', () => {
+  beforeEach(() => {
+    coreRefs.apmInfrastructureEnabled = true;
+  });
+  afterEach(() => {
+    coreRefs.apmInfrastructureEnabled = undefined;
+  });
+
+  it('ignores the detected platform while the infrastructure feature flag is off', () => {
+    coreRefs.apmInfrastructureEnabled = false;
+    expect(getServicePlatformType({ apm: { platform: ['eks'] } }, 'poc')).toBe('Generic');
+    expect(getServicePlatformType({ apm: { platform: ['host'] } }, 'ec2:default')).toBe('AWS::EC2');
+  });
+
   it('reads apm.platform nested, flat or as an array', () => {
     expect(getApmPlatform({ apm: { platform: ['eks'] } })).toBe('eks');
     expect(getApmPlatform({ 'apm.platform': 'host' })).toBe('host');

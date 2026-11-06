@@ -11,17 +11,20 @@ import {
   getK8sHpaQueries,
   getK8sNodeQueries,
   getK8sWorkloadQueries,
-  INFRA_TOP_N,
+  getInfraGenericQuery,
   getK8sInfraQueries,
   getK8sPodTableQueries,
+  getQueryHostRanking,
   getQueryInfraLabelStyleProbe,
   getQueryK8sServicePods,
   getQueryServiceInfraKeys,
   getQueryServiceMapInfraKeys,
   infraLabel,
   k8sScopeMatchers,
-  K8sWorkloadScope,
+  podKey,
 } from '../infra_queries';
+import { INFRA_TOP_N } from '../../../common/infra_constants';
+import { K8sWorkloadScope } from '../../../common/types/infra_types';
 
 const pricing: K8sWorkloadScope = {
   cluster: 'prod-1',
@@ -163,41 +166,70 @@ describe('infra_queries', () => {
       { cluster: 'prod-1', namespace: 'retail', pod: 'pricing-a' },
       { cluster: 'prod-1', namespace: 'retail', pod: 'pricing-b' },
     ];
-    const q = getK8sInfraQueries([pricing], pods, 'plain');
+    const q = getK8sInfraQueries(pods, 'plain');
+    const byPod = 'k8s_cluster_name, k8s_namespace_name, k8s_pod_name';
 
-    it('takes usage from the workload scope and limits from the pods', () => {
-      expect(q.cpu).toContain('sum by (k8s_pod_name) (container_cpu_usage{');
+    it('charts only the given pods, aggregated by cluster, namespace and pod', () => {
+      expect(q.cpu).toContain(
+        `sum by (${byPod}) (container_cpu_usage{k8s_cluster_name="prod-1",k8s_namespace_name="retail",k8s_pod_name=~"pricing-a|pricing-b"})`
+      );
       expect(q.cpu).toContain(
         'k8s_container_cpu_limit{k8s_cluster_name="prod-1",k8s_namespace_name="retail",k8s_pod_name=~"pricing-a|pricing-b"}'
       );
+      // The chart pods are picked once (top N by CPU), so no per-step topk.
+      expect(q.cpu).not.toContain('topk');
+      expect(q.podLabel).toBe('k8s_pod_name');
     });
 
     it('falls back to the CPU request when there is no limit', () => {
       expect(q.cpu).toContain('"request"');
       expect(q.cpu).toContain(
-        'unless on() max(sum by (k8s_pod_name) (max by (k8s_pod_name, k8s_container_name) (k8s_container_cpu_limit{'
+        `unless on() max(sum by (${byPod}) (max by (${byPod}, k8s_container_name) (k8s_container_cpu_limit{`
       );
     });
 
-    it('applies rate to each selector, not to the or expression', () => {
+    it('sums restarts over containers, and rates network per selector', () => {
+      expect(q.restarts.startsWith(`sum by (${byPod}) (k8s_container_restarts{`)).toBe(true);
       expect(q.network).toBe(
-        'sum by (direction) (rate(k8s_pod_network_io_bytes_total{k8s_cluster_name="prod-1",k8s_namespace_name="retail",k8s_deployment_name="pricing"}[2m]))'
+        'sum by (direction) (rate(k8s_pod_network_io_bytes_total{k8s_cluster_name="prod-1",k8s_namespace_name="retail",k8s_pod_name=~"pricing-a|pricing-b"}[2m]))'
+      );
+    });
+
+    it('selects pods per cluster and namespace, so equal pod names stay apart', () => {
+      const r = getK8sInfraQueries(
+        [
+          { cluster: 'a', namespace: 'shop', pod: 'db-0' },
+          { cluster: 'b', namespace: 'shop', pod: 'db-0' },
+        ],
+        'plain'
+      );
+      expect(r.memory).toContain(
+        'k8s_cluster_name="a",k8s_namespace_name="shop",k8s_pod_name=~"db-0"'
+      );
+      expect(r.memory).toContain(
+        ' or container_memory_working_set_bytes{k8s_cluster_name="b",k8s_namespace_name="shop",k8s_pod_name=~"db-0"}'
       );
     });
 
     it('escapes regex characters in pod names', () => {
-      const r = getK8sInfraQueries([pricing], [{ namespace: 'n', pod: 'a.b' }], 'plain');
+      const r = getK8sInfraQueries([{ namespace: 'n', pod: 'a.b' }], 'plain');
       expect(r.restarts).toContain('k8s_pod_name=~"a\\\\.b"');
     });
   });
 
-  it('builds the pod table queries per pod', () => {
-    const q = getK8sPodTableQueries([pricing], [{ namespace: 'retail', pod: 'p' }], 'resource');
+  it('builds the pod table queries per pod, keyed by cluster, namespace and pod', () => {
+    const q = getK8sPodTableQueries([{ namespace: 'retail', pod: 'p' }], 'resource');
     expect(q.phase).toBe(
       // The Data Prepper prometheus sink writes `k8s_pod_phase_`, the collector `k8s_pod_phase`.
-      'max by (resource_k8s_pod_name) ({__name__=~"k8s_pod_phase_?",resource_k8s_namespace_name="retail",resource_k8s_pod_name=~"p"})'
+      'max by (resource_k8s_cluster_name, resource_k8s_namespace_name, resource_k8s_pod_name) ({__name__=~"k8s_pod_phase_?",resource_k8s_namespace_name="retail",resource_k8s_pod_name=~"p"})'
     );
-    expect(q.podLabel).toBe('resource_k8s_pod_name');
+    expect(q.keyLabels).toEqual({
+      cluster: 'resource_k8s_cluster_name',
+      namespace: 'resource_k8s_namespace_name',
+      pod: 'resource_k8s_pod_name',
+    });
+    expect(podKey({ cluster: 'c', namespace: 'n', pod: 'p' })).toBe('c|n|p');
+    expect(podKey({ namespace: 'n', pod: 'p' })).toBe('|n|p');
   });
 
   it('builds host queries on host.id', () => {
@@ -224,11 +256,11 @@ describe('pods over the range, top-N and should-have charts', () => {
     expect(getQueryK8sServicePods([scope], 'plain', 5)).toContain('[60s]');
   });
 
-  it('keeps only the top pods and nodes on the charts', () => {
-    const q = getK8sInfraQueries([scope], [{ namespace: 'shop', pod: 'db-0' }], 'plain');
-    expect(q.cpu.startsWith(`topk(${INFRA_TOP_N}, sum by (k8s_pod_name)`)).toBe(true);
-    expect(q.restarts.startsWith(`topk(${INFRA_TOP_N}, `)).toBe(true);
-    expect(getK8sNodeQueries(['n1'], 'plain').memory).toContain(`topk(${INFRA_TOP_N}, `);
+  it('ranks hosts once by CPU to pick the charted ones; node charts take no topk', () => {
+    expect(getQueryHostRanking(['h1', 'h2'], 'plain')).toBe(
+      `topk(${INFRA_TOP_N}, 1 - sum by (host_id) (rate(system_cpu_time_seconds_total{host_id=~"h1|h2",state="idle"}[5m])) / sum by (host_id) (rate(system_cpu_time_seconds_total{host_id=~"h1|h2"}[5m])))`
+    );
+    expect(getK8sNodeQueries(['n1'], 'plain').memory).not.toContain('topk');
   });
 
   it('reads node readiness under both metric names', () => {
@@ -303,5 +335,34 @@ describe('HPA and other metrics', () => {
     expect(getInfraMetricQuery('k8s_node_filesystem_usage_bytes', sources[2].matchers)).toBe(
       'k8s_node_filesystem_usage_bytes{k8s_node_name=~"n1"}'
     );
+  });
+
+  it('limits generic pod and host charts to the charted pods / hosts', () => {
+    const pod = getInfraGenericQuery(
+      'container_filesystem_usage',
+      'k8s_namespace_name="shop",k8s_deployment_name="catalog"',
+      'pod',
+      'plain',
+      { pods: [{ namespace: 'shop', pod: 'c-1' }] }
+    );
+    expect(pod).toEqual({
+      query:
+        'avg by (k8s_cluster_name, k8s_namespace_name, k8s_pod_name) (container_filesystem_usage{k8s_namespace_name="shop",k8s_pod_name=~"c-1"})',
+      labelField: 'k8s_pod_name',
+    });
+    expect(
+      getInfraGenericQuery('system_paging_faults_total', 'host_id=~"h1|h2"', 'host', 'plain', {
+        hostIds: ['h1'],
+      }).query
+    ).toBe('sum by (host_id) (rate(system_paging_faults_total{host_id=~"h1"}[2m]))');
+    // Nodes: every node of the charted pods, from the source's matchers.
+    expect(
+      getInfraGenericQuery(
+        'k8s_node_uptime',
+        '__name__=~"k8s_node_.*",k8s_node_name=~"n1"',
+        'node',
+        'plain'
+      ).query
+    ).toBe('avg by (k8s_node_name) (k8s_node_uptime{k8s_node_name=~"n1"})');
   });
 });

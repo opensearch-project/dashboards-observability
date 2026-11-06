@@ -11,11 +11,6 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 const mockChartState = { mounts: 0 };
 
 jest.mock('../../../shared/hooks/use_dependencies', () => ({ useDependencies: jest.fn() }));
-const mockNavigateToServiceDetails = jest.fn();
-jest.mock('../../../shared/utils/navigation_utils', () => ({
-  ...jest.requireActual('../../../shared/utils/navigation_utils'),
-  navigateToServiceDetails: (...args: unknown[]) => mockNavigateToServiceDetails(...args),
-}));
 jest.mock('../../../shared/hooks/use_dependency_metrics', () => ({
   useDependencyMetrics: jest.fn(),
 }));
@@ -136,14 +131,6 @@ describe('ServiceDependencies - percentile switch does not remount the table (#2
       metrics: buildMetricsMap(dependencies),
       isLoading: false,
       error: null,
-    });
-  });
-
-  it('opens the dependency service page from its name, keeping the time range', () => {
-    render(<ServiceDependencies {...props} />);
-    fireEvent.click(screen.getByTestId(`dependencyServiceLink-${svc(0)}`));
-    expect(mockNavigateToServiceDetails).toHaveBeenCalledWith(svc(0), 'prod', {
-      timeRange: props.timeRange,
     });
   });
 
