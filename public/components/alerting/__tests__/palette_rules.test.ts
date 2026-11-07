@@ -11,6 +11,7 @@ import {
   STATUS_COLORS,
   getCloudWatchStateBadgeColor,
   getCloudWatchStateHealthColor,
+  getRuleStatusColor,
   getStatusBadgeColor,
 } from '../shared_constants';
 
@@ -32,9 +33,24 @@ describe('alerting palette rules', () => {
     });
   });
 
-  it('red never means "Active", whatever source the row comes from', () => {
+  it('red never means healthy or enabled: an enabled OpenSearch monitor is not red', () => {
     expect(STATUS_COLORS.active).toBe('primary');
-    expect(getStatusBadgeColor('active')).toBe('primary');
+    expect(getRuleStatusColor('active', 'opensearch')).toBe('primary');
+    expect(getStatusBadgeColor('active', 'opensearch')).toBe('primary');
+  });
+
+  it('an alarm condition is red: a firing Prometheus rule or a CloudWatch alarm in ALARM', () => {
+    expect(getRuleStatusColor('active', 'prometheus')).toBe('danger');
+    expect(getRuleStatusColor('active', 'cloudwatch')).toBe('danger');
+    expect(getStatusBadgeColor('active', 'prometheus')).toBe('danger');
+    expect(getRuleStatusColor('pending', 'prometheus')).toBe('warning');
+  });
+
+  it('alert states: firing red, acknowledged blue, resolved green, silenced not red', () => {
+    expect(STATE_COLORS.active).toBe('danger');
+    expect(STATE_COLORS.acknowledged).toBe('primary');
+    expect(STATE_COLORS.resolved).toBe('success');
+    expect(STATE_COLORS.silenced).not.toBe('danger');
   });
 
   it('status badges only get named EuiBadge colors', () => {

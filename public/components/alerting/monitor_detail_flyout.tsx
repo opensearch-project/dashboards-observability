@@ -347,7 +347,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={getStatusBadgeColor(monitor.status)}>
+                  <EuiBadge color={getStatusBadgeColor(monitor.status, monitor.datasourceType)}>
                     {getMonitorStateLabel(monitor.status)}
                   </EuiBadge>
                 </EuiFlexItem>
