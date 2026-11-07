@@ -44,6 +44,7 @@ import {
   isForecasterRule,
   SEVERITY_COLORS,
   STATUS_COLORS,
+  getCloudWatchStateBadgeColor,
   TYPE_LABELS,
 } from '../shared_constants';
 import { TruncatedLabel } from '../../common/truncated_label';
@@ -53,11 +54,6 @@ import { isPending } from './pending_rules';
 import type { CloudWatchWindowState } from '../hooks/use_cloudwatch_states_at';
 
 /** Tint for the `CW: <state>` badge shown alongside the unified status. */
-const CLOUDWATCH_STATE_BADGE_COLOR: Record<string, string> = {
-  ALARM: 'danger',
-  OK: 'success',
-  INSUFFICIENT_DATA: 'warning',
-};
 
 // ============================================================================
 // Column Definitions
@@ -335,7 +331,7 @@ export function buildTableColumns({
                           )
                     }
                   >
-                    <EuiBadge color={CLOUDWATCH_STATE_BADGE_COLOR[cw.state] || 'hollow'}>
+                    <EuiBadge color={getCloudWatchStateBadgeColor(cw.state)}>
                       <span style={truncate}>CW: {getCloudWatchStateLabel(cw.state)}</span>
                     </EuiBadge>
                   </EuiToolTip>

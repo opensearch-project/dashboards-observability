@@ -19,7 +19,7 @@
  */
 import React, { useMemo } from 'react';
 import moment from 'moment-timezone';
-import { EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
@@ -86,6 +86,47 @@ function formatBucketLabel(ts: number, rangeMs: number, tz: string): string {
   if (rangeMs <= SEVEN_DAYS_MS) return m.format('MM-DD HH:mm');
   return m.format('MM-DD');
 }
+
+/** Severities in timeline series order (most severe first). */
+const TIMELINE_SEVERITIES = ['critical', 'high', 'medium', 'low', 'info'] as const;
+
+/**
+ * Severity legend for the Alerts timeline, rendered in the panel header row.
+ * Uses the same swatch and severity tokens (`SEVERITY_HEX`) as the filter
+ * panel and the table badges, so all three read the same.
+ */
+export const AlertTimelineLegend: React.FC = () => (
+  <EuiFlexGroup
+    gutterSize="m"
+    alignItems="center"
+    responsive={false}
+    wrap
+    data-test-subj="alertTimelineLegend"
+  >
+    {TIMELINE_SEVERITIES.map((key) => (
+      <EuiFlexItem grow={false} key={key}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <span
+              aria-hidden="true"
+              data-test-subj={`alertTimelineLegend-swatch-${key}`}
+              style={{
+                display: 'inline-block',
+                width: 12,
+                height: 12,
+                borderRadius: 2,
+                backgroundColor: SEVERITY_COLORS[key],
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{getSeverityLabel(key)}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    ))}
+  </EuiFlexGroup>
+);
 
 export interface AlertTimelineProps {
   alerts: UnifiedAlertSummary[];
@@ -227,11 +268,13 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
         appendToBody: true,
         confine: false,
       },
-      legend: { bottom: 0, left: 'center', textStyle: { fontSize: 10 } },
+      // The legend lives in the panel header row (AlertTimelineLegend), not
+      // under the x-axis, so the chart draws none of its own.
+      legend: { show: false },
       // Reserve extra headroom for the reconciliation subtitle when present.
       // `left: 50` (was 44) gives the rotated y-axis name + 3-digit count tick
       // labels room so they don't clip the chart's left edge.
-      grid: { top: noteText ? 24 : 10, right: 15, bottom: 36, left: 50 },
+      grid: { top: noteText ? 24 : 10, right: 15, bottom: 20, left: 50 },
       xAxis: {
         type: 'category' as const,
         data: timeLabels,

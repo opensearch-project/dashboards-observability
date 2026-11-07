@@ -9,6 +9,8 @@ import {
   SEVERITY_COLORS,
   STATE_COLORS,
   STATUS_COLORS,
+  getCloudWatchStateBadgeColor,
+  getCloudWatchStateHealthColor,
   getStatusBadgeColor,
 } from '../shared_constants';
 
@@ -55,5 +57,14 @@ describe('alerting palette rules', () => {
     expect(STATUS_COLORS['Awaiting data to restart']).not.toBe('warning');
     expect(STATE_COLORS.insufficient_data).not.toBe('warning');
     expect(STATE_HEX.insufficient_data).not.toBe(euiThemeVars.euiColorWarning);
+  });
+
+  it('CloudWatch states take the palette slot of the unified state they map to', () => {
+    expect(getCloudWatchStateHealthColor('ALARM')).toBe(STATE_COLORS.active);
+    expect(getCloudWatchStateHealthColor('OK')).toBe(STATE_COLORS.resolved);
+    expect(getCloudWatchStateHealthColor('INSUFFICIENT_DATA')).toBe(STATE_COLORS.insufficient_data);
+    // No yellow for missing data, and badges only get named badge colors.
+    expect(getCloudWatchStateBadgeColor('INSUFFICIENT_DATA')).toBe('default');
+    expect(getCloudWatchStateBadgeColor(undefined)).toBe('default');
   });
 });

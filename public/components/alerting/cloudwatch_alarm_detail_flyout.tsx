@@ -64,7 +64,13 @@ import { EchartsRender } from './echarts_render';
 import { ClassifiedErrorCallout } from '../common/error';
 import { useCloudWatchAlarmDetail } from './hooks/use_cloudwatch_alarm_detail';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
-import { SEVERITY_COLORS } from './shared_constants';
+import {
+  CLOUDWATCH_STATE_TO_UNIFIED,
+  SEVERITY_COLORS,
+  getCloudWatchStateBadgeColor,
+  getCloudWatchStateHealthColor,
+} from './shared_constants';
+import { getStateHex } from './alert_colors';
 import { formatTimestamp, localizeTimestampsInText } from './time_format';
 import {
   getCloudWatchStateLabel,
@@ -108,22 +114,17 @@ export interface CloudWatchAlarmDetailFlyoutProps {
   timeRange?: AlarmTimeWindow;
 }
 
-// State → OUI health colour used consistently for dots/badges in this flyout.
-const STATE_HEALTH: Record<CloudWatchAlarmState, string> = {
-  ALARM: 'danger',
-  OK: 'success',
-  INSUFFICIENT_DATA: 'warning',
-};
-
-// State → hex for the timeline band / chart shading (OUI semantic hexes).
+// CloudWatch states use the same palette slots as the unified alert states
+// they map to (see CLOUDWATCH_STATE_TO_UNIFIED), for dots, badges and the
+// timeline band alike.
 const STATE_HEX: Record<CloudWatchAlarmState, string> = {
-  ALARM: '#BD271E',
-  OK: '#017D73',
-  INSUFFICIENT_DATA: '#F5A700',
+  ALARM: getStateHex(CLOUDWATCH_STATE_TO_UNIFIED.ALARM),
+  OK: getStateHex(CLOUDWATCH_STATE_TO_UNIFIED.OK),
+  INSUFFICIENT_DATA: getStateHex(CLOUDWATCH_STATE_TO_UNIFIED.INSUFFICIENT_DATA),
 };
 
 function stateHealthColor(state?: CloudWatchAlarmState): string {
-  return state ? STATE_HEALTH[state] : 'subdued';
+  return getCloudWatchStateHealthColor(state);
 }
 
 /**
@@ -648,7 +649,9 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
             })}
           </EuiTextColor>{' '}
           {state ? (
-            <EuiBadge color={STATE_HEALTH[state]}>{getCloudWatchStateLabel(state)}</EuiBadge>
+            <EuiBadge color={getCloudWatchStateBadgeColor(state)}>
+              {getCloudWatchStateLabel(state)}
+            </EuiBadge>
           ) : (
             '—'
           )}
@@ -722,7 +725,7 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
             <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
               {state && (
                 <EuiFlexItem grow={false}>
-                  <EuiHealth color={STATE_HEALTH[state]}>
+                  <EuiHealth color={getCloudWatchStateHealthColor(state)}>
                     {state === 'ALARM'
                       ? getStateLabel('active')
                       : state === 'INSUFFICIENT_DATA'

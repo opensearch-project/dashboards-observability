@@ -70,6 +70,29 @@ export const STATE_COLORS: Record<string, string> = {
   deleted: 'subdued',
 };
 
+/**
+ * CloudWatch alarm states take the same palette slot as the unified alert
+ * state they map to (ALARM → active, OK → resolved, INSUFFICIENT_DATA →
+ * insufficient_data), so a CloudWatch row never introduces its own colors.
+ * Labels stay CloudWatch's own ("In alarm", "OK", "Insufficient data").
+ */
+export const CLOUDWATCH_STATE_TO_UNIFIED: Record<CloudWatchAlarmState, string> = {
+  ALARM: 'active',
+  OK: 'resolved',
+  INSUFFICIENT_DATA: 'insufficient_data',
+};
+
+/** `EuiHealth` color for a CloudWatch alarm state. */
+export function getCloudWatchStateHealthColor(state?: CloudWatchAlarmState | null): string {
+  return (state && STATE_COLORS[CLOUDWATCH_STATE_TO_UNIFIED[state]]) || 'subdued';
+}
+
+/** `EuiBadge` color for a CloudWatch alarm state (`subdued` is not a badge color). */
+export function getCloudWatchStateBadgeColor(state?: CloudWatchAlarmState | null): string {
+  const color = getCloudWatchStateHealthColor(state);
+  return color === 'subdued' ? 'default' : color;
+}
+
 // ============================================================================
 // Monitor status
 // ============================================================================

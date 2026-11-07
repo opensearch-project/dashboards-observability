@@ -24,7 +24,8 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
 }));
 
-import { AlertTimeline } from '../alerts_charts';
+import { AlertTimeline, AlertTimelineLegend } from '../alerts_charts';
+import { SEVERITY_HEX } from '../alert_colors';
 import type { UnifiedAlertSummary } from '../../../../common/types/alerting';
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -74,6 +75,31 @@ describe('alerts_charts', () => {
     };
     expect(option.series.map((s) => s.name)).toEqual(['Critical', 'High', 'Medium', 'Low', 'Info']);
     expect(option.series.every((s) => s.type === 'bar' && s.stack === 'severity')).toBe(true);
+  });
+
+  it('AlertTimeline draws no legend of its own; series use the severity palette', () => {
+    const now = Date.now();
+    render(<AlertTimeline alerts={[makeAlert({})]} startMs={now - HOUR_MS} endMs={now} />);
+    const opts = mockSetOption.mock.calls[mockSetOption.mock.calls.length - 1][0];
+    expect(opts.legend).toEqual({ show: false });
+    expect(opts.series.map((s: { itemStyle: { color: string } }) => s.itemStyle.color)).toEqual([
+      SEVERITY_HEX.critical,
+      SEVERITY_HEX.high,
+      SEVERITY_HEX.medium,
+      SEVERITY_HEX.low,
+      SEVERITY_HEX.info,
+    ]);
+  });
+
+  it('AlertTimelineLegend shows each severity with its badge-palette swatch', () => {
+    const { getByTestId, getByText } = render(<AlertTimelineLegend />);
+    (['critical', 'high', 'medium', 'low', 'info'] as const).forEach((key) => {
+      expect(getByTestId(`alertTimelineLegend-swatch-${key}`)).toHaveStyle({
+        backgroundColor: SEVERITY_HEX[key],
+      });
+    });
+    expect(getByText('Critical')).toBeInTheDocument();
+    expect(getByText('Info')).toBeInTheDocument();
   });
 
   it('AlertTimeline shows an empty-state message when there are no alerts', () => {
