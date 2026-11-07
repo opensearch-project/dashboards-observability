@@ -42,7 +42,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { alertMatchesSearch, filterAlerts } from '../../../common/services/alerting/filter';
-import { AlertTimeline } from './alerts_charts';
+import { AlertTimeline, AlertTimelineLegend } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import {
   canAcknowledgeAlert,
@@ -1091,7 +1091,11 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         name: i18n.translate('observability.alerting.alertsDashboard.column.state', {
           defaultMessage: 'State',
         }),
-        width: '12%',
+        // A floor wide enough for "Acknowledged" plus its dot: the table uses
+        // `table-layout: fixed`, where a CSS min-width on the cell is ignored.
+        width: 'max(12%, 136px)',
+        // No wrapping inside the label (see `.altAlertStateColumn`).
+        className: 'altAlertStateColumn',
         sortable: (alert: AlertTableRow) => getAlertDisplayState(alert),
         // Route the raw lowercase wire enum through `getStateLabel` so the UI
         // shows "Active" / "Acknowledged" rather than `active`. `anomaly` is a
@@ -1554,6 +1558,17 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                             </h4>
                           </EuiTitle>
                         </EuiFlexItem>
+                        {/* Severity legend sits in the header row, right side,
+                            only while the chart itself is showing. */}
+                        {!emptyMode && filteredAlerts.length > 0 && (
+                          <EuiFlexItem grow={true}>
+                            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+                              <EuiFlexItem grow={false}>
+                                <AlertTimelineLegend />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                        )}
                         <EuiFlexItem grow={false}>
                           {/* `EuiSuperDatePicker` doesn't forward `data-test-subj`
                               to its rendered control, so anchor it on a wrapper

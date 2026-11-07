@@ -29,6 +29,7 @@ jest.mock('../alerts_charts', () => ({
     mockTimeline(props);
     return <div data-test-subj="alertTimelineStub" />;
   },
+  AlertTimelineLegend: () => <div data-test-subj="alertTimelineLegendStub" />,
 }));
 
 import { AlertsDashboard } from '../alerts_dashboard';
@@ -263,6 +264,22 @@ describe('AlertsDashboard', () => {
       )
     ).toBeInTheDocument();
     expect(getByText('Go to Rules')).toBeInTheDocument();
+  });
+
+  it('shows the severity legend in the timeline header only while the chart is shown', () => {
+    const { container, rerender } = render(
+      <AlertsDashboard {...baseProps} alerts={[sampleAlert]} />
+    );
+    const legend = container.querySelector('[data-test-subj="alertTimelineLegendStub"]');
+    expect(legend).not.toBeNull();
+    // Same header row as the date picker, not under the chart.
+    const header = container
+      .querySelector('[data-test-subj="alertManagerDatePicker"]')!
+      .closest('.euiFlexGroup');
+    expect(header!.contains(legend)).toBe(true);
+
+    rerender(<AlertsDashboard {...baseProps} alerts={[]} />);
+    expect(container.querySelector('[data-test-subj="alertTimelineLegendStub"]')).toBeNull();
   });
 
   it('renders alert table when alerts provided', () => {

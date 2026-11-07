@@ -70,6 +70,29 @@ export const STATE_COLORS: Record<string, string> = {
   deleted: 'subdued',
 };
 
+/**
+ * CloudWatch alarm states take the same palette slot as the unified alert
+ * state they map to (ALARM → active, OK → resolved, INSUFFICIENT_DATA →
+ * insufficient_data), so a CloudWatch row never introduces its own colors.
+ * Labels stay CloudWatch's own ("In alarm", "OK", "Insufficient data").
+ */
+export const CLOUDWATCH_STATE_TO_UNIFIED: Record<CloudWatchAlarmState, string> = {
+  ALARM: 'active',
+  OK: 'resolved',
+  INSUFFICIENT_DATA: 'insufficient_data',
+};
+
+/** `EuiHealth` color for a CloudWatch alarm state. */
+export function getCloudWatchStateHealthColor(state?: CloudWatchAlarmState | null): string {
+  return (state && STATE_COLORS[CLOUDWATCH_STATE_TO_UNIFIED[state]]) || 'subdued';
+}
+
+/** `EuiBadge` color for a CloudWatch alarm state (`subdued` is not a badge color). */
+export function getCloudWatchStateBadgeColor(state?: CloudWatchAlarmState | null): string {
+  const color = getCloudWatchStateHealthColor(state);
+  return color === 'subdued' ? 'default' : color;
+}
+
 // ============================================================================
 // Monitor status
 // ============================================================================
@@ -107,11 +130,25 @@ export const STATUS_COLORS: Record<string, string> = {
 };
 
 /**
- * `STATUS_COLORS` for an `EuiBadge`. `subdued` is an `EuiHealth` color but not
- * a badge color, so badges use `default` for those statuses instead.
+ * Rule status color. Red never means healthy or enabled, but it does mean an
+ * alarm condition. `active` is both: an enabled OpenSearch monitor (healthy,
+ * so primary), or a firing Prometheus rule / CloudWatch alarm in ALARM (an
+ * alarm, so danger, as CloudWatch shows it). Every other status uses
+ * `STATUS_COLORS`. For `EuiHealth`.
  */
-export function getStatusBadgeColor(status?: string | null): string {
-  const color = (status && STATUS_COLORS[status]) || 'default';
+export function getRuleStatusColor(status?: string | null, datasourceType?: string): string {
+  if (status === 'active' && datasourceType && datasourceType !== 'opensearch') {
+    return 'danger';
+  }
+  return (status && STATUS_COLORS[status]) || 'subdued';
+}
+
+/**
+ * `getRuleStatusColor` for an `EuiBadge`. `subdued` is an `EuiHealth` color
+ * but not a badge color, so badges use `default` for those statuses instead.
+ */
+export function getStatusBadgeColor(status?: string | null, datasourceType?: string): string {
+  const color = getRuleStatusColor(status, datasourceType);
   return color === 'subdued' ? 'default' : color;
 }
 

@@ -149,6 +149,14 @@
     text-overflow: ellipsis;
   }
 
+  /* State labels never wrap mid-word ("Acknowledged" broke at 143px). The
+   * column width floor is set on the column itself (`max(12%, 136px)`). */
+  .altAlertStateColumn {
+    .euiTableCellContent {
+      white-space: nowrap;
+    }
+  }
+
   .euiTable {
     table-layout: fixed;
     min-width: 940px;
