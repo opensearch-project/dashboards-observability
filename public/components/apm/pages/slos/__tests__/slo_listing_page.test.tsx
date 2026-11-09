@@ -192,6 +192,27 @@ describe('SloListingPage — filter integration', () => {
     expect(navigateToSloSuggest).toHaveBeenCalledTimes(1);
   });
 
+  it('fills only Create SLO; Suggest SLOs and Refresh are standard (outlined) buttons', async () => {
+    const list = jest.fn().mockResolvedValue({
+      results: [makeSummary()],
+      total: 1,
+      pageSize: 20,
+      hasMore: false,
+      nextCursor: null,
+      prevCursor: null,
+    });
+    await act(async () => {
+      renderPage(list);
+    });
+    await screen.findByTestId('slosTable');
+    expect(screen.getByTestId('slosCreate').className).toMatch(/euiButton--fill/);
+    for (const id of ['slosSuggest', 'slosRefresh']) {
+      const button = screen.getByTestId(id);
+      expect(button.className).toMatch(/\beuiButton\b/);
+      expect(button.className).not.toMatch(/euiButton--fill|euiButtonEmpty/);
+    }
+  });
+
   it('disables the Suggest SLOs toolbar button when no services are discovered', async () => {
     // SLOs can exist without APM services (e.g. custom PromQL SLOs); with no
     // services, Suggest has nothing to draft against, so the button is disabled.

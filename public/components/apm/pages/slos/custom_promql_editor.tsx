@@ -288,6 +288,7 @@ export const CustomPromqlEditor: React.FC<CustomPromqlEditorProps> = ({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiButtonGroup
+          color="primary"
           legend={i18n.translate('observability.apm.slo.wizard.customPromql.modeLegend', {
             defaultMessage: 'SLI query type',
           })}
@@ -362,6 +363,7 @@ export const CustomPromqlEditor: React.FC<CustomPromqlEditorProps> = ({
             fullWidth
           >
             <EuiTextArea
+              isInvalid={!!rawError}
               rows={3}
               value={value.errorRatioQuery}
               onChange={(e) =>

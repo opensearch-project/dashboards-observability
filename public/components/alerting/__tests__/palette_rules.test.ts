@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { euiPaletteGray } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { SEVERITY_HEX, STATE_HEX } from '../alert_colors';
 import {
@@ -15,21 +16,32 @@ import {
   getStatusBadgeColor,
 } from '../shared_constants';
 
-// Palette rules for the Alerts and Rules tabs: one severity palette from the
-// OUI vis colors; status colors never paint "active" red or "no data" yellow.
+// Palette rules for the Alerts and Rules tabs: one severity palette, kept apart
+// from the status colors; status colors never paint "active" red or "no data" yellow.
 describe('alerting palette rules', () => {
   it('badges use the same severity palette as swatches and the timeline', () => {
     expect(SEVERITY_COLORS).toEqual(SEVERITY_HEX);
   });
 
-  it('severity colors come from the OUI vis palette, not status colors or the UI primary', () => {
-    const vis = Array.from(
-      { length: 10 },
-      (_, i) => (euiThemeVars as Record<string, string>)[`euiColorVis${i}`]
-    );
+  it('severity colors are never the status colors or the UI primary', () => {
+    const reserved = [
+      euiThemeVars.euiColorPrimary,
+      euiThemeVars.euiColorDanger,
+      euiThemeVars.euiColorWarning,
+      euiThemeVars.euiColorSuccess,
+    ].map((c) => c.toLowerCase());
     Object.values(SEVERITY_HEX).forEach((hex) => {
-      expect(vis).toContain(hex);
-      expect(hex).not.toBe(euiThemeVars.euiColorPrimary);
+      expect(reserved).not.toContain(hex.toLowerCase());
+    });
+  });
+
+  it('severity reads warm to cool from OUI tokens: Vis8, Vis7, Vis5, Vis1, then gray', () => {
+    expect(SEVERITY_HEX).toEqual({
+      critical: euiThemeVars.euiColorVis8,
+      high: euiThemeVars.euiColorVis7,
+      medium: euiThemeVars.euiColorVis5,
+      low: euiThemeVars.euiColorVis1,
+      info: euiPaletteGray(5)[1],
     });
   });
 

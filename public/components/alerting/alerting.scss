@@ -10,6 +10,48 @@
   flex-direction: column;
 }
 
+/* Tab row: tabs on the left, the active tab's page-level controls on the right
+ * (portaled in by `TabRowActions`). The row draws the tabs' bottom rule across
+ * its full width, so the line runs under the controls too. The controls wrap
+ * under the tabs on a narrow viewport instead of overlapping them. */
+.altTabRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: $euiSizeM;
+  box-shadow: inset 0 (-$euiBorderWidthThin) 0 $euiBorderColor;
+}
+
+.altHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: $euiSizeS;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.altTabRow__tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.altTabRow__actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: $euiSizeS;
+  margin-left: auto;
+
+  /* Vertical: clear of the rule under the tabs. Right: the content gutter. */
+  padding: $euiSizeXS $euiSize $euiSizeXS 0;
+
+  &:empty {
+    display: none;
+  }
+}
+
 /* Per-datasource error indicator in the filter facet (FacetErrorIndicator). */
 .altFacetErrorBtn {
   margin-left: 4px;

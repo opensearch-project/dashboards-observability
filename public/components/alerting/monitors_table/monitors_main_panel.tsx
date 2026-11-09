@@ -44,6 +44,7 @@ import { MonitorsEuiTable } from './monitors_eui_table';
 import type { MonitorsEuiTableProps } from './monitors_eui_table';
 import { AlarmTimeWindow, describeTimeRange } from '../alarm_time_window';
 import type { UseTimeRangeResult } from '../hooks/use_time_range';
+import { TabRowActions } from '../tab_row_actions';
 
 export interface MonitorsMainPanelProps {
   // Data
@@ -232,6 +233,275 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
     ]
   );
 
+  // Page-level controls for the Rules tab (the rules time picker, Refresh and
+  // Create). In the Alert Manager they sit in the tab row; rendered on their
+  // own (no tab row), they keep their row above the search bar.
+  const rulesToolbarItems = onCreateMonitor ? (
+    <>
+      {showRulesTimePicker && (
+        <EuiFlexItem grow={false} data-test-subj="alertManagerRulesTimePicker">
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              {/* Hovering the picker says what it scopes, so it isn't read as a filter
+                  on every rule. */}
+              <EuiToolTip position="top" content={rulesTimePickerHelp}>
+                <EuiSuperDatePicker
+                  compressed
+                  start={rulesTime.startTime}
+                  end={rulesTime.endTime}
+                  onTimeChange={rulesTime.onTimeChange}
+                  // Refresh sits right next to it, so no second update button.
+                  showUpdateButton={false}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="questionInCircle"
+                color="subdued"
+                content={rulesTimePickerHelp}
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.rulesTimePickerHelpAria',
+                  { defaultMessage: 'About the time range' }
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+      {onRefresh && (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconType="refresh"
+            size="s"
+            isLoading={refreshing}
+            onClick={() => {
+              // Re-resolve a relative window ("now-24h") to the current time too.
+              rulesTime.bumpRefreshToken();
+              onRefresh();
+            }}
+            data-test-subj="alertManagerRefreshRulesButton"
+          >
+            <FormattedMessage
+              id="observability.alerting.monitorsTable.mainPanel.refresh"
+              defaultMessage="Refresh"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              size="s"
+              onClick={() => setShowCreatePopover((prev) => !prev)}
+              data-test-subj="alertManagerCreateResourceButton"
+            >
+              <FormattedMessage
+                id="observability.alerting.monitorsTable.mainPanel.createMonitor"
+                defaultMessage="Create"
+              />
+            </EuiButton>
+          }
+          isOpen={showCreatePopover}
+          closePopover={() => setShowCreatePopover(false)}
+          panelPaddingSize="none"
+          anchorPosition="downRight"
+        >
+          <EuiListGroup flush style={{ width: 220 }}>
+            {logsCreateDisabled ? (
+              <EuiToolTip
+                position="left"
+                content={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.logsDisabledTooltip',
+                  {
+                    defaultMessage:
+                      'Logs rules require an OpenSearch datasource. Select one to enable.',
+                  }
+                )}
+              >
+                <EuiListGroupItem
+                  label={i18n.translate(
+                    'observability.alerting.monitorsTable.mainPanel.logsOption',
+                    {
+                      defaultMessage: 'Logs alert rule',
+                    }
+                  )}
+                  isDisabled
+                  aria-label={i18n.translate(
+                    'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
+                    {
+                      defaultMessage: 'Create logs rule',
+                    }
+                  )}
+                />
+              </EuiToolTip>
+            ) : (
+              <EuiListGroupItem
+                label={i18n.translate('observability.alerting.monitorsTable.mainPanel.logsOption', {
+                  defaultMessage: 'Logs alert rule',
+                })}
+                onClick={() => {
+                  setShowCreatePopover(false);
+                  onCreateMonitor('logs');
+                }}
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
+                  {
+                    defaultMessage: 'Create logs rule',
+                  }
+                )}
+              />
+            )}
+            {metricsCreateDisabled ? (
+              <EuiToolTip
+                position="left"
+                content={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.metricsDisabledTooltip',
+                  {
+                    defaultMessage:
+                      'Metrics rules require a Prometheus datasource. Select one to enable.',
+                  }
+                )}
+              >
+                <EuiListGroupItem
+                  label={i18n.translate(
+                    'observability.alerting.monitorsTable.mainPanel.metricsOption',
+                    {
+                      defaultMessage: 'Metrics alert rule',
+                    }
+                  )}
+                  isDisabled
+                  aria-label={i18n.translate(
+                    'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
+                    {
+                      defaultMessage: 'Create metrics rule',
+                    }
+                  )}
+                />
+              </EuiToolTip>
+            ) : (
+              <EuiListGroupItem
+                label={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.metricsOption',
+                  {
+                    defaultMessage: 'Metrics alert rule',
+                  }
+                )}
+                onClick={() => {
+                  setShowCreatePopover(false);
+                  onCreateMonitor('metrics');
+                }}
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
+                  {
+                    defaultMessage: 'Create metrics rule',
+                  }
+                )}
+              />
+            )}
+            {detectorCreateDisabled ? (
+              <EuiToolTip
+                position="left"
+                content={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.detectorDisabledTooltip',
+                  {
+                    defaultMessage:
+                      'Anomaly detection rules require a standard OpenSearch datasource. OpenSearch Serverless is not supported.',
+                  }
+                )}
+              >
+                <EuiListGroupItem
+                  label={i18n.translate(
+                    'observability.alerting.monitorsTable.mainPanel.detectorOption',
+                    {
+                      defaultMessage: 'Anomaly detection rule',
+                    }
+                  )}
+                  isDisabled
+                  aria-label={i18n.translate(
+                    'observability.alerting.monitorsTable.mainPanel.createDetectorAriaLabel',
+                    {
+                      defaultMessage: 'Create anomaly detection rule',
+                    }
+                  )}
+                />
+              </EuiToolTip>
+            ) : (
+              <EuiListGroupItem
+                label={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.detectorOption',
+                  {
+                    defaultMessage: 'Anomaly detection rule',
+                  }
+                )}
+                onClick={() => {
+                  setShowCreatePopover(false);
+                  onCreateMonitor('detector');
+                }}
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.createDetectorAriaLabel',
+                  {
+                    defaultMessage: 'Create anomaly detection rule',
+                  }
+                )}
+              />
+            )}
+            {forecasterCreateDisabled ? (
+              <EuiToolTip
+                position="left"
+                content={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.forecasterDisabledTooltip',
+                  {
+                    defaultMessage:
+                      'Forecasting rules require a standard OpenSearch datasource. OpenSearch Serverless is not supported.',
+                  }
+                )}
+              >
+                <EuiListGroupItem
+                  label={i18n.translate(
+                    'observability.alerting.monitorsTable.mainPanel.forecasterOption',
+                    {
+                      defaultMessage: 'Forecasting rule',
+                    }
+                  )}
+                  isDisabled
+                  aria-label={i18n.translate(
+                    'observability.alerting.monitorsTable.mainPanel.createForecasterAriaLabel',
+                    {
+                      defaultMessage: 'Create forecasting rule',
+                    }
+                  )}
+                />
+              </EuiToolTip>
+            ) : (
+              <EuiListGroupItem
+                label={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.forecasterOption',
+                  {
+                    defaultMessage: 'Forecasting rule',
+                  }
+                )}
+                onClick={() => {
+                  setShowCreatePopover(false);
+                  onCreateMonitor('forecaster');
+                }}
+                aria-label={i18n.translate(
+                  'observability.alerting.monitorsTable.mainPanel.createForecasterAriaLabel',
+                  {
+                    defaultMessage: 'Create forecasting rule',
+                  }
+                )}
+              />
+            )}
+          </EuiListGroup>
+        </EuiPopover>
+      </EuiFlexItem>
+    </>
+  ) : null;
+
   return (
     <>
       <EuiPanel
@@ -241,278 +511,21 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       >
         {/* Create Monitor Button + Search bar */}
         <div style={{ flexShrink: 0 }}>
-          {onCreateMonitor && (
-            <EuiFlexGroup
-              justifyContent="flexEnd"
-              responsive={false}
-              gutterSize="s"
-              style={{ marginBottom: 8 }}
-            >
-              {showRulesTimePicker && (
-                <EuiFlexItem grow={false} data-test-subj="alertManagerRulesTimePicker">
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      {/* Hovering the picker says what it scopes, so it isn't read as a filter
-                          on every rule. */}
-                      <EuiToolTip position="top" content={rulesTimePickerHelp}>
-                        <EuiSuperDatePicker
-                          compressed
-                          start={rulesTime.startTime}
-                          end={rulesTime.endTime}
-                          onTimeChange={rulesTime.onTimeChange}
-                          // Refresh sits right next to it, so no second update button.
-                          showUpdateButton={false}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip
-                        type="questionInCircle"
-                        color="subdued"
-                        content={rulesTimePickerHelp}
-                        aria-label={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.rulesTimePickerHelpAria',
-                          { defaultMessage: 'About the time range' }
-                        )}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              )}
-              {onRefresh && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    iconType="refresh"
-                    size="s"
-                    isLoading={refreshing}
-                    onClick={() => {
-                      // Re-resolve a relative window ("now-24h") to the current time too.
-                      rulesTime.bumpRefreshToken();
-                      onRefresh();
-                    }}
-                    data-test-subj="alertManagerRefreshRulesButton"
-                  >
-                    <FormattedMessage
-                      id="observability.alerting.monitorsTable.mainPanel.refresh"
-                      defaultMessage="Refresh"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  button={
-                    <EuiButton
-                      fill
-                      iconType="plusInCircle"
-                      size="s"
-                      onClick={() => setShowCreatePopover((prev) => !prev)}
-                      data-test-subj="alertManagerCreateResourceButton"
-                    >
-                      <FormattedMessage
-                        id="observability.alerting.monitorsTable.mainPanel.createMonitor"
-                        defaultMessage="Create"
-                      />
-                    </EuiButton>
-                  }
-                  isOpen={showCreatePopover}
-                  closePopover={() => setShowCreatePopover(false)}
-                  panelPaddingSize="none"
-                  anchorPosition="downRight"
+          {rulesToolbarItems && (
+            <TabRowActions
+              fallback={
+                <EuiFlexGroup
+                  justifyContent="flexEnd"
+                  responsive={false}
+                  gutterSize="s"
+                  style={{ marginBottom: 8 }}
                 >
-                  <EuiListGroup flush style={{ width: 220 }}>
-                    {logsCreateDisabled ? (
-                      <EuiToolTip
-                        position="left"
-                        content={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.logsDisabledTooltip',
-                          {
-                            defaultMessage:
-                              'Logs rules require an OpenSearch datasource. Select one to enable.',
-                          }
-                        )}
-                      >
-                        <EuiListGroupItem
-                          label={i18n.translate(
-                            'observability.alerting.monitorsTable.mainPanel.logsOption',
-                            {
-                              defaultMessage: 'Logs alert rule',
-                            }
-                          )}
-                          isDisabled
-                          aria-label={i18n.translate(
-                            'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
-                            {
-                              defaultMessage: 'Create logs rule',
-                            }
-                          )}
-                        />
-                      </EuiToolTip>
-                    ) : (
-                      <EuiListGroupItem
-                        label={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.logsOption',
-                          {
-                            defaultMessage: 'Logs alert rule',
-                          }
-                        )}
-                        onClick={() => {
-                          setShowCreatePopover(false);
-                          onCreateMonitor('logs');
-                        }}
-                        aria-label={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.createLogsAriaLabel',
-                          {
-                            defaultMessage: 'Create logs rule',
-                          }
-                        )}
-                      />
-                    )}
-                    {metricsCreateDisabled ? (
-                      <EuiToolTip
-                        position="left"
-                        content={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.metricsDisabledTooltip',
-                          {
-                            defaultMessage:
-                              'Metrics rules require a Prometheus datasource. Select one to enable.',
-                          }
-                        )}
-                      >
-                        <EuiListGroupItem
-                          label={i18n.translate(
-                            'observability.alerting.monitorsTable.mainPanel.metricsOption',
-                            {
-                              defaultMessage: 'Metrics alert rule',
-                            }
-                          )}
-                          isDisabled
-                          aria-label={i18n.translate(
-                            'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
-                            {
-                              defaultMessage: 'Create metrics rule',
-                            }
-                          )}
-                        />
-                      </EuiToolTip>
-                    ) : (
-                      <EuiListGroupItem
-                        label={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.metricsOption',
-                          {
-                            defaultMessage: 'Metrics alert rule',
-                          }
-                        )}
-                        onClick={() => {
-                          setShowCreatePopover(false);
-                          onCreateMonitor('metrics');
-                        }}
-                        aria-label={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.createMetricsAriaLabel',
-                          {
-                            defaultMessage: 'Create metrics rule',
-                          }
-                        )}
-                      />
-                    )}
-                    {detectorCreateDisabled ? (
-                      <EuiToolTip
-                        position="left"
-                        content={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.detectorDisabledTooltip',
-                          {
-                            defaultMessage:
-                              'Anomaly detection rules require a standard OpenSearch datasource. OpenSearch Serverless is not supported.',
-                          }
-                        )}
-                      >
-                        <EuiListGroupItem
-                          label={i18n.translate(
-                            'observability.alerting.monitorsTable.mainPanel.detectorOption',
-                            {
-                              defaultMessage: 'Anomaly detection rule',
-                            }
-                          )}
-                          isDisabled
-                          aria-label={i18n.translate(
-                            'observability.alerting.monitorsTable.mainPanel.createDetectorAriaLabel',
-                            {
-                              defaultMessage: 'Create anomaly detection rule',
-                            }
-                          )}
-                        />
-                      </EuiToolTip>
-                    ) : (
-                      <EuiListGroupItem
-                        label={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.detectorOption',
-                          {
-                            defaultMessage: 'Anomaly detection rule',
-                          }
-                        )}
-                        onClick={() => {
-                          setShowCreatePopover(false);
-                          onCreateMonitor('detector');
-                        }}
-                        aria-label={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.createDetectorAriaLabel',
-                          {
-                            defaultMessage: 'Create anomaly detection rule',
-                          }
-                        )}
-                      />
-                    )}
-                    {forecasterCreateDisabled ? (
-                      <EuiToolTip
-                        position="left"
-                        content={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.forecasterDisabledTooltip',
-                          {
-                            defaultMessage:
-                              'Forecasting rules require a standard OpenSearch datasource. OpenSearch Serverless is not supported.',
-                          }
-                        )}
-                      >
-                        <EuiListGroupItem
-                          label={i18n.translate(
-                            'observability.alerting.monitorsTable.mainPanel.forecasterOption',
-                            {
-                              defaultMessage: 'Forecasting rule',
-                            }
-                          )}
-                          isDisabled
-                          aria-label={i18n.translate(
-                            'observability.alerting.monitorsTable.mainPanel.createForecasterAriaLabel',
-                            {
-                              defaultMessage: 'Create forecasting rule',
-                            }
-                          )}
-                        />
-                      </EuiToolTip>
-                    ) : (
-                      <EuiListGroupItem
-                        label={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.forecasterOption',
-                          {
-                            defaultMessage: 'Forecasting rule',
-                          }
-                        )}
-                        onClick={() => {
-                          setShowCreatePopover(false);
-                          onCreateMonitor('forecaster');
-                        }}
-                        aria-label={i18n.translate(
-                          'observability.alerting.monitorsTable.mainPanel.createForecasterAriaLabel',
-                          {
-                            defaultMessage: 'Create forecasting rule',
-                          }
-                        )}
-                      />
-                    )}
-                  </EuiListGroup>
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                  {rulesToolbarItems}
+                </EuiFlexGroup>
+              }
+            >
+              {rulesToolbarItems}
+            </TabRowActions>
           )}
 
           {/* Search bar with suggestions */}

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { euiPaletteGray } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import type {
   UnifiedAlertKind,
@@ -29,18 +30,23 @@ import type {
 /**
  * The one severity palette: table badges, filter-panel swatches and the
  * timeline series all read it, so a severity looks the same everywhere on the
- * page. Slots come from the OUI vis palette (not the status colors and not the
- * UI primary), so severity never reads as a process state. The hues are
- * placeholders pending the final scheme; change them here only.
+ * page. OUI tokens only (the vis palette, plus OUI's gray palette for Info),
+ * never the status palette and never the UI primary, so severity never reads
+ * as a process state. Change it here only.
+ *
+ * Warm to cool, so the order reads from the color: Critical brick (Vis8), High
+ * orange (Vis7), Medium yellow (Vis5), Low blue (Vis1), Info neutral gray.
+ * Every adjacent pair stays distinguishable with deuteranopia / protanopia
+ * (OKLab ΔE >= 9). Medium and Info are under 3:1 against the surface, so they
+ * are never shown without a text label (badge text, legend, filter label).
+ * The same tokens apply in light and dark themes.
  */
-// Slots chosen so every pair stays distinguishable, including with
-// deuteranopia (closest pair CIEDE2000 >= 14), and Critical is the darkest.
 export const SEVERITY_HEX: Record<UnifiedAlertSeverity, string> = {
   critical: euiThemeVars.euiColorVis8,
-  high: euiThemeVars.euiColorVis5,
-  medium: euiThemeVars.euiColorVis4,
+  high: euiThemeVars.euiColorVis7,
+  medium: euiThemeVars.euiColorVis5,
   low: euiThemeVars.euiColorVis1,
-  info: euiThemeVars.euiColorVis6,
+  info: euiPaletteGray(5)[1],
 };
 
 /** Alert state → theme color. */

@@ -1360,8 +1360,10 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
     </EuiButton>
   );
 
+  // A standard (outlined) button, like Refresh elsewhere in Observability; only
+  // Create SLO is filled.
   const refreshButton = (
-    <EuiButtonEmpty
+    <EuiButton
       onClick={refresh}
       data-test-subj="slosRefresh"
       size="s"
@@ -1371,7 +1373,7 @@ export const SloListingPage: React.FC<SloListingPageProps> = ({
       {i18n.translate('observability.apm.slo.listing.refreshButton', {
         defaultMessage: 'Refresh',
       })}
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 
   // Overview panel tile-click: map the tile to a state filter slice so the

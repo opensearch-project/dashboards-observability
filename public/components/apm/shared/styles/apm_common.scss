@@ -71,3 +71,18 @@
     font-weight: $euiFontWeightBold;
   }
 }
+
+/* 40px standard row height for APM tables (Services, Top services / dependencies
+ * by fault rate), matching the Alert Manager tables. Cell padding drops to 4px
+ * so single-line rows fit; `height` on the row sets the floor, so every
+ * single-line row is exactly 40px. */
+.apmStandardRows {
+  .euiTableRowCell .euiTableCellContent {
+    padding-top: $euiSizeXS;
+    padding-bottom: $euiSizeXS;
+  }
+
+  .euiTableRow:not(.euiTableRow-isExpandedRow) {
+    height: 40px;
+  }
+}
