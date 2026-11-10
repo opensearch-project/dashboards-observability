@@ -560,7 +560,7 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
               <EuiComboBox
                 compressed
                 placeholder={i18n.translate('observability.apm.settings.tracesPlaceholder', {
-                  defaultMessage: 'Select traces dataset: otel-v1-apm-span-*',
+                  defaultMessage: 'Select traces dataset: otel-v2-apm-span-* or otel-v1-apm-span-*',
                 })}
                 singleSelection={{ asPlainText: true }}
                 options={tracesDatasets}

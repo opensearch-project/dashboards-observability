@@ -10,7 +10,10 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { coreRefs } from '../../../../framework/core_refs';
 import { RequirementCallout } from '../components/requirement_callout';
 import { ApmArchitectureSvgLight, ApmArchitectureSvgDark } from '../../config/apm-architecture-svg';
-import { APM_TRACES_INDEX_PATTERN, APM_SERVICE_MAP_INDEX_PATTERN } from '../../common/constants';
+import {
+  APM_TRACES_INDEX_PATTERNS_LABEL,
+  APM_SERVICE_MAP_INDEX_PATTERN,
+} from '../../common/constants';
 import { APM_DOCS_URL, APM_PIPELINE_DOCS_URL } from '../../common/constants';
 
 /**
@@ -126,7 +129,7 @@ export const OverviewStep = () => {
             id="observability.apm.setupWizard.overview.calloutBody"
             defaultMessage="For one-click setup, your data must follow the OpenTelemetry conventions: traces in {tracePattern} and a service map in {serviceMapPattern}."
             values={{
-              tracePattern: <code>{APM_TRACES_INDEX_PATTERN}</code>,
+              tracePattern: <code>{APM_TRACES_INDEX_PATTERNS_LABEL}</code>,
               serviceMapPattern: <code>{APM_SERVICE_MAP_INDEX_PATTERN}</code>,
             }}
           />

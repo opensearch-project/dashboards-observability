@@ -11,7 +11,8 @@ import {
 import {
   APM_LOGS_INDEX_PATTERN,
   APM_SERVICE_MAP_INDEX_PATTERN,
-  APM_TRACES_INDEX_PATTERN,
+  APM_TRACES_V1_INDEX_PATTERN,
+  APM_TRACES_V2_INDEX_PATTERN,
 } from '../../common/constants';
 import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
@@ -101,7 +102,7 @@ describe('fieldNamesSatisfy', () => {
 describe('detectApmData', () => {
   it('detects traces, logs and service map when all fields are present', async () => {
     const indexPatterns = makeIndexPatterns({
-      [APM_TRACES_INDEX_PATTERN]: traceFields,
+      [APM_TRACES_V1_INDEX_PATTERN]: traceFields,
       [APM_LOGS_INDEX_PATTERN]: logFields,
       [APM_SERVICE_MAP_INDEX_PATTERN]: serviceMapFields,
     });
@@ -109,7 +110,7 @@ describe('detectApmData', () => {
     const result = await detectApmData(indexPatterns);
 
     expect(result.tracesDetected).toBe(true);
-    expect(result.tracePattern).toBe(APM_TRACES_INDEX_PATTERN);
+    expect(result.tracePattern).toBe(APM_TRACES_V1_INDEX_PATTERN);
     // endTime is preferred over startTime.
     expect(result.traceTimeField).toBe('endTime');
     expect(result.logsDetected).toBe(true);
@@ -119,10 +120,46 @@ describe('detectApmData', () => {
     expect(result.serviceMapTimeField).toBe('timestamp');
   });
 
+  it('detects otel-v2-apm-span* when only v2 span indices exist', async () => {
+    const indexPatterns = makeIndexPatterns({ [APM_TRACES_V2_INDEX_PATTERN]: traceFields });
+
+    const result = await detectApmData(indexPatterns);
+
+    expect(result.tracesDetected).toBe(true);
+    expect(result.tracePattern).toBe(APM_TRACES_V2_INDEX_PATTERN);
+    expect(result.traceTimeField).toBe('endTime');
+  });
+
+  it('prefers otel-v2-apm-span* and skips the v1 probe when both exist', async () => {
+    const indexPatterns = makeIndexPatterns({
+      [APM_TRACES_V2_INDEX_PATTERN]: traceFields,
+      [APM_TRACES_V1_INDEX_PATTERN]: traceFields,
+    });
+
+    const result = await detectApmData(indexPatterns);
+
+    expect(result.tracePattern).toBe(APM_TRACES_V2_INDEX_PATTERN);
+    expect(indexPatterns.getFieldsForWildcard).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pattern: APM_TRACES_V1_INDEX_PATTERN })
+    );
+  });
+
+  it('falls back to otel-v1-apm-span* when v2 lacks required fields', async () => {
+    const indexPatterns = makeIndexPatterns({
+      [APM_TRACES_V2_INDEX_PATTERN]: [{ name: 'traceId', type: 'string' }],
+      [APM_TRACES_V1_INDEX_PATTERN]: traceFields,
+    });
+
+    const result = await detectApmData(indexPatterns);
+
+    expect(result.tracesDetected).toBe(true);
+    expect(result.tracePattern).toBe(APM_TRACES_V1_INDEX_PATTERN);
+  });
+
   it('does not detect traces when required fields are missing', async () => {
     const indexPatterns = makeIndexPatterns({
       // spanId + serviceName absent → not a valid trace index.
-      [APM_TRACES_INDEX_PATTERN]: [
+      [APM_TRACES_V1_INDEX_PATTERN]: [
         { name: 'traceId', type: 'string' },
         { name: 'endTime', type: 'date', aggregatable: true },
       ],
@@ -136,7 +173,7 @@ describe('detectApmData', () => {
 
   it('does not detect traces when no valid time field exists', async () => {
     const indexPatterns = makeIndexPatterns({
-      [APM_TRACES_INDEX_PATTERN]: [
+      [APM_TRACES_V1_INDEX_PATTERN]: [
         { name: 'traceId', type: 'string' },
         { name: 'spanId', type: 'string' },
         { name: 'serviceName', type: 'string' },
@@ -152,7 +189,7 @@ describe('detectApmData', () => {
 
   it('detects service map independently of traces', async () => {
     const indexPatterns = makeIndexPatterns({
-      [APM_TRACES_INDEX_PATTERN]: 'missing',
+      [APM_TRACES_V1_INDEX_PATTERN]: 'missing',
       [APM_LOGS_INDEX_PATTERN]: 'missing',
       [APM_SERVICE_MAP_INDEX_PATTERN]: serviceMapFields,
     });
@@ -189,7 +226,7 @@ describe('detectApmDataAcrossDataSources', () => {
     // Only ds-1 has traces; ds-2 has nothing.
     const indexPatterns = {
       getFieldsForWildcard: jest.fn(async ({ pattern, dataSourceId }) => {
-        if (dataSourceId === 'ds-1' && pattern === APM_TRACES_INDEX_PATTERN) {
+        if (dataSourceId === 'ds-1' && pattern === APM_TRACES_V1_INDEX_PATTERN) {
           return traceFields;
         }
         throw new Error('no match');

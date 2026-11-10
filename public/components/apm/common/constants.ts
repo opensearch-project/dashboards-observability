@@ -31,12 +31,25 @@ export const APM_CORRELATIONS_DOCS_URL =
  * datasets, and the manual "APM Settings" flow validates the same datasets. A
  * match requires BOTH the naming convention AND that the required fields exist.
  * Values were confirmed against a live OpenTelemetry demo cluster (indices
- * otel-v1-apm-span-*, logs-otel-v1-*, otel-v2-apm-service-map-*) and the working
+ * otel-v1-apm-span-* / otel-v2-apm-span-*, logs-otel-v1-*, otel-v2-apm-service-map-*) and the working
  * DataViews on the datasets page.
  */
 
-/** Traces: OpenTelemetry span index pattern (Data Prepper otel-v1). */
-export const APM_TRACES_INDEX_PATTERN = 'otel-v1-apm-span*';
+/** Traces: Data Prepper `trace-analytics-plain-raw-v2` span index pattern. */
+export const APM_TRACES_V2_INDEX_PATTERN = 'otel-v2-apm-span*';
+/** Traces: Data Prepper `trace-analytics-plain-raw` (v1) span index pattern. */
+export const APM_TRACES_V1_INDEX_PATTERN = 'otel-v1-apm-span*';
+/**
+ * Span index patterns probed in priority order. v2 comes first: when Data Prepper
+ * writes to both (e.g. during a v1 → v2 migration), only v2 is used so spans aren't
+ * double-counted. v1 remains the fallback for existing pipelines.
+ */
+export const APM_TRACES_INDEX_PATTERNS = [
+  APM_TRACES_V2_INDEX_PATTERN,
+  APM_TRACES_V1_INDEX_PATTERN,
+] as const;
+/** Human-readable list of the accepted span patterns, for UI copy. */
+export const APM_TRACES_INDEX_PATTERNS_LABEL = APM_TRACES_INDEX_PATTERNS.join(' or ');
 /** Fields that must exist for a span index to qualify as traces. */
 export const APM_TRACES_REQUIRED_FIELDS = ['traceId', 'spanId', 'serviceName'] as const;
 /**

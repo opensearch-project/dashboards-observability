@@ -29,7 +29,7 @@ import { RequirementCallout } from '../components/requirement_callout';
 import { DataSourcePicker } from '../components/data_source_picker';
 import { createApmTraceDatasets } from '../utils/apm_auto_create';
 import {
-  APM_TRACES_INDEX_PATTERN,
+  APM_TRACES_INDEX_PATTERNS_LABEL,
   APM_TRACES_REQUIRED_FIELDS,
   APM_TRACES_DOCS_URL,
   APM_CORRELATIONS_DOCS_URL,
@@ -546,7 +546,7 @@ export const TracesStep = ({
             {i18n.translate('observability.apm.setupWizard.traces.noDataText', {
               defaultMessage:
                 'No indices matching {pattern} with the required fields were found on this data source. Choose a different data source, or configure a Data Prepper pipeline and refresh.',
-              values: { pattern: APM_TRACES_INDEX_PATTERN },
+              values: { pattern: APM_TRACES_INDEX_PATTERNS_LABEL },
             })}
           </p>
           <EuiButton
