@@ -228,6 +228,23 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       />
     ) : null;
 
+  // The source selector on its own, for the loading, error and unavailable
+  // views: in the tab-row slot, or its own row when rendered without one.
+  const selectorToolbar = datasourceSelector && (
+    <TabRowActions
+      fallback={
+        <>
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      }
+    >
+      {datasourceSelector}
+    </TabRowActions>
+  );
+
   const routingToolbarItems = (
     <>
       {datasourceSelector && <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>}
@@ -254,20 +271,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   if (loading) {
     return (
       <div style={{ padding: '0 16px' }}>
-        {datasourceSelector && (
-          <TabRowActions
-            fallback={
-              <>
-                <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-                  <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-              </>
-            }
-          >
-            {datasourceSelector}
-          </TabRowActions>
-        )}
+        {selectorToolbar}
         <EuiFlexGroup justifyContent="center" style={{ padding: 40 }}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
@@ -280,20 +284,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   if (error) {
     return (
       <div style={{ padding: '0 16px' }}>
-        {datasourceSelector && (
-          <TabRowActions
-            fallback={
-              <>
-                <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-                  <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-              </>
-            }
-          >
-            {datasourceSelector}
-          </TabRowActions>
-        )}
+        {selectorToolbar}
         <EuiCallOut
           title={i18n.translate(
             'observability.alerting.notificationRoutingPanel.errorCallout.title',
@@ -311,20 +302,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   if (!config?.available) {
     return (
       <div style={{ padding: '0 16px' }}>
-        {datasourceSelector && (
-          <TabRowActions
-            fallback={
-              <>
-                <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-                  <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-              </>
-            }
-          >
-            {datasourceSelector}
-          </TabRowActions>
-        )}
+        {selectorToolbar}
         <EuiEmptyPrompt
           iconType="bell"
           title={

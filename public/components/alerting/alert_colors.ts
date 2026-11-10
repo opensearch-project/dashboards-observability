@@ -35,18 +35,24 @@ import type {
  * as a process state. Change it here only.
  *
  * Warm to cool, so the order reads from the color: Critical brick (Vis8), High
- * orange (Vis7), Medium yellow (Vis5), Low blue (Vis1), Info neutral gray.
+ * orange (Vis7), Medium yellow (Vis5), Low blue (Vis1), Info slate gray.
  * Every adjacent pair stays distinguishable with deuteranopia / protanopia
- * (OKLab ΔE >= 9). Medium and Info are under 3:1 against the surface, so they
- * are never shown without a text label (badge text, legend, filter label).
+ * (OKLab ΔE >= 9). Medium is under 3:1 against the surface, so severities are
+ * never shown without a text label (badge text, legend, filter label).
  * The same tokens apply in light and dark themes.
+ *
+ * Info is `euiPaletteGray(5)[2]`, not a lighter step: it must stay apart from
+ * the neutral `euiColorMediumShade` (UNKNOWN_HEX, and the silenced / deleted /
+ * no-data states) in every theme, or an Info badge reads as an unrecognised
+ * severity. CIEDE2000 >= 10 against that neutral in the light, dark, next and
+ * v9 themes (`[1]` was 2.9 in light).
  */
 export const SEVERITY_HEX: Record<UnifiedAlertSeverity, string> = {
   critical: euiThemeVars.euiColorVis8,
   high: euiThemeVars.euiColorVis7,
   medium: euiThemeVars.euiColorVis5,
   low: euiThemeVars.euiColorVis1,
-  info: euiPaletteGray(5)[1],
+  info: euiPaletteGray(5)[2],
 };
 
 /** Alert state → theme color. */

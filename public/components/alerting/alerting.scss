@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@import "../common/styles/standard_table_rows";
+
 /* 3-letter prefix `alt` scopes these rules to the Alert Manager UI. */
 
 .altPageRoot {
@@ -100,20 +102,6 @@
   min-height: calc(100vh - 140px);
 }
 
-/* 40px standard row height for the Alerts and Rules tables. Cell padding drops
- * to 4px so single-line rows fit; `height` on the row sets the floor, so every
- * single-line row is exactly 40px. */
-@mixin altStandardRows {
-  .euiTableRowCell .euiTableCellContent {
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-
-  .euiTableRow:not(.euiTableRow-isExpandedRow) {
-    height: 40px;
-  }
-}
-
 .altFiltersPanel {
   padding-top: 8px;
   padding-right: 8px;
@@ -170,7 +158,7 @@
   overflow-x: auto;
   overflow-y: hidden;
 
-  @include altStandardRows;
+  @include obsStandardTableRows;
 
   /* One line per message; the cell's tooltip shows the full text. The cell and
    * the tooltip anchor are bounded to the column so the line truncates instead
@@ -402,7 +390,7 @@
 // inside the resizable panel and removes the trailing header-cell border so
 // the right edge sits flush with the panel edge.
 .monitors-table-wrapper {
-  @include altStandardRows;
+  @include obsStandardTableRows;
 
   .euiTable {
     table-layout: auto;

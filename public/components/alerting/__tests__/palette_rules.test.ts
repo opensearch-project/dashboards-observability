@@ -5,7 +5,7 @@
 
 import { euiPaletteGray } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-import { SEVERITY_HEX, STATE_HEX } from '../alert_colors';
+import { SEVERITY_HEX, STATE_HEX, UNKNOWN_HEX } from '../alert_colors';
 import {
   SEVERITY_COLORS,
   STATE_COLORS,
@@ -41,7 +41,32 @@ describe('alerting palette rules', () => {
       high: euiThemeVars.euiColorVis7,
       medium: euiThemeVars.euiColorVis5,
       low: euiThemeVars.euiColorVis1,
-      info: euiPaletteGray(5)[1],
+      info: euiPaletteGray(5)[2],
+    });
+  });
+
+  it('every severity stays clearly apart from the neutral gray (unknown / silenced / no data)', () => {
+    // CIE76 distance in CIELAB; 10 is well past a just-noticeable difference.
+    const lab = (hex: string) => {
+      const [r, g, b] = [1, 3, 5].map((i) => {
+        const v = parseInt(hex.substr(i, 2), 16) / 255;
+        return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      });
+      const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+      const x = f((r * 0.4124 + g * 0.3576 + b * 0.1805) / 0.95047);
+      const y = f(r * 0.2126 + g * 0.7152 + b * 0.0722);
+      const z = f((r * 0.0193 + g * 0.1192 + b * 0.9505) / 1.08883);
+      return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+    };
+    const distance = (a: string, b: string) => {
+      const [p, q] = [lab(a), lab(b)];
+      return Math.hypot(p[0] - q[0], p[1] - q[1], p[2] - q[2]);
+    };
+    const neutrals = [UNKNOWN_HEX, STATE_HEX.silenced, STATE_HEX.insufficient_data];
+    Object.entries(SEVERITY_HEX).forEach(([, hex]) => {
+      neutrals.forEach((neutral) => {
+        expect(distance(hex, neutral)).toBeGreaterThan(10);
+      });
     });
   });
 

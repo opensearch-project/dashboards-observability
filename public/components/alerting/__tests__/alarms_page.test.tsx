@@ -274,9 +274,31 @@ describe('AlarmsPage', () => {
     expect(trail[0].href).toBe('#/alerts');
     expect(trail[1].href).toBeUndefined();
 
+    // Cmd/Ctrl/Shift/Alt and middle clicks are left to the browser (open in a
+    // new tab via the href): no preventDefault, no tab switch.
+    for (const modifier of [
+      { metaKey: true },
+      { ctrlKey: true },
+      { shiftKey: true },
+      { altKey: true },
+    ]) {
+      const keep = jest.fn();
+      await act(async () => {
+        trail[0].onClick({ preventDefault: keep, button: 0, ...modifier });
+      });
+      expect(keep).not.toHaveBeenCalled();
+    }
+    const middle = jest.fn();
+    await act(async () => {
+      trail[0].onClick({ preventDefault: middle, button: 1 });
+    });
+    expect(middle).not.toHaveBeenCalled();
+    expect(screen.getByTestId('monitorsTable')).toBeInTheDocument();
+
+    // A plain left click switches tabs in place.
     const preventDefault = jest.fn();
     await act(async () => {
-      trail[0].onClick({ preventDefault });
+      trail[0].onClick({ preventDefault, button: 0 });
     });
     expect(preventDefault).toHaveBeenCalled();
     expect(screen.getByTestId('alertsDashboard')).toBeInTheDocument();

@@ -1,0 +1,20 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/* 40px standard table row height, shared by the Alert Manager (Alerts, Rules)
+ * and APM (Services, Top services / dependencies by fault rate) tables so a
+ * future row-height change can't drift between them. Cell padding drops to 4px
+ * so single-line rows fit; `height` on the row sets the floor, so every
+ * single-line row is exactly 40px. Expanded rows keep their natural height. */
+@mixin obsStandardTableRows {
+  .euiTableRowCell .euiTableCellContent {
+    padding-top: $euiSizeXS;
+    padding-bottom: $euiSizeXS;
+  }
+
+  .euiTableRow:not(.euiTableRow-isExpandedRow) {
+    height: 40px;
+  }
+}

@@ -206,6 +206,21 @@ describe('ServiceMapSidebar — Include external dependencies', () => {
     ).toBeInTheDocument();
   });
 
+  it('lets keyboard users reach the focused-service reason', async () => {
+    renderWith({ included: false, onChange: jest.fn(), forcedByFocus: true });
+    const hint = screen.getByTestId('includeDependenciesFocusedHint');
+    // Focusable (the disabled checkbox itself is not) and labelled with the reason.
+    expect(hint).toHaveAttribute('tabIndex', '0');
+    expect(hint).toHaveAttribute(
+      'aria-label',
+      'Include external dependencies. A focused service always shows its dependencies.'
+    );
+    fireEvent.focus(hint);
+    expect(
+      await screen.findByText('A focused service always shows its dependencies.')
+    ).toBeInTheDocument();
+  });
+
   it('shows the saved choice again once focus is cleared', () => {
     renderWith({ included: false, onChange: jest.fn(), forcedByFocus: false });
     const checkbox = screen.getByTestId('includeDependenciesCheckbox') as HTMLInputElement;

@@ -205,15 +205,24 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
               position="right"
               display="block"
             >
-              <EuiCheckbox
-                id="apmIncludeDependencies"
-                label={<EuiText size="xs">{i18nTexts.filters.includeDependencies}</EuiText>}
-                checked
-                onChange={() => {}}
-                disabled
-                compressed
-                data-test-subj="includeDependenciesCheckbox"
-              />
+              {/* A disabled checkbox can't take focus, so the focusable span is
+                  the tooltip's anchor: keyboard users reach it with Tab and the
+                  reason is announced (same pattern as the Suggest SLOs button). */}
+              <span
+                tabIndex={0}
+                data-test-subj="includeDependenciesFocusedHint"
+                aria-label={`${i18nTexts.filters.includeDependencies}. ${i18nTexts.filters.includeDependenciesFocused}`}
+              >
+                <EuiCheckbox
+                  id="apmIncludeDependencies"
+                  label={<EuiText size="xs">{i18nTexts.filters.includeDependencies}</EuiText>}
+                  checked
+                  onChange={() => {}}
+                  disabled
+                  compressed
+                  data-test-subj="includeDependenciesCheckbox"
+                />
+              </span>
             </EuiToolTip>
           ) : (
             <EuiCheckbox

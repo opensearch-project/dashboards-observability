@@ -880,6 +880,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
               text: pageLabel,
               href: '#/alerts',
               onClick: (e: React.MouseEvent) => {
+                // Let the browser handle modifier and middle clicks (open in a
+                // new tab / window) through the crumb's href.
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
                 e.preventDefault();
                 handleTabClick('alerts');
               },
