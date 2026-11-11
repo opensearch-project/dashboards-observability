@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 // Mock echarts at the module level so the EchartsRender children render
 // without needing a real canvas. We capture the last setOption payload to
@@ -24,7 +24,7 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
 }));
 
-import { AlertTimeline, AlertTimelineLegend } from '../alerts_charts';
+import { AlertTimeline, AlertTimelineLegend, countAlertsStartedInWindow } from '../alerts_charts';
 import { SEVERITY_HEX } from '../alert_colors';
 import type { UnifiedAlertSummary } from '../../../../common/types/alerting';
 
@@ -236,7 +236,7 @@ describe('alerts_charts', () => {
     expect(total).toBe(1);
   });
 
-  it('AlertTimeline: excluded pre-window count is surfaced in the chart title (DVZ-AT1)', () => {
+  it('AlertTimeline: excluded pre-window count is surfaced in a note above the chart (DVZ-AT1)', () => {
     const start = END - HOUR_MS;
     const alerts = [
       makeAlert({ id: 'pre1', startTime: new Date(END - 2 * HOUR_MS).toISOString() }),
@@ -245,11 +245,50 @@ describe('alerts_charts', () => {
     ];
     render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} />);
 
-    const option = mockSetOption.mock.calls[0][0] as { title?: { text: string } };
-    expect(option.title).toBeDefined();
-    // Two alerts started before the window; the count must appear in the title.
-    expect(option.title!.text).toContain('2');
-    expect(option.title!.text).toContain('before this window');
+    // Two alerts started before the window: explained by a note, not a title
+    // floating over the chart.
+    const option = mockSetOption.mock.calls[0][0] as { title?: unknown };
+    expect(option.title).toBeUndefined();
+    expect(screen.getByTestId('alertTimelineNote')).toHaveTextContent(
+      '2 alerts started before this window'
+    );
+  });
+
+  it('AlertTimeline: no alert started in the window shows a compact empty state with an extend action', () => {
+    const start = END - HOUR_MS;
+    const alerts = [
+      makeAlert({ id: 'pre1', startTime: new Date(END - 2 * HOUR_MS).toISOString() }),
+      makeAlert({ id: 'pre2', startTime: new Date(END - 3 * HOUR_MS).toISOString() }),
+    ];
+    const onExtendRange = jest.fn();
+    render(
+      <AlertTimeline alerts={alerts} startMs={start} endMs={END} onExtendRange={onExtendRange} />
+    );
+    // No empty axes.
+    expect(mockSetOption).not.toHaveBeenCalled();
+    expect(screen.getByTestId('alertTimelineEmpty')).toHaveTextContent(
+      'No alerts started in the selected time range. 2 alerts started earlier. Show last 30 days'
+    );
+    fireEvent.click(screen.getByTestId('alertTimelineExtendRange'));
+    expect(onExtendRange).toHaveBeenCalledTimes(1);
+  });
+
+  it('AlertTimeline: the extend action is not offered for ranges of 30 days or more', () => {
+    const start = END - 31 * 24 * HOUR_MS;
+    const alerts = [makeAlert({ id: 'pre', startTime: new Date(start - HOUR_MS).toISOString() })];
+    render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} onExtendRange={jest.fn()} />);
+    expect(screen.getByTestId('alertTimelineEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertTimelineExtendRange')).not.toBeInTheDocument();
+  });
+
+  it('countAlertsStartedInWindow counts only alerts that start inside the range', () => {
+    const start = END - HOUR_MS;
+    const alerts = [
+      makeAlert({ id: 'pre', startTime: new Date(END - 2 * HOUR_MS).toISOString() }),
+      makeAlert({ id: 'in', startTime: new Date(END - 10 * 60 * 1000).toISOString() }),
+      makeAlert({ id: 'bad', startTime: 'not a date' }),
+    ];
+    expect(countAlertsStartedInWindow(alerts, start, END)).toBe(1);
   });
 
   it('AlertTimeline: no title is rendered when nothing was excluded', () => {
@@ -280,9 +319,8 @@ describe('alerts_charts', () => {
     const critical = option.series.find((s) => s.name === 'Critical');
     const total = (critical!.data as number[]).reduce((a, b) => a + b, 0);
     expect(total).toBe(1);
-    // The bad one is reconcilable via the title note.
-    expect(option.title).toBeDefined();
-    expect(option.title!.text).toContain('unknown start time');
+    // The bad one is reconcilable via the note above the chart.
+    expect(screen.getByTestId('alertTimelineNote')).toHaveTextContent('unknown start time');
   });
 
   it('AlertTimeline: an alert starting exactly at endMs lands in the last bucket (not dropped)', () => {

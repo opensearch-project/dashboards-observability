@@ -7,6 +7,16 @@
 
 /* 3-letter prefix `alt` scopes these rules to the Alert Manager UI. */
 
+/* Compact timeline empty state: one line instead of empty chart axes. */
+.altTimelineEmpty {
+  padding: $euiSizeS 0;
+}
+
+/* Row count under the alerts table (moved from above it). */
+.altTableFooterCount {
+  margin-top: $euiSizeXS;
+}
+
 .altPageRoot {
   display: flex;
   flex-direction: column;
@@ -93,13 +103,51 @@
   min-height: 0;
 }
 
-/* Alerts tab: the page scrolls and pagination limits the rows, so there is no
- * inner table scroller (which clipped the first row under the header and ran
- * alongside pagination). The container grows with its content instead of being
- * capped to the viewport. */
-.altResizableContainer--pageScroll {
-  height: auto;
-  min-height: calc(100vh - 140px);
+/* Alerts tab, Discover-style: the container fits the viewport (inherits the
+ * `height` above), so the page doesn't scroll. The content column stacks the
+ * timeline (fixed height) and the alerts table panel, which takes the rest and
+ * scrolls its rows internally: sticky column headers, pagination and the row
+ * count stay in view. (Replaces the page-scroll layout, where the timeline
+ * pushed most rows below the fold.) */
+.altResizableContainer--fitViewport {
+  /* `min-height` keeps a usable table on short viewports. */
+  .altTablePanel {
+    flex: 1 1 0;
+    min-height: 240px;
+  }
+
+  .altAlertsTable {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    > .euiBasicTable {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+
+      /* The table wrapper scrolls; the pagination block after it stays put. */
+      > div:first-child {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
+      }
+
+      > div:last-child {
+        flex: 0 0 auto;
+      }
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: $euiColorEmptyShade;
+    }
+  }
 }
 
 .altFiltersPanel {
@@ -144,8 +192,8 @@
 }
 
 .altTablePanel {
-  /* Sized by its content: the page scrolls (see `.altResizableContainer--pageScroll`).
-   * (Alerts-tab only; the Rules tab uses .altContentPanel + its own wrapper.) */
+  /* Alerts tab only (the Rules tab uses .altContentPanel + its own wrapper).
+   * Fills the content column; see `.altResizableContainer--fitViewport`. */
   display: flex;
   flex-direction: column;
 }

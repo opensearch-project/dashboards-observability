@@ -119,6 +119,33 @@ describe('AlertDetailFlyout', () => {
     expect(getAllByText('Error rate above threshold').length).toBeGreaterThan(0);
   });
 
+  it('shows Duration: start to now while firing, start to resolution once resolved', () => {
+    const start = Date.now() - 3 * 3600_000 - 10 * 60_000; // 3h 10m ago
+    const { getByText, rerender } = render(
+      <AlertDetailFlyout
+        alert={{ ...baseAlert, startTime: new Date(start).toISOString() }}
+        datasources={datasources}
+        onClose={jest.fn()}
+        onAcknowledge={jest.fn()}
+      />
+    );
+    expect(getByText('3h 10m')).toBeInTheDocument();
+    rerender(
+      <AlertDetailFlyout
+        alert={{
+          ...baseAlert,
+          state: 'resolved',
+          startTime: new Date(start).toISOString(),
+          lastUpdated: new Date(start + 45 * 60_000).toISOString(), // resolved after 45m
+        }}
+        datasources={datasources}
+        onClose={jest.fn()}
+        onAcknowledge={jest.fn()}
+      />
+    );
+    expect(getByText('45m')).toBeInTheDocument();
+  });
+
   it('invokes onClose when the footer close button is clicked', () => {
     const onClose = jest.fn();
     const { getByText } = render(

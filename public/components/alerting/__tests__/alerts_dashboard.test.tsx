@@ -30,6 +30,7 @@ jest.mock('../alerts_charts', () => ({
     return <div data-test-subj="alertTimelineStub" />;
   },
   AlertTimelineLegend: () => <div data-test-subj="alertTimelineLegendStub" />,
+  countAlertsStartedInWindow: jest.requireActual('../alerts_charts').countAlertsStartedInWindow,
 }));
 
 import { AlertsDashboard } from '../alerts_dashboard';
@@ -285,6 +286,31 @@ describe('AlertsDashboard', () => {
   it('renders alert table when alerts provided', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
     expect(getByText('HighCPU')).toBeInTheDocument();
+  });
+
+  it('puts the All Alerts title and search on one row and the row count under the table', () => {
+    const { container } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    const title = screen.getByText('All Alerts');
+    const search = screen.getByPlaceholderText('Search alerts by name, message, or label...');
+    // Same flex row.
+    expect(title.closest('.euiFlexGroup')).toBe(search.closest('.euiFlexGroup'));
+    // The count follows the table in document order.
+    const count = screen.getByTestId('alertsTableCount');
+    expect(count).toHaveTextContent('1 row');
+    const all = Array.from(container.querySelectorAll('*'));
+    expect(all.indexOf(count)).toBeGreaterThan(all.indexOf(container.querySelector('table')!));
+  });
+
+  it('shows one coarse relative Started time and no Duration column', () => {
+    const started = new Date(Date.now() - (37 * 24 + 20) * 3600_000).toISOString(); // 37d 20h ago
+    render(<AlertsDashboard {...baseProps} alerts={[{ ...sampleAlert, startTime: started }]} />);
+    const headers = Array.from(document.querySelectorAll('thead th')).map((th) =>
+      th.textContent?.trim()
+    );
+    expect(headers.some((h) => h?.startsWith('Started'))).toBe(true);
+    expect(headers.some((h) => h?.startsWith('Duration'))).toBe(false);
+    expect(screen.getByText('37d ago')).toBeInTheDocument();
+    expect(screen.queryByText('37d 20h')).not.toBeInTheDocument();
   });
 
   it('groups anomalies by detector and entity in the alerts table', () => {
