@@ -133,7 +133,7 @@ export interface AlertingRoutesDeps {
 
 /** Upper bound on one CloudWatch detail route. */
 const CLOUDWATCH_DETAIL_TIMEOUT_MS = 30_000;
-/** Upper bound on the CloudWatch targets route. */
+/** Upper bound on a CloudWatch targets read (the targets route and per-request listings). */
 const CLOUDWATCH_TARGETS_TIMEOUT_MS = 10_000;
 
 /**
@@ -390,7 +390,9 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         ? {
             enabled: () => resolveCwBackend(request).then((backend) => !!backend),
             region: deps.cloudWatchRegion,
-            targets: () => resolveCwBackend(request).then((backend) => backend?.listTargets()),
+            targets: (signal) =>
+              resolveCwBackend(request).then((backend) => backend?.listTargets({ signal })),
+            targetsTimeoutMs: CLOUDWATCH_TARGETS_TIMEOUT_MS,
           }
         : undefined
     );
@@ -952,7 +954,10 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
           (signal) => cwBackend.listTargets({ signal }),
           CLOUDWATCH_TARGETS_TIMEOUT_MS,
           'CloudWatch targets'
-        );
+        ).catch((e: unknown) => {
+          // A timeout answers 504 Gateway Timeout (still classified TIMEOUT, retryable).
+          throw e instanceof TimeoutError ? Object.assign(e, { statusCode: 504 }) : e;
+        });
         const region = deps.cloudWatchRegion;
         const body: CloudWatchTargets = targets ?? {
           regions: region ? [{ id: region, name: region }] : [],

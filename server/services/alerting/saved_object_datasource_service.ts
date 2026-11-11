@@ -31,10 +31,14 @@ import type {
 import {
   CLOUDWATCH_DATASOURCE_ID,
   buildCloudWatchDatasource,
-  isCloudWatchDatasourceId,
+  decodeCloudWatchDatasourceId,
   resolveCloudWatchTarget,
 } from '../../../common/services/alerting/cloudwatch_datasource_id';
 import { describeSourceError } from './cloudwatch/cloudwatch_backend';
+import { TimeoutError } from './timeout_error';
+
+/** Default upper bound on the CloudWatch targets read. */
+const DEFAULT_CLOUDWATCH_TARGETS_TIMEOUT_MS = 10_000;
 
 interface DataSourceSOAttributes {
   title?: string;
@@ -66,8 +70,14 @@ export interface CloudWatchDatasourceConfig {
   /**
    * The account scopes and regions the source offers, or undefined when it doesn't report them
    * (then there is one datasource, `cloudwatch`). Asked at most once per service instance.
+   * `signal` fires when the read times out.
    */
-  targets?: () => Promise<CloudWatchTargets | undefined>;
+  targets?: (signal: AbortSignal) => Promise<CloudWatchTargets | undefined>;
+  /**
+   * Upper bound on the targets read (default 10 s). A read that takes longer is aborted and
+   * treated like a failed one: the single `cloudwatch` datasource.
+   */
+  targetsTimeoutMs?: number;
 }
 
 export class SavedObjectDatasourceService implements DatasourceService {
@@ -84,13 +94,29 @@ export class SavedObjectDatasourceService implements DatasourceService {
 
   private cloudWatchTargetsPromise?: Promise<CloudWatchTargets | undefined>;
 
-  /** The source's targets, once per instance. A failure falls back to the single datasource. */
+  /**
+   * The source's targets, once per instance. A failure or timeout falls back to the single
+   * datasource, so listings and lookups never wait on the source longer than the bound.
+   */
   private cloudWatchTargets(): Promise<CloudWatchTargets | undefined> {
     const targets = this.cloudWatch?.targets;
     if (!targets) return Promise.resolve(undefined);
     if (!this.cloudWatchTargetsPromise) {
-      this.cloudWatchTargetsPromise = Promise.resolve()
-        .then(targets)
+      const ms = this.cloudWatch?.targetsTimeoutMs ?? DEFAULT_CLOUDWATCH_TARGETS_TIMEOUT_MS;
+      const controller = new AbortController();
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timeout = new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          const err = new TimeoutError(`CloudWatch targets timed out after ${ms}ms`, ms);
+          controller.abort(err);
+          reject(err);
+        }, ms);
+      });
+      this.cloudWatchTargetsPromise = Promise.race([
+        Promise.resolve().then(() => targets(controller.signal)),
+        timeout,
+      ])
+        .finally(() => clearTimeout(timer))
         .catch((e) => {
           this.logger?.debug(
             `SavedObjectDatasourceService: CloudWatch targets failed: ${describeSourceError(e)}`
@@ -125,6 +151,14 @@ export class SavedObjectDatasourceService implements DatasourceService {
       enabled: true,
       region: this.cloudWatch?.region,
     };
+  }
+
+  /** The datasource for a CloudWatch id the source offers, else null. */
+  private resolveCloudWatchId(targets: CloudWatchTargets, id: string): Datasource | null {
+    const resolved = resolveCloudWatchTarget(targets, id);
+    return (
+      (resolved && buildCloudWatchDatasource(targets, resolved.scope, resolved.region)) || null
+    );
   }
 
   async list(): Promise<Datasource[]> {
@@ -208,17 +242,18 @@ export class SavedObjectDatasourceService implements DatasourceService {
   }
 
   async get(id: string): Promise<Datasource | null> {
-    // CloudWatch ids never have a saved object; resolve them before any lookup.
-    if (isCloudWatchDatasourceId(id)) {
+    // `cloudwatch` is always the virtual datasource.
+    if (id === CLOUDWATCH_DATASOURCE_ID) {
       if (!(await this.isCloudWatchEnabled())) return null;
       const targets = await this.cloudWatchTargets();
-      if (!targets) {
-        return id === CLOUDWATCH_DATASOURCE_ID ? this.cloudWatchDatasource() : null;
-      }
-      const resolved = resolveCloudWatchTarget(targets, id);
-      return (
-        (resolved && buildCloudWatchDatasource(targets, resolved.scope, resolved.region)) || null
-      );
+      return targets ? this.resolveCloudWatchId(targets, id) : this.cloudWatchDatasource();
+    }
+    // Other CloudWatch ids exist only while the source reports targets; then they are resolved
+    // (or rejected) without a saved-object lookup. Otherwise, or when the id doesn't decode, it
+    // may name a saved object (e.g. a data connection called `cloudwatch_…`), so fall through.
+    if (decodeCloudWatchDatasourceId(id) && (await this.isCloudWatchEnabled())) {
+      const targets = await this.cloudWatchTargets();
+      if (targets) return this.resolveCloudWatchId(targets, id);
     }
     if (!id || id === 'local-cluster') {
       return {

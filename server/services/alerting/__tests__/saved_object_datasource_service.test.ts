@@ -212,7 +212,6 @@ describe('SavedObjectDatasourceService CloudWatch scopes and regions', () => {
   it.each([
     ['an unknown scope', 'cloudwatch_us-east-1_s9'],
     ['an unoffered region', 'cloudwatch_ap-south-1_s1'],
-    ['an undecodable id', 'cloudwatch_us-east-1_s1_x'],
     ['a non-canonical id', 'cloudwatch_us-east-1'],
   ])('returns null for %s without a saved-object lookup', async (_, id) => {
     const soClient = makeSoClient({});
@@ -263,15 +262,88 @@ describe('SavedObjectDatasourceService CloudWatch scopes and regions', () => {
     expect(logged).not.toContain('123456789012');
   });
 
-  it('with the gate off, resolves no CloudWatch id and makes no saved-object call', async () => {
+  it('with the gate off, resolves no CloudWatch id and never asks for targets', async () => {
     const soClient = makeSoClient({});
     const getTargets = jest.fn(async () => targets);
     const svc = service({ enabled: async () => false, targets: getTargets }, soClient);
-    expect(await svc.get('cloudwatch_us-east-1')).toBeNull();
     expect(await svc.get('cloudwatch')).toBeNull();
     expect(soMock(soClient).get).not.toHaveBeenCalled();
     expect(soMock(soClient).find).not.toHaveBeenCalled();
+    expect(await svc.get('cloudwatch_us-east-1')).toBeNull();
     expect(getTargets).not.toHaveBeenCalled();
     expect(await cloudWatchRows(svc)).toEqual([]);
+  });
+
+  describe('a data connection whose name starts with `cloudwatch_`', () => {
+    const promConnection = (connectionId: string) =>
+      makeSoClient({ dc: [{ id: 'dc-1', attributes: { connectionId, type: 'Prometheus' } }] });
+
+    it.each([
+      [
+        'with the gate off',
+        { enabled: false, targets: async () => targets },
+        'cloudwatch_us-east-1',
+      ],
+      ['without targets', { enabled: true }, 'cloudwatch_us-east-1'],
+      [
+        'when the id does not decode',
+        { enabled: true, targets: async () => targets },
+        'cloudwatch_amp',
+      ],
+    ])('still resolves by connectionId %s', async (_, config, id) => {
+      const svc = service(config as CloudWatchDatasourceConfig, promConnection(id));
+      expect(await svc.get(id)).toMatchObject({ id: 'dc-1', type: 'prometheus' });
+    });
+
+    it('is shadowed only by a CloudWatch id while the source reports targets', async () => {
+      const soClient = promConnection('cloudwatch_us-west-2_s1');
+      const svc = service({ enabled: true, targets: async () => targets }, soClient);
+      expect(await svc.get('cloudwatch_us-west-2_s1')).toMatchObject({ type: 'cloudwatch' });
+      expect(soMock(soClient).find).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a targets read that never settles', () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it("is aborted after the bound and falls back to today's entry", async () => {
+      let signal: AbortSignal | undefined;
+      const logger = noopLogger();
+      const svc = service(
+        {
+          enabled: true,
+          region: 'us-west-2',
+          targetsTimeoutMs: 5_000,
+          targets: (s) => {
+            signal = s;
+            return new Promise<never>(() => {});
+          },
+        },
+        makeSoClient({}),
+        logger
+      );
+      const rows = cloudWatchRows(svc);
+      const scoped = svc.get('cloudwatch_us-west-2_s1');
+      await jest.advanceTimersByTimeAsync(4_999);
+      expect(signal?.aborted).toBe(false);
+      await jest.advanceTimersByTimeAsync(1);
+      expect((await rows).map((d) => d.id)).toEqual(['cloudwatch']);
+      expect(await scoped).toBeNull();
+      expect(await svc.get('cloudwatch')).toMatchObject({ id: 'cloudwatch', region: 'us-west-2' });
+      expect(signal?.aborted).toBe(true);
+      expect(JSON.stringify((logger.debug as jest.Mock).mock.calls)).toContain('TimeoutError');
+    });
+
+    it('defaults the bound to 10 s', async () => {
+      const svc = service({ enabled: true, targets: () => new Promise<never>(() => {}) });
+      const rows = cloudWatchRows(svc);
+      let settled = false;
+      rows.then(() => (settled = true));
+      await jest.advanceTimersByTimeAsync(9_999);
+      expect(settled).toBe(false);
+      await jest.advanceTimersByTimeAsync(1);
+      expect((await rows).map((d) => d.id)).toEqual(['cloudwatch']);
+    });
   });
 });

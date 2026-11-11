@@ -119,7 +119,7 @@ describe('GET /api/alerting/cloudwatch/targets', () => {
     beforeEach(() => jest.useFakeTimers());
     afterEach(() => jest.useRealTimers());
 
-    it('gives a classified timeout after 10 s', async () => {
+    it('gives a classified 504 timeout after 10 s', async () => {
       const handler = register({
         cwBackend: backendWith(jest.fn(() => new Promise<never>(() => {}))),
       });
@@ -129,6 +129,7 @@ describe('GET /api/alerting/cloudwatch/targets', () => {
       await done;
       expect(res._calls.ok).toBeUndefined();
       // Same classification as the CloudWatch detail routes' timeout.
+      expect(res._calls.customError[0].statusCode).toBe(504);
       const detail = detailOf(res._calls.customError[0]);
       expect(detail.category).toBe('TIMEOUT');
       expect(detail.retryable).toBe(true);

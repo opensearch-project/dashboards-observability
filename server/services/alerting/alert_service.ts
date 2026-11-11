@@ -1380,7 +1380,8 @@ export class MultiBackendAlertService {
    * The datasources to fan out to. A requested CloudWatch id the listing doesn't include (another
    * region or account scope) is looked up on its own, for at most
    * `ALERT_MANAGER_MAX_DATASOURCES_LIMIT` ids; one that doesn't resolve is `unavailable`, so the
-   * caller reports it. Other unknown ids are dropped.
+   * caller reports it. An unlisted `cloudwatch` is handled the same way only when other
+   * CloudWatch datasources are listed. Other unknown ids are dropped.
    */
   private async resolveDatasources(
     dsIds?: string[]
@@ -1398,7 +1399,12 @@ export class MultiBackendAlertService {
         datasources.push(match);
         continue;
       }
-      if (!isCloudWatchDatasourceId(id) || id === CLOUDWATCH_DATASOURCE_ID) continue;
+      if (!isCloudWatchDatasourceId(id)) continue;
+      // With CloudWatch off (no CloudWatch entry listed), an unlisted `cloudwatch` is dropped as
+      // before; with per-scope entries listed, it is looked up and reported like the others.
+      if (id === CLOUDWATCH_DATASOURCE_ID && !enabled.some((ds) => ds.type === 'cloudwatch')) {
+        continue;
+      }
       const ds =
         lookups++ < ALERT_MANAGER_MAX_DATASOURCES_LIMIT
           ? await this.datasourceService.get(id)
