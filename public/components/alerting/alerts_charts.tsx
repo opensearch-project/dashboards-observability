@@ -134,12 +134,15 @@ export interface AlertTimelineProps {
   startMs: number;
   /** Range end in epoch ms (resolved by the parent). */
   endMs: number;
-  /** Widens the picked range; offered by the empty state when the range is under 30 days. */
-  onExtendRange?: () => void;
+  /**
+   * The user chose "Show last 30 days" in the empty state. Offered only when
+   * that range would put at least one alert on the chart (see below).
+   */
+  onShowLast30Days?: () => void;
 }
 
-/** Range offered by the empty state's extend action. */
-const EXTENDED_RANGE_MS = 30 * ONE_DAY_MS;
+/** Range behind the empty state's "Show last 30 days" action. */
+const LAST_30_DAYS_MS = 30 * ONE_DAY_MS;
 
 /**
  * How many alerts *started* inside [startMs, endMs] (what the histogram draws).
@@ -160,7 +163,7 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
   alerts,
   startMs,
   endMs,
-  onExtendRange,
+  onShowLast30Days,
 }) => {
   const inWindow = useMemo(
     () => countAlertsStartedInWindow(alerts, startMs, endMs),
@@ -211,6 +214,9 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
     // rather than silently vanishing from both the bars and the notes.
     let excludedBeforeWindow = 0;
     let unknownStart = 0;
+    // The latest start among the pre-window alerts: whether widening the range
+    // back 30 days from `endMs` would bring any of them onto the chart.
+    let latestBeforeWindowMs = -Infinity;
     for (let idx = 0; idx < alerts.length; idx++) {
       const t = alertStartMs[idx];
       if (Number.isNaN(t)) {
@@ -219,6 +225,7 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
       }
       if (t < startMs) {
         excludedBeforeWindow += 1;
+        latestBeforeWindowMs = Math.max(latestBeforeWindowMs, t);
         continue;
       }
       // Bucket index. `bucketDuration` is a float, so a start at exactly `endMs`
@@ -256,6 +263,14 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
         })
       );
     }
+    const unknownStartNote =
+      unknownStart > 0
+        ? i18n.translate('observability.alerting.alertsCharts.unknownStart', {
+            defaultMessage:
+              '{count, plural, one {# alert has} other {# alerts have}} an unknown start time',
+            values: { count: unknownStart },
+          })
+        : '';
     if (unknownStart > 0) {
       notes.push(
         i18n.translate('observability.alerting.alertsCharts.unknownStart', {
@@ -324,7 +339,16 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
         barMaxWidth: 32,
       })),
     };
-    return { spec, noteText, excludedBeforeWindow, rangeMs };
+    return {
+      spec,
+      noteText,
+      unknownStartNote,
+      excludedBeforeWindow,
+      // Widening to the last 30 days (ending at `endMs`) helps only if the
+      // range is shorter and some pre-window alert started inside those days.
+      canShowLast30Days:
+        rangeMs < LAST_30_DAYS_MS && latestBeforeWindowMs >= endMs - LAST_30_DAYS_MS,
+    };
   }, [alerts, startMs, endMs]);
 
   if (alerts.length === 0)
@@ -337,7 +361,8 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
       </EuiText>
     );
 
-  const { spec, noteText, excludedBeforeWindow, rangeMs } = timeline!;
+  if (!timeline) return null;
+  const { spec, noteText, unknownStartNote, excludedBeforeWindow, canShowLast30Days } = timeline;
 
   // No alert started in the window, only earlier ones that overlap it: a
   // one-line empty state instead of empty axes, with a way to widen the range.
@@ -364,8 +389,9 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
               />{' '}
             </>
           )}
-          {onExtendRange && rangeMs < EXTENDED_RANGE_MS && (
-            <EuiLink onClick={onExtendRange} data-test-subj="alertTimelineExtendRange">
+          {unknownStartNote && <>{unknownStartNote}. </>}
+          {onShowLast30Days && canShowLast30Days && (
+            <EuiLink onClick={onShowLast30Days} data-test-subj="alertTimelineExtendRange">
               <FormattedMessage
                 id="observability.alerting.alertsCharts.showLast30Days"
                 defaultMessage="Show last 30 days"

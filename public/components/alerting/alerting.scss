@@ -104,11 +104,14 @@
 }
 
 /* Alerts tab, Discover-style: the container fits the viewport (inherits the
- * `height` above), so the page doesn't scroll. The content column stacks the
- * timeline (fixed height) and the alerts table panel, which takes the rest and
- * scrolls its rows internally: sticky column headers, pagination and the row
- * count stay in view. (Replaces the page-scroll layout, where the timeline
- * pushed most rows below the fold.) */
+ * `height` above). The content column stacks the timeline (fixed height) and
+ * the alerts table panel, which takes the rest and scrolls its rows
+ * internally: sticky column headers, pagination and the row count stay in
+ * view. (Replaces the page-scroll layout, where the timeline pushed most rows
+ * below the fold.) On short viewports, where the timeline and a usable table
+ * don't both fit, it falls back to the page scrolling (see the media query
+ * below). OSD core's `.app-wrapper` min-height can still add a few pixels of
+ * page scroll under the updated page header; that's outside this plugin. */
 .altResizableContainer--fitViewport {
   /* `min-height` keeps a usable table on short viewports. */
   .altTablePanel {
@@ -129,14 +132,17 @@
       display: flex;
       flex-direction: column;
 
-      /* The table wrapper scrolls; the pagination block after it stays put. */
+      /* The table wrapper scrolls; the pagination block after it stays put.
+       * OUI renders both as unclassed divs, so they're picked by position. With
+       * no rows there's no pagination block: the lone child is the table
+       * wrapper, so the pagination rule only applies when there are two. */
       > div:first-child {
         flex: 1 1 auto;
         min-height: 0;
         overflow: auto;
       }
 
-      > div:last-child {
+      > div:last-child:not(:first-child) {
         flex: 0 0 auto;
       }
     }
@@ -146,6 +152,26 @@
       top: 0;
       z-index: 1;
       background: $euiColorEmptyShade;
+    }
+  }
+}
+
+/* Short viewports (the timeline plus the 240px table minimum don't fit): let
+ * the page scroll as before instead of nesting a page scroll around the
+ * table's own scroller. */
+@media (max-height: 760px) {
+  .altResizableContainer--fitViewport {
+    height: auto;
+    min-height: calc(100vh - 140px);
+
+    .altTablePanel {
+      flex: 0 0 auto;
+    }
+
+    .altAlertsTable,
+    .altAlertsTable > .euiBasicTable,
+    .altAlertsTable > .euiBasicTable > div:first-child {
+      overflow: visible;
     }
   }
 }
@@ -314,6 +340,8 @@
   overflow-x: hidden;
 }
 
+/* The six columns of the alerts table: Severity, Alert, State, Message,
+ * Started, Actions (no Duration column). */
 .altGroupedOccurrenceGrid {
   display: grid;
   grid-template-columns:
@@ -322,7 +350,6 @@
     140px
     minmax(260px, 1fr)
     120px
-    90px
     150px;
   align-items: center;
   min-width: 1080px;

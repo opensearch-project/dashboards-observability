@@ -86,26 +86,24 @@ function getMillis(value: string | number): number {
   return typeof value === 'number' ? value : new Date(value).getTime();
 }
 
-function formatDurationBetween(
-  startTime: string | number,
-  endTime: string | number = Date.now()
-): string {
+/**
+ * Started, for the list: one unit, rounded to the nearest ("5h 41m" → "6h",
+ * "1d 23h" → "2d", "37d 20h" → "38d"). Rounding (not truncating) keeps rows
+ * that read the same within half a unit of each other; the tooltip has the
+ * exact time.
+ */
+export function formatAgo(startTime: string | number, now: number = Date.now()): string {
   const start = typeof startTime === 'number' ? startTime : new Date(startTime).getTime();
-  const end = typeof endTime === 'number' ? endTime : new Date(endTime).getTime();
-  const ms = Math.max(0, end - start);
-  if (ms < 60000) return '<1m';
-  if (ms < 3600000) return Math.floor(ms / 60000) + 'm';
-  if (ms < 86400000) return Math.floor(ms / 3600000) + 'h ' + (Math.floor(ms / 60000) % 60) + 'm';
-  return Math.floor(ms / 86400000) + 'd ' + (Math.floor(ms / 3600000) % 24) + 'h';
-}
-
-function formatDuration(startTime: string | number): string {
-  return formatDurationBetween(startTime);
-}
-
-/** Largest unit only, for the list ("5h 12m" → "5h", "37d 20h" → "37d"). */
-function formatAgo(startTime: string | number): string {
-  return formatDurationBetween(startTime).split(' ')[0];
+  const ms = Math.max(0, now - start);
+  const MIN = 60000;
+  const HOUR = 60 * MIN;
+  const DAY = 24 * HOUR;
+  if (ms < MIN) return '<1m';
+  const minutes = Math.round(ms / MIN);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.round(ms / HOUR);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.round(ms / DAY)}d`;
 }
 
 // Cap on label-key facets rendered before the user expands the section.
@@ -438,15 +436,6 @@ function getAlertTimestamp(alert: UnifiedAlertSummary): number {
   return Number.isFinite(start) ? start : 0;
 }
 
-function formatAlertDuration(alert: UnifiedAlertSummary): string {
-  const start = getMillis(alert.startTime);
-  const end = getMillis(alert.lastUpdated);
-  if (getAlertKind(alert) === 'anomaly' && Number.isFinite(start) && Number.isFinite(end)) {
-    return formatDurationBetween(start, end);
-  }
-  return alert.startTime ? formatDuration(alert.startTime) : EMPTY_VALUE;
-}
-
 function parseAnomalyNumber(value?: string): number | undefined {
   if (!value) return undefined;
   const parsed = Number(value);
@@ -665,14 +654,11 @@ function renderGroupedAnomalyOccurrences(
                             id="observability.alerting.alertsDashboard.groupedAnomalyStartedAgo"
                             defaultMessage="{duration} ago"
                             values={{
-                              duration: formatDuration(occurrence.startTime),
+                              duration: formatAgo(occurrence.startTime),
                             }}
                           />
                         </span>
                       </EuiToolTip>
-                    </div>
-                    <div className="altGroupedOccurrenceCell">
-                      <EuiText size="xs">{formatAlertDuration(occurrence)}</EuiText>
                     </div>
                     <div className="altGroupedOccurrenceCell" />
                   </div>
@@ -1269,6 +1255,25 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     </div>
   );
 
+  // Same definition as the timeline's bars, so the legend and the chart agree.
+  const alertsStartedInWindow = useMemo(
+    () => countAlertsStartedInWindow(filteredAlerts, startMs, endMs),
+    [filteredAlerts, startMs, endMs]
+  );
+  // "Show last 30 days" widens only the start: a relative range ending now
+  // stays relative; an absolute or custom end (e.g. a past incident window)
+  // is kept, and the start moves 30 days before it.
+  const showLast30Days = useCallback(() => {
+    if (pickerEnd === 'now') {
+      onTimeChange({ start: 'now-30d', end: 'now' });
+    } else {
+      onTimeChange({
+        start: new Date(endMs - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        end: pickerEnd,
+      });
+    }
+  }, [pickerEnd, endMs, onTimeChange]);
+
   const emptyMode: 'no-ds' | 'no-rules' | 'no-alerts' | null = !loading
     ? selectedDsIds.length === 0
       ? 'no-ds'
@@ -1579,16 +1584,15 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                         </EuiFlexItem>
                         {/* Severity legend sits in the header row, right side,
                             only while the chart itself is showing. */}
-                        {!emptyMode &&
-                          countAlertsStartedInWindow(filteredAlerts, startMs, endMs) > 0 && (
-                            <EuiFlexItem grow={true}>
-                              <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-                                <EuiFlexItem grow={false}>
-                                  <AlertTimelineLegend />
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
-                            </EuiFlexItem>
-                          )}
+                        {!emptyMode && alertsStartedInWindow > 0 && (
+                          <EuiFlexItem grow={true}>
+                            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+                              <EuiFlexItem grow={false}>
+                                <AlertTimelineLegend />
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
+                        )}
                         {/* The time picker scopes the whole tab (timeline and
                             table), so it sits in the tab row, not in the chart
                             header. */}
@@ -1637,7 +1641,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                           alerts={filteredAlerts}
                           startMs={startMs}
                           endMs={endMs}
-                          onExtendRange={() => onTimeChange({ start: 'now-30d', end: 'now' })}
+                          onShowLast30Days={showLast30Days}
                         />
                       )}
                     </EuiPanel>

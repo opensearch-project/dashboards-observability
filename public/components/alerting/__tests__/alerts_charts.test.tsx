@@ -260,9 +260,14 @@ describe('alerts_charts', () => {
       makeAlert({ id: 'pre1', startTime: new Date(END - 2 * HOUR_MS).toISOString() }),
       makeAlert({ id: 'pre2', startTime: new Date(END - 3 * HOUR_MS).toISOString() }),
     ];
-    const onExtendRange = jest.fn();
+    const onShowLast30Days = jest.fn();
     render(
-      <AlertTimeline alerts={alerts} startMs={start} endMs={END} onExtendRange={onExtendRange} />
+      <AlertTimeline
+        alerts={alerts}
+        startMs={start}
+        endMs={END}
+        onShowLast30Days={onShowLast30Days}
+      />
     );
     // No empty axes.
     expect(mockSetOption).not.toHaveBeenCalled();
@@ -270,14 +275,42 @@ describe('alerts_charts', () => {
       'No alerts started in the selected time range. 2 alerts started earlier. Show last 30 days'
     );
     fireEvent.click(screen.getByTestId('alertTimelineExtendRange'));
-    expect(onExtendRange).toHaveBeenCalledTimes(1);
+    expect(onShowLast30Days).toHaveBeenCalledTimes(1);
   });
 
   it('AlertTimeline: the extend action is not offered for ranges of 30 days or more', () => {
     const start = END - 31 * 24 * HOUR_MS;
     const alerts = [makeAlert({ id: 'pre', startTime: new Date(start - HOUR_MS).toISOString() })];
-    render(<AlertTimeline alerts={alerts} startMs={start} endMs={END} onExtendRange={jest.fn()} />);
+    render(
+      <AlertTimeline alerts={alerts} startMs={start} endMs={END} onShowLast30Days={jest.fn()} />
+    );
     expect(screen.getByTestId('alertTimelineEmpty')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertTimelineExtendRange')).not.toBeInTheDocument();
+  });
+
+  it('AlertTimeline: the empty state keeps the unknown-start note', () => {
+    const start = END - HOUR_MS;
+    const alerts = [
+      makeAlert({ id: 'pre', startTime: new Date(END - 2 * HOUR_MS).toISOString() }),
+      makeAlert({ id: 'bad', startTime: 'not a date' }),
+    ];
+    render(
+      <AlertTimeline alerts={alerts} startMs={start} endMs={END} onShowLast30Days={jest.fn()} />
+    );
+    expect(screen.getByTestId('alertTimelineEmpty')).toHaveTextContent(
+      '1 alert started earlier. 1 alert has an unknown start time.'
+    );
+  });
+
+  it("AlertTimeline: doesn't offer the last 30 days when no alert would land in them", () => {
+    const start = END - 24 * HOUR_MS;
+    const alerts = [
+      makeAlert({ id: 'old', startTime: new Date(END - 40 * 24 * HOUR_MS).toISOString() }),
+    ];
+    render(
+      <AlertTimeline alerts={alerts} startMs={start} endMs={END} onShowLast30Days={jest.fn()} />
+    );
+    expect(screen.getByTestId('alertTimelineEmpty')).toHaveTextContent('1 alert started earlier.');
     expect(screen.queryByTestId('alertTimelineExtendRange')).not.toBeInTheDocument();
   });
 

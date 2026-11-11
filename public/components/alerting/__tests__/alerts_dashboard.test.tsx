@@ -33,7 +33,7 @@ jest.mock('../alerts_charts', () => ({
   countAlertsStartedInWindow: jest.requireActual('../alerts_charts').countAlertsStartedInWindow,
 }));
 
-import { AlertsDashboard } from '../alerts_dashboard';
+import { AlertsDashboard, formatAgo } from '../alerts_dashboard';
 import type { UnifiedAlertSummary, Datasource } from '../../../../common/types/alerting';
 
 const sampleAlert: UnifiedAlertSummary = {
@@ -302,15 +302,49 @@ describe('AlertsDashboard', () => {
   });
 
   it('shows one coarse relative Started time and no Duration column', () => {
-    const started = new Date(Date.now() - (37 * 24 + 20) * 3600_000).toISOString(); // 37d 20h ago
+    const started = new Date(Date.now() - (37 * 24 + 20) * 3600_000).toISOString(); // 37d 20h ago → 38d
     render(<AlertsDashboard {...baseProps} alerts={[{ ...sampleAlert, startTime: started }]} />);
     const headers = Array.from(document.querySelectorAll('thead th')).map((th) =>
       th.textContent?.trim()
     );
     expect(headers.some((h) => h?.startsWith('Started'))).toBe(true);
     expect(headers.some((h) => h?.startsWith('Duration'))).toBe(false);
-    expect(screen.getByText('37d ago')).toBeInTheDocument();
+    expect(screen.getByText('38d ago')).toBeInTheDocument();
     expect(screen.queryByText('37d 20h')).not.toBeInTheDocument();
+  });
+
+  it('formatAgo rounds to the nearest single unit', () => {
+    const now = Date.UTC(2026, 10, 11, 12, 0, 0);
+    const ago = (ms: number) => formatAgo(now - ms, now);
+    expect(ago(30_000)).toBe('<1m');
+    expect(ago(59 * 60_000)).toBe('59m');
+    expect(ago((60 + 41) * 60_000)).toBe('2h');
+    expect(ago((47 * 60 + 10) * 60_000)).toBe('2d');
+    expect(ago((37 * 24 + 20) * 3600_000)).toBe('38d');
+  });
+
+  it('Show last 30 days keeps an absolute end and only widens the start', () => {
+    const onTimeChange = jest.fn();
+    const end = Date.UTC(2026, 9, 1, 12, 0, 0);
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[{ ...sampleAlert, startTime: new Date(end - 2 * 3600_000).toISOString() }]}
+        startMs={end - 3600_000}
+        endMs={end}
+        pickerStart={new Date(end - 3600_000).toISOString()}
+        pickerEnd={new Date(end).toISOString()}
+        onTimeChange={onTimeChange}
+      />
+    );
+    const latest = mockTimeline.mock.calls[mockTimeline.mock.calls.length - 1][0] as {
+      onShowLast30Days: () => void;
+    };
+    latest.onShowLast30Days();
+    expect(onTimeChange).toHaveBeenCalledWith({
+      start: new Date(end - 30 * 24 * 3600_000).toISOString(),
+      end: new Date(end).toISOString(),
+    });
   });
 
   it('groups anomalies by detector and entity in the alerts table', () => {
@@ -349,7 +383,12 @@ describe('AlertsDashboard', () => {
     expect(screen.getByText('Occurrence 2 of 2')).toBeInTheDocument();
     expect(screen.getByText('Occurrence 1 of 2')).toBeInTheDocument();
     expect(screen.queryByText('Latest')).not.toBeInTheDocument();
-    expect(screen.getAllByText('10m').length).toBeGreaterThan(0);
+    // Occurrence rows line up with the six table columns: no Duration cell,
+    // and Started reads like the parent row ("… ago", one unit).
+    const grids = document.querySelectorAll('.altGroupedOccurrenceGrid');
+    expect(grids.length).toBe(2);
+    grids.forEach((grid) => expect(grid.children).toHaveLength(6));
+    expect(screen.queryByText('10m')).not.toBeInTheDocument();
     expect(onViewDetail).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByText('Occurrence 1 of 2'));

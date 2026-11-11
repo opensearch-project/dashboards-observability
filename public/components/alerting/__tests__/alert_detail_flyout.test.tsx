@@ -121,7 +121,7 @@ describe('AlertDetailFlyout', () => {
 
   it('shows Duration: start to now while firing, start to resolution once resolved', () => {
     const start = Date.now() - 3 * 3600_000 - 10 * 60_000; // 3h 10m ago
-    const { getByText, rerender } = render(
+    const { getByText, queryByText, rerender } = render(
       <AlertDetailFlyout
         alert={{ ...baseAlert, startTime: new Date(start).toISOString() }}
         datasources={datasources}
@@ -144,6 +144,22 @@ describe('AlertDetailFlyout', () => {
       />
     );
     expect(getByText('45m')).toBeInTheDocument();
+    // Alarm-backed rows set the same timestamp for start and update: no end to
+    // measure to, so no "0m".
+    rerender(
+      <AlertDetailFlyout
+        alert={{
+          ...baseAlert,
+          state: 'resolved',
+          startTime: new Date(start).toISOString(),
+          lastUpdated: new Date(start).toISOString(),
+        }}
+        datasources={datasources}
+        onClose={jest.fn()}
+        onAcknowledge={jest.fn()}
+      />
+    );
+    expect(queryByText('0m')).not.toBeInTheDocument();
   });
 
   it('invokes onClose when the footer close button is clicked', () => {
