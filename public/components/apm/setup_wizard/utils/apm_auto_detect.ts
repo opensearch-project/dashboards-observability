@@ -13,7 +13,9 @@
 import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
 import {
   DatasetField,
+  isMissingIndicesError,
   isValidTimeField,
+  OTEL_SPAN_INDEX_PATTERNS,
   pickTimeField,
 } from '../../../../../../../src/plugins/data/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
@@ -24,7 +26,6 @@ import {
   APM_SERVICE_MAP_INDEX_PATTERN,
   APM_SERVICE_MAP_REQUIRED_FIELDS,
   APM_SERVICE_MAP_TIME_FIELD,
-  APM_TRACES_INDEX_PATTERNS,
   APM_TRACES_REQUIRED_FIELDS,
   APM_TRACES_TIME_FIELD_CANDIDATES,
 } from '../../common/constants';
@@ -83,7 +84,7 @@ export async function detectApmData(
 
   // Traces: prefer otel-v2-apm-span*, fall back to otel-v1-apm-span*. The first
   // pattern with the required fields and a valid time field wins.
-  for (const pattern of APM_TRACES_INDEX_PATTERNS) {
+  for (const pattern of OTEL_SPAN_INDEX_PATTERNS) {
     try {
       const traceFields = (await indexPatternsService.getFieldsForWildcard({
         pattern,
@@ -105,8 +106,11 @@ export async function detectApmData(
           break;
         }
       }
-    } catch {
-      // No matching indices for this pattern; try the next one.
+    } catch (error) {
+      // Only a "no matching indices" result moves on to the next pattern. Any other failure
+      // (timeout, permissions, server error) stops trace detection, so a transient error on
+      // the v2 probe can't lock in a v1 dataset.
+      if (!isMissingIndicesError(error)) break;
     }
   }
 

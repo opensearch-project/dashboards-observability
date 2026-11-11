@@ -10,11 +10,8 @@ import {
   refreshAndPersistFields,
 } from './apm_auto_create';
 import { ApmDetectionResult } from '../types';
-import {
-  APM_SERVICE_MAP_INDEX_PATTERN,
-  APM_TRACES_V1_INDEX_PATTERN,
-  APM_LOGS_INDEX_PATTERN,
-} from '../../common/constants';
+import { APM_SERVICE_MAP_INDEX_PATTERN, APM_LOGS_INDEX_PATTERN } from '../../common/constants';
+import { OTEL_V1_SPAN_INDEX_PATTERN } from '../../../../../../../src/plugins/data/common';
 import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
 import { DataViewsContract } from '../../../../../../../src/plugins/data/public';
 
@@ -46,7 +43,7 @@ const fullDetection: ApmDetectionResult = {
   dataSourceId: undefined,
   dataSourceTitle: 'Local Cluster',
   tracesDetected: true,
-  tracePattern: APM_TRACES_V1_INDEX_PATTERN,
+  tracePattern: OTEL_V1_SPAN_INDEX_PATTERN,
   traceTimeField: 'endTime',
   logsDetected: true,
   logPattern: APM_LOGS_INDEX_PATTERN,
@@ -64,7 +61,7 @@ describe('createOrReuseDataView', () => {
     });
 
     const id = await createOrReuseDataView(savedObjects, dataViews, {
-      title: APM_TRACES_V1_INDEX_PATTERN,
+      title: OTEL_V1_SPAN_INDEX_PATTERN,
     });
 
     expect(id).toBe('existing-id');

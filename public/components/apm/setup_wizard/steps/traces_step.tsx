@@ -29,11 +29,14 @@ import { RequirementCallout } from '../components/requirement_callout';
 import { DataSourcePicker } from '../components/data_source_picker';
 import { createApmTraceDatasets } from '../utils/apm_auto_create';
 import {
-  APM_TRACES_INDEX_PATTERNS_LABEL,
   APM_TRACES_REQUIRED_FIELDS,
   APM_TRACES_DOCS_URL,
   APM_CORRELATIONS_DOCS_URL,
 } from '../../common/constants';
+import {
+  OTEL_V1_SPAN_INDEX_PATTERN,
+  OTEL_V2_SPAN_INDEX_PATTERN,
+} from '../../../../../../../src/plugins/data/common';
 import { ApmDatasetsHook } from '../../shared/hooks/use_apm_config';
 import { ApmDetectionHook } from '../hooks/use_apm_detection';
 import { useDatasetStep } from '../hooks/use_dataset_step';
@@ -545,8 +548,11 @@ export const TracesStep = ({
           <p>
             {i18n.translate('observability.apm.setupWizard.traces.noDataText', {
               defaultMessage:
-                'No indices matching {pattern} with the required fields were found on this data source. Choose a different data source, or configure a Data Prepper pipeline and refresh.',
-              values: { pattern: APM_TRACES_INDEX_PATTERNS_LABEL },
+                'No indices matching {v2Pattern} or {v1Pattern} with the required fields were found on this data source. Choose a different data source, or configure a Data Prepper pipeline and refresh.',
+              values: {
+                v2Pattern: OTEL_V2_SPAN_INDEX_PATTERN,
+                v1Pattern: OTEL_V1_SPAN_INDEX_PATTERN,
+              },
             })}
           </p>
           <EuiButton

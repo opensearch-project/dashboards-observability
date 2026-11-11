@@ -31,6 +31,10 @@ import {
 import { i18n } from '@osd/i18n';
 import { NotificationsStart } from '../../../../../../src/core/public';
 import { getWorkspaceIdFromUrl } from '../../../../../../src/core/public/utils';
+import {
+  OTEL_V1_SPAN_INDEX_PATTERN,
+  OTEL_V2_SPAN_INDEX_PATTERN,
+} from '../../../../../../src/plugins/data/common';
 import { coreRefs } from '../../../framework/core_refs';
 import {
   useDatasets,
@@ -560,7 +564,11 @@ export const ApmSettingsModal = (props: ApmSettingsModalProps) => {
               <EuiComboBox
                 compressed
                 placeholder={i18n.translate('observability.apm.settings.tracesPlaceholder', {
-                  defaultMessage: 'Select traces dataset: otel-v2-apm-span-* or otel-v1-apm-span-*',
+                  defaultMessage: 'Select traces dataset: {v2Pattern} or {v1Pattern}',
+                  values: {
+                    v2Pattern: OTEL_V2_SPAN_INDEX_PATTERN,
+                    v1Pattern: OTEL_V1_SPAN_INDEX_PATTERN,
+                  },
                 })}
                 singleSelection={{ asPlainText: true }}
                 options={tracesDatasets}

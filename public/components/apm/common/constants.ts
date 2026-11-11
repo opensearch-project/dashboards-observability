@@ -35,21 +35,10 @@ export const APM_CORRELATIONS_DOCS_URL =
  * DataViews on the datasets page.
  */
 
-/** Traces: Data Prepper `trace-analytics-plain-raw-v2` span index pattern. */
-export const APM_TRACES_V2_INDEX_PATTERN = 'otel-v2-apm-span*';
-/** Traces: Data Prepper `trace-analytics-plain-raw` (v1) span index pattern. */
-export const APM_TRACES_V1_INDEX_PATTERN = 'otel-v1-apm-span*';
 /**
- * Span index patterns probed in priority order. v2 comes first: when Data Prepper
- * writes to both (e.g. during a v1 → v2 migration), only v2 is used so spans aren't
- * double-counted. v1 remains the fallback for existing pipelines.
+ * Traces: the OpenTelemetry span index patterns (v2 first, then v1) come from OSD
+ * `data/common` (`OTEL_SPAN_INDEX_PATTERNS`), shared with Explore traces and Agent Traces.
  */
-export const APM_TRACES_INDEX_PATTERNS = [
-  APM_TRACES_V2_INDEX_PATTERN,
-  APM_TRACES_V1_INDEX_PATTERN,
-] as const;
-/** Human-readable list of the accepted span patterns, for UI copy. */
-export const APM_TRACES_INDEX_PATTERNS_LABEL = APM_TRACES_INDEX_PATTERNS.join(' or ');
 /** Fields that must exist for a span index to qualify as traces. */
 export const APM_TRACES_REQUIRED_FIELDS = ['traceId', 'spanId', 'serviceName'] as const;
 /**
