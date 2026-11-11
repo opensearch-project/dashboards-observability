@@ -14,6 +14,7 @@ import {
   getThresholdLabel,
   getThemeAwareThresholdColor,
 } from '../filter_utils';
+import { SEVERITY_HEX } from '../../../../../alerting/alert_colors';
 
 // Mock euiThemeVars for testing
 jest.mock('@osd/ui-shared-deps/theme', () => ({
@@ -22,14 +23,13 @@ jest.mock('@osd/ui-shared-deps/theme', () => ({
     euiColorWarning: '#FFFF00',
     euiColorSuccess: '#00FF00',
     euiColorMediumShade: '#888888',
-    // Severity palette slots (alert_colors SEVERITY_HEX): critical, high, medium,
-    // low, info. Distinct from the danger/warning/success values above so the
-    // tests fail if thresholds go back to the status colors.
+    // Severity palette slots (alert_colors SEVERITY_HEX): critical, high,
+    // medium, low. Distinct from the danger/warning/success values above; the
+    // threshold tests compare against SEVERITY_HEX and check it is never those.
     euiColorVis8: '#AA0001',
-    euiColorVis5: '#AA0002',
-    euiColorVis4: '#AA0003',
+    euiColorVis7: '#AA0002',
+    euiColorVis5: '#AA0003',
     euiColorVis1: '#AA0004',
-    euiColorVis6: '#AA0005',
   },
 }));
 
@@ -239,22 +239,32 @@ describe('filter_utils', () => {
   });
 
   describe('getThemeAwareThresholdColor', () => {
+    it('never uses the danger/warning/success status colors', () => {
+      const status = ['#FF0000', '#FFFF00', '#00FF00'];
+      [AvailabilityThreshold.LOW, AvailabilityThreshold.MEDIUM, AvailabilityThreshold.HIGH].forEach(
+        (t) => expect(status).not.toContain(getThemeAwareThresholdColor(t, 'availability'))
+      );
+      [ErrorRateThreshold.LOW, ErrorRateThreshold.MEDIUM, ErrorRateThreshold.HIGH].forEach((t) =>
+        expect(status).not.toContain(getThemeAwareThresholdColor(t, 'errorRate'))
+      );
+    });
+
     describe('availability thresholds', () => {
       it('should return the Critical severity color for LOW', () => {
         expect(getThemeAwareThresholdColor(AvailabilityThreshold.LOW, 'availability')).toBe(
-          '#AA0001'
+          SEVERITY_HEX.critical
         );
       });
 
       it('should return the Medium severity color for MEDIUM', () => {
         expect(getThemeAwareThresholdColor(AvailabilityThreshold.MEDIUM, 'availability')).toBe(
-          '#AA0003'
+          SEVERITY_HEX.medium
         );
       });
 
       it('should return the Low severity color for HIGH', () => {
         expect(getThemeAwareThresholdColor(AvailabilityThreshold.HIGH, 'availability')).toBe(
-          '#AA0004'
+          SEVERITY_HEX.low
         );
       });
 
@@ -267,15 +277,21 @@ describe('filter_utils', () => {
 
     describe('errorRate thresholds', () => {
       it('should return the Low severity color for LOW', () => {
-        expect(getThemeAwareThresholdColor(ErrorRateThreshold.LOW, 'errorRate')).toBe('#AA0004');
+        expect(getThemeAwareThresholdColor(ErrorRateThreshold.LOW, 'errorRate')).toBe(
+          SEVERITY_HEX.low
+        );
       });
 
       it('should return the Medium severity color for MEDIUM', () => {
-        expect(getThemeAwareThresholdColor(ErrorRateThreshold.MEDIUM, 'errorRate')).toBe('#AA0003');
+        expect(getThemeAwareThresholdColor(ErrorRateThreshold.MEDIUM, 'errorRate')).toBe(
+          SEVERITY_HEX.medium
+        );
       });
 
       it('should return the Critical severity color for HIGH', () => {
-        expect(getThemeAwareThresholdColor(ErrorRateThreshold.HIGH, 'errorRate')).toBe('#AA0001');
+        expect(getThemeAwareThresholdColor(ErrorRateThreshold.HIGH, 'errorRate')).toBe(
+          SEVERITY_HEX.critical
+        );
       });
 
       it('should return medium shade for unknown threshold', () => {

@@ -1344,6 +1344,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButtonGroup
+                        color="primary"
                         legend={i18nTexts.focus.modeLegend}
                         buttonSize="compressed"
                         options={[
@@ -1387,7 +1388,12 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
                       onToggle={() => togglePanel('filter-sidebar', { direction: 'left' })}
                       dependencies={
                         hasDependencyNodes
-                          ? { included: includeDependencies, onChange: setIncludeDependencies }
+                          ? {
+                              included: includeDependencies,
+                              onChange: setIncludeDependencies,
+                              // The focused view always includes dependencies (see focusCenter).
+                              forcedByFocus: !!focusGraph,
+                            }
                           : undefined
                       }
                     />

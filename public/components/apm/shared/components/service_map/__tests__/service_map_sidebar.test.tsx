@@ -190,4 +190,41 @@ describe('ServiceMapSidebar — Include external dependencies', () => {
     fireEvent.click(checkbox);
     expect(onChange).toHaveBeenCalledWith(false);
   });
+
+  it('shows dependencies as included and locked while a service is focused', async () => {
+    const onChange = jest.fn();
+    renderWith({ included: false, onChange, forcedByFocus: true });
+    const checkbox = screen.getByTestId('includeDependenciesCheckbox') as HTMLInputElement;
+    // The focused view always shows a service's dependencies, so the box says so.
+    expect(checkbox.checked).toBe(true);
+    expect(checkbox).toBeDisabled();
+    fireEvent.click(checkbox);
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.mouseOver(screen.getByText('Include external dependencies'));
+    expect(
+      await screen.findByText('A focused service always shows its dependencies.')
+    ).toBeInTheDocument();
+  });
+
+  it('lets keyboard users reach the focused-service reason', async () => {
+    renderWith({ included: false, onChange: jest.fn(), forcedByFocus: true });
+    const hint = screen.getByTestId('includeDependenciesFocusedHint');
+    // Focusable (the disabled checkbox itself is not) and labelled with the reason.
+    expect(hint).toHaveAttribute('tabIndex', '0');
+    expect(hint).toHaveAttribute(
+      'aria-label',
+      'Include external dependencies. A focused service always shows its dependencies.'
+    );
+    fireEvent.focus(hint);
+    expect(
+      await screen.findByText('A focused service always shows its dependencies.')
+    ).toBeInTheDocument();
+  });
+
+  it('shows the saved choice again once focus is cleared', () => {
+    renderWith({ included: false, onChange: jest.fn(), forcedByFocus: false });
+    const checkbox = screen.getByTestId('includeDependenciesCheckbox') as HTMLInputElement;
+    expect(checkbox.checked).toBe(false);
+    expect(checkbox).not.toBeDisabled();
+  });
 });

@@ -151,6 +151,7 @@ export const ExclusionWindowsEditor: React.FC<ExclusionWindowsEditorProps> = ({
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
           <EuiButtonGroup
+            color="primary"
             legend={i18n.translate(
               'observability.apm.slo.wizard.exclusionWindows.scheduleTypeLegend',
               { defaultMessage: 'Schedule type' }

@@ -19,6 +19,7 @@ import {
   EuiFieldSearch,
   EuiLink,
   EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FailureRateThresholdFilter, ErrorRateThreshold } from '../filters';
 import { ApplicationMapFilters } from '../../../common/types/service_map_types';
@@ -43,6 +44,12 @@ export interface ServiceMapSidebarProps {
   dependencies?: {
     included: boolean;
     onChange: (included: boolean) => void;
+    /**
+     * True while a service is focused: the focused view always shows its dependencies, so the
+     * checkbox shows them as included and is disabled, with a tooltip saying why. The saved
+     * choice is unchanged and applies again when focus is cleared.
+     */
+    forcedByFocus?: boolean;
   };
 }
 
@@ -192,15 +199,42 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
 
       {dependencies && (
         <>
-          <EuiCheckbox
-            id="apmIncludeDependencies"
-            label={<EuiText size="xs">{i18nTexts.filters.includeDependencies}</EuiText>}
-            checked={dependencies.included}
-            onChange={(e) => dependencies.onChange(e.target.checked)}
-            disabled={isLoading}
-            compressed
-            data-test-subj="includeDependenciesCheckbox"
-          />
+          {dependencies.forcedByFocus ? (
+            <EuiToolTip
+              content={i18nTexts.filters.includeDependenciesFocused}
+              position="right"
+              display="block"
+            >
+              {/* A disabled checkbox can't take focus, so the focusable span is
+                  the tooltip's anchor: keyboard users reach it with Tab and the
+                  reason is announced (same pattern as the Suggest SLOs button). */}
+              <span
+                tabIndex={0}
+                data-test-subj="includeDependenciesFocusedHint"
+                aria-label={`${i18nTexts.filters.includeDependencies}. ${i18nTexts.filters.includeDependenciesFocused}`}
+              >
+                <EuiCheckbox
+                  id="apmIncludeDependencies"
+                  label={<EuiText size="xs">{i18nTexts.filters.includeDependencies}</EuiText>}
+                  checked
+                  onChange={() => {}}
+                  disabled
+                  compressed
+                  data-test-subj="includeDependenciesCheckbox"
+                />
+              </span>
+            </EuiToolTip>
+          ) : (
+            <EuiCheckbox
+              id="apmIncludeDependencies"
+              label={<EuiText size="xs">{i18nTexts.filters.includeDependencies}</EuiText>}
+              checked={dependencies.included}
+              onChange={(e) => dependencies.onChange(e.target.checked)}
+              disabled={isLoading}
+              compressed
+              data-test-subj="includeDependenciesCheckbox"
+            />
+          )}
           <EuiHorizontalRule margin="xs" />
         </>
       )}

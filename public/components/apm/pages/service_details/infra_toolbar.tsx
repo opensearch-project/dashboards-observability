@@ -242,6 +242,7 @@ export const InfraToolbar: React.FC<InfraToolbarProps> = (props) => (
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
+          color="primary"
           legend={t('layout', 'Layout')}
           options={[
             { id: 'grid', label: t('grid', 'Grid') },

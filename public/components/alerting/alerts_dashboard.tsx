@@ -57,6 +57,7 @@ import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
 import { formatTimestamp } from './time_format';
 import { ALERT_KIND_HEX, getStateHex } from './alert_colors';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
+import { TabRowActions } from './tab_row_actions';
 import './alerting.scss';
 
 // ============================================================================
@@ -1255,6 +1256,21 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   //   'no-rules' — DS selected, but no rules exist across them
   //   'no-alerts' — rules exist, but none fired in the current time range
   //   null — render the timeline
+  // `EuiSuperDatePicker` doesn't forward `data-test-subj` to its rendered
+  // control, so anchor it on a wrapper div for stable Cypress / functional
+  // selectors.
+  const datePicker = (
+    <div data-test-subj="alertManagerDatePicker">
+      <EuiSuperDatePicker
+        compressed
+        start={pickerStart}
+        end={pickerEnd}
+        onTimeChange={onTimeChange}
+        onRefresh={onRefresh}
+      />
+    </div>
+  );
+
   const emptyMode: 'no-ds' | 'no-rules' | 'no-alerts' | null = !loading
     ? selectedDsIds.length === 0
       ? 'no-ds'
@@ -1539,9 +1555,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 <EuiFlexGroup gutterSize="m" responsive={true} className="altVizRow">
                   <EuiFlexItem grow={3} className="altVizItem">
                     <EuiPanel paddingSize="m" hasBorder className="altVizPanel">
-                      {/* Title left, time picker right. Always rendered so the */}
-                      {/* picker stays reachable from the empty states (e.g.    */}
-                      {/* "No alerts in range" → user widens the range).        */}
+                      {/* Title left, legend right. The time picker is in the   */}
+                      {/* tab row and always rendered, so it stays reachable    */}
+                      {/* from the empty states (e.g. "No alerts in range" →    */}
+                      {/* the user widens the range).                           */}
                       <EuiFlexGroup
                         gutterSize="s"
                         alignItems="center"
@@ -1569,20 +1586,14 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                             </EuiFlexGroup>
                           </EuiFlexItem>
                         )}
-                        <EuiFlexItem grow={false}>
-                          {/* `EuiSuperDatePicker` doesn't forward `data-test-subj`
-                              to its rendered control, so anchor it on a wrapper
-                              div for stable Cypress / functional selectors. */}
-                          <div data-test-subj="alertManagerDatePicker">
-                            <EuiSuperDatePicker
-                              compressed
-                              start={pickerStart}
-                              end={pickerEnd}
-                              onTimeChange={onTimeChange}
-                              onRefresh={onRefresh}
-                            />
-                          </div>
-                        </EuiFlexItem>
+                        {/* The time picker scopes the whole tab (timeline and
+                            table), so it sits in the tab row, not in the chart
+                            header. */}
+                        <TabRowActions
+                          fallback={<EuiFlexItem grow={false}>{datePicker}</EuiFlexItem>}
+                        >
+                          {datePicker}
+                        </TabRowActions>
                       </EuiFlexGroup>
                       <EuiSpacer size="s" />
                       {emptyMode === 'no-ds' || emptyMode === 'no-rules' ? (

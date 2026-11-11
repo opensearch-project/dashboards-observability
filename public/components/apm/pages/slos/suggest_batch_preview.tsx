@@ -112,6 +112,7 @@ export const SuggestBatchPreview: React.FC<SuggestBatchPreviewProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
+            color="primary"
             legend={i18n.translate('observability.apm.slo.suggest.batchPreview.windowLegend', {
               defaultMessage: 'SLI evaluation window',
             })}

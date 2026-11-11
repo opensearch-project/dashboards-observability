@@ -261,6 +261,8 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
             <EuiFlexItem grow={false}>
               <EuiButtonGroup
                 legend="Select latency percentile"
+                // Primary, not the default dark-gray "text" fill, matching the other toggles.
+                color="primary"
                 options={LATENCY_PERCENTILE_OPTIONS}
                 idSelected={latencyPercentile}
                 onChange={(id) => setLatencyPercentile(id as 'p99' | 'p90' | 'p50')}
@@ -338,6 +340,7 @@ const ServicesTablePanelUI: React.FC<ServicesTablePanelProps> = ({
           }}
           loading={isTableLoading}
           onTableChange={onTableChange}
+          className="apmStandardRows"
           data-test-subj="servicesTable"
         />
       )}
