@@ -12,7 +12,9 @@
  * to `setupRoutes`, the same way it can pass a Prometheus backend. Without one, the CloudWatch
  * backend, routes and UI stay off even when `observability.cloudwatch.enabled` is set.
  */
+/* eslint-disable max-classes-per-file */
 import type { CloudWatchAlarmSource } from '../../../../common/types/alerting';
+import { CLOUDWATCH_SCOPE_UNAVAILABLE_ERROR_NAME } from '../../../../common/types/alerting';
 import type { OpenSearchDashboardsRequest } from '../../../../../../src/core/server';
 
 /**
@@ -25,6 +27,18 @@ export class CloudWatchCredentialsError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'CloudWatchCredentialsError';
+  }
+}
+
+/**
+ * A datasource names an account scope the source can't provide for this request (`forScope`
+ * is absent or returned undefined). The message is fixed: it never carries the scope id.
+ */
+export class CloudWatchScopeUnavailableError extends Error {
+  readonly statusCode = 404;
+  constructor() {
+    super('CloudWatch account scope is not available');
+    this.name = CLOUDWATCH_SCOPE_UNAVAILABLE_ERROR_NAME;
   }
 }
 
@@ -45,9 +59,11 @@ export type CloudWatchFlagResolver = (request: OpenSearchDashboardsRequest) => P
 // The source contract itself is a plain type in common/ so a deployment's implementation can
 // import it alongside the other alerting types; re-exported here for server callers.
 export type {
+  CloudWatchAccountScope,
   CloudWatchAlarmSource,
   CloudWatchCallerIdentity,
   CloudWatchMetricDataQuery,
   CloudWatchStateChange,
   CloudWatchStateChangesQuery,
+  CloudWatchTargets,
 } from '../../../../common/types/alerting';

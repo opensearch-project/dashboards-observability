@@ -1171,11 +1171,12 @@ export function cloudWatchSeverity(alarm: CloudWatchAlarm): UnifiedAlertSeverity
 }
 
 /**
- * A row id that stays unique across regions and accounts: the alarm ARN, else the region and
- * name. The alarm name itself rides on `cloudWatch.alarmName`.
+ * A row id that stays unique across regions and accounts: the alarm ARN, else the account,
+ * region and name, so same-named alarms in two accounts don't collide. The alarm name itself
+ * rides on `cloudWatch.alarmName`.
  */
 export function cloudWatchRowId(alarm: CloudWatchAlarm): string {
-  return alarm.alarmArn || `${alarm.region ?? ''}:${alarm.alarmName}`;
+  return alarm.alarmArn || `${alarm.accountId ?? ''}:${alarm.region ?? ''}:${alarm.alarmName}`;
 }
 
 function cloudWatchMeta(alarm: CloudWatchAlarm): UnifiedCloudWatchMeta {

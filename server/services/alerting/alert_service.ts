@@ -45,6 +45,11 @@ import {
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
 import { parseDateMathMs, computeStep } from '../../../common/services/alerting';
+import {
+  CLOUDWATCH_DATASOURCE_ID,
+  isCloudWatchDatasourceId,
+} from '../../../common/services/alerting/cloudwatch_datasource_id';
+import { ALERT_MANAGER_MAX_DATASOURCES_LIMIT } from '../../../common/constants/alerting_settings';
 import { classifyError, toClientPayload, ErrorCode, redactForDisplay } from '../../../common/error';
 import type { ClassifiedError } from '../../../common/error';
 import { TimeoutError } from './timeout_error';
@@ -73,6 +78,21 @@ import type { CloudWatchBackend } from './cloudwatch/cloudwatch_backend';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_MAX_RESULTS = 5_000;
+/** The `error` for a requested CloudWatch datasource the source doesn't offer. */
+const CLOUDWATCH_UNAVAILABLE_TEXT = 'CloudWatch datasource is not available';
+
+/** A failed status for a requested CloudWatch datasource that isn't available. */
+function unavailableCloudWatchResult<T>(id: string): DatasourceFetchResult<T> {
+  return {
+    datasourceId: id,
+    datasourceName: id,
+    datasourceType: 'cloudwatch',
+    status: 'error',
+    data: [],
+    error: CLOUDWATCH_UNAVAILABLE_TEXT,
+    durationMs: 0,
+  };
+}
 /**
  * Concurrency cap on per-datasource fan-outs. The unified views fan a
  * single OSD request out to up to `ALERT_MANAGER_MAX_DATASOURCES_LIMIT`
@@ -517,7 +537,7 @@ export class MultiBackendAlertService {
     ctx?: RequestHandlerContext,
     sourceRequest?: OpenSearchDashboardsRequest
   ): Promise<ProgressiveResponse<UnifiedAlertSummary>> {
-    const datasources = await this.resolveDatasources(options?.dsIds);
+    const { datasources, unavailable } = await this.resolveDatasources(options?.dsIds);
     const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const maxResults = options?.maxResults ?? DEFAULT_MAX_RESULTS;
     const fetchedAt = new Date().toISOString();
@@ -580,11 +600,12 @@ export class MultiBackendAlertService {
         statusList.push(errResult);
       }
     }
+    for (const id of unavailable) statusList.push(unavailableCloudWatchResult(id));
 
     return {
       results: allResults.slice(0, maxResults),
       datasourceStatus: statusList,
-      totalDatasources: datasources.length,
+      totalDatasources: datasources.length + unavailable.length,
       completedDatasources: statusList.filter((s) => s.status === 'success').length,
       fetchedAt,
     };
@@ -594,7 +615,7 @@ export class MultiBackendAlertService {
     clientOrResolver: AlertingOSClient | ((dsId: string) => Promise<AlertingOSClient>),
     options?: UnifiedFetchOptions
   ): Promise<ProgressiveResponse<UnifiedRuleSummary>> {
-    const datasources = await this.resolveDatasources(options?.dsIds);
+    const { datasources, unavailable } = await this.resolveDatasources(options?.dsIds);
     const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const maxResults = options?.maxResults ?? DEFAULT_MAX_RESULTS;
     const fetchedAt = new Date().toISOString();
@@ -643,11 +664,12 @@ export class MultiBackendAlertService {
         statusList.push(errResult);
       }
     }
+    for (const id of unavailable) statusList.push(unavailableCloudWatchResult(id));
 
     return {
       results: allResults.slice(0, maxResults),
       datasourceStatus: statusList,
-      totalDatasources: datasources.length,
+      totalDatasources: datasources.length + unavailable.length,
       completedDatasources: statusList.filter((s) => s.status === 'success').length,
       fetchedAt,
     };
@@ -1354,17 +1376,41 @@ export class MultiBackendAlertService {
   // Helpers
   // =========================================================================
 
-  private async resolveDatasources(dsIds?: string[]): Promise<Datasource[]> {
+  /**
+   * The datasources to fan out to. A requested CloudWatch id the listing doesn't include (another
+   * region or account scope) is looked up on its own, for at most
+   * `ALERT_MANAGER_MAX_DATASOURCES_LIMIT` ids; one that doesn't resolve is `unavailable`, so the
+   * caller reports it. Other unknown ids are dropped.
+   */
+  private async resolveDatasources(
+    dsIds?: string[]
+  ): Promise<{ datasources: Datasource[]; unavailable: string[] }> {
     const all = await this.datasourceService.list();
     const enabled = all.filter((ds) => ds.enabled);
-    if (!dsIds || dsIds.length === 0) return enabled;
+    if (!dsIds || dsIds.length === 0) return { datasources: enabled, unavailable: [] };
 
-    const resolved: Datasource[] = [];
-    for (const id of dsIds) {
-      const match = enabled.filter((ds) => ds.id === id);
-      if (match.length > 0) resolved.push(match[0]);
+    const datasources: Datasource[] = [];
+    const unavailable: string[] = [];
+    let lookups = 0;
+    for (const id of Array.from(new Set(dsIds))) {
+      const match = enabled.find((ds) => ds.id === id);
+      if (match) {
+        datasources.push(match);
+        continue;
+      }
+      if (!isCloudWatchDatasourceId(id) || id === CLOUDWATCH_DATASOURCE_ID) continue;
+      const ds =
+        lookups++ < ALERT_MANAGER_MAX_DATASOURCES_LIMIT
+          ? await this.datasourceService.get(id)
+          : null;
+      if (ds && ds.enabled && ds.type === 'cloudwatch') {
+        datasources.push(ds);
+      } else {
+        this.logger.debug(`CloudWatch datasource not available: ${id}`);
+        unavailable.push(id);
+      }
     }
-    return resolved;
+    return { datasources, unavailable };
   }
 
   private withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {

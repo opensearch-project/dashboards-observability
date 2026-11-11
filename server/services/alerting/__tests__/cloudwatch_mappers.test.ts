@@ -146,12 +146,24 @@ describe('cloudWatchAlarmToUnifiedRuleSummary', () => {
     expect(row.lastModified).toBeUndefined();
   });
 
-  it('falls back to region and name for the id without an ARN', () => {
+  it('falls back to account, region and name for the id without an ARN', () => {
     const row = cloudWatchAlarmToUnifiedRuleSummary(
       metricAlarm({ alarmArn: undefined }),
       'cloudwatch'
     );
-    expect(row.id).toBe('us-east-1:checkout-errors-high');
+    expect(row.id).toBe('123456789012:us-east-1:checkout-errors-high');
+  });
+  it("keeps two accounts' same-named alarms apart without an ARN", () => {
+    const a = cloudWatchAlarmToUnifiedRuleSummary(
+      metricAlarm({ alarmArn: undefined, accountId: '123456789012' }),
+      'cloudwatch'
+    );
+    const b = cloudWatchAlarmToUnifiedRuleSummary(
+      metricAlarm({ alarmArn: undefined, accountId: '210987654321' }),
+      'cloudwatch_us-east-1_s1'
+    );
+    expect(a.id).not.toBe(b.id);
+    expect(b.id).toBe('210987654321:us-east-1:checkout-errors-high');
   });
 
   it('INSUFFICIENT_DATA alarm carries the distinct unified status and no lastTriggered', () => {

@@ -23,10 +23,18 @@
 import type { SavedObject, SavedObjectsClientContract } from '../../../../../src/core/server';
 import type {
   AlertingOSClient,
+  CloudWatchTargets,
   Datasource,
   DatasourceService,
   Logger,
 } from '../../../common/types/alerting';
+import {
+  CLOUDWATCH_DATASOURCE_ID,
+  buildCloudWatchDatasource,
+  isCloudWatchDatasourceId,
+  resolveCloudWatchTarget,
+} from '../../../common/services/alerting/cloudwatch_datasource_id';
+import { describeSourceError } from './cloudwatch/cloudwatch_backend';
 
 interface DataSourceSOAttributes {
   title?: string;
@@ -41,10 +49,11 @@ interface DataConnectionSOAttributes {
 /**
  * The virtual CloudWatch datasource id. There is no saved object for it — the
  * CloudWatch integration is a zero-setup virtual datasource for the account the
- * caller's AWS credentials reach (through the deployment's source). Kept in sync with the
- * client-side synthetic entry in `use_datasources.ts`.
+ * caller's AWS credentials reach (through the deployment's source). Defined in
+ * `common/services/alerting/cloudwatch_datasource_id.ts` with the ids of the other
+ * (scope, region) pairs; re-exported here for server callers.
  */
-export const CLOUDWATCH_DATASOURCE_ID = 'cloudwatch';
+export { CLOUDWATCH_DATASOURCE_ID };
 
 export interface CloudWatchDatasourceConfig {
   /**
@@ -54,6 +63,11 @@ export interface CloudWatchDatasourceConfig {
   enabled: boolean | (() => Promise<boolean>);
   /** The region the source queries; undefined lets the source use its own default. */
   region?: string;
+  /**
+   * The account scopes and regions the source offers, or undefined when it doesn't report them
+   * (then there is one datasource, `cloudwatch`). Asked at most once per service instance.
+   */
+  targets?: () => Promise<CloudWatchTargets | undefined>;
 }
 
 export class SavedObjectDatasourceService implements DatasourceService {
@@ -67,6 +81,25 @@ export class SavedObjectDatasourceService implements DatasourceService {
      */
     private readonly cloudWatch?: CloudWatchDatasourceConfig
   ) {}
+
+  private cloudWatchTargetsPromise?: Promise<CloudWatchTargets | undefined>;
+
+  /** The source's targets, once per instance. A failure falls back to the single datasource. */
+  private cloudWatchTargets(): Promise<CloudWatchTargets | undefined> {
+    const targets = this.cloudWatch?.targets;
+    if (!targets) return Promise.resolve(undefined);
+    if (!this.cloudWatchTargetsPromise) {
+      this.cloudWatchTargetsPromise = Promise.resolve()
+        .then(targets)
+        .catch((e) => {
+          this.logger?.debug(
+            `SavedObjectDatasourceService: CloudWatch targets failed: ${describeSourceError(e)}`
+          );
+          return undefined;
+        });
+    }
+    return this.cloudWatchTargetsPromise;
+  }
 
   private async isCloudWatchEnabled(): Promise<boolean> {
     const enabled = this.cloudWatch?.enabled;
@@ -155,15 +188,37 @@ export class SavedObjectDatasourceService implements DatasourceService {
     }
     // Virtual CloudWatch datasource — no saved object; appears automatically
     // when the feature is enabled and a CloudWatch source is available.
+    // With targets, one per account scope at that scope's default region.
     if (await this.isCloudWatchEnabled()) {
-      all.push(this.cloudWatchDatasource());
+      const targets = await this.cloudWatchTargets();
+      if (targets) {
+        for (const scope of targets.scopes) {
+          const ds = buildCloudWatchDatasource(
+            targets,
+            scope,
+            scope.defaultRegion ?? targets.defaultRegion
+          );
+          if (ds) all.push(ds);
+        }
+      } else {
+        all.push(this.cloudWatchDatasource());
+      }
     }
     return all;
   }
 
   async get(id: string): Promise<Datasource | null> {
-    if (id === CLOUDWATCH_DATASOURCE_ID) {
-      return (await this.isCloudWatchEnabled()) ? this.cloudWatchDatasource() : null;
+    // CloudWatch ids never have a saved object; resolve them before any lookup.
+    if (isCloudWatchDatasourceId(id)) {
+      if (!(await this.isCloudWatchEnabled())) return null;
+      const targets = await this.cloudWatchTargets();
+      if (!targets) {
+        return id === CLOUDWATCH_DATASOURCE_ID ? this.cloudWatchDatasource() : null;
+      }
+      const resolved = resolveCloudWatchTarget(targets, id);
+      return (
+        (resolved && buildCloudWatchDatasource(targets, resolved.scope, resolved.region)) || null
+      );
     }
     if (!id || id === 'local-cluster') {
       return {

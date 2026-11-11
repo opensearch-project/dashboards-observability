@@ -170,6 +170,13 @@ export interface Datasource {
    * CloudWatch source for the caller's credentials — never configured.
    */
   accountId?: string;
+  /**
+   * For a CloudWatch datasource: the account scope id it reads through (`forScope`). Absent:
+   * the source's default scope.
+   */
+  cloudWatchScope?: string;
+  /** For a CloudWatch datasource: the account scope's display label. */
+  cloudWatchScopeLabel?: string;
   /** For Prometheus datasources decomposed into workspaces */
   workspaceId?: string;
   workspaceName?: string;

@@ -22,12 +22,18 @@ import {
   RequestHandlerContext,
   SavedObject,
 } from '../../../../../src/core/server';
-import type { AlertingOSClient, Datasource, Logger } from '../../../common/types/alerting';
+import type {
+  AlertingOSClient,
+  CloudWatchTargets,
+  Datasource,
+  Logger,
+} from '../../../common/types/alerting';
 import {
   parseDateMathMs,
   validateDateMath,
   validateTimeRangeQuery,
 } from '../../../common/services/alerting';
+import { CLOUDWATCH_DEFAULT_SCOPE_LABEL } from '../../../common/services/alerting/cloudwatch_datasource_id';
 import {
   HttpOpenSearchBackend,
   MultiBackendAlertService,
@@ -127,6 +133,8 @@ export interface AlertingRoutesDeps {
 
 /** Upper bound on one CloudWatch detail route. */
 const CLOUDWATCH_DETAIL_TIMEOUT_MS = 30_000;
+/** Upper bound on the CloudWatch targets route. */
+const CLOUDWATCH_TARGETS_TIMEOUT_MS = 10_000;
 
 /**
  * Runs `work` with an `AbortSignal` that fires when the route gives up (after `ms`) or the client
@@ -382,6 +390,7 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
         ? {
             enabled: () => resolveCwBackend(request).then((backend) => !!backend),
             region: deps.cloudWatchRegion,
+            targets: () => resolveCwBackend(request).then((backend) => backend?.listTargets()),
           }
         : undefined
     );
@@ -920,9 +929,41 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
   //
   // These back the CloudWatch alarm flyout's lazily-loaded sections. The row
   // data itself flows through the unchanged `/api/alerting/unified/rules` and
-  // `/api/alerting/unified/alerts` fan-out. `dsId` is the virtual datasource
-  // id (`cloudwatch`); the resolved datasource carries the AWS region.
+  // `/api/alerting/unified/alerts` fan-out. `dsId` is a virtual datasource id
+  // (`cloudwatch`, `cloudwatch_<region>` or `cloudwatch_<region>_<scopeId>`);
+  // the resolved datasource carries the AWS region and account scope.
   // ===========================================================================
+  // The account scopes and regions the caller may read alarms from. A source
+  // that doesn't report them offers one target: its default scope in the
+  // configured region (or its own default region when none is configured).
+  router.get(
+    {
+      path: '/api/alerting/cloudwatch/targets',
+      validate: false,
+    },
+    async (_ctx, req, res) =>
+      runClassifiedHandler(res, 'cloudwatch.targets', 'cloudwatch', async () => {
+        const cwBackend = await resolveCwBackend(req);
+        if (!cwBackend) {
+          throw createNotFoundError('CloudWatch alarms are not enabled for this request');
+        }
+        const targets = await withRouteTimeout(
+          req,
+          (signal) => cwBackend.listTargets({ signal }),
+          CLOUDWATCH_TARGETS_TIMEOUT_MS,
+          'CloudWatch targets'
+        );
+        const region = deps.cloudWatchRegion;
+        const body: CloudWatchTargets = targets ?? {
+          regions: region ? [{ id: region, name: region }] : [],
+          defaultRegion: region,
+          scopes: [
+            { label: CLOUDWATCH_DEFAULT_SCOPE_LABEL, relation: 'own', defaultRegion: region },
+          ],
+        };
+        return { status: 200, body };
+      })
+  );
 
   /**
    * Resolve the CloudWatch backend + datasource for a detail route, or throw a

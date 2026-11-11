@@ -24,12 +24,17 @@ import type {
   CloudWatchRelationshipGraph,
   CloudWatchRelationshipNode,
   CloudWatchStatesAt,
+  CloudWatchTargets,
   Datasource,
   Logger,
 } from '../../../../common/types/alerting';
 import { CLOUDWATCH_HISTORY_RETENTION_MS } from '../../../../common/types/alerting';
 import { CLOUDWATCH_ACCESS_DENIED_ERROR_NAMES } from '../../../../common/error';
-import { CloudWatchAlarmSource, CloudWatchCredentialsError } from './types';
+import {
+  CloudWatchAlarmSource,
+  CloudWatchCredentialsError,
+  CloudWatchScopeUnavailableError,
+} from './types';
 
 /** Initial descendant depth rendered before the "load deeper" continuation. */
 const DEFAULT_RELATIONSHIP_DEPTH = 2;
@@ -121,10 +126,40 @@ export function findCausingAlarm(
 export class CloudWatchBackend {
   readonly type = 'cloudwatch' as const;
 
+  /** Sources bound to an account scope, one per scope id for this backend's lifetime. */
+  private readonly scoped = new Map<string, CloudWatchAlarmSource>();
+
   constructor(
     private readonly logger: Logger,
     private readonly source: CloudWatchAlarmSource
   ) {}
+
+  /**
+   * The source a datasource reads through: the default source, or the one bound to the
+   * datasource's account scope. Throws `CloudWatchScopeUnavailableError` when the source can't
+   * provide that scope.
+   */
+  private sourceFor(ds: Datasource): CloudWatchAlarmSource {
+    const scopeId = ds.cloudWatchScope;
+    if (!scopeId) return this.source;
+    let scoped = this.scoped.get(scopeId);
+    if (!scoped) {
+      scoped = this.source.forScope?.(scopeId);
+      if (!scoped) throw new CloudWatchScopeUnavailableError();
+      this.scoped.set(scopeId, scoped);
+    }
+    return scoped;
+  }
+
+  /**
+   * The account scopes and regions the source offers, or undefined when it doesn't report them
+   * (it then offers one target: its default scope in its default region).
+   */
+  async listTargets(call?: CloudWatchCallOptions): Promise<CloudWatchTargets | undefined> {
+    return this.guarded(async () =>
+      this.source.listTargets ? await this.source.listTargets(call) : undefined
+    );
+  }
 
   /** Wrap a source call, mapping credential/other failures to typed errors. */
   private async guarded<T>(op: () => Promise<T>): Promise<T> {
@@ -162,7 +197,9 @@ export class CloudWatchBackend {
     call?: CloudWatchCallOptions
   ): Promise<CloudWatchAlarmList> {
     const [list, identity] = await Promise.all([
-      this.guarded(() => this.source.describeAlarms({ region: ds.region, ...options }, call)),
+      this.guarded(() =>
+        this.sourceFor(ds).describeAlarms({ region: ds.region, ...options }, call)
+      ),
       this.getIdentitySafe(ds, call),
     ]);
     return {
@@ -193,7 +230,7 @@ export class CloudWatchBackend {
       return { atMs, states: {}, complete: true, beyondRetention: true };
     }
     const { changes, complete } = await this.guarded(() =>
-      this.source.describeStateChanges(
+      this.sourceFor(ds).describeStateChanges(
         { region: ds.region, startTimeMs: atMs, endTimeMs: nowMs },
         call
       )
@@ -213,8 +250,10 @@ export class CloudWatchBackend {
     ds: Datasource,
     call?: CloudWatchCallOptions
   ): Promise<{ accountId: string; region: string } | undefined> {
+    // Outside the try: a missing scope is a failure, not "identity unknown".
+    const source = this.sourceFor(ds);
     try {
-      return await this.source.getCallerIdentity(ds.region, call);
+      return await source.getCallerIdentity(ds.region, call);
     } catch (err) {
       // Identity is best-effort labeling; a failure here shouldn't blank rows.
       this.logger.debug(`CloudWatch getCallerIdentity failed: ${describeSourceError(err)}`);
@@ -234,7 +273,9 @@ export class CloudWatchBackend {
     opts: { startTimeMs?: number; endTimeMs?: number; signal?: AbortSignal } = {}
   ): Promise<CloudWatchAlarmDetail | null> {
     const call: CloudWatchCallOptions = { signal: opts.signal };
-    const alarm = await this.guarded(() => this.source.describeAlarm(alarmName, ds.region, call));
+    const alarm = await this.guarded(() =>
+      this.sourceFor(ds).describeAlarm(alarmName, ds.region, call)
+    );
     if (!alarm) return null;
     const identity = await this.getIdentitySafe(ds, call);
     alarm.accountId = alarm.accountId || identity?.accountId;
@@ -247,7 +288,7 @@ export class CloudWatchBackend {
     let history: CloudWatchAlarmHistoryItem[] | undefined;
     let historyAccessDenied = false;
     try {
-      history = await this.source.describeAlarmHistory(alarmName, ds.region, call);
+      history = await this.sourceFor(ds).describeAlarmHistory(alarmName, ds.region, call);
     } catch (err) {
       if (isAccessDenied(err)) {
         historyAccessDenied = true;
@@ -272,13 +313,13 @@ export class CloudWatchBackend {
           startTimeMs,
           endTimeMs,
         };
-        let points = await this.source.getMetricData(query, call);
+        let points = await this.sourceFor(ds).getMetricData(query, call);
         // If the default window has no samples (e.g. the metric only reported
         // earlier), widen to the last 24h so the preview still shows the
         // series rather than rendering an empty chart. A caller-picked window
         // is respected as-is: the flyout says "No metric data in {window}".
         if (points.length === 0 && opts.startTimeMs === undefined) {
-          points = await this.source.getMetricData(
+          points = await this.sourceFor(ds).getMetricData(
             { ...query, startTimeMs: endTimeMs - 24 * 60 * 60 * 1000 },
             call
           );
@@ -333,7 +374,7 @@ export class CloudWatchBackend {
     call?: CloudWatchCallOptions
   ): Promise<{ items: CloudWatchAlarmHistoryItem[]; accessDenied: boolean }> {
     try {
-      const items = await this.source.describeAlarmHistory(alarmName, ds.region, call);
+      const items = await this.sourceFor(ds).describeAlarmHistory(alarmName, ds.region, call);
       return { items, accessDenied: false };
     } catch (err) {
       if (isAccessDenied(err)) return { items: [], accessDenied: true };
@@ -352,7 +393,9 @@ export class CloudWatchBackend {
     depth?: number,
     call?: CloudWatchCallOptions
   ): Promise<CloudWatchRelationshipGraph | null> {
-    const alarm = await this.guarded(() => this.source.describeAlarm(alarmName, ds.region, call));
+    const alarm = await this.guarded(() =>
+      this.sourceFor(ds).describeAlarm(alarmName, ds.region, call)
+    );
     return alarm ? this.buildRelationships(ds, alarm, depth, call) : null;
   }
 
@@ -388,7 +431,7 @@ export class CloudWatchBackend {
       for (let k = 0; k < unseen.length; k += ALARM_NAMES_PER_CALL) {
         const batch = unseen.slice(k, k + ALARM_NAMES_PER_CALL);
         const alarms = await this.guarded(() =>
-          this.source.describeAlarmsByName(batch, ds.region, call)
+          this.sourceFor(ds).describeAlarmsByName(batch, ds.region, call)
         );
         found.push(...alarms);
       }
@@ -442,7 +485,7 @@ export class CloudWatchBackend {
 
     // Parents: composite alarms whose rule references this alarm.
     const parentAlarms = await this.guarded(() =>
-      this.source.describeParentAlarms(alarm.alarmName, ds.region, call)
+      this.sourceFor(ds).describeParentAlarms(alarm.alarmName, ds.region, call)
     );
     const parents: CloudWatchRelationshipNode[] = parentAlarms
       .filter((p) => p.alarmName !== alarm.alarmName)

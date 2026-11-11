@@ -153,3 +153,25 @@ describe('cloudWatchClassifier — sign-in without AWS credentials', () => {
     expect(out.remediation).not.toContain('Sign in again');
   });
 });
+
+describe('cloudWatchClassifier — account scope not available', () => {
+  it.each([
+    ['with', 'cloudwatch'],
+    ['without', undefined],
+  ])(
+    'CloudWatchScopeUnavailable → NOT_FOUND / 404, not retryable (%s sourceType)',
+    (_, sourceType) => {
+      const out = classifyError({
+        operation: 'unified.rules.fetch',
+        sourceType,
+        errorName: 'CloudWatchScopeUnavailable',
+        message: 'CloudWatch account scope is not available',
+      });
+      expect(out.category).toBe('NOT_FOUND');
+      expect(out.code).toBe(CloudWatchErrorCode.SCOPE_UNAVAILABLE);
+      expect(out.httpStatus).toBe(404);
+      expect(out.retryable).toBe(false);
+      expect(out.title).toBe('CloudWatch datasource not available');
+    }
+  );
+});

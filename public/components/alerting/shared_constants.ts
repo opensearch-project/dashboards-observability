@@ -199,8 +199,8 @@ export const isStandardOpenSearchDatasource = (datasource: Datasource): boolean 
 // Anomaly detection / forecasting lifecycle helpers
 // ============================================================================
 
-/** The virtual CloudWatch datasource id (mirrors the server's `CLOUDWATCH_DATASOURCE_ID`). */
-export const CLOUDWATCH_DATASOURCE_ID = 'cloudwatch';
+/** The default CloudWatch datasource id (shared with the server). */
+export { CLOUDWATCH_DATASOURCE_ID } from '../../../common/services/alerting/cloudwatch_datasource_id';
 
 export const isCloudWatchRule = (rule: UnifiedRuleSummary): boolean =>
   rule.definitionType === 'cloudwatch_alarm' ||
