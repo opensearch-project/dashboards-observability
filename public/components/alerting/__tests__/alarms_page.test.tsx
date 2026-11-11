@@ -120,8 +120,17 @@ jest.mock('../hooks/use_monitor_mutations', () => ({
 import { AlarmsPage, parseAlarmsHashRoute } from '../alarms_page';
 import type { Datasource } from '../../../../common/types/alerting';
 
+// One data source: with none, the page shows only the "No data sources available" prompt.
+const LOCAL_DATASOURCE: Datasource = {
+  id: 'ds-1',
+  name: 'Cluster 1',
+  type: 'opensearch',
+  url: 'ds-1',
+  enabled: true,
+  mdsId: 'ds-1',
+};
 const defaultProps = {
-  datasources: [] as Datasource[],
+  datasources: [LOCAL_DATASOURCE] as Datasource[],
   datasourcesLoading: false,
   defaultDatasources: [] as string[],
   maxDatasources: 5,
@@ -180,6 +189,33 @@ beforeEach(() => {
 });
 
 describe('AlarmsPage', () => {
+  describe('with no data sources', () => {
+    const { coreRefs } = jest.requireMock('../../../framework/core_refs');
+    afterEach(() => {
+      delete coreRefs.application;
+    });
+    it('shows the "No data sources available" prompt instead of the tabs', async () => {
+      const navigateToApp = jest.fn();
+      coreRefs.application = { navigateToApp };
+      await act(async () => {
+        render(<AlarmsPage {...defaultProps} datasources={[]} />);
+      });
+      expect(screen.getByTestId('alertManagerNoDatasources')).toHaveTextContent(
+        'No data sources available'
+      );
+      expect(screen.queryByTestId('alertManagerTabs')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('alertsDashboard')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('alertManagerAssociateDatasource'));
+      expect(navigateToApp).toHaveBeenCalledWith('dataSources');
+    });
+    it('waits for the data source list before deciding there are none', async () => {
+      await act(async () => {
+        render(<AlarmsPage {...defaultProps} datasources={[]} datasourcesLoading />);
+      });
+      expect(screen.queryByTestId('alertManagerNoDatasources')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alertManagerTabs')).toBeInTheDocument();
+    });
+  });
   it('renders tabs and defaults to Alerts tab', async () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
