@@ -37,6 +37,10 @@ import {
   UnifiedRuleSummary,
 } from '../../../../common/types/alerting';
 import { FacetFilterGroup } from '../facet_filter_panel';
+import {
+  CloudWatchRegionControl,
+  CloudWatchRegionControlProps,
+} from '../cloudwatch_region_control';
 import { HEALTH_COLORS, SEVERITY_COLORS, STATUS_COLORS, TYPE_LABELS } from '../shared_constants';
 import { getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
 import { collectLabelValues, FilterState } from './monitors_table_filters';
@@ -55,6 +59,8 @@ export interface MonitorsFiltersPanelProps {
   onDatasourceCapReached: () => void;
   /** Per-datasource error text keyed by datasource NAME; see AlertsDashboard. */
   datasourceErrorMap?: Record<string, string>;
+  /** CloudWatch region picker, rendered under the Datasource facet when set. */
+  cloudWatchRegionControl?: CloudWatchRegionControlProps;
 
   filters: FilterState;
   activeFilterCount: number;
@@ -99,6 +105,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
   maxDatasources,
   onDatasourceCapReached,
   datasourceErrorMap,
+  cloudWatchRegionControl,
   filters,
   activeFilterCount,
   clearAllFilters,
@@ -264,6 +271,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           isCollapsed={isFacetCollapsed('datasource')}
           onToggleCollapse={toggleFacetCollapse}
         />
+        {cloudWatchRegionControl && <CloudWatchRegionControl {...cloudWatchRegionControl} />}
 
         {renderFacetGroup(
           'status',

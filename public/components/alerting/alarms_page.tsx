@@ -39,6 +39,7 @@ import {
 import { localizeClassified } from '../../../common/error';
 import type { ClassifiedError } from '../../../common/error';
 import {
+  CloudWatchTargets,
   Datasource,
   UnifiedAlertSummary,
   UnifiedRule,
@@ -87,6 +88,10 @@ import {
   resolveDatasourceTokens,
 } from './alarms_page_helpers';
 import { usePendingRules } from './hooks/use_pending_rules';
+import {
+  applyCloudWatchRegionChange,
+  sanitizeCloudWatchRegions,
+} from './hooks/use_cloudwatch_regions';
 import { key as pendingRuleKey, PendingEntry } from './monitors_table/pending_rules';
 
 // ============================================================================
@@ -101,6 +106,12 @@ interface AlarmsPageProps {
   defaultDatasources: string[];
   /** Cap on concurrently selected datasources (from uiSettings). */
   maxDatasources: number;
+  /** The CloudWatch source's account scopes and regions, when it reported them. */
+  cloudWatchTargets?: CloudWatchTargets;
+  /** The selected CloudWatch regions. */
+  cloudWatchRegions?: string[];
+  /** Stores a new CloudWatch region selection. */
+  onCloudWatchRegionsChange?: (regions: string[]) => void;
 }
 
 type TabId = 'alerts' | 'rules' | 'routing';
@@ -252,6 +263,9 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   datasourcesLoading,
   defaultDatasources,
   maxDatasources,
+  cloudWatchTargets,
+  cloudWatchRegions,
+  onCloudWatchRegionsChange,
 }) => {
   const mutations = useMonitorMutations();
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
@@ -866,6 +880,45 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     },
     [setSelectedDsIds, dropPendingOutsideDsIds]
   );
+
+  // A region change adds or drops the matching CloudWatch datasources in the selection: an added
+  // region is selected for every account scope that already has one selected (within the cap).
+  const handleCloudWatchRegionsChange = useCallback(
+    (next: string[]) => {
+      if (!cloudWatchTargets || !onCloudWatchRegionsChange) return;
+      const nextRegions = sanitizeCloudWatchRegions(next, cloudWatchTargets);
+      const change = applyCloudWatchRegionChange({
+        targets: cloudWatchTargets,
+        prevRegions: cloudWatchRegions ?? [],
+        nextRegions,
+        selectedDsIds,
+        maxDatasources,
+      });
+      onCloudWatchRegionsChange(nextRegions);
+      const changed =
+        change.selectedDsIds.length !== selectedDsIds.length ||
+        change.selectedDsIds.some((id, i) => id !== selectedDsIds[i]);
+      if (changed) handleDatasourceChange(change.selectedDsIds);
+      if (change.capReached) handleDatasourceCapReached();
+    },
+    [
+      cloudWatchTargets,
+      cloudWatchRegions,
+      onCloudWatchRegionsChange,
+      selectedDsIds,
+      maxDatasources,
+      handleDatasourceChange,
+      handleDatasourceCapReached,
+    ]
+  );
+  const cloudWatchRegionControl =
+    coreRefs.cloudwatchEnabled && cloudWatchTargets && cloudWatchTargets.regions.length > 1
+      ? {
+          regions: cloudWatchTargets.regions,
+          selected: cloudWatchRegions ?? [],
+          onChange: handleCloudWatchRegionsChange,
+        }
+      : undefined;
 
   // ---- Handlers ----
 
@@ -1773,6 +1826,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             onTimeChange={handleTimeChange}
             onRefresh={handleRefreshTime}
             datasourceErrorMap={datasourceErrorMapByName}
+            cloudWatchRegionControl={cloudWatchRegionControl}
             initialSearchQuery={linkedSearchFor('alerts')}
             initialSearchQueryKey={deepLink.seq}
             onInitialSearchQueryEdited={handleLinkedSearchEdited}
@@ -1813,6 +1867,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           maxDatasources={maxDatasources}
           onDatasourceCapReached={handleDatasourceCapReached}
           datasourceErrorMap={datasourceErrorMapByName}
+          cloudWatchRegionControl={cloudWatchRegionControl}
           initialSearchQuery={linkedSearchFor('rules')}
           initialSearchQueryKey={deepLink.seq}
           onInitialSearchQueryEdited={handleLinkedSearchEdited}

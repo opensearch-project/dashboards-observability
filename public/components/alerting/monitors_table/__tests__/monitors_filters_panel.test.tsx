@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen, within } from '@testing-library/react';
 import { MonitorsFiltersPanel } from '../monitors_filters_panel';
 import { emptyFilters } from '../monitors_table_filters';
 
@@ -86,5 +86,55 @@ describe('MonitorsFiltersPanel — facet labels match the table', () => {
 
     fireEvent.click(getByText('No data'));
     expect(updateFilter).toHaveBeenCalledWith('healthStatus', ['no_data']);
+  });
+});
+
+describe('MonitorsFiltersPanel — CloudWatch region control', () => {
+  const regions = [
+    { id: 'us-east-1', name: 'US East (N. Virginia)' },
+    { id: 'eu-west-1', name: 'Europe (Ireland)' },
+  ];
+
+  it('is hidden without the prop', () => {
+    render(<MonitorsFiltersPanel {...makeProps()} />);
+    expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
+  });
+
+  it('is hidden when the source offers one region', () => {
+    render(
+      <MonitorsFiltersPanel
+        {...makeProps({
+          cloudWatchRegionControl: {
+            regions: regions.slice(0, 1),
+            selected: [],
+            onChange: jest.fn(),
+          },
+        })}
+      />
+    );
+    expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
+  });
+
+  it('shows the selected regions and reports an added or removed region', () => {
+    const onChange = jest.fn();
+    render(
+      <MonitorsFiltersPanel
+        {...makeProps({
+          cloudWatchRegionControl: { regions, selected: ['us-east-1'], onChange },
+        })}
+      />
+    );
+    const control = screen.getByTestId('cloudWatchRegionControl');
+    expect(screen.getByText('CloudWatch regions')).toBeInTheDocument();
+    expect(within(control).getByText('US East (N. Virginia)')).toBeInTheDocument();
+
+    fireEvent.click(within(control).getByTestId('comboBoxToggleListButton'));
+    fireEvent.click(screen.getByRole('option', { name: 'Europe (Ireland)' }));
+    expect(onChange).toHaveBeenLastCalledWith(['us-east-1', 'eu-west-1']);
+
+    fireEvent.click(
+      within(control).getByLabelText('Remove US East (N. Virginia) from selection in this group')
+    );
+    expect(onChange).toHaveBeenLastCalledWith([]);
   });
 });

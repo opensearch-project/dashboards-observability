@@ -131,6 +131,26 @@ describe('AlertsDashboard', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders the CloudWatch region control under the Datasource facet when set', () => {
+    const { rerender } = render(<AlertsDashboard {...baseProps} />);
+    expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
+    rerender(
+      <AlertsDashboard
+        {...baseProps}
+        cloudWatchRegionControl={{
+          regions: [
+            { id: 'us-east-1', name: 'us-east-1' },
+            { id: 'eu-west-1', name: 'eu-west-1' },
+          ],
+          selected: ['eu-west-1'],
+          onChange: jest.fn(),
+        }}
+      />
+    );
+    const control = screen.getByTestId('cloudWatchRegionControl');
+    expect(within(control).getByText('eu-west-1')).toBeInTheDocument();
+  });
+
   it('renders "no datasource" empty state when selection is empty', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} selectedDsIds={[]} />);
     expect(

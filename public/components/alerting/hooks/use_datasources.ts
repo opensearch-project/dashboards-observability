@@ -27,7 +27,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import type { SavedObject } from '../../../../../../src/core/public';
 import { coreRefs } from '../../../framework/core_refs';
-import type { Datasource } from '../../../../common/types/alerting';
+import type { CloudWatchTargets, Datasource } from '../../../../common/types/alerting';
+import { cloudWatchDatasourcesFor } from '../../../../common/services/alerting/cloudwatch_datasource_id';
 import { CLOUDWATCH_DATASOURCE_ID } from '../shared_constants';
 
 // Attribute shapes for the two saved-object types we consume.
@@ -136,6 +137,19 @@ export interface UseDatasourcesResult {
   refresh: () => void;
 }
 
+export interface UseDatasourcesOptions {
+  /**
+   * The CloudWatch source's account scopes and regions. With `targets`, the single CloudWatch
+   * row becomes one row per (scope, region) for the selected regions; without, it stays as is.
+   */
+  cloudWatch?: {
+    targets?: CloudWatchTargets;
+    /** True while the targets are loading; the datasource list counts as loading too. */
+    targetsLoading?: boolean;
+    regions?: string[];
+  };
+}
+
 /**
  * React hook — returns the current list of Alert Manager datasources
  * (OpenSearch + Prometheus), sourced from the `data-source` and
@@ -143,8 +157,11 @@ export interface UseDatasourcesResult {
  * so user selections persisted in localStorage continue to resolve across
  * page loads, server restarts, and discovery refreshes.
  */
-export function useDatasources(): UseDatasourcesResult {
-  const [datasources, setDatasources] = useState<Datasource[]>([]);
+export function useDatasources(options?: UseDatasourcesOptions): UseDatasourcesResult {
+  const cloudWatchTargets = options?.cloudWatch?.targets;
+  const cloudWatchTargetsLoading = !!options?.cloudWatch?.targetsLoading;
+  const cloudWatchRegions = options?.cloudWatch?.regions;
+  const [discovered, setDatasources] = useState<Datasource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
@@ -198,8 +215,19 @@ export function useDatasources(): UseDatasourcesResult {
     };
   }, [refreshToken]);
 
+  // Replace the single CloudWatch row (present only while CloudWatch is on) with one row per
+  // (scope, region) the source offers for the selected regions.
+  const datasources = useMemo(() => {
+    if (!cloudWatchTargets || !discovered.some((d) => d.type === 'cloudwatch')) return discovered;
+    return [
+      ...discovered.filter((d) => d.type !== 'cloudwatch'),
+      ...cloudWatchDatasourcesFor(cloudWatchTargets, cloudWatchRegions ?? []),
+    ];
+  }, [discovered, cloudWatchTargets, cloudWatchRegions]);
+  const loading = isLoading || cloudWatchTargetsLoading;
+
   return useMemo(
-    () => ({ datasources, isLoading, error, refresh }),
-    [datasources, isLoading, error, refresh]
+    () => ({ datasources, isLoading: loading, error, refresh }),
+    [datasources, loading, error, refresh]
   );
 }

@@ -40,6 +40,7 @@ import { MonitorsMainPanel } from './monitors_main_panel';
 import { RULES_END_TIME_KEY, RULES_START_TIME_KEY } from '../alarms_page_helpers';
 import { useTimeRange } from '../hooks/use_time_range';
 import { useCloudWatchStatesAt } from '../hooks/use_cloudwatch_states_at';
+import type { CloudWatchRegionControlProps } from '../cloudwatch_region_control';
 import '../alerting.scss';
 
 interface MonitorsTableProps {
@@ -80,6 +81,8 @@ interface MonitorsTableProps {
    * affected row in the filter panel; click opens a popover with details.
    */
   datasourceErrorMap?: Record<string, string>;
+  /** CloudWatch region picker for the filters panel; omitted when there is nothing to pick. */
+  cloudWatchRegionControl?: CloudWatchRegionControlProps;
   /**
    * Optional pre-fill for the search box. Used by deep links from the SLO
    * detail page so users can jump straight to a specific recording rule
@@ -117,6 +120,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   maxDatasources,
   onDatasourceCapReached,
   datasourceErrorMap,
+  cloudWatchRegionControl,
   initialSearchQuery,
   initialSearchQueryKey,
   onInitialSearchQueryEdited,
@@ -472,6 +476,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 maxDatasources={maxDatasources}
                 onDatasourceCapReached={onDatasourceCapReached}
                 datasourceErrorMap={datasourceErrorMap}
+                cloudWatchRegionControl={cloudWatchRegionControl}
                 filters={filters}
                 activeFilterCount={activeFilterCount}
                 clearAllFilters={clearAllFilters}

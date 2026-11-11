@@ -16,6 +16,7 @@ import type {
   CloudWatchAlarmHistoryItem,
   CloudWatchRelationshipGraph,
   CloudWatchStatesAt,
+  CloudWatchTargets,
   ProgressiveResponse,
   UnifiedAlert,
   UnifiedAlertSummary,
@@ -139,6 +140,13 @@ export class AlertingOpenSearchService {
       `/api/alerting/cloudwatch/${encodeURIComponent(dsId)}/alarm-states`,
       { query: { at }, signal }
     )) as CloudWatchStatesAt;
+  }
+
+  /** The account scopes and regions the CloudWatch source offers. */
+  async getCloudWatchTargets(signal?: AbortSignal): Promise<CloudWatchTargets> {
+    return (await this.requireHttp().get('/api/alerting/cloudwatch/targets', {
+      signal,
+    })) as CloudWatchTargets;
   }
 
   /** CloudWatch alarm history (partial-permission aware). */

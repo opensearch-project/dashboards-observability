@@ -44,6 +44,7 @@ import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting'
 import { alertMatchesSearch, filterAlerts } from '../../../common/services/alerting/filter';
 import { AlertTimeline, AlertTimelineLegend } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
+import { CloudWatchRegionControl, CloudWatchRegionControlProps } from './cloudwatch_region_control';
 import {
   canAcknowledgeAlert,
   SEVERITY_SORT_ORDER,
@@ -736,6 +737,8 @@ export interface AlertsDashboardProps {
    * details.
    */
   datasourceErrorMap?: Record<string, string>;
+  /** CloudWatch region picker, rendered under the Datasource facet when set. */
+  cloudWatchRegionControl?: CloudWatchRegionControlProps;
   /**
    * Seeds the alerts search box on first render — used by deep links such as
    * `#/alerts?q=slo_id:<id>` that expect the list to arrive pre-filtered. Applied
@@ -772,6 +775,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   onTimeChange,
   onRefresh,
   datasourceErrorMap,
+  cloudWatchRegionControl,
   initialSearchQuery,
   initialSearchQueryKey,
   onInitialSearchQueryEdited,
@@ -1374,6 +1378,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   isCollapsed={isFacetCollapsed('datasource')}
                   onToggleCollapse={toggleFacetCollapse}
                 />
+                {cloudWatchRegionControl && (
+                  <CloudWatchRegionControl {...cloudWatchRegionControl} />
+                )}
 
                 {renderFacetGroup(
                   'type',

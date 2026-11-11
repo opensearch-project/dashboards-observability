@@ -19,3 +19,7 @@ export const ALERT_MANAGER_MAX_DATASOURCES_DEFAULT = 5;
 // Stored as a JSON array of datasource names (stable across server restarts, unlike ds-N ids).
 export const ALERT_MANAGER_SELECTED_DS_STORAGE_KEY =
   'observability.alertManager.selectedDatasources';
+
+// localStorage key for the CloudWatch regions the user picked: a JSON array of region codes.
+export const ALERT_MANAGER_CLOUDWATCH_REGIONS_STORAGE_KEY =
+  'observability.alertManager.cloudWatchRegions';
