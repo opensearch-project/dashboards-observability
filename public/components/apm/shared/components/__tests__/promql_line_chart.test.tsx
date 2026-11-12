@@ -716,6 +716,27 @@ describe('PromQLLineChart', () => {
     });
   });
 
+  describe('initialization', () => {
+    it('creates the chart only once its container is shown, even with data on the first render', () => {
+      // Data already loaded (e.g. the topology side panel reusing the map's metrics): an
+      // instance created on the hidden container would get a 100px canvas.
+      mockUsePromQLChartData.mockReturnValue({
+        series: mockSeriesData,
+        isLoading: false,
+        error: null,
+      });
+      const echarts = jest.requireMock('echarts');
+      const displayAtInit: string[] = [];
+      echarts.init.mockImplementationOnce((dom: HTMLElement) => {
+        displayAtInit.push(dom.style.display);
+        return echarts.init.getMockImplementation()!(dom);
+      });
+      render(<PromQLLineChart {...defaultProps} />);
+      expect(displayAtInit).toEqual(['block']);
+      expect(mockSetOption).toHaveBeenCalled();
+    });
+  });
+
   describe('resize', () => {
     let frames: Map<number, FrameRequestCallback>;
     let nextFrame: number;
