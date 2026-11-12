@@ -6,7 +6,7 @@
 // Test the helper functions and utilities used by the flyout
 // Full component rendering tests are skipped due to complex EUI async dependencies
 
-import { getEnvironmentDisplayName } from '../../../common/constants';
+import { getEnvironmentLabel } from '../../../common/constants';
 
 import {
   formatSpanKind,
@@ -18,18 +18,18 @@ import {
 } from '../../utils/format_utils';
 
 describe('ServiceCorrelationsFlyout utilities', () => {
-  describe('getEnvironmentDisplayName', () => {
-    it('should return prefix before colon', () => {
-      expect(getEnvironmentDisplayName('generic:default')).toBe('generic');
-      expect(getEnvironmentDisplayName('eks:cluster/namespace')).toBe('eks');
+  describe('getEnvironmentLabel', () => {
+    it('shortens the generic:default placeholder', () => {
+      expect(getEnvironmentLabel('generic:default')).toBe('generic');
     });
 
-    it('should return full string if no colon', () => {
-      expect(getEnvironmentDisplayName('production')).toBe('production');
+    it('keeps the full value, including the part after the platform prefix', () => {
+      expect(getEnvironmentLabel('eks:cluster/dev')).toBe('eks:cluster/dev');
+      expect(getEnvironmentLabel('production')).toBe('production');
     });
 
     it('should return empty string for empty input', () => {
-      expect(getEnvironmentDisplayName('')).toBe('');
+      expect(getEnvironmentLabel('')).toBe('');
     });
   });
 

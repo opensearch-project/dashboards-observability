@@ -64,7 +64,7 @@ import {
   APM_INCLUDE_DEPENDENCIES_STORAGE_KEY,
   APPLICATION_MAP_CONSTANTS,
   THRESHOLD_LABELS,
-  getEnvironmentDisplayName,
+  getEnvironmentLabel,
   getPlatformTypeFromEnvironment,
 } from '../../common/constants';
 import { removeDependencies } from '../../shared/utils/dependency_stacking';
@@ -127,19 +127,6 @@ function sanitizeUrlParam(value: string | null): string | null {
   }
 
   return value;
-}
-
-/**
- * The Environment filter's id for a raw environment. The filter lists one id per display name
- * (the first raw environment seen with it, as availableEnvironments does), so e.g.
- * "eks:cluster2" maps to the "eks:cluster1" checkbox when both display as "eks".
- */
-function environmentFilterId(nodes: ServiceMapNode[], environment: string): string {
-  const display = getEnvironmentDisplayName(environment);
-  return (
-    nodes.find((n) => getEnvironmentDisplayName(n.KeyAttributes.Environment) === display)
-      ?.KeyAttributes.Environment ?? environment
-  );
 }
 
 const NO_EDGES: ServiceMapEdge[] = [];
@@ -532,9 +519,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
           nodeType: matchingNode.KeyAttributes?.Type,
           groupByAttributes: matchingNode.GroupByAttributes,
         },
-        environmentGroup: large
-          ? { value: environment, environmentFilterId: environmentFilterId(nodes, environment) }
-          : undefined,
+        environmentGroup: large ? environment : undefined,
       });
     }
 
@@ -607,23 +592,15 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   }, [onScreenNodes, viewGraph, focusGraph]);
 
   // Extract unique environments from nodes (sorted alphabetically by display name).
-  // Dedupe on the display name rather than the raw env string: the map filters by
-  // display name (see service_map_graph), so two raw envs sharing a prefix (e.g.
-  // "eks:cluster1" and "eks:cluster2") must collapse into a single "eks" checkbox
-  // instead of rendering as identical duplicates.
+  // One checkbox per environment value: the map filters by exact value (see service_map_graph),
+  // as the Services page does, so e.g. "eks:cluster/dev" and "eks:cluster/fvt" are separate.
   const availableEnvironments = useMemo(() => {
-    const byDisplayName = new Map<string, string>();
+    const envs = new Set<string>();
     nodes.forEach((node) => {
-      const env = node.KeyAttributes.Environment;
-      if (env) {
-        const displayName = getEnvironmentDisplayName(env);
-        if (!byDisplayName.has(displayName)) {
-          byDisplayName.set(displayName, env);
-        }
-      }
+      if (node.KeyAttributes.Environment) envs.add(node.KeyAttributes.Environment);
     });
-    return Array.from(byDisplayName.values()).sort((a, b) =>
-      getEnvironmentDisplayName(a).localeCompare(getEnvironmentDisplayName(b))
+    return Array.from(envs).sort((a, b) =>
+      getEnvironmentLabel(a).localeCompare(getEnvironmentLabel(b))
     );
   }, [nodes]);
 
@@ -704,16 +681,16 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
     dispatch({ type: 'selectEdge', edge: null });
   }, [refetchMetrics]);
 
-  // The environment groups an Environment filter selection matches (by display name, as the
-  // map filters), for the environment grouping's filter / opened-environment sync.
+  // The environment groups an Environment filter selection matches (by exact value, as the map
+  // filters), for the environment grouping's filter / opened-environment sync.
   const environmentGroups = useCallback(
     (environments: string[]) => {
-      const selected = new Set(environments.map(getEnvironmentDisplayName));
+      const selected = new Set(environments);
       return Array.from(
         new Set(
           mapGraph.nodes
             .map((n) => getNodeGroupValue(n, ENVIRONMENT_GROUP_BY))
-            .filter((v): v is string => !!v && selected.has(getEnvironmentDisplayName(v)))
+            .filter((v): v is string => !!v && selected.has(v))
         )
       );
     },
@@ -729,16 +706,8 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   // Map navigation (drill-down, breadcrumbs). Leaves focus mode; opening an environment (grouped
   // by environment) checks it in the Environment filter.
   const handleNavigationStateChange = useCallback(
-    (next: MapNavigationState) =>
-      dispatch({
-        type: 'navigate',
-        navigation: next,
-        environmentFilterId:
-          next.groupByAttribute === ENVIRONMENT_GROUP_BY && next.groupByValue
-            ? environmentFilterId(mapGraph.nodes, next.groupByValue)
-            : undefined,
-      }),
-    [mapGraph.nodes]
+    (next: MapNavigationState) => dispatch({ type: 'navigate', navigation: next }),
+    []
   );
 
   // Handle node click (View insights)
@@ -955,7 +924,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
       badges.push({
         key: 'environment',
         category: i18nTexts.filters.environment,
-        values: filters.environments.map((env) => getEnvironmentDisplayName(env)),
+        values: filters.environments.map((env) => getEnvironmentLabel(env)),
         onRemove: () => setFilters((prev) => ({ ...prev, environments: [] })),
       });
     }
@@ -1038,8 +1007,6 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
           kind: 'group',
           groupBy: filterGroupBy,
           value,
-          environmentFilterId:
-            filterGroupBy === ENVIRONMENT_GROUP_BY ? environmentFilterId(nodes, value) : undefined,
         };
       }
     } else if (node && onMap && navigationState.level === 'application') {
@@ -1049,7 +1016,6 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
             kind: 'group',
             groupBy: ENVIRONMENT_GROUP_BY,
             value: env,
-            environmentFilterId: environmentFilterId(nodes, env),
           }
         : { kind: 'services' };
     }

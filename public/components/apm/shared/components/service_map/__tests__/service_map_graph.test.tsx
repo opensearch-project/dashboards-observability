@@ -564,3 +564,32 @@ describe('ServiceMapGraph unavailable metrics', () => {
     expect(onHide).toHaveBeenCalled();
   });
 });
+
+describe('ServiceMapGraph environment filter', () => {
+  const servicesLevel = {
+    ...baseProps.navigationState,
+    level: 'services' as const,
+    breadcrumbs: [{ id: 'services', label: 'Services' }],
+  };
+  const inEnv = (env: string): ServiceMapNode => ({
+    ...node,
+    NodeId: `checkout::${env}`,
+    KeyAttributes: { ...node.KeyAttributes, Environment: env },
+  });
+  const focusedIds = () =>
+    (
+      mockCelestialProps.mock.calls.slice(-1)[0][0] as { nodesInFocus?: Array<{ id: string }> }
+    ).nodesInFocus?.map((n) => n.id);
+
+  it('matches the exact environment, not every environment sharing its platform prefix', () => {
+    render(
+      <ServiceMapGraph
+        {...baseProps}
+        nodes={[inEnv('eks:cluster/dev'), inEnv('eks:cluster/fvt')]}
+        navigationState={servicesLevel}
+        filters={{ ...baseProps.filters, environments: ['eks:cluster/dev'] }}
+      />
+    );
+    expect(focusedIds()).toEqual(['checkout::eks:cluster/dev']);
+  });
+});
