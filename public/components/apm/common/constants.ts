@@ -319,6 +319,18 @@ export function getEnvironmentDisplayName(environment: string): string {
 }
 
 /**
+ * Full environment label: the raw value, with only well-known placeholders (`generic:default`)
+ * shortened. Unlike getEnvironmentDisplayName it keeps the part after the platform prefix, so
+ * `eks:cluster/dev` and `eks:cluster/fvt` stay distinguishable.
+ */
+export function getEnvironmentLabel(environment: string): string {
+  if (!environment) {
+    return '';
+  }
+  return ENVIRONMENT_DISPLAY_MAP[environment] ?? environment;
+}
+
+/**
  * Correlation constants for log-trace correlation
  */
 export const CORRELATION_CONSTANTS = {

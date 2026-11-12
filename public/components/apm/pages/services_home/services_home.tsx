@@ -60,7 +60,6 @@ import { TopDependenciesByFaultRate } from '../../shared/components/fault_widget
 import { TimeRange, ServiceTableItem } from '../../common/types/service_types';
 import { parseTimeRange } from '../../shared/utils/time_utils';
 import { usePersistentTimeRange } from '../../shared/hooks/use_persistent_time_range';
-import { parseEnvironmentType } from '../../query_services/query_requests/response_processor';
 import {
   navigateToServiceMap,
   navigateToServiceDetails,
@@ -75,7 +74,7 @@ import {
   THRESHOLD_LABELS,
 } from '../../shared/components/filters';
 import { ActiveFilterBadges, FilterBadge } from '../../shared/components/active_filter_badges';
-import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../common/constants';
+import { getEnvironmentLabel, APM_CONSTANTS } from '../../common/constants';
 import {
   isDependencyType,
   getNodeTypeLabel,
@@ -597,25 +596,26 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     return result;
   }, [availableGroupByAttributes, attributeSearchQueries]);
 
-  // Extract unique environments from services data
+  // Unique environment values in the services data. Filtered by exact value (not by platform
+  // prefix) so e.g. `dev` and `fvt` are separate choices.
   const availableEnvironments = useMemo(() => {
     const envSet = new Set<string>();
     (services || []).forEach((service) => {
-      if (service.environment) {
-        const envDetails = parseEnvironmentType(service.environment);
-        const platform = envDetails.platform;
-        if (platform) {
-          envSet.add(platform);
-        }
-      }
+      if (service.environment) envSet.add(service.environment);
     });
-    return Array.from(envSet).sort((a, b) => a.localeCompare(b));
+    return Array.from(envSet).sort((a, b) =>
+      getEnvironmentLabel(a).localeCompare(getEnvironmentLabel(b))
+    );
   }, [services]);
 
   const filteredEnvironments = useMemo(() => {
     if (!environmentSearchQuery) return availableEnvironments;
     const searchLower = environmentSearchQuery.toLowerCase();
-    return availableEnvironments.filter((env) => env.toLowerCase().includes(searchLower));
+    return availableEnvironments.filter(
+      (env) =>
+        env.toLowerCase().includes(searchLower) ||
+        getEnvironmentLabel(env).toLowerCase().includes(searchLower)
+    );
   }, [availableEnvironments, environmentSearchQuery]);
 
   // Handle environment filter changes
@@ -688,14 +688,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       );
     }
 
-    // Filter by environment (platform type)
+    // Filter by environment (exact value)
     const hasSelectedEnvironments = Object.values(selectedEnvironments).some((v) => v);
     if (hasSelectedEnvironments) {
-      filtered = filtered.filter((service) => {
-        const envDetails = parseEnvironmentType(service.environment);
-        const platform = envDetails.platform;
-        return selectedEnvironments[platform] === true;
-      });
+      filtered = filtered.filter((service) => selectedEnvironments[service.environment] === true);
     }
 
     // Filter by node type (service / database / messaging / external)
@@ -753,10 +749,13 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
   const scopeNodes = useMemo(() => fullyFilteredItems.map(toMetricsNode), [fullyFilteredItems]);
   // Push the environment facet down as a label matcher (short at any scale); search text and
   // attribute facets can only be expressed as a name list.
-  const selectedPlatformsKey = Object.keys(selectedEnvironments)
-    .filter((k) => selectedEnvironments[k])
-    .sort()
-    .join('|');
+  const selectedEnvironmentList = useMemo(
+    () =>
+      Object.keys(selectedEnvironments)
+        .filter((k) => selectedEnvironments[k])
+        .sort(),
+    [selectedEnvironments]
+  );
   const needsNameList =
     !!searchQuery.trim() ||
     Object.values(selectedGroupByAttributes).some((vals) => Object.values(vals).some(Boolean));
@@ -765,10 +764,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
       buildScopeFilters({
         catalog: catalogNodes,
         scope: scopeNodes,
-        environmentPlatforms: selectedPlatformsKey ? selectedPlatformsKey.split('|') : undefined,
+        environments: selectedEnvironmentList.length ? selectedEnvironmentList : undefined,
         needsNameList,
       }),
-    [catalogNodes, scopeNodes, selectedPlatformsKey, needsNameList]
+    [catalogNodes, scopeNodes, selectedEnvironmentList, needsNameList]
   );
   const pageScope = useMemo<PageScope>(
     () => ({ filters: scopeFilters, services: scopeNodes }),
@@ -1035,7 +1034,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
     // Environment filter badges
     const selectedEnvValues = Object.entries(selectedEnvironments)
       .filter(([_, isSelected]) => isSelected)
-      .map(([env]) => env);
+      .map(([env]) => getEnvironmentLabel(env));
     if (selectedEnvValues.length > 0) {
       badges.push({
         key: 'environment',
@@ -1441,7 +1440,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         // adds 18% only when sloFeatureEnabled; without it the others
         // distribute the remainder via EuiBasicTable's flex rules).
         render: (environment: string) => {
-          return <EuiText size="s">{getEnvironmentDisplayName(environment)}</EuiText>;
+          return <EuiText size="s">{getEnvironmentLabel(environment)}</EuiText>;
         },
       },
       ...(hasDependencyRows
@@ -1715,7 +1714,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
                                             )
                                         ).map((env) => ({
                                           id: env,
-                                          label: <TruncatedLabel text={env} />,
+                                          label: <TruncatedLabel text={getEnvironmentLabel(env)} />,
                                         }))}
                                         idToSelectedMap={selectedEnvironments}
                                         onChange={onEnvironmentChange}

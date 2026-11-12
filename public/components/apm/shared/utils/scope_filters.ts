@@ -46,10 +46,11 @@ export interface BuildScopeFiltersParams {
   catalog: ScopeNode[];
   scope: ScopeNode[];
   /**
-   * Selected environment platforms (e.g. `eks`, `generic`) when the environment facet is active.
-   * Matched as an `environment` label pattern, which stays short however many services it keeps.
+   * Selected environments (exact values, e.g. `dev`, `eks:cluster/ns`) when the environment facet
+   * is active. Matched as an `environment` label pattern, which stays short however many services
+   * it keeps.
    */
-  environmentPlatforms?: string[];
+  environments?: string[];
   /**
    * Whether the scope depends on more than the environment / type facets (search text, attribute
    * facets), which only a name list can express. Defaults to true.
@@ -58,15 +59,10 @@ export interface BuildScopeFiltersParams {
 }
 
 /**
- * Anchored PromQL regex for environment values whose platform (the part before `:`, compared
- * case-insensitively, see parseEnvironmentType) is one of `platforms`. A value without `:` is the
- * `generic` platform.
+ * PromQL matcher for `label` equal to one of `environments` (PromQL regex matchers are anchored).
  */
-export const environmentPlatformMatcher = (label: string, platforms: string[]): string => {
-  const alternatives = platforms.map((p) => `(?i:${escapePromQLRegex(p)}):.*`);
-  if (platforms.some((p) => p.toLowerCase() === 'generic')) alternatives.push('[^:]*');
-  return `${label}=~"${alternatives.join('|')}"`;
-};
+export const environmentMatcher = (label: string, environments: string[]): string =>
+  `${label}=~"${environments.map(escapePromQLRegex).join('|')}"`;
 
 /**
  * PromQL filters bounding the instant (whole-range) queries to the rows a page's filters leave.
@@ -75,7 +71,7 @@ export const environmentPlatformMatcher = (label: string, platforms: string[]): 
 export const buildScopeFilters = ({
   catalog,
   scope,
-  environmentPlatforms,
+  environments,
   needsNameList = true,
 }: BuildScopeFiltersParams): ScopeFilters => {
   const unique = (rows: ScopeNode[]) => Array.from(new Set(rows.map((s) => s.serviceName)));
@@ -106,20 +102,24 @@ export const buildScopeFilters = ({
     dependencyBatches,
   };
 
-  // Environment facet as a label matcher: short at any scale, and a superset of the scope (rows
-  // are matched by key afterwards), so it is a valid bound even when a name list is also needed.
+  // Environment facet as a label matcher: one alternative per selected environment (not per
+  // service), and a superset of the scope (rows are matched by key afterwards), so it is a valid
+  // bound even when a name list is also needed. Unusable when so many environments are selected
+  // that the matcher would exceed the query length budget.
+  const hasEnvironments = !!environments && environments.length > 0;
+  const environmentFilter = hasEnvironments ? environmentMatcher('environment', environments) : '';
   const byEnvironment =
-    environmentPlatforms && environmentPlatforms.length > 0
+    hasEnvironments && environmentFilter.length <= MAX_SCOPED_FILTER_CHARS
       ? {
-          serviceFilter: environmentPlatformMatcher('environment', environmentPlatforms),
-          dependencyFilter: `remoteService!="",${environmentPlatformMatcher(
+          serviceFilter: environmentFilter,
+          dependencyFilter: `remoteService!="",${environmentMatcher(
             'remoteEnvironment',
-            environmentPlatforms
+            environments
           )}`,
         }
       : null;
 
-  if (!needsNameList) {
+  if (!needsNameList && (byEnvironment || !hasEnvironments)) {
     // Only the environment / type facets: the label matcher (or no list at all, for a type-only
     // filter, which just skips the service or dependency queries) expresses the scope exactly.
     return { bounded: true, fellBack: false, ...(byEnvironment ?? { serviceFilter: '' }), ...run };
