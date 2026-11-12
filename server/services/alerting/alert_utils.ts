@@ -314,7 +314,10 @@ export function osAlertToUnified(a: OSAlert, dsId: string): UnifiedAlertSummary 
 
 export function promAlertToUnified(a: PromAlert, dsId: string): UnifiedAlertSummary {
   return {
-    id: `${dsId}-${a.labels.alertname}-${a.labels.instance || ''}`,
+    // Prometheus identifies an alert by its full label set, so one rule fires one alert per
+    // series. Hash every label (not just `instance`, which many rules don't emit) so each
+    // series gets its own row id, as `promEpisodeToUnified` does.
+    id: `${dsId}-${a.labels.alertname}-${hashLabels(a.labels)}`,
     datasourceId: dsId,
     datasourceType: 'prometheus',
     alertKind: 'alert',

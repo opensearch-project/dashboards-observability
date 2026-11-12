@@ -567,6 +567,12 @@ function collectAlertLabelValues(alerts: UnifiedAlertSummary[], key: string): st
 // public/components/apm/pages/services_home/services_home.tsx.
 // ============================================================================
 
+// The table's row id, also the key for expanded rows. Alert ids are unique within a
+// datasource, but two datasources can report the same id (an OpenSearch alert id read through
+// two connections to one cluster), so the datasource id is part of it. A repeated row id gives
+// React duplicate keys, and it then keeps stale rows when filtering shrinks the list.
+const alertRowId = (row: Pick<UnifiedAlertSummary, 'datasourceId' | 'id'>): string =>
+  `${row.datasourceId}::${row.id}`;
 interface AlertsTableProps {
   items: AlertTableRow[];
   columns: Array<EuiBasicTableColumn<AlertTableRow>>;
@@ -580,7 +586,7 @@ const AlertsTable = React.memo(
     <div className="altAlertsTable">
       <EuiInMemoryTable
         items={items}
-        itemId="id"
+        itemId={alertRowId}
         columns={columns}
         loading={loading}
         pagination={{ initialPageSize: 20, pageSizeOptions: [10, 20, 50, 100] }}
@@ -881,8 +887,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const groupedOccurrenceRows = useMemo(() => {
     const rows: Record<string, React.ReactNode> = {};
     for (const row of groupedTableRows) {
-      if (expandedGroupIds[row.id] && isGroupedAnomalyRow(row)) {
-        rows[row.id] = renderGroupedAnomalyOccurrences(row, onViewDetail);
+      const rowId = alertRowId(row);
+      if (expandedGroupIds[rowId] && isGroupedAnomalyRow(row)) {
+        rows[rowId] = renderGroupedAnomalyOccurrences(row, onViewDetail);
       }
     }
     return rows;
@@ -995,7 +1002,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         render: (name: string, alert: AlertTableRow) => {
           const representative = getRepresentativeAlert(alert);
           const isGrouped = isGroupedAnomalyRow(alert);
-          const isExpanded = Boolean(expandedGroupIds[alert.id]);
+          const rowId = alertRowId(alert);
+          const isExpanded = Boolean(expandedGroupIds[rowId]);
           const iconType =
             alert.datasourceType === 'cloudwatch'
               ? cloudWatchIconType
@@ -1005,7 +1013,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           const toggleExpandedGroup = () => {
             setExpandedGroupIds((prev) => ({
               ...prev,
-              [alert.id]: !prev[alert.id],
+              [rowId]: !prev[rowId],
             }));
           };
           // `iconType` on EuiButtonEmpty puts the icon in the button's

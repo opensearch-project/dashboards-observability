@@ -38,6 +38,7 @@ jest.mock('../cloudwatch_icon', () => ({
   useCloudWatchIconType: () => '/plugins/workspace/assets/cloudwatch_logo.svg',
 }));
 import { AlertsDashboard } from '../alerts_dashboard';
+import { promAlertToUnified } from '../../../../server/services/alerting/alert_utils';
 import type { UnifiedAlertSummary, Datasource } from '../../../../common/types/alerting';
 
 const sampleAlert: UnifiedAlertSummary = {
@@ -382,6 +383,79 @@ describe('AlertsDashboard', () => {
     expect(getByText('HighCPU')).toBeInTheDocument();
   });
 
+  it('keeps one row per alert series and drops filtered-out rows', () => {
+    // One Prometheus rule firing on several series (no `instance` label), mapped the way the
+    // server maps live alerts, plus an OpenSearch alert whose id a second connection repeats.
+    const promAlerts = ['cart', 'checkout', 'payment'].flatMap((service) =>
+      [
+        { alertname: 'test-rule', severity: 'critical' },
+        { alertname: 'rule-123', severity: 'warning' },
+      ].map((labels) =>
+        promAlertToUnified(
+          {
+            labels: { ...labels, service },
+            annotations: {},
+            state: 'firing',
+            activeAt: new Date(NOW - 10 * 60 * 1000).toISOString(),
+            value: '1',
+          },
+          'prometheus-1'
+        )
+      )
+    );
+    const osAlert: UnifiedAlertSummary = { ...sampleAlert, name: 'LocalMonitor' };
+    const mirroredOsAlert: UnifiedAlertSummary = {
+      ...sampleAlert,
+      datasourceId: 'ds-2',
+      name: 'MirroredMonitor',
+      severity: 'medium',
+    };
+    const datasources = [sampleDs, samplePrometheusDs, { ...sampleDs, id: 'ds-2', name: 'Mirror' }];
+    const tableRowNames = () =>
+      Array.from(document.querySelectorAll('.altAlertsTable tbody tr')).map(
+        (row) => row.querySelector('.altAlertNameText')?.textContent
+      );
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const { rerender } = render(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={datasources}
+        selectedDsIds={['ds-1', 'prometheus-1', 'ds-2']}
+        alerts={[osAlert, mirroredOsAlert, ...promAlerts]}
+      />
+    );
+    expect(tableRowNames()).toHaveLength(8);
+    // Deselecting the Prometheus datasource and the mirror leaves only local-cluster rows.
+    rerender(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={datasources}
+        selectedDsIds={['ds-1']}
+        alerts={[osAlert]}
+      />
+    );
+    expect(tableRowNames()).toEqual(['LocalMonitor']);
+    expect(screen.getByText('1 row')).toBeInTheDocument();
+    // Back to every source, then Severity = Critical keeps only the critical rows.
+    rerender(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={datasources}
+        selectedDsIds={['ds-1', 'prometheus-1', 'ds-2']}
+        alerts={[osAlert, mirroredOsAlert, ...promAlerts]}
+      />
+    );
+    fireEvent.click(within(screen.getByTestId('facetGroup-severity')).getByLabelText(/critical/i));
+    const critical = tableRowNames();
+    expect(critical).toHaveLength(4);
+    expect(critical.filter((name) => name === 'test-rule')).toHaveLength(3);
+    expect(critical).toContain('LocalMonitor');
+    const duplicateKeyWarnings = errorSpy.mock.calls.filter((call) =>
+      String(call[0]).includes('Encountered two children with the same key')
+    );
+    errorSpy.mockRestore();
+    expect(duplicateKeyWarnings).toEqual([]);
+  });
   it('groups anomalies by detector and entity in the alerts table', () => {
     const onViewDetail = jest.fn();
     render(
