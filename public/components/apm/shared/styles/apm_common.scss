@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@import "../../../common/styles/standard_table_rows";
+
 .apm-range-filter .euiRangeSlider {
   border: none;
 }
@@ -70,4 +72,10 @@
     overflow: hidden;
     font-weight: $euiFontWeightBold;
   }
+}
+
+/* 40px standard rows for the Services and "Top … by fault rate" tables: the
+ * same shared rule as the Alert Manager tables. */
+.apmStandardRows {
+  @include obsStandardTableRows;
 }

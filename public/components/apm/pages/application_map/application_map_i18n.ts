@@ -59,6 +59,10 @@ export const applicationMapI18nTexts = {
       'observability.apm.applicationMap.filters.includeDependencies',
       { defaultMessage: 'Include external dependencies' }
     ),
+    includeDependenciesFocused: i18n.translate(
+      'observability.apm.applicationMap.filters.includeDependenciesFocused',
+      { defaultMessage: 'A focused service always shows its dependencies.' }
+    ),
     noGrouping: i18n.translate('observability.apm.applicationMap.filters.noGrouping', {
       defaultMessage: 'No grouping',
     }),

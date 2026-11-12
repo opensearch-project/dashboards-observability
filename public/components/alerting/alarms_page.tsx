@@ -56,6 +56,8 @@ import { AlertDetailFlyout, SourceRuleStatus } from './alert_detail_flyout';
 import { AnomalyDetailFlyout } from './anomaly_detail_flyout';
 import { CloudWatchAlarmDetailFlyout } from './cloudwatch_alarm_detail_flyout';
 import { NotificationRoutingPanel } from './notification_routing_panel';
+import { TabRowActionsProvider } from './tab_row_actions';
+import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_headerControl';
 import type { MonitorBackendType } from './monitor_form_components';
 import { useAlerts } from './hooks/use_alerts';
 import { useAlertingPluginAvailability } from './hooks/use_alerting_plugin_availability';
@@ -302,6 +304,26 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
   const [activeTab, setActiveTab] = useState<TabId>(deepLink.tab ?? 'alerts');
+  // The tab row's controls slot. A state ref, so the tabs re-render and portal
+  // into it once it mounts.
+  const [tabActionsEl, setTabActionsEl] = useState<HTMLDivElement | null>(null);
+  // Where that slot lives: the page title row's right-side controls when the
+  // header supports them (the same check as HeaderControlledComponentsWrapper),
+  // else the tab row. The slot element is memoized so the header mounts it once.
+  const headerControlsEnabled = !!(
+    coreRefs.chrome?.navGroup.getNavGroupEnabled() && coreRefs.navigation?.ui.HeaderControl
+  );
+  const headerSlot = useMemo(
+    () => [
+      <div
+        key="alertManagerTabActions"
+        ref={setTabActionsEl}
+        className="altHeaderActions"
+        data-test-subj="alertManagerTabActions"
+      />,
+    ],
+    []
+  );
   // Switch tab whenever the deep-link updates with a valid tab. Uses the
   // full `deepLink` object as the dependency (not just `.tab`) so that
   // repeated navigations to the same tab (e.g. #/rules?q=A then #/rules?q=B)
@@ -860,11 +882,27 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     });
     const tabLabel = TAB_LABELS[activeTab];
     // Suppress the tab segment when it duplicates the page-level segment
-    // (the "Alerts" tab and the page name are both "Alerts").
+    // (the "Alerts" tab and the page name are both "Alerts"). On another tab
+    // the "Alerts" crumb links back to the Alerts tab.
     const trail =
-      tabLabel === pageLabel ? [{ text: pageLabel }] : [{ text: pageLabel }, { text: tabLabel }];
+      tabLabel === pageLabel
+        ? [{ text: pageLabel }]
+        : [
+            {
+              text: pageLabel,
+              href: '#/alerts',
+              onClick: (e: React.MouseEvent) => {
+                // Let the browser handle modifier and middle clicks (open in a
+                // new tab / window) through the crumb's href.
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                e.preventDefault();
+                handleTabClick('alerts');
+              },
+            },
+            { text: tabLabel },
+          ];
     setNavBreadCrumbs([{ text: observabilityTitle, href: `${observabilityID}#/` }], trail);
-  }, [activeTab]);
+  }, [activeTab, handleTabClick]);
 
   // Reset pages when datasource selection changes. `useAlerts` refetches
   // automatically on `selectedDsIds` change, so no alerts-page reset here.
@@ -2057,18 +2095,32 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       {/* have been migrated to toasts — see `useAlertingPageToasts`. Per-DS   */}
       {/* connection errors are ALSO surfaced next to the affected row in the  */}
       {/* datasource facet via `datasourceErrorMapByName`.                     */}
-      <EuiTabs data-test-subj="alertManagerTabs">
-        {tabs.map((t) => (
-          <EuiTab
-            key={t.id}
-            isSelected={activeTab === t.id}
-            onClick={() => handleTabClick(t.id)}
-            data-test-subj={`alertManagerTabs-${t.id}`}
-          >
-            {t.name}
-          </EuiTab>
-        ))}
-      </EuiTabs>
+      {/* The active tab's page-level controls (portaled in through
+          `TabRowActions`) sit on the page title row, on the right, like "APM
+          Settings" on the APM pages. Without the header controls (new
+          navigation off), they sit on the right of the tab row instead. */}
+      {headerControlsEnabled && <HeaderControlledComponentsWrapper components={headerSlot} />}
+      <div className="altTabRow">
+        <EuiTabs data-test-subj="alertManagerTabs" className="altTabRow__tabs">
+          {tabs.map((t) => (
+            <EuiTab
+              key={t.id}
+              isSelected={activeTab === t.id}
+              onClick={() => handleTabClick(t.id)}
+              data-test-subj={`alertManagerTabs-${t.id}`}
+            >
+              {t.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        {!headerControlsEnabled && (
+          <div
+            ref={setTabActionsEl}
+            className="altTabRow__actions"
+            data-test-subj="alertManagerTabActions"
+          />
+        )}
+      </div>
       {/* CloudWatch alarms are an experimental, opt-in datasource
           (`observability.cloudwatch.enabled`). Banner renders only when the
           operator enabled it, and stays dismissed for the session. */}
@@ -2108,7 +2160,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           }}
         />
       </div>
-      {renderTable()}
+      <TabRowActionsProvider value={tabActionsEl}>{renderTable()}</TabRowActionsProvider>
       {/* Metrics rules use the SAME flyout component as the Metrics Explore
           page ("Create alert rule" action) so the two surfaces can never
           drift. It persists the rule itself; handleMetricsRuleSaved only

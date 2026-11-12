@@ -4,7 +4,7 @@
  */
 
 /*
- * Detects APM data per data source: traces (otel-v1-apm-span*), correlated logs
+ * Detects APM data per data source: traces (otel-v2-apm-span*, else otel-v1-apm-span*), correlated logs
  * (logs-otel-v1*), and the v2 service map (otel-v2-apm-service-map*). Every
  * detection requires both the naming convention AND that the required fields
  * exist.
@@ -13,7 +13,9 @@
 import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
 import {
   DatasetField,
+  isMissingIndicesError,
   isValidTimeField,
+  OTEL_SPAN_INDEX_PATTERNS,
   pickTimeField,
 } from '../../../../../../../src/plugins/data/common';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
@@ -24,7 +26,6 @@ import {
   APM_SERVICE_MAP_INDEX_PATTERN,
   APM_SERVICE_MAP_REQUIRED_FIELDS,
   APM_SERVICE_MAP_TIME_FIELD,
-  APM_TRACES_INDEX_PATTERN,
   APM_TRACES_REQUIRED_FIELDS,
   APM_TRACES_TIME_FIELD_CANDIDATES,
 } from '../../common/constants';
@@ -71,7 +72,8 @@ const hasAllFields = (fields: WildcardField[], required: readonly string[]): boo
 
 /**
  * Detect APM data for a single data source following OpenTelemetry conventions.
- * Probes traces (otel-v1-apm-span*), correlated logs (logs-otel-v1*) and the v2
+ * Probes traces (otel-v2-apm-span*, falling back to otel-v1-apm-span*), correlated
+ * logs (logs-otel-v1*) and the v2
  * service map (otel-v2-apm-service-map*), validating required fields for each.
  */
 export async function detectApmData(
@@ -80,29 +82,36 @@ export async function detectApmData(
 ): Promise<ApmDetectionResult> {
   const result = emptyResult(dataSourceId);
 
-  // Traces: otel-v1-apm-span*
-  try {
-    const traceFields = (await indexPatternsService.getFieldsForWildcard({
-      pattern: APM_TRACES_INDEX_PATTERN,
-      dataSourceId,
-    })) as WildcardField[];
+  // Traces: prefer otel-v2-apm-span*, fall back to otel-v1-apm-span*. The first
+  // pattern with the required fields and a valid time field wins.
+  for (const pattern of OTEL_SPAN_INDEX_PATTERNS) {
+    try {
+      const traceFields = (await indexPatternsService.getFieldsForWildcard({
+        pattern,
+        dataSourceId,
+      })) as WildcardField[];
 
-    if (hasAllFields(traceFields, APM_TRACES_REQUIRED_FIELDS)) {
-      const validDateFieldNames = traceFields
-        .filter((f) => isValidTimeField({ type: '', ...f } as DatasetField))
-        .map((f) => f.name);
-      const traceTimeField = pickTimeField(validDateFieldNames, [
-        ...APM_TRACES_TIME_FIELD_CANDIDATES,
-      ]);
+      if (hasAllFields(traceFields, APM_TRACES_REQUIRED_FIELDS)) {
+        const validDateFieldNames = traceFields
+          .filter((f) => isValidTimeField({ type: '', ...f } as DatasetField))
+          .map((f) => f.name);
+        const traceTimeField = pickTimeField(validDateFieldNames, [
+          ...APM_TRACES_TIME_FIELD_CANDIDATES,
+        ]);
 
-      if (traceTimeField) {
-        result.tracesDetected = true;
-        result.tracePattern = APM_TRACES_INDEX_PATTERN;
-        result.traceTimeField = traceTimeField;
+        if (traceTimeField) {
+          result.tracesDetected = true;
+          result.tracePattern = pattern;
+          result.traceTimeField = traceTimeField;
+          break;
+        }
       }
+    } catch (error) {
+      // Only a "no matching indices" result moves on to the next pattern. Any other failure
+      // (timeout, permissions, server error) stops trace detection, so a transient error on
+      // the v2 probe can't lock in a v1 dataset.
+      if (!isMissingIndicesError(error)) break;
     }
-  } catch {
-    // No matching indices; leave traces undetected.
   }
 
   // Correlated logs: logs-otel-v1*
@@ -142,7 +151,7 @@ export async function detectApmData(
 
 /** Max data sources probed for the picker; keeps the preview bounded. */
 export const MAX_PROBED_DATA_SOURCES = 50;
-/** How many data sources to probe concurrently (each probe = 3 field_caps). */
+/** How many data sources to probe concurrently (each probe = 3-4 field_caps). */
 export const PROBE_CONCURRENCY = 6;
 
 /** Run an async mapper over items in fixed-size concurrent chunks. */

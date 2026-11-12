@@ -54,11 +54,7 @@ import {
   navigateToExploreLogs,
   navigateToDatasetCorrelations,
 } from '../utils/navigation_utils';
-import {
-  getEnvironmentDisplayName,
-  APM_CONSTANTS,
-  CORRELATION_CONSTANTS,
-} from '../../common/constants';
+import { getEnvironmentLabel, APM_CONSTANTS, CORRELATION_CONSTANTS } from '../../common/constants';
 import { uiSettingsService } from '../../../../../common/utils';
 import { SpanData, LogData, LogDatasetResult } from '../../common/types/correlations_types';
 import { LanguageIcon } from './language_icon';
@@ -1064,7 +1060,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           <EuiDescriptionList>
             <EuiDescriptionListTitle>{i18nTexts.environment}</EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <EuiBadge color="hollow">{getEnvironmentDisplayName(environment)}</EuiBadge>
+              <EuiBadge color="hollow">{getEnvironmentLabel(environment)}</EuiBadge>
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
 
@@ -1307,7 +1303,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{getEnvironmentDisplayName(environment)}</EuiBadge>
+            <EuiBadge color="hollow">{getEnvironmentLabel(environment)}</EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
         {/* Filter badge - shown only when operation or dependency filters are active */}

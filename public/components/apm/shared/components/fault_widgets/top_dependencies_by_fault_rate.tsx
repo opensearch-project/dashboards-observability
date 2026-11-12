@@ -297,7 +297,12 @@ export const TopDependenciesByFaultRate: React.FC<TopDependenciesByFaultRateProp
           <h4>{i18nTexts.title}</h4>
         </EuiText>
         <EuiSpacer size="s" />
-        <EuiBasicTable items={tableItems} columns={columns} tableLayout="auto" />
+        <EuiBasicTable
+          items={tableItems}
+          columns={columns}
+          tableLayout="auto"
+          className="apmStandardRows"
+        />
       </EuiPanel>
     </EuiFlexItem>
   );

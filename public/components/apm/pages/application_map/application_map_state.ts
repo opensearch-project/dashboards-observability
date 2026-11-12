@@ -65,9 +65,7 @@ export const groupValueView = (groupBy: string, value: string): MapNavigationSta
 
 /** Where leaving focus mode lands (computed by the page from the map's nodes). */
 export type ExitFocusTarget =
-  | { kind: 'stay' }
-  | { kind: 'services' }
-  | { kind: 'group'; groupBy: string; value: string; environmentFilterId?: string };
+  { kind: 'stay' } | { kind: 'services' } | { kind: 'group'; groupBy: string; value: string };
 
 export type MapViewAction =
   /**
@@ -79,8 +77,8 @@ export type MapViewAction =
       filters: ApplicationMapFilters | ((prev: ApplicationMapFilters) => ApplicationMapFilters);
       environmentGroups?: (environments: string[]) => string[];
     }
-  /** Map navigation (drill-down, breadcrumb). `environmentFilterId` for an opened environment. */
-  | { type: 'navigate'; navigation: MapNavigationState; environmentFilterId?: string }
+  /** Map navigation (drill-down, breadcrumb). Opening an environment group checks it. */
+  | { type: 'navigate'; navigation: MapNavigationState }
   /** Focus a node (click, search, or a neighbor in focus mode) and select it. */
   | { type: 'focus'; nodeId: string; selection: SelectedNodeState }
   | { type: 'setFocusMode'; mode: FocusMode }
@@ -102,7 +100,8 @@ export type MapViewAction =
       type: 'deepLink';
       nodeId: string;
       selection: SelectedNodeState;
-      environmentGroup?: { value: string; environmentFilterId: string };
+      /** The service's environment, when the view underneath is its environment group. */
+      environmentGroup?: string;
     }
   | { type: 'clearAllFilters' };
 
@@ -160,11 +159,11 @@ export function mapViewReducer(state: MapViewState, action: MapViewAction): MapV
     case 'navigate': {
       const next = { ...state, navigation: action.navigation, focus: null };
       if (action.navigation.groupByAttribute !== ENVIRONMENT_GROUP_BY) return next;
-      if (action.navigation.level === 'groupByValue' && action.environmentFilterId) {
+      if (action.navigation.level === 'groupByValue' && action.navigation.groupByValue) {
         // Opening an environment checks it.
         return {
           ...next,
-          filters: { ...state.filters, environments: [action.environmentFilterId] },
+          filters: { ...state.filters, environments: [action.navigation.groupByValue] },
         };
       }
       if (action.navigation.level === 'groupBy' && state.filters.environments.length === 1) {
@@ -196,8 +195,7 @@ export function mapViewReducer(state: MapViewState, action: MapViewAction): MapV
         filters: {
           ...state.filters,
           groupBy: target.groupBy,
-          ...(isEnvironment &&
-            target.environmentFilterId && { environments: [target.environmentFilterId] }),
+          ...(isEnvironment && { environments: [target.value] }),
         },
         navigation: groupValueView(target.groupBy, target.value),
         fromUrl: false,
@@ -236,9 +234,9 @@ export function mapViewReducer(state: MapViewState, action: MapViewAction): MapV
         filters: {
           ...state.filters,
           groupBy: ENVIRONMENT_GROUP_BY,
-          environments: [action.environmentGroup.environmentFilterId],
+          environments: [action.environmentGroup],
         },
-        navigation: groupValueView(ENVIRONMENT_GROUP_BY, action.environmentGroup.value),
+        navigation: groupValueView(ENVIRONMENT_GROUP_BY, action.environmentGroup),
         fromUrl: false,
       };
     }

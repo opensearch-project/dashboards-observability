@@ -10,8 +10,12 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { coreRefs } from '../../../../framework/core_refs';
 import { RequirementCallout } from '../components/requirement_callout';
 import { ApmArchitectureSvgLight, ApmArchitectureSvgDark } from '../../config/apm-architecture-svg';
-import { APM_TRACES_INDEX_PATTERN, APM_SERVICE_MAP_INDEX_PATTERN } from '../../common/constants';
+import { APM_SERVICE_MAP_INDEX_PATTERN } from '../../common/constants';
 import { APM_DOCS_URL, APM_PIPELINE_DOCS_URL } from '../../common/constants';
+import {
+  OTEL_V1_SPAN_INDEX_PATTERN,
+  OTEL_V2_SPAN_INDEX_PATTERN,
+} from '../../../../../../../src/plugins/data/common';
 
 /**
  * Page 1 — explains what Application Monitoring is, the objects the wizard will
@@ -124,9 +128,10 @@ export const OverviewStep = () => {
         <p>
           <FormattedMessage
             id="observability.apm.setupWizard.overview.calloutBody"
-            defaultMessage="For one-click setup, your data must follow the OpenTelemetry conventions: traces in {tracePattern} and a service map in {serviceMapPattern}."
+            defaultMessage="For one-click setup, your data must follow the OpenTelemetry conventions: traces in {v2Pattern} or {v1Pattern} and a service map in {serviceMapPattern}."
             values={{
-              tracePattern: <code>{APM_TRACES_INDEX_PATTERN}</code>,
+              v2Pattern: <code>{OTEL_V2_SPAN_INDEX_PATTERN}</code>,
+              v1Pattern: <code>{OTEL_V1_SPAN_INDEX_PATTERN}</code>,
               serviceMapPattern: <code>{APM_SERVICE_MAP_INDEX_PATTERN}</code>,
             }}
           />

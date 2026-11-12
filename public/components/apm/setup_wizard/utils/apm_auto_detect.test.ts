@@ -8,11 +8,12 @@ import {
   detectApmDataAcrossDataSources,
   fieldNamesSatisfy,
 } from './apm_auto_detect';
+import { APM_LOGS_INDEX_PATTERN, APM_SERVICE_MAP_INDEX_PATTERN } from '../../common/constants';
 import {
-  APM_LOGS_INDEX_PATTERN,
-  APM_SERVICE_MAP_INDEX_PATTERN,
-  APM_TRACES_INDEX_PATTERN,
-} from '../../common/constants';
+  OTEL_V1_SPAN_INDEX_PATTERN,
+  OTEL_V2_SPAN_INDEX_PATTERN,
+} from '../../../../../../../src/plugins/data/common';
+import { IndexPatternMissingIndices } from '../../../../../../../src/plugins/data/common/index_patterns/lib/errors';
 import { SavedObjectsClientContract } from '../../../../../../../src/core/public';
 import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 
@@ -57,7 +58,7 @@ function makeIndexPatterns(
     getFieldsForWildcard: jest.fn(async ({ pattern }: { pattern: string }) => {
       const entry = byPattern[pattern];
       if (!entry || entry === 'missing') {
-        throw new Error(`no index matching ${pattern}`);
+        throw new IndexPatternMissingIndices(`no index matching ${pattern}`);
       }
       return entry;
     }),
@@ -101,7 +102,7 @@ describe('fieldNamesSatisfy', () => {
 describe('detectApmData', () => {
   it('detects traces, logs and service map when all fields are present', async () => {
     const indexPatterns = makeIndexPatterns({
-      [APM_TRACES_INDEX_PATTERN]: traceFields,
+      [OTEL_V1_SPAN_INDEX_PATTERN]: traceFields,
       [APM_LOGS_INDEX_PATTERN]: logFields,
       [APM_SERVICE_MAP_INDEX_PATTERN]: serviceMapFields,
     });
@@ -109,7 +110,7 @@ describe('detectApmData', () => {
     const result = await detectApmData(indexPatterns);
 
     expect(result.tracesDetected).toBe(true);
-    expect(result.tracePattern).toBe(APM_TRACES_INDEX_PATTERN);
+    expect(result.tracePattern).toBe(OTEL_V1_SPAN_INDEX_PATTERN);
     // endTime is preferred over startTime.
     expect(result.traceTimeField).toBe('endTime');
     expect(result.logsDetected).toBe(true);
@@ -119,10 +120,63 @@ describe('detectApmData', () => {
     expect(result.serviceMapTimeField).toBe('timestamp');
   });
 
+  it('detects otel-v2-apm-span* when only v2 span indices exist', async () => {
+    const indexPatterns = makeIndexPatterns({ [OTEL_V2_SPAN_INDEX_PATTERN]: traceFields });
+
+    const result = await detectApmData(indexPatterns);
+
+    expect(result.tracesDetected).toBe(true);
+    expect(result.tracePattern).toBe(OTEL_V2_SPAN_INDEX_PATTERN);
+    expect(result.traceTimeField).toBe('endTime');
+  });
+
+  it('prefers otel-v2-apm-span* and skips the v1 probe when both exist', async () => {
+    const indexPatterns = makeIndexPatterns({
+      [OTEL_V2_SPAN_INDEX_PATTERN]: traceFields,
+      [OTEL_V1_SPAN_INDEX_PATTERN]: traceFields,
+    });
+
+    const result = await detectApmData(indexPatterns);
+
+    expect(result.tracePattern).toBe(OTEL_V2_SPAN_INDEX_PATTERN);
+    expect(indexPatterns.getFieldsForWildcard).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pattern: OTEL_V1_SPAN_INDEX_PATTERN })
+    );
+  });
+
+  it('does not fall back to v1 when the v2 probe fails for another reason', async () => {
+    const indexPatterns = {
+      getFieldsForWildcard: jest.fn(async ({ pattern }: { pattern: string }) => {
+        if (pattern === OTEL_V2_SPAN_INDEX_PATTERN) throw new Error('Request timed out');
+        if (pattern === OTEL_V1_SPAN_INDEX_PATTERN) return traceFields;
+        throw new IndexPatternMissingIndices(pattern);
+      }),
+    } as unknown as IndexPatternsContract;
+
+    const result = await detectApmData(indexPatterns);
+
+    expect(result.tracesDetected).toBe(false);
+    expect(indexPatterns.getFieldsForWildcard).not.toHaveBeenCalledWith(
+      expect.objectContaining({ pattern: OTEL_V1_SPAN_INDEX_PATTERN })
+    );
+  });
+
+  it('falls back to otel-v1-apm-span* when v2 lacks required fields', async () => {
+    const indexPatterns = makeIndexPatterns({
+      [OTEL_V2_SPAN_INDEX_PATTERN]: [{ name: 'traceId', type: 'string' }],
+      [OTEL_V1_SPAN_INDEX_PATTERN]: traceFields,
+    });
+
+    const result = await detectApmData(indexPatterns);
+
+    expect(result.tracesDetected).toBe(true);
+    expect(result.tracePattern).toBe(OTEL_V1_SPAN_INDEX_PATTERN);
+  });
+
   it('does not detect traces when required fields are missing', async () => {
     const indexPatterns = makeIndexPatterns({
       // spanId + serviceName absent → not a valid trace index.
-      [APM_TRACES_INDEX_PATTERN]: [
+      [OTEL_V1_SPAN_INDEX_PATTERN]: [
         { name: 'traceId', type: 'string' },
         { name: 'endTime', type: 'date', aggregatable: true },
       ],
@@ -136,7 +190,7 @@ describe('detectApmData', () => {
 
   it('does not detect traces when no valid time field exists', async () => {
     const indexPatterns = makeIndexPatterns({
-      [APM_TRACES_INDEX_PATTERN]: [
+      [OTEL_V1_SPAN_INDEX_PATTERN]: [
         { name: 'traceId', type: 'string' },
         { name: 'spanId', type: 'string' },
         { name: 'serviceName', type: 'string' },
@@ -152,7 +206,7 @@ describe('detectApmData', () => {
 
   it('detects service map independently of traces', async () => {
     const indexPatterns = makeIndexPatterns({
-      [APM_TRACES_INDEX_PATTERN]: 'missing',
+      [OTEL_V1_SPAN_INDEX_PATTERN]: 'missing',
       [APM_LOGS_INDEX_PATTERN]: 'missing',
       [APM_SERVICE_MAP_INDEX_PATTERN]: serviceMapFields,
     });
@@ -189,10 +243,10 @@ describe('detectApmDataAcrossDataSources', () => {
     // Only ds-1 has traces; ds-2 has nothing.
     const indexPatterns = {
       getFieldsForWildcard: jest.fn(async ({ pattern, dataSourceId }) => {
-        if (dataSourceId === 'ds-1' && pattern === APM_TRACES_INDEX_PATTERN) {
+        if (dataSourceId === 'ds-1' && pattern === OTEL_V1_SPAN_INDEX_PATTERN) {
           return traceFields;
         }
-        throw new Error('no match');
+        throw new IndexPatternMissingIndices('no match');
       }),
     } as unknown as IndexPatternsContract;
 
@@ -222,7 +276,7 @@ describe('detectApmDataAcrossDataSources', () => {
         if (dataSourceId === undefined && pattern === APM_SERVICE_MAP_INDEX_PATTERN) {
           return serviceMapFields;
         }
-        throw new Error('no match');
+        throw new IndexPatternMissingIndices('no match');
       }),
     } as unknown as IndexPatternsContract;
 
@@ -243,7 +297,7 @@ describe('detectApmDataAcrossDataSources', () => {
 
     const indexPatterns = {
       getFieldsForWildcard: jest.fn(async () => {
-        throw new Error('no match');
+        throw new IndexPatternMissingIndices('no match');
       }),
     } as unknown as IndexPatternsContract;
 

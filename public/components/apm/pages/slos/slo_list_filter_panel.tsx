@@ -601,6 +601,7 @@ export const SloListFilterPanel: React.FC<SloListFilterPanelProps> = ({
       >
         <EuiSpacer size="xs" />
         <EuiButtonGroup
+          color="primary"
           legend={i18n.translate('observability.apm.slo.listFilterPanel.enabledLegend', {
             defaultMessage: 'Filter by enabled',
           })}

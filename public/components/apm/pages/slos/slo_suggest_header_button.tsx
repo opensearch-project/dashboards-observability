@@ -36,8 +36,8 @@ export const SloSuggestHeaderButton: React.FC = () => {
   const hasServices = servicesLoading || serviceCount > 0;
 
   const button = (
+    // Outlined: Create SLO is the one filled primary in the header.
     <EuiButton
-      fill
       size="s"
       iconType="inspect"
       isDisabled={!hasServices}

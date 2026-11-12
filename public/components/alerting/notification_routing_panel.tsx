@@ -29,6 +29,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { Datasource } from '../../../common/types/alerting';
+import { TabRowActions } from './tab_row_actions';
 import { AlertmanagerAdminService } from './query_services/alertmanager_admin_service';
 
 // ---------------------------------------------------------------------------
@@ -227,17 +228,50 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       />
     ) : null;
 
+  // The source selector on its own, for the loading, error and unavailable
+  // views: in the tab-row slot, or its own row when rendered without one.
+  const selectorToolbar = datasourceSelector && (
+    <TabRowActions
+      fallback={
+        <>
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      }
+    >
+      {datasourceSelector}
+    </TabRowActions>
+  );
+
+  const routingToolbarItems = (
+    <>
+      {datasourceSelector && <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>}
+      <EuiFlexItem grow={false}>
+        <EuiToolTip
+          content={i18n.translate(
+            'observability.alerting.notificationRoutingPanel.refreshTooltip',
+            { defaultMessage: 'Refresh' }
+          )}
+        >
+          <EuiButtonIcon
+            iconType="refresh"
+            aria-label={i18n.translate(
+              'observability.alerting.notificationRoutingPanel.refreshAriaLabel',
+              { defaultMessage: 'Refresh' }
+            )}
+            onClick={fetchConfig}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+    </>
+  );
+
   if (loading) {
     return (
       <div style={{ padding: '0 16px' }}>
-        {datasourceSelector && (
-          <>
-            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-              <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
-        )}
+        {selectorToolbar}
         <EuiFlexGroup justifyContent="center" style={{ padding: 40 }}>
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
@@ -250,14 +284,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   if (error) {
     return (
       <div style={{ padding: '0 16px' }}>
-        {datasourceSelector && (
-          <>
-            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-              <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
-        )}
+        {selectorToolbar}
         <EuiCallOut
           title={i18n.translate(
             'observability.alerting.notificationRoutingPanel.errorCallout.title',
@@ -275,14 +302,7 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
   if (!config?.available) {
     return (
       <div style={{ padding: '0 16px' }}>
-        {datasourceSelector && (
-          <>
-            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-              <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
-        )}
+        {selectorToolbar}
         <EuiEmptyPrompt
           iconType="bell"
           title={
@@ -544,29 +564,20 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       </EuiCallOut>
       <EuiSpacer size="s" />
 
-      {/* Datasource selector + refresh toolbar */}
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        {datasourceSelector && <EuiFlexItem grow={false}>{datasourceSelector}</EuiFlexItem>}
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate(
-              'observability.alerting.notificationRoutingPanel.refreshTooltip',
-              { defaultMessage: 'Refresh' }
-            )}
-          >
-            <EuiButtonIcon
-              iconType="refresh"
-              aria-label={i18n.translate(
-                'observability.alerting.notificationRoutingPanel.refreshAriaLabel',
-                { defaultMessage: 'Refresh' }
-              )}
-              onClick={fetchConfig}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
+      {/* Datasource selector + refresh. In the Alert Manager they sit in the
+          tab row; rendered on their own, they keep their toolbar row. */}
+      <TabRowActions
+        fallback={
+          <>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              {routingToolbarItems}
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+          </>
+        }
+      >
+        {routingToolbarItems}
+      </TabRowActions>
 
       {/* Route tree */}
       <EuiTitle size="xs">

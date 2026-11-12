@@ -218,8 +218,15 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
       return;
     }
 
-    // Initialize chart if not already created
+    // Initialize chart if not already created. Only once the container is shown: an
+    // ECharts instance created on a `display: none` div gets a 100px canvas, and a later
+    // resize() doesn't always recover it (data already cached, e.g. the topology side panel).
+    // Showing the container re-runs this effect (showChart is a dependency).
     if (!chartInstance.current) {
+      if (!showChart) {
+        setShowChart(true);
+        return;
+      }
       chartInstance.current = echarts.init(chartRef.current);
     }
 
@@ -402,6 +409,7 @@ export const PromQLLineChart: React.FC<PromQLLineChartProps> = ({
       });
     }
   }, [
+    showChart,
     series,
     isLoading,
     error,

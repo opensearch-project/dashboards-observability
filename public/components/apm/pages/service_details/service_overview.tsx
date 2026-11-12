@@ -353,6 +353,8 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiButtonGroup
                       legend="Latency percentile"
+                      // Primary, not the default dark-gray "text" fill, matching the other toggles.
+                      color="primary"
                       options={latencyPercentileOptions}
                       idSelected={latencyPercentile}
                       onChange={(id) => setLatencyPercentile(id as 'p99' | 'p90' | 'p50')}
@@ -423,6 +425,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButtonGroup
+                          color="primary"
                           legend="Top K operations"
                           options={limitOptions}
                           idSelected={String(requestsTopK)}
@@ -490,6 +493,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButtonGroup
+                          color="primary"
                           legend="Bottom K operations"
                           options={limitOptions}
                           idSelected={String(availabilityBottomK)}
@@ -563,6 +567,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButtonGroup
+                          color="primary"
                           legend="Top K operations"
                           options={limitOptions}
                           idSelected={String(faultRateTopK)}
@@ -626,6 +631,7 @@ export const ServiceOverview: React.FC<ServiceOverviewProps> = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiButtonGroup
+                          color="primary"
                           legend="Top K operations"
                           options={limitOptions}
                           idSelected={String(errorRateTopK)}

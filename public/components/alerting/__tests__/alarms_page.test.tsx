@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, act, within } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 
 jest.mock('../../../framework/core_refs', () => ({
@@ -60,9 +60,20 @@ jest.mock('../monitors_table', () => ({
     return <div data-test-subj="monitorsTable" />;
   },
 }));
-jest.mock('../notification_routing_panel', () => ({
-  NotificationRoutingPanel: () => <div data-test-subj="routingPanel" />,
-}));
+// The routing stub puts a control in the tab row, like the real panel's
+// source selector, so the tab-row slot can be asserted.
+jest.mock('../notification_routing_panel', () => {
+  const { TabRowActions } = jest.requireActual('../tab_row_actions');
+  return {
+    NotificationRoutingPanel: () => (
+      <div data-test-subj="routingPanel">
+        <TabRowActions>
+          <button data-test-subj="routingSourceStub">Source</button>
+        </TabRowActions>
+      </div>
+    ),
+  };
+});
 jest.mock('../create_monitor', () => ({ CreateMonitor: () => null }));
 // The Alert Manager "Create metrics rule" path renders CreateMetricsMonitor;
 // capture its props so we can assert the group-scoped duplicate-name checker.
@@ -188,6 +199,112 @@ describe('AlarmsPage', () => {
     });
     fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
     expect(screen.getByTestId('monitorsTable')).toBeInTheDocument();
+  });
+
+  it("shows the active tab's controls in the tab row without header controls", async () => {
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    const slot = screen.getByTestId('alertManagerTabActions');
+    expect(slot).toBeEmptyDOMElement();
+
+    fireEvent.click(screen.getByTestId('alertManagerTabs-routing'));
+    expect(within(slot).getByTestId('routingSourceStub')).toBeInTheDocument();
+    expect(
+      within(screen.getByTestId('routingPanel')).queryByTestId('routingSourceStub')
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('alertManagerTabs-alerts'));
+    expect(slot).toBeEmptyDOMElement();
+  });
+
+  it("puts the active tab's controls on the page title row when the header supports it", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { coreRefs: headerRefs } = require('../../../framework/core_refs');
+    // A HeaderControl stand-in that renders the right-side controls in place.
+    headerRefs.chrome = { navGroup: { getNavGroupEnabled: () => true } };
+    headerRefs.application = { setAppRightControls: jest.fn() };
+    headerRefs.navigation = {
+      ui: {
+        HeaderControl: ({
+          controls,
+        }: {
+          controls: Array<{ renderComponent?: React.ReactNode }>;
+        }) => (
+          <div data-test-subj="headerRightControls">
+            {controls.map((c, i) => (
+              <React.Fragment key={i}>{c.renderComponent}</React.Fragment>
+            ))}
+          </div>
+        ),
+      },
+    };
+    try {
+      await act(async () => {
+        render(<AlarmsPage {...defaultProps} />);
+      });
+      const header = screen.getByTestId('headerRightControls');
+      const slot = within(header).getByTestId('alertManagerTabActions');
+      // The slot moved out of the tab row.
+      expect(screen.getAllByTestId('alertManagerTabActions')).toHaveLength(1);
+
+      fireEvent.click(screen.getByTestId('alertManagerTabs-routing'));
+      expect(within(slot).getByTestId('routingSourceStub')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('alertManagerTabs-alerts'));
+      expect(slot).toBeEmptyDOMElement();
+    } finally {
+      delete headerRefs.chrome;
+      delete headerRefs.application;
+      delete headerRefs.navigation;
+    }
+  });
+
+  it('links the Alerts breadcrumb back to the Alerts tab from a sub-tab', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { setNavBreadCrumbs } = require('../../../../common/utils/set_nav_bread_crumbs');
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    // On the Alerts tab the trail is just the current page.
+    expect((setNavBreadCrumbs as jest.Mock).mock.calls.slice(-1)[0][1]).toEqual([
+      { text: 'Alerts' },
+    ]);
+
+    fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    const trail = (setNavBreadCrumbs as jest.Mock).mock.calls.slice(-1)[0][1];
+    expect(trail.map((c: { text: string }) => c.text)).toEqual(['Alerts', 'Rules']);
+    expect(trail[0].href).toBe('#/alerts');
+    expect(trail[1].href).toBeUndefined();
+
+    // Cmd/Ctrl/Shift/Alt and middle clicks are left to the browser (open in a
+    // new tab via the href): no preventDefault, no tab switch.
+    for (const modifier of [
+      { metaKey: true },
+      { ctrlKey: true },
+      { shiftKey: true },
+      { altKey: true },
+    ]) {
+      const keep = jest.fn();
+      await act(async () => {
+        trail[0].onClick({ preventDefault: keep, button: 0, ...modifier });
+      });
+      expect(keep).not.toHaveBeenCalled();
+    }
+    const middle = jest.fn();
+    await act(async () => {
+      trail[0].onClick({ preventDefault: middle, button: 1 });
+    });
+    expect(middle).not.toHaveBeenCalled();
+    expect(screen.getByTestId('monitorsTable')).toBeInTheDocument();
+
+    // A plain left click switches tabs in place.
+    const preventDefault = jest.fn();
+    await act(async () => {
+      trail[0].onClick({ preventDefault, button: 0 });
+    });
+    expect(preventDefault).toHaveBeenCalled();
+    expect(screen.getByTestId('alertsDashboard')).toBeInTheDocument();
   });
 
   it('scopes the duplicate-name check to the rule group', async () => {

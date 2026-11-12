@@ -70,7 +70,6 @@ describe('mapViewReducer', () => {
       const opened = reduce(grouped, {
         type: 'navigate',
         navigation: groupValueView('environment', 'dev'),
-        environmentFilterId: 'dev',
       });
       expect(opened.filters.environments).toEqual(['dev']);
       const back = reduce(opened, { type: 'navigate', navigation: groupView('environment') });
@@ -96,7 +95,6 @@ describe('mapViewReducer', () => {
       const opened = reduce(grouped, {
         type: 'navigate',
         navigation: groupValueView('environment', 'dev'),
-        environmentFilterId: 'dev',
       });
       const filtered = reduce(opened, {
         type: 'setFilters',
@@ -130,7 +128,6 @@ describe('mapViewReducer', () => {
             kind: 'group',
             groupBy: 'environment',
             value: 'dev',
-            environmentFilterId: 'dev',
           },
         }
       );
@@ -163,7 +160,7 @@ describe('mapViewReducer', () => {
         type: 'deepLink',
         nodeId: 'a',
         selection: selection('a'),
-        environmentGroup: { value: 'dev', environmentFilterId: 'dev' },
+        environmentGroup: 'dev',
       }
     );
     expect(state.focus).toEqual({ nodeId: 'a', mode: 'direct' });

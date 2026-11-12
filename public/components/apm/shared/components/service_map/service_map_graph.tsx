@@ -33,7 +33,6 @@ import {
 import {
   getNodeIconType,
   getNodeSubtitle,
-  getEnvironmentDisplayName,
   APPLICATION_MAP_CONSTANTS,
 } from '../../../common/constants';
 import { matchesErrorRateThreshold } from '../filters';
@@ -373,15 +372,10 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
           if (!errorMatch) matches = false;
         }
 
-        // Apply environment filter: include group if ANY member matches
+        // Apply environment filter (exact value): include group if ANY member matches
         if (matches && filters.environments.length > 0) {
-          const selectedDisplayNames = new Set(
-            filters.environments.map((env) => getEnvironmentDisplayName(env))
-          );
-          const envMatch = groupNodes.some((node) => {
-            const nodeEnvDisplayName = getEnvironmentDisplayName(node.KeyAttributes.Environment);
-            return selectedDisplayNames.has(nodeEnvDisplayName);
-          });
+          const selected = new Set(filters.environments);
+          const envMatch = groupNodes.some((node) => selected.has(node.KeyAttributes.Environment));
           if (!envMatch) matches = false;
         }
 
@@ -437,16 +431,12 @@ export const ServiceMapGraph: React.FC<ServiceMapGraphProps> = ({
         });
       }
 
-      // Apply environment filter (compare display names)
+      // Apply environment filter (exact value)
       if (filters.environments.length > 0) {
-        // Get the display names of selected environments for comparison
-        const selectedDisplayNames = new Set(
-          filters.environments.map((env) => getEnvironmentDisplayName(env))
+        const selected = new Set(filters.environments);
+        matchingNodes = matchingNodes.filter((node) =>
+          selected.has(node.KeyAttributes.Environment)
         );
-        matchingNodes = matchingNodes.filter((node) => {
-          const nodeEnvDisplayName = getEnvironmentDisplayName(node.KeyAttributes.Environment);
-          return selectedDisplayNames.has(nodeEnvDisplayName);
-        });
       }
 
       // Apply search filter
