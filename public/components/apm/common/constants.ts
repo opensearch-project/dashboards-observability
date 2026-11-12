@@ -31,12 +31,14 @@ export const APM_CORRELATIONS_DOCS_URL =
  * datasets, and the manual "APM Settings" flow validates the same datasets. A
  * match requires BOTH the naming convention AND that the required fields exist.
  * Values were confirmed against a live OpenTelemetry demo cluster (indices
- * otel-v1-apm-span-*, logs-otel-v1-*, otel-v2-apm-service-map-*) and the working
+ * otel-v1-apm-span-* / otel-v2-apm-span-*, logs-otel-v1-*, otel-v2-apm-service-map-*) and the working
  * DataViews on the datasets page.
  */
 
-/** Traces: OpenTelemetry span index pattern (Data Prepper otel-v1). */
-export const APM_TRACES_INDEX_PATTERN = 'otel-v1-apm-span*';
+/**
+ * Traces: the OpenTelemetry span index patterns (v2 first, then v1) come from OSD
+ * `data/common` (`OTEL_SPAN_INDEX_PATTERNS`), shared with Explore traces and Agent Traces.
+ */
 /** Fields that must exist for a span index to qualify as traces. */
 export const APM_TRACES_REQUIRED_FIELDS = ['traceId', 'spanId', 'serviceName'] as const;
 /**
