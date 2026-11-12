@@ -42,7 +42,7 @@ import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { EchartsRender } from '../../../alerting/echarts_render';
 import { usePromQLChartData } from '../../shared/hooks/use_promql_chart_data';
-import { formatPct } from '../../../../../common/slo/format';
+import { formatPct, SLO_PRECISION } from '../../../../../common/slo/format';
 
 /** Fixed 7d window. Independent of the page time picker by design. */
 const TIME_RANGE = { from: 'now-7d', to: 'now' } as const;
@@ -90,11 +90,11 @@ const t = {
   tooltipRemaining: (v: number, ts: string) =>
     i18n.translate('observability.apm.services.sloBudgetSparkline.tooltip', {
       defaultMessage: '{ts}: {pct} error ratio',
-      values: { ts, pct: formatPct(v) },
+      values: { ts, pct: formatPct(v, { decimals: SLO_PRECISION.budget }) },
     }),
 };
 
-function buildOption(data: Array<[number, number]>): EChartsOption {
+export function buildOption(data: Array<[number, number]>): EChartsOption {
   return {
     grid: { left: 0, right: 0, top: 2, bottom: 2, containLabel: false },
     tooltip: {
@@ -125,7 +125,9 @@ function buildOption(data: Array<[number, number]>): EChartsOption {
       {
         type: 'line',
         data,
-        smooth: true,
+        // Discrete/step data: smoothing rounds off the short-lived burn spikes
+        // that are the whole point of this trend line, so keep it linear.
+        smooth: false,
         symbol: 'none',
         lineStyle: { color: euiThemeVars.euiColorPrimary, width: 1.5 },
         areaStyle: { color: euiThemeVars.euiColorPrimary, opacity: 0.12 },
