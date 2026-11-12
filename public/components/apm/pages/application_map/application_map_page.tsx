@@ -519,9 +519,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
           nodeType: matchingNode.KeyAttributes?.Type,
           groupByAttributes: matchingNode.GroupByAttributes,
         },
-        environmentGroup: large
-          ? { value: environment, environmentFilterId: environment }
-          : undefined,
+        environmentGroup: large ? environment : undefined,
       });
     }
 
@@ -708,15 +706,7 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
   // Map navigation (drill-down, breadcrumbs). Leaves focus mode; opening an environment (grouped
   // by environment) checks it in the Environment filter.
   const handleNavigationStateChange = useCallback(
-    (next: MapNavigationState) =>
-      dispatch({
-        type: 'navigate',
-        navigation: next,
-        environmentFilterId:
-          next.groupByAttribute === ENVIRONMENT_GROUP_BY && next.groupByValue
-            ? next.groupByValue
-            : undefined,
-      }),
+    (next: MapNavigationState) => dispatch({ type: 'navigate', navigation: next }),
     []
   );
 
@@ -1017,7 +1007,6 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
           kind: 'group',
           groupBy: filterGroupBy,
           value,
-          environmentFilterId: filterGroupBy === ENVIRONMENT_GROUP_BY ? value : undefined,
         };
       }
     } else if (node && onMap && navigationState.level === 'application') {
@@ -1027,7 +1016,6 @@ export const ApplicationMapPage: React.FC<ApplicationMapPageProps> = ({
             kind: 'group',
             groupBy: ENVIRONMENT_GROUP_BY,
             value: env,
-            environmentFilterId: env,
           }
         : { kind: 'services' };
     }
