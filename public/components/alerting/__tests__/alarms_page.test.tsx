@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 jest.mock('../../../framework/core_refs', () => ({
   coreRefs: {
@@ -1341,5 +1342,71 @@ describe('AlarmsPage CloudWatch regions', () => {
     });
     expect(lastProps(mockDashboard).cloudWatch).toBeUndefined();
     expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1']);
+  });
+});
+describe('AlarmsPage cap toasts', () => {
+  const lastProps = (mock: jest.Mock) => mock.mock.calls[mock.mock.calls.length - 1][0];
+  const refs = coreRefs as unknown as {
+    cloudwatchEnabled?: boolean;
+    http: { basePath: { get: jest.Mock } };
+    toasts: { addWarning: jest.Mock };
+  };
+  const targets: CloudWatchTargets = {
+    regions: [
+      { id: 'us-east-1', name: 'us-east-1' },
+      { id: 'eu-west-1', name: 'eu-west-1' },
+    ],
+    defaultRegion: 'us-east-1',
+    scopes: [{ label: 'CloudWatch', relation: 'own' }],
+  };
+  const lastToast = () =>
+    refs.toasts.addWarning.mock.calls[refs.toasts.addWarning.mock.calls.length - 1][0];
+  beforeEach(() => {
+    refs.toasts.addWarning.mockClear();
+  });
+  afterEach(() => {
+    refs.http.basePath.get.mockReturnValue('');
+    refs.cloudwatchEnabled = undefined;
+  });
+  it('states the workspace limit from the setting and links to that setting in the workspace', async () => {
+    refs.http.basePath.get.mockReturnValue('/osd/w/ws1');
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} maxDatasources={7} />);
+    });
+    act(() => lastProps(mockDashboard).onDatasourceCapReached());
+    const toast = lastToast();
+    expect(toast.title).toBe('Maximum 7 datasources can be selected');
+    render(<I18nProvider>{toast.text}</I18nProvider>);
+    const body = screen.getByTestId('alertManagerMaxDatasourcesSettingsLink').parentElement!;
+    expect(body).toHaveTextContent(
+      'Your workspace limit is 7 datasources. Clear one to add another, or change it in settings.'
+    );
+    const link = screen.getByTestId('alertManagerMaxDatasourcesSettingsLink');
+    expect(link).toHaveTextContent(/^settings$/);
+    const href = '/osd/w/ws1/app/settings#observability:alertManagerMaxDatasources-group';
+    expect(link.tagName).toBe('A');
+    expect(link).toHaveAttribute('href', href);
+    expect(link).not.toHaveAttribute('target');
+  });
+  it('states the CloudWatch account and region bound without a settings link', async () => {
+    refs.cloudwatchEnabled = true;
+    await act(async () => {
+      render(
+        <AlarmsPage
+          {...defaultProps}
+          datasources={cloudWatchDatasourcesFor(targets, ['us-east-1', 'eu-west-1'])}
+          defaultDatasources={['cloudwatch']}
+          cloudWatchTargets={targets}
+          cloudWatchRegions={['us-east-1']}
+          onCloudWatchRegionsChange={jest.fn()}
+        />
+      );
+    });
+    act(() => lastProps(mockDashboard).cloudWatch.onPairCapReached());
+    const toast = lastToast();
+    expect(toast.text).toBe(
+      'CloudWatch is limited to 20 account and region combinations. Clear an account or a region to add another.'
+    );
+    expect(typeof toast.text).toBe('string');
   });
 });

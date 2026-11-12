@@ -32,6 +32,11 @@ jest.mock('../alerts_charts', () => ({
   AlertTimelineLegend: () => <div data-test-subj="alertTimelineLegendStub" />,
 }));
 
+const CW_LOGO = '/plugins/workspace/assets/cloudwatch_logo.svg';
+jest.mock('../cloudwatch_icon', () => ({
+  ...jest.requireActual('../cloudwatch_icon'),
+  useCloudWatchIconType: () => '/plugins/workspace/assets/cloudwatch_logo.svg',
+}));
 import { AlertsDashboard } from '../alerts_dashboard';
 import type { UnifiedAlertSummary, Datasource } from '../../../../common/types/alerting';
 
@@ -203,6 +208,24 @@ describe('AlertsDashboard', () => {
     expect(region.queryByText('us-east-1')).toBeNull();
   });
 
+  it("shows core's CloudWatch logo on a CloudWatch row only", () => {
+    const cwAlert: UnifiedAlertSummary = {
+      ...sampleAlert,
+      id: 'cw-1',
+      name: 'cw-alarm',
+      datasourceId: 'cloudwatch',
+      datasourceType: 'cloudwatch',
+    };
+    const { container } = render(
+      <AlertsDashboard {...baseProps} alerts={[cwAlert, sampleAlert]} />
+    );
+    const rowIcons = Array.from(container.querySelectorAll('.altAlertNameButton')).map((b) =>
+      b.querySelector('img')?.getAttribute('src')
+    );
+    expect(rowIcons).toHaveLength(2);
+    expect(rowIcons.filter((src) => src === CW_LOGO)).toHaveLength(1);
+    expect(rowIcons.filter((src) => src === undefined)).toHaveLength(1);
+  });
   it('renders "no datasource" empty state when selection is empty', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} selectedDsIds={[]} />);
     expect(

@@ -211,3 +211,35 @@ describe('monitors_table_columns Datasource cell', () => {
     ).toEqual(['Prometheus • prod-amp-workspace', 'us-west-2']);
   });
 });
+describe('monitors_table_columns Name cell icon', () => {
+  const renderName = (item: Partial<UnifiedRuleSummary>, cloudWatchIconType?: string) => {
+    const cols = buildTableColumns({
+      ...baseParams,
+      visibleColumns: new Set(['name']),
+      cloudWatchIconType,
+    });
+    const col = cols.find((c) => c.field === 'name') as {
+      render: (v: unknown, item: UnifiedRuleSummary) => React.ReactNode;
+    };
+    const row = { id: 'rule-1', name: 'cpu', ...item } as UnifiedRuleSummary;
+    return render(<div>{col.render(row.name, row)}</div>);
+  };
+  it('shows the given CloudWatch logo on a CloudWatch row', () => {
+    const { container } = renderName(
+      { datasourceType: 'cloudwatch' },
+      '/plugins/workspace/assets/cloudwatch_logo.svg'
+    );
+    expect(container.querySelector('img')).toHaveAttribute(
+      'src',
+      '/plugins/workspace/assets/cloudwatch_logo.svg'
+    );
+  });
+  it('falls back to the AWS logo, and other types keep their logo', () => {
+    expect(renderName({ datasourceType: 'cloudwatch' }).container.querySelector('img')).toBeNull();
+    const prom = renderName(
+      { datasourceType: 'prometheus' },
+      '/plugins/workspace/assets/cloudwatch_logo.svg'
+    );
+    expect(prom.container.querySelector('img')).toBeNull();
+  });
+});

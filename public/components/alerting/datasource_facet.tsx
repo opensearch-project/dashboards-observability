@@ -30,6 +30,7 @@ import { cloudWatchScopeKeyOf } from '../../../common/services/alerting/cloudwat
 import { FacetErrorIndicator } from './facet_filter_panel';
 import { CloudWatchRegionControl } from './cloudwatch_region_control';
 import { limitDatasourceSelection } from './hooks/use_cloudwatch_regions';
+import { CLOUDWATCH_ICON_FALLBACK, useCloudWatchIconType } from './cloudwatch_icon';
 
 const FACET_ID = 'datasource';
 
@@ -38,8 +39,9 @@ export const DATASOURCE_TYPE_ORDER: DatasourceType[] = ['opensearch', 'prometheu
 export const DATASOURCE_TYPE_ICONS: Record<DatasourceType, string> = {
   opensearch: 'logoOpenSearch',
   prometheus: 'logoPrometheus',
-  // OUI has no CloudWatch logo; the AWS logo is the closest existing one.
-  cloudwatch: 'logoAWS',
+  // OUI has no CloudWatch logo: the facet shows core's CloudWatch logo (see cloudwatch_icon.ts)
+  // and falls back to this one when it cannot load.
+  cloudwatch: CLOUDWATCH_ICON_FALLBACK,
 };
 
 export function datasourceTypeLabel(type: DatasourceType): string {
@@ -173,6 +175,7 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
   onToggleCollapse,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const cloudWatchIconType = useCloudWatchIconType();
   const title = i18n.translate('observability.alerting.datasourceFacet.title', {
     defaultMessage: 'Datasource',
   });
@@ -328,7 +331,9 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
                 >
                   <EuiFlexItem grow={false}>
                     <EuiIcon
-                      type={DATASOURCE_TYPE_ICONS[type]}
+                      type={
+                        type === 'cloudwatch' ? cloudWatchIconType : DATASOURCE_TYPE_ICONS[type]
+                      }
                       size="s"
                       data-test-subj={`datasourceFacet-groupIcon-${type}`}
                     />

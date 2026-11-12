@@ -42,6 +42,7 @@ import { useTimeRange } from '../hooks/use_time_range';
 import { useCloudWatchStatesAt } from '../hooks/use_cloudwatch_states_at';
 import type { DatasourceFacetCloudWatch } from '../datasource_facet';
 import { facetLabels } from '../../../../common/services/alerting/facet_labels';
+import { useCloudWatchIconType } from '../cloudwatch_icon';
 import '../alerting.scss';
 
 interface MonitorsTableProps {
@@ -348,6 +349,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     disabled: rulesTime.isInvalid,
   });
 
+  const cloudWatchIconType = useCloudWatchIconType();
   // Build table columns from visible set
   const tableColumns = useMemo(() => {
     return buildTableColumns({
@@ -361,13 +363,23 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       toggleSelectAll,
       setSelectedMonitor,
       cloudWatchStateAt,
+      cloudWatchIconType,
     });
     // `toggleSelect`/`toggleSelectAll` are recreated every render; adding them
     // would invalidate this memo every render. The closures only read from
     // `selectedIds`/`filtered` which are in the dep list, so staleness is
     // bounded to the same render cycle as the columns.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleColumns, selectedIds, filtered, dsNameMap, dsById, columnWidths, cloudWatchStateAt]);
+  }, [
+    visibleColumns,
+    selectedIds,
+    filtered,
+    dsNameMap,
+    dsById,
+    columnWidths,
+    cloudWatchStateAt,
+    cloudWatchIconType,
+  ]);
 
   // Attach DOM-based resize handles to table header cells
   useResizableColumns(tableWrapperRef, columnWidths, setColumnWidths, visibleColumns);

@@ -804,16 +804,18 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     : listedRuleStatus;
 
   // Fires when a user tries to select past `maxDatasources`. Pops a warning
-  // toast with an in-toast link to the Advanced Settings entry so they can
-  // raise the cap without hunting through Management. Uses the core toasts
-  // API directly (not the shared `useToast` wrapper) because the wrapper
-  // only accepts plain strings — we need a React body to render the link.
+  // toast whose "settings" link opens Advanced Settings on the max-datasources
+  // setting. Uses the core toasts API directly (not the shared `useToast`
+  // wrapper) because the wrapper only accepts plain strings — we need a React
+  // body to render the link.
   //
-  // Uses `window.location.assign('/app/settings#...')` instead of
-  // `navigateToApp('management', ...)` because Advanced Settings doesn't
-  // support SPA redirection in a workspace context — the workspace path
-  // prefix strips the hash and lands on a broken URL. See the same
-  // workaround in trace_analytics helper_functions.tsx (line 70).
+  // The link is a plain same-tab href (a full page load, like the
+  // `window.location.assign` workaround in trace_analytics
+  // helper_functions.tsx) instead of `navigateToApp`/`navigateToUrl`, because
+  // Advanced Settings doesn't support SPA redirection in a workspace context —
+  // the workspace path prefix strips the hash and lands on a broken URL.
+  // `basePath.get()` includes the workspace prefix (`/w/<id>`), so the link
+  // stays in the current workspace.
   const handleDatasourceCapReached = useCallback(() => {
     const toasts = coreRefs.toasts;
     const http = coreRefs.http;
@@ -833,24 +835,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       text: toMountPoint(
         <FormattedMessage
           id="observability.alerting.alarmsPage.maxDatasourcesToast.text"
-          defaultMessage="Adjust the {settingName} setting in Advanced Settings to raise this cap. {openLink}"
+          defaultMessage="Your workspace limit is {max} datasources. Clear one to add another, or change it in {settingsLink}."
           values={{
-            settingName: (
-              <strong>
-                <FormattedMessage
-                  id="observability.alerting.alarmsPage.maxDatasourcesToast.settingName"
-                  defaultMessage="Alerts maximum selected datasources"
-                />
-              </strong>
-            ),
-            openLink: (
-              <EuiLink onClick={() => window.location.assign(settingsHref)}>
-                {i18n.translate(
-                  'observability.alerting.alarmsPage.maxDatasourcesToast.openSetting',
-                  {
-                    defaultMessage: 'Open setting',
-                  }
-                )}
+            max: maxDatasources,
+            settingsLink: (
+              <EuiLink href={settingsHref} data-test-subj="alertManagerMaxDatasourcesSettingsLink">
+                {i18n.translate('observability.alerting.alarmsPage.maxDatasourcesToast.settings', {
+                  defaultMessage: 'settings',
+                })}
               </EuiLink>
             ),
           }}
@@ -894,7 +886,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         defaultMessage: 'Too many CloudWatch account and region combinations',
       }),
       text: i18n.translate('observability.alerting.cloudwatch.pairCapToast.text', {
-        defaultMessage: 'Select at most {max} CloudWatch account and region combinations.',
+        defaultMessage:
+          'CloudWatch is limited to {max} account and region combinations. Clear an account or a region to add another.',
         values: { max: ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS },
       }),
     });

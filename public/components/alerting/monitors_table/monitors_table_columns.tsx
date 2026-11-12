@@ -55,6 +55,7 @@ import { getCloudWatchStateLabel, getMonitorStateLabel, getSeverityLabel } from 
 import { DEFAULT_WIDTHS } from './resizable_columns';
 import { isPending } from './pending_rules';
 import type { CloudWatchWindowState } from '../hooks/use_cloudwatch_states_at';
+import { CLOUDWATCH_ICON_FALLBACK } from '../cloudwatch_icon';
 
 /** Tint for the `CW: <state>` badge shown alongside the unified status. */
 
@@ -101,6 +102,8 @@ export interface BuildTableColumnsParams {
    * past. Status and Health then show that state instead of the current one.
    */
   cloudWatchStateAt?: (r: UnifiedRuleSummary) => CloudWatchWindowState | undefined;
+  /** The Name cell's icon for a CloudWatch row (see cloudwatch_icon.ts); defaults to `logoAWS`. */
+  cloudWatchIconType?: string;
 }
 
 const formatAt = (ms: number) => moment(ms).format('M/D HH:mm');
@@ -170,6 +173,7 @@ export function buildTableColumns({
   toggleSelectAll,
   setSelectedMonitor,
   cloudWatchStateAt,
+  cloudWatchIconType = CLOUDWATCH_ICON_FALLBACK,
 }: BuildTableColumnsParams): Array<Record<string, unknown>> {
   const w = (id: string) => `${columnWidths[id] || DEFAULT_WIDTHS[id] || 120}px`;
   // Pending optimistic rows aren't selectable (their synthetic id would 404),
@@ -230,7 +234,7 @@ export function buildTableColumns({
         render: (name: string, item: UnifiedRuleSummary) => {
           const iconType =
             item.datasourceType === 'cloudwatch'
-              ? 'logoAWS'
+              ? cloudWatchIconType
               : item.datasourceType === 'prometheus'
                 ? 'logoPrometheus'
                 : 'logoOpenSearch';

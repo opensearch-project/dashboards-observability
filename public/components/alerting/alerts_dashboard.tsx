@@ -58,6 +58,7 @@ import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
 import { formatTimestamp } from './time_format';
 import { ALERT_KIND_HEX, getStateHex } from './alert_colors';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
+import { useCloudWatchIconType } from './cloudwatch_icon';
 import './alerting.scss';
 
 // ============================================================================
@@ -963,6 +964,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
   // Table columns — memoized so `AlertsTable`'s React.memo shallow-compare
   // doesn't invalidate on every parent re-render.
+  const cloudWatchIconType = useCloudWatchIconType();
   const columns = useMemo<Array<EuiBasicTableColumn<AlertTableRow>>>(
     () => [
       {
@@ -996,7 +998,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           const isExpanded = Boolean(expandedGroupIds[alert.id]);
           const iconType =
             alert.datasourceType === 'cloudwatch'
-              ? 'logoAWS'
+              ? cloudWatchIconType
               : alert.datasourceType === 'prometheus'
                 ? 'logoPrometheus'
                 : 'logoOpenSearch';
@@ -1228,7 +1230,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         },
       },
     ],
-    [expandedGroupIds, onAcknowledge, onViewDetail]
+    [expandedGroupIds, onAcknowledge, onViewDetail, cloudWatchIconType]
   );
 
   // Chart-area empty state mode. Cascade:

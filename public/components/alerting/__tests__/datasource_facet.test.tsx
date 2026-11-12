@@ -7,6 +7,11 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import type { CloudWatchTargets, Datasource } from '../../../../common/types/alerting';
 import { cloudWatchDatasourcesFor } from '../../../../common/services/alerting/cloudwatch_datasource_id';
+let mockCloudWatchIconType = 'logoAWS';
+jest.mock('../cloudwatch_icon', () => ({
+  ...jest.requireActual('../cloudwatch_icon'),
+  useCloudWatchIconType: () => mockCloudWatchIconType,
+}));
 import {
   DatasourceFacet,
   DatasourceFacetProps,
@@ -131,6 +136,18 @@ describe('DatasourceFacet', () => {
     expect(cw.getByText('Prod account')).toBeInTheDocument();
     expect(cw.getByText('Partner (read-only)')).toBeInTheDocument();
     expect(cw.queryByText(/us-west-2/)).toBeNull();
+  });
+  it("heads the CloudWatch group with core's CloudWatch logo, and the AWS logo as fallback", () => {
+    mockCloudWatchIconType = '/plugins/workspace/assets/cloudwatch_logo.svg';
+    const { unmount } = renderFacet();
+    const icon = screen.getByTestId('datasourceFacet-groupIcon-cloudwatch');
+    expect(icon.tagName).toBe('IMG');
+    expect(icon).toHaveAttribute('src', '/plugins/workspace/assets/cloudwatch_logo.svg');
+    expect(screen.getByTestId('datasourceFacet-groupIcon-prometheus').tagName).not.toBe('IMG');
+    unmount();
+    mockCloudWatchIconType = 'logoAWS';
+    renderFacet();
+    expect(screen.getByTestId('datasourceFacet-groupIcon-cloudwatch').tagName).not.toBe('IMG');
   });
 
   it('shows the Regions control only once a CloudWatch account is checked', () => {
