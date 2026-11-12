@@ -303,6 +303,313 @@ describe('IntegrationInstanceBuilder', () => {
 
       expect(remappedAssets).toMatchObject(expectedRemappedAssets);
     });
+
+    it('should remap links to installed assets inside JSON-encoded string attributes', () => {
+      const visualization = JSON.stringify({
+        params: {
+          dataLinks: [
+            {
+              title: 'Open details',
+              url: '/app/dashboards#/view/details-dashboard?_a=(query:(language:kuery))',
+            },
+          ],
+        },
+      });
+      const assets = [
+        {
+          id: 'details-dashboard',
+          type: 'dashboard',
+          attributes: { title: 'Details' },
+          references: [],
+        },
+        {
+          id: 'summary-table',
+          type: 'explore',
+          attributes: { title: 'Summary', visualization },
+          references: [{ name: 'link_0', type: 'dashboard', id: 'details-dashboard' }],
+        },
+      ];
+
+      const [dashboard, explore] = builder.remapIDs(assets);
+
+      const { url } = JSON.parse((explore.attributes as { visualization: string }).visualization)
+        .params.dataLinks[0];
+      expect(dashboard.id).not.toBe('details-dashboard');
+      expect(url).toBe(`/app/dashboards#/view/${dashboard.id}?_a=(query:(language:kuery))`);
+    });
+
+    it('should remap links in nested and array string attributes', () => {
+      const assets = [
+        {
+          id: 'overview',
+          type: 'dashboard',
+          attributes: { title: 'Overview' },
+          references: [],
+        },
+        {
+          id: 'saved-viz',
+          type: 'visualization',
+          attributes: {
+            title: 'Links',
+            visState: {
+              params: {
+                markdown: '[Overview](#/view/overview) [Edit](#/edit/saved-viz)',
+              },
+            },
+            links: ['/app/dashboards#/view/overview'],
+          },
+          references: [
+            { name: 'link_0', type: 'dashboard', id: 'overview' },
+            { name: 'link_1', type: 'visualization', id: 'saved-viz' },
+          ],
+        },
+      ];
+
+      const [dashboard, visualization] = builder.remapIDs(assets);
+
+      expect(visualization.attributes).toEqual({
+        title: 'Links',
+        visState: {
+          params: {
+            markdown: `[Overview](#/view/${dashboard.id}) [Edit](#/edit/${visualization.id})`,
+          },
+        },
+        links: [`/app/dashboards#/view/${dashboard.id}`],
+      });
+    });
+
+    it('should remap links to an asset that appears later in the bundle', () => {
+      const assets = [
+        {
+          id: 'source',
+          type: 'visualization',
+          attributes: { title: 'Source', description: 'See #/view/target' },
+          references: [{ name: 'link_0', type: 'dashboard', id: 'target' }],
+        },
+        {
+          id: 'target',
+          type: 'dashboard',
+          attributes: { title: 'Target' },
+          references: [],
+        },
+      ];
+
+      const [source, target] = builder.remapIDs(assets);
+
+      expect(source.attributes).toMatchObject({ description: `See #/view/${target.id}` });
+    });
+
+    it('should keep links to IDs outside the installed assets and partial ID matches', () => {
+      const description =
+        '#/view/external-dashboard #/view/main-dashboard-2 #/view/referenced-only ' +
+        '/view/main-dashboard_old';
+      const assets = [
+        {
+          id: 'main-dashboard',
+          type: 'dashboard',
+          attributes: { title: 'Main', description },
+          references: [
+            { name: 'link_0', type: 'dashboard', id: 'main-dashboard' },
+            { name: 'panel_0', type: 'visualization', id: 'referenced-only' },
+          ],
+        },
+      ];
+
+      const [dashboard] = builder.remapIDs(assets);
+
+      expect(dashboard.attributes).toEqual({ title: 'Main', description });
+    });
+
+    it('should keep links that are not declared as link references', () => {
+      const description = '#/view/target #/edit/target';
+      const assets = [
+        {
+          id: 'source',
+          type: 'dashboard',
+          attributes: { title: 'Source', description },
+          references: [],
+        },
+        {
+          id: 'linked-source',
+          type: 'dashboard',
+          attributes: { title: 'Linked source', description },
+          references: [{ name: 'panel_0', type: 'dashboard', id: 'target' }],
+        },
+        {
+          id: 'target',
+          type: 'dashboard',
+          attributes: { title: 'Target' },
+          references: [],
+        },
+      ];
+
+      const [source, linkedSource, target] = builder.remapIDs(assets);
+
+      expect(target.id).not.toBe('target');
+      expect(source.attributes).toEqual({ title: 'Source', description });
+      expect(linkedSource.attributes).toEqual({ title: 'Linked source', description });
+    });
+
+    it('should keep link references and links to objects outside the installed assets', () => {
+      const description = '#/view/existing-dashboard #/view/target';
+      const assets = [
+        {
+          id: 'source',
+          type: 'dashboard',
+          attributes: { title: 'Source', description },
+          references: [
+            { name: 'link_0', type: 'dashboard', id: 'existing-dashboard' },
+            { name: 'link_1', type: 'dashboard', id: 'target' },
+          ],
+        },
+        {
+          id: 'target',
+          type: 'dashboard',
+          attributes: { title: 'Target' },
+          references: [],
+        },
+      ];
+
+      const [source, target] = builder.remapIDs(assets);
+
+      expect(source.attributes).toEqual({
+        title: 'Source',
+        description: `#/view/existing-dashboard #/view/${target.id}`,
+      });
+      expect(source.references).toEqual([
+        { name: 'link_0', type: 'dashboard', id: 'existing-dashboard' },
+        { name: 'link_1', type: 'dashboard', id: target.id },
+      ]);
+    });
+
+    it('should remap links followed by punctuation', () => {
+      const assets = [
+        {
+          id: 'source',
+          type: 'dashboard',
+          attributes: {
+            title: 'Source',
+            description: 'See #/view/target. Or #/view/target, #/view/target;x **#/view/target**',
+          },
+          references: [{ name: 'link_0', type: 'dashboard', id: 'target' }],
+        },
+        {
+          id: 'target',
+          type: 'dashboard',
+          attributes: { title: 'Target' },
+          references: [],
+        },
+      ];
+
+      const [source, target] = builder.remapIDs(assets);
+
+      expect(source.attributes).toMatchObject({
+        description:
+          `See #/view/${target.id}. Or #/view/${target.id}, ` +
+          `#/view/${target.id};x **#/view/${target.id}**`,
+      });
+    });
+
+    it('should remap links between dashboards that link to each other', () => {
+      const dashboard = (id: string, links: string[], declaredLinks: string[]) => ({
+        id,
+        type: 'dashboard',
+        attributes: {
+          title: id,
+          description: links.map((link) => `[${link}](#/view/${link})`).join(' '),
+        },
+        references: declaredLinks.map((link, n) => ({
+          name: `link_${n}`,
+          type: 'dashboard',
+          id: link,
+        })),
+      });
+      const assets = [
+        dashboard('dash-a', ['dash-b', 'external-dashboard'], ['dash-b']),
+        dashboard('dash-b', ['dash-c', 'dash-d'], ['dash-c', 'dash-d']),
+        dashboard('dash-c', [], []),
+        dashboard('dash-d', ['external-dashboard'], []),
+      ];
+
+      const [dashA, dashB, dashC, dashD] = builder.remapIDs(assets);
+
+      const newIds = [dashA, dashB, dashC, dashD].map((asset) => asset.id);
+      expect(new Set(newIds).size).toBe(4);
+      newIds.forEach((id) => expect(['dash-a', 'dash-b', 'dash-c', 'dash-d']).not.toContain(id));
+      expect(dashA.attributes).toEqual({
+        title: 'dash-a',
+        description: `[dash-b](#/view/${dashB.id}) [external-dashboard](#/view/external-dashboard)`,
+      });
+      expect(dashB.attributes).toEqual({
+        title: 'dash-b',
+        description: `[dash-c](#/view/${dashC.id}) [dash-d](#/view/${dashD.id})`,
+      });
+      expect(dashC.attributes).toEqual({ title: 'dash-c', description: '' });
+      expect(dashD.attributes).toEqual({
+        title: 'dash-d',
+        description: '[external-dashboard](#/view/external-dashboard)',
+      });
+      expect(dashA.references.map((ref) => ref.id)).toEqual([dashB.id]);
+      expect(dashB.references.map((ref) => ref.id)).toEqual([dashC.id, dashD.id]);
+    });
+
+    it('should keep installed asset IDs that are not part of a view or edit link', () => {
+      const description =
+        'Drill down from main-dashboard. /app/dashboards#/main-dashboard /list/main-dashboard';
+      const optionsJSON = JSON.stringify({ targetDashboard: 'main-dashboard' });
+      const assets = [
+        {
+          id: 'main-dashboard',
+          type: 'dashboard',
+          attributes: { title: 'main-dashboard', description: '' },
+          references: [],
+        },
+        {
+          id: 'overview',
+          type: 'dashboard',
+          attributes: { title: 'Overview', description, optionsJSON },
+          references: [{ name: 'link_0', type: 'dashboard', id: 'main-dashboard' }],
+        },
+      ];
+
+      const [mainDashboard, overview] = builder.remapIDs(assets);
+
+      expect(mainDashboard.id).not.toBe('main-dashboard');
+      expect(mainDashboard.attributes).toEqual({
+        title: 'main-dashboard',
+        description: '',
+      });
+      expect(overview.attributes).toEqual({
+        title: 'Overview',
+        description,
+        optionsJSON,
+      });
+    });
+
+    it('should leave non-string attributes unchanged', () => {
+      const assets = [
+        {
+          id: 'dashboard',
+          type: 'dashboard',
+          attributes: {
+            title: 'Dashboard',
+            version: 1,
+            timeRestore: false,
+            refreshInterval: null,
+          },
+          references: [],
+        },
+      ];
+
+      const [dashboard] = builder.remapIDs(assets);
+
+      expect(dashboard.attributes).toEqual({
+        title: 'Dashboard',
+        version: 1,
+        timeRestore: false,
+        refreshInterval: null,
+      });
+    });
   });
 
   describe('postAssets', () => {
