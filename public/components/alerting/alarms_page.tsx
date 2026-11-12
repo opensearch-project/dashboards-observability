@@ -804,29 +804,30 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     : listedRuleStatus;
 
   // Fires when a user tries to select past `maxDatasources`. Pops a warning
-  // toast whose "settings" link opens Advanced Settings on the max-datasources
-  // setting. Uses the core toasts API directly (not the shared `useToast`
-  // wrapper) because the wrapper only accepts plain strings — we need a React
-  // body to render the link.
+  // toast whose "settings" link opens Advanced Settings showing only the
+  // max-datasources setting. Uses the core toasts API directly (not the shared
+  // `useToast` wrapper) because the wrapper only accepts plain strings, and we
+  // need a React body to render the link.
   //
   // The link is a plain same-tab href (a full page load, like the
   // `window.location.assign` workaround in trace_analytics
   // helper_functions.tsx) instead of `navigateToApp`/`navigateToUrl`, because
-  // Advanced Settings doesn't support SPA redirection in a workspace context —
-  // the workspace path prefix strips the hash and lands on a broken URL.
-  // `basePath.get()` includes the workspace prefix (`/w/<id>`), so the link
-  // stays in the current workspace.
+  // `navigateToApp('settings')` leaves the workspace. `basePath.get()`
+  // includes the workspace prefix (`/w/<id>`), so the link stays in the
+  // current workspace.
   const handleDatasourceCapReached = useCallback(() => {
     const toasts = coreRefs.toasts;
     const http = coreRefs.http;
     if (!toasts) return;
-    // Advanced Settings renders each row with DOM id `${setting.name}-group`
-    // (src/plugins/advanced_settings/.../field.tsx) and its scroll-to-hash
-    // handler calls getElementById(hash) — so the hash must include the
-    // `-group` suffix to scroll / highlight the target row.
+    // Advanced Settings' `/:query` route pre-fills its search bar, so the page
+    // lists only the matching setting. A `#<key>-group` hash doesn't work: the
+    // page looks for the row once while it still shows its loading spinner and
+    // never scrolls. The key is lowercased so the query doesn't also match
+    // "Alerts selected datasources", and the colon is left unencoded because
+    // `%3A` matches nothing.
     const settingsHref = `${
       http?.basePath.get() ?? ''
-    }/app/settings#${ALERT_MANAGER_MAX_DATASOURCES_SETTING}-group`;
+    }/app/settings/${ALERT_MANAGER_MAX_DATASOURCES_SETTING.toLowerCase()}`;
     toasts.addWarning({
       title: i18n.translate('observability.alerting.alarmsPage.maxDatasourcesToast.title', {
         defaultMessage: 'Maximum {maxDatasources} datasources can be selected',

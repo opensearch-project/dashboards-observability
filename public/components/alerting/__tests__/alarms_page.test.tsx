@@ -1383,7 +1383,7 @@ describe('AlarmsPage cap toasts', () => {
     );
     const link = screen.getByTestId('alertManagerMaxDatasourcesSettingsLink');
     expect(link).toHaveTextContent(/^settings$/);
-    const href = '/osd/w/ws1/app/settings#observability:alertManagerMaxDatasources-group';
+    const href = '/osd/w/ws1/app/settings/observability:alertmanagermaxdatasources';
     expect(link.tagName).toBe('A');
     expect(link).toHaveAttribute('href', href);
     expect(link).not.toHaveAttribute('target');
