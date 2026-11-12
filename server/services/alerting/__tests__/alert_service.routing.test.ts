@@ -1049,6 +1049,38 @@ describe('MultiBackendAlertService — CloudWatch datasource', () => {
       expect(res.datasourceStatus.every((s) => s.status === 'error')).toBe(true);
     });
 
+    it('reads at most 20 CloudWatch datasources per request, listed or looked up', async () => {
+      const listed = Array.from({ length: 21 }, (_, i) => ({
+        ...regional,
+        id: `cloudwatch_us-east-1_s${i}`,
+        name: `CloudWatch · S${i} · us-east-1`,
+      }));
+      const dsSvcListed = {
+        ...mockDsSvc,
+        list: jest.fn(async () => [osDatasource, ...listed]),
+        get: jest.fn(async () => null),
+      };
+      const cwBackend = {
+        describeAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: false })),
+      };
+      const service = new MultiBackendAlertService(dsSvcListed as never, mockLogger);
+      service.registerOpenSearch(mockOsBackend as never);
+      service.registerCloudWatch(cwBackend as never);
+      const res = await service.getUnifiedRules(jest.fn() as never, {
+        dsIds: [...listed.map((d) => d.id), osDatasource.id],
+      });
+      expect(cwBackend.describeAlarms).toHaveBeenCalledTimes(20);
+      const cwStatus = res.datasourceStatus.filter((s) => s.datasourceType === 'cloudwatch');
+      expect(cwStatus).toHaveLength(21);
+      expect(cwStatus.filter((s) => s.status === 'success')).toHaveLength(20);
+      expect(cwStatus.find((s) => s.status === 'error')).toMatchObject({
+        datasourceId: 'cloudwatch_us-east-1_s20',
+        error: 'Too many CloudWatch account and region combinations in one request',
+      });
+      // The OpenSearch datasource is not part of the CloudWatch bound.
+      expect(res.datasourceStatus.some((s) => s.datasourceId === osDatasource.id)).toBe(true);
+    });
+
     it('reports an unlisted `cloudwatch` as unavailable when other CloudWatch entries are listed', async () => {
       const dsSvcLookup = {
         ...mockDsSvc,

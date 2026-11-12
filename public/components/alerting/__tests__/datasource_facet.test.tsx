@@ -1,0 +1,236 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React from 'react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import type { CloudWatchTargets, Datasource } from '../../../../common/types/alerting';
+import { cloudWatchDatasourcesFor } from '../../../../common/services/alerting/cloudwatch_datasource_id';
+import {
+  DatasourceFacet,
+  DatasourceFacetProps,
+  buildDatasourceFacetEntries,
+  toggleDatasourceEntry,
+} from '../datasource_facet';
+
+const targets: CloudWatchTargets = {
+  regions: [
+    { id: 'us-west-2', name: 'US West (Oregon)' },
+    { id: 'us-east-1', name: 'US East (N. Virginia)' },
+    { id: 'eu-west-1', name: 'Europe (Ireland)' },
+  ],
+  defaultRegion: 'us-west-2',
+  scopes: [
+    { label: 'Your AWS permissions', relation: 'own', accountId: '111122223333' },
+    { id: 'prod', label: 'Prod account', relation: 'other', accountId: '444455556666' },
+    { id: 'partner', label: 'Partner (read-only)', relation: 'other' },
+  ],
+};
+
+const os: Datasource = {
+  id: 'os-1',
+  name: 'Local Cluster',
+  type: 'opensearch',
+  url: '',
+  enabled: true,
+};
+const promProd: Datasource = {
+  id: 'prom-1',
+  name: 'prod-amp-workspace',
+  type: 'prometheus',
+  url: '',
+  enabled: true,
+};
+const promStaging: Datasource = { ...promProd, id: 'prom-2', name: 'staging-amp-workspace' };
+
+const regionsSelected = ['us-west-2', 'us-east-1'];
+const datasources = [
+  promStaging,
+  os,
+  promProd,
+  ...cloudWatchDatasourcesFor(targets, regionsSelected),
+];
+
+const renderFacet = (props: Partial<DatasourceFacetProps> = {}) => {
+  const onChange = jest.fn();
+  const onCapReached = jest.fn();
+  const onRegionsChange = jest.fn();
+  const onPairCapReached = jest.fn();
+  const utils = render(
+    <DatasourceFacet
+      datasources={datasources}
+      selectedDsIds={['os-1']}
+      onChange={onChange}
+      maxDatasources={5}
+      onCapReached={onCapReached}
+      cloudWatch={{
+        regions: targets.regions,
+        selectedRegions: regionsSelected,
+        onRegionsChange,
+        onPairCapReached,
+      }}
+      isCollapsed={false}
+      onToggleCollapse={jest.fn()}
+      {...props}
+    />
+  );
+  return { ...utils, onChange, onCapReached, onRegionsChange, onPairCapReached };
+};
+
+describe('buildDatasourceFacetEntries', () => {
+  it('groups OpenSearch, Prometheus (by name) and one entry per CloudWatch account', () => {
+    expect(buildDatasourceFacetEntries(datasources).map((e) => [e.type, e.label])).toEqual([
+      ['opensearch', 'Local Cluster'],
+      ['prometheus', 'prod-amp-workspace'],
+      ['prometheus', 'staging-amp-workspace'],
+      ['cloudwatch', 'Your AWS permissions'],
+      ['cloudwatch', 'Prod account'],
+      ['cloudwatch', 'Partner (read-only)'],
+    ]);
+  });
+});
+
+describe('toggleDatasourceEntry', () => {
+  const entries = buildDatasourceFacetEntries(datasources);
+  const prod = entries.find((e) => e.label === 'Prod account')!;
+
+  it('checks an account in every selected region and unchecks all of them', () => {
+    const on = toggleDatasourceEntry(prod, ['os-1'], 5);
+    expect(on.selectedDsIds).toEqual([
+      'os-1',
+      'cloudwatch_us-west-2_prod',
+      'cloudwatch_us-east-1_prod',
+    ]);
+    expect(toggleDatasourceEntry(prod, on.selectedDsIds, 5).selectedDsIds).toEqual(['os-1']);
+  });
+
+  it('counts accounts, not account x region, toward the cap', () => {
+    const cw = entries.filter((e) => e.type === 'cloudwatch');
+    let ids = ['os-1', 'prom-1'];
+    for (const e of cw) ids = toggleDatasourceEntry(e, ids, 5).selectedDsIds;
+    // 2 sources + 3 accounts (6 pairs) = 5.
+    expect(ids).toHaveLength(8);
+    const extra = toggleDatasourceEntry(
+      entries.find((e) => e.label === 'staging-amp-workspace')!,
+      ids,
+      5
+    );
+    expect(extra).toEqual({ selectedDsIds: ids, capReached: true, pairCapReached: false });
+  });
+});
+
+describe('DatasourceFacet', () => {
+  it('renders a header with the type icon per group and account labels without regions', () => {
+    renderFacet();
+    for (const type of ['opensearch', 'prometheus', 'cloudwatch']) {
+      expect(screen.getByTestId(`datasourceFacet-groupIcon-${type}`)).toBeInTheDocument();
+    }
+    const cw = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
+    expect(cw.getByText('CloudWatch')).toBeInTheDocument();
+    expect(cw.getByText('Prod account')).toBeInTheDocument();
+    expect(cw.getByText('Partner (read-only)')).toBeInTheDocument();
+    expect(cw.queryByText(/us-west-2/)).toBeNull();
+  });
+
+  it('shows the Regions control only once a CloudWatch account is checked', () => {
+    const { rerender, onChange } = renderFacet();
+    expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
+    fireEvent.click(screen.getByLabelText('Prod account'));
+    expect(onChange).toHaveBeenCalledWith([
+      'os-1',
+      'cloudwatch_us-west-2_prod',
+      'cloudwatch_us-east-1_prod',
+    ]);
+    rerender(
+      <DatasourceFacet
+        datasources={datasources}
+        selectedDsIds={['os-1', 'cloudwatch_us-west-2_prod', 'cloudwatch_us-east-1_prod']}
+        onChange={onChange}
+        maxDatasources={5}
+        onCapReached={jest.fn()}
+        cloudWatch={{
+          regions: targets.regions,
+          selectedRegions: regionsSelected,
+          onRegionsChange: jest.fn(),
+          onPairCapReached: jest.fn(),
+        }}
+        isCollapsed={false}
+        onToggleCollapse={jest.fn()}
+      />
+    );
+    const controls = screen.getAllByTestId('cloudWatchRegionControl');
+    expect(controls).toHaveLength(1);
+    const cw = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
+    expect(cw.getByText('Regions')).toBeInTheDocument();
+    expect(cw.getByText('US West (Oregon)')).toBeInTheDocument();
+    expect(cw.getByText('US East (N. Virginia)')).toBeInTheDocument();
+  });
+
+  it('reports a removed region chip, but never an empty region list', () => {
+    const { onRegionsChange } = renderFacet({
+      selectedDsIds: ['cloudwatch_us-west-2_prod', 'cloudwatch_us-east-1_prod'],
+    });
+    const control = screen.getByTestId('cloudWatchRegionControl');
+    fireEvent.click(
+      within(control).getByLabelText('Remove US East (N. Virginia) from selection in this group')
+    );
+    expect(onRegionsChange).toHaveBeenLastCalledWith(['us-west-2']);
+    onRegionsChange.mockClear();
+    const { container } = renderFacet({
+      selectedDsIds: ['cloudwatch_us-west-2_prod'],
+      cloudWatch: {
+        regions: targets.regions,
+        selectedRegions: ['us-west-2'],
+        onRegionsChange,
+        onPairCapReached: jest.fn(),
+      },
+    });
+    const single = within(container).getByTestId('cloudWatchRegionControl');
+    fireEvent.click(
+      within(single).getByLabelText('Remove US West (Oregon) from selection in this group')
+    );
+    expect(onRegionsChange).not.toHaveBeenCalled();
+  });
+
+  it('shows no Regions control with one region, and a single CloudWatch entry without targets', () => {
+    renderFacet({
+      selectedDsIds: ['cloudwatch'],
+      datasources: [
+        os,
+        {
+          id: 'cloudwatch',
+          name: 'CloudWatch',
+          type: 'cloudwatch',
+          url: 'cloudwatch',
+          enabled: true,
+        },
+      ],
+      cloudWatch: undefined,
+    });
+    const cw = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
+    // Group header plus the one entry.
+    expect(cw.getAllByText('CloudWatch')).toHaveLength(2);
+    expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
+  });
+
+  it('fires the cap callback instead of selecting past the cap', () => {
+    const { onChange, onCapReached } = renderFacet({ maxDatasources: 1 });
+    fireEvent.click(screen.getByLabelText('Prod account'));
+    expect(onCapReached).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("joins a CloudWatch account's region errors", () => {
+    renderFacet({
+      errorMap: {
+        'CloudWatch · Prod account · us-east-1': 'AccessDenied',
+        'CloudWatch · Prod account · us-west-2': 'Timed out',
+      },
+    });
+    fireEvent.click(screen.getByTestId('facetGroup-datasource-error-Prod account'));
+    const popover = screen.getByTestId('facetGroup-datasource-error-Prod account-popover');
+    expect(popover.textContent).toContain('us-west-2: Timed out');
+    expect(popover.textContent).toContain('us-east-1: AccessDenied');
+  });
+});

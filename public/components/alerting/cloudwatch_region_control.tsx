@@ -4,8 +4,9 @@
  */
 
 /**
- * Picks the CloudWatch regions the Datasource facet lists. Rendered under the facet on both
- * tabs, and only when the source offers more than one region.
+ * The "Regions" control of the Datasource facet's CloudWatch group: the regions every checked
+ * CloudWatch account is read in. Rendered only inside that group, only when the source offers
+ * more than one region. At least one region stays selected.
  */
 import React, { useMemo } from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
@@ -36,7 +37,7 @@ export const CloudWatchRegionControl: React.FC<CloudWatchRegionControlProps> = (
   return (
     <EuiFormRow
       label={i18n.translate('observability.alerting.cloudwatch.regionControl.label', {
-        defaultMessage: 'CloudWatch regions',
+        defaultMessage: 'Regions',
       })}
       display="rowCompressed"
       fullWidth
@@ -45,6 +46,7 @@ export const CloudWatchRegionControl: React.FC<CloudWatchRegionControlProps> = (
         data-test-subj="cloudWatchRegionControl"
         compressed
         fullWidth
+        isClearable={false}
         placeholder={i18n.translate('observability.alerting.cloudwatch.regionControl.placeholder', {
           defaultMessage: 'Select regions',
         })}
@@ -53,9 +55,12 @@ export const CloudWatchRegionControl: React.FC<CloudWatchRegionControlProps> = (
         })}
         options={options}
         selectedOptions={selectedOptions}
-        onChange={(next) =>
-          onChange(next.map((o) => o.value).filter((v): v is string => typeof v === 'string'))
-        }
+        onChange={(next) => {
+          const ids = next.map((o) => o.value).filter((v): v is string => typeof v === 'string');
+          // Removing the last chip would leave the checked accounts with no region to read.
+          if (ids.length === 0) return;
+          onChange(ids);
+        }}
       />
     </EuiFormRow>
   );

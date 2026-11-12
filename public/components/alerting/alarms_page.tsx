@@ -68,7 +68,12 @@ import { useTimeRange } from './hooks/use_time_range';
 import { coreRefs } from '../../framework/core_refs';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 import { observabilityID, observabilityTitle } from '../../../common/constants/shared';
-import { ALERT_MANAGER_MAX_DATASOURCES_SETTING } from '../../../common/constants/alerting_settings';
+import {
+  ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS,
+  ALERT_MANAGER_MAX_DATASOURCES_SETTING,
+} from '../../../common/constants/alerting_settings';
+import { clampToDatasourceCap } from '../../../common/services/alerting/cloudwatch_datasource_id';
+import type { DatasourceFacetCloudWatch } from './datasource_facet';
 import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
 import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
 import { showMonitorCreatedToast } from './toast_helpers';
@@ -376,7 +381,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     if (!datasources.some((d) => d.id === dsId)) return;
     lastAppliedDsSeqRef.current = deepLink.seq;
     if (selectedDsIds.includes(dsId)) return;
-    setSelectedDsIds([...selectedDsIds, dsId].slice(0, maxDatasources));
+    setSelectedDsIds(clampToDatasourceCap([...selectedDsIds, dsId], maxDatasources));
   }, [
     deepLink.ds,
     deepLink.seq,
@@ -881,8 +886,23 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     [setSelectedDsIds, dropPendingOutsideDsIds]
   );
 
+  // Fires when a change would select more CloudWatch (account, region) datasources than one
+  // request reads (the cap counts accounts, so this bounds the AWS calls instead).
+  const handleCloudWatchPairCapReached = useCallback(() => {
+    coreRefs.toasts?.addWarning({
+      title: i18n.translate('observability.alerting.cloudwatch.pairCapToast.title', {
+        defaultMessage: 'Too many CloudWatch account and region combinations',
+      }),
+      text: i18n.translate('observability.alerting.cloudwatch.pairCapToast.text', {
+        defaultMessage: 'Select at most {max} CloudWatch account and region combinations.',
+        values: { max: ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS },
+      }),
+    });
+  }, []);
+
   // A region change adds or drops the matching CloudWatch datasources in the selection: an added
-  // region is selected for every account scope that already has one selected (within the cap).
+  // region is selected for every account scope that already has one selected. A change past the
+  // CloudWatch pair bound is refused: regions and selection stay as they are.
   const handleCloudWatchRegionsChange = useCallback(
     (next: string[]) => {
       if (!cloudWatchTargets || !onCloudWatchRegionsChange) return;
@@ -894,12 +914,19 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         selectedDsIds,
         maxDatasources,
       });
+      if (change.pairCapReached) {
+        handleCloudWatchPairCapReached();
+        return;
+      }
+      if (change.capReached) {
+        handleDatasourceCapReached();
+        return;
+      }
       onCloudWatchRegionsChange(nextRegions);
       const changed =
         change.selectedDsIds.length !== selectedDsIds.length ||
         change.selectedDsIds.some((id, i) => id !== selectedDsIds[i]);
       if (changed) handleDatasourceChange(change.selectedDsIds);
-      if (change.capReached) handleDatasourceCapReached();
     },
     [
       cloudWatchTargets,
@@ -909,16 +936,28 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       maxDatasources,
       handleDatasourceChange,
       handleDatasourceCapReached,
+      handleCloudWatchPairCapReached,
     ]
   );
-  const cloudWatchRegionControl =
-    coreRefs.cloudwatchEnabled && cloudWatchTargets && cloudWatchTargets.regions.length > 1
-      ? {
-          regions: cloudWatchTargets.regions,
-          selected: cloudWatchRegions ?? [],
-          onChange: handleCloudWatchRegionsChange,
-        }
-      : undefined;
+  // The Datasource facet's CloudWatch group: accounts come from the datasource list; this adds
+  // the Regions control (shown by the facet when an account is checked and >1 region exists).
+  const cloudWatchFacet = useMemo<DatasourceFacetCloudWatch | undefined>(
+    () =>
+      coreRefs.cloudwatchEnabled && cloudWatchTargets
+        ? {
+            regions: cloudWatchTargets.regions,
+            selectedRegions: cloudWatchRegions ?? [],
+            onRegionsChange: handleCloudWatchRegionsChange,
+            onPairCapReached: handleCloudWatchPairCapReached,
+          }
+        : undefined,
+    [
+      cloudWatchTargets,
+      cloudWatchRegions,
+      handleCloudWatchRegionsChange,
+      handleCloudWatchPairCapReached,
+    ]
+  );
 
   // ---- Handlers ----
 
@@ -1804,8 +1843,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             maxDatasources={maxDatasources}
             onDatasourceCapReached={handleDatasourceCapReached}
             rulesTotal={rulesTotal}
-            defaultDatasources={resolveDatasourceTokens(defaultDatasources, datasources).slice(
-              0,
+            defaultDatasources={clampToDatasourceCap(
+              resolveDatasourceTokens(defaultDatasources, datasources),
               maxDatasources
             )}
             onGoToRules={() => handleTabClick('rules')}
@@ -1826,7 +1865,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             onTimeChange={handleTimeChange}
             onRefresh={handleRefreshTime}
             datasourceErrorMap={datasourceErrorMapByName}
-            cloudWatchRegionControl={cloudWatchRegionControl}
+            cloudWatch={cloudWatchFacet}
             initialSearchQuery={linkedSearchFor('alerts')}
             initialSearchQueryKey={deepLink.seq}
             onInitialSearchQueryEdited={handleLinkedSearchEdited}
@@ -1867,7 +1906,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           maxDatasources={maxDatasources}
           onDatasourceCapReached={handleDatasourceCapReached}
           datasourceErrorMap={datasourceErrorMapByName}
-          cloudWatchRegionControl={cloudWatchRegionControl}
+          cloudWatch={cloudWatchFacet}
           initialSearchQuery={linkedSearchFor('rules')}
           initialSearchQueryKey={deepLink.seq}
           onInitialSearchQueryEdited={handleLinkedSearchEdited}

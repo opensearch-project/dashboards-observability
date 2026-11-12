@@ -24,6 +24,7 @@ import {
   UnifiedAlertSeverity,
   UnifiedRuleSummary,
 } from '../../../../common/types/alerting';
+import { facetLabels } from '../../../../common/services/alerting/facet_labels';
 
 // ============================================================================
 // Types
@@ -110,9 +111,10 @@ export function matchesFilters(rule: UnifiedRuleSummary, filters: FilterState): 
     const hasMatch = rule.notificationDestinations.some((d) => filters.destinations.includes(d));
     if (!hasMatch) return false;
   }
+  const labels = facetLabels(rule);
   for (const [key, values] of Object.entries(filters.labels)) {
     if (values.length > 0) {
-      const ruleVal = rule.labels[key];
+      const ruleVal = labels[key];
       if (!ruleVal || !values.includes(ruleVal)) return false;
     }
   }
@@ -126,7 +128,7 @@ export function matchesFilters(rule: UnifiedRuleSummary, filters: FilterState): 
 export function collectLabelKeys(rules: UnifiedRuleSummary[]): string[] {
   const keys = new Set<string>();
   for (const r of rules) {
-    for (const k of Object.keys(r.labels)) keys.add(k);
+    for (const k of Object.keys(facetLabels(r))) keys.add(k);
   }
   return Array.from(keys).sort();
 }
@@ -147,7 +149,7 @@ export function collectUniqueValues(
 export function collectLabelValues(rules: UnifiedRuleSummary[], key: string): string[] {
   const set = new Set<string>();
   for (const r of rules) {
-    const v = r.labels[key];
+    const v = facetLabels(r)[key];
     if (v) set.add(v);
   }
   return Array.from(set).sort();

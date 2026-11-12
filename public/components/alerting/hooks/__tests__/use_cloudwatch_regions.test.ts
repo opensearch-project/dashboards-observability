@@ -7,6 +7,7 @@ import type { CloudWatchTargets } from '../../../../../common/types/alerting';
 import { ALERT_MANAGER_CLOUDWATCH_REGIONS_STORAGE_KEY } from '../../../../../common/constants/alerting_settings';
 import {
   applyCloudWatchRegionChange,
+  limitDatasourceSelection,
   sanitizeCloudWatchRegions,
   useCloudWatchRegions,
 } from '../use_cloudwatch_regions';
@@ -94,6 +95,7 @@ describe('applyCloudWatchRegionChange', () => {
         'cloudwatch_eu-west-1_scope-b',
       ],
       capReached: false,
+      pairCapReached: false,
     });
   });
 
@@ -121,28 +123,49 @@ describe('applyCloudWatchRegionChange', () => {
           'cloudwatch_eu-west-1_scope-b',
         ],
       })
-    ).toEqual({ selectedDsIds: ['os-1', 'cloudwatch_eu-west-1_scope-b'], capReached: false });
+    ).toEqual({
+      selectedDsIds: ['os-1', 'cloudwatch_eu-west-1_scope-b'],
+      capReached: false,
+      pairCapReached: false,
+    });
   });
 
-  it('adds nothing and reports the cap when the additions would exceed it', () => {
-    expect(
-      applyCloudWatchRegionChange({
-        ...base,
-        maxDatasources: 3,
-        prevRegions: ['us-east-1'],
-        nextRegions: ['us-east-1', 'eu-west-1'],
-        selectedDsIds: ['os-1', 'cloudwatch'],
-      })
-    ).toEqual({ selectedDsIds: ['os-1', 'cloudwatch', 'cloudwatch_eu-west-1'], capReached: false });
+  it('counts an account once, so an added region never reaches the cap', () => {
     expect(
       applyCloudWatchRegionChange({
         ...base,
         maxDatasources: 2,
         prevRegions: ['us-east-1'],
-        nextRegions: ['us-east-1', 'eu-west-1'],
+        nextRegions: ['us-east-1', 'eu-west-1', 'us-west-2'],
         selectedDsIds: ['os-1', 'cloudwatch'],
       })
-    ).toEqual({ selectedDsIds: ['os-1', 'cloudwatch'], capReached: true });
+    ).toEqual({
+      selectedDsIds: ['os-1', 'cloudwatch', 'cloudwatch_eu-west-1', 'cloudwatch_us-west-2'],
+      capReached: false,
+      pairCapReached: false,
+    });
+  });
+
+  it('refuses a change past the CloudWatch pair bound', () => {
+    const many: CloudWatchTargets = {
+      ...targets,
+      scopes: Array.from({ length: 11 }, (_, i) => ({
+        id: `s${i}`,
+        label: `Account ${i}`,
+        relation: 'other' as const,
+      })),
+    };
+    const selected = many.scopes.map((s) => `cloudwatch_us-east-1_${s.id}`);
+    // 11 accounts x 2 regions = 22 pairs > 20.
+    expect(
+      applyCloudWatchRegionChange({
+        targets: many,
+        maxDatasources: 20,
+        prevRegions: ['us-east-1'],
+        nextRegions: ['us-east-1', 'eu-west-1'],
+        selectedDsIds: selected,
+      })
+    ).toEqual({ selectedDsIds: selected, capReached: false, pairCapReached: true });
   });
 
   it('leaves the selection alone when no CloudWatch datasource is selected', () => {
@@ -153,6 +176,23 @@ describe('applyCloudWatchRegionChange', () => {
         nextRegions: ['us-east-1', 'eu-west-1'],
         selectedDsIds: ['os-1'],
       })
-    ).toEqual({ selectedDsIds: ['os-1'], capReached: false });
+    ).toEqual({ selectedDsIds: ['os-1'], capReached: false, pairCapReached: false });
+  });
+});
+
+describe('limitDatasourceSelection', () => {
+  it('accepts a change that only shrinks a selection already over the cap', () => {
+    expect(limitDatasourceSelection(['a', 'b', 'c'], ['a', 'b'], 1).selectedDsIds).toEqual([
+      'a',
+      'b',
+    ]);
+  });
+
+  it('refuses a new source past the cap', () => {
+    expect(limitDatasourceSelection(['a'], ['a', 'b'], 1)).toEqual({
+      selectedDsIds: ['a'],
+      capReached: true,
+      pairCapReached: false,
+    });
   });
 });

@@ -40,7 +40,8 @@ import { MonitorsMainPanel } from './monitors_main_panel';
 import { RULES_END_TIME_KEY, RULES_START_TIME_KEY } from '../alarms_page_helpers';
 import { useTimeRange } from '../hooks/use_time_range';
 import { useCloudWatchStatesAt } from '../hooks/use_cloudwatch_states_at';
-import type { CloudWatchRegionControlProps } from '../cloudwatch_region_control';
+import type { DatasourceFacetCloudWatch } from '../datasource_facet';
+import { facetLabels } from '../../../../common/services/alerting/facet_labels';
 import '../alerting.scss';
 
 interface MonitorsTableProps {
@@ -81,8 +82,8 @@ interface MonitorsTableProps {
    * affected row in the filter panel; click opens a popover with details.
    */
   datasourceErrorMap?: Record<string, string>;
-  /** CloudWatch region picker for the filters panel; omitted when there is nothing to pick. */
-  cloudWatchRegionControl?: CloudWatchRegionControlProps;
+  /** CloudWatch accounts and regions for the Datasource facet; omitted without CloudWatch targets. */
+  cloudWatch?: DatasourceFacetCloudWatch;
   /**
    * Optional pre-fill for the search box. Used by deep links from the SLO
    * detail page so users can jump straight to a specific recording rule
@@ -120,7 +121,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   maxDatasources,
   onDatasourceCapReached,
   datasourceErrorMap,
-  cloudWatchRegionControl,
+  cloudWatch,
   initialSearchQuery,
   initialSearchQueryKey,
   onInitialSearchQueryEdited,
@@ -185,6 +186,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   );
 
   const dsNameMap = useMemo(() => new Map(datasources.map((d) => [d.id, d.name])), [datasources]);
+  const dsById = useMemo(() => new Map(datasources.map((d) => [d.id, d])), [datasources]);
 
   const selectedDatasources = useMemo(
     () =>
@@ -213,15 +215,6 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   }, [datasources, selectedDsIds]);
 
   const adCreateDisabled = !selectedDatasources.some(isStandardOpenSearchDatasource);
-
-  // Build selectable datasource entries for the filter facet — alpha by name
-  const datasourceEntries = useMemo(
-    () =>
-      datasources
-        .map((ds) => ({ id: ds.id, label: ds.name }))
-        .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })),
-    [datasources]
-  );
 
   const allSuggestions = useMemo(() => buildSuggestions(rules), [rules]);
   const labelKeys = useMemo(() => collectLabelKeys(rules), [rules]);
@@ -363,6 +356,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       selectedIds,
       columnWidths,
       dsNameMap,
+      dsById,
       toggleSelect,
       toggleSelectAll,
       setSelectedMonitor,
@@ -373,7 +367,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     // `selectedIds`/`filtered` which are in the dep list, so staleness is
     // bounded to the same render cycle as the columns.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleColumns, selectedIds, filtered, dsNameMap, columnWidths, cloudWatchStateAt]);
+  }, [visibleColumns, selectedIds, filtered, dsNameMap, dsById, columnWidths, cloudWatchStateAt]);
 
   // Attach DOM-based resize handles to table header cells
   useResizableColumns(tableWrapperRef, columnWidths, setColumnWidths, visibleColumns);
@@ -444,7 +438,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
     for (const key of labelKeys) {
       labelCounts[key] = {};
       for (const r of searchMatched) {
-        const v = r.labels[key];
+        const v = facetLabels(r)[key];
         if (v) labelCounts[key][v] = (labelCounts[key][v] || 0) + 1;
       }
     }
@@ -476,14 +470,13 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 maxDatasources={maxDatasources}
                 onDatasourceCapReached={onDatasourceCapReached}
                 datasourceErrorMap={datasourceErrorMap}
-                cloudWatchRegionControl={cloudWatchRegionControl}
+                cloudWatch={cloudWatch}
                 filters={filters}
                 activeFilterCount={activeFilterCount}
                 clearAllFilters={clearAllFilters}
                 updateFilter={updateFilter}
                 updateLabelFilter={updateLabelFilter}
                 labelKeys={labelKeys}
-                datasourceEntries={datasourceEntries}
                 uniqueStatuses={uniqueStatuses}
                 uniqueSeverities={uniqueSeverities}
                 uniqueTypes={uniqueTypes}

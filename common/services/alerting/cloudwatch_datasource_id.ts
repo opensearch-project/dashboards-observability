@@ -21,6 +21,7 @@
  * Pure, framework-free: safe to import from either side.
  */
 import type { CloudWatchAccountScope, CloudWatchTargets, Datasource } from '../../types/alerting';
+import { ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS } from '../../constants/alerting_settings';
 
 /** The id of the default scope in the default region (and of today's single datasource). */
 export const CLOUDWATCH_DATASOURCE_ID = 'cloudwatch';
@@ -147,23 +148,21 @@ export function buildCloudWatchDatasource(
 }
 
 /**
- * The datasources for the selected regions: per scope, one per selected region plus the scope's
- * default region, in `targets.regions` order. When the source reports no regions, one per scope
- * at its default region.
+ * The datasources for the selected regions: per scope, one per selected region, in
+ * `targets.regions` order. With no offered region selected (or none reported by the source),
+ * one per scope at its default region.
  */
 export function cloudWatchDatasourcesFor(
   targets: CloudWatchTargets,
   selectedRegions: string[]
 ): Datasource[] {
   const selected = new Set(selectedRegions);
+  const picked = targets.regions.map((r) => r.id).filter((r) => selected.has(r));
   const out: Datasource[] = [];
   const seen = new Set<string>();
   for (const scope of targets.scopes) {
     const home = scope.defaultRegion ?? targets.defaultRegion;
-    const regions: Array<string | undefined> =
-      targets.regions.length === 0
-        ? [home]
-        : targets.regions.map((r) => r.id).filter((r) => selected.has(r) || r === home);
+    const regions: Array<string | undefined> = picked.length === 0 ? [home] : picked;
     for (const region of regions) {
       const ds = buildCloudWatchDatasource(targets, scope, region);
       if (ds && !seen.has(ds.id)) {
@@ -171,6 +170,58 @@ export function cloudWatchDatasourcesFor(
         out.push(ds);
       }
     }
+  }
+  return out;
+}
+
+/**
+ * The account scope a CloudWatch datasource id belongs to: `''` for the default scope
+ * (`cloudwatch`, `cloudwatch_<region>`), else the scope id. Undefined for any other id.
+ */
+export function cloudWatchScopeKeyOf(id: string): string | undefined {
+  if (!isCloudWatchDatasourceId(id)) return undefined;
+  const decoded = decodeCloudWatchDatasourceId(id);
+  // An undecodable `cloudwatch_…` id is its own scope, so it still counts once.
+  if (!decoded) return id;
+  return decoded.scopeId ?? '';
+}
+
+/**
+ * How many datasources a selection counts toward `observability:alertManagerMaxDatasources`:
+ * each OpenSearch or Prometheus datasource counts once, and each CloudWatch account scope counts
+ * once however many of its regions are selected.
+ */
+export function countTowardDatasourceCap(ids: string[]): number {
+  const keys = new Set<string>();
+  for (const id of ids) {
+    const scope = cloudWatchScopeKeyOf(id);
+    keys.add(scope === undefined ? `ds:${id}` : `cw:${scope}`);
+  }
+  return keys.size;
+}
+
+/** How many CloudWatch (account scope, region) datasources a selection has. */
+export function countCloudWatchPairs(ids: string[]): number {
+  return new Set(ids.filter((id) => isCloudWatchDatasourceId(id))).size;
+}
+
+/**
+ * The ids, in input order, that fit the cap: an id is kept when the selection so far still
+ * counts at most `max` (see `countTowardDatasourceCap`) and has at most `maxPairs` CloudWatch
+ * datasources. A region of an already kept CloudWatch account always fits the cap.
+ */
+export function clampToDatasourceCap(
+  ids: string[],
+  max: number,
+  maxPairs: number = ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS
+): string[] {
+  const out: string[] = [];
+  for (const id of ids) {
+    if (out.includes(id)) continue;
+    const next = [...out, id];
+    if (countTowardDatasourceCap(next) > max) continue;
+    if (countCloudWatchPairs(next) > maxPairs) continue;
+    out.push(id);
   }
   return out;
 }

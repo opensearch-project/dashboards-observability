@@ -89,52 +89,81 @@ describe('MonitorsFiltersPanel — facet labels match the table', () => {
   });
 });
 
-describe('MonitorsFiltersPanel — CloudWatch region control', () => {
+describe('MonitorsFiltersPanel — Datasource facet', () => {
   const regions = [
     { id: 'us-east-1', name: 'US East (N. Virginia)' },
-    { id: 'eu-west-1', name: 'Europe (Ireland)' },
+    { id: 'us-west-2', name: 'US West (Oregon)' },
   ];
+  const datasources = [
+    { id: 'os-1', name: 'Local Cluster', type: 'opensearch', url: '', enabled: true },
+    { id: 'prom-1', name: 'prod-amp-workspace', type: 'prometheus', url: '', enabled: true },
+    {
+      id: 'cloudwatch_us-east-1_prod',
+      name: 'CloudWatch · Prod account · us-east-1',
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+      region: 'us-east-1',
+      cloudWatchScope: 'prod',
+      cloudWatchScopeLabel: 'Prod account',
+    },
+  ];
+  const cloudWatch = {
+    regions,
+    selectedRegions: ['us-east-1'],
+    onRegionsChange: jest.fn(),
+    onPairCapReached: jest.fn(),
+  };
 
-  it('is hidden without the prop', () => {
-    render(<MonitorsFiltersPanel {...makeProps()} />);
+  it('groups the entries by type and shows one Regions control once an account is checked', () => {
+    const { rerender } = render(
+      <MonitorsFiltersPanel {...makeProps({ datasources, selectedDsIds: ['os-1'], cloudWatch })} />
+    );
+    for (const type of ['opensearch', 'prometheus', 'cloudwatch']) {
+      expect(screen.getByTestId(`datasourceFacet-groupIcon-${type}`)).toBeInTheDocument();
+    }
     expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
+    rerender(
+      <MonitorsFiltersPanel
+        {...makeProps({
+          datasources,
+          selectedDsIds: ['os-1', 'cloudwatch_us-east-1_prod'],
+          cloudWatch,
+        })}
+      />
+    );
+    expect(screen.getAllByTestId('cloudWatchRegionControl')).toHaveLength(1);
+    expect(screen.getByText('Regions')).toBeInTheDocument();
   });
 
-  it('is hidden when the source offers one region', () => {
+  it('leaves CloudWatch account and region out of the Labels facet', () => {
+    const rule = (over: Record<string, unknown>) => ({
+      id: 'r',
+      name: 'r',
+      labels: {},
+      annotations: {},
+      ...over,
+    });
     render(
       <MonitorsFiltersPanel
         {...makeProps({
-          cloudWatchRegionControl: {
-            regions: regions.slice(0, 1),
-            selected: [],
-            onChange: jest.fn(),
+          rules: [
+            rule({
+              datasourceType: 'cloudwatch',
+              labels: { account: '444455556666', region: 'us-east-1', namespace: 'AWS/EC2' },
+            }),
+            rule({ datasourceType: 'prometheus', labels: { region: 'eu' } }),
+          ],
+          labelKeys: ['namespace', 'region'],
+          facetCounts: {
+            counts: { status: {}, severity: {}, monitorType: {}, healthStatus: {}, createdBy: {} },
+            labelCounts: { namespace: { 'AWS/EC2': 1 }, region: { eu: 1 } },
           },
         })}
       />
     );
-    expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
-  });
-
-  it('shows the selected regions and reports an added or removed region', () => {
-    const onChange = jest.fn();
-    render(
-      <MonitorsFiltersPanel
-        {...makeProps({
-          cloudWatchRegionControl: { regions, selected: ['us-east-1'], onChange },
-        })}
-      />
-    );
-    const control = screen.getByTestId('cloudWatchRegionControl');
-    expect(screen.getByText('CloudWatch regions')).toBeInTheDocument();
-    expect(within(control).getByText('US East (N. Virginia)')).toBeInTheDocument();
-
-    fireEvent.click(within(control).getByTestId('comboBoxToggleListButton'));
-    fireEvent.click(screen.getByRole('option', { name: 'Europe (Ireland)' }));
-    expect(onChange).toHaveBeenLastCalledWith(['us-east-1', 'eu-west-1']);
-
-    fireEvent.click(
-      within(control).getByLabelText('Remove US East (N. Virginia) from selection in this group')
-    );
-    expect(onChange).toHaveBeenLastCalledWith([]);
+    const region = within(screen.getByTestId('facetGroup-label:region'));
+    expect(region.getByText('eu')).toBeInTheDocument();
+    expect(region.queryByText('us-east-1')).toBeNull();
   });
 });

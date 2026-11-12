@@ -131,24 +131,76 @@ describe('AlertsDashboard', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the CloudWatch region control under the Datasource facet when set', () => {
-    const { rerender } = render(<AlertsDashboard {...baseProps} />);
+  it('renders one Regions control, inside the CloudWatch group, once an account is checked', () => {
+    const cwDatasources: Datasource[] = [
+      sampleDs,
+      {
+        id: 'cloudwatch_us-east-1_prod',
+        name: 'CloudWatch · Prod account · us-east-1',
+        type: 'cloudwatch',
+        url: 'cloudwatch',
+        enabled: true,
+        region: 'us-east-1',
+        cloudWatchScope: 'prod',
+        cloudWatchScopeLabel: 'Prod account',
+      },
+    ];
+    const cloudWatch = {
+      regions: [
+        { id: 'us-east-1', name: 'US East (N. Virginia)' },
+        { id: 'eu-west-1', name: 'Europe (Ireland)' },
+      ],
+      selectedRegions: ['us-east-1'],
+      onRegionsChange: jest.fn(),
+      onPairCapReached: jest.fn(),
+    };
+    const { rerender } = render(
+      <AlertsDashboard {...baseProps} datasources={cwDatasources} cloudWatch={cloudWatch} />
+    );
     expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
     rerender(
       <AlertsDashboard
         {...baseProps}
-        cloudWatchRegionControl={{
-          regions: [
-            { id: 'us-east-1', name: 'us-east-1' },
-            { id: 'eu-west-1', name: 'eu-west-1' },
-          ],
-          selected: ['eu-west-1'],
-          onChange: jest.fn(),
-        }}
+        datasources={cwDatasources}
+        selectedDsIds={['ds-1', 'cloudwatch_us-east-1_prod']}
+        cloudWatch={cloudWatch}
       />
     );
-    const control = screen.getByTestId('cloudWatchRegionControl');
-    expect(within(control).getByText('eu-west-1')).toBeInTheDocument();
+    expect(screen.getAllByTestId('cloudWatchRegionControl')).toHaveLength(1);
+    const group = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
+    expect(group.getByTestId('cloudWatchRegionControl')).toBeInTheDocument();
+    expect(group.getByText('Prod account')).toBeInTheDocument();
+    expect(group.getByText('US East (N. Virginia)')).toBeInTheDocument();
+  });
+
+  it('leaves CloudWatch account and region out of the Labels facet', () => {
+    const cwAlert: UnifiedAlertSummary = {
+      ...sampleAlert,
+      id: 'cw-1',
+      datasourceId: 'cloudwatch',
+      datasourceType: 'cloudwatch',
+      labels: { account: '444455556666', region: 'us-east-1', namespace: 'AWS/EC2' },
+    };
+    const promAlert: UnifiedAlertSummary = {
+      ...sampleAlert,
+      id: 'p-1',
+      datasourceId: 'prometheus-1',
+      datasourceType: 'prometheus',
+      labels: { region: 'eu' },
+    };
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[cwAlert, promAlert]}
+        datasources={[sampleDs, samplePrometheusDs]}
+      />
+    );
+    expect(screen.queryByTestId('facetGroup-label:account')).toBeNull();
+    expect(screen.getByTestId('facetGroup-label:namespace')).toBeInTheDocument();
+    const region = within(screen.getByTestId('facetGroup-label:region'));
+    fireEvent.click(region.getByTestId('facetGroup-label:region-toggle'));
+    expect(region.getByText('eu')).toBeInTheDocument();
+    expect(region.queryByText('us-east-1')).toBeNull();
   });
 
   it('renders "no datasource" empty state when selection is empty', () => {

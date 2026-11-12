@@ -5,8 +5,8 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { buildTableColumns } from '../monitors_table_columns';
-import type { UnifiedRuleSummary } from '../../../../../common/types/alerting';
+import { buildTableColumns, datasourceCellLines } from '../monitors_table_columns';
+import type { Datasource, UnifiedRuleSummary } from '../../../../../common/types/alerting';
 
 const baseParams = {
   filtered: [] as UnifiedRuleSummary[],
@@ -120,5 +120,94 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
     expect(status.queryByText('CW: In alarm')).toBeNull();
     status.unmount();
     expect(cell('healthStatus', () => at).getByText('—')).toBeInTheDocument();
+  });
+});
+
+describe('monitors_table_columns Datasource cell', () => {
+  const ds = (d: Partial<Datasource> & Pick<Datasource, 'id' | 'name' | 'type'>): Datasource => ({
+    url: '',
+    enabled: true,
+    ...d,
+  });
+  const dsById = new Map<string, Datasource>(
+    [
+      ds({ id: 'os-1', name: 'Local Cluster', type: 'opensearch' }),
+      ds({ id: 'prom-1', name: 'prod-amp-workspace', type: 'prometheus', region: 'us-west-2' }),
+      ds({
+        id: 'cloudwatch_us-east-1_prod',
+        name: 'CloudWatch · Prod account · us-east-1',
+        type: 'cloudwatch',
+        region: 'us-east-1',
+        cloudWatchScope: 'prod',
+        cloudWatchScopeLabel: 'Prod account',
+      }),
+      ds({
+        id: 'cloudwatch',
+        name: 'CloudWatch',
+        type: 'cloudwatch',
+        cloudWatchScopeLabel: 'CloudWatch',
+      }),
+    ].map((d) => [d.id, d])
+  );
+  const row = (over: Partial<UnifiedRuleSummary>) => over as unknown as UnifiedRuleSummary;
+
+  it('reads "<Type> • <source>" with the account id and region below for CloudWatch', () => {
+    expect(
+      datasourceCellLines(
+        row({
+          datasourceId: 'cloudwatch_us-east-1_prod',
+          datasourceType: 'cloudwatch',
+          cloudWatch: {
+            state: 'ALARM',
+            alarmType: 'metric',
+            accountId: '444455556666',
+            region: 'us-east-1',
+          },
+        }),
+        new Map(),
+        dsById
+      )
+    ).toEqual(['CloudWatch • Prod account', '444455556666 • us-east-1']);
+  });
+
+  it('omits an account id the source does not report', () => {
+    expect(
+      datasourceCellLines(
+        row({
+          datasourceId: 'cloudwatch_us-east-1_prod',
+          datasourceType: 'cloudwatch',
+          cloudWatch: { state: 'OK', alarmType: 'metric', region: 'us-east-1' },
+        }),
+        new Map(),
+        dsById
+      )
+    ).toEqual(['CloudWatch • Prod account', 'us-east-1']);
+  });
+
+  it('labels the legacy single CloudWatch datasource just "CloudWatch"', () => {
+    expect(
+      datasourceCellLines(
+        row({ datasourceId: 'cloudwatch', datasourceType: 'cloudwatch' }),
+        new Map(),
+        dsById
+      )
+    ).toEqual(['CloudWatch', undefined]);
+  });
+
+  it('reads OpenSearch and Prometheus sources by name, with a Prometheus region', () => {
+    expect(
+      datasourceCellLines(
+        row({ datasourceId: 'os-1', datasourceType: 'opensearch' }),
+        new Map(),
+        dsById
+      )
+    ).toEqual(['OpenSearch • Local Cluster', undefined]);
+    expect(
+      datasourceCellLines(
+        row({ datasourceId: 'prom-1', datasourceType: 'prometheus' }),
+        new Map(),
+        dsById
+      )
+    ).toEqual(['Prometheus • prod-amp-workspace', 'us-west-2']);
   });
 });

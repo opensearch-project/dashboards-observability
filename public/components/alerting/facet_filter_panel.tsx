@@ -125,7 +125,7 @@ interface FacetErrorIndicatorProps {
   displayLabel: string;
   error: string;
 }
-const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
+export const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
   facetId,
   option,
   displayLabel,
@@ -162,7 +162,10 @@ const FacetErrorIndicator: React.FC<FacetErrorIndicatorProps> = ({
           <strong>{displayLabel}</strong>
         </EuiText>
         <EuiSpacer size="xs" />
-        <EuiText size="xs">{error}</EuiText>
+        {/* `pre-line`: a CloudWatch account lists one `<region>: <error>` line per region. */}
+        <EuiText size="xs" style={{ whiteSpace: 'pre-line' }}>
+          {error}
+        </EuiText>
       </div>
     </EuiPopover>
   );

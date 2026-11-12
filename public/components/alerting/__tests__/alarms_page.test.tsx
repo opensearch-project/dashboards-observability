@@ -1243,17 +1243,17 @@ describe('AlarmsPage CloudWatch regions', () => {
     refs.cloudwatchEnabled = undefined;
   });
 
-  it('passes the region control to both tabs', async () => {
+  it('passes the CloudWatch regions to both tabs', async () => {
     await renderPage();
-    const control = lastProps(mockDashboard).cloudWatchRegionControl;
-    expect(control).toEqual(
-      expect.objectContaining({ regions: targets.regions, selected: ['us-east-1'] })
+    const cw = lastProps(mockDashboard).cloudWatch;
+    expect(cw).toEqual(
+      expect.objectContaining({ regions: targets.regions, selectedRegions: ['us-east-1'] })
     );
     await act(async () => {
       fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
     });
-    expect(lastProps(mockMonitorsTable).cloudWatchRegionControl).toEqual(
-      expect.objectContaining({ regions: targets.regions, selected: ['us-east-1'] })
+    expect(lastProps(mockMonitorsTable).cloudWatch).toEqual(
+      expect.objectContaining({ regions: targets.regions, selectedRegions: ['us-east-1'] })
     );
   });
 
@@ -1261,7 +1261,7 @@ describe('AlarmsPage CloudWatch regions', () => {
     const onRegions = await renderPage();
     expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1', 'cloudwatch']);
     await act(async () => {
-      lastProps(mockDashboard).cloudWatchRegionControl.onChange(['us-east-1', 'eu-west-1']);
+      lastProps(mockDashboard).cloudWatch.onRegionsChange(['us-east-1', 'eu-west-1']);
     });
     expect(onRegions).toHaveBeenCalledWith(['us-east-1', 'eu-west-1']);
     expect(lastProps(mockDashboard).selectedDsIds).toEqual([
@@ -1283,39 +1283,63 @@ describe('AlarmsPage CloudWatch regions', () => {
       'cloudwatch_eu-west-1_scope-b',
     ]);
     await act(async () => {
-      lastProps(mockDashboard).cloudWatchRegionControl.onChange(['us-east-1']);
+      lastProps(mockDashboard).cloudWatch.onRegionsChange(['us-east-1']);
     });
     expect(onRegions).toHaveBeenCalledWith(['us-east-1']);
     expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1', 'cloudwatch']);
   });
 
-  it('selects nothing and shows the cap toast when the cap would be exceeded', async () => {
+  it('counts a CloudWatch account once toward the cap', async () => {
+    // Cap 2: Local + the default account in two regions still fits.
     const onRegions = await renderPage({ maxDatasources: 2 });
     await act(async () => {
-      lastProps(mockDashboard).cloudWatchRegionControl.onChange(['us-east-1', 'eu-west-1']);
+      lastProps(mockDashboard).cloudWatch.onRegionsChange(['us-east-1', 'eu-west-1']);
     });
     expect(onRegions).toHaveBeenCalledWith(['us-east-1', 'eu-west-1']);
-    expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1', 'cloudwatch']);
-    expect(refs.toasts.addWarning).toHaveBeenCalledTimes(1);
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual([
+      'os-1',
+      'cloudwatch',
+      'cloudwatch_eu-west-1',
+    ]);
+    expect(refs.toasts.addWarning).not.toHaveBeenCalled();
   });
 
-  it('passes no region control without targets, with one region, or with CloudWatch off', async () => {
+  it('keeps every region of the selected accounts when clamping the default selection', async () => {
+    await renderPage({
+      maxDatasources: 2,
+      cloudWatchRegions: ['us-east-1', 'eu-west-1'],
+      defaultDatasources: [
+        'os-1',
+        'cloudwatch',
+        'cloudwatch_eu-west-1',
+        'cloudwatch_us-east-1_scope-b',
+      ],
+    });
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual([
+      'os-1',
+      'cloudwatch',
+      'cloudwatch_eu-west-1',
+    ]);
+  });
+
+  it('passes the CloudWatch regions without a Regions choice, and none with CloudWatch off', async () => {
     await renderPage({ cloudWatchTargets: undefined });
-    expect(lastProps(mockDashboard).cloudWatchRegionControl).toBeUndefined();
+    expect(lastProps(mockDashboard).cloudWatch).toBeUndefined();
     mockDashboard.mockClear();
+    // One region: the facet gets it but shows no Regions control.
     await renderPage({ cloudWatchTargets: { ...targets, regions: targets.regions.slice(0, 1) } });
-    expect(lastProps(mockDashboard).cloudWatchRegionControl).toBeUndefined();
+    expect(lastProps(mockDashboard).cloudWatch.regions).toHaveLength(1);
     mockDashboard.mockClear();
     refs.cloudwatchEnabled = false;
     await renderPage();
-    expect(lastProps(mockDashboard).cloudWatchRegionControl).toBeUndefined();
+    expect(lastProps(mockDashboard).cloudWatch).toBeUndefined();
   });
 
   it('is unchanged without the CloudWatch props', async () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} datasources={[osDs]} />);
     });
-    expect(lastProps(mockDashboard).cloudWatchRegionControl).toBeUndefined();
+    expect(lastProps(mockDashboard).cloudWatch).toBeUndefined();
     expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1']);
   });
 });

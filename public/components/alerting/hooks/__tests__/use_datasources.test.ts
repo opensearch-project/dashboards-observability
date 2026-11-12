@@ -75,7 +75,7 @@ describe('useDatasources CloudWatch rows', () => {
     expect(result.current.datasources.map((d) => d.id)).toEqual(['local-cluster', 'cloudwatch']);
   });
 
-  it('lists one row per scope and selected region, plus each scope default region', async () => {
+  it('lists one row per scope and selected region only', async () => {
     const { result } = renderHook(() =>
       useDatasources({ cloudWatch: { targets, regions: ['us-east-1', 'us-west-2'] } })
     );
@@ -85,8 +85,7 @@ describe('useDatasources CloudWatch rows', () => {
       ['cloudwatch_us-west-2', 'CloudWatch · CloudWatch · us-west-2'],
       ['cloudwatch_us-east-1_scope-b', 'CloudWatch · Shared · us-east-1'],
       ['cloudwatch_us-west-2_scope-b', 'CloudWatch · Shared · us-west-2'],
-      // The scope's default region is listed although it isn't selected.
-      ['cloudwatch_eu-west-1_scope-b', 'CloudWatch · Shared · eu-west-1'],
+      // The scope is homed in eu-west-1, which isn't selected: no row there.
     ]);
   });
 

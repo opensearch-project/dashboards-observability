@@ -8,7 +8,11 @@ import {
   CLOUDWATCH_DATASOURCE_ID,
   buildCloudWatchDatasource,
   cloudWatchDatasourceName,
+  clampToDatasourceCap,
   cloudWatchDatasourcesFor,
+  cloudWatchScopeKeyOf,
+  countCloudWatchPairs,
+  countTowardDatasourceCap,
   decodeCloudWatchDatasourceId,
   encodeCloudWatchDatasourceId,
   isCloudWatchDatasourceId,
@@ -198,21 +202,26 @@ describe('buildCloudWatchDatasource', () => {
 });
 
 describe('cloudWatchDatasourcesFor', () => {
-  it('gives each scope a row per selected region plus its default region', () => {
-    const ids = cloudWatchDatasourcesFor(targets, ['us-east-1', 'us-west-2']).map((d) => d.id);
+  it('gives each scope a row per selected region only', () => {
+    const ids = cloudWatchDatasourcesFor(targets, ['us-west-2', 'us-east-1']).map((d) => d.id);
+    // Production is homed in eu-west-1, which isn't selected: no row there.
     expect(ids).toEqual([
       'cloudwatch',
       'cloudwatch_us-west-2',
       'cloudwatch_us-east-1_s1',
       'cloudwatch_us-west-2_s1',
-      // Production is homed in an unselected region; its default row is kept.
-      'cloudwatch_eu-west-1_s1',
     ]);
   });
 
-  it('ignores selected regions the source does not offer', () => {
-    const ids = cloudWatchDatasourcesFor(targets, ['ap-south-1']).map((d) => d.id);
-    expect(ids).toEqual(['cloudwatch', 'cloudwatch_eu-west-1_s1']);
+  it('falls back to each scope default region when no offered region is selected', () => {
+    expect(cloudWatchDatasourcesFor(targets, ['ap-south-1']).map((d) => d.id)).toEqual([
+      'cloudwatch',
+      'cloudwatch_eu-west-1_s1',
+    ]);
+    expect(cloudWatchDatasourcesFor(targets, []).map((d) => d.id)).toEqual([
+      'cloudwatch',
+      'cloudwatch_eu-west-1_s1',
+    ]);
   });
 
   it('gives one row per scope at its default region when the source reports no regions', () => {
@@ -234,5 +243,59 @@ describe('cloudWatchDatasourcesFor', () => {
 
   it('gives no rows without scopes', () => {
     expect(cloudWatchDatasourcesFor({ ...targets, scopes: [] }, ['us-east-1'])).toEqual([]);
+  });
+});
+
+describe('datasource cap counting', () => {
+  it('maps CloudWatch ids to their scope and other ids to nothing', () => {
+    expect(cloudWatchScopeKeyOf('cloudwatch')).toBe('');
+    expect(cloudWatchScopeKeyOf('cloudwatch_us-west-2')).toBe('');
+    expect(cloudWatchScopeKeyOf('cloudwatch_us-west-2_s1')).toBe('s1');
+    expect(cloudWatchScopeKeyOf('ds-os')).toBeUndefined();
+  });
+
+  it('counts a CloudWatch account once, whatever its regions', () => {
+    expect(
+      countTowardDatasourceCap([
+        'ds-os',
+        'prom-1',
+        'cloudwatch',
+        'cloudwatch_us-west-2',
+        'cloudwatch_us-east-1_s1',
+        'cloudwatch_us-west-2_s1',
+      ])
+    ).toBe(4);
+    expect(countCloudWatchPairs(['ds-os', 'cloudwatch', 'cloudwatch_us-west-2'])).toBe(2);
+  });
+
+  it('clamps to the cap in input order, keeping regions of a kept account', () => {
+    const ids = [
+      'ds-os',
+      'cloudwatch_us-east-1_a',
+      'cloudwatch_us-east-1_b',
+      'cloudwatch_us-west-2_a',
+      'cloudwatch_us-east-1_c',
+      'cloudwatch_us-west-2_b',
+    ];
+    expect(clampToDatasourceCap(ids, 3)).toEqual([
+      'ds-os',
+      'cloudwatch_us-east-1_a',
+      'cloudwatch_us-east-1_b',
+      'cloudwatch_us-west-2_a',
+      'cloudwatch_us-west-2_b',
+    ]);
+  });
+
+  it('keeps Local Cluster plus 4 accounts in 2 regions under a cap of 5', () => {
+    const ids = ['ds-os'];
+    for (const s of ['a', 'b', 'c', 'd']) {
+      ids.push(`cloudwatch_us-east-1_${s}`, `cloudwatch_us-west-2_${s}`);
+    }
+    expect(clampToDatasourceCap(ids, 5)).toEqual(ids);
+  });
+
+  it('clamps to the CloudWatch pair bound', () => {
+    const ids = Array.from({ length: 25 }, (_, i) => `cloudwatch_us-east-1_s${i}`);
+    expect(clampToDatasourceCap(ids, 30, 20)).toHaveLength(20);
   });
 });

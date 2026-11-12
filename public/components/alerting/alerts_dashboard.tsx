@@ -42,14 +42,14 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { alertMatchesSearch, filterAlerts } from '../../../common/services/alerting/filter';
+import { facetLabels } from '../../../common/services/alerting/facet_labels';
 import { AlertTimeline, AlertTimelineLegend } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
-import { CloudWatchRegionControl, CloudWatchRegionControlProps } from './cloudwatch_region_control';
+import { DatasourceFacet, DatasourceFacetCloudWatch } from './datasource_facet';
 import {
   canAcknowledgeAlert,
   SEVERITY_SORT_ORDER,
   sortBySeverity,
-  countBy,
   isStandardOpenSearchDatasource,
   SEVERITY_COLORS,
   STATE_COLORS,
@@ -539,10 +539,12 @@ function collectAlertUniqueValues(
   return Array.from(set).sort();
 }
 
+// The Labels facet reads `facetLabels`: a CloudWatch row's account and region are left out,
+// since the Datasource facet and its Regions control already filter on them.
 function collectAlertLabelKeys(alerts: UnifiedAlertSummary[]): string[] {
   const keys = new Set<string>();
   for (const a of alerts) {
-    for (const k of Object.keys(a.labels)) keys.add(k);
+    for (const k of Object.keys(facetLabels(a))) keys.add(k);
   }
   return Array.from(keys).sort();
 }
@@ -550,7 +552,7 @@ function collectAlertLabelKeys(alerts: UnifiedAlertSummary[]): string[] {
 function collectAlertLabelValues(alerts: UnifiedAlertSummary[], key: string): string[] {
   const set = new Set<string>();
   for (const a of alerts) {
-    const v = a.labels[key];
+    const v = facetLabels(a)[key];
     if (v) set.add(v);
   }
   return Array.from(set).sort();
@@ -737,8 +739,8 @@ export interface AlertsDashboardProps {
    * details.
    */
   datasourceErrorMap?: Record<string, string>;
-  /** CloudWatch region picker, rendered under the Datasource facet when set. */
-  cloudWatchRegionControl?: CloudWatchRegionControlProps;
+  /** CloudWatch regions for the Datasource facet's CloudWatch group; omitted without targets. */
+  cloudWatch?: DatasourceFacetCloudWatch;
   /**
    * Seeds the alerts search box on first render — used by deep links such as
    * `#/alerts?q=slo_id:<id>` that expect the list to arrive pre-filtered. Applied
@@ -775,7 +777,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   onTimeChange,
   onRefresh,
   datasourceErrorMap,
-  cloudWatchRegionControl,
+  cloudWatch,
   initialSearchQuery,
   initialSearchQueryKey,
   onInitialSearchQueryEdited,
@@ -805,31 +807,6 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const [labelSearch, setLabelSearch] = useState('');
   const [showAllLabels, setShowAllLabels] = useState(false);
   const [expandedGroupIds, setExpandedGroupIds] = useState<Record<string, boolean>>({});
-
-  // Build selectable datasource entries for the filter facet — alpha by name
-  const datasourceEntries = useMemo(
-    () =>
-      datasources
-        .map((ds) => ({ id: ds.id, label: ds.name }))
-        .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })),
-    [datasources]
-  );
-
-  // Per-name icon map so the datasource facet renders a leading
-  // OpenSearch / Prometheus glyph next to each option. Keyed by name
-  // because that's the option key passed to FacetFilterGroup.
-  const datasourceIconMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    for (const ds of datasources) {
-      map[ds.name] =
-        ds.type === 'cloudwatch'
-          ? 'logoAWS'
-          : ds.type === 'prometheus'
-            ? 'logoPrometheus'
-            : 'logoOpenSearch';
-    }
-    return map;
-  }, [datasources]);
 
   // Unique values for facets
   const uniqueSeverities = useMemo(
@@ -872,7 +849,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     for (const key of labelKeys) {
       labelCounts[key] = {};
       for (const a of searchMatched) {
-        const v = a.labels[key];
+        const v = facetLabels(a)[key];
         if (v) labelCounts[key][v] = (labelCounts[key][v] || 0) + 1;
       }
     }
@@ -1336,51 +1313,29 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
               <div className="altFiltersBody">
-                <FacetFilterGroup
-                  id="datasource"
-                  label={i18n.translate('observability.alerting.alertsDashboard.facet.datasource', {
-                    defaultMessage: 'Datasource',
-                  })}
-                  iconMap={datasourceIconMap}
-                  errorMap={datasourceErrorMap}
-                  options={datasourceEntries.map((e) => e.label)}
-                  selected={selectedDsIds
-                    .map((id) => datasourceEntries.find((e) => e.id === id)?.label || '')
-                    .filter(Boolean)}
-                  onChange={(labels) => {
-                    const ids = labels
-                      .map((l) => datasourceEntries.find((e) => e.label === l)?.id)
-                      .filter(Boolean) as string[];
+                <DatasourceFacet
+                  datasources={datasources}
+                  selectedDsIds={selectedDsIds}
+                  onChange={(ids) => {
                     onDatasourceChange(ids);
                     // Clearing datasource invalidates the other facet options
                     // (severity/state/labels are derived from the selected
                     // datasources' alerts), so wipe dependent filters.
                     if (ids.length === 0) clearDependentFilters();
                   }}
-                  counts={countBy(
-                    datasourceEntries.filter(
-                      (e) => selectedDsIds.includes(e.id) || selectedDsIds.length === 0
-                    ),
-                    (e) => e.label
-                  )}
-                  searchable
-                  showCounts={false}
-                  initialVisible={5}
-                  maxSelected={maxDatasources}
+                  maxDatasources={maxDatasources}
                   onCapReached={onDatasourceCapReached}
+                  errorMap={datasourceErrorMap}
+                  cloudWatch={cloudWatch}
                   searchAriaLabel={i18n.translate(
                     'observability.alerting.alertsDashboard.searchDatasourcesAriaLabel',
                     {
                       defaultMessage: 'Search datasources',
                     }
                   )}
-                  checkedFirst
                   isCollapsed={isFacetCollapsed('datasource')}
                   onToggleCollapse={toggleFacetCollapse}
                 />
-                {cloudWatchRegionControl && (
-                  <CloudWatchRegionControl {...cloudWatchRegionControl} />
-                )}
 
                 {renderFacetGroup(
                   'type',

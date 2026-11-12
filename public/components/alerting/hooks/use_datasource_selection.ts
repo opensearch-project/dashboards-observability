@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Datasource } from '../../../../common/types/alerting';
 import { ALERT_MANAGER_SELECTED_DS_STORAGE_KEY } from '../../../../common/constants/alerting_settings';
+import { clampToDatasourceCap } from '../../../../common/services/alerting/cloudwatch_datasource_id';
 import {
   loadPersistedSelection as loadPersistedSelectionRaw,
   persistSelection as persistSelectionRaw,
@@ -67,13 +68,17 @@ export function useDatasourceSelection({
   // lowers the cap after the user stored 5 names, we drop the overflow.
   useEffect(() => {
     if (datasourcesLoading) return;
+    // The cap counts sources: a CloudWatch account counts once, whatever its regions.
     setSelectedDsIdsState((prev) => {
-      if (prev.length > 0) return prev.slice(0, maxDatasources);
+      if (prev.length > 0) {
+        const clamped = clampToDatasourceCap(prev, maxDatasources);
+        return clamped.length === prev.length ? prev : clamped;
+      }
 
       const persistedNames = loadPersistedSelection();
       if (persistedNames.length > 0) {
         const resolved = resolveDatasourceTokens(persistedNames, datasources);
-        if (resolved.length > 0) return resolved.slice(0, maxDatasources);
+        if (resolved.length > 0) return clampToDatasourceCap(resolved, maxDatasources);
         // All cached entries were stale (datasources removed). Fall
         // through to the admin-curated setting below rather than
         // jumping straight to "first datasource" — the setting is a
@@ -82,7 +87,7 @@ export function useDatasourceSelection({
 
       if (defaultDatasources.length > 0) {
         const resolved = resolveDatasourceTokens(defaultDatasources, datasources);
-        if (resolved.length > 0) return resolved.slice(0, maxDatasources);
+        if (resolved.length > 0) return clampToDatasourceCap(resolved, maxDatasources);
       }
 
       const first = datasources[0]?.id;

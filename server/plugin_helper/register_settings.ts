@@ -194,7 +194,7 @@ export const registerObservabilityUISettings = (uiSettings: UiSettingsServiceSet
       category: ['Observability'],
       description: i18n.translate('observability.alertManagerMaxDatasources.description', {
         defaultMessage:
-          'Maximum number of datasources that can be selected at once on the Alerts page. Raising this increases fan-out query cost.',
+          'Maximum number of datasources that can be selected at once on the Alerts page. A CloudWatch account counts once, whatever the number of regions selected. Raising this increases fan-out query cost.',
       }),
       schema: schema.number({
         min: 1,

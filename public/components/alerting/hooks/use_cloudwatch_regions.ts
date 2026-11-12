@@ -10,9 +10,14 @@
  */
 import { useCallback, useMemo, useState } from 'react';
 import type { CloudWatchTargets } from '../../../../common/types/alerting';
-import { ALERT_MANAGER_CLOUDWATCH_REGIONS_STORAGE_KEY } from '../../../../common/constants/alerting_settings';
+import {
+  ALERT_MANAGER_CLOUDWATCH_REGIONS_STORAGE_KEY,
+  ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS,
+} from '../../../../common/constants/alerting_settings';
 import {
   CLOUDWATCH_DATASOURCE_ID,
+  countCloudWatchPairs,
+  countTowardDatasourceCap,
   decodeCloudWatchDatasourceId,
   encodeCloudWatchDatasourceId,
   isCloudWatchDatasourceId,
@@ -61,6 +66,40 @@ export function useCloudWatchRegions(targets?: CloudWatchTargets): UseCloudWatch
   return { selectedRegions, setSelectedRegions };
 }
 
+export interface DatasourceSelectionChange {
+  selectedDsIds: string[];
+  /** The change was refused: it would count more than `maxDatasources` sources. */
+  capReached: boolean;
+  /** The change was refused: it would select more than the CloudWatch pair bound. */
+  pairCapReached: boolean;
+}
+
+/**
+ * `next` when it fits the limits, else `prev` with the flag that refused it. A change that
+ * only removes ids, or doesn't raise the count it would break, is always accepted, so a
+ * selection that is already over a lowered cap can still shrink.
+ *
+ * `maxDatasources` counts sources: a CloudWatch account counts once however many regions are
+ * selected (`countTowardDatasourceCap`). CloudWatch (account, region) datasources are bounded
+ * by `maxPairs`.
+ */
+export function limitDatasourceSelection(
+  prev: string[],
+  next: string[],
+  maxDatasources: number,
+  maxPairs: number = ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS
+): DatasourceSelectionChange {
+  const sources = countTowardDatasourceCap(next);
+  if (sources > maxDatasources && sources > countTowardDatasourceCap(prev)) {
+    return { selectedDsIds: prev, capReached: true, pairCapReached: false };
+  }
+  const pairs = countCloudWatchPairs(next);
+  if (pairs > maxPairs && pairs > countCloudWatchPairs(prev)) {
+    return { selectedDsIds: prev, capReached: false, pairCapReached: true };
+  }
+  return { selectedDsIds: next, capReached: false, pairCapReached: false };
+}
+
 export interface CloudWatchRegionChange {
   targets: CloudWatchTargets;
   prevRegions: string[];
@@ -72,8 +111,9 @@ export interface CloudWatchRegionChange {
 /**
  * The datasource selection after a region change. A removed region drops every selected
  * CloudWatch id in that region (`cloudwatch` is in the default region). An added region selects
- * its id for every account scope that already has a CloudWatch selection, unless that would go
- * over `maxDatasources`: then nothing is added and `capReached` is set.
+ * its id for every account scope that already has a CloudWatch selection. A change past the
+ * limits (see `limitDatasourceSelection`) keeps the selection and sets the flag; the caller
+ * then keeps the regions too.
  */
 export function applyCloudWatchRegionChange({
   targets,
@@ -81,7 +121,7 @@ export function applyCloudWatchRegionChange({
   nextRegions,
   selectedDsIds,
   maxDatasources,
-}: CloudWatchRegionChange): { selectedDsIds: string[]; capReached: boolean } {
+}: CloudWatchRegionChange): DatasourceSelectionChange {
   const removed = new Set(prevRegions.filter((r) => !nextRegions.includes(r)));
   const added = nextRegions.filter((r) => !prevRegions.includes(r));
 
@@ -114,9 +154,5 @@ export function applyCloudWatchRegionChange({
       additions.push(id);
     }
   }
-  if (additions.length === 0) return { selectedDsIds: kept, capReached: false };
-  if (kept.length + additions.length > maxDatasources) {
-    return { selectedDsIds: kept, capReached: true };
-  }
-  return { selectedDsIds: [...kept, ...additions], capReached: false };
+  return limitDatasourceSelection(selectedDsIds, [...kept, ...additions], maxDatasources);
 }
