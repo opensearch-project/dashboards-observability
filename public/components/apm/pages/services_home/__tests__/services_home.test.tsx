@@ -157,16 +157,8 @@ const renderHome = (
   );
 };
 
-// Seven distinct platforms (before ':'); sorted -> dev, ec2, ecs, eks, lambda, prod, staging
-const SEVEN_ENVS = [
-  'prod:default',
-  'dev:default',
-  'staging:default',
-  'eks:cluster/ns',
-  'ec2:asg',
-  'ecs:cluster',
-  'lambda:default',
-];
+// Seven distinct environments; sorted -> dev, ec2, ecs, eks, lambda, prod, staging
+const SEVEN_ENVS = ['prod', 'dev', 'staging', 'eks', 'ec2', 'ecs', 'lambda'];
 
 const envGroup = () => screen.getByTestId('environmentCheckboxGroup');
 const checkedIds = () =>
@@ -241,6 +233,61 @@ describe('ServicesHome — Environment filter', () => {
     // Clear all wipes the map.
     fireEvent.click(screen.getByTestId('environmentClearAll'));
     expect(checkedIds()).toEqual([]);
+  });
+
+  const tableRows = () =>
+    screen
+      .getAllByRole('row')
+      .slice(1)
+      .map((r) => r.textContent ?? '');
+
+  it('lists each environment value separately, even when they share a platform prefix', () => {
+    renderHome(['dev', 'fvt', 'eks:cluster/dev', 'eks:cluster/fvt', 'generic:default']);
+
+    const labels = within(envGroup())
+      .getAllByRole('checkbox')
+      .map((el) => el.closest('div')?.textContent);
+    expect(labels).toEqual(['dev', 'eks:cluster/dev', 'eks:cluster/fvt', 'fvt', 'generic']);
+  });
+
+  it('filters the catalog to the selected environment only', () => {
+    mockUseServices.mockReturnValue({
+      data: [
+        makeService('fvt', 'checkout'),
+        makeService('dev', 'checkout'),
+        makeService('fvt', 'cart'),
+      ],
+      isLoading: false,
+      error: null,
+      availableGroupByAttributes: {},
+      refetch: jest.fn(),
+    });
+    render(
+      <ServicesHome
+        chrome={{ setBreadcrumbs: jest.fn() }}
+        parentBreadcrumb={{ text: 'APM', href: '#/' }}
+        onServiceClick={jest.fn()}
+      />
+    );
+    expect(tableRows()).toHaveLength(3);
+
+    fireEvent.click(within(envGroup()).getByLabelText('dev'));
+
+    const rows = tableRows();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toContain('checkout');
+    expect(rows[0]).toContain('dev');
+    expect(screen.getByTestId('stub-ActiveFilterBadges')).toHaveTextContent(
+      `${servicesI18nTexts.filters.environment}: dev`
+    );
+    // The metrics queries are scoped to the exact environment, not its platform.
+    const lastArgs = mockRedMetricsArgs.mock.calls[mockRedMetricsArgs.mock.calls.length - 1][0];
+    expect(JSON.stringify(lastArgs)).toContain('environment=~\\"dev\\"');
+  });
+
+  it('shows the full environment value in the table', () => {
+    renderHome(['eks:cluster/dev']);
+    expect(tableRows()[0]).toContain('eks:cluster/dev');
   });
 });
 

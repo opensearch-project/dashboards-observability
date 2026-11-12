@@ -3,11 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  buildScopeFilters,
-  environmentPlatformMatcher,
-  MAX_SCOPED_FILTER_CHARS,
-} from '../scope_filters';
+import { buildScopeFilters, environmentMatcher, MAX_SCOPED_FILTER_CHARS } from '../scope_filters';
 
 const svc = (serviceName: string, environment = 'eks:prod/default') => ({
   serviceName,
@@ -20,21 +16,19 @@ const dep = (serviceName: string, environment = 'eks:prod/default') => ({
   type: 'database',
 });
 
-describe('environmentPlatformMatcher', () => {
-  it('matches the platform prefix case-insensitively', () => {
-    expect(environmentPlatformMatcher('environment', ['eks'])).toBe('environment=~"(?i:eks):.*"');
+describe('environmentMatcher', () => {
+  it('matches the exact environment values', () => {
+    expect(environmentMatcher('environment', ['dev', 'fvt'])).toBe('environment=~"dev|fvt"');
   });
 
-  it('also matches values without a platform prefix for generic', () => {
-    expect(environmentPlatformMatcher('remoteEnvironment', ['generic', 'ec2'])).toBe(
-      'remoteEnvironment=~"(?i:generic):.*|(?i:ec2):.*|[^:]*"'
+  it('keeps values sharing a platform prefix distinct', () => {
+    expect(environmentMatcher('remoteEnvironment', ['eks:prod/default', 'generic:default'])).toBe(
+      'remoteEnvironment=~"eks:prod/default|generic:default"'
     );
   });
 
-  it('escapes regex metacharacters in a platform', () => {
-    expect(environmentPlatformMatcher('environment', ['a.b'])).toBe(
-      'environment=~"(?i:a\\\\.b):.*"'
-    );
+  it('escapes regex metacharacters in a value', () => {
+    expect(environmentMatcher('environment', ['a.b'])).toBe('environment=~"a\\\\.b"');
   });
 });
 
@@ -63,13 +57,13 @@ describe('buildScopeFilters', () => {
     const f = buildScopeFilters({
       catalog: [...many, svc('x', 'ec2:asg')],
       scope: many,
-      environmentPlatforms: ['eks'],
+      environments: ['eks:prod/default'],
       needsNameList: false,
     });
     expect(f).toMatchObject({
       bounded: true,
       fellBack: false,
-      serviceFilter: 'environment=~"(?i:eks):.*"',
+      serviceFilter: 'environment=~"eks:prod/default"',
       runDependencies: false,
     });
   });
@@ -85,10 +79,33 @@ describe('buildScopeFilters', () => {
     const f = buildScopeFilters({
       catalog: [...many, svc('x')],
       scope: many,
-      environmentPlatforms: ['eks'],
+      environments: ['eks:prod/default'],
     });
     expect(f).toMatchObject({ bounded: true, fellBack: false });
-    expect(f.serviceFilter).toBe('environment=~"(?i:eks):.*"');
+    expect(f.serviceFilter).toBe('environment=~"eks:prod/default"');
+  });
+
+  it('does not use an environment matcher longer than the query budget', () => {
+    const envs = Array.from({ length: 200 }, (_, i) => `environment-with-a-long-name-${i}`);
+    const many = envs.map((e, i) => svc(`service-with-a-long-name-${i}`, e));
+    const f = buildScopeFilters({
+      catalog: [...many, svc('x')],
+      scope: many,
+      environments: envs,
+      needsNameList: false,
+    });
+    expect(f).toMatchObject({ bounded: false, fellBack: true, serviceFilter: '' });
+  });
+
+  it('bounds by name list when the environment matcher is too long but the scope is short', () => {
+    const envs = Array.from({ length: 200 }, (_, i) => `environment-with-a-long-name-${i}`);
+    const f = buildScopeFilters({
+      catalog: [svc('a', envs[0]), svc('b', envs[1])],
+      scope: [svc('a', envs[0])],
+      environments: envs,
+      needsNameList: false,
+    });
+    expect(f).toMatchObject({ bounded: true, fellBack: false, serviceFilter: 'service=~"a"' });
   });
 
   it('reports a fallback when nothing can narrow a long list', () => {
