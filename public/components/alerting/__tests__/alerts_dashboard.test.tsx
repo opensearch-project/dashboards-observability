@@ -347,6 +347,34 @@ describe('AlertsDashboard', () => {
     });
   });
 
+  it.each([
+    ['now', 'now-30d'],
+    ['now-1h', 'now-1h-30d'],
+    ['now/d', 'now/d-30d'],
+  ])('Show last 30 days keeps a relative end %s relative', (pickerEnd, expectedStart) => {
+    const onTimeChange = jest.fn();
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[sampleAlert]}
+        pickerStart="now-1h"
+        pickerEnd={pickerEnd}
+        onTimeChange={onTimeChange}
+      />
+    );
+    const latest = mockTimeline.mock.calls[mockTimeline.mock.calls.length - 1][0] as {
+      onShowLast30Days: () => void;
+    };
+    latest.onShowLast30Days();
+    expect(onTimeChange).toHaveBeenCalledWith({ start: expectedStart, end: pickerEnd });
+  });
+
+  it('keeps the title and search row at the top of the table panel', () => {
+    render(<AlertsDashboard {...baseProps} />);
+    const panel = document.querySelector('.altTablePanel');
+    expect(panel?.firstElementChild).toHaveClass('altTablePanelHeader');
+  });
+
   it('groups anomalies by detector and entity in the alerts table', () => {
     const onViewDetail = jest.fn();
     render(

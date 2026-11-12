@@ -1260,12 +1260,13 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     () => countAlertsStartedInWindow(filteredAlerts, startMs, endMs),
     [filteredAlerts, startMs, endMs]
   );
-  // "Show last 30 days" widens only the start: a relative range ending now
-  // stays relative; an absolute or custom end (e.g. a past incident window)
-  // is kept, and the start moves 30 days before it.
+  // "Show last 30 days" widens only the start and keeps the end. A relative
+  // end (date math such as `now`, `now-1h` or `now/d`) stays relative, with
+  // the start 30 days before it; an absolute end (e.g. a past incident
+  // window) gets an absolute start 30 days before it.
   const showLast30Days = useCallback(() => {
-    if (pickerEnd === 'now') {
-      onTimeChange({ start: 'now-30d', end: 'now' });
+    if (pickerEnd.startsWith('now')) {
+      onTimeChange({ start: `${pickerEnd}-30d`, end: pickerEnd });
     } else {
       onTimeChange({
         start: new Date(endMs - 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -1654,7 +1655,12 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 <EuiPanel paddingSize="m" hasBorder className="altTablePanel">
                   {/* Title and search share one row; the row count moves to the
                       footer, under the table, so the data starts higher. */}
-                  <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+                  <EuiFlexGroup
+                    gutterSize="m"
+                    alignItems="center"
+                    responsive={false}
+                    className="altTablePanelHeader"
+                  >
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
                         <h2>

@@ -263,14 +263,6 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
         })
       );
     }
-    const unknownStartNote =
-      unknownStart > 0
-        ? i18n.translate('observability.alerting.alertsCharts.unknownStart', {
-            defaultMessage:
-              '{count, plural, one {# alert has} other {# alerts have}} an unknown start time',
-            values: { count: unknownStart },
-          })
-        : '';
     if (unknownStart > 0) {
       notes.push(
         i18n.translate('observability.alerting.alertsCharts.unknownStart', {
@@ -342,7 +334,7 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
     return {
       spec,
       noteText,
-      unknownStartNote,
+      unknownStart,
       excludedBeforeWindow,
       // Widening to the last 30 days (ending at `endMs`) helps only if the
       // range is shorter and some pre-window alert started inside those days.
@@ -362,7 +354,7 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
     );
 
   if (!timeline) return null;
-  const { spec, noteText, unknownStartNote, excludedBeforeWindow, canShowLast30Days } = timeline;
+  const { spec, noteText, unknownStart, excludedBeforeWindow, canShowLast30Days } = timeline;
 
   // No alert started in the window, only earlier ones that overlap it: a
   // one-line empty state instead of empty axes, with a way to widen the range.
@@ -389,7 +381,15 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({
               />{' '}
             </>
           )}
-          {unknownStartNote && <>{unknownStartNote}. </>}
+          {unknownStart > 0 && (
+            <>
+              <FormattedMessage
+                id="observability.alerting.alertsCharts.unknownStartSentence"
+                defaultMessage="{count, plural, one {# alert has} other {# alerts have}} an unknown start time."
+                values={{ count: unknownStart }}
+              />{' '}
+            </>
+          )}
           {onShowLast30Days && canShowLast30Days && (
             <EuiLink onClick={onShowLast30Days} data-test-subj="alertTimelineExtendRange">
               <FormattedMessage

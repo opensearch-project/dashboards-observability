@@ -119,6 +119,12 @@
     min-height: 240px;
   }
 
+  /* Only the table takes the panel's spare height; the title/search row
+   * (an EuiFlexGroup, which grows by default) stays at the top. */
+  .altTablePanelHeader {
+    flex: 0 0 auto;
+  }
+
   .altAlertsTable {
     flex: 1 1 auto;
     min-height: 0;
