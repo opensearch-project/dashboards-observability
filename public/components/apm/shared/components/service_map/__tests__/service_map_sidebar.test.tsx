@@ -19,16 +19,8 @@ import { ServiceMapSidebar } from '../service_map_sidebar';
 import { applicationMapI18nTexts } from '../../../../pages/application_map/application_map_i18n';
 import { ApplicationMapFilters } from '../../../../common/types/service_map_types';
 
-// Seven distinct platforms (prefix before ':'); display name is the prefix.
-const SEVEN_ENVS = [
-  'prod:default',
-  'dev:default',
-  'staging:default',
-  'eks:cluster/ns',
-  'ec2:asg',
-  'ecs:cluster',
-  'lambda:default',
-];
+// Seven distinct environments (each label is the value itself).
+const SEVEN_ENVS = ['prod', 'dev', 'staging', 'eks', 'ec2', 'ecs', 'lambda'];
 
 const baseFilters: ApplicationMapFilters = {
   faultRateThresholds: [],
@@ -81,7 +73,15 @@ describe('ServiceMapSidebar — Environment filter', () => {
     expect(within(envGroup()).queryByText('lambda')).not.toBeInTheDocument();
   });
 
-  it('search narrows the list case-insensitively (matches display name)', () => {
+  it('labels environments sharing a platform prefix by their full value', () => {
+    renderSidebar(['eks:cluster/dev', 'eks:cluster/fvt', 'generic:default']);
+
+    expect(within(envGroup()).getByText('eks:cluster/dev')).toBeInTheDocument();
+    expect(within(envGroup()).getByText('eks:cluster/fvt')).toBeInTheDocument();
+    expect(within(envGroup()).getByText('generic')).toBeInTheDocument();
+  });
+
+  it('search narrows the list case-insensitively', () => {
     renderSidebar(SEVEN_ENVS);
 
     fireEvent.change(screen.getByTestId('environmentSearch'), { target: { value: 'EC' } });
@@ -136,22 +136,22 @@ describe('ServiceMapSidebar — Environment filter', () => {
   });
 
   it('Select all merges the currently-filtered subset into the selection', () => {
-    const { onFiltersChange } = renderSidebar(SEVEN_ENVS, ['prod:default']);
+    const { onFiltersChange } = renderSidebar(SEVEN_ENVS, ['prod']);
 
-    // Narrow to the two "ec*" platforms, then select all -> existing prod kept, ec2/ecs added.
+    // Narrow to the two "ec*" environments, then select all -> existing prod kept, ec2/ecs added.
     fireEvent.change(screen.getByTestId('environmentSearch'), { target: { value: 'ec' } });
     fireEvent.click(screen.getByTestId('environmentSelectAll'));
 
     expect(onFiltersChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        environments: expect.arrayContaining(['prod:default', 'ec2:asg', 'ecs:cluster']),
+        environments: expect.arrayContaining(['prod', 'ec2', 'ecs']),
       })
     );
     expect(onFiltersChange.mock.calls[0][0].environments).toHaveLength(3);
   });
 
   it('Clear all empties the selection', () => {
-    const { onFiltersChange } = renderSidebar(SEVEN_ENVS, ['prod:default', 'dev:default']);
+    const { onFiltersChange } = renderSidebar(SEVEN_ENVS, ['prod', 'dev']);
 
     fireEvent.click(screen.getByTestId('environmentClearAll'));
 

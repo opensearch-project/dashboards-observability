@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { FailureRateThresholdFilter, ErrorRateThreshold } from '../filters';
 import { ApplicationMapFilters } from '../../../common/types/service_map_types';
-import { getEnvironmentDisplayName, APM_CONSTANTS } from '../../../common/constants';
+import { getEnvironmentLabel, APM_CONSTANTS } from '../../../common/constants';
 import { applicationMapI18nTexts as i18nTexts } from '../../../pages/application_map/application_map_i18n';
 import { TruncatedLabel } from '../../../../common/truncated_label';
 import { ENVIRONMENT_GROUP_BY } from '../../utils/map_grouping';
@@ -89,12 +89,14 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
     ].map((attrPath) => ({ label: attrPath }));
   }, [availableGroupByAttributes]);
 
-  // Environments narrowed by the per-filter search box (matches the display name).
+  // Environments narrowed by the per-filter search box (matches the raw value or its label).
   const filteredEnvironments = useMemo(() => {
     if (!environmentSearchQuery) return availableEnvironments;
     const searchLower = environmentSearchQuery.toLowerCase();
-    return availableEnvironments.filter((env) =>
-      getEnvironmentDisplayName(env).toLowerCase().includes(searchLower)
+    return availableEnvironments.filter(
+      (env) =>
+        env.toLowerCase().includes(searchLower) ||
+        getEnvironmentLabel(env).toLowerCase().includes(searchLower)
     );
   }, [availableEnvironments, environmentSearchQuery]);
 
@@ -399,7 +401,7 @@ export const ServiceMapSidebar: React.FC<ServiceMapSidebarProps> = ({
                       : filteredEnvironments.slice(0, APM_CONSTANTS.ATTRIBUTE_VALUES_INITIAL_LIMIT)
                     ).map((env) => ({
                       id: env,
-                      label: <TruncatedLabel text={getEnvironmentDisplayName(env)} />,
+                      label: <TruncatedLabel text={getEnvironmentLabel(env)} />,
                     }))}
                     idToSelectedMap={environmentSelectionMap}
                     onChange={handleEnvironmentChange}

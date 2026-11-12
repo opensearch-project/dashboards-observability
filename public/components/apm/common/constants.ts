@@ -295,33 +295,9 @@ export const ENVIRONMENT_DISPLAY_MAP: Record<string, string> = {
 };
 
 /**
- * Get display-friendly environment name
- * @param environment - Raw environment string (e.g., "generic:default", "eks:cluster/namespace")
- * @returns Display-friendly name (e.g., "generic", "eks")
- */
-export function getEnvironmentDisplayName(environment: string): string {
-  if (!environment) {
-    return '';
-  }
-
-  // Check if there's a direct mapping
-  if (ENVIRONMENT_DISPLAY_MAP[environment]) {
-    return ENVIRONMENT_DISPLAY_MAP[environment];
-  }
-
-  // Default: return environment prefix (before colon)
-  const colonIndex = environment.indexOf(':');
-  if (colonIndex > 0) {
-    return environment.substring(0, colonIndex);
-  }
-
-  return environment;
-}
-
-/**
- * Full environment label: the raw value, with only well-known placeholders (`generic:default`)
- * shortened. Unlike getEnvironmentDisplayName it keeps the part after the platform prefix, so
- * `eks:cluster/dev` and `eks:cluster/fvt` stay distinguishable.
+ * Environment label shown across APM: the raw value, with only well-known placeholders
+ * (`generic:default`) shortened. Keeps the part after the platform prefix, so `eks:cluster/dev`
+ * and `eks:cluster/fvt` stay distinguishable.
  */
 export function getEnvironmentLabel(environment: string): string {
   if (!environment) {
