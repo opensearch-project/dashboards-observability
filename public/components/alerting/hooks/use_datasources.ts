@@ -132,7 +132,13 @@ export function mapSavedObjectsToDatasources(
 
 export interface UseDatasourcesResult {
   datasources: Datasource[];
+  /** True while the saved-object datasources (OpenSearch, Prometheus) are loading. */
   isLoading: boolean;
+  /**
+   * True while the CloudWatch targets are loading. The CloudWatch rows are left out of
+   * `datasources` meanwhile; the other rows don't wait for them.
+   */
+  cloudWatchLoading: boolean;
   error: Error | null;
   refresh: () => void;
 }
@@ -144,7 +150,7 @@ export interface UseDatasourcesOptions {
    */
   cloudWatch?: {
     targets?: CloudWatchTargets;
-    /** True while the targets are loading; the datasource list counts as loading too. */
+    /** True while the targets are loading; the CloudWatch rows are left out meanwhile. */
     targetsLoading?: boolean;
     regions?: string[];
   };
@@ -216,18 +222,20 @@ export function useDatasources(options?: UseDatasourcesOptions): UseDatasourcesR
   }, [refreshToken]);
 
   // Replace the single CloudWatch row (present only while CloudWatch is on) with one row per
-  // (scope, region) the source offers for the selected regions.
+  // (scope, region) the source offers for the selected regions. While the targets load, leave
+  // the CloudWatch rows out, so the single row doesn't flash before the per-scope rows.
   const datasources = useMemo(() => {
-    if (!cloudWatchTargets || !discovered.some((d) => d.type === 'cloudwatch')) return discovered;
+    if (!discovered.some((d) => d.type === 'cloudwatch')) return discovered;
+    if (cloudWatchTargetsLoading) return discovered.filter((d) => d.type !== 'cloudwatch');
+    if (!cloudWatchTargets) return discovered;
     return [
       ...discovered.filter((d) => d.type !== 'cloudwatch'),
       ...cloudWatchDatasourcesFor(cloudWatchTargets, cloudWatchRegions ?? []),
     ];
-  }, [discovered, cloudWatchTargets, cloudWatchRegions]);
-  const loading = isLoading || cloudWatchTargetsLoading;
+  }, [discovered, cloudWatchTargets, cloudWatchTargetsLoading, cloudWatchRegions]);
 
   return useMemo(
-    () => ({ datasources, isLoading: loading, error, refresh }),
-    [datasources, loading, error, refresh]
+    () => ({ datasources, isLoading, cloudWatchLoading: cloudWatchTargetsLoading, error, refresh }),
+    [datasources, isLoading, cloudWatchTargetsLoading, error, refresh]
   );
 }

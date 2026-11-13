@@ -107,17 +107,22 @@ describe('useDatasources CloudWatch rows', () => {
     expect(cloudWatchRows(result.current.datasources)).toEqual([]);
   });
 
-  it('stays loading while the targets load', async () => {
+  it('publishes the other rows while the targets load, without CloudWatch rows', async () => {
     const { result, rerender } = renderHook(
-      ({ loading }) => useDatasources({ cloudWatch: { targetsLoading: loading } }),
+      ({ loading, t }) =>
+        useDatasources({ cloudWatch: { targets: t, targetsLoading: loading, regions: [] } }),
       {
-        initialProps: { loading: true },
+        initialProps: { loading: true, t: undefined as CloudWatchTargets | undefined },
       }
     );
-    await waitFor(() => expect(mockFind).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(result.current.datasources.length).toBeGreaterThan(0));
-    expect(result.current.isLoading).toBe(true);
-    rerender({ loading: false });
-    expect(result.current.isLoading).toBe(false);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.cloudWatchLoading).toBe(true);
+    expect(result.current.datasources.map((d) => d.id)).toEqual(['local-cluster']);
+    rerender({ loading: false, t: targets });
+    expect(result.current.cloudWatchLoading).toBe(false);
+    expect(cloudWatchRows(result.current.datasources).map(([id]) => id)).toEqual([
+      'cloudwatch',
+      'cloudwatch_eu-west-1_scope-b',
+    ]);
   });
 });

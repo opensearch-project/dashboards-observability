@@ -9,6 +9,10 @@
  * cluster, a Prometheus workspace, or a CloudWatch account scope. A CloudWatch account stands
  * for its (account, region) datasources in the selected regions; the group's "Regions" control
  * (shown once an account is checked) picks those regions for every checked account.
+ *
+ * Within each group, checked entries come first and the first
+ * `DATASOURCE_FACET_INITIAL_VISIBLE` entries show, with a "+N more" toggle; a search shows every
+ * match.
  */
 import React, { useMemo, useState } from 'react';
 import {
@@ -20,6 +24,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -33,6 +38,14 @@ import { limitDatasourceSelection } from './hooks/use_cloudwatch_regions';
 import { CLOUDWATCH_ICON_FALLBACK, useCloudWatchIconType } from './cloudwatch_icon';
 
 const FACET_ID = 'datasource';
+
+/** Entries shown per group before the "+N more" toggle. */
+export const DATASOURCE_FACET_INITIAL_VISIBLE = 5;
+
+/** A `data-test-subj` suffix for an entry key (`ds:<id>`, `cw:<scope>`): letters, digits, `-`. */
+export function datasourceEntryTestSubj(key: string): string {
+  return `datasourceFacet-entry-${key.replace(/[^A-Za-z0-9-]/g, '-')}`;
+}
 
 export const DATASOURCE_TYPE_ORDER: DatasourceType[] = ['opensearch', 'prometheus', 'cloudwatch'];
 
@@ -146,6 +159,8 @@ export interface DatasourceFacetCloudWatch {
   onRegionsChange: (regions: string[]) => void;
   /** Fires when a change would select too many CloudWatch (account, region) datasources. */
   onPairCapReached: () => void;
+  /** True while the CloudWatch accounts load; the group shows a loading state meanwhile. */
+  loading?: boolean;
 }
 
 export interface DatasourceFacetProps {
@@ -175,6 +190,7 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
   onToggleCollapse,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandedTypes, setExpandedTypes] = useState<Set<DatasourceType>>(() => new Set());
   const cloudWatchIconType = useCloudWatchIconType();
   const title = i18n.translate('observability.alerting.datasourceFacet.title', {
     defaultMessage: 'Datasource',
@@ -207,7 +223,7 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
           <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
             <EuiCheckbox
               id={checkboxId}
-              data-test-subj={`datasourceFacet-entry-${entry.key}`}
+              data-test-subj={datasourceEntryTestSubj(entry.key)}
               label={
                 // Labels wrap instead of truncating, so a long account label stays readable.
                 <span style={{ fontSize: 12, lineHeight: '18px', overflowWrap: 'anywhere' }}>
@@ -310,13 +326,25 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
           />
           <EuiSpacer size="xs" />
           {DATASOURCE_TYPE_ORDER.map((type) => {
-            const ofType = visible.filter((e) => e.type === type);
+            const matching = visible.filter((e) => e.type === type);
+            // Checked first, keeping the order within the checked and unchecked parts.
+            const ordered = [
+              ...matching.filter((e) => checkedKeys.has(e.key)),
+              ...matching.filter((e) => !checkedKeys.has(e.key)),
+            ];
+            const expanded = expandedTypes.has(type);
+            const hasOverflow = !q && ordered.length > DATASOURCE_FACET_INITIAL_VISIBLE;
+            const ofType =
+              hasOverflow && !expanded
+                ? ordered.slice(0, DATASOURCE_FACET_INITIAL_VISIBLE)
+                : ordered;
             const showRegions =
               type === 'cloudwatch' &&
               !!cloudWatch &&
               cloudWatch.regions.length > 1 &&
               cloudWatchChecked;
-            if (ofType.length === 0 && !showRegions) return null;
+            const showLoading = type === 'cloudwatch' && !!cloudWatch?.loading && !q;
+            if (ofType.length === 0 && !showRegions && !showLoading) return null;
             return (
               <div
                 key={type}
@@ -345,6 +373,57 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <div style={{ paddingLeft: 4 }}>{ofType.map(renderEntry)}</div>
+                {showLoading && (
+                  <EuiFlexGroup
+                    gutterSize="xs"
+                    alignItems="center"
+                    responsive={false}
+                    style={{ paddingLeft: 4 }}
+                    data-test-subj="datasourceFacet-cloudwatch-loading"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="s" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="observability.alerting.datasourceFacet.cloudWatchLoading"
+                          defaultMessage="Loading accounts"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+                {hasOverflow && (
+                  <EuiLink
+                    onClick={() =>
+                      setExpandedTypes((prev) => {
+                        const next = new Set(prev);
+                        if (next.has(type)) next.delete(type);
+                        else next.add(type);
+                        return next;
+                      })
+                    }
+                    color="primary"
+                    data-test-subj={`datasourceFacet-group-${type}-showMore`}
+                    style={{ marginTop: 4, paddingLeft: 4 }}
+                  >
+                    <EuiText size="xs">
+                      {expanded ? (
+                        <FormattedMessage
+                          id="observability.alerting.facetFilterPanel.showLess"
+                          defaultMessage="Show less"
+                        />
+                      ) : (
+                        <FormattedMessage
+                          id="observability.alerting.facetFilterPanel.showMore"
+                          defaultMessage="+{count} more"
+                          values={{ count: ordered.length - DATASOURCE_FACET_INITIAL_VISIBLE }}
+                        />
+                      )}
+                    </EuiText>
+                  </EuiLink>
+                )}
                 {showRegions && cloudWatch && (
                   <div style={{ paddingLeft: 4, marginTop: 4 }}>
                     <CloudWatchRegionControl

@@ -109,6 +109,8 @@ interface AlarmsPageProps {
   datasources: Datasource[];
   /** True while the initial datasource discovery is pending. */
   datasourcesLoading: boolean;
+  /** True while the CloudWatch datasources are loading (they aren't in `datasources` yet). */
+  cloudWatchLoading?: boolean;
   /** Datasource names/ids to pre-select on first mount (from uiSettings). */
   defaultDatasources: string[];
   /** Cap on concurrently selected datasources (from uiSettings). */
@@ -268,6 +270,7 @@ function buildUniqueCloneName(
 export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   datasources,
   datasourcesLoading,
+  cloudWatchLoading = false,
   defaultDatasources,
   maxDatasources,
   cloudWatchTargets,
@@ -378,6 +381,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const { selectedDsIds, setSelectedDsIds } = useDatasourceSelection({
     datasources,
     datasourcesLoading,
+    cloudWatchLoading,
     defaultDatasources,
     maxDatasources,
   });
@@ -499,12 +503,20 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       return changed ? next : prev;
     });
   }, [rawAlerts]);
+  // A status names its datasource by the server's name; the page shows its own row name, matched
+  // by id (a datasource the server couldn't resolve is named by its id).
+  const datasourceDisplayName = useCallback(
+    (s: { datasourceId: string; datasourceName: string }) =>
+      datasources.find((d) => d.id === s.datasourceId)?.name ?? s.datasourceName,
+    [datasources]
+  );
   const alertsWarnings = useMemo(() => {
     const failed = (alertsData?.datasourceStatus || []).filter(
       (s) => s.status === 'error' || !!s.error
     );
     return failed.map((s) => ({
-      datasourceName: s.datasourceName,
+      datasourceId: s.datasourceId,
+      datasourceName: datasourceDisplayName(s),
       error:
         s.error ||
         i18n.translate('observability.alerting.alarmsPage.unknownError', {
@@ -512,7 +524,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         }),
       errorDetail: s.errorDetail,
     }));
-  }, [alertsData]);
+  }, [alertsData, datasourceDisplayName]);
   // Backend hints surfaced through the dashboard banner props.
   const alertsTruncated = (alertsData?.datasourceStatus || []).some((s) => s.truncated);
   const alertsFallbackHints = useMemo(
@@ -520,10 +532,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       (alertsData?.datasourceStatus || [])
         .filter((s) => s.fallback)
         .map((s) => ({
-          datasourceName: s.datasourceName,
+          datasourceName: datasourceDisplayName(s),
           fallback: s.fallback!,
         })),
-    [alertsData]
+    [alertsData, datasourceDisplayName]
   );
   const alertsErrorMessage =
     alertsError instanceof Error ? alertsError.message : alertsError ? String(alertsError) : null;
@@ -858,7 +870,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       text: toMountPoint(
         <FormattedMessage
           id="observability.alerting.alarmsPage.maxDatasourcesToast.text"
-          defaultMessage="Your workspace limit is {max} datasources. Clear one to add another, or change it in {settingsLink}."
+          defaultMessage="The limit is {max} datasources. Clear one to add another, or change it in {settingsLink}."
           values={{
             max: maxDatasources,
             settingsLink: (
@@ -973,23 +985,33 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   );
   // The Datasource facet's CloudWatch group: accounts come from the datasource list; this adds
   // the Regions control (shown by the facet when an account is checked and >1 region exists).
-  const cloudWatchFacet = useMemo<DatasourceFacetCloudWatch | undefined>(
-    () =>
-      coreRefs.cloudwatchEnabled && cloudWatchTargets
-        ? {
-            regions: cloudWatchTargets.regions,
-            selectedRegions: cloudWatchRegions ?? [],
-            onRegionsChange: handleCloudWatchRegionsChange,
-            onPairCapReached: handleCloudWatchPairCapReached,
-          }
-        : undefined,
-    [
-      cloudWatchTargets,
-      cloudWatchRegions,
-      handleCloudWatchRegionsChange,
-      handleCloudWatchPairCapReached,
-    ]
-  );
+  // While the CloudWatch datasources load, the group shows a loading state instead.
+  const cloudWatchFacet = useMemo<DatasourceFacetCloudWatch | undefined>(() => {
+    if (!coreRefs.cloudwatchEnabled) return undefined;
+    if (cloudWatchLoading) {
+      return {
+        regions: [],
+        selectedRegions: [],
+        onRegionsChange: handleCloudWatchRegionsChange,
+        onPairCapReached: handleCloudWatchPairCapReached,
+        loading: true,
+      };
+    }
+    return cloudWatchTargets
+      ? {
+          regions: cloudWatchTargets.regions,
+          selectedRegions: cloudWatchRegions ?? [],
+          onRegionsChange: handleCloudWatchRegionsChange,
+          onPairCapReached: handleCloudWatchPairCapReached,
+        }
+      : undefined;
+  }, [
+    cloudWatchLoading,
+    cloudWatchTargets,
+    cloudWatchRegions,
+    handleCloudWatchRegionsChange,
+    handleCloudWatchPairCapReached,
+  ]);
 
   // ---- Handlers ----
 
@@ -1974,22 +1996,32 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         errorDetail?: ClassifiedError;
       }
     >();
-    const addOnce = (dsName: string, message: string, errorDetail?: ClassifiedError) => {
-      // Look up id by name — both `alertsWarnings` and `rulesWarnings`
-      // carry the display name, not the id. Fall back to name as the key
-      // if the datasource list hasn't hydrated yet.
-      const ds = datasources.find((d) => d.name === dsName);
-      const id = ds?.id ?? dsName;
+    const addOnce = (
+      dsId: string | undefined,
+      dsName: string,
+      message: string,
+      errorDetail?: ClassifiedError
+    ) => {
+      // Look the datasource up by id first (a CloudWatch datasource the server couldn't resolve
+      // is named by its id), then by name. Use the row's name, so the facet indicator and the
+      // toast name the row. Fall back to the warning's own id and name if the datasource list
+      // hasn't hydrated yet.
+      const ds =
+        (dsId ? datasources.find((d) => d.id === dsId) : undefined) ??
+        datasources.find((d) => d.name === dsName);
+      const id = ds?.id ?? dsId ?? dsName;
       if (!byId.has(id))
         byId.set(id, {
           datasourceId: id,
-          datasourceName: dsName,
+          datasourceName: ds?.name ?? dsName,
           error: message,
           errorDetail,
         });
     };
-    for (const w of alertsWarnings) addOnce(w.datasourceName, w.error, w.errorDetail);
-    for (const w of rulesWarnings) addOnce(w.datasourceName, w.error, w.errorDetail);
+    for (const w of alertsWarnings)
+      addOnce(w.datasourceId, w.datasourceName, w.error, w.errorDetail);
+    for (const w of rulesWarnings)
+      addOnce(w.datasourceId, w.datasourceName, w.error, w.errorDetail);
     // Alerting-plugin probe: only decorate individual DSes when the probe
     // is finished (avoids flashing the indicator during the initial mount)
     // AND we're not already in the "everything failed" state — that latter

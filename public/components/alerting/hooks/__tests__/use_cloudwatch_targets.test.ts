@@ -64,4 +64,17 @@ describe('useCloudWatchTargets', () => {
     expect(JSON.stringify(warn.mock.calls)).not.toContain('123456789012');
     warn.mockRestore();
   });
+  it('reads again on the next mount after a failed read', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    mockGetTargets.mockRejectedValueOnce({ response: { status: 504 } });
+    mockGetTargets.mockResolvedValueOnce(targets);
+    const first = renderHook(() => useCloudWatchTargets());
+    await waitFor(() => expect(first.result.current.isLoading).toBe(false));
+    expect(first.result.current.targets).toBeUndefined();
+    first.unmount();
+    const second = renderHook(() => useCloudWatchTargets());
+    await waitFor(() => expect(second.result.current.targets).toEqual(targets));
+    expect(mockGetTargets).toHaveBeenCalledTimes(2);
+    warn.mockRestore();
+  });
 });

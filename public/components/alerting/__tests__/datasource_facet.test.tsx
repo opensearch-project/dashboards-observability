@@ -250,4 +250,59 @@ describe('DatasourceFacet', () => {
     expect(popover.textContent).toContain('us-west-2: Timed out');
     expect(popover.textContent).toContain('us-east-1: AccessDenied');
   });
+  describe('per-group limit', () => {
+    const many: Datasource[] = Array.from({ length: 8 }, (_, i) => ({
+      ...os,
+      id: `os-${i}`,
+      name: `cluster-${i}`,
+    }));
+    const osNames = () =>
+      within(screen.getByTestId('datasourceFacet-group-opensearch'))
+        .getAllByRole('checkbox')
+        .map((c) => (c.closest('.altFacetCheckboxRow') as HTMLElement).textContent);
+    it('shows 5 entries per group with a toggle for the rest', () => {
+      renderFacet({ datasources: [...many, promProd], selectedDsIds: [] });
+      expect(osNames()).toHaveLength(5);
+      const toggle = screen.getByTestId('datasourceFacet-group-opensearch-showMore');
+      expect(toggle).toHaveTextContent('+3 more');
+      // The Prometheus group has one entry, so no toggle.
+      expect(screen.queryByTestId('datasourceFacet-group-prometheus-showMore')).toBeNull();
+      fireEvent.click(toggle);
+      expect(osNames()).toHaveLength(8);
+      expect(toggle).toHaveTextContent('Show less');
+    });
+    it('puts checked entries first within the group', () => {
+      renderFacet({ datasources: many, selectedDsIds: ['os-6', 'os-7'] });
+      expect(osNames()).toEqual(['cluster-6', 'cluster-7', 'cluster-0', 'cluster-1', 'cluster-2']);
+    });
+    it('shows every match while searching', () => {
+      renderFacet({ datasources: many, selectedDsIds: [] });
+      fireEvent.change(screen.getByTestId('facetGroup-datasource-search'), {
+        target: { value: 'cluster' },
+      });
+      expect(osNames()).toHaveLength(8);
+      expect(screen.queryByTestId('datasourceFacet-group-opensearch-showMore')).toBeNull();
+    });
+  });
+  it('uses a test subject without special characters for an entry', () => {
+    renderFacet();
+    expect(screen.getByTestId('datasourceFacet-entry-ds-os-1')).toBeInTheDocument();
+    expect(screen.getByTestId('datasourceFacet-entry-cw-prod')).toBeInTheDocument();
+  });
+  it('shows a loading state in the CloudWatch group while its accounts load', () => {
+    renderFacet({
+      datasources: [os],
+      cloudWatch: {
+        regions: [],
+        selectedRegions: [],
+        onRegionsChange: jest.fn(),
+        onPairCapReached: jest.fn(),
+        loading: true,
+      },
+    });
+    const cw = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
+    expect(cw.getByTestId('datasourceFacet-cloudwatch-loading')).toHaveTextContent(
+      'Loading accounts'
+    );
+  });
 });

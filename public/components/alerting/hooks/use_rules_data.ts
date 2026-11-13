@@ -26,6 +26,8 @@ import { isAlertingConfigMissingError } from '../alarms_page_helpers';
 import { isCloudWatchDatasourceId } from '../../../../common/services/alerting/cloudwatch_datasource_id';
 
 export interface DatasourceWarning {
+  /** The datasource the status is for; the page matches warnings to datasources by id first. */
+  datasourceId?: string;
   datasourceName: string;
   error: string;
   /** Structured failure classification when the server attached one. */
@@ -112,6 +114,7 @@ export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDat
           .filter((s) => s.status === 'error')
           .filter((s) => !isAlertingConfigMissingError(s.error));
         const nextWarnings = failedStatuses.map((s) => ({
+          datasourceId: s.datasourceId,
           datasourceName: s.datasourceName,
           error:
             s.error ||

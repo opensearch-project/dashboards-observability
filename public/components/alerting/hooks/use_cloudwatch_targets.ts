@@ -6,7 +6,8 @@
 /**
  * The account scopes and regions the CloudWatch source offers, read once per page load and
  * shared by every caller. Undefined while CloudWatch is off, while loading, or when the read
- * failed; callers then keep today's single CloudWatch datasource.
+ * failed; callers then keep today's single CloudWatch datasource. Only a successful read is
+ * cached: after a failure, the next mount reads again.
  */
 import { useEffect, useMemo, useState } from 'react';
 import type { CloudWatchTargets } from '../../../../common/types/alerting';
@@ -26,6 +27,7 @@ function loadCloudWatchTargets(): Promise<CloudWatchTargets | undefined> {
       // The HTTP status only: the response body may carry provider text.
       const status = err?.response?.status ?? err?.body?.statusCode;
       console.warn('CloudWatch targets are not available; status:', status);
+      cachedTargets = undefined;
       return undefined;
     });
   }

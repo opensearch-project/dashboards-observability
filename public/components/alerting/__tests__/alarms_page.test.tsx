@@ -511,6 +511,52 @@ describe('AlarmsPage', () => {
     expect(last.datasourceErrorMap.Local).toContain('AD unavailable');
   });
 
+  it('matches a status named by its id to the datasource row, for the facet and the toast', async () => {
+    const id = 'cloudwatch_eu-west-1_prod';
+    mockUseAlerts.mockReturnValue({
+      ...emptyHookResult,
+      data: {
+        results: [],
+        datasourceStatus: [
+          {
+            datasourceId: id,
+            // The server names a datasource it couldn't resolve by its id.
+            datasourceName: id,
+            datasourceType: 'cloudwatch',
+            status: 'error',
+            data: [],
+            durationMs: 0,
+            error: 'CloudWatch datasource is not available',
+          },
+        ],
+        totalDatasources: 1,
+        completedDatasources: 0,
+        fetchedAt: '2026-01-01T00:00:00Z',
+      },
+    });
+    const rowName = 'CloudWatch · Prod · eu-west-1';
+    await act(async () => {
+      render(
+        <AlarmsPage
+          {...defaultProps}
+          datasources={[
+            {
+              id,
+              name: rowName,
+              type: 'cloudwatch',
+              url: 'cloudwatch',
+              enabled: true,
+            } as Datasource,
+          ]}
+        />
+      );
+    });
+    const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
+    expect(Object.keys(last.datasourceErrorMap)).toEqual([rowName]);
+    const toastText = JSON.stringify(mockSetToast.mock.calls);
+    expect(toastText).toContain(rowName);
+    expect(toastText).not.toContain(id);
+  });
   it('fires a "Showing current alerts only" toast when a datasource reports a legacy-fallback', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
@@ -1496,7 +1542,7 @@ describe('AlarmsPage cap toasts', () => {
     render(<I18nProvider>{toast.text}</I18nProvider>);
     const body = screen.getByTestId('alertManagerMaxDatasourcesSettingsLink').parentElement!;
     expect(body).toHaveTextContent(
-      'Your workspace limit is 7 datasources. Clear one to add another, or change it in settings.'
+      'The limit is 7 datasources. Clear one to add another, or change it in settings.'
     );
     const link = screen.getByTestId('alertManagerMaxDatasourcesSettingsLink');
     expect(link).toHaveTextContent(/^settings$/);
