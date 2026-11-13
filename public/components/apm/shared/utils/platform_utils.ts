@@ -88,6 +88,8 @@ export function keyAttributeValues(value: unknown): string[] {
   if (Array.isArray(value)) return value.flatMap(keyAttributeValues);
   const text = String(value).trim();
   if (!text) return [];
+  // Note: any plain string starting with `[` and ending with `]` is treated as a list; this
+  // matches all known keys (platform values, k8s names, host ids, scope tuples).
   if (text.startsWith('[') && text.endsWith(']')) {
     const inner = text.slice(1, -1).trim();
     if (!inner) return [];
@@ -100,7 +102,9 @@ export function keyAttributeValues(value: unknown): string[] {
       }
     }
     // The list's string form separates elements with ", " (values from Kubernetes object names
-    // and host ids contain neither).
+    // and host ids contain neither). Note: a free-form k8s.cluster.name that contains ", "
+    // cannot be represented unambiguously in the 3.5 form; it is split as two broken values.
+    // The 3.9 JSON array form does not have this limitation.
     return inner
       .split(', ')
       .map((v) => v.trim())

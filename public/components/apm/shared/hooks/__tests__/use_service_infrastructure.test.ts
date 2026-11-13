@@ -186,7 +186,7 @@ describe('keyRowsFromServiceMap: PPL array fields on OpenSearch 3.9 and 3.5', ()
     });
   });
 
-  it('expands host ids and individual keys (no scope key) in both forms', () => {
+  it('expands host ids (no scope key) in both response forms', () => {
     ['[h1, h2]', ['h1', 'h2']].forEach((hosts) => {
       const keys = toInfraKeys(
         keyRowsFromServiceMap([
@@ -200,6 +200,11 @@ describe('keyRowsFromServiceMap: PPL array fields on OpenSearch 3.9 and 3.5', ()
       expect(keys.platform).toBe('ec2');
       expect(keys.hostIds).toEqual(['h1', 'h2']);
     });
+  });
+
+  it('builds distinct cluster×namespace×workload rows without the scope key (no-scope path)', () => {
+    // Without apm.k8s.scope, the individual k8s keys are independent sets; the function builds
+    // distinct combinations (capped). It is an approximation: some may not exist.
     const keys = toInfraKeys(
       keyRowsFromServiceMap([
         {
@@ -213,6 +218,20 @@ describe('keyRowsFromServiceMap: PPL array fields on OpenSearch 3.9 and 3.5', ()
     expect(keys.scopes).toEqual([
       { cluster: 'c1', namespace: 'shop', kind: 'statefulset', workload: 'db' },
     ]);
+  });
+
+  it('caps the no-scope rows at MAX_KEY_ROWS_PER_STATS_ROW (50)', () => {
+    // 100 namespaces × 10 workloads = 1000 combinations; expect exactly 50.
+    const namespaces = Array.from({ length: 100 }, (_, i) => `ns-${i}`);
+    const deployments = Array.from({ length: 10 }, (_, i) => `svc-${i}`);
+    const { rows } = keyRowsFromServiceMap([
+      {
+        [k('apm.platform')]: 'kubernetes',
+        [k('k8s.namespace.name')]: namespaces,
+        [k('k8s.deployment.name')]: deployments,
+      },
+    ]);
+    expect(rows.length).toBe(50);
   });
 
   it('splits the scope on unescaped bars only', () => {

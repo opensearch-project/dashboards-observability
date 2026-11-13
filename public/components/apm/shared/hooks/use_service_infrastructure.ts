@@ -142,17 +142,8 @@ export function splitK8sScope(scope: string): string[] {
   return parts;
 }
 
-/** Every combination of the given per-key values (one row per combination). */
-function expandRows(
-  base: Record<string, string | undefined>,
-  values: Array<[string, string[]]>
-): Array<Record<string, string | undefined>> {
-  return values.reduce<Array<Record<string, string | undefined>>>(
-    (rows, [key, vals]) =>
-      vals.length === 0 ? rows : rows.flatMap((r) => vals.map((v) => ({ ...r, [key]: v }))),
-    [base]
-  );
-}
+/** Cap on key rows produced from one stats row (the no-scope approximation). */
+const MAX_KEY_ROWS_PER_STATS_ROW = 50;
 
 /**
  * Key rows (in the span-query shape, `resource.attributes.<key>`, one value per key) from the
@@ -160,29 +151,44 @@ function expandRows(
  *
  * The platform keys are arrays (Data Prepper keeps every value seen, bounded per key), and PPL
  * returns them as JSON arrays (OpenSearch 3.9) or as `[a, b]` strings (3.5): both are read with
- * `keyAttributeValues`, and a row with several values becomes one row per value. When Data
- * Prepper wrote the joined `apm.k8s.scope` (`cluster|namespace|kind|name`), the Kubernetes keys
- * come from it, one row per scope, so a service in two clusters keeps its real cluster / namespace
- * / workload tuples instead of their cross product. `detectionEnabled` is true when any row carries
- * the platform Data Prepper writes on every node it ran detection for.
+ * `keyAttributeValues`, and a row with several values becomes one row per value.
+ *
+ * **With `apm.k8s.scope` (Data Prepper ≥ PR #7249):** one row per scope, keeping the exact
+ * cluster / namespace / workload tuples. Cloud and host keys are added to the base row (not
+ * multiplied against each scope).
+ *
+ * **Without `apm.k8s.scope` (older Data Prepper or non-k8s):** the individual `k8s.*`,
+ * `cloud.*` and `host.id` values are independent sets (the same Data Prepper window saw each one,
+ * but their combinations are unknowable), so we build one row per distinct cluster × namespace ×
+ * workload combination, capped at `MAX_KEY_ROWS_PER_STATS_ROW`. This is an approximation: some
+ * combinations may not exist, and some real scopes may be missed. Cloud/host keys are set only
+ * when no k8s scope is found.
+ *
+ * `detectionEnabled` is true when any row carries the platform Data Prepper writes on every node
+ * it ran detection for.
  */
 export function keyRowsFromServiceMap(rows: Array<Record<string, any>>) {
   let detectionEnabled = false;
-  const values = (row: Record<string, any>, key: string) =>
+  const vals = (row: Record<string, any>, key: string) =>
     keyAttributeValues(row[`${SERVICE_MAP_KEY_PREFIX}${key}`]);
   const keyRows = rows.flatMap((row) => {
-    const platform = values(row, APM_PLATFORM_KEY)[0];
+    // Data Prepper records the first value of each multi-valued array; only the first platform
+    // value is kept here (matches the precedence in getApmPlatform).
+    const platform = vals(row, APM_PLATFORM_KEY)[0];
     if (platform) detectionEnabled = true;
     const base: Record<string, string | undefined> = {
       [`resource.attributes.${APM_PLATFORM_KEY}`]: platform,
     };
-    const scopes = values(row, K8S_SCOPE_KEY);
+
+    const scopes = vals(row, K8S_SCOPE_KEY);
     if (scopes.length > 0) {
-      // Kubernetes keys from the joined scope; the other keys (cloud, host) as recorded.
-      const other = INFRA_SPAN_KEYS.filter((k) => !k.startsWith('k8s.')).map(
-        (k) => [`resource.attributes.${k}`, values(row, k)] as [string, string[]]
-      );
-      return scopes.flatMap((scope) => {
+      // Joined scope key: exact tuples. Cloud / host values go on the base only; they are not
+      // multiplied against each scope (the host's row has no namespace, so toInfraKeys ignores
+      // the host field on k8s rows anyway).
+      INFRA_SPAN_KEYS.filter((k) => !k.startsWith('k8s.')).forEach((k) => {
+        base[`resource.attributes.${k}`] = vals(row, k)[0];
+      });
+      return scopes.map((scope) => {
         const [cluster, namespace, kind, name] = splitK8sScope(scope);
         const scoped: Record<string, string | undefined> = {
           ...base,
@@ -192,13 +198,50 @@ export function keyRowsFromServiceMap(rows: Array<Record<string, any>>) {
         WORKLOAD_KEYS.forEach(([k, attr]) => {
           scoped[`resource.attributes.${attr}`] = k === kind ? str(name) : undefined;
         });
-        return expandRows(scoped, other);
+        return scoped;
       });
     }
-    return expandRows(
-      base,
-      INFRA_SPAN_KEYS.map((k) => [`resource.attributes.${k}`, values(row, k)])
+
+    // No joined scope: build distinct cluster × namespace × workload rows.
+    const clusters = vals(row, 'k8s.cluster.name');
+    const namespaces = vals(row, 'k8s.namespace.name');
+    const workloads = WORKLOAD_KEYS.flatMap(([kind, attr]) =>
+      vals(row, attr).map((name) => ({ kind, attr, name }))
     );
+    if (namespaces.length > 0) {
+      const out: Array<Record<string, string | undefined>> = [];
+      for (const namespace of namespaces) {
+        for (const cluster of clusters.length ? clusters : [undefined]) {
+          for (const w of workloads.length ? workloads : [undefined]) {
+            if (out.length >= MAX_KEY_ROWS_PER_STATS_ROW) break;
+            const r: Record<string, string | undefined> = {
+              ...base,
+              'resource.attributes.k8s.namespace.name': namespace,
+              'resource.attributes.k8s.cluster.name': cluster,
+            };
+            WORKLOAD_KEYS.forEach(([k, a]) => {
+              r[`resource.attributes.${a}`] = w && k === w.kind ? w.name : undefined;
+            });
+            out.push(r);
+          }
+          if (out.length >= MAX_KEY_ROWS_PER_STATS_ROW) break;
+        }
+        if (out.length >= MAX_KEY_ROWS_PER_STATS_ROW) break;
+      }
+      return out;
+    }
+
+    // Host / non-k8s: one row per host id (or one row if none).
+    const hostIds = vals(row, 'host.id');
+    const cloudPlats = vals(row, 'cloud.platform');
+    if (hostIds.length > 0) {
+      return hostIds.map((host) => ({
+        ...base,
+        'resource.attributes.host.id': host,
+        'resource.attributes.cloud.platform': cloudPlats[0],
+      }));
+    }
+    return [{ ...base, 'resource.attributes.cloud.platform': cloudPlats[0] }];
   });
   return { rows: keyRows, detectionEnabled };
 }
