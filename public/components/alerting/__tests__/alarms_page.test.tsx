@@ -1520,15 +1520,13 @@ describe('AlarmsPage CloudWatch regions', () => {
       cloudWatchRegions: ['us-east-1'],
       onCloudWatchRegionsChange: jest.fn(),
     };
-    let rerender: (ui: React.ReactElement) => void = () => {};
+    let view!: ReturnType<typeof render>;
     await act(async () => {
-      ({ rerender } = render(
-        <AlarmsPage {...props} datasources={[osDs]} cloudWatchLoading={true} />
-      ));
+      view = render(<AlarmsPage {...props} datasources={[osDs]} cloudWatchLoading={true} />);
     });
     expect(lastProps(mockDashboard).selectedDsIds).toEqual([]);
     await act(async () => {
-      rerender(<AlarmsPage {...props} datasources={datasources} cloudWatchLoading={false} />);
+      view.rerender(<AlarmsPage {...props} datasources={datasources} cloudWatchLoading={false} />);
     });
     expect(lastProps(mockDashboard).selectedDsIds).toEqual([
       'cloudwatch_us-east-1_scope-b',
