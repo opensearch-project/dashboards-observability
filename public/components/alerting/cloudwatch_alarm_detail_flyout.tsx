@@ -14,7 +14,7 @@
  *                (cycle-safe, tombstone-aware, lazy deeper levels), State
  *                history.
  *
- * Everything is read-only ("Read-only" pill + "View in CloudWatch" deep link).
+ * Everything is read-only (no edit, ack or mute actions; "View in CloudWatch" deep link).
  * Sections degrade independently: a history AccessDenied renders a partial-
  * permission callout, a missing metric preview is simply omitted, and a hard
  * fetch failure surfaces an actionable datasource-failure callout with retry.
@@ -23,7 +23,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiBetaBadge,
   EuiBreadcrumbs,
   EuiButton,
   EuiButtonEmpty,
@@ -43,7 +42,6 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import * as echarts from 'echarts';
 import moment from 'moment';
@@ -741,34 +739,6 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <AlarmTypeBadge alarmType={alarmType} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  label={i18n.translate('observability.alerting.cloudwatch.experimentalBadge', {
-                    defaultMessage: 'Experimental',
-                  })}
-                  tooltipContent={i18n.translate(
-                    'observability.alerting.cloudwatch.experimentalTooltip',
-                    {
-                      defaultMessage:
-                        'CloudWatch alarms support is experimental and may change or be removed in a future release.',
-                    }
-                  )}
-                />
-              </EuiFlexItem>
-              {/* The one place the flyout says it's read-only (no edit, ack or mute here). */}
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate('observability.alerting.cloudwatch.readOnlyTooltip', {
-                    defaultMessage: 'CloudWatch alarms are read-only in this view.',
-                  })}
-                >
-                  <EuiBadge color="hollow" data-test-subj="cwAlarmReadOnlyBadge">
-                    {i18n.translate('observability.alerting.cloudwatch.readOnly', {
-                      defaultMessage: 'Read-only',
-                    })}
-                  </EuiBadge>
-                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

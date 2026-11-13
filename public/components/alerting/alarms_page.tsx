@@ -25,7 +25,7 @@
  *   - `AlertManagerEndTime`   — date-math string for picker end.
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiLink, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
@@ -81,9 +81,6 @@ import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validato
 import { showMonitorCreatedToast } from './toast_helpers';
 import { isAdResourceRunning, isDetectorRule, isForecasterRule } from './shared_constants';
 import './alerting.scss';
-
-/** sessionStorage key: the CloudWatch experimental banner was dismissed this session. */
-const CW_BANNER_DISMISSED_KEY = 'AlertManagerCloudWatchBannerDismissed';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
 import {
   extractPplValidationError,
@@ -537,18 +534,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       errorDetail: s.errorDetail,
     }));
   }, [alertsData, datasourceDisplayName]);
-  // Backend hints surfaced through the dashboard banner props.
+  // Backend truncation hint, surfaced as a toast by `useAlertingPageToasts`.
   const alertsTruncated = (alertsData?.datasourceStatus || []).some((s) => s.truncated);
-  const alertsFallbackHints = useMemo(
-    () =>
-      (alertsData?.datasourceStatus || [])
-        .filter((s) => s.fallback)
-        .map((s) => ({
-          datasourceName: datasourceDisplayName(s),
-          fallback: s.fallback!,
-        })),
-    [alertsData, datasourceDisplayName]
-  );
   const alertsErrorMessage =
     alertsError instanceof Error ? alertsError.message : alertsError ? String(alertsError) : null;
 
@@ -2006,10 +1993,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   //
   // Deduped by datasource id so a slow DS reporting the same error on both
   // paths doesn't produce a doubled indicator. The FIRST error wins; later
-  // duplicates are dropped. Output shape:
-  //   - `datasourceErrorsById`  for toast messaging (stable id)
-  //   - `datasourceErrorsByName` for the FacetFilterGroup indicator (keyed
-  //     by option label, which is the datasource name)
+  // duplicates are dropped. The result feeds `datasourceErrorMapByName`, the
+  // facet indicator (keyed by datasource name; CloudWatch rows show none).
   const datasourceIssues = useMemo(() => {
     const byId = new Map<
       string,
@@ -2027,8 +2012,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       errorDetail?: ClassifiedError
     ) => {
       // Look the datasource up by id first (a CloudWatch datasource the server couldn't resolve
-      // is named by its id), then by name. Use the row's name, so the facet indicator and the
-      // toast name the row. Fall back to the warning's own id and name if the datasource list
+      // is named by its id), then by name. Use the row's name, so the facet indicator names
+      // the row. Fall back to the warning's own id and name if the datasource list
       // hasn't hydrated yet.
       const ds =
         (dsId ? datasources.find((d) => d.id === dsId) : undefined) ??
@@ -2078,28 +2063,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return Array.from(byId.values());
   }, [alertsWarnings, rulesWarnings, alertingAvailability, datasources]);
 
-  // Experimental-feature banner for the opt-in CloudWatch alarms datasource.
-  // Shown only when the operator enabled it (a `cloudwatch` datasource is
-  // present). Dismissal lasts for the browser session, across tabs and reloads, so it isn't
-  // restated on every tab.
-  const [cwBannerDismissed, setCwBannerDismissed] = useState(() => {
-    try {
-      return window.sessionStorage.getItem(CW_BANNER_DISMISSED_KEY) === 'true';
-    } catch (_e) {
-      return false;
-    }
-  });
-  const dismissCloudWatchExperimentalBanner = useCallback(() => {
-    setCwBannerDismissed(true);
-    try {
-      window.sessionStorage.setItem(CW_BANNER_DISMISSED_KEY, 'true');
-    } catch (_e) {
-      // sessionStorage can be unavailable; the banner then stays dismissed for this page only.
-    }
-  }, []);
-  const showCloudWatchExperimentalBanner =
-    !cwBannerDismissed && datasources.some((d) => d.type === 'cloudwatch');
-
   const datasourceErrorMapByName = useMemo(() => {
     const m: Record<string, string> = {};
     for (const issue of datasourceIssues) {
@@ -2113,8 +2076,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         m[issue.datasourceName] = `${localized.title} — ${classifiedToastText(localized)}`;
         continue;
       }
-      // Frame the raw error with the same "Could not connect" language the
-      // toast uses so the indicator popover reads as a complete thought
+      // Frame the raw error with "Could not connect" language so the
+      // indicator popover reads as a complete thought
       // (the raw error alone — e.g. "getaddrinfo ENOTFOUND opensearch" — is
       // opaque without it). The datasource name is already shown as the
       // popover heading, so it is not repeated here.
@@ -2129,28 +2092,27 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return m;
   }, [datasourceIssues]);
 
-  // Fire toasts on transitions for every condition the callout strip used
-  // to cover, plus the two inline dashboard warnings (truncation + Prom
-  // legacy-fallback). See the hook for the per-condition dedupe strategy.
+  // Fire toasts on transitions for the fetch errors, the missing alerting
+  // plugin and result truncation. Per-datasource connection failures and the
+  // Prometheus legacy fallback raise no toast. See the hook for the
+  // per-condition dedupe strategy.
   useAlertingPageToasts({
     activeTab,
     alertsErrorMessage,
     rulesErrorMessage: error,
     alertingPluginMissing: alertingAvailability.unavailable,
     alertingProbeLoading: alertingAvailability.isLoading,
-    datasourceIssues,
     alertsTruncated,
     rulesTruncatedDatasources,
-    fallbackHints: alertsFallbackHints,
   });
 
   return (
     <div data-test-subj="alertManagerPage" className="altPageRoot">
-      {/* Page-top banner callouts (errors, alerting-plugin missing,           */}
-      {/* per-datasource unreachable, alerts truncation, Prom legacy fallback) */}
-      {/* have been migrated to toasts — see `useAlertingPageToasts`. Per-DS   */}
-      {/* connection errors are ALSO surfaced next to the affected row in the  */}
-      {/* datasource facet via `datasourceErrorMapByName`.                     */}
+      {/* Page-top banner callouts (errors, alerting-plugin missing, alerts     */}
+      {/* truncation) have been migrated to toasts — see                        */}
+      {/* `useAlertingPageToasts`. Per-DS connection errors are shown only next */}
+      {/* to the affected OpenSearch / Prometheus row in the datasource facet  */}
+      {/* via `datasourceErrorMapByName`.                                       */}
       {/* The active tab's page-level controls (portaled in through
           `TabRowActions`) sit on the page title row, on the right, like "APM
           Settings" on the APM pages. Without the header controls (new
@@ -2177,36 +2139,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           />
         )}
       </div>
-      {/* CloudWatch alarms are an experimental, opt-in datasource
-          (`observability.cloudwatch.enabled`). Banner renders only when the
-          operator enabled it, and stays dismissed for the session. */}
-      {showCloudWatchExperimentalBanner && (
-        <>
-          <EuiSpacer size="s" />
-          {/* Primary, not warning: OUI only renders the dismiss button on non-warning
-              callouts, and this is a notice, not a problem. */}
-          <EuiCallOut
-            size="s"
-            color="primary"
-            iconType="beaker"
-            data-test-subj="cloudWatchExperimentalCallout"
-            title={i18n.translate(
-              'observability.alerting.alarmsPage.cloudwatchExperimental.title',
-              {
-                defaultMessage: 'CloudWatch alarms support is experimental',
-              }
-            )}
-            dismissible
-            onDismiss={dismissCloudWatchExperimentalBanner}
-          >
-            <FormattedMessage
-              id="observability.alerting.alarmsPage.cloudwatchExperimental.body"
-              defaultMessage="Amazon CloudWatch alarms shown in this view are an experimental feature and may change or be removed in a future release. They're read-only here."
-            />
-          </EuiCallOut>
-        </>
-      )}
-
       <div aria-live="polite" className="euiScreenReaderOnly">
         <FormattedMessage
           id="observability.alerting.alarmsPage.ariaLive.showingTab"

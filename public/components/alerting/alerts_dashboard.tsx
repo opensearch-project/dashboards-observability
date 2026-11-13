@@ -753,9 +753,7 @@ export interface AlertsDashboardProps {
    * Per-datasource error text, keyed by datasource NAME (the label key used
    * by the datasource facet). Rendered as an error icon next to the
    * affected row in the filter panel; click opens a popover with details.
-   * Truncation / fallback hints and connection failures are ALSO surfaced
-   * by page-level toasts — this indicator is the persistent home for the
-   * details.
+   * CloudWatch account rows never show it.
    */
   datasourceErrorMap?: Record<string, string>;
   /** CloudWatch regions for the Datasource facet's CloudWatch group; omitted without targets. */
@@ -1568,12 +1566,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           >
             {
               <>
-                {/* Backend hints (truncation / Prometheus legacy fallback) are   */}
-                {/* now surfaced as page-level toasts (see                        */}
+                {/* The truncation hint is surfaced as a page-level toast (see    */}
                 {/* useAlertingPageToasts). The banners that used to live here    */}
                 {/* were removed to keep the visualization row anchored to the    */}
-                {/* top of the panel; the toasts are event-driven so the user is  */}
-                {/* still notified when the condition transitions.               */}
+                {/* top of the panel.                                             */}
 
                 {/* ---- Visualization Row ---- */}
                 <EuiFlexGroup gutterSize="m" responsive={true} className="altVizRow">

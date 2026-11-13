@@ -287,10 +287,12 @@ describe('CloudWatchAlarmDetailFlyout time window', () => {
 describe('CloudWatchAlarmDetailFlyout polish', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('states read-only once, and the last change in the local format', () => {
+  it('shows no Experimental or Read-only tag, and the last change in the local format', () => {
     mockHook({ detail: detailFixture() });
     renderFlyout();
-    expect(screen.getAllByText('Read-only')).toHaveLength(1);
+    expect(screen.queryByText('Read-only')).toBeNull();
+    expect(screen.queryByTestId('cwAlarmReadOnlyBadge')).toBeNull();
+    expect(screen.queryByText('Experimental')).toBeNull();
     expect(screen.getByTestId('cwAlarmDetailLastChange')).not.toHaveTextContent('T10:00:00');
   });
 

@@ -159,17 +159,19 @@ export function toggleDatasourceEntry(
   return limitDatasourceSelection(selectedDsIds, [...selectedDsIds, ...additions], maxDatasources);
 }
 
-/** The entry's error text: per region for a CloudWatch account (`<region>: <error>` lines). */
+/**
+ * The entry's error text. CloudWatch accounts never show one: a scope or region that fails to
+ * read just contributes no rows.
+ */
 function entryError(
   entry: DatasourceFacetEntry,
   errorMap?: Record<string, string>
 ): string | undefined {
-  if (!errorMap) return undefined;
+  if (!errorMap || entry.type === 'cloudwatch') return undefined;
   const lines: string[] = [];
   for (const ds of entry.datasources) {
     const error = errorMap[ds.name];
-    if (!error) continue;
-    lines.push(entry.type === 'cloudwatch' && ds.region ? `${ds.region}: ${error}` : error);
+    if (error) lines.push(error);
   }
   return lines.length > 0 ? lines.join('\n') : undefined;
 }

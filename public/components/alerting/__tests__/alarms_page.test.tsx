@@ -458,7 +458,7 @@ describe('AlarmsPage', () => {
     expect(truncatedToast![1]).toBe('warning');
   });
 
-  it('surfaces partial-success datasource errors as a toast + facet error indicator', async () => {
+  it('surfaces partial-success datasource errors in the facet indicator without a toast', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
       data: {
@@ -497,22 +497,20 @@ describe('AlarmsPage', () => {
       );
     });
 
-    // Page-level toast fires — replaces the banner strip.
-    const singleTitleCall = mockSetToast.mock.calls.find(
-      (c) => typeof c[0] === 'string' && c[0].includes('Could not connect to')
-    );
-    expect(singleTitleCall).toBeDefined();
-    expect(singleTitleCall![1]).toBe('warning');
+    // A per-datasource failure raises no toast: it isn't a response to a user action.
+    const toastText = JSON.stringify(mockSetToast.mock.calls);
+    expect(toastText).not.toContain('Could not connect');
+    expect(toastText).not.toContain('AD unavailable');
 
     // AlertsDashboard receives the per-datasource error map, keyed by DS name.
-    // The indicator message is framed with "Could not connect" (matching the
-    // toast) and still carries the underlying error text.
+    // The indicator message is framed with "Could not connect" and still
+    // carries the underlying error text.
     const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
     expect(last.datasourceErrorMap.Local).toMatch(/^Could not connect\./);
     expect(last.datasourceErrorMap.Local).toContain('AD unavailable');
   });
 
-  it('matches a status named by its id to the datasource row, for the facet and the toast', async () => {
+  it('matches a status named by its id to the datasource row and raises no toast for it', async () => {
     const id = 'cloudwatch_eu-west-1_prod';
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
@@ -554,11 +552,59 @@ describe('AlarmsPage', () => {
     });
     const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
     expect(Object.keys(last.datasourceErrorMap)).toEqual([rowName]);
-    const toastText = JSON.stringify(mockSetToast.mock.calls);
-    expect(toastText).toContain(rowName);
-    expect(toastText).not.toContain(id);
+    // CloudWatch access-denied / not-available failures don't pop up a toast.
+    expect(mockSetToast).not.toHaveBeenCalled();
   });
-  it('fires a "Showing current alerts only" toast when a datasource reports a legacy-fallback', async () => {
+
+  it('shows no CloudWatch experimental banner when a CloudWatch datasource is present', async () => {
+    window.sessionStorage.removeItem('AlertManagerCloudWatchBannerDismissed');
+    await act(async () => {
+      render(
+        <AlarmsPage
+          {...defaultProps}
+          datasources={[
+            {
+              id: 'cloudwatch',
+              name: 'CloudWatch',
+              type: 'cloudwatch',
+              url: 'cloudwatch',
+              enabled: true,
+            } as Datasource,
+          ]}
+        />
+      );
+    });
+    expect(screen.queryByTestId('cloudWatchExperimentalCallout')).not.toBeInTheDocument();
+    expect(screen.queryByText(/experimental/i)).not.toBeInTheDocument();
+  });
+
+  it('raises no toast when several datasources fail', async () => {
+    mockUseAlerts.mockReturnValue({
+      ...emptyHookResult,
+      data: {
+        results: [],
+        datasourceStatus: ['ds-1', 'ds-2'].map((dsId) => ({
+          datasourceId: dsId,
+          datasourceName: dsId,
+          datasourceType: 'opensearch',
+          status: 'error',
+          data: [],
+          durationMs: 0,
+          error: 'ENOTFOUND',
+        })),
+        totalDatasources: 2,
+        completedDatasources: 0,
+        fetchedAt: '2026-01-01T00:00:00Z',
+      },
+    });
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} />);
+    });
+    const toastText = JSON.stringify(mockSetToast.mock.calls);
+    expect(toastText).not.toContain('could not be reached');
+    expect(toastText).not.toContain('Could not connect');
+  });
+  it('raises no "Showing current alerts only" toast when a datasource reports a legacy-fallback', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
       data: {
@@ -591,12 +637,7 @@ describe('AlarmsPage', () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
-    const fallbackToast = mockSetToast.mock.calls.find(
-      (c) => typeof c[0] === 'string' && c[0].includes('Showing current alerts only')
-    );
-    expect(fallbackToast).toBeDefined();
-    expect(fallbackToast![1]).toBe('warning');
-    expect(String(fallbackToast![2])).toContain('prom-prod');
+    expect(JSON.stringify(mockSetToast.mock.calls)).not.toContain('Showing current alerts only');
   });
 
   it('passes selectedDsIds, startTime, endTime, refreshToken together to useAlerts', async () => {
