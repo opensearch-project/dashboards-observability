@@ -25,9 +25,22 @@ import type { AlarmTimeWindow } from '../alarm_time_window';
 jest.mock('../hooks/use_cloudwatch_alarm_detail', () => ({
   useCloudWatchAlarmDetail: jest.fn(),
 }));
-// Chart rendering is out of scope; keep jsdom light.
+// Chart rendering is out of scope; keep jsdom light. The specs handed to the chart are kept so
+// tests can check the options (label placement) without a canvas.
+interface MockChartSpec {
+  legend?: unknown;
+  grid: { top: number };
+  series: Array<{
+    markArea?: { data: Array<Array<{ label?: Record<string, unknown> }>> };
+    markLine?: { z?: number; data: Array<{ label: { formatter: string } }> };
+  }>;
+}
+const mockChartSpecs: MockChartSpec[] = [];
 jest.mock('../echarts_render', () => ({
-  EchartsRender: () => <div data-test-subj="mockEcharts" />,
+  EchartsRender: ({ spec }: { spec: MockChartSpec }) => {
+    mockChartSpecs.push(spec);
+    return <div data-test-subj="mockEcharts" />;
+  },
 }));
 
 const useDetailMock = useCloudWatchAlarmDetail as jest.MockedFunction<
@@ -99,9 +112,33 @@ describe('CloudWatchAlarmDetailFlyout', () => {
   it('renders the loaded detail summary', () => {
     mockHook({ detail: detailFixture() });
     renderFlyout();
-    expect(
-      screen.getByText('checkout-errors-high is in ALARM. Threshold Crossed')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('cwAlarmDetailSummary')).toHaveTextContent(
+      'checkout-errors-high is in ALARM. Threshold Crossed'
+    );
+  });
+
+  it('shows the ALARM state word in the summary bold and in the danger color', () => {
+    mockHook({ detail: detailFixture() });
+    renderFlyout();
+    const stateWord = screen.getByTestId('cwAlarmSummaryState');
+    expect(stateWord).toHaveTextContent(/^ALARM$/);
+    expect(stateWord).toHaveClass('euiTextColor--danger');
+    expect(stateWord.querySelector('strong')).toHaveTextContent('ALARM');
+  });
+
+  it('keeps an OK summary in plain text', () => {
+    mockHook({
+      detail: {
+        ...detailFixture(),
+        alarm: { ...detailFixture().alarm, stateValue: 'OK' },
+        summary: 'checkout-errors-high is OK.',
+      },
+    });
+    renderFlyout();
+    expect(screen.getByTestId('cwAlarmDetailSummary')).toHaveTextContent(
+      'checkout-errors-high is OK.'
+    );
+    expect(screen.queryByTestId('cwAlarmSummaryState')).toBeNull();
   });
 
   it("names a composite's causing child as a link instead of the raw ARN", () => {
@@ -316,6 +353,46 @@ describe('CloudWatchAlarmDetailFlyout polish', () => {
     expect(trail).toHaveTextContent('checkout-service-degraded');
     fireEvent.click(screen.getByText('checkout-errors-high', { selector: 'button, a' }));
     expect(screen.queryByTestId('cwAlarmFlyoutTrail')).toBeNull();
+  });
+});
+
+describe('CloudWatchAlarmDetailFlyout metric preview', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockChartSpecs.length = 0;
+  });
+  const withPreview = (alarmBands?: Array<[number, number]>) => ({
+    ...detailFixture(),
+    metricPreview: {
+      label: 'HTTPCode_Target_5XX_Count',
+      threshold: 10,
+      points: [
+        { timestamp: 1_000, value: 4 },
+        { timestamp: 2_000, value: 13 },
+        { timestamp: 3_000, value: 12 },
+      ],
+      alarmBands,
+    },
+  });
+  const previewSpec = () => mockChartSpecs.find((s) => s.legend)!;
+
+  it('puts the ALARM band label above the plot, clear of the line', () => {
+    mockHook({ detail: withPreview([[1_500, 3_000]]) });
+    renderFlyout();
+    const spec = previewSpec();
+    const label = spec.series[0].markArea!.data[0][0].label;
+    expect(label).toMatchObject({ show: true, formatter: 'ALARM', position: 'top' });
+    // The grid leaves top room for the label, so it never sits inside the plot area.
+    expect(spec.grid.top).toBeGreaterThanOrEqual(24);
+  });
+
+  it('keeps the threshold label on the markLine, which draws above the line', () => {
+    mockHook({ detail: withPreview() });
+    renderFlyout();
+    const markLine = previewSpec().series[0].markLine!;
+    expect(markLine.data[0].label.formatter).toBe('threshold 10');
+    // markLine defaults to z 5, above the line series (z 3); no lower z override.
+    expect(markLine.z).toBeUndefined();
   });
 });
 

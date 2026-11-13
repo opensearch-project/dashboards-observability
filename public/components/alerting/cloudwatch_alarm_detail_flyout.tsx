@@ -194,22 +194,26 @@ function buildMetricPreviewSpec(preview: CloudWatchMetricPreview): echarts.EChar
     {
       xAxis: band[0],
       itemStyle: { color: STATE_BAND_FILL },
-      // Label only the first band "ALARM", so repeated breaches don't stack labels.
+      // Label only the first band "ALARM", so repeated breaches don't stack labels. ECharts draws
+      // markArea (z 1) under the line series (z 3), so the label sits above the band, in the
+      // grid's top margin, where the line (clipped to the grid) can never cross it.
       label:
         i === 0
           ? {
               show: true,
               formatter: 'ALARM',
-              position: 'insideTop' as const,
+              position: 'top' as const,
+              distance: 4,
               color: STATE_HEX.ALARM,
+              fontWeight: 'bold' as const,
             }
           : undefined,
     },
     { xAxis: band[1] },
   ]);
   return {
-    // Extra bottom room for the legend row.
-    grid: { left: 48, right: 16, top: 16, bottom: 44 },
+    // Top room for the band's "ALARM" label above the plot; bottom room for the legend row.
+    grid: { left: 48, right: 16, top: bands.length ? 28 : 16, bottom: 44 },
     tooltip: { trigger: 'axis' },
     legend: {
       bottom: 0,
@@ -564,6 +568,37 @@ export const StateTimeline: React.FC<{
 };
 
 // ============================================================================
+// Summary sentence
+// ============================================================================
+
+/**
+ * The server's "<name> is in ALARM. <reason>" sentence, with the ALARM state word bold and in
+ * the theme's danger color (as the "CloudWatch state" badge colors it). The text is unchanged;
+ * any other sentence shape (OK, insufficient data) renders as plain text.
+ */
+const AlarmSummaryText: React.FC<{
+  summary: string;
+  alarmName: string;
+  state?: CloudWatchAlarmState;
+}> = ({ summary, alarmName, state }) => {
+  const prefix = `${alarmName} is in `;
+  const word = 'ALARM';
+  if (state !== 'ALARM' || !summary.startsWith(prefix + word)) {
+    return <>{localizeTimestampsInText(summary)}</>;
+  }
+  return (
+    <>
+      {prefix}
+      {/* ALARM maps to `danger`, the same slot the state badge uses (stateHealthColor). */}
+      <EuiTextColor color="danger" data-test-subj="cwAlarmSummaryState">
+        <strong>{word}</strong>
+      </EuiTextColor>
+      {localizeTimestampsInText(summary.slice(prefix.length + word.length))}
+    </>
+  );
+};
+
+// ============================================================================
 // Section header
 // ============================================================================
 
@@ -797,7 +832,15 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
             {(detail.summary || detail.causedBy || detail.alarm.stateUpdatedTimestamp) && (
               <>
                 <EuiText size="s">
-                  {detail.summary && <p>{localizeTimestampsInText(detail.summary)}</p>}
+                  {detail.summary && (
+                    <p data-test-subj="cwAlarmDetailSummary">
+                      <AlarmSummaryText
+                        summary={detail.summary}
+                        alarmName={detail.alarm.alarmName}
+                        state={detail.alarm.stateValue}
+                      />
+                    </p>
+                  )}
                   {detail.alarm.stateUpdatedTimestamp && (
                     <p data-test-subj="cwAlarmDetailLastChange">
                       <EuiTextColor color="subdued">
