@@ -31,7 +31,6 @@ const base: UseAlertingPageToastsParams = {
   alertingProbeLoading: false,
   datasourceIssues: [],
   alertsTruncated: false,
-  fallbackHints: [],
 };
 
 // Fresh object each render so effect deps churn exactly like the real page,
@@ -40,7 +39,6 @@ const base: UseAlertingPageToastsParams = {
 const props = (over: Partial<UseAlertingPageToastsParams>): UseAlertingPageToastsParams => ({
   ...base,
   datasourceIssues: [],
-  fallbackHints: [],
   ...over,
 });
 

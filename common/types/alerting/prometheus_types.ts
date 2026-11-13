@@ -283,7 +283,7 @@ export interface PrometheusBackend {
    *                 request's `endTime` was date-math relative to `now`
    *                 (e.g. `'now'`, `'now-5m'`). When `true` AND the matrix
    *                 is empty, the backend falls back to `/api/v1/alerts`
-   *                 (current-active only) and sets `fallback`. When `false`
+   *                 (current-active only). When `false`
    *                 the empty matrix is treated as a legitimate "no alerts
    *                 fired in this past window" result. Passing this
    *                 explicitly avoids ambiguity with wall-clock-based
@@ -292,9 +292,6 @@ export interface PrometheusBackend {
    * Returns:
    *   - `alerts`:   unified alert summaries, one per firing-run episode
    *                 (runs of `value === 1` in the ALERTS matrix).
-   *   - `fallback`: set to `'prometheus-alerts-current-only'` when the
-   *                 matrix was empty AND `endIsNow === true`, causing
-   *                 the backend to fall back to legacy `/api/v1/alerts`.
    *   - `error`:    transport / parse error; `alerts` is empty in this case.
    */
   getHistoricalAlerts?(
@@ -323,7 +320,6 @@ export interface PrometheusBackend {
     }
   ): Promise<{
     alerts: UnifiedAlertSummary[];
-    fallback?: 'prometheus-alerts-current-only';
     error?: string;
   }>;
 

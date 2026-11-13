@@ -690,7 +690,6 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     opts: { sourceRequest?: OpenSearchDashboardsRequest } = {}
   ): Promise<{
     alerts: UnifiedAlertSummary[];
-    fallback?: 'prometheus-alerts-current-only';
     error?: string;
   }> {
     // Filter `alertstate="firing"` at the PromQL level. Pending samples
@@ -722,16 +721,16 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
     } catch (err) {
       // Matrix failed — still surface live alerts when window ends at now,
       // so a transient Prometheus error doesn't blank the UI for what's firing
-      // RIGHT NOW.
+      // RIGHT NOW. The user sees those alerts without an error message; the
+      // matrix failure is only logged.
       const live = await liveSettled;
       if (!live.ok || live.alerts.length === 0) {
         return { alerts: [], error: String(err) };
       }
-      return {
-        alerts: live.alerts.map((a) => promAlertToUnified(a, ds.id)),
-        fallback: 'prometheus-alerts-current-only',
-        error: String(err),
-      };
+      this.logger.debug(
+        `Prometheus alert history query failed for ${ds.name}; returning current alerts: ${err}`
+      );
+      return { alerts: live.alerts.map((a) => promAlertToUnified(a, ds.id)) };
     }
 
     const windowStartMs = startEpochSec * 1000;
@@ -818,17 +817,8 @@ export class DirectQueryPrometheusBackend implements PrometheusBackend, Promethe
       }
     }
 
-    // Flag the "current alerts only" banner when the matrix returned
-    // nothing but live alerts exist — tells the UI that coverage is
-    // limited to "now" rather than the picked window.
-    const fallback =
-      historicalAlerts.length === 0 && liveAdditions.length > 0
-        ? ('prometheus-alerts-current-only' as const)
-        : undefined;
-
     return {
       alerts: [...historicalAlerts, ...liveAdditions],
-      ...(fallback ? { fallback } : {}),
       // Only surface the live-side error when it's the only signal the
       // user gets — otherwise it's noise on top of a successful matrix.
       ...(liveError && historicalAlerts.length === 0 && liveAdditions.length === 0

@@ -558,47 +558,6 @@ describe('AlarmsPage', () => {
     expect(toastText).toContain(rowName);
     expect(toastText).not.toContain(id);
   });
-  it('fires a "Showing current alerts only" toast when a datasource reports a legacy-fallback', async () => {
-    mockUseAlerts.mockReturnValue({
-      ...emptyHookResult,
-      data: {
-        results: [],
-        datasourceStatus: [
-          {
-            datasourceId: 'p-1',
-            datasourceName: 'prom-prod',
-            datasourceType: 'prometheus',
-            status: 'success',
-            data: [],
-            durationMs: 10,
-            fallback: 'prometheus-alerts-current-only',
-          },
-          {
-            datasourceId: 'os-1',
-            datasourceName: 'os-prod',
-            datasourceType: 'opensearch',
-            status: 'success',
-            data: [],
-            durationMs: 10,
-          },
-        ],
-        totalDatasources: 2,
-        completedDatasources: 2,
-        fetchedAt: '2026-01-01T00:00:00Z',
-      },
-    });
-
-    await act(async () => {
-      render(<AlarmsPage {...defaultProps} />);
-    });
-    const fallbackToast = mockSetToast.mock.calls.find(
-      (c) => typeof c[0] === 'string' && c[0].includes('Showing current alerts only')
-    );
-    expect(fallbackToast).toBeDefined();
-    expect(fallbackToast![1]).toBe('warning');
-    expect(String(fallbackToast![2])).toContain('prom-prod');
-  });
-
   it('passes selectedDsIds, startTime, endTime, refreshToken together to useAlerts', async () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);

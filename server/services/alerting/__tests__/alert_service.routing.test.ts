@@ -835,23 +835,32 @@ describe('MultiBackendAlertService — routing & list', () => {
     ).rejects.toThrow(/Invalid date-math/);
   });
 
-  it('fallback hint propagates into datasourceStatus', async () => {
+  it('ranged Prometheus fetch without a request context returns current alerts with no warning', async () => {
     mockOsBackend.getAlerts.mockResolvedValueOnce({
       alerts: [],
       totalAlerts: 0,
       truncated: false,
     });
-    mockPromBackend.getHistoricalAlerts.mockResolvedValueOnce({
-      alerts: [],
-      fallback: 'prometheus-alerts-current-only',
-    });
+    mockPromBackend.getAlerts.mockResolvedValueOnce([
+      {
+        labels: { alertname: 'Live', instance: 'i' },
+        state: 'firing',
+        annotations: {},
+        activeAt: '',
+        value: '',
+      },
+    ] as never);
     const resolver = jest.fn(async () => ({}) as never);
     const response = await svc.getUnifiedAlerts(resolver, {
       startTime: 'now-1h',
       endTime: 'now',
     });
+    expect(mockPromBackend.getHistoricalAlerts).not.toHaveBeenCalled();
     const promStatus = response.datasourceStatus.find((s) => s.datasourceId === 'ds-prom');
-    expect(promStatus?.fallback).toBe('prometheus-alerts-current-only');
+    expect(promStatus?.status).toBe('success');
+    expect(promStatus?.data.map((a) => a.name)).toEqual(['Live']);
+    expect(promStatus?.error).toBeUndefined();
+    expect(promStatus).not.toHaveProperty('fallback');
   });
 
   /**

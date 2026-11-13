@@ -537,18 +537,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       errorDetail: s.errorDetail,
     }));
   }, [alertsData, datasourceDisplayName]);
-  // Backend hints surfaced through the dashboard banner props.
+  // Backend truncation hint surfaced as a toast.
   const alertsTruncated = (alertsData?.datasourceStatus || []).some((s) => s.truncated);
-  const alertsFallbackHints = useMemo(
-    () =>
-      (alertsData?.datasourceStatus || [])
-        .filter((s) => s.fallback)
-        .map((s) => ({
-          datasourceName: datasourceDisplayName(s),
-          fallback: s.fallback!,
-        })),
-    [alertsData, datasourceDisplayName]
-  );
   const alertsErrorMessage =
     alertsError instanceof Error ? alertsError.message : alertsError ? String(alertsError) : null;
 
@@ -2130,8 +2120,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   }, [datasourceIssues]);
 
   // Fire toasts on transitions for every condition the callout strip used
-  // to cover, plus the two inline dashboard warnings (truncation + Prom
-  // legacy-fallback). See the hook for the per-condition dedupe strategy.
+  // to cover, plus the inline dashboard truncation warning. See the hook for the per-condition dedupe strategy.
   useAlertingPageToasts({
     activeTab,
     alertsErrorMessage,
@@ -2141,13 +2130,12 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     datasourceIssues,
     alertsTruncated,
     rulesTruncatedDatasources,
-    fallbackHints: alertsFallbackHints,
   });
 
   return (
     <div data-test-subj="alertManagerPage" className="altPageRoot">
       {/* Page-top banner callouts (errors, alerting-plugin missing,           */}
-      {/* per-datasource unreachable, alerts truncation, Prom legacy fallback) */}
+      {/* per-datasource unreachable, alerts truncation)                      */}
       {/* have been migrated to toasts — see `useAlertingPageToasts`. Per-DS   */}
       {/* connection errors are ALSO surfaced next to the affected row in the  */}
       {/* datasource facet via `datasourceErrorMapByName`.                     */}

@@ -17,18 +17,6 @@ import type { PromAlert, PromAlertingRule } from './prometheus_types';
 import type { CloudWatchAlarmState, CloudWatchAlarmType } from './cloudwatch_types';
 import type { ClassifiedError } from '../../error';
 
-/**
- * Known fallback reasons a backend may surface through
- * `DatasourceFetchResult.fallback`. String-literal union (not `string`) so
- * the UI can exhaustively switch on the value and a new reason requires a
- * type-level declaration.
- *
- * Today's only member: Prometheus historical reconstruction returned an
- * empty matrix on a `now`-relative range, and the backend fell back to
- * `/api/v1/alerts` (current-active only).
- */
-export type DatasourceFetchFallback = 'prometheus-alerts-current-only';
-
 export interface ADDetector {
   id: string;
   name?: string;
@@ -444,13 +432,6 @@ export interface DatasourceFetchResult<T> {
    * `EuiCallOut` prompting the user to narrow the range.
    */
   truncated?: boolean;
-  /**
-   * Set by the Prometheus backend when the historical range query returned
-   * an empty matrix AND the range included `now`, so the backend fell back
-   * to the legacy `/api/v1/alerts` (active-only) endpoint. UI renders a
-   * per-datasource banner explaining the coverage limit.
-   */
-  fallback?: DatasourceFetchFallback;
 }
 
 export interface ProgressiveResponse<T> {

@@ -18,7 +18,7 @@ const mockClient = {
   transport: { request: jest.fn() },
 };
 
-const searcher = (jest.fn() as unknown) as jest.MockedFunction<PromQLSearcher>;
+const searcher = jest.fn() as unknown as jest.MockedFunction<PromQLSearcher>;
 
 const ds: Datasource = {
   id: 'ds-1',
@@ -78,7 +78,7 @@ function buildDataFrame(series: SeriesFixture[], isRange: boolean) {
     const seriesName = formatMetric(s.metric);
     const labelsWithoutName = { ...s.metric };
     delete labelsWithoutName.__name__;
-    const points = isRange ? s.points ?? [] : s.value ? [s.value] : [];
+    const points = isRange ? (s.points ?? []) : s.value ? [s.value] : [];
     for (const [tsSec, raw] of points) {
       Time.push(tsSec * 1000);
       Series.push(seriesName);
@@ -408,7 +408,6 @@ describe('DirectQueryPrometheusBackend', () => {
       expect(result.alerts[0].startTime).toBe(new Date(160_000).toISOString());
       expect(result.alerts[0].lastUpdated).toBe(new Date(280_000).toISOString());
       expect(result.alerts[0].annotations.truncatedStart).toBeUndefined();
-      expect(result.fallback).toBeUndefined();
     });
 
     it('reconstructs two runs separated by a gap as separate episodes', async () => {
@@ -658,7 +657,7 @@ describe('DirectQueryPrometheusBackend', () => {
       expect(byName.Pending).toBe('pending');
     });
 
-    it('empty matrix + endIsNow=false ⇒ { alerts: [], no fallback }', async () => {
+    it('empty matrix + endIsNow=false ⇒ { alerts: [] }', async () => {
       searcher.mockResolvedValueOnce(matrixDF([]));
       const result = await backend.getHistoricalAlerts(
         ctx,
@@ -670,14 +669,13 @@ describe('DirectQueryPrometheusBackend', () => {
         /* endIsNow */ false
       );
       expect(result.alerts).toEqual([]);
-      expect(result.fallback).toBeUndefined();
       expect(result.error).toBeUndefined();
       // Strategy was called once; resource client was never called.
       expect(searcher).toHaveBeenCalledTimes(1);
       expect(mockClient.transport.request).not.toHaveBeenCalled();
     });
 
-    it('empty matrix + endIsNow=true ⇒ surfaces live alerts with fallback flag', async () => {
+    it('empty matrix + endIsNow=true ⇒ surfaces live alerts without an error', async () => {
       searcher.mockResolvedValueOnce(matrixDF([]));
       mockClient.transport.request.mockResolvedValueOnce({
         body: {
@@ -702,9 +700,40 @@ describe('DirectQueryPrometheusBackend', () => {
         60,
         /* endIsNow */ true
       );
-      expect(result.fallback).toBe('prometheus-alerts-current-only');
+      expect(result).not.toHaveProperty('fallback');
+      expect(result.error).toBeUndefined();
       expect(result.alerts).toHaveLength(1);
       expect(result.alerts[0].name).toBe('Live');
+    });
+
+    it('queryRangeMatrix throws + live alerts ⇒ surfaces live alerts without an error', async () => {
+      searcher.mockRejectedValueOnce(new Error('range query unsupported'));
+      mockClient.transport.request.mockResolvedValueOnce({
+        body: {
+          data: {
+            alerts: [
+              {
+                labels: { alertname: 'Live', instance: 'i-1' },
+                state: 'firing',
+                annotations: {},
+                activeAt: '2024-01-15T12:00:00Z',
+              },
+            ],
+          },
+        },
+      });
+      const result = await backend.getHistoricalAlerts(
+        ctx,
+        mockClient as never,
+        ds,
+        100,
+        500,
+        60,
+        /* endIsNow */ true
+      );
+      expect(result).not.toHaveProperty('fallback');
+      expect(result.error).toBeUndefined();
+      expect(result.alerts.map((a) => a.name)).toEqual(['Live']);
     });
 
     it('live alerts merged with historical episodes; active episodes dedupe the live duplicate', async () => {
@@ -771,7 +800,6 @@ describe('DirectQueryPrometheusBackend', () => {
       expect(result.alerts).toHaveLength(3);
       const names = result.alerts.map((a) => a.name).sort();
       expect(names).toEqual(['Active', 'Emerging', 'Resolved']);
-      expect(result.fallback).toBeUndefined();
     });
 
     it('resolved historical episode does NOT dedupe a re-firing live alert', async () => {
@@ -845,7 +873,6 @@ describe('DirectQueryPrometheusBackend', () => {
       expect(result.alerts).toHaveLength(1);
       expect(searcher).toHaveBeenCalledTimes(1);
       expect(mockClient.transport.request).not.toHaveBeenCalled();
-      expect(result.fallback).toBeUndefined();
     });
 
     it('empty matrix + endIsNow=true + live /api/v1/alerts fails ⇒ { alerts: [], error }', async () => {

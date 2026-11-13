@@ -25,7 +25,6 @@ import {
   ADDetector,
   ADForecaster,
   Datasource,
-  DatasourceFetchFallback,
   DatasourceFetchResult,
   DatasourceFetchStatus,
   DatasourceService,
@@ -239,13 +238,12 @@ interface ResolvedRange {
 /**
  * Per-datasource shape returned by `fetchAlertsRaw`. Carries the mapped
  * `UnifiedAlertSummary[]` plus optional envelope hints (truncation,
- * Prometheus fallback, error) that propagate up into
+ * error) that propagate up into
  * `DatasourceFetchResult`.
  */
 interface FetchAlertsRawResult {
   alerts: UnifiedAlertSummary[];
   truncated?: boolean;
-  fallback?: DatasourceFetchFallback;
   error?: string;
 }
 
@@ -768,7 +766,6 @@ export class MultiBackendAlertService {
       error?: string,
       extra?: {
         truncated?: boolean;
-        fallback?: DatasourceFetchFallback;
         errorDetail?: ClassifiedError;
       }
     ): DatasourceFetchResult<UnifiedAlertSummary> => ({
@@ -780,7 +777,6 @@ export class MultiBackendAlertService {
       error,
       durationMs: Date.now() - start,
       ...(extra?.truncated !== undefined ? { truncated: extra.truncated } : {}),
-      ...(extra?.fallback !== undefined ? { fallback: extra.fallback } : {}),
       ...(extra?.errorDetail !== undefined ? { errorDetail: extra.errorDetail } : {}),
     });
 
@@ -792,7 +788,6 @@ export class MultiBackendAlertService {
       );
       const result = makeResult('success', raw.alerts, raw.error, {
         truncated: raw.truncated,
-        fallback: raw.fallback,
       });
       if (onProgress) onProgress(result);
       return result;
@@ -872,10 +867,8 @@ export class MultiBackendAlertService {
    *   - OpenSearch + no range⇒ legacy `osBackend.getAlerts(client)` (no filter).
    *   - Prometheus + range   ⇒ `promBackend.getHistoricalAlerts(...)` which
    *                            reconstructs episodes via range queries against
-   *                            the `ALERTS` metric. Propagates `fallback` when
-   *                            the matrix is empty AND the range includes `now`
-   *                            (in which case the backend falls back to the
-   *                            legacy current-only API).
+   *                            the `ALERTS` metric, merged with currently
+   *                            firing alerts when the range includes `now`.
    *   - Prometheus + no range⇒ legacy `promBackend.getAlerts(...)`
    *                            (current-active only).
    */
@@ -985,7 +978,7 @@ export class MultiBackendAlertService {
         // (`DirectQueryPrometheusBackend` today) AND when we have an OSD
         // request context (the matrix scan routes through the data plugin's
         // search strategy). Without `ctx` we fall back to the legacy
-        // current-only path with a banner rather than throwing.
+        // current-only path rather than throwing.
         if (typeof this.promBackend.getHistoricalAlerts === 'function' && ctx) {
           const startSec = Math.floor(range.startMs / 1000);
           const endSec = Math.floor(range.endMs / 1000);
@@ -1000,18 +993,9 @@ export class MultiBackendAlertService {
             range.endIsNow,
             { sourceRequest }
           );
-          return {
-            alerts: historical.alerts,
-            fallback: historical.fallback,
-            error: historical.error,
-          };
+          return { alerts: historical.alerts, error: historical.error };
         }
-        // No historical support ⇒ emulate by falling back to legacy with a banner.
-        const alerts = await this.promBackend.getAlerts(client, ds);
-        return {
-          alerts: alerts.map((a) => promAlertToUnified(a, ds.id)),
-          fallback: 'prometheus-alerts-current-only',
-        };
+        // No historical support ⇒ fall through to the current-only alerts.
       }
       const alerts = await this.promBackend.getAlerts(client, ds);
       return { alerts: alerts.map((a) => promAlertToUnified(a, ds.id)) };

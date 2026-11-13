@@ -13,7 +13,6 @@
  *   - "Alerting plugin not detected"
  *   - "Some datasources could not be reached"
  *   - "Search incomplete — too many alerts"  (OS post-filter cap)
- *   - "Showing current alerts only"          (Prom empty-matrix fallback)
  *
  * Each of these is now surfaced as a toast. Because toasts are event-driven
  * (fire once per new occurrence) rather than declarative (visible while the
@@ -22,8 +21,8 @@
  * growing every render while a datasource is down, or firing a duplicate
  * "plugin not detected" toast on every keystroke elsewhere on the page.
  *
- * Tab gating: the three alerts-derived conditions (alerts fetch error, result
- * truncation, Prometheus legacy-fallback) only fire while the Alerts tab is
+ * Tab gating: the two alerts-derived conditions (alerts fetch error, result
+ * truncation) only fire while the Alerts tab is
  * active, matching the pre-toast behavior where those callouts lived inside
  * `AlertsDashboard` / were gated on `activeTab === 'alerts'`. If the condition
  * is still active when the user switches TO the Alerts tab, the toast fires
@@ -41,18 +40,12 @@
  */
 import { useEffect, useRef } from 'react';
 import { i18n } from '@osd/i18n';
-import type { DatasourceFetchFallback } from '../../../../common/types/alerting';
 import { useToast } from '../../common/toast';
 
 export interface DatasourceIssue {
   datasourceId: string;
   datasourceName: string;
   error: string;
-}
-
-export interface FallbackHint {
-  datasourceName: string;
-  fallback: DatasourceFetchFallback;
 }
 
 export interface UseAlertingPageToastsParams {
@@ -72,8 +65,6 @@ export interface UseAlertingPageToastsParams {
   alertsTruncated: boolean;
   /** Datasources whose rule listing was capped (e.g. a large CloudWatch account). */
   rulesTruncatedDatasources?: string[];
-  /** Per-datasource legacy-fallback hints (Prom empty-matrix → active-only /alerts). */
-  fallbackHints: FallbackHint[];
 }
 
 /**
@@ -92,13 +83,6 @@ function datasourceIssuesKey(issues: DatasourceIssue[]): string {
     .join('||');
 }
 
-function fallbackHintsKey(hints: FallbackHint[]): string {
-  return hints
-    .map((h) => `${h.datasourceName}|${h.fallback}`)
-    .sort()
-    .join('||');
-}
-
 export function useAlertingPageToasts({
   activeTab,
   alertsErrorMessage,
@@ -108,7 +92,6 @@ export function useAlertingPageToasts({
   datasourceIssues,
   alertsTruncated,
   rulesTruncatedDatasources = [],
-  fallbackHints,
 }: UseAlertingPageToastsParams): void {
   const { setToast } = useToast();
 
@@ -123,7 +106,6 @@ export function useAlertingPageToasts({
   const lastDsIssuesKeyRef = useRef<string>('');
   const lastTruncatedRef = useRef<boolean>(false);
   const lastRulesTruncatedKeyRef = useRef<string>('');
-  const lastFallbackKeyRef = useRef<string>('');
 
   const onAlertsTab = activeTab === 'alerts';
 
@@ -250,28 +232,4 @@ export function useAlertingPageToasts({
       lastRulesTruncatedKeyRef.current = rulesTruncatedKey;
     }
   }, [rulesTruncatedKey, activeTab, setToast]);
-
-  // Legacy-fallback hints (Prometheus empty-matrix → active-only) — alerts-tab only.
-  useEffect(() => {
-    const key = fallbackHintsKey(fallbackHints);
-    if (!key) {
-      lastFallbackKeyRef.current = '';
-      return;
-    }
-    if (onAlertsTab && key !== lastFallbackKeyRef.current) {
-      const names = fallbackHints.map((h) => h.datasourceName).join(', ');
-      setToast(
-        i18n.translate('observability.alerting.alarmsPage.toast.fallback.title', {
-          defaultMessage: 'Showing current alerts only',
-        }),
-        'warning',
-        i18n.translate('observability.alerting.alarmsPage.toast.fallback.body', {
-          defaultMessage:
-            '{names}: historical alert data unavailable; showing currently active alerts instead.',
-          values: { names },
-        })
-      );
-      lastFallbackKeyRef.current = key;
-    }
-  }, [fallbackHints, onAlertsTab, setToast]);
 }

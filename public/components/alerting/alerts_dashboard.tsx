@@ -1568,7 +1568,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           >
             {
               <>
-                {/* Backend hints (truncation / Prometheus legacy fallback) are   */}
+                {/* The backend truncation hint is                               */}
                 {/* now surfaced as page-level toasts (see                        */}
                 {/* useAlertingPageToasts). The banners that used to live here    */}
                 {/* were removed to keep the visualization row anchored to the    */}
