@@ -73,8 +73,40 @@ export function getApmPlatform(keyAttributes: unknown): string | undefined {
     (ka.apm && typeof ka.apm === 'object'
       ? (ka.apm as Record<string, unknown>).platform
       : undefined);
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  return typeof value === 'string' && value ? value : undefined;
+  return keyAttributeValues(raw)[0];
+}
+
+/**
+ * The values of a service-map key attribute. Data Prepper stores the descriptive keys written by
+ * platform detection (`apm.platform`, `apm.k8s.scope`, `host.id`, ...) as arrays, and PPL returns
+ * an array field differently by OpenSearch version: as a JSON array (3.9), or as the list's string
+ * form, `[a, b]` (3.5). Both, a JSON-encoded array string and a plain value give the same list;
+ * empty values are dropped.
+ */
+export function keyAttributeValues(value: unknown): string[] {
+  if (value === null || value === undefined) return [];
+  if (Array.isArray(value)) return value.flatMap(keyAttributeValues);
+  const text = String(value).trim();
+  if (!text) return [];
+  if (text.startsWith('[') && text.endsWith(']')) {
+    const inner = text.slice(1, -1).trim();
+    if (!inner) return [];
+    if (inner.startsWith('"')) {
+      try {
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) return parsed.flatMap(keyAttributeValues);
+      } catch {
+        // Not JSON: fall through to the list form.
+      }
+    }
+    // The list's string form separates elements with ", " (values from Kubernetes object names
+    // and host ids contain neither).
+    return inner
+      .split(', ')
+      .map((v) => v.trim())
+      .filter(Boolean);
+  }
+  return [text];
 }
 
 /** Platform type from the detected `apm.platform` value; undefined for an unknown value. */

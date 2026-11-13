@@ -52,6 +52,7 @@ import {
   ServiceInfrastructure,
 } from '../../common/types/infra_types';
 import { TimeRange } from '../../common/types/service_types';
+import { keyAttributeValues } from '../utils/platform_utils';
 import { toPplDataset } from '../utils/dataset_utils';
 import { getTimeInSeconds, parseTimeRange } from '../utils/time_utils';
 
@@ -120,34 +121,84 @@ const WORKLOAD_KEYS: Array<[K8sWorkloadKind, InfraSpanKey]> = [
 ];
 
 /**
- * Key rows (in the span-query shape, `resource.attributes.<key>`) from the service-map stats rows
- * (`sourceNode.keyAttributes.<key>`). When Data Prepper wrote the joined `apm.k8s.scope`
- * (`cluster|namespace|kind|name`), the Kubernetes keys come from it, so a service in two clusters
- * keeps its real cluster / namespace / workload tuples instead of their cross product.
- * `detectionEnabled` is true when any row carries the platform Data Prepper writes on every node
- * it ran detection for.
+ * Splits a joined `apm.k8s.scope` value (`cluster|namespace|kind|name`). Data Prepper escapes a `|`
+ * or `\` inside a segment with a backslash (`k8s.cluster.name` is free-form).
+ */
+export function splitK8sScope(scope: string): string[] {
+  const parts: string[] = [];
+  let current = '';
+  for (let i = 0; i < scope.length; i++) {
+    const c = scope[i];
+    if (c === '\\' && i + 1 < scope.length) {
+      current += scope[++i];
+    } else if (c === '|') {
+      parts.push(current);
+      current = '';
+    } else {
+      current += c;
+    }
+  }
+  parts.push(current);
+  return parts;
+}
+
+/** Every combination of the given per-key values (one row per combination). */
+function expandRows(
+  base: Record<string, string | undefined>,
+  values: Array<[string, string[]]>
+): Array<Record<string, string | undefined>> {
+  return values.reduce<Array<Record<string, string | undefined>>>(
+    (rows, [key, vals]) =>
+      vals.length === 0 ? rows : rows.flatMap((r) => vals.map((v) => ({ ...r, [key]: v }))),
+    [base]
+  );
+}
+
+/**
+ * Key rows (in the span-query shape, `resource.attributes.<key>`, one value per key) from the
+ * service-map stats rows (`sourceNode.keyAttributes.<key>`).
+ *
+ * The platform keys are arrays (Data Prepper keeps every value seen, bounded per key), and PPL
+ * returns them as JSON arrays (OpenSearch 3.9) or as `[a, b]` strings (3.5): both are read with
+ * `keyAttributeValues`, and a row with several values becomes one row per value. When Data
+ * Prepper wrote the joined `apm.k8s.scope` (`cluster|namespace|kind|name`), the Kubernetes keys
+ * come from it, one row per scope, so a service in two clusters keeps its real cluster / namespace
+ * / workload tuples instead of their cross product. `detectionEnabled` is true when any row carries
+ * the platform Data Prepper writes on every node it ran detection for.
  */
 export function keyRowsFromServiceMap(rows: Array<Record<string, any>>) {
   let detectionEnabled = false;
-  const keyRows = rows.map((row) => {
-    const platform = str(row[`${SERVICE_MAP_KEY_PREFIX}${APM_PLATFORM_KEY}`]);
+  const values = (row: Record<string, any>, key: string) =>
+    keyAttributeValues(row[`${SERVICE_MAP_KEY_PREFIX}${key}`]);
+  const keyRows = rows.flatMap((row) => {
+    const platform = values(row, APM_PLATFORM_KEY)[0];
     if (platform) detectionEnabled = true;
-    const out: Record<string, string | undefined> = {
+    const base: Record<string, string | undefined> = {
       [`resource.attributes.${APM_PLATFORM_KEY}`]: platform,
     };
-    INFRA_SPAN_KEYS.forEach((key) => {
-      out[`resource.attributes.${key}`] = str(row[`${SERVICE_MAP_KEY_PREFIX}${key}`]);
-    });
-    const scope = str(row[`${SERVICE_MAP_KEY_PREFIX}${K8S_SCOPE_KEY}`]);
-    if (scope) {
-      const [cluster, namespace, kind, name] = scope.split('|');
-      out['resource.attributes.k8s.cluster.name'] = str(cluster);
-      out['resource.attributes.k8s.namespace.name'] = str(namespace);
-      WORKLOAD_KEYS.forEach(([k, attr]) => {
-        out[`resource.attributes.${attr}`] = k === kind ? str(name) : undefined;
+    const scopes = values(row, K8S_SCOPE_KEY);
+    if (scopes.length > 0) {
+      // Kubernetes keys from the joined scope; the other keys (cloud, host) as recorded.
+      const other = INFRA_SPAN_KEYS.filter((k) => !k.startsWith('k8s.')).map(
+        (k) => [`resource.attributes.${k}`, values(row, k)] as [string, string[]]
+      );
+      return scopes.flatMap((scope) => {
+        const [cluster, namespace, kind, name] = splitK8sScope(scope);
+        const scoped: Record<string, string | undefined> = {
+          ...base,
+          'resource.attributes.k8s.cluster.name': str(cluster),
+          'resource.attributes.k8s.namespace.name': str(namespace),
+        };
+        WORKLOAD_KEYS.forEach(([k, attr]) => {
+          scoped[`resource.attributes.${attr}`] = k === kind ? str(name) : undefined;
+        });
+        return expandRows(scoped, other);
       });
     }
-    return out;
+    return expandRows(
+      base,
+      INFRA_SPAN_KEYS.map((k) => [`resource.attributes.${k}`, values(row, k)])
+    );
   });
   return { rows: keyRows, detectionEnabled };
 }

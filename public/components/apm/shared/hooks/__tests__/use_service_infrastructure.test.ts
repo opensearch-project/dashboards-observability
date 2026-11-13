@@ -5,7 +5,7 @@
 
 jest.mock('../../../config/apm_config_context', () => ({ useApmConfig: () => ({ config: null }) }));
 
-import { keyRowsFromServiceMap, toInfraKeys } from '../use_service_infrastructure';
+import { keyRowsFromServiceMap, splitK8sScope, toInfraKeys } from '../use_service_infrastructure';
 
 const row = (attrs: Record<string, string | null>) =>
   Object.fromEntries(Object.entries(attrs).map(([k, v]) => [`resource.attributes.${k}`, v]));
@@ -135,5 +135,100 @@ describe('keyRowsFromServiceMap', () => {
 
   it('reports no detection when no row carries the platform', () => {
     expect(keyRowsFromServiceMap([]).detectionEnabled).toBe(false);
+  });
+});
+
+describe('keyRowsFromServiceMap: PPL array fields on OpenSearch 3.9 and 3.5', () => {
+  const k = (key: string) => `sourceNode.keyAttributes.${key}`;
+  const scope = 'obs-stack-usw1-rc|observability-stack|deployment|cart';
+  const expected = [
+    {
+      cluster: 'obs-stack-usw1-rc',
+      namespace: 'observability-stack',
+      kind: 'deployment',
+      workload: 'cart',
+    },
+  ];
+
+  it('reads the scope from a JSON array (3.9)', () => {
+    const { rows, detectionEnabled } = keyRowsFromServiceMap([
+      { [k('apm.platform')]: ['kubernetes'], [k('apm.k8s.scope')]: [scope] },
+    ]);
+    expect(detectionEnabled).toBe(true);
+    const keys = toInfraKeys(rows);
+    expect(keys.platform).toBe('kubernetes');
+    expect(keys.scopes).toEqual(expected);
+  });
+
+  it('reads the scope from the list string form (3.5), without the brackets', () => {
+    // As returned by the playground (OpenSearch 3.5): the tab queried
+    // k8s_cluster_name="[obs-stack-usw1-rc" and k8s_deployment_name="cart]".
+    const { rows } = keyRowsFromServiceMap([
+      { [k('apm.platform')]: '[kubernetes]', [k('apm.k8s.scope')]: `[${scope}]` },
+    ]);
+    const keys = toInfraKeys(rows);
+    expect(keys.platform).toBe('kubernetes');
+    expect(keys.scopes).toEqual(expected);
+  });
+
+  it('gives one scope per value when a service runs in two clusters, in both forms', () => {
+    const a = 'prod-1|shop|deployment|checkout';
+    const b = 'prod-2|shop|deployment|checkout-canary';
+    [[a, b], `[${a}, ${b}]`].forEach((value) => {
+      const keys = toInfraKeys(
+        keyRowsFromServiceMap([{ [k('apm.platform')]: ['eks'], [k('apm.k8s.scope')]: value }]).rows
+      );
+      expect(keys.platform).toBe('eks');
+      expect(keys.scopes.map((x) => `${x.cluster}/${x.workload}`).sort()).toEqual([
+        'prod-1/checkout',
+        'prod-2/checkout-canary',
+      ]);
+    });
+  });
+
+  it('expands host ids and individual keys (no scope key) in both forms', () => {
+    ['[h1, h2]', ['h1', 'h2']].forEach((hosts) => {
+      const keys = toInfraKeys(
+        keyRowsFromServiceMap([
+          {
+            [k('apm.platform')]: '[ec2]',
+            [k('cloud.platform')]: '[aws_ec2]',
+            [k('host.id')]: hosts,
+          },
+        ]).rows
+      );
+      expect(keys.platform).toBe('ec2');
+      expect(keys.hostIds).toEqual(['h1', 'h2']);
+    });
+    const keys = toInfraKeys(
+      keyRowsFromServiceMap([
+        {
+          [k('apm.platform')]: '[kubernetes]',
+          [k('k8s.cluster.name')]: '[c1]',
+          [k('k8s.namespace.name')]: '[shop]',
+          [k('k8s.statefulset.name')]: '[db]',
+        },
+      ]).rows
+    );
+    expect(keys.scopes).toEqual([
+      { cluster: 'c1', namespace: 'shop', kind: 'statefulset', workload: 'db' },
+    ]);
+  });
+
+  it('splits the scope on unescaped bars only', () => {
+    // Data Prepper escapes `|` and `\` inside a segment (the cluster name is free-form).
+    expect(splitK8sScope('prod\\|east|shop|deployment|cart')).toEqual([
+      'prod|east',
+      'shop',
+      'deployment',
+      'cart',
+    ]);
+    expect(splitK8sScope('c\\\\|shop|deployment|cart')).toEqual([
+      'c\\',
+      'shop',
+      'deployment',
+      'cart',
+    ]);
+    expect(splitK8sScope('c|shop|deployment|cart')).toEqual(['c', 'shop', 'deployment', 'cart']);
   });
 });

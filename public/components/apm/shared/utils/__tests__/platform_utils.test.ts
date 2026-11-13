@@ -6,6 +6,7 @@
 import {
   PLATFORM_TYPE_MAP,
   getApmPlatform,
+  keyAttributeValues,
   getDependencySystemFromName,
   getNodeIconType,
   getNodeSubtitle,
@@ -210,6 +211,24 @@ describe('platform_utils', () => {
   });
 });
 
+describe('keyAttributeValues (PPL array fields, OpenSearch 3.9 and 3.5)', () => {
+  it('reads JSON arrays, list strings, JSON array strings and plain values', () => {
+    expect(keyAttributeValues(['a', 'b'])).toEqual(['a', 'b']); // 3.9
+    expect(keyAttributeValues('[a, b]')).toEqual(['a', 'b']); // 3.5
+    expect(keyAttributeValues('[kubernetes]')).toEqual(['kubernetes']);
+    expect(keyAttributeValues('["a","b"]')).toEqual(['a', 'b']);
+    expect(keyAttributeValues('eks')).toEqual(['eks']);
+  });
+
+  it('drops empty values', () => {
+    expect(keyAttributeValues(null)).toEqual([]);
+    expect(keyAttributeValues(undefined)).toEqual([]);
+    expect(keyAttributeValues('')).toEqual([]);
+    expect(keyAttributeValues('[]')).toEqual([]);
+    expect(keyAttributeValues([])).toEqual([]);
+  });
+});
+
 describe('detected platform (apm.platform)', () => {
   beforeEach(() => {
     coreRefs.apmInfrastructureEnabled = true;
@@ -227,6 +246,9 @@ describe('detected platform (apm.platform)', () => {
   it('reads apm.platform nested, flat or as an array', () => {
     expect(getApmPlatform({ apm: { platform: ['eks'] } })).toBe('eks');
     expect(getApmPlatform({ 'apm.platform': 'host' })).toBe('host');
+    // OpenSearch 3.5 PPL returns the array field as its list string.
+    expect(getApmPlatform({ 'apm.platform': '[eks]' })).toBe('eks');
+    expect(getApmPlatform({ apm: { platform: '[kubernetes]' } })).toBe('kubernetes');
     expect(getApmPlatform({ name: 'x' })).toBeUndefined();
     expect(getApmPlatform(undefined)).toBeUndefined();
   });
