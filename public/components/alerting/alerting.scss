@@ -7,6 +7,16 @@
 
 /* 3-letter prefix `alt` scopes these rules to the Alert Manager UI. */
 
+/* Compact timeline empty state: one line instead of empty chart axes. */
+.altTimelineEmpty {
+  padding: $euiSizeS 0;
+}
+
+/* Row count under the alerts table (moved from above it). */
+.altTableFooterCount {
+  margin-top: $euiSizeXS;
+}
+
 .altPageRoot {
   display: flex;
   flex-direction: column;
@@ -93,13 +103,83 @@
   min-height: 0;
 }
 
-/* Alerts tab: the page scrolls and pagination limits the rows, so there is no
- * inner table scroller (which clipped the first row under the header and ran
- * alongside pagination). The container grows with its content instead of being
- * capped to the viewport. */
-.altResizableContainer--pageScroll {
-  height: auto;
-  min-height: calc(100vh - 140px);
+/* Alerts tab, Discover-style: the container fits the viewport (inherits the
+ * `height` above). The content column stacks the timeline (fixed height) and
+ * the alerts table panel, which takes the rest and scrolls its rows
+ * internally: sticky column headers, pagination and the row count stay in
+ * view. (Replaces the page-scroll layout, where the timeline pushed most rows
+ * below the fold.) On short viewports, where the timeline and a usable table
+ * don't both fit, it falls back to the page scrolling (see the media query
+ * below). OSD core's `.app-wrapper` min-height can still add a few pixels of
+ * page scroll under the updated page header; that's outside this plugin. */
+.altResizableContainer--fitViewport {
+  /* `min-height` keeps a usable table on short viewports. */
+  .altTablePanel {
+    flex: 1 1 0;
+    min-height: 240px;
+  }
+
+  /* Only the table takes the panel's spare height; the title/search row
+   * (an EuiFlexGroup, which grows by default) stays at the top. */
+  .altTablePanelHeader {
+    flex: 0 0 auto;
+  }
+
+  .altAlertsTable {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    > .euiBasicTable {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+
+      /* The table wrapper scrolls; the pagination block after it stays put.
+       * OUI renders both as unclassed divs, so they're picked by position. With
+       * no rows there's no pagination block: the lone child is the table
+       * wrapper, so the pagination rule only applies when there are two. */
+      > div:first-child {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
+      }
+
+      > div:last-child:not(:first-child) {
+        flex: 0 0 auto;
+      }
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: $euiColorEmptyShade;
+    }
+  }
+}
+
+/* Short viewports (the timeline plus the 240px table minimum don't fit): let
+ * the page scroll as before instead of nesting a page scroll around the
+ * table's own scroller. */
+@media (max-height: 760px) {
+  .altResizableContainer--fitViewport {
+    height: auto;
+    min-height: calc(100vh - 140px);
+
+    .altTablePanel {
+      flex: 0 0 auto;
+    }
+
+    .altAlertsTable,
+    .altAlertsTable > .euiBasicTable,
+    .altAlertsTable > .euiBasicTable > div:first-child {
+      overflow: visible;
+    }
+  }
 }
 
 .altFiltersPanel {
@@ -144,8 +224,8 @@
 }
 
 .altTablePanel {
-  /* Sized by its content: the page scrolls (see `.altResizableContainer--pageScroll`).
-   * (Alerts-tab only; the Rules tab uses .altContentPanel + its own wrapper.) */
+  /* Alerts tab only (the Rules tab uses .altContentPanel + its own wrapper).
+   * Fills the content column; see `.altResizableContainer--fitViewport`. */
   display: flex;
   flex-direction: column;
 }
@@ -266,6 +346,8 @@
   overflow-x: hidden;
 }
 
+/* The six columns of the alerts table: Severity, Alert, State, Message,
+ * Started, Actions (no Duration column). */
 .altGroupedOccurrenceGrid {
   display: grid;
   grid-template-columns:
@@ -274,7 +356,6 @@
     140px
     minmax(260px, 1fr)
     120px
-    90px
     150px;
   align-items: center;
   min-width: 1080px;
