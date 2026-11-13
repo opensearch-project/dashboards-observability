@@ -211,13 +211,18 @@ describe('platform_utils', () => {
   });
 });
 
-describe('keyAttributeValues (PPL array fields, OpenSearch 3.9 and 3.5)', () => {
-  it('reads JSON arrays, list strings, JSON array strings and plain values', () => {
-    expect(keyAttributeValues(['a', 'b'])).toEqual(['a', 'b']); // 3.9
-    expect(keyAttributeValues('[a, b]')).toEqual(['a', 'b']); // 3.5
+describe('keyAttributeValues (PPL array fields)', () => {
+  it('reads list strings (not-pushed-down form on both 3.5 and 3.9.1), JSON array strings and plain values', () => {
+    expect(keyAttributeValues('[a, b]')).toEqual(['a', 'b']); // not pushed-down string form
     expect(keyAttributeValues('[kubernetes]')).toEqual(['kubernetes']);
-    expect(keyAttributeValues('["a","b"]')).toEqual(['a', 'b']);
-    expect(keyAttributeValues('eks')).toEqual(['eks']);
+    expect(keyAttributeValues('["a","b"]')).toEqual(['a', 'b']); // JSON-encoded
+    expect(keyAttributeValues('eks')).toEqual(['eks']); // plain scalar (pushed-down)
+  });
+
+  it('reads real arrays without recursing on elements (pushed-down arrays from fields queries)', () => {
+    expect(keyAttributeValues(['a', 'b'])).toEqual(['a', 'b']);
+    // An element that looks like "[i-1, x]" is a literal string, not a nested list.
+    expect(keyAttributeValues(['[i-1, x]'])).toEqual(['[i-1, x]']);
   });
 
   it('drops empty values', () => {
@@ -226,6 +231,11 @@ describe('keyAttributeValues (PPL array fields, OpenSearch 3.9 and 3.5)', () => 
     expect(keyAttributeValues('')).toEqual([]);
     expect(keyAttributeValues('[]')).toEqual([]);
     expect(keyAttributeValues([])).toEqual([]);
+  });
+
+  it('returns [] for unexpected shapes (object, function) rather than "[object Object]"', () => {
+    expect(keyAttributeValues({ value: 'k8s' })).toEqual([]);
+    expect(keyAttributeValues(() => 'k8s')).toEqual([]);
   });
 });
 

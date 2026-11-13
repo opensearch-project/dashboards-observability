@@ -202,16 +202,16 @@ describe('keyRowsFromServiceMap: PPL array fields on OpenSearch 3.9 and 3.5', ()
     });
   });
 
-  it('builds distinct cluster×namespace×workload rows without the scope key (no-scope path)', () => {
-    // Without apm.k8s.scope, the individual k8s keys are independent sets; the function builds
-    // distinct combinations (capped). It is an approximation: some may not exist.
+  it('single-value no-scope path (pushed-down): one real scope', () => {
+    // When pushed down, OpenSearch gives one stats row per combination with scalar values.
+    // Each row has single values for every key, so the combination is a real scope.
     const keys = toInfraKeys(
       keyRowsFromServiceMap([
         {
-          [k('apm.platform')]: '[kubernetes]',
-          [k('k8s.cluster.name')]: '[c1]',
-          [k('k8s.namespace.name')]: '[shop]',
-          [k('k8s.statefulset.name')]: '[db]',
+          [k('apm.platform')]: 'kubernetes',
+          [k('k8s.cluster.name')]: 'c1',
+          [k('k8s.namespace.name')]: 'shop',
+          [k('k8s.statefulset.name')]: 'db',
         },
       ]).rows
     );
@@ -220,18 +220,29 @@ describe('keyRowsFromServiceMap: PPL array fields on OpenSearch 3.9 and 3.5', ()
     ]);
   });
 
-  it('caps the no-scope rows at MAX_KEY_ROWS_PER_STATS_ROW (50)', () => {
-    // 100 namespaces × 10 workloads = 1000 combinations; expect exactly 50.
-    const namespaces = Array.from({ length: 100 }, (_, i) => `ns-${i}`);
-    const deployments = Array.from({ length: 10 }, (_, i) => `svc-${i}`);
-    const { rows } = keyRowsFromServiceMap([
-      {
-        [k('apm.platform')]: 'kubernetes',
-        [k('k8s.namespace.name')]: namespaces,
-        [k('k8s.deployment.name')]: deployments,
-      },
+  it('multi-value no-scope path (not pushed-down): falls back to namespace-only', () => {
+    // When not pushed down (e.g. mixed index mappings), OpenSearch returns one row with the
+    // array as "[c1, c2]". The individual keys are independent sets; the combinations are
+    // unknowable and could match another team's pods. Fall back to namespace-only.
+    const keys = toInfraKeys(
+      keyRowsFromServiceMap([
+        {
+          [k('apm.platform')]: '[kubernetes]',
+          [k('k8s.cluster.name')]: '[c1, c2]',
+          [k('k8s.namespace.name')]: '[shop, staging]',
+          [k('k8s.deployment.name')]: '[cart]',
+        },
+      ]).rows
+    );
+    expect(keys.namespaceOnly).toBe(true);
+    // Namespace × cluster combinations, no workload.
+    expect(keys.scopes.map((s) => `${s.cluster}/${s.namespace}`).sort()).toEqual([
+      'c1/shop',
+      'c1/staging',
+      'c2/shop',
+      'c2/staging',
     ]);
-    expect(rows.length).toBe(50);
+    expect(keys.scopes.every((s) => s.kind === 'namespace')).toBe(true);
   });
 
   it('splits the scope on unescaped bars only', () => {
