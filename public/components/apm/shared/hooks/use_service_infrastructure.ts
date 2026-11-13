@@ -52,6 +52,7 @@ import {
   ServiceInfrastructure,
 } from '../../common/types/infra_types';
 import { TimeRange } from '../../common/types/service_types';
+import { keyAttributeValues } from '../utils/platform_utils';
 import { toPplDataset } from '../utils/dataset_utils';
 import { getTimeInSeconds, parseTimeRange } from '../utils/time_utils';
 
@@ -120,34 +121,135 @@ const WORKLOAD_KEYS: Array<[K8sWorkloadKind, InfraSpanKey]> = [
 ];
 
 /**
- * Key rows (in the span-query shape, `resource.attributes.<key>`) from the service-map stats rows
- * (`sourceNode.keyAttributes.<key>`). When Data Prepper wrote the joined `apm.k8s.scope`
- * (`cluster|namespace|kind|name`), the Kubernetes keys come from it, so a service in two clusters
- * keeps its real cluster / namespace / workload tuples instead of their cross product.
+ * Splits a joined `apm.k8s.scope` value (`cluster|namespace|kind|name`). Data Prepper escapes a `|`
+ * or `\` inside a segment with a backslash (`k8s.cluster.name` is free-form).
+ */
+export function splitK8sScope(scope: string): string[] {
+  const parts: string[] = [];
+  let current = '';
+  for (let i = 0; i < scope.length; i++) {
+    const c = scope[i];
+    if (c === '\\' && i + 1 < scope.length) {
+      current += scope[++i];
+    } else if (c === '|') {
+      parts.push(current);
+      current = '';
+    } else {
+      current += c;
+    }
+  }
+  parts.push(current);
+  return parts;
+}
+
+/**
+ * Key rows (in the span-query shape, `resource.attributes.<key>`, one value per key) from the
+ * service-map stats rows (`sourceNode.keyAttributes.<key>`).
+ *
+ * The platform keys are arrays (Data Prepper keeps every value seen, bounded per key). A PPL
+ * `stats` query returns them in one of two shapes (see `keyAttributeValues`):
+ * - **Pushed down** (uniform index mapping): one row per element combination as plain scalars.
+ *   OpenSearch computes the cross product, so multi-key arrays give multiple rows — each with one
+ *   value per key — and those combinations are real scopes.
+ * - **Not pushed down** (mixed mappings): one row per original array as the string `"[a, b]"`,
+ *   on both 3.5 and 3.9.1. The individual keys are independent sets and their combinations are
+ *   unknowable.
+ *
+ * **With `apm.k8s.scope` (Data Prepper ≥ PR #7249):** one row per scope, keeping the exact
+ * cluster / namespace / workload tuples regardless of push-down.
+ *
+ * **Without `apm.k8s.scope`, pushed down:** each stats row has single values for every key, so
+ * the combinations are the real scopes returned by OpenSearch.
+ *
+ * **Without `apm.k8s.scope`, not pushed down:** multiple values per key with unknowable
+ * combinations. Rather than inventing potentially wrong scopes (which could match another team's
+ * pods), we fall back to namespace-only rows. The tab then shows the namespace-only callout and
+ * suggests adding the joined scope key (or upgrading Data Prepper).
+ *
  * `detectionEnabled` is true when any row carries the platform Data Prepper writes on every node
  * it ran detection for.
  */
-export function keyRowsFromServiceMap(rows: Array<Record<string, any>>) {
+export function keyRowsFromServiceMap(rows: Array<Record<string, unknown>>) {
   let detectionEnabled = false;
-  const keyRows = rows.map((row) => {
-    const platform = str(row[`${SERVICE_MAP_KEY_PREFIX}${APM_PLATFORM_KEY}`]);
+  const vals = (row: Record<string, unknown>, key: string) =>
+    keyAttributeValues(row[`${SERVICE_MAP_KEY_PREFIX}${key}`]);
+  const keyRows = rows.flatMap((row) => {
+    // Data Prepper records the first value of each multi-valued array; only the first platform
+    // value is kept here (matches the precedence in getApmPlatform). When a service was seen on
+    // two platforms in one window, the array order determines which one wins.
+    const platform = vals(row, APM_PLATFORM_KEY)[0];
     if (platform) detectionEnabled = true;
-    const out: Record<string, string | undefined> = {
+    const base: Record<string, string | undefined> = {
       [`resource.attributes.${APM_PLATFORM_KEY}`]: platform,
+      // cloud.platform is needed by toInfraKeys for managed-k8s detection (EKS, etc.);
+      // set it on base so it is present in every branch.
+      'resource.attributes.cloud.platform': vals(row, 'cloud.platform')[0],
     };
-    INFRA_SPAN_KEYS.forEach((key) => {
-      out[`resource.attributes.${key}`] = str(row[`${SERVICE_MAP_KEY_PREFIX}${key}`]);
-    });
-    const scope = str(row[`${SERVICE_MAP_KEY_PREFIX}${K8S_SCOPE_KEY}`]);
-    if (scope) {
-      const [cluster, namespace, kind, name] = scope.split('|');
-      out['resource.attributes.k8s.cluster.name'] = str(cluster);
-      out['resource.attributes.k8s.namespace.name'] = str(namespace);
-      WORKLOAD_KEYS.forEach(([k, attr]) => {
-        out[`resource.attributes.${attr}`] = k === kind ? str(name) : undefined;
+
+    const scopes = vals(row, K8S_SCOPE_KEY);
+    if (scopes.length > 0) {
+      // Joined scope key: exact tuples regardless of push-down.
+      return scopes.map((scope) => {
+        const [cluster, namespace, kind, name] = splitK8sScope(scope);
+        const scoped: Record<string, string | undefined> = {
+          ...base,
+          'resource.attributes.k8s.cluster.name': str(cluster),
+          'resource.attributes.k8s.namespace.name': str(namespace),
+        };
+        WORKLOAD_KEYS.forEach(([k, attr]) => {
+          scoped[`resource.attributes.${attr}`] = k === kind ? str(name) : undefined;
+        });
+        return scoped;
       });
     }
-    return out;
+
+    // No joined scope key.
+    const clusters = vals(row, 'k8s.cluster.name');
+    const namespaces = vals(row, 'k8s.namespace.name');
+    const workloads = WORKLOAD_KEYS.flatMap(([kind, attr]) =>
+      vals(row, attr).map((name) => ({ kind, attr, name }))
+    );
+
+    if (namespaces.length > 0) {
+      // Pushed-down case: each key has exactly one value, so the combination is a real scope.
+      // Not-pushed-down case: multiple values per key — combinations are unknowable. Fall back
+      // to namespace-only rows to avoid matching another team's pods. The tab's namespace-only
+      // callout will tell the user to upgrade Data Prepper or add k8s_attributes.
+      const multiValued = clusters.length > 1 || namespaces.length > 1 || workloads.length > 1;
+      if (multiValued) {
+        // Namespace-only: one row per namespace (and one per cluster when there are several,
+        // since in the not-pushed-down case there is also one stats row with cluster="[c1, c2]").
+        const clustersOrNone = clusters.length ? clusters : [undefined as string | undefined];
+        return namespaces.flatMap((namespace) =>
+          clustersOrNone.map((cluster) => ({
+            ...base,
+            'resource.attributes.k8s.namespace.name': namespace,
+            'resource.attributes.k8s.cluster.name': cluster,
+          }))
+        );
+      }
+      // Single combination: exact scope.
+      const r: Record<string, string | undefined> = {
+        ...base,
+        'resource.attributes.k8s.namespace.name': namespaces[0],
+        'resource.attributes.k8s.cluster.name': clusters[0],
+      };
+      WORKLOAD_KEYS.forEach(([k, a]) => {
+        const w = workloads[0];
+        r[`resource.attributes.${a}`] = w && k === w.kind ? w.name : undefined;
+      });
+      return [r];
+    }
+
+    // Host / non-k8s: one row per host id (or one row if none).
+    const hostIds = vals(row, 'host.id');
+    if (hostIds.length > 0) {
+      return hostIds.map((host) => ({
+        ...base,
+        'resource.attributes.host.id': host,
+      }));
+    }
+    return [base];
   });
   return { rows: keyRows, detectionEnabled };
 }

@@ -73,8 +73,69 @@ export function getApmPlatform(keyAttributes: unknown): string | undefined {
     (ka.apm && typeof ka.apm === 'object'
       ? (ka.apm as Record<string, unknown>).platform
       : undefined);
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  return typeof value === 'string' && value ? value : undefined;
+  return keyAttributeValues(raw)[0];
+}
+
+/**
+ * The values of a service-map key attribute. Data Prepper stores the descriptive keys written by
+ * platform detection (`apm.platform`, `apm.k8s.scope`, `host.id`, ...) as arrays. A PPL `stats`
+ * query returns an array field in one of three shapes depending on whether OpenSearch pushed the
+ * aggregation down:
+ * - **Pushed down** (uniform index mapping): one row per element, as plain scalars. OpenSearch
+ *   computes the cross product itself, so multi-key arrays give multiple rows, each with a single
+ *   value for each key.
+ * - **Not pushed down** (mixed mappings, e.g. two indices where one has the field as `keyword` and
+ *   the other has a dynamic `text`+`keyword` mapping): one row per original array, as the list's
+ *   string form `[a, b]`. Observed on both 3.5 and 3.9.1.
+ * - **JSON-encoded array** (from plain `fields` queries or future versions): `["a","b"]`.
+ *
+ * All three shapes give the same list; empty values are dropped.
+ */
+export function keyAttributeValues(value: unknown): string[] {
+  if (value === null || value === undefined) return [];
+  // Real arrays: elements are already plain values; do not recurse, since an element that
+  // looks like "[a, b]" is a literal string, not a nested list.
+  if (Array.isArray(value)) {
+    return value
+      .filter((v) => typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean')
+      .map((v) => String(v).trim())
+      .filter(Boolean);
+  }
+  // Guard unexpected shapes (e.g. { value: 'k8s' } would otherwise become '[object Object]'
+  // and trigger the bracket branch below, returning ['object Object']).
+  if (typeof value !== 'string' && typeof value !== 'number' && typeof value !== 'boolean') {
+    return [];
+  }
+  const text = String(value).trim();
+  if (!text) return [];
+  // Any plain string starting with `[` and ending with `]` is treated as a list; this covers
+  // the not-pushed-down string form and JSON-encoded arrays. Note: a plain string that happens
+  // to start with `[` and end with `]` is treated as a list too — this matches all known keys.
+  if (text.startsWith('[') && text.endsWith(']')) {
+    const inner = text.slice(1, -1).trim();
+    if (!inner) return [];
+    if (inner.startsWith('"')) {
+      try {
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) {
+          return parsed
+            .filter((v) => typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean')
+            .map((v) => String(v).trim())
+            .filter(Boolean);
+        }
+      } catch {
+        // Not JSON: fall through to the list form.
+      }
+    }
+    // The not-pushed-down list string form: elements separated by ", ". Note: a free-form
+    // k8s.cluster.name that contains ", " cannot be represented unambiguously in this form
+    // and would be split into broken values. This is a known limitation of the string form.
+    return inner
+      .split(', ')
+      .map((v) => v.trim())
+      .filter(Boolean);
+  }
+  return [text];
 }
 
 /** Platform type from the detected `apm.platform` value; undefined for an unknown value. */

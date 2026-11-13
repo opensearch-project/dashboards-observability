@@ -6,6 +6,7 @@
 import {
   PLATFORM_TYPE_MAP,
   getApmPlatform,
+  keyAttributeValues,
   getDependencySystemFromName,
   getNodeIconType,
   getNodeSubtitle,
@@ -210,6 +211,34 @@ describe('platform_utils', () => {
   });
 });
 
+describe('keyAttributeValues (PPL array fields)', () => {
+  it('reads list strings (not-pushed-down form on both 3.5 and 3.9.1), JSON array strings and plain values', () => {
+    expect(keyAttributeValues('[a, b]')).toEqual(['a', 'b']); // not pushed-down string form
+    expect(keyAttributeValues('[kubernetes]')).toEqual(['kubernetes']);
+    expect(keyAttributeValues('["a","b"]')).toEqual(['a', 'b']); // JSON-encoded
+    expect(keyAttributeValues('eks')).toEqual(['eks']); // plain scalar (pushed-down)
+  });
+
+  it('reads real arrays without recursing on elements (pushed-down arrays from fields queries)', () => {
+    expect(keyAttributeValues(['a', 'b'])).toEqual(['a', 'b']);
+    // An element that looks like "[i-1, x]" is a literal string, not a nested list.
+    expect(keyAttributeValues(['[i-1, x]'])).toEqual(['[i-1, x]']);
+  });
+
+  it('drops empty values', () => {
+    expect(keyAttributeValues(null)).toEqual([]);
+    expect(keyAttributeValues(undefined)).toEqual([]);
+    expect(keyAttributeValues('')).toEqual([]);
+    expect(keyAttributeValues('[]')).toEqual([]);
+    expect(keyAttributeValues([])).toEqual([]);
+  });
+
+  it('returns [] for unexpected shapes (object, function) rather than "[object Object]"', () => {
+    expect(keyAttributeValues({ value: 'k8s' })).toEqual([]);
+    expect(keyAttributeValues(() => 'k8s')).toEqual([]);
+  });
+});
+
 describe('detected platform (apm.platform)', () => {
   beforeEach(() => {
     coreRefs.apmInfrastructureEnabled = true;
@@ -227,6 +256,9 @@ describe('detected platform (apm.platform)', () => {
   it('reads apm.platform nested, flat or as an array', () => {
     expect(getApmPlatform({ apm: { platform: ['eks'] } })).toBe('eks');
     expect(getApmPlatform({ 'apm.platform': 'host' })).toBe('host');
+    // OpenSearch 3.5 PPL returns the array field as its list string.
+    expect(getApmPlatform({ 'apm.platform': '[eks]' })).toBe('eks');
+    expect(getApmPlatform({ apm: { platform: '[kubernetes]' } })).toBe('kubernetes');
     expect(getApmPlatform({ name: 'x' })).toBeUndefined();
     expect(getApmPlatform(undefined)).toBeUndefined();
   });
