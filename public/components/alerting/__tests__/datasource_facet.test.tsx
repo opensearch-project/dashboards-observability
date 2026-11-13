@@ -16,6 +16,7 @@ import {
   DatasourceFacet,
   DatasourceFacetProps,
   buildDatasourceFacetEntries,
+  datasourceEntryLabel,
   toggleDatasourceEntry,
 } from '../datasource_facet';
 
@@ -93,6 +94,40 @@ describe('buildDatasourceFacetEntries', () => {
       ['cloudwatch', 'Prod account'],
       ['cloudwatch', 'Partner (read-only)'],
     ]);
+  });
+});
+
+describe('datasourceEntryLabel', () => {
+  const cw = (over: Partial<Datasource>): Datasource => ({
+    id: 'cloudwatch',
+    name: 'CloudWatch',
+    type: 'cloudwatch',
+    url: 'cloudwatch',
+    enabled: true,
+    ...over,
+  });
+  it("labels the caller's own account without a label of its own as this account", () => {
+    expect(
+      datasourceEntryLabel(cw({ cloudWatchScopeLabel: 'CloudWatch', accountId: '111111111111' }))
+    ).toBe('This account (111111111111)');
+    expect(datasourceEntryLabel(cw({}))).toBe('This account');
+  });
+  it('keeps the labels the source gives', () => {
+    expect(datasourceEntryLabel(cw({ cloudWatchScopeLabel: 'Main', accountId: '1' }))).toBe('Main');
+    expect(
+      datasourceEntryLabel(
+        cw({ id: 'cloudwatch_us-east-1_s1', cloudWatchScope: 's1', cloudWatchScopeLabel: 'Prod' })
+      )
+    ).toBe('Prod');
+    expect(
+      datasourceEntryLabel({
+        id: 'os-1',
+        name: 'Local',
+        type: 'opensearch',
+        url: '',
+        enabled: true,
+      })
+    ).toBe('Local');
   });
 });
 
@@ -226,8 +261,9 @@ describe('DatasourceFacet', () => {
       cloudWatch: undefined,
     });
     const cw = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
-    // Group header plus the one entry.
-    expect(cw.getAllByText('CloudWatch')).toHaveLength(2);
+    // The group header, and the one entry for the caller's own account.
+    expect(cw.getAllByText('CloudWatch')).toHaveLength(1);
+    expect(cw.getByText('This account')).toBeInTheDocument();
     expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
   });
 

@@ -180,6 +180,60 @@ describe('AlertsDashboard', () => {
     expect(group.getByText('US East (N. Virginia)')).toBeInTheDocument();
   });
 
+  it('shows the account and region under the name of a CloudWatch alert', () => {
+    const cwDs = (scope: string, label: string): Datasource => ({
+      id: `cloudwatch_us-east-1_${scope}`,
+      name: `CloudWatch · ${label} · us-east-1`,
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+      region: 'us-east-1',
+      cloudWatchScope: scope,
+      cloudWatchScopeLabel: label,
+    });
+    const own: Datasource = {
+      id: 'cloudwatch',
+      name: 'CloudWatch',
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+      cloudWatchScopeLabel: 'CloudWatch',
+      accountId: '111111111111',
+    };
+    const datasources = [sampleDs, own, cwDs('s1', 'Prod'), cwDs('s2', 'Staging')];
+    const cwAlert = (id: string, dsId: string, region: string): UnifiedAlertSummary => ({
+      ...sampleAlert,
+      id,
+      datasourceId: dsId,
+      datasourceType: 'cloudwatch',
+      name: 'checkout-api-cpu-high-0',
+      cloudWatch: { state: 'ALARM', alarmType: 'metric', region },
+    });
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={datasources}
+        selectedDsIds={datasources.map((d) => d.id)}
+        alerts={[
+          cwAlert('cw-1', 'cloudwatch_us-east-1_s1', 'us-east-1'),
+          cwAlert('cw-2', 'cloudwatch_us-east-1_s2', 'us-east-1'),
+          cwAlert('cw-3', 'cloudwatch', 'us-west-2'),
+          sampleAlert,
+        ]}
+      />
+    );
+    expect(
+      screen.getAllByTestId('alertsTable-cloudWatchSource').map((el) => el.textContent)
+    ).toEqual(
+      expect.arrayContaining([
+        'Prod • us-east-1',
+        'Staging • us-east-1',
+        'This account (111111111111) • us-west-2',
+      ])
+    );
+    // OpenSearch rows get no second line.
+    expect(screen.getAllByTestId('alertsTable-cloudWatchSource')).toHaveLength(3);
+  });
   it('leaves CloudWatch account and region out of the Labels facet', () => {
     const cwAlert: UnifiedAlertSummary = {
       ...sampleAlert,

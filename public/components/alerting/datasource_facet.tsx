@@ -31,7 +31,10 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import type { Datasource, DatasourceType } from '../../../common/types/alerting';
-import { cloudWatchScopeKeyOf } from '../../../common/services/alerting/cloudwatch_datasource_id';
+import {
+  CLOUDWATCH_DEFAULT_SCOPE_LABEL,
+  cloudWatchScopeKeyOf,
+} from '../../../common/services/alerting/cloudwatch_datasource_id';
 import { FacetErrorIndicator } from './facet_filter_panel';
 import { CloudWatchRegionControl } from './cloudwatch_region_control';
 import { limitDatasourceSelection } from './hooks/use_cloudwatch_regions';
@@ -90,8 +93,29 @@ export function datasourceEntryKeyOf(id: string): string {
 }
 
 /**
+ * The label of a datasource's facet entry: the name, or for CloudWatch the account scope's
+ * label. The default scope (the caller's own account) without a label of its own reads
+ * "This account", with the account id when the source reports it.
+ */
+export function datasourceEntryLabel(ds: Datasource): string {
+  if (ds.type !== 'cloudwatch') return ds.name;
+  const label = ds.cloudWatchScopeLabel;
+  if (ds.cloudWatchScope === undefined && (!label || label === CLOUDWATCH_DEFAULT_SCOPE_LABEL)) {
+    return ds.accountId
+      ? i18n.translate('observability.alerting.datasourceFacet.cloudWatchOwnAccountWithId', {
+          defaultMessage: 'This account ({accountId})',
+          values: { accountId: ds.accountId },
+        })
+      : i18n.translate('observability.alerting.datasourceFacet.cloudWatchOwnAccount', {
+          defaultMessage: 'This account',
+        });
+  }
+  return label || ds.name;
+}
+
+/**
  * The facet entries: each OpenSearch or Prometheus datasource (by name), and one per
- * CloudWatch account scope (in listing order, labelled with the scope label).
+ * CloudWatch account scope (in listing order, labelled by `datasourceEntryLabel`).
  */
 export function buildDatasourceFacetEntries(datasources: Datasource[]): DatasourceFacetEntry[] {
   const byKey = new Map<string, DatasourceFacetEntry>();
@@ -102,8 +126,7 @@ export function buildDatasourceFacetEntries(datasources: Datasource[]): Datasour
       existing.datasources.push(ds);
       continue;
     }
-    const label = ds.type === 'cloudwatch' ? ds.cloudWatchScopeLabel || ds.name : ds.name;
-    byKey.set(key, { key, label, type: ds.type, datasources: [ds] });
+    byKey.set(key, { key, label: datasourceEntryLabel(ds), type: ds.type, datasources: [ds] });
   }
   const entries = Array.from(byKey.values());
   const byName = (a: DatasourceFacetEntry, b: DatasourceFacetEntry) =>

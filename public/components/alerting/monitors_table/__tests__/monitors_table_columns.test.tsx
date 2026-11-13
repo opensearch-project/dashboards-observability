@@ -183,6 +183,36 @@ describe('monitors_table_columns Datasource cell', () => {
       )
     ).toEqual(['CloudWatch • Prod account', 'us-east-1']);
   });
+  it('shows the account id once when the first line already has it', () => {
+    const repeated = new Map(dsById);
+    repeated.set(
+      'cloudwatch_us-east-1_s2',
+      ds({
+        id: 'cloudwatch_us-east-1_s2',
+        name: 'CloudWatch · Prod (222222222222) · us-east-1',
+        type: 'cloudwatch',
+        region: 'us-east-1',
+        cloudWatchScope: 's2',
+        cloudWatchScopeLabel: 'Prod (222222222222)',
+      })
+    );
+    expect(
+      datasourceCellLines(
+        row({
+          datasourceId: 'cloudwatch_us-east-1_s2',
+          datasourceType: 'cloudwatch',
+          cloudWatch: {
+            state: 'ALARM',
+            alarmType: 'metric',
+            accountId: '222222222222',
+            region: 'us-east-1',
+          },
+        }),
+        new Map(),
+        repeated
+      )
+    ).toEqual(['CloudWatch • Prod (222222222222)', 'us-east-1']);
+  });
 
   it('labels the legacy single CloudWatch datasource just "CloudWatch"', () => {
     expect(

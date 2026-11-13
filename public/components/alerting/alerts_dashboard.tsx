@@ -45,7 +45,11 @@ import { alertMatchesSearch, filterAlerts } from '../../../common/services/alert
 import { facetLabels } from '../../../common/services/alerting/facet_labels';
 import { AlertTimeline, AlertTimelineLegend, countAlertsStartedInWindow } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
-import { DatasourceFacet, DatasourceFacetCloudWatch } from './datasource_facet';
+import {
+  DatasourceFacet,
+  DatasourceFacetCloudWatch,
+  datasourceEntryLabel,
+} from './datasource_facet';
 import {
   canAcknowledgeAlert,
   SEVERITY_SORT_ORDER,
@@ -566,6 +570,22 @@ function collectAlertLabelValues(alerts: UnifiedAlertSummary[], key: string): st
 // datasource, but two datasources can report the same id (an OpenSearch alert id read through
 // two connections to one cluster), so the datasource id is part of it. A repeated row id gives
 // React duplicate keys, and it then keeps stale rows when filtering shrinks the list.
+/**
+ * The account and region a CloudWatch alert row reads (`<account> • <region>`), so same-named
+ * alarms in two accounts or regions can be told apart. The account reads as in the Datasource
+ * facet. Undefined for other rows.
+ */
+export function cloudWatchAlertSourceLine(
+  alert: Pick<UnifiedAlertSummary, 'datasourceId' | 'datasourceType' | 'cloudWatch'>,
+  dsById: Map<string, Datasource>
+): string | undefined {
+  if (alert.datasourceType !== 'cloudwatch') return undefined;
+  const ds = dsById.get(alert.datasourceId);
+  const account = ds ? datasourceEntryLabel(ds) : alert.cloudWatch?.accountId;
+  const parts = [account, alert.cloudWatch?.region ?? ds?.region].filter(Boolean);
+  return parts.length > 0 ? parts.join(' • ') : undefined;
+}
+
 const alertRowId = (row: Pick<UnifiedAlertSummary, 'datasourceId' | 'id'>): string =>
   `${row.datasourceId}::${row.id}`;
 interface AlertsTableProps {
@@ -964,6 +984,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   // Table columns — memoized so `AlertsTable`'s React.memo shallow-compare
   // doesn't invalidate on every parent re-render.
   const cloudWatchIconType = useCloudWatchIconType();
+  const dsById = useMemo(() => new Map(datasources.map((d) => [d.id, d])), [datasources]);
   const columns = useMemo<Array<EuiBasicTableColumn<AlertTableRow>>>(
     () => [
       {
@@ -1002,6 +1023,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
               : alert.datasourceType === 'prometheus'
                 ? 'logoPrometheus'
                 : 'logoOpenSearch';
+          const sourceLine = cloudWatchAlertSourceLine(alert, dsById);
           const toggleExpandedGroup = () => {
             setExpandedGroupIds((prev) => ({
               ...prev,
@@ -1022,7 +1044,19 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
               wrap={false}
             >
               <EuiFlexItem className="altAlertNameItem" grow={true}>
-                <EuiToolTip content={name}>
+                <EuiToolTip
+                  content={
+                    sourceLine ? (
+                      <>
+                        {name}
+                        <br />
+                        {sourceLine}
+                      </>
+                    ) : (
+                      name
+                    )
+                  }
+                >
                   <EuiButtonEmpty
                     className="altAlertNameButton"
                     size="xs"
@@ -1036,6 +1070,16 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     <span className="altAlertNameText">{name}</span>
                   </EuiButtonEmpty>
                 </EuiToolTip>
+                {sourceLine && (
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    className="altAlertSourceText"
+                    data-test-subj="alertsTable-cloudWatchSource"
+                  >
+                    {sourceLine}
+                  </EuiText>
+                )}
               </EuiFlexItem>
               {isGrouped && (
                 <EuiFlexItem className="altAlertOccurrencesItem" grow={false}>
@@ -1223,7 +1267,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         },
       },
     ],
-    [expandedGroupIds, onAcknowledge, onViewDetail, cloudWatchIconType]
+    [expandedGroupIds, onAcknowledge, onViewDetail, cloudWatchIconType, dsById]
   );
 
   // Chart-area empty state mode. Cascade:

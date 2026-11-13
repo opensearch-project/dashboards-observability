@@ -113,7 +113,8 @@ const CELL_SEPARATOR = ' • ';
 /**
  * The Datasource cell: `<Type> • <source>` (e.g. "CloudWatch • Prod account"), then, when known,
  * the account id and region of a CloudWatch row ("444455556666 • us-east-1"; the account id only
- * when the source reports it) or the region of a Prometheus datasource.
+ * when the source reports it and the first line doesn't already show it) or the region of a
+ * Prometheus datasource.
  */
 export function datasourceCellLines(
   item: UnifiedRuleSummary,
@@ -134,7 +135,8 @@ export function datasourceCellLines(
   let detail: string | undefined;
   if (type === 'cloudwatch') {
     const cw = item.cloudWatch;
-    const parts = [cw?.accountId, cw?.region ?? ds?.region].filter(Boolean);
+    const accountId = cw?.accountId && !source?.includes(cw.accountId) ? cw.accountId : undefined;
+    const parts = [accountId, cw?.region ?? ds?.region].filter(Boolean);
     detail = parts.length > 0 ? parts.join(CELL_SEPARATOR) : undefined;
   } else if (type === 'prometheus') {
     detail = ds?.region || undefined;

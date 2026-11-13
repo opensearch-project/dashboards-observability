@@ -334,6 +334,15 @@
   white-space: nowrap;
 }
 
+// The account and region under a CloudWatch alert's name, truncated like the name.
+.altAlertSourceText {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .altAlertOccurrencesItem {
   flex-shrink: 0;
 }
