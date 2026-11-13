@@ -33,7 +33,13 @@ jest.mock('../alerts_charts', () => ({
   countAlertsStartedInWindow: jest.requireActual('../alerts_charts').countAlertsStartedInWindow,
 }));
 
+const CW_LOGO = '/plugins/workspace/assets/cloudwatch_logo.svg';
+jest.mock('../cloudwatch_icon', () => ({
+  ...jest.requireActual('../cloudwatch_icon'),
+  useCloudWatchIconType: () => '/plugins/workspace/assets/cloudwatch_logo.svg',
+}));
 import { AlertsDashboard, formatAgo } from '../alerts_dashboard';
+import { promAlertToUnified } from '../../../../server/services/alerting/alert_utils';
 import type { UnifiedAlertSummary, Datasource } from '../../../../common/types/alerting';
 
 const sampleAlert: UnifiedAlertSummary = {
@@ -132,6 +138,150 @@ describe('AlertsDashboard', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders one Regions control, inside the CloudWatch group, once an account is checked', () => {
+    const cwDatasources: Datasource[] = [
+      sampleDs,
+      {
+        id: 'cloudwatch_us-east-1_prod',
+        name: 'CloudWatch · Prod account · us-east-1',
+        type: 'cloudwatch',
+        url: 'cloudwatch',
+        enabled: true,
+        region: 'us-east-1',
+        cloudWatchScope: 'prod',
+        cloudWatchScopeLabel: 'Prod account',
+      },
+    ];
+    const cloudWatch = {
+      regions: [
+        { id: 'us-east-1', name: 'US East (N. Virginia)' },
+        { id: 'eu-west-1', name: 'Europe (Ireland)' },
+      ],
+      selectedRegions: ['us-east-1'],
+      onRegionsChange: jest.fn(),
+      onPairCapReached: jest.fn(),
+    };
+    const { rerender } = render(
+      <AlertsDashboard {...baseProps} datasources={cwDatasources} cloudWatch={cloudWatch} />
+    );
+    expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
+    rerender(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={cwDatasources}
+        selectedDsIds={['ds-1', 'cloudwatch_us-east-1_prod']}
+        cloudWatch={cloudWatch}
+      />
+    );
+    expect(screen.getAllByTestId('cloudWatchRegionControl')).toHaveLength(1);
+    const group = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
+    expect(group.getByTestId('cloudWatchRegionControl')).toBeInTheDocument();
+    expect(group.getByText('Prod account')).toBeInTheDocument();
+    expect(group.getByText('US East (N. Virginia)')).toBeInTheDocument();
+  });
+
+  it('shows the account and region under the name of a CloudWatch alert', () => {
+    const cwDs = (scope: string, label: string): Datasource => ({
+      id: `cloudwatch_us-east-1_${scope}`,
+      name: `CloudWatch · ${label} · us-east-1`,
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+      region: 'us-east-1',
+      cloudWatchScope: scope,
+      cloudWatchScopeLabel: label,
+    });
+    const own: Datasource = {
+      id: 'cloudwatch',
+      name: 'CloudWatch',
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+      cloudWatchScopeLabel: 'CloudWatch',
+      accountId: '111111111111',
+    };
+    const datasources = [sampleDs, own, cwDs('s1', 'Prod'), cwDs('s2', 'Staging')];
+    const cwAlert = (id: string, dsId: string, region: string): UnifiedAlertSummary => ({
+      ...sampleAlert,
+      id,
+      datasourceId: dsId,
+      datasourceType: 'cloudwatch',
+      name: 'checkout-api-cpu-high-0',
+      cloudWatch: { state: 'ALARM', alarmType: 'metric', region },
+    });
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={datasources}
+        selectedDsIds={datasources.map((d) => d.id)}
+        alerts={[
+          cwAlert('cw-1', 'cloudwatch_us-east-1_s1', 'us-east-1'),
+          cwAlert('cw-2', 'cloudwatch_us-east-1_s2', 'us-east-1'),
+          cwAlert('cw-3', 'cloudwatch', 'us-west-2'),
+          sampleAlert,
+        ]}
+      />
+    );
+    expect(
+      screen.getAllByTestId('alertsTable-cloudWatchSource').map((el) => el.textContent)
+    ).toEqual(
+      expect.arrayContaining([
+        'Prod • us-east-1',
+        'Staging • us-east-1',
+        'This account (111111111111) • us-west-2',
+      ])
+    );
+    // OpenSearch rows get no second line.
+    expect(screen.getAllByTestId('alertsTable-cloudWatchSource')).toHaveLength(3);
+  });
+  it('leaves CloudWatch account and region out of the Labels facet', () => {
+    const cwAlert: UnifiedAlertSummary = {
+      ...sampleAlert,
+      id: 'cw-1',
+      datasourceId: 'cloudwatch',
+      datasourceType: 'cloudwatch',
+      labels: { account: '444455556666', region: 'us-east-1', namespace: 'AWS/EC2' },
+    };
+    const promAlert: UnifiedAlertSummary = {
+      ...sampleAlert,
+      id: 'p-1',
+      datasourceId: 'prometheus-1',
+      datasourceType: 'prometheus',
+      labels: { region: 'eu' },
+    };
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[cwAlert, promAlert]}
+        datasources={[sampleDs, samplePrometheusDs]}
+      />
+    );
+    expect(screen.queryByTestId('facetGroup-label:account')).toBeNull();
+    expect(screen.getByTestId('facetGroup-label:namespace')).toBeInTheDocument();
+    const region = within(screen.getByTestId('facetGroup-label:region'));
+    fireEvent.click(region.getByTestId('facetGroup-label:region-toggle'));
+    expect(region.getByText('eu')).toBeInTheDocument();
+    expect(region.queryByText('us-east-1')).toBeNull();
+  });
+
+  it("shows core's CloudWatch logo on a CloudWatch row only", () => {
+    const cwAlert: UnifiedAlertSummary = {
+      ...sampleAlert,
+      id: 'cw-1',
+      name: 'cw-alarm',
+      datasourceId: 'cloudwatch',
+      datasourceType: 'cloudwatch',
+    };
+    const { container } = render(
+      <AlertsDashboard {...baseProps} alerts={[cwAlert, sampleAlert]} />
+    );
+    const rowIcons = Array.from(container.querySelectorAll('.altAlertNameButton')).map((b) =>
+      b.querySelector('img')?.getAttribute('src')
+    );
+    expect(rowIcons).toHaveLength(2);
+    expect(rowIcons.filter((src) => src === CW_LOGO)).toHaveLength(1);
+    expect(rowIcons.filter((src) => src === undefined)).toHaveLength(1);
+  });
   it('renders "no datasource" empty state when selection is empty', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} selectedDsIds={[]} />);
     expect(
@@ -286,6 +436,80 @@ describe('AlertsDashboard', () => {
   it('renders alert table when alerts provided', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
     expect(getByText('HighCPU')).toBeInTheDocument();
+  });
+
+  it('keeps one row per alert series and drops filtered-out rows', () => {
+    // One Prometheus rule firing on several series (no `instance` label), mapped the way the
+    // server maps live alerts, plus an OpenSearch alert whose id a second connection repeats.
+    const promAlerts = ['cart', 'checkout', 'payment'].flatMap((service) =>
+      [
+        { alertname: 'test-rule', severity: 'critical' },
+        { alertname: 'rule-123', severity: 'warning' },
+      ].map((labels) =>
+        promAlertToUnified(
+          {
+            labels: { ...labels, service },
+            annotations: {},
+            state: 'firing',
+            activeAt: new Date(NOW - 10 * 60 * 1000).toISOString(),
+            value: '1',
+          },
+          'prometheus-1'
+        )
+      )
+    );
+    const osAlert: UnifiedAlertSummary = { ...sampleAlert, name: 'LocalMonitor' };
+    const mirroredOsAlert: UnifiedAlertSummary = {
+      ...sampleAlert,
+      datasourceId: 'ds-2',
+      name: 'MirroredMonitor',
+      severity: 'medium',
+    };
+    const datasources = [sampleDs, samplePrometheusDs, { ...sampleDs, id: 'ds-2', name: 'Mirror' }];
+    const tableRowNames = () =>
+      Array.from(document.querySelectorAll('.altAlertsTable tbody tr')).map(
+        (row) => row.querySelector('.altAlertNameText')?.textContent
+      );
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const { rerender } = render(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={datasources}
+        selectedDsIds={['ds-1', 'prometheus-1', 'ds-2']}
+        alerts={[osAlert, mirroredOsAlert, ...promAlerts]}
+      />
+    );
+    expect(tableRowNames()).toHaveLength(8);
+    // Deselecting the Prometheus datasource and the mirror leaves only local-cluster rows.
+    rerender(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={datasources}
+        selectedDsIds={['ds-1']}
+        alerts={[osAlert]}
+      />
+    );
+    expect(tableRowNames()).toEqual(['LocalMonitor']);
+    expect(screen.getByText('1 row')).toBeInTheDocument();
+    // Back to every source, then Severity = Critical keeps only the critical rows.
+    rerender(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={datasources}
+        selectedDsIds={['ds-1', 'prometheus-1', 'ds-2']}
+        alerts={[osAlert, mirroredOsAlert, ...promAlerts]}
+      />
+    );
+    fireEvent.click(within(screen.getByTestId('facetGroup-severity')).getByLabelText(/critical/i));
+    const critical = tableRowNames();
+    expect(critical).toHaveLength(4);
+    expect(critical.filter((name) => name === 'test-rule')).toHaveLength(3);
+    expect(critical).toContain('LocalMonitor');
+    const duplicateKeyWarnings = errorSpy.mock.calls.filter((call) =>
+      String(call[0]).includes('Encountered two children with the same key')
+    );
+    errorSpy.mockRestore();
+    expect(duplicateKeyWarnings).toEqual([]);
   });
 
   it('puts the All Alerts title and search on one row and the row count under the table', () => {

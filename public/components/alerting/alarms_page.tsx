@@ -39,6 +39,7 @@ import {
 import { localizeClassified } from '../../../common/error';
 import type { ClassifiedError } from '../../../common/error';
 import {
+  CloudWatchTargets,
   Datasource,
   UnifiedAlertSummary,
   UnifiedRule,
@@ -69,7 +70,12 @@ import { useTimeRange } from './hooks/use_time_range';
 import { coreRefs } from '../../framework/core_refs';
 import { setNavBreadCrumbs } from '../../../common/utils/set_nav_bread_crumbs';
 import { observabilityID, observabilityTitle } from '../../../common/constants/shared';
-import { ALERT_MANAGER_MAX_DATASOURCES_SETTING } from '../../../common/constants/alerting_settings';
+import {
+  ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS,
+  ALERT_MANAGER_MAX_DATASOURCES_SETTING,
+} from '../../../common/constants/alerting_settings';
+import { clampToDatasourceCap } from '../../../common/services/alerting/cloudwatch_datasource_id';
+import type { DatasourceFacetCloudWatch } from './datasource_facet';
 import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
 import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
 import { showMonitorCreatedToast } from './toast_helpers';
@@ -89,6 +95,10 @@ import {
   resolveDatasourceTokens,
 } from './alarms_page_helpers';
 import { usePendingRules } from './hooks/use_pending_rules';
+import {
+  applyCloudWatchRegionChange,
+  sanitizeCloudWatchRegions,
+} from './hooks/use_cloudwatch_regions';
 import { key as pendingRuleKey, PendingEntry } from './monitors_table/pending_rules';
 
 // ============================================================================
@@ -99,10 +109,22 @@ interface AlarmsPageProps {
   datasources: Datasource[];
   /** True while the initial datasource discovery is pending. */
   datasourcesLoading: boolean;
+  /** True while the CloudWatch datasources are loading (they aren't in `datasources` yet). */
+  cloudWatchLoading?: boolean;
+  /** True when the CloudWatch accounts couldn't be read (only the single CloudWatch row is listed). */
+  cloudWatchFailed?: boolean;
+  /** Reads the CloudWatch accounts again after a failure. */
+  onCloudWatchRetry?: () => void;
   /** Datasource names/ids to pre-select on first mount (from uiSettings). */
   defaultDatasources: string[];
   /** Cap on concurrently selected datasources (from uiSettings). */
   maxDatasources: number;
+  /** The CloudWatch source's account scopes and regions, when it reported them. */
+  cloudWatchTargets?: CloudWatchTargets;
+  /** The selected CloudWatch regions. */
+  cloudWatchRegions?: string[];
+  /** Stores a new CloudWatch region selection. */
+  onCloudWatchRegionsChange?: (regions: string[]) => void;
 }
 
 type TabId = 'alerts' | 'rules' | 'routing';
@@ -252,8 +274,14 @@ function buildUniqueCloneName(
 export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   datasources,
   datasourcesLoading,
+  cloudWatchLoading = false,
+  cloudWatchFailed = false,
+  onCloudWatchRetry,
   defaultDatasources,
   maxDatasources,
+  cloudWatchTargets,
+  cloudWatchRegions,
+  onCloudWatchRegionsChange,
 }) => {
   const mutations = useMonitorMutations();
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
@@ -359,6 +387,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const { selectedDsIds, setSelectedDsIds } = useDatasourceSelection({
     datasources,
     datasourcesLoading,
+    cloudWatchLoading,
+    cloudWatchUnavailable: cloudWatchFailed,
     defaultDatasources,
     maxDatasources,
   });
@@ -380,17 +410,22 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const dsId = deepLink.ds;
     if (!dsId) return;
     if (datasourcesLoading) return;
+    // Wait for the CloudWatch accounts too, so the stored ones are restored first and the link
+    // adds to them (a CloudWatch link also needs its row listed). The update reads the latest
+    // selection, which the restore may have just changed.
+    if (cloudWatchLoading) return;
     if (lastAppliedDsSeqRef.current === deepLink.seq) return;
     if (!datasources.some((d) => d.id === dsId)) return;
     lastAppliedDsSeqRef.current = deepLink.seq;
-    if (selectedDsIds.includes(dsId)) return;
-    setSelectedDsIds([...selectedDsIds, dsId].slice(0, maxDatasources));
+    setSelectedDsIds((prev) =>
+      prev.includes(dsId) ? prev : clampToDatasourceCap([...prev, dsId], maxDatasources)
+    );
   }, [
     deepLink.ds,
     deepLink.seq,
     datasources,
     datasourcesLoading,
-    selectedDsIds,
+    cloudWatchLoading,
     setSelectedDsIds,
     maxDatasources,
   ]);
@@ -480,12 +515,20 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       return changed ? next : prev;
     });
   }, [rawAlerts]);
+  // A status names its datasource by the server's name; the page shows its own row name, matched
+  // by id (a datasource the server couldn't resolve is named by its id).
+  const datasourceDisplayName = useCallback(
+    (s: { datasourceId: string; datasourceName: string }) =>
+      datasources.find((d) => d.id === s.datasourceId)?.name ?? s.datasourceName,
+    [datasources]
+  );
   const alertsWarnings = useMemo(() => {
     const failed = (alertsData?.datasourceStatus || []).filter(
       (s) => s.status === 'error' || !!s.error
     );
     return failed.map((s) => ({
-      datasourceName: s.datasourceName,
+      datasourceId: s.datasourceId,
+      datasourceName: datasourceDisplayName(s),
       error:
         s.error ||
         i18n.translate('observability.alerting.alarmsPage.unknownError', {
@@ -493,7 +536,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         }),
       errorDetail: s.errorDetail,
     }));
-  }, [alertsData]);
+  }, [alertsData, datasourceDisplayName]);
   // Backend hints surfaced through the dashboard banner props.
   const alertsTruncated = (alertsData?.datasourceStatus || []).some((s) => s.truncated);
   const alertsFallbackHints = useMemo(
@@ -501,10 +544,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       (alertsData?.datasourceStatus || [])
         .filter((s) => s.fallback)
         .map((s) => ({
-          datasourceName: s.datasourceName,
+          datasourceName: datasourceDisplayName(s),
           fallback: s.fallback!,
         })),
-    [alertsData]
+    [alertsData, datasourceDisplayName]
   );
   const alertsErrorMessage =
     alertsError instanceof Error ? alertsError.message : alertsError ? String(alertsError) : null;
@@ -807,27 +850,30 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     : listedRuleStatus;
 
   // Fires when a user tries to select past `maxDatasources`. Pops a warning
-  // toast with an in-toast link to the Advanced Settings entry so they can
-  // raise the cap without hunting through Management. Uses the core toasts
-  // API directly (not the shared `useToast` wrapper) because the wrapper
-  // only accepts plain strings — we need a React body to render the link.
+  // toast whose "settings" link opens Advanced Settings showing only the
+  // max-datasources setting. Uses the core toasts API directly (not the shared
+  // `useToast` wrapper) because the wrapper only accepts plain strings, and we
+  // need a React body to render the link.
   //
-  // Uses `window.location.assign('/app/settings#...')` instead of
-  // `navigateToApp('management', ...)` because Advanced Settings doesn't
-  // support SPA redirection in a workspace context — the workspace path
-  // prefix strips the hash and lands on a broken URL. See the same
-  // workaround in trace_analytics helper_functions.tsx (line 70).
+  // The link is a plain same-tab href (a full page load, like the
+  // `window.location.assign` workaround in trace_analytics
+  // helper_functions.tsx) instead of `navigateToApp`/`navigateToUrl`, because
+  // `navigateToApp('settings')` leaves the workspace. `basePath.get()`
+  // includes the workspace prefix (`/w/<id>`), so the link stays in the
+  // current workspace.
   const handleDatasourceCapReached = useCallback(() => {
     const toasts = coreRefs.toasts;
     const http = coreRefs.http;
     if (!toasts) return;
-    // Advanced Settings renders each row with DOM id `${setting.name}-group`
-    // (src/plugins/advanced_settings/.../field.tsx) and its scroll-to-hash
-    // handler calls getElementById(hash) — so the hash must include the
-    // `-group` suffix to scroll / highlight the target row.
+    // Advanced Settings' `/:query` route pre-fills its search bar, so the page
+    // lists only the matching setting. A `#<key>-group` hash doesn't work: the
+    // page looks for the row once while it still shows its loading spinner and
+    // never scrolls. The key is lowercased so the query doesn't also match
+    // "Alerts selected datasources", and the colon is left unencoded because
+    // `%3A` matches nothing.
     const settingsHref = `${
       http?.basePath.get() ?? ''
-    }/app/settings#${ALERT_MANAGER_MAX_DATASOURCES_SETTING}-group`;
+    }/app/settings/${ALERT_MANAGER_MAX_DATASOURCES_SETTING.toLowerCase()}`;
     toasts.addWarning({
       title: i18n.translate('observability.alerting.alarmsPage.maxDatasourcesToast.title', {
         defaultMessage: 'Maximum {maxDatasources} datasources can be selected',
@@ -836,24 +882,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       text: toMountPoint(
         <FormattedMessage
           id="observability.alerting.alarmsPage.maxDatasourcesToast.text"
-          defaultMessage="Adjust the {settingName} setting in Advanced Settings to raise this cap. {openLink}"
+          defaultMessage="The limit is {max} datasources. Clear one to add another, or change it in {settingsLink}."
           values={{
-            settingName: (
-              <strong>
-                <FormattedMessage
-                  id="observability.alerting.alarmsPage.maxDatasourcesToast.settingName"
-                  defaultMessage="Alerts maximum selected datasources"
-                />
-              </strong>
-            ),
-            openLink: (
-              <EuiLink onClick={() => window.location.assign(settingsHref)}>
-                {i18n.translate(
-                  'observability.alerting.alarmsPage.maxDatasourcesToast.openSetting',
-                  {
-                    defaultMessage: 'Open setting',
-                  }
-                )}
+            max: maxDatasources,
+            settingsLink: (
+              <EuiLink href={settingsHref} data-test-subj="alertManagerMaxDatasourcesSettingsLink">
+                {i18n.translate('observability.alerting.alarmsPage.maxDatasourcesToast.settings', {
+                  defaultMessage: 'settings',
+                })}
               </EuiLink>
             ),
           }}
@@ -904,6 +940,102 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     },
     [setSelectedDsIds, dropPendingOutsideDsIds]
   );
+
+  // Fires when a change would select more CloudWatch (account, region) datasources than one
+  // request reads (the cap counts accounts, so this bounds the AWS calls instead).
+  const handleCloudWatchPairCapReached = useCallback(() => {
+    coreRefs.toasts?.addWarning({
+      title: i18n.translate('observability.alerting.cloudwatch.pairCapToast.title', {
+        defaultMessage: 'Too many CloudWatch account and region combinations',
+      }),
+      text: i18n.translate('observability.alerting.cloudwatch.pairCapToast.text', {
+        defaultMessage:
+          'CloudWatch is limited to {max} account and region combinations. Clear an account or a region to add another.',
+        values: { max: ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS },
+      }),
+    });
+  }, []);
+
+  // A region change adds or drops the matching CloudWatch datasources in the selection: an added
+  // region is selected for every account scope that already has one selected. A change past the
+  // CloudWatch pair bound is refused: regions and selection stay as they are.
+  const handleCloudWatchRegionsChange = useCallback(
+    (next: string[]) => {
+      if (!cloudWatchTargets || !onCloudWatchRegionsChange) return;
+      const nextRegions = sanitizeCloudWatchRegions(next, cloudWatchTargets);
+      const change = applyCloudWatchRegionChange({
+        targets: cloudWatchTargets,
+        prevRegions: cloudWatchRegions ?? [],
+        nextRegions,
+        selectedDsIds,
+        maxDatasources,
+      });
+      if (change.pairCapReached) {
+        handleCloudWatchPairCapReached();
+        return;
+      }
+      if (change.capReached) {
+        handleDatasourceCapReached();
+        return;
+      }
+      onCloudWatchRegionsChange(nextRegions);
+      const changed =
+        change.selectedDsIds.length !== selectedDsIds.length ||
+        change.selectedDsIds.some((id, i) => id !== selectedDsIds[i]);
+      if (changed) handleDatasourceChange(change.selectedDsIds);
+    },
+    [
+      cloudWatchTargets,
+      cloudWatchRegions,
+      onCloudWatchRegionsChange,
+      selectedDsIds,
+      maxDatasources,
+      handleDatasourceChange,
+      handleDatasourceCapReached,
+      handleCloudWatchPairCapReached,
+    ]
+  );
+  // The Datasource facet's CloudWatch group: accounts come from the datasource list; this adds
+  // the Regions control (shown by the facet when an account is checked and >1 region exists).
+  // While the CloudWatch datasources load, the group shows a loading state instead.
+  const cloudWatchFacet = useMemo<DatasourceFacetCloudWatch | undefined>(() => {
+    if (!coreRefs.cloudwatchEnabled) return undefined;
+    if (cloudWatchLoading) {
+      return {
+        regions: [],
+        selectedRegions: [],
+        onRegionsChange: handleCloudWatchRegionsChange,
+        onPairCapReached: handleCloudWatchPairCapReached,
+        loading: true,
+      };
+    }
+    if (cloudWatchFailed) {
+      return {
+        regions: [],
+        selectedRegions: [],
+        onRegionsChange: handleCloudWatchRegionsChange,
+        onPairCapReached: handleCloudWatchPairCapReached,
+        failed: true,
+        onRetry: onCloudWatchRetry,
+      };
+    }
+    return cloudWatchTargets
+      ? {
+          regions: cloudWatchTargets.regions,
+          selectedRegions: cloudWatchRegions ?? [],
+          onRegionsChange: handleCloudWatchRegionsChange,
+          onPairCapReached: handleCloudWatchPairCapReached,
+        }
+      : undefined;
+  }, [
+    cloudWatchLoading,
+    cloudWatchFailed,
+    onCloudWatchRetry,
+    cloudWatchTargets,
+    cloudWatchRegions,
+    handleCloudWatchRegionsChange,
+    handleCloudWatchPairCapReached,
+  ]);
 
   // ---- Handlers ----
 
@@ -1789,8 +1921,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             maxDatasources={maxDatasources}
             onDatasourceCapReached={handleDatasourceCapReached}
             rulesTotal={rulesTotal}
-            defaultDatasources={resolveDatasourceTokens(defaultDatasources, datasources).slice(
-              0,
+            defaultDatasources={clampToDatasourceCap(
+              resolveDatasourceTokens(defaultDatasources, datasources),
               maxDatasources
             )}
             onGoToRules={() => handleTabClick('rules')}
@@ -1811,6 +1943,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             onTimeChange={handleTimeChange}
             onRefresh={handleRefreshTime}
             datasourceErrorMap={datasourceErrorMapByName}
+            cloudWatch={cloudWatchFacet}
             initialSearchQuery={linkedSearchFor('alerts')}
             initialSearchQueryKey={deepLink.seq}
             onInitialSearchQueryEdited={handleLinkedSearchEdited}
@@ -1851,6 +1984,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           maxDatasources={maxDatasources}
           onDatasourceCapReached={handleDatasourceCapReached}
           datasourceErrorMap={datasourceErrorMapByName}
+          cloudWatch={cloudWatchFacet}
           initialSearchQuery={linkedSearchFor('rules')}
           initialSearchQueryKey={deepLink.seq}
           onInitialSearchQueryEdited={handleLinkedSearchEdited}
@@ -1886,22 +2020,32 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         errorDetail?: ClassifiedError;
       }
     >();
-    const addOnce = (dsName: string, message: string, errorDetail?: ClassifiedError) => {
-      // Look up id by name — both `alertsWarnings` and `rulesWarnings`
-      // carry the display name, not the id. Fall back to name as the key
-      // if the datasource list hasn't hydrated yet.
-      const ds = datasources.find((d) => d.name === dsName);
-      const id = ds?.id ?? dsName;
+    const addOnce = (
+      dsId: string | undefined,
+      dsName: string,
+      message: string,
+      errorDetail?: ClassifiedError
+    ) => {
+      // Look the datasource up by id first (a CloudWatch datasource the server couldn't resolve
+      // is named by its id), then by name. Use the row's name, so the facet indicator and the
+      // toast name the row. Fall back to the warning's own id and name if the datasource list
+      // hasn't hydrated yet.
+      const ds =
+        (dsId ? datasources.find((d) => d.id === dsId) : undefined) ??
+        datasources.find((d) => d.name === dsName);
+      const id = ds?.id ?? dsId ?? dsName;
       if (!byId.has(id))
         byId.set(id, {
           datasourceId: id,
-          datasourceName: dsName,
+          datasourceName: ds?.name ?? dsName,
           error: message,
           errorDetail,
         });
     };
-    for (const w of alertsWarnings) addOnce(w.datasourceName, w.error, w.errorDetail);
-    for (const w of rulesWarnings) addOnce(w.datasourceName, w.error, w.errorDetail);
+    for (const w of alertsWarnings)
+      addOnce(w.datasourceId, w.datasourceName, w.error, w.errorDetail);
+    for (const w of rulesWarnings)
+      addOnce(w.datasourceId, w.datasourceName, w.error, w.errorDetail);
     // Alerting-plugin probe: only decorate individual DSes when the probe
     // is finished (avoids flashing the indicator during the initial mount)
     // AND we're not already in the "everything failed" state — that latter

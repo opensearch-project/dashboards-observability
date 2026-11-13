@@ -14,9 +14,28 @@ import {
 } from '../../../common/constants/alerting_settings';
 import { AlarmsPage } from './alarms_page';
 import { useDatasources } from './hooks/use_datasources';
+import { useCloudWatchTargets } from './hooks/use_cloudwatch_targets';
+import { useCloudWatchRegions } from './hooks/use_cloudwatch_regions';
 
 export const AlertingHome = () => {
-  const { datasources, isLoading: datasourcesLoading } = useDatasources();
+  const {
+    targets: cloudWatchTargets,
+    isLoading: cloudWatchTargetsLoading,
+    failed: cloudWatchFailed,
+    reload: reloadCloudWatchTargets,
+  } = useCloudWatchTargets();
+  const { selectedRegions, setSelectedRegions } = useCloudWatchRegions(cloudWatchTargets);
+  const {
+    datasources,
+    isLoading: datasourcesLoading,
+    cloudWatchLoading,
+  } = useDatasources({
+    cloudWatch: {
+      targets: cloudWatchTargets,
+      targetsLoading: cloudWatchTargetsLoading,
+      regions: selectedRegions,
+    },
+  });
 
   const { defaultDatasources, maxDatasources } = useMemo(() => {
     const uiSettings = coreRefs.core?.uiSettings;
@@ -45,8 +64,14 @@ export const AlertingHome = () => {
           <AlarmsPage
             datasources={datasources}
             datasourcesLoading={datasourcesLoading}
+            cloudWatchLoading={cloudWatchLoading}
+            cloudWatchFailed={cloudWatchFailed}
+            onCloudWatchRetry={reloadCloudWatchTargets}
             defaultDatasources={defaultDatasources}
             maxDatasources={maxDatasources}
+            cloudWatchTargets={cloudWatchTargets}
+            cloudWatchRegions={selectedRegions}
+            onCloudWatchRegionsChange={setSelectedRegions}
           />
         )}
       />

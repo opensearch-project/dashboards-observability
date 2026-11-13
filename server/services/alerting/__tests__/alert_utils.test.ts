@@ -20,6 +20,7 @@ import {
   extractADAnomalyResultIdsFromMonitor,
   osAlertToUnified,
   osMonitorToUnifiedRuleSummary,
+  promAlertToUnified,
   promEpisodeToUnified,
   runtimeStateToMonitorStatus,
   stripTrailingComparison,
@@ -63,6 +64,35 @@ describe('stripTrailingComparison', () => {
   });
 });
 
+describe('promAlertToUnified', () => {
+  const series = (labels: Record<string, string>) => ({
+    labels: { alertname: 'rule-123', severity: 'medium', ...labels },
+    annotations: {},
+    state: 'firing' as const,
+    activeAt: '2024-01-15T12:00:00.000Z',
+    value: '1',
+  });
+  it('gives each series of one rule its own id, even without an instance label', () => {
+    const ids = [
+      series({ service: 'cart' }),
+      series({ service: 'checkout' }),
+      series({ service: 'cart', pod: 'p-2' }),
+    ].map((a) => promAlertToUnified(a, 'ds-prom').id);
+    expect(new Set(ids).size).toBe(3);
+    ids.forEach((id) => expect(id.startsWith('ds-prom-rule-123-')).toBe(true));
+  });
+  it('keeps the id stable when label order changes', () => {
+    const a = promAlertToUnified(series({ job: 'api', service: 'cart' }), 'ds-prom');
+    const b = promAlertToUnified(
+      {
+        ...series({}),
+        labels: { service: 'cart', job: 'api', severity: 'medium', alertname: 'rule-123' },
+      },
+      'ds-prom'
+    );
+    expect(a.id).toBe(b.id);
+  });
+});
 describe('promEpisodeToUnified', () => {
   const START = Date.UTC(2024, 0, 15, 12, 0, 0);
   const END = Date.UTC(2024, 0, 15, 13, 0, 0);

@@ -27,7 +27,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import type { SavedObject } from '../../../../../../src/core/public';
 import { coreRefs } from '../../../framework/core_refs';
-import type { Datasource } from '../../../../common/types/alerting';
+import type { CloudWatchTargets, Datasource } from '../../../../common/types/alerting';
+import { cloudWatchDatasourcesFor } from '../../../../common/services/alerting/cloudwatch_datasource_id';
 import { CLOUDWATCH_DATASOURCE_ID } from '../shared_constants';
 
 // Attribute shapes for the two saved-object types we consume.
@@ -131,9 +132,28 @@ export function mapSavedObjectsToDatasources(
 
 export interface UseDatasourcesResult {
   datasources: Datasource[];
+  /** True while the saved-object datasources (OpenSearch, Prometheus) are loading. */
   isLoading: boolean;
+  /**
+   * True while the CloudWatch targets are loading. The CloudWatch rows are left out of
+   * `datasources` meanwhile; the other rows don't wait for them.
+   */
+  cloudWatchLoading: boolean;
   error: Error | null;
   refresh: () => void;
+}
+
+export interface UseDatasourcesOptions {
+  /**
+   * The CloudWatch source's account scopes and regions. With `targets`, the single CloudWatch
+   * row becomes one row per (scope, region) for the selected regions; without, it stays as is.
+   */
+  cloudWatch?: {
+    targets?: CloudWatchTargets;
+    /** True while the targets are loading; the CloudWatch rows are left out meanwhile. */
+    targetsLoading?: boolean;
+    regions?: string[];
+  };
 }
 
 /**
@@ -143,8 +163,11 @@ export interface UseDatasourcesResult {
  * so user selections persisted in localStorage continue to resolve across
  * page loads, server restarts, and discovery refreshes.
  */
-export function useDatasources(): UseDatasourcesResult {
-  const [datasources, setDatasources] = useState<Datasource[]>([]);
+export function useDatasources(options?: UseDatasourcesOptions): UseDatasourcesResult {
+  const cloudWatchTargets = options?.cloudWatch?.targets;
+  const cloudWatchTargetsLoading = !!options?.cloudWatch?.targetsLoading;
+  const cloudWatchRegions = options?.cloudWatch?.regions;
+  const [discovered, setDatasources] = useState<Datasource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
@@ -198,8 +221,21 @@ export function useDatasources(): UseDatasourcesResult {
     };
   }, [refreshToken]);
 
+  // Replace the single CloudWatch row (present only while CloudWatch is on) with one row per
+  // (scope, region) the source offers for the selected regions. While the targets load, leave
+  // the CloudWatch rows out, so the single row doesn't flash before the per-scope rows.
+  const datasources = useMemo(() => {
+    if (!discovered.some((d) => d.type === 'cloudwatch')) return discovered;
+    if (cloudWatchTargetsLoading) return discovered.filter((d) => d.type !== 'cloudwatch');
+    if (!cloudWatchTargets) return discovered;
+    return [
+      ...discovered.filter((d) => d.type !== 'cloudwatch'),
+      ...cloudWatchDatasourcesFor(cloudWatchTargets, cloudWatchRegions ?? []),
+    ];
+  }, [discovered, cloudWatchTargets, cloudWatchTargetsLoading, cloudWatchRegions]);
+
   return useMemo(
-    () => ({ datasources, isLoading, error, refresh }),
-    [datasources, isLoading, error, refresh]
+    () => ({ datasources, isLoading, cloudWatchLoading: cloudWatchTargetsLoading, error, refresh }),
+    [datasources, isLoading, cloudWatchTargetsLoading, error, refresh]
   );
 }

@@ -170,6 +170,13 @@ export interface Datasource {
    * CloudWatch source for the caller's credentials — never configured.
    */
   accountId?: string;
+  /**
+   * For a CloudWatch datasource: the account scope id it reads through (`forScope`). Absent:
+   * the source's default scope.
+   */
+  cloudWatchScope?: string;
+  /** For a CloudWatch datasource: the account scope's display label. */
+  cloudWatchScopeLabel?: string;
   /** For Prometheus datasources decomposed into workspaces */
   workspaceId?: string;
   workspaceName?: string;
@@ -226,8 +233,16 @@ export interface PaginatedResponse<T> {
 // Datasource service interface
 // ============================================================================
 
+export interface DatasourceListOptions {
+  /**
+   * Whether to include the CloudWatch datasources (default true). False skips the CloudWatch
+   * targets read, for requests that name no CloudWatch datasource.
+   */
+  includeCloudWatch?: boolean;
+}
+
 export interface DatasourceService {
-  list(): Promise<Datasource[]>;
+  list(options?: DatasourceListOptions): Promise<Datasource[]>;
   get(id: string): Promise<Datasource | null>;
   create(input: Omit<Datasource, 'id'>): Promise<Datasource>;
   update(id: string, input: Partial<Datasource>): Promise<Datasource | null>;

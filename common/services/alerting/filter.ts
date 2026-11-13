@@ -6,6 +6,7 @@
 /**
  * Filtering and sorting utilities for monitors and alerts.
  */
+import { facetLabels } from './facet_labels';
 
 export interface FilterState {
   status: string[];
@@ -120,9 +121,10 @@ export function matchesFilters(
   if (filters.destinations.length > 0) {
     if (!rule.notificationDestinations.some((d) => filters.destinations.includes(d))) return false;
   }
+  const labels = facetLabels(rule);
   for (const [key, values] of Object.entries(filters.labels)) {
     if (values.length > 0) {
-      const ruleVal = rule.labels[key];
+      const ruleVal = labels[key];
       if (!ruleVal || !values.includes(ruleVal)) return false;
     }
   }
@@ -159,6 +161,7 @@ export function filterAlerts<
     labels: Record<string, string>;
     name: string;
     message?: string;
+    datasourceType?: string;
   },
 >(
   alerts: T[],
@@ -178,8 +181,9 @@ export function filterAlerts<
       return false;
     if (filters.state && filters.state.length > 0 && !filters.state.includes(a.state)) return false;
     if (filters.labels) {
+      const labels = facetLabels(a);
       for (const [key, values] of Object.entries(filters.labels)) {
-        if (values.length > 0 && (!a.labels[key] || !values.includes(a.labels[key]))) return false;
+        if (values.length > 0 && (!labels[key] || !values.includes(labels[key]))) return false;
       }
     }
     if (filters.search && !alertMatchesSearch(a, filters.search)) {

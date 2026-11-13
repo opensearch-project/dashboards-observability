@@ -23,9 +23,11 @@ import type { UnifiedRuleSummary } from '../../../../common/types/alerting';
 import type { ClassifiedError } from '../../../../common/error';
 import { AlertingOpenSearchService } from '../query_services/alerting_opensearch_service';
 import { isAlertingConfigMissingError } from '../alarms_page_helpers';
-import { CLOUDWATCH_DATASOURCE_ID } from '../shared_constants';
+import { isCloudWatchDatasourceId } from '../../../../common/services/alerting/cloudwatch_datasource_id';
 
 export interface DatasourceWarning {
+  /** The datasource the status is for; the page matches warnings to datasources by id first. */
+  datasourceId?: string;
   datasourceName: string;
   error: string;
   /** Structured failure classification when the server attached one. */
@@ -50,8 +52,8 @@ export interface UseRulesDataResult {
   refetch: () => void;
   /** Silent refetch that does NOT toggle the loading state — use for periodic
    * background polling so the table doesn't flash while it re-syncs. It skips the CloudWatch
-   * datasource (its alarm listing is rate-limited per account and shared with the user's other
-   * tools) and keeps the last CloudWatch rows; explicit refetches include it. */
+   * datasources (their alarm listing is rate-limited per account and shared with the user's other
+   * tools) and keeps the last CloudWatch rows; explicit refetches include them. */
   backgroundRefetch: () => void;
   /** Datasources that returned only part of their rules (a capped listing). */
   truncatedDatasourceNames: string[];
@@ -86,11 +88,10 @@ export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDat
         setError(null);
         setWarnings([]);
       }
-      // Background polls leave CloudWatch out and keep its last rows (see `backgroundRefetch`).
-      const skipCloudWatch = background && dsIds.includes(CLOUDWATCH_DATASOURCE_ID);
-      const fetchIds = skipCloudWatch
-        ? dsIds.filter((id) => id !== CLOUDWATCH_DATASOURCE_ID)
-        : dsIds;
+      // Background polls leave every CloudWatch datasource out and keep their last rows (see
+      // `backgroundRefetch`).
+      const skipCloudWatch = background && dsIds.some(isCloudWatchDatasourceId);
+      const fetchIds = skipCloudWatch ? dsIds.filter((id) => !isCloudWatchDatasourceId(id)) : dsIds;
       try {
         const res =
           fetchIds.length > 0
@@ -100,7 +101,7 @@ export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDat
         if (skipCloudWatch) {
           const next = [
             ...fetched,
-            ...rulesRef.current.filter((r) => r.datasourceId === CLOUDWATCH_DATASOURCE_ID),
+            ...rulesRef.current.filter((r) => isCloudWatchDatasourceId(r.datasourceId)),
           ];
           setRules(next);
           setRulesTotal(next.length);
@@ -113,6 +114,7 @@ export function useRulesData({ selectedDsIds }: UseRulesDataParams): UseRulesDat
           .filter((s) => s.status === 'error')
           .filter((s) => !isAlertingConfigMissingError(s.error));
         const nextWarnings = failedStatuses.map((s) => ({
+          datasourceId: s.datasourceId,
           datasourceName: s.datasourceName,
           error:
             s.error ||

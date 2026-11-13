@@ -30,6 +30,7 @@ import {
   CloudWatchCallerIdentity,
   CloudWatchCredentialsError,
   CloudWatchMetricDataQuery,
+  CloudWatchScopeUnavailableError,
   CloudWatchStateChange,
   CloudWatchStateChangesQuery,
 } from '../types';
@@ -603,5 +604,148 @@ describe('computeThresholdBreachBands', () => {
   it('returns undefined without a numeric threshold or points', () => {
     expect(computeThresholdBreachBands(points, undefined, 'GreaterThanThreshold')).toBeUndefined();
     expect(computeThresholdBreachBands([], 80, 'GreaterThanThreshold')).toBeUndefined();
+  });
+});
+
+describe('CloudWatchBackend scopes', () => {
+  const scopedDs: Datasource = {
+    ...ds,
+    id: 'cloudwatch_us-east-1_s1',
+    cloudWatchScope: 's1',
+  };
+
+  /** A default source whose `forScope('s1')` returns `scoped`, counting the calls. */
+  function scopedSources() {
+    const base = new FakeSource();
+    const scoped = new FakeSource();
+    scoped.identity = { accountId: '210987654321', region: 'us-east-1' };
+    scoped.alarms = [
+      alarm({ alarmName: 'root', alarmType: 'composite', alarmRule: 'ALARM("cpu-high")' }),
+      alarm({ accountId: undefined }),
+    ];
+    const forScope = jest.fn((id: string) => (id === 's1' ? scoped : undefined));
+    const source = Object.assign(base, { forScope }) as FakeSource & {
+      forScope: typeof forScope;
+    };
+    return { source, scoped, forScope };
+  }
+
+  it("sends every call for a scoped datasource to that scope's source", async () => {
+    const { source, scoped } = scopedSources();
+    const baseCalls = [
+      jest.spyOn(source, 'describeAlarms'),
+      jest.spyOn(source, 'describeAlarm'),
+      jest.spyOn(source, 'describeAlarmHistory'),
+      jest.spyOn(source, 'describeAlarmsByName'),
+      jest.spyOn(source, 'describeParentAlarms'),
+      jest.spyOn(source, 'describeStateChanges'),
+      jest.spyOn(source, 'getCallerIdentity'),
+      jest.spyOn(source, 'getMetricData'),
+    ];
+    const describeAlarms = jest.spyOn(scoped, 'describeAlarms');
+    const history = jest.spyOn(scoped, 'describeAlarmHistory');
+    const byName = jest.spyOn(scoped, 'describeAlarmsByName');
+    const parents = jest.spyOn(scoped, 'describeParentAlarms');
+    const backend = new CloudWatchBackend(noopLogger, source);
+
+    const { alarms } = await backend.describeAlarms(scopedDs);
+    expect(alarms.find((a) => a.alarmName === 'cpu-high')?.accountId).toBe('210987654321');
+    expect((await backend.getAlarmDetail(scopedDs, 'cpu-high'))?.alarm.alarmName).toBe('cpu-high');
+    await backend.getAlarmHistory(scopedDs, 'cpu-high');
+    await backend.getRelationships(scopedDs, 'root');
+    await backend.getStatesAt(scopedDs, Date.now() - 60_000);
+
+    expect(describeAlarms).toHaveBeenCalled();
+    expect(history).toHaveBeenCalled();
+    expect(byName).toHaveBeenCalled();
+    expect(parents).toHaveBeenCalled();
+    for (const spy of baseCalls) expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('asks for each scope once per backend', async () => {
+    const { source, forScope } = scopedSources();
+    const backend = new CloudWatchBackend(noopLogger, source);
+    await backend.describeAlarms(scopedDs);
+    await backend.describeAlarmingAlarms(scopedDs);
+    await backend.getAlarmHistory(scopedDs, 'cpu-high');
+    expect(forScope).toHaveBeenCalledTimes(1);
+    expect(forScope).toHaveBeenCalledWith('s1');
+  });
+
+  it('rejects with CloudWatchScopeUnavailable when the source has no such scope', async () => {
+    const { source } = scopedSources();
+    const backend = new CloudWatchBackend(noopLogger, source);
+    const unknown = { ...scopedDs, cloudWatchScope: 's9' };
+    await expect(backend.describeAlarms(unknown)).rejects.toMatchObject({
+      name: 'CloudWatchScopeUnavailable',
+      statusCode: 404,
+    });
+    await expect(backend.getAlarmDetail(unknown, 'cpu-high')).rejects.toMatchObject({
+      name: 'CloudWatchScopeUnavailable',
+    });
+    await expect(backend.getAlarmHistory(unknown, 'cpu-high')).rejects.toMatchObject({
+      name: 'CloudWatchScopeUnavailable',
+    });
+  });
+
+  it('rejects the same way when the source has no forScope', async () => {
+    const source = new FakeSource();
+    source.alarms = [alarm()];
+    const backend = new CloudWatchBackend(noopLogger, source);
+    await expect(backend.describeAlarms(scopedDs)).rejects.toBeInstanceOf(
+      CloudWatchScopeUnavailableError
+    );
+    await expect(backend.getRelationships(scopedDs, 'cpu-high')).rejects.toBeInstanceOf(
+      CloudWatchScopeUnavailableError
+    );
+  });
+
+  it('reads the caller identity once per scope, whatever its regions', async () => {
+    const { source, scoped } = scopedSources();
+    const baseIdentity = jest.spyOn(source, 'getCallerIdentity');
+    const scopedIdentity = jest.spyOn(scoped, 'getCallerIdentity');
+    const backend = new CloudWatchBackend(noopLogger, source);
+    for (const region of ['us-east-1', 'us-west-2', 'eu-west-1']) {
+      await backend.describeAlarms({ ...ds, id: `cloudwatch_${region}`, region });
+      await backend.describeAlarms({ ...scopedDs, id: `cloudwatch_${region}_s1`, region });
+    }
+    expect(baseIdentity).toHaveBeenCalledTimes(1);
+    expect(scopedIdentity).toHaveBeenCalledTimes(1);
+  });
+  it('retries the caller identity after a failed read', async () => {
+    const source = new FakeSource();
+    source.alarms = [alarm({ accountId: undefined })];
+    source.failWith.getCallerIdentity = new Error('sts down');
+    const identity = jest.spyOn(source, 'getCallerIdentity');
+    const backend = new CloudWatchBackend(noopLogger, source);
+    expect((await backend.describeAlarms(ds)).alarms[0].accountId).toBeUndefined();
+    delete source.failWith.getCallerIdentity;
+    expect((await backend.describeAlarms(ds)).alarms[0].accountId).toBe('123456789012');
+    expect(identity).toHaveBeenCalledTimes(2);
+  });
+  it('keeps a datasource without a scope on the default source', async () => {
+    const { source, forScope } = scopedSources();
+    source.alarms = [alarm()];
+    const backend = new CloudWatchBackend(noopLogger, source);
+    const { alarms } = await backend.describeAlarms(ds);
+    expect(alarms.map((a) => a.accountId)).toEqual(['123456789012']);
+    expect(forScope).not.toHaveBeenCalled();
+  });
+
+  it("passes the source's targets through, or undefined when it doesn't report them", async () => {
+    const targets = {
+      regions: [{ id: 'us-east-1', name: 'us-east-1' }],
+      defaultRegion: 'us-east-1',
+      scopes: [{ label: 'CloudWatch', relation: 'own' as const, defaultRegion: 'us-east-1' }],
+    };
+    const withTargets = Object.assign(new FakeSource(), {
+      listTargets: jest.fn(async () => targets),
+    });
+    const { signal } = new AbortController();
+    expect(await new CloudWatchBackend(noopLogger, withTargets).listTargets({ signal })).toBe(
+      targets
+    );
+    expect(withTargets.listTargets).toHaveBeenCalledWith({ signal });
+    expect(await new CloudWatchBackend(noopLogger, new FakeSource()).listTargets()).toBeUndefined();
   });
 });

@@ -21,7 +21,8 @@ import {
   hasPersistedTimeRange,
   rangeCoveringActiveAlerts,
 } from '../alarms_page_helpers';
-import type { Datasource } from '../../../../common/types/alerting';
+import type { CloudWatchTargets, Datasource } from '../../../../common/types/alerting';
+import { cloudWatchDatasourcesFor } from '../../../../common/services/alerting/cloudwatch_datasource_id';
 import type { MonitorFormState } from '../create_monitor';
 
 describe('alarms_page_helpers', () => {
@@ -112,6 +113,23 @@ describe('alarms_page_helpers', () => {
       expect(resolveDatasourceTokens(['ds-1', 5, null] as unknown as string[], ds)).toEqual([
         'ds-1',
       ]);
+    });
+
+    it('resolves a persisted `CloudWatch` selection to the per-scope rows default datasource', () => {
+      const targets: CloudWatchTargets = {
+        regions: [
+          { id: 'us-east-1', name: 'us-east-1' },
+          { id: 'eu-west-1', name: 'eu-west-1' },
+        ],
+        defaultRegion: 'us-east-1',
+        scopes: [
+          { label: 'My account', relation: 'own' },
+          { id: 'scope-b', label: 'Shared', relation: 'other' },
+        ],
+      };
+      const rows = cloudWatchDatasourcesFor(targets, ['us-east-1', 'eu-west-1']);
+      expect(rows.find((d) => d.id === 'cloudwatch')?.name).not.toBe('CloudWatch');
+      expect(resolveDatasourceTokens(['CloudWatch'], [...ds, ...rows])).toEqual(['cloudwatch']);
     });
   });
 

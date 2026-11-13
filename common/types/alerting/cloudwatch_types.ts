@@ -195,9 +195,52 @@ export interface DescribeAlarmsOptions {
 // the AWS error name (e.g. `AccessDeniedException`) so permission handling and classification
 // work. A request whose sign-in method carries no AWS credentials at all (so retrying can't
 // help) should fail with `CLOUDWATCH_SIGN_IN_UNSUPPORTED_ERROR_NAME`.
+//
+// Two methods are optional. `listTargets` reports the account scopes and regions the caller may
+// read; a source without it offers one target, its default scope in its default region (the
+// single `cloudwatch` datasource). `forScope` returns a source bound to one of those scopes, or
+// undefined when the scope isn't available for the request; a datasource read through a scope
+// the source can't provide fails with `CLOUDWATCH_SCOPE_UNAVAILABLE_ERROR_NAME`.
 
 /** Error `name` for "this sign-in method can't reach CloudWatch" (no AWS credentials exist). */
 export const CLOUDWATCH_SIGN_IN_UNSUPPORTED_ERROR_NAME = 'CloudWatchSignInUnsupported';
+
+/** Error `name` for "the account scope this datasource reads isn't available for this request". */
+export const CLOUDWATCH_SCOPE_UNAVAILABLE_ERROR_NAME = 'CloudWatchScopeUnavailable';
+
+/** One set of credentials the source can read alarms with. */
+export interface CloudWatchAccountScope {
+  /**
+   * Opaque, source-defined id matching `^[A-Za-z0-9-]{1,64}$`. Absent: the source's default
+   * scope (what the source reads without `forScope`).
+   */
+  id?: string;
+  /** Shown in the datasource name, facet and cell. */
+  label: string;
+  /** The account the scope reads, when the source lets this caller see it. */
+  accountId?: string;
+  /** Whether the scope reads the caller's own account. */
+  relation: 'own' | 'other';
+  /**
+   * The scope's own default region. Regions are chosen once, for every account, in the shared
+   * Regions control, which starts at `CloudWatchTargets.defaultRegion`; this field is used only
+   * when the source reports no offered shared default. Absent only when the source reports no
+   * regions; the source then uses its own default.
+   */
+  defaultRegion?: string;
+}
+
+/** The account scopes and regions the caller may read alarms from. */
+export interface CloudWatchTargets {
+  /** Regions the caller may pick, in display order. */
+  regions: Array<{ id: string; name: string }>;
+  /**
+   * The region of the default scope's default datasource. Absent only when the source reports
+   * no regions; the source then uses its own default.
+   */
+  defaultRegion?: string;
+  scopes: CloudWatchAccountScope[];
+}
 
 /** A page of `describeAlarms`. `truncated` when more alarms exist than were returned. */
 export interface CloudWatchAlarmList {
@@ -311,4 +354,16 @@ export interface CloudWatchAlarmSource {
     query: CloudWatchMetricDataQuery,
     options?: CloudWatchCallOptions
   ): Promise<CloudWatchMetricDataPoint[]>;
+
+  /**
+   * Optional. The account scopes and regions the caller may read. Absent: one target, the
+   * default scope in the default region.
+   */
+  listTargets?(options?: CloudWatchCallOptions): Promise<CloudWatchTargets>;
+
+  /**
+   * Optional. A source bound to `scopeId` (an `id` from `listTargets`), or undefined when that
+   * scope isn't available for this request.
+   */
+  forScope?(scopeId: string): CloudWatchAlarmSource | undefined;
 }

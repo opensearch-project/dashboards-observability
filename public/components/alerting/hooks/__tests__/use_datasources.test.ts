@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { mapSavedObjectsToDatasources } from '../use_datasources';
+import { renderHook, waitFor } from '@testing-library/react';
+const mockFind = jest.fn();
+jest.mock('../../../../framework/core_refs', () => ({
+  coreRefs: { savedObjectsClient: { find: (...args: unknown[]) => mockFind(...args) } },
+}));
+import { coreRefs } from '../../../../framework/core_refs';
+import type { CloudWatchTargets } from '../../../../../common/types/alerting';
+import { mapSavedObjectsToDatasources, useDatasources } from '../use_datasources';
 
 describe('mapSavedObjectsToDatasources', () => {
   it('preserves OpenSearch engine metadata used by AD and Forecasting create gating', () => {
@@ -30,5 +37,92 @@ describe('mapSavedObjectsToDatasources', () => {
         engineType: 'OpenSearch Serverless',
       })
     );
+  });
+});
+
+describe('useDatasources CloudWatch rows', () => {
+  const targets: CloudWatchTargets = {
+    regions: [
+      { id: 'us-east-1', name: 'us-east-1' },
+      { id: 'us-west-2', name: 'us-west-2' },
+      { id: 'eu-west-1', name: 'eu-west-1' },
+    ],
+    defaultRegion: 'us-east-1',
+    scopes: [
+      { label: 'CloudWatch', relation: 'own', accountId: '123456789012' },
+      {
+        id: 'scope-b',
+        label: 'Shared',
+        relation: 'other',
+        accountId: '210987654321',
+        defaultRegion: 'eu-west-1',
+      },
+    ],
+  };
+  const cloudWatchRows = (datasources: Array<{ id: string; name: string; type: string }>) =>
+    datasources.filter((d) => d.type === 'cloudwatch').map((d) => [d.id, d.name]);
+
+  beforeEach(() => {
+    mockFind.mockReset();
+    mockFind.mockResolvedValue({ savedObjects: [] });
+    (coreRefs as { cloudwatchEnabled?: boolean }).cloudwatchEnabled = true;
+  });
+
+  it("keeps today's single CloudWatch row without options", async () => {
+    const { result } = renderHook(() => useDatasources());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(cloudWatchRows(result.current.datasources)).toEqual([['cloudwatch', 'CloudWatch']]);
+    expect(result.current.datasources.map((d) => d.id)).toEqual(['local-cluster', 'cloudwatch']);
+  });
+
+  it('lists one row per scope and selected region only', async () => {
+    const { result } = renderHook(() =>
+      useDatasources({ cloudWatch: { targets, regions: ['us-east-1', 'us-west-2'] } })
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(cloudWatchRows(result.current.datasources)).toEqual([
+      ['cloudwatch', 'CloudWatch'],
+      ['cloudwatch_us-west-2', 'CloudWatch · us-west-2'],
+      ['cloudwatch_us-east-1_scope-b', 'CloudWatch · Shared · us-east-1'],
+      ['cloudwatch_us-west-2_scope-b', 'CloudWatch · Shared · us-west-2'],
+      // The scope is homed in eu-west-1, which isn't selected: no row there.
+    ]);
+  });
+
+  it('lists no CloudWatch rows when the source offers no scopes', async () => {
+    const { result } = renderHook(() =>
+      useDatasources({ cloudWatch: { targets: { ...targets, scopes: [] }, regions: [] } })
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(cloudWatchRows(result.current.datasources)).toEqual([]);
+    expect(result.current.datasources.map((d) => d.id)).toEqual(['local-cluster']);
+  });
+
+  it('lists no CloudWatch rows while CloudWatch is off, even with targets', async () => {
+    (coreRefs as { cloudwatchEnabled?: boolean }).cloudwatchEnabled = false;
+    const { result } = renderHook(() =>
+      useDatasources({ cloudWatch: { targets, regions: ['us-east-1'] } })
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(cloudWatchRows(result.current.datasources)).toEqual([]);
+  });
+
+  it('publishes the other rows while the targets load, without CloudWatch rows', async () => {
+    const { result, rerender } = renderHook(
+      ({ loading, t }) =>
+        useDatasources({ cloudWatch: { targets: t, targetsLoading: loading, regions: [] } }),
+      {
+        initialProps: { loading: true, t: undefined as CloudWatchTargets | undefined },
+      }
+    );
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.cloudWatchLoading).toBe(true);
+    expect(result.current.datasources.map((d) => d.id)).toEqual(['local-cluster']);
+    rerender({ loading: false, t: targets });
+    expect(result.current.cloudWatchLoading).toBe(false);
+    expect(cloudWatchRows(result.current.datasources).map(([id]) => id)).toEqual([
+      'cloudwatch',
+      'cloudwatch_eu-west-1_scope-b',
+    ]);
   });
 });

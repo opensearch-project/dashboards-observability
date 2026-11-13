@@ -45,6 +45,11 @@ import {
   UnifiedRuleSummary,
 } from '../../../common/types/alerting';
 import { parseDateMathMs, computeStep } from '../../../common/services/alerting';
+import {
+  CLOUDWATCH_DATASOURCE_ID,
+  isCloudWatchDatasourceId,
+} from '../../../common/services/alerting/cloudwatch_datasource_id';
+import { ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS } from '../../../common/constants/alerting_settings';
 import { classifyError, toClientPayload, ErrorCode, redactForDisplay } from '../../../common/error';
 import type { ClassifiedError } from '../../../common/error';
 import { TimeoutError } from './timeout_error';
@@ -70,9 +75,44 @@ import {
 } from './alert_utils';
 import { describeSourceError } from './cloudwatch/cloudwatch_backend';
 import type { CloudWatchBackend } from './cloudwatch/cloudwatch_backend';
+import { CloudWatchScopeUnavailableError } from './cloudwatch/types';
+import { CloudWatchTargetsUnavailableError } from './cloudwatch_targets_unavailable_error';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_MAX_RESULTS = 5_000;
+/** The `error` for a requested CloudWatch datasource the source doesn't offer. */
+const CLOUDWATCH_UNAVAILABLE_TEXT = 'CloudWatch datasource is not available';
+
+/** The `error` for a requested CloudWatch datasource past the per-request pair bound. */
+const CLOUDWATCH_TOO_MANY_PAIRS_TEXT =
+  'Too many CloudWatch account and region combinations in one request';
+
+/** The `error` for a requested CloudWatch datasource when the targets read failed. */
+const CLOUDWATCH_TARGETS_UNAVAILABLE_TEXT = 'CloudWatch account list is not available';
+/** A requested CloudWatch datasource that isn't read, and why. */
+interface UnavailableDatasource {
+  id: string;
+  error?: string;
+  errorDetail?: ClassifiedError;
+}
+/** A failed status for a requested CloudWatch datasource that isn't read. */
+function unavailableCloudWatchResult<T>(u: UnavailableDatasource): DatasourceFetchResult<T> {
+  return {
+    datasourceId: u.id,
+    // The browser shows its own name for the datasource; it matches statuses by id.
+    datasourceName: u.id,
+    datasourceType: 'cloudwatch',
+    status: 'error',
+    data: [],
+    error: u.error ?? CLOUDWATCH_UNAVAILABLE_TEXT,
+    ...(u.errorDetail ? { errorDetail: u.errorDetail } : {}),
+    durationMs: 0,
+  };
+}
+/** A stand-in datasource for classifying a failure of a CloudWatch id that wasn't resolved. */
+function cloudWatchStub(id: string): Datasource {
+  return { id, name: id, type: 'cloudwatch', url: 'cloudwatch', enabled: true };
+}
 /**
  * Concurrency cap on per-datasource fan-outs. The unified views fan a
  * single OSD request out to up to `ALERT_MANAGER_MAX_DATASOURCES_LIMIT`
@@ -517,7 +557,7 @@ export class MultiBackendAlertService {
     ctx?: RequestHandlerContext,
     sourceRequest?: OpenSearchDashboardsRequest
   ): Promise<ProgressiveResponse<UnifiedAlertSummary>> {
-    const datasources = await this.resolveDatasources(options?.dsIds);
+    const { datasources, unavailable } = await this.resolveDatasources(options?.dsIds);
     const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const maxResults = options?.maxResults ?? DEFAULT_MAX_RESULTS;
     const fetchedAt = new Date().toISOString();
@@ -580,11 +620,12 @@ export class MultiBackendAlertService {
         statusList.push(errResult);
       }
     }
+    for (const u of unavailable) statusList.push(unavailableCloudWatchResult(u));
 
     return {
       results: allResults.slice(0, maxResults),
       datasourceStatus: statusList,
-      totalDatasources: datasources.length,
+      totalDatasources: datasources.length + unavailable.length,
       completedDatasources: statusList.filter((s) => s.status === 'success').length,
       fetchedAt,
     };
@@ -594,7 +635,7 @@ export class MultiBackendAlertService {
     clientOrResolver: AlertingOSClient | ((dsId: string) => Promise<AlertingOSClient>),
     options?: UnifiedFetchOptions
   ): Promise<ProgressiveResponse<UnifiedRuleSummary>> {
-    const datasources = await this.resolveDatasources(options?.dsIds);
+    const { datasources, unavailable } = await this.resolveDatasources(options?.dsIds);
     const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     const maxResults = options?.maxResults ?? DEFAULT_MAX_RESULTS;
     const fetchedAt = new Date().toISOString();
@@ -643,11 +684,12 @@ export class MultiBackendAlertService {
         statusList.push(errResult);
       }
     }
+    for (const u of unavailable) statusList.push(unavailableCloudWatchResult(u));
 
     return {
       results: allResults.slice(0, maxResults),
       datasourceStatus: statusList,
-      totalDatasources: datasources.length,
+      totalDatasources: datasources.length + unavailable.length,
       completedDatasources: statusList.filter((s) => s.status === 'success').length,
       fetchedAt,
     };
@@ -1354,19 +1396,101 @@ export class MultiBackendAlertService {
   // Helpers
   // =========================================================================
 
-  private async resolveDatasources(dsIds?: string[]): Promise<Datasource[]> {
-    const all = await this.datasourceService.list();
+  /**
+   * The datasources to fan out to. A requested CloudWatch id the listing doesn't include (another
+   * region or account scope) is looked up on its own; one that doesn't resolve is `unavailable`,
+   * so the caller reports it. An unlisted `cloudwatch` is handled the same way only when other
+   * CloudWatch datasources are listed. Other unknown ids are dropped. With no `dsIds`, every
+   * listed datasource is requested.
+   *
+   * The CloudWatch targets are read only when a requested id is a CloudWatch id, or when no
+   * `dsIds` are given; OpenSearch- or Prometheus-only requests don't wait on them.
+   *
+   * At most `ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS` CloudWatch datasources (listed or looked up) are
+   * read per request; any further CloudWatch id is `unavailable` with a fixed error. The
+   * max-datasources setting counts a CloudWatch account once, so this bounds the AWS calls.
+   * Every CloudWatch-shaped id tried counts, including ones that don't resolve, except one that
+   * turns out to name a saved object: it costs no AWS call. Once the bound is reached, further
+   * CloudWatch-shaped ids are not looked up at all.
+   */
+  private async resolveDatasources(
+    dsIds?: string[]
+  ): Promise<{ datasources: Datasource[]; unavailable: UnavailableDatasource[] }> {
+    const requested = dsIds && dsIds.length > 0 ? dsIds : undefined;
+    const includeCloudWatch = !requested || requested.some((id) => isCloudWatchDatasourceId(id));
+    const all = await this.datasourceService.list({ includeCloudWatch });
     const enabled = all.filter((ds) => ds.enabled);
-    if (!dsIds || dsIds.length === 0) return enabled;
-
-    const resolved: Datasource[] = [];
-    for (const id of dsIds) {
-      const match = enabled.filter((ds) => ds.id === id);
-      if (match.length > 0) resolved.push(match[0]);
+    const ids = requested ?? enabled.map((ds) => ds.id);
+    const datasources: Datasource[] = [];
+    const unavailable: UnavailableDatasource[] = [];
+    let cloudWatchPairs = 0;
+    for (const id of Array.from(new Set(ids))) {
+      const match = enabled.find((ds) => ds.id === id);
+      if (match && match.type !== 'cloudwatch') {
+        datasources.push(match);
+        continue;
+      }
+      if (!match && !isCloudWatchDatasourceId(id)) continue;
+      // With CloudWatch off (no CloudWatch entry listed), an unlisted `cloudwatch` is dropped as
+      // before; with per-scope entries listed, it is looked up and reported like the others.
+      if (
+        !match &&
+        id === CLOUDWATCH_DATASOURCE_ID &&
+        !enabled.some((ds) => ds.type === 'cloudwatch')
+      ) {
+        continue;
+      }
+      if (cloudWatchPairs >= ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS) {
+        this.logger.debug(`CloudWatch datasource past the per-request bound: ${id}`);
+        unavailable.push({ id, error: CLOUDWATCH_TOO_MANY_PAIRS_TEXT });
+        continue;
+      }
+      let ds: Datasource | null;
+      try {
+        ds = match ?? (await this.datasourceService.get(id));
+      } catch (err) {
+        if (err instanceof CloudWatchTargetsUnavailableError) {
+          cloudWatchPairs++;
+          this.logger.debug(`CloudWatch account list not available for: ${id}`);
+          unavailable.push({
+            id,
+            error: CLOUDWATCH_TARGETS_UNAVAILABLE_TEXT,
+            errorDetail: classifyDatasourceFailure(
+              err.targetsError,
+              cloudWatchStub(id),
+              'unified.datasources.resolve'
+            ),
+          });
+          continue;
+        }
+        ds = null;
+      }
+      if (ds && ds.enabled && ds.type !== 'cloudwatch') {
+        // An id shaped like a CloudWatch id that names a saved object (e.g. a data connection).
+        // It isn't a CloudWatch pair, so it doesn't count toward the bound.
+        const found = ds;
+        if (!datasources.some((d) => d.id === found.id)) datasources.push(found);
+        continue;
+      }
+      // Every other CloudWatch id tried counts, resolved or not: the check above runs before the
+      // lookup, so CloudWatch reads and lookups of unlisted ids stay bounded.
+      cloudWatchPairs++;
+      if (ds && ds.enabled) {
+        datasources.push(ds);
+      } else {
+        this.logger.debug(`CloudWatch datasource not available: ${id}`);
+        unavailable.push({
+          id,
+          errorDetail: classifyDatasourceFailure(
+            new CloudWatchScopeUnavailableError(),
+            cloudWatchStub(id),
+            'unified.datasources.resolve'
+          ),
+        });
+      }
     }
-    return resolved;
+    return { datasources, unavailable };
   }
-
   private withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       let settled = false;

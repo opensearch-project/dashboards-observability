@@ -37,6 +37,7 @@ import {
   UnifiedRuleSummary,
 } from '../../../../common/types/alerting';
 import { FacetFilterGroup } from '../facet_filter_panel';
+import { DatasourceFacet, DatasourceFacetCloudWatch } from '../datasource_facet';
 import { HEALTH_COLORS, SEVERITY_COLORS, STATUS_COLORS, TYPE_LABELS } from '../shared_constants';
 import { getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
 import { collectLabelValues, FilterState } from './monitors_table_filters';
@@ -55,6 +56,8 @@ export interface MonitorsFiltersPanelProps {
   onDatasourceCapReached: () => void;
   /** Per-datasource error text keyed by datasource NAME; see AlertsDashboard. */
   datasourceErrorMap?: Record<string, string>;
+  /** CloudWatch regions for the Datasource facet's CloudWatch group; omitted without targets. */
+  cloudWatch?: DatasourceFacetCloudWatch;
 
   filters: FilterState;
   activeFilterCount: number;
@@ -63,7 +66,6 @@ export interface MonitorsFiltersPanelProps {
   updateLabelFilter: (key: string, values: string[]) => void;
 
   labelKeys: string[];
-  datasourceEntries: Array<{ id: string; label: string }>;
   uniqueStatuses: string[];
   uniqueSeverities: string[];
   uniqueTypes: string[];
@@ -99,13 +101,13 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
   maxDatasources,
   onDatasourceCapReached,
   datasourceErrorMap,
+  cloudWatch,
   filters,
   activeFilterCount,
   clearAllFilters,
   updateFilter,
   updateLabelFilter,
   labelKeys,
-  datasourceEntries,
   uniqueStatuses,
   uniqueSeverities,
   uniqueTypes,
@@ -131,17 +133,6 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
   // via `filters.labels`, so there's no upstream state to lift.
   const [labelSearch, setLabelSearch] = useState('');
   const [showAllLabels, setShowAllLabels] = useState(false);
-
-  // Per-name icon map so the datasource facet renders a leading
-  // OpenSearch / Prometheus glyph next to each option. Keyed by name
-  // because that's the option key passed to FacetFilterGroup.
-  const datasourceIconMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    for (const ds of datasources) {
-      map[ds.name] = ds.type === 'prometheus' ? 'logoPrometheus' : 'logoOpenSearch';
-    }
-    return map;
-  }, [datasources]);
 
   // Display maps so the Status / Severity / Health facet labels read the same
   // as the table cells (e.g. "Active", "Medium", "No data") instead of the raw
@@ -225,42 +216,23 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <div className="altFiltersBody">
-        <FacetFilterGroup
-          id="datasource"
-          label={i18n.translate('observability.alerting.monitorsTable.filtersPanel.datasource', {
-            defaultMessage: 'Datasource',
-          })}
-          iconMap={datasourceIconMap}
-          errorMap={datasourceErrorMap}
-          options={datasourceEntries.map((e) => e.label)}
-          selected={selectedDsIds
-            .map((id) => datasourceEntries.find((e) => e.id === id)?.label || '')
-            .filter(Boolean)}
-          onChange={(labels) => {
-            const ids = labels
-              .map((l) => datasourceEntries.find((e) => e.label === l)?.id)
-              .filter(Boolean) as string[];
+        <DatasourceFacet
+          datasources={datasources}
+          selectedDsIds={selectedDsIds}
+          onChange={(ids) => {
             onDatasourceChange(ids);
             if (ids.length === 0) clearAllFilters();
           }}
-          counts={Object.fromEntries(
-            datasourceEntries.map((e) => [
-              e.label,
-              selectedDsIds.includes(e.id) || selectedDsIds.length === 0 ? 1 : 0,
-            ])
-          )}
-          searchable
-          showCounts={false}
-          initialVisible={5}
-          maxSelected={maxDatasources}
+          maxDatasources={maxDatasources}
           onCapReached={onDatasourceCapReached}
+          errorMap={datasourceErrorMap}
+          cloudWatch={cloudWatch}
           searchAriaLabel={i18n.translate(
             'observability.alerting.monitorsTable.filtersPanel.searchDatasourcesAriaLabel',
             {
               defaultMessage: 'Search datasources',
             }
           )}
-          checkedFirst
           isCollapsed={isFacetCollapsed('datasource')}
           onToggleCollapse={toggleFacetCollapse}
         />

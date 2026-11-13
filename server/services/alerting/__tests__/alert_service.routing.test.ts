@@ -4,6 +4,7 @@
  */
 
 import { MultiBackendAlertService } from '../alert_service';
+import { SavedObjectDatasourceService } from '../saved_object_datasource_service';
 import { registerDefaultClassifiers } from '../../../../common/error';
 import type { Datasource, Logger } from '../../../../common/types/alerting';
 
@@ -940,5 +941,321 @@ describe('MultiBackendAlertService — CloudWatch datasource', () => {
     service.registerCloudWatch(provider);
     await service.getUnifiedRules({} as never, { dsIds: ['ds-os'] });
     expect(provider).not.toHaveBeenCalled();
+  });
+
+  describe('CloudWatch ids the listing does not include', () => {
+    const regional: Datasource = {
+      id: 'cloudwatch_eu-west-1',
+      name: 'CloudWatch · eu-west-1',
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+      region: 'eu-west-1',
+    };
+    const lookupSvc = (resolve: (id: string) => Datasource | null) => ({
+      ...mockDsSvc,
+      list: jest.fn(async () => [osDatasource, cwDatasource]),
+      get: jest.fn(async (id: string) => resolve(id)),
+    });
+
+    it('resolves an unlisted id through get() and fetches with that datasource', async () => {
+      const dsSvcLookup = lookupSvc((id) => (id === regional.id ? regional : null));
+      const cwBackend = {
+        describeAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: false })),
+      };
+      const service = new MultiBackendAlertService(dsSvcLookup as never, mockLogger);
+      service.registerCloudWatch(cwBackend as never);
+      const res = await service.getUnifiedRules(jest.fn() as never, { dsIds: [regional.id] });
+      expect(dsSvcLookup.get).toHaveBeenCalledWith(regional.id);
+      expect(cwBackend.describeAlarms).toHaveBeenCalledTimes(1);
+      expect((cwBackend.describeAlarms.mock.calls[0] as unknown as [Datasource])[0].region).toBe(
+        'eu-west-1'
+      );
+      expect(res.datasourceStatus).toEqual([
+        expect.objectContaining({ datasourceId: regional.id, status: 'success' }),
+      ]);
+    });
+
+    it('reports an unavailable id with the fixed text and never calls the backend for it', async () => {
+      const dsSvcLookup = lookupSvc(() => null);
+      const cwBackend = {
+        describeAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: false })),
+        describeAlarmingAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: false })),
+      };
+      const service = new MultiBackendAlertService(dsSvcLookup as never, mockLogger);
+      service.registerCloudWatch(cwBackend as never);
+      const id = 'cloudwatch_us-east-1_gone';
+      const rules = await service.getUnifiedRules(jest.fn() as never, { dsIds: [id] });
+      const alerts = await service.getUnifiedAlerts(jest.fn() as never, { dsIds: [id] });
+      for (const res of [rules, alerts]) {
+        expect(res.datasourceStatus).toEqual([
+          {
+            datasourceId: id,
+            datasourceName: id,
+            datasourceType: 'cloudwatch',
+            status: 'error',
+            data: [],
+            error: 'CloudWatch datasource is not available',
+            // Classified, so the browser shows localized text.
+            errorDetail: expect.objectContaining({
+              category: 'NOT_FOUND',
+              code: 'CLOUDWATCH_SCOPE_UNAVAILABLE',
+            }),
+            durationMs: 0,
+          },
+        ]);
+        expect(res.totalDatasources).toBe(1);
+      }
+      expect(cwBackend.describeAlarms).not.toHaveBeenCalled();
+      expect(cwBackend.describeAlarmingAlarms).not.toHaveBeenCalled();
+    });
+
+    it('reports a failing and a succeeding CloudWatch datasource side by side', async () => {
+      const dsSvcLookup = lookupSvc((id) => (id === regional.id ? regional : null));
+      const cwBackend = {
+        describeAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: false })),
+      };
+      const service = new MultiBackendAlertService(dsSvcLookup as never, mockLogger);
+      service.registerCloudWatch(cwBackend as never);
+      const res = await service.getUnifiedRules(jest.fn() as never, {
+        dsIds: [regional.id, 'cloudwatch_us-east-1_gone'],
+      });
+      expect(res.results.map((r) => r.name)).toEqual(['cpu-high']);
+      expect(res.datasourceStatus.map((s) => [s.datasourceId, s.status])).toEqual([
+        [regional.id, 'success'],
+        ['cloudwatch_us-east-1_gone', 'error'],
+      ]);
+      expect(res.totalDatasources).toBe(2);
+      expect(res.completedDatasources).toBe(1);
+    });
+
+    it('fetches a duplicated id once', async () => {
+      const dsSvcLookup = lookupSvc((id) => (id === regional.id ? regional : null));
+      const cwBackend = {
+        describeAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: false })),
+      };
+      const service = new MultiBackendAlertService(dsSvcLookup as never, mockLogger);
+      service.registerCloudWatch(cwBackend as never);
+      const res = await service.getUnifiedRules(jest.fn() as never, {
+        dsIds: [regional.id, regional.id, 'cloudwatch', 'cloudwatch'],
+      });
+      expect(dsSvcLookup.get).toHaveBeenCalledTimes(1);
+      expect(cwBackend.describeAlarms).toHaveBeenCalledTimes(2);
+      expect(res.datasourceStatus.map((s) => s.datasourceId)).toEqual([regional.id, 'cloudwatch']);
+    });
+
+    it('looks up at most the datasource limit of unlisted ids', async () => {
+      const dsSvcLookup = lookupSvc(() => null);
+      const service = new MultiBackendAlertService(dsSvcLookup as never, mockLogger);
+      service.registerCloudWatch({ describeAlarms: jest.fn() } as never);
+      const ids = Array.from({ length: 25 }, (_, i) => `cloudwatch_us-east-1_s${i}`);
+      const res = await service.getUnifiedRules(jest.fn() as never, { dsIds: ids });
+      expect(dsSvcLookup.get).toHaveBeenCalledTimes(20);
+      expect(res.datasourceStatus).toHaveLength(25);
+      expect(res.datasourceStatus.every((s) => s.status === 'error')).toBe(true);
+    });
+
+    it('reads at most 20 CloudWatch datasources per request, listed or looked up', async () => {
+      const listed = Array.from({ length: 21 }, (_, i) => ({
+        ...regional,
+        id: `cloudwatch_us-east-1_s${i}`,
+        name: `CloudWatch · S${i} · us-east-1`,
+      }));
+      const dsSvcListed = {
+        ...mockDsSvc,
+        list: jest.fn(async () => [osDatasource, ...listed]),
+        get: jest.fn(async () => null),
+      };
+      const cwBackend = {
+        describeAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: false })),
+      };
+      const service = new MultiBackendAlertService(dsSvcListed as never, mockLogger);
+      service.registerOpenSearch(mockOsBackend as never);
+      service.registerCloudWatch(cwBackend as never);
+      const res = await service.getUnifiedRules(jest.fn() as never, {
+        dsIds: [...listed.map((d) => d.id), osDatasource.id],
+      });
+      expect(cwBackend.describeAlarms).toHaveBeenCalledTimes(20);
+      const cwStatus = res.datasourceStatus.filter((s) => s.datasourceType === 'cloudwatch');
+      expect(cwStatus).toHaveLength(21);
+      expect(cwStatus.filter((s) => s.status === 'success')).toHaveLength(20);
+      expect(cwStatus.find((s) => s.status === 'error')).toMatchObject({
+        datasourceId: 'cloudwatch_us-east-1_s20',
+        error: 'Too many CloudWatch account and region combinations in one request',
+      });
+      // The OpenSearch datasource is not part of the CloudWatch bound.
+      expect(res.datasourceStatus.some((s) => s.datasourceId === osDatasource.id)).toBe(true);
+    });
+
+    it('does not count a CloudWatch-shaped id that names a saved object toward the bound', async () => {
+      const listed = Array.from({ length: 20 }, (_, i) => ({
+        ...regional,
+        id: `cloudwatch_us-east-1_s${i}`,
+        name: `CloudWatch · S${i} · us-east-1`,
+      }));
+      const connection: Datasource = {
+        id: 'cloudwatch_us-west-2_conn',
+        name: 'cloudwatch_us-west-2_conn',
+        type: 'prometheus',
+        url: 'cloudwatch_us-west-2_conn',
+        enabled: true,
+      };
+      const dsSvcListed = {
+        ...mockDsSvc,
+        list: jest.fn(async () => [osDatasource, ...listed]),
+        get: jest.fn(async (id: string) => (id === connection.id ? connection : null)),
+      };
+      const cwBackend = {
+        describeAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: false })),
+      };
+      const service = new MultiBackendAlertService(dsSvcListed as never, mockLogger);
+      service.registerPrometheus(mockPromBackend as never);
+      service.registerCloudWatch(cwBackend as never);
+      const res = await service.getUnifiedRules(jest.fn() as never, {
+        dsIds: [connection.id, ...listed.map((d) => d.id), 'cloudwatch_us-east-1_s20'],
+      });
+      expect(dsSvcListed.get).toHaveBeenCalledWith(connection.id);
+      expect(cwBackend.describeAlarms).toHaveBeenCalledTimes(20);
+      expect(
+        res.datasourceStatus.find((s) => s.datasourceId === connection.id)?.datasourceType
+      ).toBe('prometheus');
+      const errors = res.datasourceStatus.filter(
+        (s) => s.status === 'error' && s.datasourceType === 'cloudwatch'
+      );
+      // Only the 21st CloudWatch id is past the bound, and it is not looked up.
+      expect(errors).toEqual([
+        expect.objectContaining({
+          datasourceId: 'cloudwatch_us-east-1_s20',
+          error: 'Too many CloudWatch account and region combinations in one request',
+        }),
+      ]);
+      expect(dsSvcListed.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports an unlisted `cloudwatch` as unavailable when other CloudWatch entries are listed', async () => {
+      const dsSvcLookup = {
+        ...mockDsSvc,
+        list: jest.fn(async () => [osDatasource, regional]),
+        get: jest.fn(async () => null),
+      };
+      const cwBackend = { describeAlarms: jest.fn() };
+      const service = new MultiBackendAlertService(dsSvcLookup as never, mockLogger);
+      service.registerCloudWatch(cwBackend as never);
+      const res = await service.getUnifiedRules(jest.fn() as never, { dsIds: ['cloudwatch'] });
+      expect(dsSvcLookup.get).toHaveBeenCalledWith('cloudwatch');
+      expect(res.datasourceStatus).toEqual([
+        expect.objectContaining({
+          datasourceId: 'cloudwatch',
+          status: 'error',
+          error: 'CloudWatch datasource is not available',
+        }),
+      ]);
+      expect(cwBackend.describeAlarms).not.toHaveBeenCalled();
+    });
+
+    it('drops an unlisted `cloudwatch` silently when no CloudWatch entry is listed', async () => {
+      const dsSvcLookup = {
+        ...mockDsSvc,
+        list: jest.fn(async () => [osDatasource]),
+        get: jest.fn(async () => null),
+      };
+      const service = new MultiBackendAlertService(dsSvcLookup as never, mockLogger);
+      const res = await service.getUnifiedRules(jest.fn() as never, { dsIds: ['cloudwatch'] });
+      expect(dsSvcLookup.get).not.toHaveBeenCalled();
+      expect(res.datasourceStatus).toEqual([]);
+    });
+
+    it('reads every listed CloudWatch datasource up to the bound when no dsIds are given', async () => {
+      const listed = Array.from({ length: 25 }, (_, i) => ({
+        ...regional,
+        id: `cloudwatch_us-east-1_s${i}`,
+        name: `CloudWatch · S${i} · us-east-1`,
+      }));
+      const dsSvcListed = {
+        ...mockDsSvc,
+        list: jest.fn(async () => [osDatasource, ...listed]),
+        get: jest.fn(async () => null),
+      };
+      const cwBackend = {
+        describeAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: false })),
+      };
+      const service = new MultiBackendAlertService(dsSvcListed as never, mockLogger);
+      service.registerOpenSearch(mockOsBackend as never);
+      service.registerCloudWatch(cwBackend as never);
+      const res = await service.getUnifiedRules(jest.fn() as never, {});
+      expect(cwBackend.describeAlarms).toHaveBeenCalledTimes(20);
+      const cwStatus = res.datasourceStatus.filter((s) => s.datasourceType === 'cloudwatch');
+      expect(cwStatus.filter((s) => s.status === 'success')).toHaveLength(20);
+      const over = cwStatus.filter((s) => s.status === 'error');
+      expect(over.map((s) => s.datasourceId)).toEqual(listed.slice(20).map((d) => d.id));
+      expect(
+        over.every(
+          (s) => s.error === 'Too many CloudWatch account and region combinations in one request'
+        )
+      ).toBe(true);
+      expect(dsSvcListed.list).toHaveBeenCalledWith({ includeCloudWatch: true });
+    });
+    it('lists without CloudWatch when no requested id is a CloudWatch id', async () => {
+      const dsSvcLookup = lookupSvc(() => null);
+      const service = new MultiBackendAlertService(dsSvcLookup as never, mockLogger);
+      service.registerOpenSearch(mockOsBackend as never);
+      await service.getUnifiedRules({} as never, { dsIds: [osDatasource.id] });
+      expect(dsSvcLookup.list).toHaveBeenCalledWith({ includeCloudWatch: false });
+    });
+    it('still drops unknown non-CloudWatch ids silently', async () => {
+      const dsSvcLookup = lookupSvc(() => null);
+      const service = new MultiBackendAlertService(dsSvcLookup as never, mockLogger);
+      const res = await service.getUnifiedRules(jest.fn() as never, { dsIds: ['nope'] });
+      expect(dsSvcLookup.get).not.toHaveBeenCalled();
+      expect(res.datasourceStatus).toEqual([]);
+    });
+  });
+});
+
+describe('MultiBackendAlertService — with the saved-object datasource service', () => {
+  beforeAll(() => registerDefaultClassifiers());
+  const soClient = () => ({
+    get: jest.fn(async () => {
+      throw new Error('not found');
+    }),
+    find: jest.fn(async () => ({ saved_objects: [] })),
+  });
+  it('does not read the CloudWatch targets for a request without CloudWatch ids', async () => {
+    const targets = jest.fn(() => new Promise<never>(() => {}));
+    const dsSvc = new SavedObjectDatasourceService(soClient() as never, mockLogger, {
+      enabled: true,
+      targets,
+    });
+    const service = new MultiBackendAlertService(dsSvc, mockLogger);
+    service.registerOpenSearch(mockOsBackend as never);
+    await service.getUnifiedRules({} as never, { dsIds: ['local-cluster'] });
+    expect(targets).not.toHaveBeenCalled();
+  });
+  it('reports scoped ids without saved-object lookups when the targets read fails', async () => {
+    const so = soClient();
+    const dsSvc = new SavedObjectDatasourceService(so as never, mockLogger, {
+      enabled: true,
+      targets: async () => {
+        throw Object.assign(new Error('slow'), { name: 'TimeoutError' });
+      },
+    });
+    const cwBackend = { describeAlarms: jest.fn() };
+    const service = new MultiBackendAlertService(dsSvc, mockLogger);
+    service.registerCloudWatch(cwBackend as never);
+    const ids = ['cloudwatch_us-east-1_s1', 'cloudwatch_us-east-1_s2', 'cloudwatch_eu-west-1_s1'];
+    so.find.mockClear();
+    const res = await service.getUnifiedRules(jest.fn() as never, { dsIds: ids });
+    expect(so.get).not.toHaveBeenCalled();
+    // The listing's own `find` calls only; no per-id lookups.
+    expect(so.find).toHaveBeenCalledTimes(2);
+    expect(res.datasourceStatus.map((s) => s.datasourceId)).toEqual(ids);
+    for (const status of res.datasourceStatus) {
+      expect(status).toMatchObject({
+        status: 'error',
+        error: 'CloudWatch account list is not available',
+        errorDetail: expect.objectContaining({ category: 'TIMEOUT', retryable: true }),
+      });
+    }
+    expect(cwBackend.describeAlarms).not.toHaveBeenCalled();
   });
 });

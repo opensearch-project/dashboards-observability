@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen, within } from '@testing-library/react';
 import { MonitorsFiltersPanel } from '../monitors_filters_panel';
 import { emptyFilters } from '../monitors_table_filters';
 
@@ -86,5 +86,84 @@ describe('MonitorsFiltersPanel — facet labels match the table', () => {
 
     fireEvent.click(getByText('No data'));
     expect(updateFilter).toHaveBeenCalledWith('healthStatus', ['no_data']);
+  });
+});
+
+describe('MonitorsFiltersPanel — Datasource facet', () => {
+  const regions = [
+    { id: 'us-east-1', name: 'US East (N. Virginia)' },
+    { id: 'us-west-2', name: 'US West (Oregon)' },
+  ];
+  const datasources = [
+    { id: 'os-1', name: 'Local Cluster', type: 'opensearch', url: '', enabled: true },
+    { id: 'prom-1', name: 'prod-amp-workspace', type: 'prometheus', url: '', enabled: true },
+    {
+      id: 'cloudwatch_us-east-1_prod',
+      name: 'CloudWatch · Prod account · us-east-1',
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+      region: 'us-east-1',
+      cloudWatchScope: 'prod',
+      cloudWatchScopeLabel: 'Prod account',
+    },
+  ];
+  const cloudWatch = {
+    regions,
+    selectedRegions: ['us-east-1'],
+    onRegionsChange: jest.fn(),
+    onPairCapReached: jest.fn(),
+  };
+
+  it('groups the entries by type and shows one Regions control once an account is checked', () => {
+    const { rerender } = render(
+      <MonitorsFiltersPanel {...makeProps({ datasources, selectedDsIds: ['os-1'], cloudWatch })} />
+    );
+    for (const type of ['opensearch', 'prometheus', 'cloudwatch']) {
+      expect(screen.getByTestId(`datasourceFacet-groupIcon-${type}`)).toBeInTheDocument();
+    }
+    expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
+    rerender(
+      <MonitorsFiltersPanel
+        {...makeProps({
+          datasources,
+          selectedDsIds: ['os-1', 'cloudwatch_us-east-1_prod'],
+          cloudWatch,
+        })}
+      />
+    );
+    expect(screen.getAllByTestId('cloudWatchRegionControl')).toHaveLength(1);
+    expect(screen.getByText('Regions')).toBeInTheDocument();
+  });
+
+  it('leaves CloudWatch account and region out of the Labels facet', () => {
+    const rule = (over: Record<string, unknown>) => ({
+      id: 'r',
+      name: 'r',
+      labels: {},
+      annotations: {},
+      ...over,
+    });
+    render(
+      <MonitorsFiltersPanel
+        {...makeProps({
+          rules: [
+            rule({
+              datasourceType: 'cloudwatch',
+              labels: { account: '444455556666', region: 'us-east-1', namespace: 'AWS/EC2' },
+            }),
+            rule({ datasourceType: 'prometheus', labels: { region: 'eu' } }),
+          ],
+          labelKeys: ['namespace', 'region'],
+          facetCounts: {
+            counts: { status: {}, severity: {}, monitorType: {}, healthStatus: {}, createdBy: {} },
+            labelCounts: { namespace: { 'AWS/EC2': 1 }, region: { eu: 1 } },
+          },
+        })}
+      />
+    );
+    const region = within(screen.getByTestId('facetGroup-label:region'));
+    expect(region.getByText('eu')).toBeInTheDocument();
+    expect(region.queryByText('us-east-1')).toBeNull();
   });
 });

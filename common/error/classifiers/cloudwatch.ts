@@ -41,6 +41,7 @@ export const CloudWatchErrorCode = {
   ACCESS_DENIED: 'CLOUDWATCH_ACCESS_DENIED',
   THROTTLED: 'CLOUDWATCH_THROTTLED',
   ENDPOINT_UNREACHABLE: 'CLOUDWATCH_ENDPOINT_UNREACHABLE',
+  SCOPE_UNAVAILABLE: 'CLOUDWATCH_SCOPE_UNAVAILABLE',
 } as const;
 
 function msg(code: string, key: string, defaultMessage: string): MessageDescriptor {
@@ -67,6 +68,12 @@ function messages(
  * `CLOUDWATCH_SIGN_IN_UNSUPPORTED_ERROR_NAME` in the CloudWatch source contract.
  */
 const SIGN_IN_UNSUPPORTED_NAMES = new Set(['CloudWatchSignInUnsupported']);
+
+/**
+ * The account scope a datasource reads isn't available for this request. Mirrors
+ * `CLOUDWATCH_SCOPE_UNAVAILABLE_ERROR_NAME` in the CloudWatch source contract.
+ */
+const SCOPE_UNAVAILABLE_NAMES = new Set(['CloudWatchScopeUnavailable']);
 
 /** Credential chain produced nothing (or our typed wrapper for it). */
 const CREDENTIALS_MISSING_NAMES = new Set([
@@ -142,6 +149,7 @@ export const cloudWatchClassifier: ErrorClassifier = {
   match: (ctx: RawErrorContext): boolean => {
     if (ctx.errorName) {
       if (
+        SCOPE_UNAVAILABLE_NAMES.has(ctx.errorName) ||
         SIGN_IN_UNSUPPORTED_NAMES.has(ctx.errorName) ||
         CREDENTIALS_MISSING_NAMES.has(ctx.errorName) ||
         AUTH_INVALID_NAMES.has(ctx.errorName) ||
@@ -161,6 +169,21 @@ export const cloudWatchClassifier: ErrorClassifier = {
     const details = rawDetails(ctx.message);
     const name = ctx.errorName || '';
 
+    if (SCOPE_UNAVAILABLE_NAMES.has(name)) {
+      return {
+        category: 'NOT_FOUND',
+        code: CloudWatchErrorCode.SCOPE_UNAVAILABLE,
+        retryable: false,
+        httpStatus: 404,
+        details,
+        messages: messages(
+          CloudWatchErrorCode.SCOPE_UNAVAILABLE,
+          'CloudWatch datasource not available',
+          "The account scope this CloudWatch datasource reads isn't available for this request.",
+          'Choose another CloudWatch datasource. If it should be available, ask an administrator to check its configuration.'
+        ),
+      };
+    }
     if (SIGN_IN_UNSUPPORTED_NAMES.has(name)) {
       return {
         category: 'PERMISSION_DENIED',

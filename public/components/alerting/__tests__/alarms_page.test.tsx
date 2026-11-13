@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, act, within } from '@testing-library/react';
+import { I18nProvider } from '@osd/i18n/react';
 
 jest.mock('../../../framework/core_refs', () => ({
   coreRefs: {
@@ -118,7 +119,10 @@ jest.mock('../hooks/use_monitor_mutations', () => ({
 }));
 
 import { AlarmsPage, parseAlarmsHashRoute } from '../alarms_page';
-import type { Datasource } from '../../../../common/types/alerting';
+import type { CloudWatchTargets, Datasource } from '../../../../common/types/alerting';
+import { cloudWatchDatasourcesFor } from '../../../../common/services/alerting/cloudwatch_datasource_id';
+import { coreRefs } from '../../../framework/core_refs';
+import { ALERT_MANAGER_SELECTED_DS_STORAGE_KEY } from '../../../../common/constants/alerting_settings';
 
 const defaultProps = {
   datasources: [] as Datasource[],
@@ -217,11 +221,11 @@ describe('AlarmsPage', () => {
 
   it("puts the active tab's controls on the page title row when the header supports it", async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { coreRefs } = require('../../../framework/core_refs');
+    const { coreRefs: headerRefs } = require('../../../framework/core_refs');
     // A HeaderControl stand-in that renders the right-side controls in place.
-    coreRefs.chrome = { navGroup: { getNavGroupEnabled: () => true } };
-    coreRefs.application = { setAppRightControls: jest.fn() };
-    coreRefs.navigation = {
+    headerRefs.chrome = { navGroup: { getNavGroupEnabled: () => true } };
+    headerRefs.application = { setAppRightControls: jest.fn() };
+    headerRefs.navigation = {
       ui: {
         HeaderControl: ({
           controls,
@@ -251,9 +255,9 @@ describe('AlarmsPage', () => {
       fireEvent.click(screen.getByTestId('alertManagerTabs-alerts'));
       expect(slot).toBeEmptyDOMElement();
     } finally {
-      delete coreRefs.chrome;
-      delete coreRefs.application;
-      delete coreRefs.navigation;
+      delete headerRefs.chrome;
+      delete headerRefs.application;
+      delete headerRefs.navigation;
     }
   });
 
@@ -508,6 +512,52 @@ describe('AlarmsPage', () => {
     expect(last.datasourceErrorMap.Local).toContain('AD unavailable');
   });
 
+  it('matches a status named by its id to the datasource row, for the facet and the toast', async () => {
+    const id = 'cloudwatch_eu-west-1_prod';
+    mockUseAlerts.mockReturnValue({
+      ...emptyHookResult,
+      data: {
+        results: [],
+        datasourceStatus: [
+          {
+            datasourceId: id,
+            // The server names a datasource it couldn't resolve by its id.
+            datasourceName: id,
+            datasourceType: 'cloudwatch',
+            status: 'error',
+            data: [],
+            durationMs: 0,
+            error: 'CloudWatch datasource is not available',
+          },
+        ],
+        totalDatasources: 1,
+        completedDatasources: 0,
+        fetchedAt: '2026-01-01T00:00:00Z',
+      },
+    });
+    const rowName = 'CloudWatch · Prod · eu-west-1';
+    await act(async () => {
+      render(
+        <AlarmsPage
+          {...defaultProps}
+          datasources={[
+            {
+              id,
+              name: rowName,
+              type: 'cloudwatch',
+              url: 'cloudwatch',
+              enabled: true,
+            } as Datasource,
+          ]}
+        />
+      );
+    });
+    const last = mockDashboard.mock.calls[mockDashboard.mock.calls.length - 1][0];
+    expect(Object.keys(last.datasourceErrorMap)).toEqual([rowName]);
+    const toastText = JSON.stringify(mockSetToast.mock.calls);
+    expect(toastText).toContain(rowName);
+    expect(toastText).not.toContain(id);
+  });
   it('fires a "Showing current alerts only" toast when a datasource reports a legacy-fallback', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
@@ -1303,5 +1353,259 @@ describe('parseAlarmsHashRoute', () => {
 
   it('falls back when the path segment is unknown', () => {
     expect(parseAlarmsHashRoute('#/something-else')).toEqual({});
+  });
+});
+
+describe('AlarmsPage CloudWatch regions', () => {
+  const lastProps = (mock: jest.Mock) => mock.mock.calls[mock.mock.calls.length - 1][0];
+  const refs = coreRefs as unknown as {
+    cloudwatchEnabled?: boolean;
+    toasts: { addWarning: jest.Mock };
+  };
+  const targets: CloudWatchTargets = {
+    regions: [
+      { id: 'us-east-1', name: 'us-east-1' },
+      { id: 'eu-west-1', name: 'eu-west-1' },
+    ],
+    defaultRegion: 'us-east-1',
+    scopes: [
+      { label: 'CloudWatch', relation: 'own' },
+      { id: 'scope-b', label: 'Shared', relation: 'other' },
+    ],
+  };
+  const osDs: Datasource = {
+    id: 'os-1',
+    name: 'Local',
+    type: 'opensearch',
+    url: '',
+    enabled: true,
+  };
+  const datasources = [osDs, ...cloudWatchDatasourcesFor(targets, ['us-east-1', 'eu-west-1'])];
+  const renderPage = async (props: Record<string, unknown> = {}) => {
+    const onCloudWatchRegionsChange = jest.fn();
+    await act(async () => {
+      render(
+        <AlarmsPage
+          {...defaultProps}
+          datasources={datasources}
+          defaultDatasources={['os-1', 'cloudwatch']}
+          cloudWatchTargets={targets}
+          cloudWatchRegions={['us-east-1']}
+          onCloudWatchRegionsChange={onCloudWatchRegionsChange}
+          {...props}
+        />
+      );
+    });
+    return onCloudWatchRegionsChange;
+  };
+
+  beforeEach(() => {
+    window.localStorage.clear();
+    refs.cloudwatchEnabled = true;
+    refs.toasts.addWarning.mockClear();
+  });
+  afterAll(() => {
+    refs.cloudwatchEnabled = undefined;
+  });
+
+  it('passes the CloudWatch regions to both tabs', async () => {
+    await renderPage();
+    const cw = lastProps(mockDashboard).cloudWatch;
+    expect(cw).toEqual(
+      expect.objectContaining({ regions: targets.regions, selectedRegions: ['us-east-1'] })
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    });
+    expect(lastProps(mockMonitorsTable).cloudWatch).toEqual(
+      expect.objectContaining({ regions: targets.regions, selectedRegions: ['us-east-1'] })
+    );
+  });
+
+  it('selects an added region for the scopes that already have a selection', async () => {
+    const onRegions = await renderPage();
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1', 'cloudwatch']);
+    await act(async () => {
+      lastProps(mockDashboard).cloudWatch.onRegionsChange(['us-east-1', 'eu-west-1']);
+    });
+    expect(onRegions).toHaveBeenCalledWith(['us-east-1', 'eu-west-1']);
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual([
+      'os-1',
+      'cloudwatch',
+      'cloudwatch_eu-west-1',
+    ]);
+    expect(refs.toasts.addWarning).not.toHaveBeenCalled();
+  });
+
+  it("drops a removed region's datasources from the selection", async () => {
+    const onRegions = await renderPage({
+      cloudWatchRegions: ['us-east-1', 'eu-west-1'],
+      defaultDatasources: ['os-1', 'cloudwatch', 'cloudwatch_eu-west-1_scope-b'],
+    });
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual([
+      'os-1',
+      'cloudwatch',
+      'cloudwatch_eu-west-1_scope-b',
+    ]);
+    await act(async () => {
+      lastProps(mockDashboard).cloudWatch.onRegionsChange(['us-east-1']);
+    });
+    expect(onRegions).toHaveBeenCalledWith(['us-east-1']);
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1', 'cloudwatch']);
+  });
+
+  it('counts a CloudWatch account once toward the cap', async () => {
+    // Cap 2: Local + the default account in two regions still fits.
+    const onRegions = await renderPage({ maxDatasources: 2 });
+    await act(async () => {
+      lastProps(mockDashboard).cloudWatch.onRegionsChange(['us-east-1', 'eu-west-1']);
+    });
+    expect(onRegions).toHaveBeenCalledWith(['us-east-1', 'eu-west-1']);
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual([
+      'os-1',
+      'cloudwatch',
+      'cloudwatch_eu-west-1',
+    ]);
+    expect(refs.toasts.addWarning).not.toHaveBeenCalled();
+  });
+
+  it('keeps every region of the selected accounts when clamping the default selection', async () => {
+    await renderPage({
+      maxDatasources: 2,
+      cloudWatchRegions: ['us-east-1', 'eu-west-1'],
+      defaultDatasources: [
+        'os-1',
+        'cloudwatch',
+        'cloudwatch_eu-west-1',
+        'cloudwatch_us-east-1_scope-b',
+      ],
+    });
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual([
+      'os-1',
+      'cloudwatch',
+      'cloudwatch_eu-west-1',
+    ]);
+  });
+
+  it('passes the CloudWatch regions without a Regions choice, and none with CloudWatch off', async () => {
+    await renderPage({ cloudWatchTargets: undefined });
+    expect(lastProps(mockDashboard).cloudWatch).toBeUndefined();
+    mockDashboard.mockClear();
+    // One region: the facet gets it but shows no Regions control.
+    await renderPage({ cloudWatchTargets: { ...targets, regions: targets.regions.slice(0, 1) } });
+    expect(lastProps(mockDashboard).cloudWatch.regions).toHaveLength(1);
+    mockDashboard.mockClear();
+    refs.cloudwatchEnabled = false;
+    await renderPage();
+    expect(lastProps(mockDashboard).cloudWatch).toBeUndefined();
+  });
+  it('offers a retry in the CloudWatch group when the accounts could not be read', async () => {
+    const onCloudWatchRetry = jest.fn();
+    await renderPage({ cloudWatchTargets: undefined, cloudWatchFailed: true, onCloudWatchRetry });
+    const cw = lastProps(mockDashboard).cloudWatch;
+    expect(cw).toEqual(expect.objectContaining({ failed: true, regions: [] }));
+    cw.onRetry();
+    expect(onCloudWatchRetry).toHaveBeenCalledTimes(1);
+  });
+  it('applies a datasource link once the CloudWatch accounts have loaded', async () => {
+    window.localStorage.setItem(
+      ALERT_MANAGER_SELECTED_DS_STORAGE_KEY,
+      JSON.stringify(['cloudwatch_us-east-1_scope-b'])
+    );
+    window.history.replaceState(null, '', '#/alerts?ds=os-1');
+    const props = {
+      ...defaultProps,
+      defaultDatasources: [],
+      cloudWatchTargets: targets,
+      cloudWatchRegions: ['us-east-1'],
+      onCloudWatchRegionsChange: jest.fn(),
+    };
+    let view!: ReturnType<typeof render>;
+    await act(async () => {
+      view = render(<AlarmsPage {...props} datasources={[osDs]} cloudWatchLoading={true} />);
+    });
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual([]);
+    await act(async () => {
+      view.rerender(<AlarmsPage {...props} datasources={datasources} cloudWatchLoading={false} />);
+    });
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual([
+      'cloudwatch_us-east-1_scope-b',
+      'os-1',
+    ]);
+    window.history.replaceState(null, '', '#/');
+  });
+
+  it('is unchanged without the CloudWatch props', async () => {
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} datasources={[osDs]} />);
+    });
+    expect(lastProps(mockDashboard).cloudWatch).toBeUndefined();
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1']);
+  });
+});
+describe('AlarmsPage cap toasts', () => {
+  const lastProps = (mock: jest.Mock) => mock.mock.calls[mock.mock.calls.length - 1][0];
+  const refs = coreRefs as unknown as {
+    cloudwatchEnabled?: boolean;
+    http: { basePath: { get: jest.Mock } };
+    toasts: { addWarning: jest.Mock };
+  };
+  const targets: CloudWatchTargets = {
+    regions: [
+      { id: 'us-east-1', name: 'us-east-1' },
+      { id: 'eu-west-1', name: 'eu-west-1' },
+    ],
+    defaultRegion: 'us-east-1',
+    scopes: [{ label: 'CloudWatch', relation: 'own' }],
+  };
+  const lastToast = () =>
+    refs.toasts.addWarning.mock.calls[refs.toasts.addWarning.mock.calls.length - 1][0];
+  beforeEach(() => {
+    refs.toasts.addWarning.mockClear();
+  });
+  afterEach(() => {
+    refs.http.basePath.get.mockReturnValue('');
+    refs.cloudwatchEnabled = undefined;
+  });
+  it('states the workspace limit from the setting and links to that setting in the workspace', async () => {
+    refs.http.basePath.get.mockReturnValue('/osd/w/ws1');
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} maxDatasources={7} />);
+    });
+    act(() => lastProps(mockDashboard).onDatasourceCapReached());
+    const toast = lastToast();
+    expect(toast.title).toBe('Maximum 7 datasources can be selected');
+    render(<I18nProvider>{toast.text}</I18nProvider>);
+    const body = screen.getByTestId('alertManagerMaxDatasourcesSettingsLink').parentElement!;
+    expect(body).toHaveTextContent(
+      'The limit is 7 datasources. Clear one to add another, or change it in settings.'
+    );
+    const link = screen.getByTestId('alertManagerMaxDatasourcesSettingsLink');
+    expect(link).toHaveTextContent(/^settings$/);
+    const href = '/osd/w/ws1/app/settings/observability:alertmanagermaxdatasources';
+    expect(link.tagName).toBe('A');
+    expect(link).toHaveAttribute('href', href);
+    expect(link).not.toHaveAttribute('target');
+  });
+  it('states the CloudWatch account and region bound without a settings link', async () => {
+    refs.cloudwatchEnabled = true;
+    await act(async () => {
+      render(
+        <AlarmsPage
+          {...defaultProps}
+          datasources={cloudWatchDatasourcesFor(targets, ['us-east-1', 'eu-west-1'])}
+          defaultDatasources={['cloudwatch']}
+          cloudWatchTargets={targets}
+          cloudWatchRegions={['us-east-1']}
+          onCloudWatchRegionsChange={jest.fn()}
+        />
+      );
+    });
+    act(() => lastProps(mockDashboard).cloudWatch.onPairCapReached());
+    const toast = lastToast();
+    expect(toast.text).toBe(
+      'CloudWatch is limited to 20 account and region combinations. Clear an account or a region to add another.'
+    );
+    expect(typeof toast.text).toBe('string');
   });
 });

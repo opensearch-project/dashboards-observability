@@ -15,7 +15,16 @@ export const ALERT_MANAGER_MAX_DATASOURCES_SETTING = 'observability:alertManager
 export const ALERT_MANAGER_MAX_DATASOURCES_LIMIT = 20;
 export const ALERT_MANAGER_MAX_DATASOURCES_DEFAULT = 5;
 
+// The max-datasources setting counts a CloudWatch account once, whatever the number of regions
+// selected. This bounds the CloudWatch (account, region) datasources per selection and per
+// request instead, so the AWS calls of one request stay bounded.
+export const ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS = ALERT_MANAGER_MAX_DATASOURCES_LIMIT;
+
 // localStorage key for persisting the user's datasource selection across page reloads.
 // Stored as a JSON array of datasource names (stable across server restarts, unlike ds-N ids).
 export const ALERT_MANAGER_SELECTED_DS_STORAGE_KEY =
   'observability.alertManager.selectedDatasources';
+
+// localStorage key for the CloudWatch regions the user picked: a JSON array of region codes.
+export const ALERT_MANAGER_CLOUDWATCH_REGIONS_STORAGE_KEY =
+  'observability.alertManager.cloudWatchRegions';
