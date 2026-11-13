@@ -128,6 +128,14 @@ export class CloudWatchBackend {
 
   /** Sources bound to an account scope, one per scope id for this backend's lifetime. */
   private readonly scoped = new Map<string, CloudWatchAlarmSource>();
+  /**
+   * The caller identity per account scope for this backend's lifetime (one request), shared by
+   * that scope's regions. A failed read is removed, so a later call retries.
+   */
+  private readonly identities = new Map<
+    string,
+    Promise<{ accountId: string; region: string } | undefined>
+  >();
 
   constructor(
     private readonly logger: Logger,
@@ -206,7 +214,8 @@ export class CloudWatchBackend {
       alarms: list.alarms.map((a) => ({
         ...a,
         accountId: a.accountId || identity?.accountId,
-        region: a.region || identity?.region || ds.region,
+        // The datasource's region first: the identity is shared by the scope's regions.
+        region: a.region || ds.region || identity?.region,
       })),
       truncated: list.truncated,
     };
@@ -252,13 +261,22 @@ export class CloudWatchBackend {
   ): Promise<{ accountId: string; region: string } | undefined> {
     // Outside the try: a missing scope is a failure, not "identity unknown".
     const source = this.sourceFor(ds);
-    try {
-      return await source.getCallerIdentity(ds.region, call);
-    } catch (err) {
-      // Identity is best-effort labeling; a failure here shouldn't blank rows.
-      this.logger.debug(`CloudWatch getCallerIdentity failed: ${describeSourceError(err)}`);
-      return undefined;
+    // The identity depends on the scope only. Without a region, the source's default region is
+    // the identity's region, so that read is kept apart.
+    const key = `${ds.cloudWatchScope ?? ''}${ds.region ? '' : '#default-region'}`;
+    let identity = this.identities.get(key);
+    if (!identity) {
+      identity = Promise.resolve()
+        .then(() => source.getCallerIdentity(ds.region, call))
+        .catch((err) => {
+          // Identity is best-effort labeling; a failure here shouldn't blank rows.
+          this.logger.debug(`CloudWatch getCallerIdentity failed: ${describeSourceError(err)}`);
+          this.identities.delete(key);
+          return undefined;
+        });
+      this.identities.set(key, identity);
     }
+    return identity;
   }
 
   /**

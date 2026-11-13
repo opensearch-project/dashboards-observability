@@ -700,6 +700,29 @@ describe('CloudWatchBackend scopes', () => {
     );
   });
 
+  it('reads the caller identity once per scope, whatever its regions', async () => {
+    const { source, scoped } = scopedSources();
+    const baseIdentity = jest.spyOn(source, 'getCallerIdentity');
+    const scopedIdentity = jest.spyOn(scoped, 'getCallerIdentity');
+    const backend = new CloudWatchBackend(noopLogger, source);
+    for (const region of ['us-east-1', 'us-west-2', 'eu-west-1']) {
+      await backend.describeAlarms({ ...ds, id: `cloudwatch_${region}`, region });
+      await backend.describeAlarms({ ...scopedDs, id: `cloudwatch_${region}_s1`, region });
+    }
+    expect(baseIdentity).toHaveBeenCalledTimes(1);
+    expect(scopedIdentity).toHaveBeenCalledTimes(1);
+  });
+  it('retries the caller identity after a failed read', async () => {
+    const source = new FakeSource();
+    source.alarms = [alarm({ accountId: undefined })];
+    source.failWith.getCallerIdentity = new Error('sts down');
+    const identity = jest.spyOn(source, 'getCallerIdentity');
+    const backend = new CloudWatchBackend(noopLogger, source);
+    expect((await backend.describeAlarms(ds)).alarms[0].accountId).toBeUndefined();
+    delete source.failWith.getCallerIdentity;
+    expect((await backend.describeAlarms(ds)).alarms[0].accountId).toBe('123456789012');
+    expect(identity).toHaveBeenCalledTimes(2);
+  });
   it('keeps a datasource without a scope on the default source', async () => {
     const { source, forScope } = scopedSources();
     source.alarms = [alarm()];

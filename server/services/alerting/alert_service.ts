@@ -75,6 +75,8 @@ import {
 } from './alert_utils';
 import { describeSourceError } from './cloudwatch/cloudwatch_backend';
 import type { CloudWatchBackend } from './cloudwatch/cloudwatch_backend';
+import { CloudWatchScopeUnavailableError } from './cloudwatch/types';
+import { CloudWatchTargetsUnavailableError } from './cloudwatch_targets_unavailable_error';
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_MAX_RESULTS = 5_000;
@@ -85,20 +87,31 @@ const CLOUDWATCH_UNAVAILABLE_TEXT = 'CloudWatch datasource is not available';
 const CLOUDWATCH_TOO_MANY_PAIRS_TEXT =
   'Too many CloudWatch account and region combinations in one request';
 
+/** The `error` for a requested CloudWatch datasource when the targets read failed. */
+const CLOUDWATCH_TARGETS_UNAVAILABLE_TEXT = 'CloudWatch account list is not available';
+/** A requested CloudWatch datasource that isn't read, and why. */
+interface UnavailableDatasource {
+  id: string;
+  error?: string;
+  errorDetail?: ClassifiedError;
+}
 /** A failed status for a requested CloudWatch datasource that isn't read. */
-function unavailableCloudWatchResult<T>(
-  id: string,
-  error: string = CLOUDWATCH_UNAVAILABLE_TEXT
-): DatasourceFetchResult<T> {
+function unavailableCloudWatchResult<T>(u: UnavailableDatasource): DatasourceFetchResult<T> {
   return {
-    datasourceId: id,
-    datasourceName: id,
+    datasourceId: u.id,
+    // The browser shows its own name for the datasource; it matches statuses by id.
+    datasourceName: u.id,
     datasourceType: 'cloudwatch',
     status: 'error',
     data: [],
-    error,
+    error: u.error ?? CLOUDWATCH_UNAVAILABLE_TEXT,
+    ...(u.errorDetail ? { errorDetail: u.errorDetail } : {}),
     durationMs: 0,
   };
+}
+/** A stand-in datasource for classifying a failure of a CloudWatch id that wasn't resolved. */
+function cloudWatchStub(id: string): Datasource {
+  return { id, name: id, type: 'cloudwatch', url: 'cloudwatch', enabled: true };
 }
 /**
  * Concurrency cap on per-datasource fan-outs. The unified views fan a
@@ -607,7 +620,7 @@ export class MultiBackendAlertService {
         statusList.push(errResult);
       }
     }
-    for (const u of unavailable) statusList.push(unavailableCloudWatchResult(u.id, u.error));
+    for (const u of unavailable) statusList.push(unavailableCloudWatchResult(u));
 
     return {
       results: allResults.slice(0, maxResults),
@@ -671,7 +684,7 @@ export class MultiBackendAlertService {
         statusList.push(errResult);
       }
     }
-    for (const u of unavailable) statusList.push(unavailableCloudWatchResult(u.id, u.error));
+    for (const u of unavailable) statusList.push(unavailableCloudWatchResult(u));
 
     return {
       results: allResults.slice(0, maxResults),
@@ -1387,7 +1400,11 @@ export class MultiBackendAlertService {
    * The datasources to fan out to. A requested CloudWatch id the listing doesn't include (another
    * region or account scope) is looked up on its own; one that doesn't resolve is `unavailable`,
    * so the caller reports it. An unlisted `cloudwatch` is handled the same way only when other
-   * CloudWatch datasources are listed. Other unknown ids are dropped.
+   * CloudWatch datasources are listed. Other unknown ids are dropped. With no `dsIds`, every
+   * listed datasource is requested.
+   *
+   * The CloudWatch targets are read only when a requested id is a CloudWatch id, or when no
+   * `dsIds` are given; OpenSearch- or Prometheus-only requests don't wait on them.
    *
    * At most `ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS` CloudWatch datasources (listed or looked up) are
    * read per request; any further CloudWatch id is `unavailable` with a fixed error. The
@@ -1395,15 +1412,16 @@ export class MultiBackendAlertService {
    */
   private async resolveDatasources(
     dsIds?: string[]
-  ): Promise<{ datasources: Datasource[]; unavailable: Array<{ id: string; error?: string }> }> {
-    const all = await this.datasourceService.list();
+  ): Promise<{ datasources: Datasource[]; unavailable: UnavailableDatasource[] }> {
+    const requested = dsIds && dsIds.length > 0 ? dsIds : undefined;
+    const includeCloudWatch = !requested || requested.some((id) => isCloudWatchDatasourceId(id));
+    const all = await this.datasourceService.list({ includeCloudWatch });
     const enabled = all.filter((ds) => ds.enabled);
-    if (!dsIds || dsIds.length === 0) return { datasources: enabled, unavailable: [] };
-
+    const ids = requested ?? enabled.map((ds) => ds.id);
     const datasources: Datasource[] = [];
-    const unavailable: Array<{ id: string; error?: string }> = [];
+    const unavailable: UnavailableDatasource[] = [];
     let cloudWatchPairs = 0;
-    for (const id of Array.from(new Set(dsIds))) {
+    for (const id of Array.from(new Set(ids))) {
       const match = enabled.find((ds) => ds.id === id);
       if (match && match.type !== 'cloudwatch') {
         datasources.push(match);
@@ -1426,17 +1444,44 @@ export class MultiBackendAlertService {
       }
       // Every CloudWatch id tried counts, so lookups of unlisted ids stay bounded too.
       cloudWatchPairs++;
-      const ds = match ?? (await this.datasourceService.get(id));
+      let ds: Datasource | null;
+      try {
+        ds = match ?? (await this.datasourceService.get(id));
+      } catch (err) {
+        if (err instanceof CloudWatchTargetsUnavailableError) {
+          this.logger.debug(`CloudWatch account list not available for: ${id}`);
+          unavailable.push({
+            id,
+            error: CLOUDWATCH_TARGETS_UNAVAILABLE_TEXT,
+            errorDetail: classifyDatasourceFailure(
+              err.targetsError,
+              cloudWatchStub(id),
+              'unified.datasources.resolve'
+            ),
+          });
+          continue;
+        }
+        ds = null;
+      }
       if (ds && ds.enabled && ds.type === 'cloudwatch') {
         datasources.push(ds);
-      } else {
+      } else if (ds && ds.enabled && !datasources.some((d) => d.id === ds!.id)) {
+        // An id shaped like a CloudWatch id that names a saved object (e.g. a data connection).
+        datasources.push(ds);
+      } else if (!ds || !ds.enabled) {
         this.logger.debug(`CloudWatch datasource not available: ${id}`);
-        unavailable.push({ id });
+        unavailable.push({
+          id,
+          errorDetail: classifyDatasourceFailure(
+            new CloudWatchScopeUnavailableError(),
+            cloudWatchStub(id),
+            'unified.datasources.resolve'
+          ),
+        });
       }
     }
     return { datasources, unavailable };
   }
-
   private withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       let settled = false;

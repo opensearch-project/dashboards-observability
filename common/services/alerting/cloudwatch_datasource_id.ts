@@ -107,9 +107,29 @@ export function resolveCloudWatchTarget(
 }
 
 /**
- * The datasource name: `CloudWatch · <scope label> · <region>`. The default datasource of a
- * source that doesn't label its default scope keeps today's name, `CloudWatch`. Names must be
- * unique, since per-datasource errors and warnings are keyed by name.
+ * The label shown for a scope. A label that repeats among `targets.scopes` gets the account id
+ * appended, e.g. `Prod (123456789012)`, or the scope id when the source returned no account id
+ * (or the account id repeats too), e.g. `Prod (s2)`. Labels that don't repeat are unchanged.
+ */
+export function cloudWatchScopeDisplayLabel(
+  targets: CloudWatchTargets,
+  scope: CloudWatchAccountScope
+): string {
+  const sameLabel = targets.scopes.filter((s) => s.label === scope.label);
+  if (sameLabel.length < 2) return scope.label;
+  const accountIdIsUnique =
+    scope.accountId !== undefined &&
+    sameLabel.filter((s) => s.accountId === scope.accountId).length === 1;
+  const suffix = accountIdIsUnique ? scope.accountId : (scope.id ?? 'default');
+  return `${scope.label} (${suffix})`;
+}
+
+/**
+ * The datasource name: `CloudWatch · <scope label> · <region>`, without the scope label when it
+ * is the default label (so `CloudWatch · us-west-2`, not `CloudWatch · CloudWatch · us-west-2`).
+ * The default datasource of a source that doesn't label its default scope keeps today's name,
+ * `CloudWatch`. Pass the scope's display label (`cloudWatchScopeDisplayLabel`): it makes repeated
+ * labels distinct, so each (scope, region) pair has a distinct name.
  */
 export function cloudWatchDatasourceName(
   id: string,
@@ -119,7 +139,8 @@ export function cloudWatchDatasourceName(
   if (id === CLOUDWATCH_DATASOURCE_ID && scope.label === CLOUDWATCH_DEFAULT_SCOPE_LABEL) {
     return CLOUDWATCH_DEFAULT_SCOPE_LABEL;
   }
-  return ['CloudWatch', scope.label, region].filter(Boolean).join(NAME_SEPARATOR);
+  const label = scope.label === CLOUDWATCH_DEFAULT_SCOPE_LABEL ? undefined : scope.label;
+  return ['CloudWatch', label, region].filter(Boolean).join(NAME_SEPARATOR);
 }
 
 /** The datasource for a (scope, region) pair, or undefined when the source doesn't offer it. */
@@ -134,15 +155,16 @@ export function buildCloudWatchDatasource(
     defaultRegion: targets.defaultRegion,
   });
   if (!id || resolveCloudWatchTarget(targets, id)?.scope !== scope) return undefined;
+  const label = cloudWatchScopeDisplayLabel(targets, scope);
   return {
     id,
-    name: cloudWatchDatasourceName(id, scope, region),
+    name: cloudWatchDatasourceName(id, { ...scope, label }, region),
     type: 'cloudwatch',
     url: 'cloudwatch',
     enabled: true,
     ...(region !== undefined ? { region } : {}),
     ...(scope.id !== undefined ? { cloudWatchScope: scope.id } : {}),
-    cloudWatchScopeLabel: scope.label,
+    cloudWatchScopeLabel: label,
     ...(scope.accountId !== undefined ? { accountId: scope.accountId } : {}),
   };
 }
@@ -150,7 +172,9 @@ export function buildCloudWatchDatasource(
 /**
  * The datasources for the selected regions: per scope, one per selected region, in
  * `targets.regions` order. With no offered region selected (or none reported by the source),
- * one per scope at its default region.
+ * one per scope at its default region. The server listing and the browser both use this, with
+ * `[targets.defaultRegion]` when nothing else is selected, so a scope's own `defaultRegion` only
+ * applies when the source reports no offered shared default.
  */
 export function cloudWatchDatasourcesFor(
   targets: CloudWatchTargets,

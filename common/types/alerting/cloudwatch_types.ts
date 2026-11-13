@@ -222,7 +222,9 @@ export interface CloudWatchAccountScope {
   /** Whether the scope reads the caller's own account. */
   relation: 'own' | 'other';
   /**
-   * Region selected when the scope is first picked. Absent only when the source reports no
+   * The scope's own default region. Regions are chosen once, for every account, in the shared
+   * Regions control, which starts at `CloudWatchTargets.defaultRegion`; this field is used only
+   * when the source reports no offered shared default. Absent only when the source reports no
    * regions; the source then uses its own default.
    */
   defaultRegion?: string;

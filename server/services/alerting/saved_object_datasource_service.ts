@@ -25,17 +25,22 @@ import type {
   AlertingOSClient,
   CloudWatchTargets,
   Datasource,
+  DatasourceListOptions,
   DatasourceService,
   Logger,
 } from '../../../common/types/alerting';
 import {
   CLOUDWATCH_DATASOURCE_ID,
   buildCloudWatchDatasource,
+  cloudWatchDatasourcesFor,
   decodeCloudWatchDatasourceId,
   resolveCloudWatchTarget,
 } from '../../../common/services/alerting/cloudwatch_datasource_id';
 import { describeSourceError } from './cloudwatch/cloudwatch_backend';
 import { TimeoutError } from './timeout_error';
+import { CloudWatchTargetsUnavailableError } from './cloudwatch_targets_unavailable_error';
+
+export { CloudWatchTargetsUnavailableError };
 
 /** Default upper bound on the CloudWatch targets read. */
 const DEFAULT_CLOUDWATCH_TARGETS_TIMEOUT_MS = 10_000;
@@ -93,6 +98,8 @@ export class SavedObjectDatasourceService implements DatasourceService {
   ) {}
 
   private cloudWatchTargetsPromise?: Promise<CloudWatchTargets | undefined>;
+  /** Set when the targets read failed or timed out (not when the source reports none). */
+  private cloudWatchTargetsFailure?: { error: unknown };
 
   /**
    * The source's targets, once per instance. A failure or timeout falls back to the single
@@ -118,6 +125,7 @@ export class SavedObjectDatasourceService implements DatasourceService {
       ])
         .finally(() => clearTimeout(timer))
         .catch((e) => {
+          this.cloudWatchTargetsFailure = { error: e };
           this.logger?.debug(
             `SavedObjectDatasourceService: CloudWatch targets failed: ${describeSourceError(e)}`
           );
@@ -161,7 +169,7 @@ export class SavedObjectDatasourceService implements DatasourceService {
     );
   }
 
-  async list(): Promise<Datasource[]> {
+  async list(options?: DatasourceListOptions): Promise<Datasource[]> {
     const all: Datasource[] = [];
     let osCount = 0;
     try {
@@ -222,18 +230,14 @@ export class SavedObjectDatasourceService implements DatasourceService {
     }
     // Virtual CloudWatch datasource — no saved object; appears automatically
     // when the feature is enabled and a CloudWatch source is available.
-    // With targets, one per account scope at that scope's default region.
-    if (await this.isCloudWatchEnabled()) {
+    // With targets, one per account scope at the shared default region (the browser's rule
+    // when no region is stored), so both sides list the same ids.
+    if (options?.includeCloudWatch !== false && (await this.isCloudWatchEnabled())) {
       const targets = await this.cloudWatchTargets();
       if (targets) {
-        for (const scope of targets.scopes) {
-          const ds = buildCloudWatchDatasource(
-            targets,
-            scope,
-            scope.defaultRegion ?? targets.defaultRegion
-          );
-          if (ds) all.push(ds);
-        }
+        all.push(
+          ...cloudWatchDatasourcesFor(targets, targets.defaultRegion ? [targets.defaultRegion] : [])
+        );
       } else {
         all.push(this.cloudWatchDatasource());
       }
@@ -248,12 +252,19 @@ export class SavedObjectDatasourceService implements DatasourceService {
       const targets = await this.cloudWatchTargets();
       return targets ? this.resolveCloudWatchId(targets, id) : this.cloudWatchDatasource();
     }
-    // Other CloudWatch ids exist only while the source reports targets; then they are resolved
-    // (or rejected) without a saved-object lookup. Otherwise, or when the id doesn't decode, it
-    // may name a saved object (e.g. a data connection called `cloudwatch_…`), so fall through.
+    // Other CloudWatch ids exist only while the source reports targets. An offered pair resolves
+    // without a saved-object lookup. When the targets read failed, the id can't be checked, so it
+    // isn't looked up as a saved object either: `CloudWatchTargetsUnavailableError`. Otherwise
+    // (not offered, no targets reported, or the id doesn't decode) it may name a saved object,
+    // e.g. a data connection called `cloudwatch_…`, so fall through.
     if (decodeCloudWatchDatasourceId(id) && (await this.isCloudWatchEnabled())) {
       const targets = await this.cloudWatchTargets();
-      if (targets) return this.resolveCloudWatchId(targets, id);
+      if (targets) {
+        const ds = this.resolveCloudWatchId(targets, id);
+        if (ds) return ds;
+      } else if (this.cloudWatchTargetsFailure) {
+        throw new CloudWatchTargetsUnavailableError(this.cloudWatchTargetsFailure.error);
+      }
     }
     if (!id || id === 'local-cluster') {
       return {

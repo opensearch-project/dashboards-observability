@@ -82,7 +82,7 @@ describe('useDatasources CloudWatch rows', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(cloudWatchRows(result.current.datasources)).toEqual([
       ['cloudwatch', 'CloudWatch'],
-      ['cloudwatch_us-west-2', 'CloudWatch · CloudWatch · us-west-2'],
+      ['cloudwatch_us-west-2', 'CloudWatch · us-west-2'],
       ['cloudwatch_us-east-1_scope-b', 'CloudWatch · Shared · us-east-1'],
       ['cloudwatch_us-west-2_scope-b', 'CloudWatch · Shared · us-west-2'],
       // The scope is homed in eu-west-1, which isn't selected: no row there.

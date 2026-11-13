@@ -16,6 +16,10 @@ describe('facetLabels', () => {
     const prom = { region: 'eu', account: 'x', team: 'a' };
     expect(facetLabels({ datasourceType: 'prometheus', labels: prom })).toBe(prom);
   });
+  it('copies a CloudWatch row once', () => {
+    const row = { datasourceType: 'cloudwatch', labels: cwLabels };
+    expect(facetLabels(row)).toBe(facetLabels(row));
+  });
 });
 
 describe('label facet matching ignores CloudWatch account and region', () => {

@@ -10,6 +10,7 @@ import {
   cloudWatchDatasourceName,
   clampToDatasourceCap,
   cloudWatchDatasourcesFor,
+  cloudWatchScopeDisplayLabel,
   cloudWatchScopeKeyOf,
   countCloudWatchPairs,
   countTowardDatasourceCap,
@@ -157,8 +158,9 @@ describe('cloudWatchDatasourceName', () => {
   });
 
   it('names every other datasource by scope label and region', () => {
+    // The default label isn't repeated.
     expect(cloudWatchDatasourceName('cloudwatch_us-west-2', own, 'us-west-2')).toBe(
-      'CloudWatch · CloudWatch · us-west-2'
+      'CloudWatch · us-west-2'
     );
     expect(
       cloudWatchDatasourceName('cloudwatch', { ...own, label: 'Own account' }, 'us-east-1')
@@ -169,6 +171,35 @@ describe('cloudWatchDatasourceName', () => {
   });
 });
 
+describe('cloudWatchScopeDisplayLabel', () => {
+  const twoProds: CloudWatchTargets = {
+    ...targets,
+    scopes: [
+      own,
+      { id: 's1', label: 'Prod', accountId: '111111111111', relation: 'other' },
+      { id: 's2', label: 'Prod', relation: 'other' },
+    ],
+  };
+  it('keeps a label that does not repeat', () => {
+    expect(cloudWatchScopeDisplayLabel(twoProds, own)).toBe('CloudWatch');
+  });
+  it('appends the account id, or the scope id without one, to a repeated label', () => {
+    expect(cloudWatchScopeDisplayLabel(twoProds, twoProds.scopes[1])).toBe('Prod (111111111111)');
+    expect(cloudWatchScopeDisplayLabel(twoProds, twoProds.scopes[2])).toBe('Prod (s2)');
+  });
+  it('gives two scopes labelled the same distinct names and labels', () => {
+    const rows = cloudWatchDatasourcesFor(twoProds, ['us-west-2']);
+    expect(rows.map((d) => [d.id, d.name, d.cloudWatchScopeLabel])).toEqual([
+      ['cloudwatch_us-west-2', 'CloudWatch · us-west-2', 'CloudWatch'],
+      [
+        'cloudwatch_us-west-2_s1',
+        'CloudWatch · Prod (111111111111) · us-west-2',
+        'Prod (111111111111)',
+      ],
+      ['cloudwatch_us-west-2_s2', 'CloudWatch · Prod (s2) · us-west-2', 'Prod (s2)'],
+    ]);
+  });
+});
 describe('buildCloudWatchDatasource', () => {
   it('builds a scoped datasource with its region, scope and account', () => {
     expect(buildCloudWatchDatasource(targets, prod, 'eu-west-1')).toEqual({

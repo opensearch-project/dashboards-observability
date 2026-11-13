@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectDatasourceService } from '../saved_object_datasource_service';
+import {
+  CloudWatchTargetsUnavailableError,
+  SavedObjectDatasourceService,
+} from '../saved_object_datasource_service';
 import type { CloudWatchDatasourceConfig } from '../saved_object_datasource_service';
 import type { CloudWatchTargets, Logger } from '../../../../common/types/alerting';
 
@@ -178,14 +181,14 @@ describe('SavedObjectDatasourceService CloudWatch scopes and regions', () => {
     ]);
   });
 
-  it('lists one entry per scope at its default region', async () => {
+  it('lists one entry per scope at the shared default region', async () => {
     const svc = service({ enabled: true, targets: async () => targets });
     expect(await cloudWatchRows(svc)).toEqual([
       expect.objectContaining({ id: 'cloudwatch', name: 'CloudWatch', region: 'us-east-1' }),
       expect.objectContaining({
-        id: 'cloudwatch_eu-west-1_s1',
-        name: 'CloudWatch · Production · eu-west-1',
-        region: 'eu-west-1',
+        id: 'cloudwatch_us-east-1_s1',
+        name: 'CloudWatch · Production · us-east-1',
+        region: 'us-east-1',
         cloudWatchScope: 's1',
         cloudWatchScopeLabel: 'Production',
         accountId: '210987654321',
@@ -209,16 +212,33 @@ describe('SavedObjectDatasourceService CloudWatch scopes and regions', () => {
     expect(await svc.get('cloudwatch')).toMatchObject({ id: 'cloudwatch', region: 'us-east-1' });
   });
 
+  it('lists the same ids as the browser when scopes have their own default regions', async () => {
+    // Every scope is listed at the shared default, including one whose own default isn't offered.
+    const svc = service({
+      enabled: true,
+      targets: async () => ({
+        ...targets,
+        scopes: [
+          ...targets.scopes,
+          { id: 's3', label: 'Staging', relation: 'other', defaultRegion: 'ap-south-1' },
+        ],
+      }),
+    });
+    expect((await cloudWatchRows(svc)).map((d) => d.id)).toEqual([
+      'cloudwatch',
+      'cloudwatch_us-east-1_s1',
+      'cloudwatch_us-east-1_s3',
+    ]);
+  });
   it.each([
     ['an unknown scope', 'cloudwatch_us-east-1_s9'],
     ['an unoffered region', 'cloudwatch_ap-south-1_s1'],
     ['a non-canonical id', 'cloudwatch_us-east-1'],
-  ])('returns null for %s without a saved-object lookup', async (_, id) => {
+  ])('returns null for %s after the saved-object lookup misses', async (_, id) => {
     const soClient = makeSoClient({});
     const svc = service({ enabled: true, targets: async () => targets }, soClient);
     expect(await svc.get(id)).toBeNull();
-    expect(soMock(soClient).get).not.toHaveBeenCalled();
-    expect(soMock(soClient).find).not.toHaveBeenCalled();
+    expect(soMock(soClient).get).toHaveBeenCalledWith('data-source', id);
   });
 
   it('returns null for `cloudwatch` when the source offers no default scope', async () => {
@@ -256,12 +276,46 @@ describe('SavedObjectDatasourceService CloudWatch scopes and regions', () => {
     );
     expect((await cloudWatchRows(svc)).map((d) => d.id)).toEqual(['cloudwatch']);
     expect(await svc.get('cloudwatch')).toMatchObject({ id: 'cloudwatch', region: 'us-west-2' });
-    expect(await svc.get('cloudwatch_us-west-2_s1')).toBeNull();
+    await expect(svc.get('cloudwatch_us-west-2_s1')).rejects.toBeInstanceOf(
+      CloudWatchTargetsUnavailableError
+    );
     const logged = JSON.stringify((logger.debug as jest.Mock).mock.calls);
     expect(logged).toContain('AccessDeniedException');
     expect(logged).not.toContain('123456789012');
   });
 
+  it('skips the saved-object lookups for CloudWatch ids when the targets read fails', async () => {
+    const soClient = makeSoClient({});
+    const svc = service(
+      {
+        enabled: true,
+        targets: async () => {
+          throw Object.assign(new Error('slow'), { name: 'TimeoutError' });
+        },
+      },
+      soClient
+    );
+    for (const id of [
+      'cloudwatch_us-west-2_s1',
+      'cloudwatch_eu-west-1_s2',
+      'cloudwatch_us-west-2',
+    ]) {
+      const err = await svc.get(id).catch((e) => e);
+      expect(err).toBeInstanceOf(CloudWatchTargetsUnavailableError);
+      expect((err as CloudWatchTargetsUnavailableError).targetsError).toMatchObject({
+        name: 'TimeoutError',
+      });
+    }
+    expect(soMock(soClient).get).not.toHaveBeenCalled();
+    expect(soMock(soClient).find).not.toHaveBeenCalled();
+  });
+  it('skips the targets read for a listing without CloudWatch', async () => {
+    const getTargets = jest.fn(async () => targets);
+    const svc = service({ enabled: true, targets: getTargets });
+    const rows = await svc.list({ includeCloudWatch: false });
+    expect(rows.some((d) => d.type === 'cloudwatch')).toBe(false);
+    expect(getTargets).not.toHaveBeenCalled();
+  });
   it('with the gate off, resolves no CloudWatch id and never asks for targets', async () => {
     const soClient = makeSoClient({});
     const getTargets = jest.fn(async () => targets);
@@ -295,6 +349,16 @@ describe('SavedObjectDatasourceService CloudWatch scopes and regions', () => {
       expect(await svc.get(id)).toMatchObject({ id: 'dc-1', type: 'prometheus' });
     });
 
+    it('resolves an id the source does not offer, while it reports targets', async () => {
+      const svc = service(
+        { enabled: true, targets: async () => targets },
+        promConnection('cloudwatch_us-east-1')
+      );
+      expect(await svc.get('cloudwatch_us-east-1')).toMatchObject({
+        id: 'dc-1',
+        type: 'prometheus',
+      });
+    });
     it('is shadowed only by a CloudWatch id while the source reports targets', async () => {
       const soClient = promConnection('cloudwatch_us-west-2_s1');
       const svc = service({ enabled: true, targets: async () => targets }, soClient);
@@ -324,12 +388,12 @@ describe('SavedObjectDatasourceService CloudWatch scopes and regions', () => {
         logger
       );
       const rows = cloudWatchRows(svc);
-      const scoped = svc.get('cloudwatch_us-west-2_s1');
+      const scoped = svc.get('cloudwatch_us-west-2_s1').catch((e) => e);
       await jest.advanceTimersByTimeAsync(4_999);
       expect(signal?.aborted).toBe(false);
       await jest.advanceTimersByTimeAsync(1);
       expect((await rows).map((d) => d.id)).toEqual(['cloudwatch']);
-      expect(await scoped).toBeNull();
+      expect(await scoped).toBeInstanceOf(CloudWatchTargetsUnavailableError);
       expect(await svc.get('cloudwatch')).toMatchObject({ id: 'cloudwatch', region: 'us-west-2' });
       expect(signal?.aborted).toBe(true);
       expect(JSON.stringify((logger.debug as jest.Mock).mock.calls)).toContain('TimeoutError');
