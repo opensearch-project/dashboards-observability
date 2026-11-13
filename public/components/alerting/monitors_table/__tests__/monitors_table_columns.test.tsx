@@ -7,6 +7,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { buildTableColumns, datasourceCellLines } from '../monitors_table_columns';
 import type { Datasource, UnifiedRuleSummary } from '../../../../../common/types/alerting';
+import { cloudWatchDatasourcesFor } from '../../../../../common/services/alerting/cloudwatch_datasource_id';
 
 const baseParams = {
   filtered: [] as UnifiedRuleSummary[],
@@ -214,6 +215,35 @@ describe('monitors_table_columns Datasource cell', () => {
     ).toEqual(['CloudWatch • Prod (222222222222)', 'us-east-1']);
   });
 
+  it('shows the type once when two scopes are labelled CloudWatch', () => {
+    const rows = cloudWatchDatasourcesFor(
+      {
+        regions: [{ id: 'us-east-1', name: 'US East (N. Virginia)' }],
+        defaultRegion: 'us-east-1',
+        scopes: [
+          { label: 'CloudWatch', relation: 'own', accountId: '111111111111' },
+          { id: 's2', label: 'CloudWatch', relation: 'other', accountId: '222222222222' },
+        ],
+      },
+      ['us-east-1']
+    );
+    const byId = new Map(rows.map((d) => [d.id, d]));
+    const cw = (datasourceId: string, accountId: string) =>
+      datasourceCellLines(
+        row({
+          datasourceId,
+          datasourceType: 'cloudwatch',
+          cloudWatch: { state: 'OK', alarmType: 'metric', accountId, region: 'us-east-1' },
+        }),
+        new Map(),
+        byId
+      );
+    expect(cw('cloudwatch', '111111111111')).toEqual(['CloudWatch', '111111111111 • us-east-1']);
+    expect(cw('cloudwatch_us-east-1_s2', '222222222222')).toEqual([
+      'CloudWatch • 222222222222',
+      'us-east-1',
+    ]);
+  });
   it('labels the legacy single CloudWatch datasource just "CloudWatch"', () => {
     expect(
       datasourceCellLines(

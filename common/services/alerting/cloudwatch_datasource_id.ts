@@ -110,18 +110,26 @@ export function resolveCloudWatchTarget(
  * The label shown for a scope. A label that repeats among `targets.scopes` gets the account id
  * appended, e.g. `Prod (123456789012)`, or the scope id when the source returned no account id
  * (or the account id repeats too), e.g. `Prod (s2)`. Labels that don't repeat are unchanged.
+ *
+ * The default label (`CloudWatch`) is the datasource type, so it is checked on the raw label
+ * first: the default scope labelled `CloudWatch` is never decorated (it keeps today's names), and
+ * any other scope labelled `CloudWatch` that needs telling apart shows the account id or scope id
+ * alone, e.g. `123456789012`, rather than `CloudWatch (123456789012)`. A decorated label is
+ * therefore never the default label.
  */
 export function cloudWatchScopeDisplayLabel(
   targets: CloudWatchTargets,
   scope: CloudWatchAccountScope
 ): string {
+  const isDefaultLabel = scope.label === CLOUDWATCH_DEFAULT_SCOPE_LABEL;
+  if (isDefaultLabel && scope.id === undefined) return scope.label;
   const sameLabel = targets.scopes.filter((s) => s.label === scope.label);
   if (sameLabel.length < 2) return scope.label;
   const accountIdIsUnique =
     scope.accountId !== undefined &&
     sameLabel.filter((s) => s.accountId === scope.accountId).length === 1;
   const suffix = accountIdIsUnique ? scope.accountId : (scope.id ?? 'default');
-  return `${scope.label} (${suffix})`;
+  return isDefaultLabel ? `${suffix}` : `${scope.label} (${suffix})`;
 }
 
 /**
@@ -129,7 +137,9 @@ export function cloudWatchScopeDisplayLabel(
  * is the default label (so `CloudWatch · us-west-2`, not `CloudWatch · CloudWatch · us-west-2`).
  * The default datasource of a source that doesn't label its default scope keeps today's name,
  * `CloudWatch`. Pass the scope's display label (`cloudWatchScopeDisplayLabel`): it makes repeated
- * labels distinct, so each (scope, region) pair has a distinct name.
+ * labels distinct, so each (scope, region) pair has a distinct name, and it leaves the default
+ * label undecorated only where it doesn't repeat or belongs to the default scope, so the checks
+ * below see the same default label the raw scope had.
  */
 export function cloudWatchDatasourceName(
   id: string,

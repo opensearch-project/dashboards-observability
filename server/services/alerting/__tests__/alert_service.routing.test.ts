@@ -1087,6 +1087,51 @@ describe('MultiBackendAlertService — CloudWatch datasource', () => {
       expect(res.datasourceStatus.some((s) => s.datasourceId === osDatasource.id)).toBe(true);
     });
 
+    it('does not count a CloudWatch-shaped id that names a saved object toward the bound', async () => {
+      const listed = Array.from({ length: 20 }, (_, i) => ({
+        ...regional,
+        id: `cloudwatch_us-east-1_s${i}`,
+        name: `CloudWatch · S${i} · us-east-1`,
+      }));
+      const connection: Datasource = {
+        id: 'cloudwatch_us-west-2_conn',
+        name: 'cloudwatch_us-west-2_conn',
+        type: 'prometheus',
+        url: 'cloudwatch_us-west-2_conn',
+        enabled: true,
+      };
+      const dsSvcListed = {
+        ...mockDsSvc,
+        list: jest.fn(async () => [osDatasource, ...listed]),
+        get: jest.fn(async (id: string) => (id === connection.id ? connection : null)),
+      };
+      const cwBackend = {
+        describeAlarms: jest.fn(async () => ({ alarms: [cwAlarm], truncated: false })),
+      };
+      const service = new MultiBackendAlertService(dsSvcListed as never, mockLogger);
+      service.registerPrometheus(mockPromBackend as never);
+      service.registerCloudWatch(cwBackend as never);
+      const res = await service.getUnifiedRules(jest.fn() as never, {
+        dsIds: [connection.id, ...listed.map((d) => d.id), 'cloudwatch_us-east-1_s20'],
+      });
+      expect(dsSvcListed.get).toHaveBeenCalledWith(connection.id);
+      expect(cwBackend.describeAlarms).toHaveBeenCalledTimes(20);
+      expect(
+        res.datasourceStatus.find((s) => s.datasourceId === connection.id)?.datasourceType
+      ).toBe('prometheus');
+      const errors = res.datasourceStatus.filter(
+        (s) => s.status === 'error' && s.datasourceType === 'cloudwatch'
+      );
+      // Only the 21st CloudWatch id is past the bound, and it is not looked up.
+      expect(errors).toEqual([
+        expect.objectContaining({
+          datasourceId: 'cloudwatch_us-east-1_s20',
+          error: 'Too many CloudWatch account and region combinations in one request',
+        }),
+      ]);
+      expect(dsSvcListed.get).toHaveBeenCalledTimes(1);
+    });
+
     it('reports an unlisted `cloudwatch` as unavailable when other CloudWatch entries are listed', async () => {
       const dsSvcLookup = {
         ...mockDsSvc,

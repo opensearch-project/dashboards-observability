@@ -1409,6 +1409,9 @@ export class MultiBackendAlertService {
    * At most `ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS` CloudWatch datasources (listed or looked up) are
    * read per request; any further CloudWatch id is `unavailable` with a fixed error. The
    * max-datasources setting counts a CloudWatch account once, so this bounds the AWS calls.
+   * Every CloudWatch-shaped id tried counts, including ones that don't resolve, except one that
+   * turns out to name a saved object: it costs no AWS call. Once the bound is reached, further
+   * CloudWatch-shaped ids are not looked up at all.
    */
   private async resolveDatasources(
     dsIds?: string[]
@@ -1442,13 +1445,12 @@ export class MultiBackendAlertService {
         unavailable.push({ id, error: CLOUDWATCH_TOO_MANY_PAIRS_TEXT });
         continue;
       }
-      // Every CloudWatch id tried counts, so lookups of unlisted ids stay bounded too.
-      cloudWatchPairs++;
       let ds: Datasource | null;
       try {
         ds = match ?? (await this.datasourceService.get(id));
       } catch (err) {
         if (err instanceof CloudWatchTargetsUnavailableError) {
+          cloudWatchPairs++;
           this.logger.debug(`CloudWatch account list not available for: ${id}`);
           unavailable.push({
             id,
@@ -1463,12 +1465,19 @@ export class MultiBackendAlertService {
         }
         ds = null;
       }
-      if (ds && ds.enabled && ds.type === 'cloudwatch') {
-        datasources.push(ds);
-      } else if (ds && ds.enabled && !datasources.some((d) => d.id === ds!.id)) {
+      if (ds && ds.enabled && ds.type !== 'cloudwatch') {
         // An id shaped like a CloudWatch id that names a saved object (e.g. a data connection).
+        // It isn't a CloudWatch pair, so it doesn't count toward the bound.
+        const found = ds;
+        if (!datasources.some((d) => d.id === found.id)) datasources.push(found);
+        continue;
+      }
+      // Every other CloudWatch id tried counts, resolved or not: the check above runs before the
+      // lookup, so CloudWatch reads and lookups of unlisted ids stay bounded.
+      cloudWatchPairs++;
+      if (ds && ds.enabled) {
         datasources.push(ds);
-      } else if (!ds || !ds.enabled) {
+      } else {
         this.logger.debug(`CloudWatch datasource not available: ${id}`);
         unavailable.push({
           id,

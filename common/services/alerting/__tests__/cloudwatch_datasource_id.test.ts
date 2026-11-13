@@ -199,6 +199,25 @@ describe('cloudWatchScopeDisplayLabel', () => {
       ['cloudwatch_us-west-2_s2', 'CloudWatch · Prod (s2) · us-west-2', 'Prod (s2)'],
     ]);
   });
+  it('keeps the default scope undecorated when another scope is also labelled CloudWatch', () => {
+    const twoCloudWatch: CloudWatchTargets = {
+      ...targets,
+      scopes: [
+        { ...own, accountId: '111111111111' },
+        { id: 's2', label: 'CloudWatch', accountId: '222222222222', relation: 'other' },
+        { id: 's3', label: 'CloudWatch', relation: 'other' },
+      ],
+    };
+    const rows = cloudWatchDatasourcesFor(twoCloudWatch, ['us-east-1', 'us-west-2']);
+    expect(rows.map((d) => [d.id, d.name, d.cloudWatchScopeLabel])).toEqual([
+      ['cloudwatch', 'CloudWatch', 'CloudWatch'],
+      ['cloudwatch_us-west-2', 'CloudWatch · us-west-2', 'CloudWatch'],
+      ['cloudwatch_us-east-1_s2', 'CloudWatch · 222222222222 · us-east-1', '222222222222'],
+      ['cloudwatch_us-west-2_s2', 'CloudWatch · 222222222222 · us-west-2', '222222222222'],
+      ['cloudwatch_us-east-1_s3', 'CloudWatch · s3 · us-east-1', 's3'],
+      ['cloudwatch_us-west-2_s3', 'CloudWatch · s3 · us-west-2', 's3'],
+    ]);
+  });
 });
 describe('buildCloudWatchDatasource', () => {
   it('builds a scoped datasource with its region, scope and account', () => {
