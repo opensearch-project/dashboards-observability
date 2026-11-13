@@ -119,18 +119,6 @@ function getMatchers(route: AlertmanagerRoute): string[] {
   return result;
 }
 
-const INTEGRATION_COLORS: Record<string, string> = {
-  webhook: 'hollow',
-  slack: '#4A154B',
-  email: 'primary',
-  pagerduty: '#06AC38',
-  opsgenie: '#2684FF',
-  telegram: '#0088cc',
-  msteams: '#6264A7',
-  sns: '#FF9900',
-  none: 'default',
-};
-
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -407,7 +395,8 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
       render: (g: string[]) =>
         g.length > 0 ? (
           g.map((s, i) => (
-            <EuiBadge key={i} color="primary">
+            // Neutral, like the other label chips: group-by keys aren't a state.
+            <EuiBadge key={i} color="hollow">
               {s}
             </EuiBadge>
           ))
@@ -482,9 +471,11 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
         defaultMessage: 'Integrations',
       }),
       render: (intgs: Array<{ type: string; summary: string }>) =>
+        // One neutral chip style for every integration (no brand fills), like
+        // the Matchers and Equal Labels chips on this page.
         intgs.map((intg, i) => (
           <EuiToolTip key={i} content={intg.summary}>
-            <EuiBadge color={INTEGRATION_COLORS[intg.type] || 'hollow'} style={{ marginRight: 4 }}>
+            <EuiBadge color="hollow" style={{ marginRight: 4 }}>
               {intg.type}
             </EuiBadge>
           </EuiToolTip>

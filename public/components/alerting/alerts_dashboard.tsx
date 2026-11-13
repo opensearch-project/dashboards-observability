@@ -43,7 +43,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { UnifiedAlertSummary, Datasource } from '../../../common/types/alerting';
 import { alertMatchesSearch, filterAlerts } from '../../../common/services/alerting/filter';
 import { facetLabels } from '../../../common/services/alerting/facet_labels';
-import { AlertTimeline, AlertTimelineLegend } from './alerts_charts';
+import { AlertTimeline, AlertTimelineLegend, countAlertsStartedInWindow } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import { DatasourceFacet, DatasourceFacetCloudWatch } from './datasource_facet';
 import {
@@ -88,21 +88,24 @@ function getMillis(value: string | number): number {
   return typeof value === 'number' ? value : new Date(value).getTime();
 }
 
-function formatDurationBetween(
-  startTime: string | number,
-  endTime: string | number = Date.now()
-): string {
+/**
+ * Started, for the list: one unit, rounded to the nearest ("5h 41m" → "6h",
+ * "1d 23h" → "2d", "37d 20h" → "38d"). Rounding (not truncating) keeps rows
+ * that read the same within half a unit of each other; the tooltip has the
+ * exact time.
+ */
+export function formatAgo(startTime: string | number, now: number = Date.now()): string {
   const start = typeof startTime === 'number' ? startTime : new Date(startTime).getTime();
-  const end = typeof endTime === 'number' ? endTime : new Date(endTime).getTime();
-  const ms = Math.max(0, end - start);
-  if (ms < 60000) return '<1m';
-  if (ms < 3600000) return Math.floor(ms / 60000) + 'm';
-  if (ms < 86400000) return Math.floor(ms / 3600000) + 'h ' + (Math.floor(ms / 60000) % 60) + 'm';
-  return Math.floor(ms / 86400000) + 'd ' + (Math.floor(ms / 3600000) % 24) + 'h';
-}
-
-function formatDuration(startTime: string | number): string {
-  return formatDurationBetween(startTime);
+  const ms = Math.max(0, now - start);
+  const MIN = 60000;
+  const HOUR = 60 * MIN;
+  const DAY = 24 * HOUR;
+  if (ms < MIN) return '<1m';
+  const minutes = Math.round(ms / MIN);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.round(ms / HOUR);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.round(ms / DAY)}d`;
 }
 
 // Cap on label-key facets rendered before the user expands the section.
@@ -435,15 +438,6 @@ function getAlertTimestamp(alert: UnifiedAlertSummary): number {
   return Number.isFinite(start) ? start : 0;
 }
 
-function formatAlertDuration(alert: UnifiedAlertSummary): string {
-  const start = getMillis(alert.startTime);
-  const end = getMillis(alert.lastUpdated);
-  if (getAlertKind(alert) === 'anomaly' && Number.isFinite(start) && Number.isFinite(end)) {
-    return formatDurationBetween(start, end);
-  }
-  return alert.startTime ? formatDuration(alert.startTime) : EMPTY_VALUE;
-}
-
 function parseAnomalyNumber(value?: string): number | undefined {
   if (!value) return undefined;
   const parsed = Number(value);
@@ -670,14 +664,11 @@ function renderGroupedAnomalyOccurrences(
                             id="observability.alerting.alertsDashboard.groupedAnomalyStartedAgo"
                             defaultMessage="{duration} ago"
                             values={{
-                              duration: formatDuration(occurrence.startTime),
+                              duration: formatAgo(occurrence.startTime),
                             }}
                           />
                         </span>
                       </EuiToolTip>
-                    </div>
-                    <div className="altGroupedOccurrenceCell">
-                      <EuiText size="xs">{formatAlertDuration(occurrence)}</EuiText>
                     </div>
                     <div className="altGroupedOccurrenceCell" />
                   </div>
@@ -1135,7 +1126,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         name: i18n.translate('observability.alerting.alertsDashboard.column.started', {
           defaultMessage: 'Started',
         }),
-        width: '14%',
+        width: '10%',
         sortable: true,
         // The absolute, timezone-labeled timestamp used to live only in a hover
         // tooltip on a non-focusable span (A11Y6). It is now also exposed via
@@ -1150,23 +1141,16 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 <FormattedMessage
                   id="observability.alerting.alertsDashboard.startedAgo"
                   defaultMessage="{duration} ago"
-                  values={{ duration: formatDuration(ts) }}
+                  values={{ duration: formatAgo(ts) }}
                 />
               </span>
             </EuiToolTip>
           );
         },
       },
-      {
-        field: 'startTime',
-        name: i18n.translate('observability.alerting.alertsDashboard.column.duration', {
-          defaultMessage: 'Duration',
-        }),
-        width: '9%',
-        render: (_ts: string, alert: AlertTableRow) => (
-          <EuiText size="xs">{formatAlertDuration(getRepresentativeAlert(alert))}</EuiText>
-        ),
-      },
+      // No Duration column: for a firing alert it repeats "Started … ago", so the
+      // list shows one relative time (full timestamp on hover) and the flyout
+      // shows Duration.
       {
         name: i18n.translate('observability.alerting.alertsDashboard.column.actions', {
           defaultMessage: 'Actions',
@@ -1262,6 +1246,26 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     </div>
   );
 
+  // Same definition as the timeline's bars, so the legend and the chart agree.
+  const alertsStartedInWindow = useMemo(
+    () => countAlertsStartedInWindow(filteredAlerts, startMs, endMs),
+    [filteredAlerts, startMs, endMs]
+  );
+  // "Show last 30 days" widens only the start and keeps the end. A relative
+  // end (date math such as `now`, `now-1h` or `now/d`) stays relative, with
+  // the start 30 days before it; an absolute end (e.g. a past incident
+  // window) gets an absolute start 30 days before it.
+  const showLast30Days = useCallback(() => {
+    if (pickerEnd.startsWith('now')) {
+      onTimeChange({ start: `${pickerEnd}-30d`, end: pickerEnd });
+    } else {
+      onTimeChange({
+        start: new Date(endMs - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        end: pickerEnd,
+      });
+    }
+  }, [pickerEnd, endMs, onTimeChange]);
+
   const emptyMode: 'no-ds' | 'no-rules' | 'no-alerts' | null = !loading
     ? selectedDsIds.length === 0
       ? 'no-ds'
@@ -1290,8 +1294,12 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
               defaultMessage: 'No alerts or anomalies were detected in the selected time range.',
             });
 
+  // Discover-style layout: the container fits the viewport (the page itself
+  // doesn't scroll); the timeline keeps its height and the alerts table fills
+  // the rest, scrolling inside its panel with the header and pagination in view
+  // (see `.altResizableContainer--fitViewport`).
   return (
-    <EuiResizableContainer className="altResizableContainer altResizableContainer--pageScroll">
+    <EuiResizableContainer className="altResizableContainer altResizableContainer--fitViewport">
       {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => (
         <>
           <EuiResizablePanel
@@ -1549,7 +1557,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                         </EuiFlexItem>
                         {/* Severity legend sits in the header row, right side,
                             only while the chart itself is showing. */}
-                        {!emptyMode && filteredAlerts.length > 0 && (
+                        {!emptyMode && alertsStartedInWindow > 0 && (
                           <EuiFlexItem grow={true}>
                             <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
                               <EuiFlexItem grow={false}>
@@ -1602,7 +1610,12 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                           }
                         />
                       ) : (
-                        <AlertTimeline alerts={filteredAlerts} startMs={startMs} endMs={endMs} />
+                        <AlertTimeline
+                          alerts={filteredAlerts}
+                          startMs={startMs}
+                          endMs={endMs}
+                          onShowLast30Days={showLast30Days}
+                        />
                       )}
                     </EuiPanel>
                   </EuiFlexItem>
@@ -1612,35 +1625,59 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
                 {/* ---- Search + Table ---- */}
                 <EuiPanel paddingSize="m" hasBorder className="altTablePanel">
-                  <EuiTitle size="xs">
-                    <h2>
-                      <FormattedMessage
-                        id="observability.alerting.alertsDashboard.allAlertsTitle"
-                        defaultMessage="All Alerts"
+                  {/* Title and search share one row; the row count moves to the
+                      footer, under the table, so the data starts higher. */}
+                  <EuiFlexGroup
+                    gutterSize="m"
+                    alignItems="center"
+                    responsive={false}
+                    className="altTablePanelHeader"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h2>
+                          <FormattedMessage
+                            id="observability.alerting.alertsDashboard.allAlertsTitle"
+                            defaultMessage="All Alerts"
+                          />
+                        </h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFieldSearch
+                        placeholder={i18n.translate(
+                          'observability.alerting.alertsDashboard.searchPlaceholder',
+                          {
+                            defaultMessage: 'Search alerts by name, message, or label...',
+                          }
+                        )}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        isClearable
+                        fullWidth
+                        aria-label={i18n.translate(
+                          'observability.alerting.alertsDashboard.searchAlertsAriaLabel',
+                          {
+                            defaultMessage: 'Search alerts',
+                          }
+                        )}
                       />
-                    </h2>
-                  </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                   <EuiSpacer size="s" />
-                  <EuiFieldSearch
-                    placeholder={i18n.translate(
-                      'observability.alerting.alertsDashboard.searchPlaceholder',
-                      {
-                        defaultMessage: 'Search alerts by name, message, or label...',
-                      }
-                    )}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    isClearable
-                    fullWidth
-                    aria-label={i18n.translate(
-                      'observability.alerting.alertsDashboard.searchAlertsAriaLabel',
-                      {
-                        defaultMessage: 'Search alerts',
-                      }
-                    )}
+                  <AlertsTable
+                    items={groupedTableRows}
+                    columns={columns}
+                    loading={loading}
+                    itemIdToExpandedRowMap={groupedOccurrenceRows}
+                    message={emptyTableMessage}
                   />
-                  <EuiSpacer size="s" />
-                  <EuiText size="s">
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    className="altTableFooterCount"
+                    data-test-subj="alertsTableCount"
+                  >
                     <FormattedMessage
                       id="observability.alerting.alertsDashboard.alertsCount"
                       defaultMessage="{count} {count, plural, one {row} other {rows}}"
@@ -1669,14 +1706,6 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                       </span>
                     )}
                   </EuiText>
-                  <EuiSpacer size="s" />
-                  <AlertsTable
-                    items={groupedTableRows}
-                    columns={columns}
-                    loading={loading}
-                    itemIdToExpandedRowMap={groupedOccurrenceRows}
-                    message={emptyTableMessage}
-                  />
                 </EuiPanel>
               </>
             }

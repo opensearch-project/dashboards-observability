@@ -489,7 +489,7 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 title: i18n.translate('observability.alerting.alertDetailFlyout.duration', {
                   defaultMessage: 'Duration',
                 }),
-                description: getAlertDuration(alert.startTime),
+                description: getAlertDuration(alert),
               },
               ...(sourceLink
                 ? [
@@ -686,9 +686,30 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
 // Helpers
 // ============================================================================
 
-function getAlertDuration(startTime: string): string {
+/**
+ * Firing alerts: start to now (matches the list's "Started … ago"). Resolved
+ * alerts: start to when they resolved (`lastUpdated`), so the value stops
+ * growing once the alert is over.
+ */
+function getAlertDuration(alert: {
+  startTime: string;
+  lastUpdated?: string;
+  state?: string;
+}): string {
+  const { startTime } = alert;
   if (!startTime) return '—';
-  const ms = Date.now() - new Date(startTime).getTime();
+  const start = new Date(startTime).getTime();
+  let end = Date.now();
+  if (alert.state === 'resolved') {
+    // `lastUpdated` is the resolve time for Prometheus episodes and close to it
+    // (last notification) for OpenSearch monitors. Alarm-backed rows set it to
+    // the same state-change timestamp as `startTime`, so there's no end to
+    // measure to: show no duration rather than "0m".
+    const resolved = alert.lastUpdated ? new Date(alert.lastUpdated).getTime() : NaN;
+    if (!Number.isFinite(resolved) || resolved <= start) return '—';
+    end = resolved;
+  }
+  const ms = Math.max(0, end - start);
   const minutes = Math.floor(ms / 60000);
   if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(minutes / 60);

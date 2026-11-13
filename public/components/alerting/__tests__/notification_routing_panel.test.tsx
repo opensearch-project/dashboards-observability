@@ -33,12 +33,12 @@ jest.mock('../query_services/alertmanager_admin_service', () => ({
 import { NotificationRoutingPanel } from '../notification_routing_panel';
 import { Datasource } from '../../../../common/types/alerting';
 
-const promDs = ({
+const promDs = {
   id: '1',
   name: 'prom1',
   type: 'prometheus',
   directQueryName: 'prom1',
-} as unknown) as Datasource;
+} as unknown as Datasource;
 
 describe('NotificationRoutingPanel', () => {
   beforeEach(() => {
@@ -51,6 +51,33 @@ describe('NotificationRoutingPanel', () => {
     await waitFor(() => expect(screen.getByText('Route Tree')).toBeInTheDocument());
     expect(screen.getAllByText('default').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/Receivers/)).toBeInTheDocument();
+  });
+
+  it('renders integration and group-by chips in one neutral style (no brand fills)', async () => {
+    mockGetConfig.mockResolvedValue({
+      ...mockConfig,
+      config: {
+        ...mockConfig.config,
+        route: { receiver: 'default', group_by: ['alertname', 'service_name'], group_wait: '30s' },
+        receivers: [
+          {
+            name: 'default',
+            integrations: [
+              { type: 'slack', summary: '#alerts' },
+              { type: 'pagerduty', summary: 'oncall' },
+              { type: 'email', summary: 'ops@example.com' },
+            ],
+          },
+        ],
+      },
+    });
+    render(<NotificationRoutingPanel datasources={[promDs]} />);
+    await waitFor(() => expect(screen.getByText('Route Tree')).toBeInTheDocument());
+    ['slack', 'pagerduty', 'email', 'alertname', 'service_name'].forEach((label) => {
+      const badge = screen.getByText(label).closest('.euiBadge') as HTMLElement;
+      expect(badge.className).toMatch(/euiBadge--hollow/);
+      expect(badge.style.backgroundColor).toBe('');
+    });
   });
 
   it('shows error callout when fetch fails', async () => {

@@ -19,7 +19,7 @@
  */
 import React, { useMemo } from 'react';
 import moment from 'moment-timezone';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EchartsRender } from './echarts_render';
@@ -134,10 +134,42 @@ export interface AlertTimelineProps {
   startMs: number;
   /** Range end in epoch ms (resolved by the parent). */
   endMs: number;
+  /**
+   * The user chose "Show last 30 days" in the empty state. Offered only when
+   * that range would put at least one alert on the chart (see below).
+   */
+  onShowLast30Days?: () => void;
 }
 
-export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, endMs }) => {
-  const spec = useMemo(() => {
+/** Range behind the empty state's "Show last 30 days" action. */
+const LAST_30_DAYS_MS = 30 * ONE_DAY_MS;
+
+/**
+ * How many alerts *started* inside [startMs, endMs] (what the histogram draws).
+ * The backend also returns alerts that started earlier but overlap the window;
+ * those have no bar. Shared with the dashboard so the legend hides with the bars.
+ */
+export const countAlertsStartedInWindow = (
+  alerts: UnifiedAlertSummary[],
+  startMs: number,
+  endMs: number
+): number =>
+  alerts.reduce((n, a) => {
+    const t = new Date(a.startTime).getTime();
+    return !Number.isNaN(t) && t >= startMs && t <= endMs ? n + 1 : n;
+  }, 0);
+
+export const AlertTimeline: React.FC<AlertTimelineProps> = ({
+  alerts,
+  startMs,
+  endMs,
+  onShowLast30Days,
+}) => {
+  const inWindow = useMemo(
+    () => countAlertsStartedInWindow(alerts, startMs, endMs),
+    [alerts, startMs, endMs]
+  );
+  const timeline = useMemo(() => {
     if (alerts.length === 0) return null;
 
     // Defend against inverted or zero-length ranges — pick a minimum 1ms
@@ -182,6 +214,9 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
     // rather than silently vanishing from both the bars and the notes.
     let excludedBeforeWindow = 0;
     let unknownStart = 0;
+    // The latest start among the pre-window alerts: whether widening the range
+    // back 30 days from `endMs` would bring any of them onto the chart.
+    let latestBeforeWindowMs = -Infinity;
     for (let idx = 0; idx < alerts.length; idx++) {
       const t = alertStartMs[idx];
       if (Number.isNaN(t)) {
@@ -190,6 +225,7 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
       }
       if (t < startMs) {
         excludedBeforeWindow += 1;
+        latestBeforeWindowMs = Math.max(latestBeforeWindowMs, t);
         continue;
       }
       // Bucket index. `bucketDuration` is a float, so a start at exactly `endMs`
@@ -247,18 +283,10 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
       { key: 'info', color: SEVERITY_COLORS.info },
     ];
 
-    return {
-      // Surface alerts excluded from the bars (started before the window, or
-      // with an unknown start time — see the counting pass above) as a small
-      // subtitle instead of silently dropping them. Omitted when there's none.
-      title: noteText
-        ? {
-            left: 'center' as const,
-            top: 0,
-            text: noteText,
-            textStyle: { fontSize: 10, fontWeight: 'normal' as const, color: '#98A2B3' },
-          }
-        : undefined,
+    const spec = {
+      // Alerts excluded from the bars (started before the window, or with an
+      // unknown start time — see the counting pass above) are explained by a
+      // note above the chart (rendered below), not a title floating mid-chart.
       tooltip: {
         trigger: 'axis' as const,
         axisPointer: { type: 'shadow' as const },
@@ -271,10 +299,9 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
       // The legend lives in the panel header row (AlertTimelineLegend), not
       // under the x-axis, so the chart draws none of its own.
       legend: { show: false },
-      // Reserve extra headroom for the reconciliation subtitle when present.
       // `left: 50` (was 44) gives the rotated y-axis name + 3-digit count tick
       // labels room so they don't clip the chart's left edge.
-      grid: { top: noteText ? 24 : 10, right: 15, bottom: 20, left: 50 },
+      grid: { top: 10, right: 15, bottom: 20, left: 50 },
       xAxis: {
         type: 'category' as const,
         data: timeLabels,
@@ -304,6 +331,16 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
         barMaxWidth: 32,
       })),
     };
+    return {
+      spec,
+      noteText,
+      unknownStart,
+      excludedBeforeWindow,
+      // Widening to the last 30 days (ending at `endMs`) helps only if the
+      // range is shorter and some pre-window alert started inside those days.
+      canShowLast30Days:
+        rangeMs < LAST_30_DAYS_MS && latestBeforeWindowMs >= endMs - LAST_30_DAYS_MS,
+    };
   }, [alerts, startMs, endMs]);
 
   if (alerts.length === 0)
@@ -316,5 +353,64 @@ export const AlertTimeline: React.FC<AlertTimelineProps> = ({ alerts, startMs, e
       </EuiText>
     );
 
-  return <EchartsRender spec={spec!} height={160} />;
+  if (!timeline) return null;
+  const { spec, noteText, unknownStart, excludedBeforeWindow, canShowLast30Days } = timeline;
+
+  // No alert started in the window, only earlier ones that overlap it: a
+  // one-line empty state instead of empty axes, with a way to widen the range.
+  if (inWindow === 0) {
+    return (
+      <EuiText
+        size="s"
+        color="subdued"
+        textAlign="center"
+        className="altTimelineEmpty"
+        data-test-subj="alertTimelineEmpty"
+      >
+        <p>
+          <FormattedMessage
+            id="observability.alerting.alertsCharts.noneStartedInWindow"
+            defaultMessage="No alerts started in the selected time range."
+          />{' '}
+          {excludedBeforeWindow > 0 && (
+            <>
+              <FormattedMessage
+                id="observability.alerting.alertsCharts.startedEarlier"
+                defaultMessage="{count, plural, one {# alert} other {# alerts}} started earlier."
+                values={{ count: excludedBeforeWindow }}
+              />{' '}
+            </>
+          )}
+          {unknownStart > 0 && (
+            <>
+              <FormattedMessage
+                id="observability.alerting.alertsCharts.unknownStartSentence"
+                defaultMessage="{count, plural, one {# alert has} other {# alerts have}} an unknown start time."
+                values={{ count: unknownStart }}
+              />{' '}
+            </>
+          )}
+          {onShowLast30Days && canShowLast30Days && (
+            <EuiLink onClick={onShowLast30Days} data-test-subj="alertTimelineExtendRange">
+              <FormattedMessage
+                id="observability.alerting.alertsCharts.showLast30Days"
+                defaultMessage="Show last 30 days"
+              />
+            </EuiLink>
+          )}
+        </p>
+      </EuiText>
+    );
+  }
+
+  return (
+    <>
+      {noteText && (
+        <EuiText size="xs" color="subdued" data-test-subj="alertTimelineNote">
+          <p>{noteText}</p>
+        </EuiText>
+      )}
+      <EchartsRender spec={spec} height={160} />
+    </>
+  );
 };
