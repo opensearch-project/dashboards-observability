@@ -27,7 +27,7 @@ import { loadPersistedSelection, persistSelection } from '../alarms_page_helpers
 
 /**
  * The regions in `stored` that the source offers, de-duplicated, in input order. When none are
- * left, the source's default region (or nothing when it has none).
+ * left, the source's default region (or nothing when it has none or doesn't offer it).
  */
 export function sanitizeCloudWatchRegions(stored: unknown, targets?: CloudWatchTargets): string[] {
   if (!targets) return [];
@@ -39,7 +39,7 @@ export function sanitizeCloudWatchRegions(stored: unknown, targets?: CloudWatchT
     }
   }
   if (out.length > 0) return out;
-  return targets.defaultRegion ? [targets.defaultRegion] : [];
+  return targets.defaultRegion && offered.has(targets.defaultRegion) ? [targets.defaultRegion] : [];
 }
 
 export interface UseCloudWatchRegionsResult {

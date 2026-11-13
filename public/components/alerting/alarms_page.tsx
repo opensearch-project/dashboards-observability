@@ -111,6 +111,10 @@ interface AlarmsPageProps {
   datasourcesLoading: boolean;
   /** True while the CloudWatch datasources are loading (they aren't in `datasources` yet). */
   cloudWatchLoading?: boolean;
+  /** True when the CloudWatch accounts couldn't be read (only the single CloudWatch row is listed). */
+  cloudWatchFailed?: boolean;
+  /** Reads the CloudWatch accounts again after a failure. */
+  onCloudWatchRetry?: () => void;
   /** Datasource names/ids to pre-select on first mount (from uiSettings). */
   defaultDatasources: string[];
   /** Cap on concurrently selected datasources (from uiSettings). */
@@ -271,6 +275,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   datasources,
   datasourcesLoading,
   cloudWatchLoading = false,
+  cloudWatchFailed = false,
+  onCloudWatchRetry,
   defaultDatasources,
   maxDatasources,
   cloudWatchTargets,
@@ -382,6 +388,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     datasources,
     datasourcesLoading,
     cloudWatchLoading,
+    cloudWatchUnavailable: cloudWatchFailed,
     defaultDatasources,
     maxDatasources,
   });
@@ -403,17 +410,22 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const dsId = deepLink.ds;
     if (!dsId) return;
     if (datasourcesLoading) return;
+    // Wait for the CloudWatch accounts too, so the stored ones are restored first and the link
+    // adds to them (a CloudWatch link also needs its row listed). The update reads the latest
+    // selection, which the restore may have just changed.
+    if (cloudWatchLoading) return;
     if (lastAppliedDsSeqRef.current === deepLink.seq) return;
     if (!datasources.some((d) => d.id === dsId)) return;
     lastAppliedDsSeqRef.current = deepLink.seq;
-    if (selectedDsIds.includes(dsId)) return;
-    setSelectedDsIds(clampToDatasourceCap([...selectedDsIds, dsId], maxDatasources));
+    setSelectedDsIds((prev) =>
+      prev.includes(dsId) ? prev : clampToDatasourceCap([...prev, dsId], maxDatasources)
+    );
   }, [
     deepLink.ds,
     deepLink.seq,
     datasources,
     datasourcesLoading,
-    selectedDsIds,
+    cloudWatchLoading,
     setSelectedDsIds,
     maxDatasources,
   ]);
@@ -997,6 +1009,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         loading: true,
       };
     }
+    if (cloudWatchFailed) {
+      return {
+        regions: [],
+        selectedRegions: [],
+        onRegionsChange: handleCloudWatchRegionsChange,
+        onPairCapReached: handleCloudWatchPairCapReached,
+        failed: true,
+        onRetry: onCloudWatchRetry,
+      };
+    }
     return cloudWatchTargets
       ? {
           regions: cloudWatchTargets.regions,
@@ -1007,6 +1029,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       : undefined;
   }, [
     cloudWatchLoading,
+    cloudWatchFailed,
+    onCloudWatchRetry,
     cloudWatchTargets,
     cloudWatchRegions,
     handleCloudWatchRegionsChange,

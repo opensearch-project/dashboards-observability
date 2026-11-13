@@ -39,6 +39,11 @@ describe('sanitizeCloudWatchRegions', () => {
     expect(sanitizeCloudWatchRegions('not an array', targets)).toEqual(['us-east-1']);
     expect(sanitizeCloudWatchRegions([], { ...targets, defaultRegion: undefined })).toEqual([]);
   });
+  it('falls back to nothing when the default region is not offered', () => {
+    expect(sanitizeCloudWatchRegions([], { ...targets, defaultRegion: 'mars-north-1' })).toEqual(
+      []
+    );
+  });
 
   it('is empty without targets', () => {
     expect(sanitizeCloudWatchRegions(['us-east-1'])).toEqual([]);

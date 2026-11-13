@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 const mockGetTargets = jest.fn();
 jest.mock('../../query_services/alerting_opensearch_service', () => ({
   AlertingOpenSearchService: jest.fn().mockImplementation(() => ({
@@ -35,7 +35,12 @@ describe('useCloudWatchTargets', () => {
   it('makes no request while CloudWatch is off', () => {
     (coreRefs as { cloudwatchEnabled?: boolean }).cloudwatchEnabled = false;
     const { result } = renderHook(() => useCloudWatchTargets());
-    expect(result.current).toEqual({ targets: undefined, isLoading: false });
+    expect(result.current).toEqual({
+      targets: undefined,
+      isLoading: false,
+      failed: false,
+      reload: expect.any(Function),
+    });
     expect(mockGetTargets).not.toHaveBeenCalled();
   });
 
@@ -59,6 +64,7 @@ describe('useCloudWatchTargets', () => {
     const { result } = renderHook(() => useCloudWatchTargets());
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.targets).toBeUndefined();
+    expect(result.current.failed).toBe(true);
     expect(warn).toHaveBeenCalledTimes(1);
     expect(JSON.stringify(warn.mock.calls)).toContain('403');
     expect(JSON.stringify(warn.mock.calls)).not.toContain('123456789012');
@@ -74,6 +80,20 @@ describe('useCloudWatchTargets', () => {
     first.unmount();
     const second = renderHook(() => useCloudWatchTargets());
     await waitFor(() => expect(second.result.current.targets).toEqual(targets));
+    expect(mockGetTargets).toHaveBeenCalledTimes(2);
+    warn.mockRestore();
+  });
+  it('reads again on reload() after a failed read', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    mockGetTargets.mockRejectedValueOnce({ response: { status: 504 } });
+    mockGetTargets.mockResolvedValueOnce(targets);
+    const { result } = renderHook(() => useCloudWatchTargets());
+    await waitFor(() => expect(result.current.failed).toBe(true));
+    act(() => result.current.reload());
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.failed).toBe(false);
+    await waitFor(() => expect(result.current.targets).toEqual(targets));
+    expect(result.current.failed).toBe(false);
     expect(mockGetTargets).toHaveBeenCalledTimes(2);
     warn.mockRestore();
   });

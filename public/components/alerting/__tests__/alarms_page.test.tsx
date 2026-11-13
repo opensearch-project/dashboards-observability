@@ -122,6 +122,7 @@ import { AlarmsPage, parseAlarmsHashRoute } from '../alarms_page';
 import type { CloudWatchTargets, Datasource } from '../../../../common/types/alerting';
 import { cloudWatchDatasourcesFor } from '../../../../common/services/alerting/cloudwatch_datasource_id';
 import { coreRefs } from '../../../framework/core_refs';
+import { ALERT_MANAGER_SELECTED_DS_STORAGE_KEY } from '../../../../common/constants/alerting_settings';
 
 const defaultProps = {
   datasources: [] as Datasource[],
@@ -1497,6 +1498,43 @@ describe('AlarmsPage CloudWatch regions', () => {
     refs.cloudwatchEnabled = false;
     await renderPage();
     expect(lastProps(mockDashboard).cloudWatch).toBeUndefined();
+  });
+  it('offers a retry in the CloudWatch group when the accounts could not be read', async () => {
+    const onCloudWatchRetry = jest.fn();
+    await renderPage({ cloudWatchTargets: undefined, cloudWatchFailed: true, onCloudWatchRetry });
+    const cw = lastProps(mockDashboard).cloudWatch;
+    expect(cw).toEqual(expect.objectContaining({ failed: true, regions: [] }));
+    cw.onRetry();
+    expect(onCloudWatchRetry).toHaveBeenCalledTimes(1);
+  });
+  it('applies a datasource link once the CloudWatch accounts have loaded', async () => {
+    window.localStorage.setItem(
+      ALERT_MANAGER_SELECTED_DS_STORAGE_KEY,
+      JSON.stringify(['cloudwatch_us-east-1_scope-b'])
+    );
+    window.history.replaceState(null, '', '#/alerts?ds=os-1');
+    const props = {
+      ...defaultProps,
+      defaultDatasources: [],
+      cloudWatchTargets: targets,
+      cloudWatchRegions: ['us-east-1'],
+      onCloudWatchRegionsChange: jest.fn(),
+    };
+    let rerender: (ui: React.ReactElement) => void = () => {};
+    await act(async () => {
+      ({ rerender } = render(
+        <AlarmsPage {...props} datasources={[osDs]} cloudWatchLoading={true} />
+      ));
+    });
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual([]);
+    await act(async () => {
+      rerender(<AlarmsPage {...props} datasources={datasources} cloudWatchLoading={false} />);
+    });
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual([
+      'cloudwatch_us-east-1_scope-b',
+      'os-1',
+    ]);
+    window.history.replaceState(null, '', '#/');
   });
 
   it('is unchanged without the CloudWatch props', async () => {

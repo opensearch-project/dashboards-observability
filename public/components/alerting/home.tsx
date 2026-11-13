@@ -18,8 +18,12 @@ import { useCloudWatchTargets } from './hooks/use_cloudwatch_targets';
 import { useCloudWatchRegions } from './hooks/use_cloudwatch_regions';
 
 export const AlertingHome = () => {
-  const { targets: cloudWatchTargets, isLoading: cloudWatchTargetsLoading } =
-    useCloudWatchTargets();
+  const {
+    targets: cloudWatchTargets,
+    isLoading: cloudWatchTargetsLoading,
+    failed: cloudWatchFailed,
+    reload: reloadCloudWatchTargets,
+  } = useCloudWatchTargets();
   const { selectedRegions, setSelectedRegions } = useCloudWatchRegions(cloudWatchTargets);
   const {
     datasources,
@@ -61,6 +65,8 @@ export const AlertingHome = () => {
             datasources={datasources}
             datasourcesLoading={datasourcesLoading}
             cloudWatchLoading={cloudWatchLoading}
+            cloudWatchFailed={cloudWatchFailed}
+            onCloudWatchRetry={reloadCloudWatchTargets}
             defaultDatasources={defaultDatasources}
             maxDatasources={maxDatasources}
             cloudWatchTargets={cloudWatchTargets}

@@ -305,4 +305,24 @@ describe('DatasourceFacet', () => {
       'Loading accounts'
     );
   });
+  it('offers a retry in the CloudWatch group when its accounts could not be read', () => {
+    const onRetry = jest.fn();
+    renderFacet({
+      datasources: [os],
+      cloudWatch: {
+        regions: [],
+        selectedRegions: [],
+        onRegionsChange: jest.fn(),
+        onPairCapReached: jest.fn(),
+        failed: true,
+        onRetry,
+      },
+    });
+    const cw = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
+    expect(cw.getByTestId('datasourceFacet-cloudwatch-error')).toHaveTextContent(
+      "Couldn't load accounts"
+    );
+    fireEvent.click(cw.getByTestId('datasourceFacet-cloudwatch-retry'));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
 });

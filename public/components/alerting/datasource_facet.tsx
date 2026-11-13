@@ -161,6 +161,9 @@ export interface DatasourceFacetCloudWatch {
   onPairCapReached: () => void;
   /** True while the CloudWatch accounts load; the group shows a loading state meanwhile. */
   loading?: boolean;
+  /** True when the CloudWatch accounts couldn't be read; the group offers a retry. */
+  failed?: boolean;
+  onRetry?: () => void;
 }
 
 export interface DatasourceFacetProps {
@@ -344,7 +347,8 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
               cloudWatch.regions.length > 1 &&
               cloudWatchChecked;
             const showLoading = type === 'cloudwatch' && !!cloudWatch?.loading && !q;
-            if (ofType.length === 0 && !showRegions && !showLoading) return null;
+            const showFailed = type === 'cloudwatch' && !!cloudWatch?.failed && !q;
+            if (ofType.length === 0 && !showRegions && !showLoading && !showFailed) return null;
             return (
               <div
                 key={type}
@@ -392,6 +396,43 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
                         />
                       </EuiText>
                     </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+                {showFailed && (
+                  <EuiFlexGroup
+                    gutterSize="xs"
+                    alignItems="center"
+                    responsive={false}
+                    style={{ paddingLeft: 4 }}
+                    data-test-subj="datasourceFacet-cloudwatch-error"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type="alert" color="warning" size="s" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        <FormattedMessage
+                          id="observability.alerting.datasourceFacet.cloudWatchError"
+                          defaultMessage="Couldn't load accounts"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                    {cloudWatch?.onRetry && (
+                      <EuiFlexItem grow={false}>
+                        <EuiLink
+                          color="primary"
+                          onClick={cloudWatch.onRetry}
+                          data-test-subj="datasourceFacet-cloudwatch-retry"
+                        >
+                          <EuiText size="xs">
+                            <FormattedMessage
+                              id="observability.alerting.datasourceFacet.cloudWatchRetry"
+                              defaultMessage="Retry"
+                            />
+                          </EuiText>
+                        </EuiLink>
+                      </EuiFlexItem>
+                    )}
                   </EuiFlexGroup>
                 )}
                 {hasOverflow && (
