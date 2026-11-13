@@ -49,6 +49,7 @@ import {
   type CloudWatchBackend,
 } from '../../services/alerting/cloudwatch/cloudwatch_backend';
 import { TimeoutError } from '../../services/alerting/timeout_error';
+import { CloudWatchTargetsUnavailableError } from '../../services/alerting/cloudwatch_targets_unavailable_error';
 import { registerAlertingMutationRoutes } from './mutations';
 import { classifyToHandlerResult } from './classified_error';
 import { toErrorBody, toHandlerResult } from './route_utils';
@@ -985,7 +986,11 @@ export function registerAlertingRoutes(router: IRouter, deps: AlertingRoutesDeps
       throw createNotFoundError('CloudWatch alarms are not enabled for this request');
     }
     const { datasourceService } = buildRequestServices(ctx, request);
-    const ds = await datasourceService.get(dsId);
+    // When the account list can't be read, answer with that read's own error, classified as in
+    // the fan-out (a timeout is retryable), not as an unknown error.
+    const ds = await datasourceService.get(dsId).catch((e: unknown) => {
+      throw e instanceof CloudWatchTargetsUnavailableError ? e.targetsError : e;
+    });
     if (!ds || ds.type !== 'cloudwatch') {
       throw createNotFoundError(`CloudWatch datasource not found: ${dsId}`);
     }

@@ -6,7 +6,7 @@
  * `GET /api/alerting/cloudwatch/targets`: the account scopes and regions the caller may read
  * alarms from. Off → typed 404; on → the source's targets, or one default target synthesized
  * from the configured region; slow (10 s) → classified timeout; failures never echo provider
- * text.
+ * text. The CloudWatch detail routes classify a failed targets read the same way.
  */
 import { registerAlertingRoutes } from '../index';
 import { registerDefaultClassifiers } from '../../../../common/error';
@@ -24,7 +24,10 @@ const mockLogger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: 
 
 type Handler = (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
-function register(deps: { cwBackend?: unknown; cloudWatchRegion?: string }): Handler {
+function register(
+  deps: { cwBackend?: unknown; cloudWatchRegion?: string },
+  path: string = TARGETS_PATH
+): Handler {
   mockRouter.get.mockClear();
   registerAlertingRoutes(mockRouter as never, {
     osBackend: {} as never,
@@ -34,10 +37,8 @@ function register(deps: { cwBackend?: unknown; cloudWatchRegion?: string }): Han
     enableMetadataRoutes: false,
     ...(deps as object),
   });
-  const call = mockRouter.get.mock.calls.find(
-    ([cfg]: [{ path: string }]) => cfg.path === TARGETS_PATH
-  );
-  if (!call) throw new Error(`route not registered: ${TARGETS_PATH}`);
+  const call = mockRouter.get.mock.calls.find(([cfg]: [{ path: string }]) => cfg.path === path);
+  if (!call) throw new Error(`route not registered: ${path}`);
   return call[1] as Handler;
 }
 
@@ -52,8 +53,11 @@ function buildRes() {
 
 /** The classified `errorDetail` of a `customError` response. */
 const detailOf = (err: Record<string, unknown>) =>
-  (err.body as { attributes: { errorDetail: { category: string; retryable: boolean } } }).attributes
-    .errorDetail;
+  (
+    err.body as {
+      attributes: { errorDetail: { category: string; code: string; retryable: boolean } };
+    }
+  ).attributes.errorDetail;
 
 const backendWith = (listTargets: jest.Mock) => async () => ({ listTargets }) as never;
 
@@ -150,5 +154,29 @@ describe('GET /api/alerting/cloudwatch/targets', () => {
     expect(err.statusCode).toBe(403);
     expect(detailOf(err).category).toBe('PERMISSION_DENIED');
     expect(JSON.stringify(err.body)).not.toContain('123456789012');
+  });
+});
+describe('CloudWatch detail routes when the targets read fails', () => {
+  beforeAll(() => registerDefaultClassifiers());
+  const ctx = { core: { savedObjects: { client: { find: jest.fn(), get: jest.fn() } } } };
+  it.each([
+    ['/api/alerting/cloudwatch/{dsId}/alarm', { name: 'cpu-high' }],
+    ['/api/alerting/cloudwatch/{dsId}/alarm/history', { name: 'cpu-high' }],
+  ])('%s classifies a timed-out targets read as a retryable timeout', async (path, query) => {
+    const timeout = Object.assign(new Error('CloudWatch targets timed out'), {
+      name: 'TimeoutError',
+    });
+    const listTargets = jest.fn(async () => Promise.reject(timeout));
+    const handler = register({ cwBackend: backendWith(listTargets) }, path);
+    const res = buildRes();
+    await handler(ctx, { params: { dsId: 'cloudwatch_us-east-1_s1' }, query }, res);
+    expect(res._calls.ok).toBeUndefined();
+    const err = res._calls.customError[0];
+    // Classified like the detail routes' own timeout (was UNKNOWN_ERROR, not retryable).
+    expect(detailOf(err)).toMatchObject({
+      category: 'TIMEOUT',
+      code: 'REQUEST_TIMEOUT',
+      retryable: true,
+    });
   });
 });
