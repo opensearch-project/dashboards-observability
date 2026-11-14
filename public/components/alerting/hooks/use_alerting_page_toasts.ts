@@ -7,48 +7,38 @@
  * Alert Manager page toasts — replaces the page-top and inline callout strip.
  *
  * The AlarmsPage used to render banners (`AlarmsPageCallouts` + two inline
- * `EuiCallOut`s in `AlertsDashboard`) for the following conditions:
+ * `EuiCallOut`s in `AlertsDashboard`). These conditions are surfaced as toasts:
  *   - "Error loading alerts" (Alerts tab hook error)
  *   - "Error loading data"   (Rules tab hook error)
  *   - "Alerting plugin not detected"
- *   - "Some datasources could not be reached"
  *   - "Search incomplete — too many alerts"  (OS post-filter cap)
+ *   - "Not all rules are listed"             (per-datasource rules cap)
  *   - "Showing current alerts only"          (Prom empty-matrix fallback)
  *
- * Each of these is now surfaced as a toast. Because toasts are event-driven
- * (fire once per new occurrence) rather than declarative (visible while the
- * condition holds), this hook diff-tracks the incoming props against a ref
- * and only fires toasts on transitions — this prevents the toast list from
- * growing every render while a datasource is down, or firing a duplicate
+ * Per-datasource connection failures raise no toast: they fire on their own
+ * (on load, refresh and background polls), so they popped up without any
+ * user action. They stay visible next to the datasource in the filter facet,
+ * and when every selected datasource fails, in the tab's empty state.
+ *
+ * Because toasts are event-driven (fire once per new occurrence) rather than
+ * declarative (visible while the condition holds), this hook diff-tracks the
+ * incoming props against a ref and only fires toasts on transitions — this
+ * prevents the toast list from growing every render, or firing a duplicate
  * "plugin not detected" toast on every keystroke elsewhere on the page.
  *
- * Tab gating: the three alerts-derived conditions (alerts fetch error, result
- * truncation, Prometheus legacy-fallback) only fire while the Alerts tab is
- * active, matching the pre-toast behavior where those callouts lived inside
- * `AlertsDashboard` / were gated on `activeTab === 'alerts'`. If the condition
- * is still active when the user switches TO the Alerts tab, the toast fires
- * then (the ref is only advanced once a toast actually fires, so a wrong-tab
- * render does not "consume" the transition). The plugin-missing, rules-fetch
- * error, and per-datasource connection toasts are cross-cutting and fire
- * regardless of tab.
- *
- * The datasource-connection failures are ALSO surfaced next to the affected
- * datasource in the filter facet (via `FacetFilterGroup`'s `errorMap` prop).
- * Firing a toast in addition to the indicator is intentional: the filter
- * panel can be collapsed or scrolled off, and users need to know something
- * changed. The toast is a one-shot notification; the indicator is the
- * persistent home for the details.
+ * Tab gating: the alerts-derived conditions (alerts fetch error, result
+ * truncation, Prometheus legacy-fallback) only fire while the Alerts tab is active, matching the
+ * pre-toast behavior where those callouts lived inside `AlertsDashboard` /
+ * were gated on `activeTab === 'alerts'`. If the condition is still active
+ * when the user switches TO the Alerts tab, the toast fires then (the ref is
+ * only advanced once a toast actually fires, so a wrong-tab render does not
+ * "consume" the transition). The plugin-missing and rules-fetch error toasts
+ * are cross-cutting and fire regardless of tab.
  */
 import { useEffect, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import type { DatasourceFetchFallback } from '../../../../common/types/alerting';
 import { useToast } from '../../common/toast';
-
-export interface DatasourceIssue {
-  datasourceId: string;
-  datasourceName: string;
-  error: string;
-}
 
 export interface FallbackHint {
   datasourceName: string;
@@ -64,32 +54,17 @@ export interface UseAlertingPageToastsParams {
   rulesErrorMessage: string | null;
   /** True when every selected OS datasource failed the alerting-plugin probe. */
   alertingPluginMissing: boolean;
-  /** Loading flag from the probe — suppresses the plugin-missing toast during the probe. */
+  /**
+   * True while the probe (or the page's first data load) is still running: the plugin-missing
+   * toast waits, and its last state is kept, so a refresh doesn't fire it again.
+   */
   alertingProbeLoading: boolean;
-  /** Per-datasource fetch failures (already merged from alerts + rules paths). */
-  datasourceIssues: DatasourceIssue[];
   /** True when a backend reported a hard cap on returned alerts. */
   alertsTruncated: boolean;
   /** Datasources whose rule listing was capped (e.g. a large CloudWatch account). */
   rulesTruncatedDatasources?: string[];
   /** Per-datasource legacy-fallback hints (Prom empty-matrix → active-only /alerts). */
   fallbackHints: FallbackHint[];
-}
-
-/**
- * Build a stable key for the datasource-issues set so we only toast when the
- * set changes (new datasource fails, existing one recovers, or the error text
- * changes). Keyed by datasource NAME rather than id: the id is derived as
- * `ds?.id ?? name` at the call site and therefore flips from name→id the
- * moment the datasource list hydrates. Keying on the always-present name keeps
- * the key stable across that hydration and avoids a spurious second toast for
- * the same failure. Sorted to be order-agnostic.
- */
-function datasourceIssuesKey(issues: DatasourceIssue[]): string {
-  return issues
-    .map((i) => `${i.datasourceName}|${i.error}`)
-    .sort()
-    .join('||');
 }
 
 function fallbackHintsKey(hints: FallbackHint[]): string {
@@ -105,7 +80,6 @@ export function useAlertingPageToasts({
   rulesErrorMessage,
   alertingPluginMissing,
   alertingProbeLoading,
-  datasourceIssues,
   alertsTruncated,
   rulesTruncatedDatasources = [],
   fallbackHints,
@@ -120,7 +94,6 @@ export function useAlertingPageToasts({
   const lastAlertsErrorRef = useRef<string | null>(null);
   const lastRulesErrorRef = useRef<string | null>(null);
   const lastPluginMissingRef = useRef<boolean>(false);
-  const lastDsIssuesKeyRef = useRef<string>('');
   const lastTruncatedRef = useRef<boolean>(false);
   const lastRulesTruncatedKeyRef = useRef<string>('');
   const lastFallbackKeyRef = useRef<string>('');
@@ -159,10 +132,11 @@ export function useAlertingPageToasts({
     lastRulesErrorRef.current = rulesErrorMessage;
   }, [rulesErrorMessage, setToast]);
 
-  // Alerting plugin not detected (suppress while the probe is still running).
-  // Cross-cutting: the old callout rendered above the tab bar.
+  // Alerting plugin not detected (wait while the probe or first load is still running, keeping
+  // the last state). Cross-cutting: the old callout rendered above the tab bar.
   useEffect(() => {
-    const active = alertingPluginMissing && !alertingProbeLoading;
+    if (alertingProbeLoading) return;
+    const active = alertingPluginMissing;
     if (active && !lastPluginMissingRef.current) {
       setToast(
         i18n.translate('observability.alerting.alarmsPage.toast.alertingPluginMissing.title', {
@@ -177,36 +151,6 @@ export function useAlertingPageToasts({
     }
     lastPluginMissingRef.current = active;
   }, [alertingPluginMissing, alertingProbeLoading, setToast]);
-
-  // Datasource-connection issues. Fire a single toast per transition; the
-  // persistent home for the details is the filter facet's error indicator.
-  // Cross-cutting — both tabs carry the datasource facet + its indicator.
-  useEffect(() => {
-    const key = datasourceIssuesKey(datasourceIssues);
-    if (key && key !== lastDsIssuesKeyRef.current) {
-      const names = datasourceIssues.map((i) => i.datasourceName);
-      const title =
-        names.length === 1
-          ? i18n.translate('observability.alerting.alarmsPage.toast.datasourceUnreachable.single', {
-              defaultMessage: 'Could not connect to {datasourceName}',
-              values: { datasourceName: names[0] },
-            })
-          : i18n.translate('observability.alerting.alarmsPage.toast.datasourceUnreachable.multi', {
-              defaultMessage: '{count} datasources could not be reached',
-              values: { count: names.length },
-            });
-      const body =
-        names.length === 1
-          ? datasourceIssues[0].error
-          : i18n.translate('observability.alerting.alarmsPage.toast.datasourceUnreachable.body', {
-              defaultMessage:
-                'Affected: {names}. See the error indicator next to each datasource in the filter panel for details.',
-              values: { names: names.join(', ') },
-            });
-      setToast(title, 'warning', body);
-    }
-    lastDsIssuesKeyRef.current = key;
-  }, [datasourceIssues, setToast]);
 
   // Alerts result truncated (OS post-filter 1000-alert cap) — alerts-tab only.
   useEffect(() => {

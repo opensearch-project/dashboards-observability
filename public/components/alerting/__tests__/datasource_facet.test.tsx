@@ -277,14 +277,21 @@ describe('DatasourceFacet', () => {
   it("joins a CloudWatch account's region errors", () => {
     renderFacet({
       errorMap: {
-        'CloudWatch · Prod account · us-east-1': 'AccessDenied',
+        'CloudWatch · Prod account · us-east-1': 'Throttled',
         'CloudWatch · Prod account · us-west-2': 'Timed out',
       },
     });
     fireEvent.click(screen.getByTestId('facetGroup-datasource-error-Prod account'));
     const popover = screen.getByTestId('facetGroup-datasource-error-Prod account-popover');
     expect(popover.textContent).toContain('us-west-2: Timed out');
-    expect(popover.textContent).toContain('us-east-1: AccessDenied');
+    expect(popover.textContent).toContain('us-east-1: Throttled');
+  });
+  it('keeps the error indicator for an OpenSearch datasource', () => {
+    renderFacet({ errorMap: { 'Local Cluster': 'Could not connect. ENOTFOUND' } });
+    fireEvent.click(screen.getByTestId('facetGroup-datasource-error-Local Cluster'));
+    expect(
+      screen.getByTestId('facetGroup-datasource-error-Local Cluster-popover').textContent
+    ).toContain('ENOTFOUND');
   });
   describe('per-group limit', () => {
     const many: Datasource[] = Array.from({ length: 8 }, (_, i) => ({

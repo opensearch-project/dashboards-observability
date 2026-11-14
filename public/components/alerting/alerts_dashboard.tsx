@@ -64,6 +64,10 @@ import { ALERT_KIND_HEX, getStateHex } from './alert_colors';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
 import { useCloudWatchIconType } from './cloudwatch_icon';
 import { TabRowActions } from './tab_row_actions';
+import {
+  UnreachableDatasource,
+  UnreachableDatasourcesPrompt,
+} from './unreachable_datasources_prompt';
 import './alerting.scss';
 
 // ============================================================================
@@ -753,11 +757,17 @@ export interface AlertsDashboardProps {
    * Per-datasource error text, keyed by datasource NAME (the label key used
    * by the datasource facet). Rendered as an error icon next to the
    * affected row in the filter panel; click opens a popover with details.
-   * Truncation / fallback hints and connection failures are ALSO surfaced
-   * by page-level toasts — this indicator is the persistent home for the
-   * details.
+   * CloudWatch account rows show it only when every region failed with an
+   * error other than a permission error; a failure to list the accounts
+   * shows in the facet's own retry state.
    */
   datasourceErrorMap?: Record<string, string>;
+  /**
+   * Set when every selected datasource failed: the chart area shows
+   * "Couldn't reach the selected datasources" with these errors in place of
+   * the onboarding empty state.
+   */
+  unreachableDatasources?: UnreachableDatasource[];
   /** CloudWatch regions for the Datasource facet's CloudWatch group; omitted without targets. */
   cloudWatch?: DatasourceFacetCloudWatch;
   /**
@@ -796,6 +806,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   onTimeChange,
   onRefresh,
   datasourceErrorMap,
+  unreachableDatasources = [],
   cloudWatch,
   initialSearchQuery,
   initialSearchQueryKey,
@@ -1272,6 +1283,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
   // Chart-area empty state mode. Cascade:
   //   'no-ds'    — user hasn't selected any datasource
+  //   'unreachable' — every selected datasource failed
   //   'no-rules' — DS selected, but no rules exist across them
   //   'no-alerts' — rules exist, but none fired in the current time range
   //   null — render the timeline
@@ -1310,14 +1322,16 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     }
   }, [pickerEnd, endMs, onTimeChange]);
 
-  const emptyMode: 'no-ds' | 'no-rules' | 'no-alerts' | null = !loading
+  const emptyMode: 'no-ds' | 'unreachable' | 'no-rules' | 'no-alerts' | null = !loading
     ? selectedDsIds.length === 0
       ? 'no-ds'
-      : rulesTotal === 0
-        ? 'no-rules'
-        : alerts.length === 0
-          ? 'no-alerts'
-          : null
+      : unreachableDatasources.length > 0 && alerts.length === 0
+        ? 'unreachable'
+        : rulesTotal === 0
+          ? 'no-rules'
+          : alerts.length === 0
+            ? 'no-alerts'
+            : null
     : null;
 
   const emptyTableMessage =
@@ -1329,14 +1343,18 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         ? i18n.translate('observability.alerting.alertsDashboard.noDatasourceTableMessage', {
             defaultMessage: 'Select a datasource to view alerts and detected anomalies.',
           })
-        : emptyMode === 'no-rules'
-          ? i18n.translate('observability.alerting.alertsDashboard.noRulesTableMessage', {
-              defaultMessage:
-                'Create a rule to get started. Triggered alerts and detected anomalies will appear here.',
+        : emptyMode === 'unreachable'
+          ? i18n.translate('observability.alerting.alertsDashboard.unreachableTableMessage', {
+              defaultMessage: "Couldn't reach the selected datasources.",
             })
-          : i18n.translate('observability.alerting.alertsDashboard.noAlertsTableMessage', {
-              defaultMessage: 'No alerts or anomalies were detected in the selected time range.',
-            });
+          : emptyMode === 'no-rules'
+            ? i18n.translate('observability.alerting.alertsDashboard.noRulesTableMessage', {
+                defaultMessage:
+                  'Create a rule to get started. Triggered alerts and detected anomalies will appear here.',
+              })
+            : i18n.translate('observability.alerting.alertsDashboard.noAlertsTableMessage', {
+                defaultMessage: 'No alerts or anomalies were detected in the selected time range.',
+              });
 
   // Discover-style layout: the container fits the viewport (the page itself
   // doesn't scroll); the timeline keeps its height and the alerts table fills
@@ -1620,7 +1638,9 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                         </TabRowActions>
                       </EuiFlexGroup>
                       <EuiSpacer size="s" />
-                      {emptyMode === 'no-ds' || emptyMode === 'no-rules' ? (
+                      {emptyMode === 'unreachable' ? (
+                        <UnreachableDatasourcesPrompt datasources={unreachableDatasources} />
+                      ) : emptyMode === 'no-ds' || emptyMode === 'no-rules' ? (
                         <UnifiedSignalsEmptyState
                           mode={emptyMode}
                           datasources={datasources}

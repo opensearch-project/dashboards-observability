@@ -9,8 +9,6 @@
  * contract directly:
  *   - a sustained condition across many re-renders toasts exactly once
  *   - recover → recur re-fires
- *   - datasource-issue set keyed by name is stable across re-renders (and
- *     across the id-hydration the call site performs)
  *   - alerts-derived toasts are gated to the Alerts tab and fire on the
  *     later tab switch, while cross-cutting toasts fire on any tab
  */
@@ -29,7 +27,6 @@ const base: UseAlertingPageToastsParams = {
   rulesErrorMessage: null,
   alertingPluginMissing: false,
   alertingProbeLoading: false,
-  datasourceIssues: [],
   alertsTruncated: false,
   fallbackHints: [],
 };
@@ -39,7 +36,6 @@ const base: UseAlertingPageToastsParams = {
 // duplicate toasts.
 const props = (over: Partial<UseAlertingPageToastsParams>): UseAlertingPageToastsParams => ({
   ...base,
-  datasourceIssues: [],
   fallbackHints: [],
   ...over,
 });
@@ -69,41 +65,19 @@ describe('useAlertingPageToasts — transition dedup', () => {
     expect(mockSetToast.mock.calls.filter((c) => c[0] === 'Error loading alerts')).toHaveLength(2);
   });
 
-  it('does not re-toast a datasource issue whose (name,error) is unchanged', () => {
-    const issue = { datasourceId: 'ds-1', datasourceName: 'Local', error: 'ENOTFOUND opensearch' };
+  it('holds the plugin-missing toast while loading and does not re-fire it after a refresh', () => {
     const { rerender } = renderHook((p: UseAlertingPageToastsParams) => useAlertingPageToasts(p), {
-      initialProps: props({ datasourceIssues: [{ ...issue }] }),
+      initialProps: props({ alertingPluginMissing: true, alertingProbeLoading: true }),
     });
-    // New array + new object, same content — must NOT re-fire.
-    rerender(props({ datasourceIssues: [{ ...issue }] }));
-
-    const dsCalls = mockSetToast.mock.calls.filter(
-      (c) => typeof c[0] === 'string' && c[0].startsWith('Could not connect to')
-    );
-    expect(dsCalls).toHaveLength(1);
-    expect(dsCalls[0]).toEqual(['Could not connect to Local', 'warning', 'ENOTFOUND opensearch']);
-  });
-
-  it('keeps the datasource key stable when the id hydrates from name to real id', () => {
-    // Call site derives `id = ds?.id ?? name`, so before hydration the issue
-    // carries datasourceId === datasourceName, and after it carries the real
-    // id. The dedup key is name-based, so this must NOT produce a second toast.
-    const { rerender } = renderHook((p: UseAlertingPageToastsParams) => useAlertingPageToasts(p), {
-      initialProps: props({
-        datasourceIssues: [{ datasourceId: 'Local', datasourceName: 'Local', error: 'down' }],
-      }),
-    });
-    rerender(
-      props({
-        datasourceIssues: [{ datasourceId: 'uuid-1', datasourceName: 'Local', error: 'down' }],
-      })
-    );
-
-    expect(
-      mockSetToast.mock.calls.filter(
-        (c) => typeof c[0] === 'string' && c[0].startsWith('Could not connect to')
-      )
-    ).toHaveLength(1);
+    const pluginCalls = () =>
+      mockSetToast.mock.calls.filter((c) => c[0] === 'Alerting plugin not detected');
+    expect(pluginCalls()).toHaveLength(0);
+    rerender(props({ alertingPluginMissing: true }));
+    expect(pluginCalls()).toHaveLength(1);
+    // A refresh: loading again, then settled with the same state.
+    rerender(props({ alertingPluginMissing: true, alertingProbeLoading: true }));
+    rerender(props({ alertingPluginMissing: true }));
+    expect(pluginCalls()).toHaveLength(1);
   });
 });
 

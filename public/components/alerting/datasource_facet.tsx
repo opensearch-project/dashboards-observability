@@ -159,7 +159,11 @@ export function toggleDatasourceEntry(
   return limitDatasourceSelection(selectedDsIds, [...selectedDsIds, ...additions], maxDatasources);
 }
 
-/** The entry's error text: per region for a CloudWatch account (`<region>: <error>` lines). */
+/**
+ * The entry's error text: per region for a CloudWatch account (`<region>: <error>` lines). The
+ * page leaves a CloudWatch account out of the map unless every selected region of it failed with
+ * an error other than a permission error.
+ */
 function entryError(
   entry: DatasourceFacetEntry,
   errorMap?: Record<string, string>
