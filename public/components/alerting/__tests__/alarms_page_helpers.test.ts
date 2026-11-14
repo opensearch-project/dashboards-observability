@@ -4,7 +4,6 @@
  */
 
 import {
-  countCloudWatchItemsByRegion,
   ALERT_MANAGER_END_TIME_KEY,
   ALERT_MANAGER_START_TIME_KEY,
   DEFAULT_END_TIME,
@@ -292,35 +291,6 @@ describe('alarms_page_helpers', () => {
   });
 });
 
-describe('countCloudWatchItemsByRegion', () => {
-  const targets: CloudWatchTargets = {
-    regions: [
-      { id: 'us-east-1', name: 'us-east-1' },
-      { id: 'eu-west-1', name: 'eu-west-1' },
-    ],
-    defaultRegion: 'us-east-1',
-    scopes: [
-      { label: 'CloudWatch', relation: 'own' },
-      { id: 'b', label: 'Shared', relation: 'other' },
-    ],
-  };
-  it('counts CloudWatch items per region and leaves other items out', () => {
-    const datasources: Datasource[] = [
-      { id: 'os-1', name: 'Local', type: 'opensearch', url: '', enabled: true },
-      { id: 'cloudwatch', name: 'CloudWatch', type: 'cloudwatch', url: '', enabled: true },
-      ...cloudWatchDatasourcesFor(targets, ['us-east-1', 'eu-west-1']).filter(
-        (d) => d.id !== 'cloudwatch'
-      ),
-    ];
-    const items = ['os-1', 'cloudwatch', 'cloudwatch_eu-west-1', 'cloudwatch_eu-west-1_b'].map(
-      (datasourceId) => ({ datasourceId })
-    );
-    expect(countCloudWatchItemsByRegion(items, datasources, targets)).toEqual({
-      'us-east-1': 1,
-      'eu-west-1': 2,
-    });
-  });
-});
 describe('rangeCoveringActiveAlerts', () => {
   const DAY = 24 * 60 * 60 * 1000;
   const now = Date.UTC(2026, 9, 22, 12);

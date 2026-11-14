@@ -86,7 +86,6 @@ import { isAdResourceRunning, isDetectorRule, isForecasterRule } from './shared_
 import './alerting.scss';
 import type { OpenSearchFormState } from './create_monitor/create_monitor_types';
 import {
-  countCloudWatchItemsByRegion,
   extractPplValidationError,
   extractServerErrorMessage,
   extractServerErrorStatus,
@@ -1023,7 +1022,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return cloudWatchTargets
       ? {
           regions: cloudWatchTargets.regions,
-          defaultRegion: cloudWatchTargets.defaultRegion,
           selectedRegions: cloudWatchRegions ?? [],
           onRegionsChange: handleCloudWatchRegionsChange,
           onPairCapReached: handleCloudWatchPairCapReached,
@@ -1039,31 +1037,6 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     handleCloudWatchPairCapReached,
   ]);
 
-  // Each tab's facet shows its own item count per CloudWatch region.
-  const alertsCloudWatchFacet = useMemo(
-    () =>
-      cloudWatchFacet && cloudWatchFacet.regions.length > 1
-        ? {
-            ...cloudWatchFacet,
-            regionCounts: countCloudWatchItemsByRegion(alerts, datasources, cloudWatchTargets),
-          }
-        : cloudWatchFacet,
-    [cloudWatchFacet, alerts, datasources, cloudWatchTargets]
-  );
-  const rulesCloudWatchFacet = useMemo(
-    () =>
-      cloudWatchFacet && cloudWatchFacet.regions.length > 1
-        ? {
-            ...cloudWatchFacet,
-            regionCounts: countCloudWatchItemsByRegion(
-              visibleRules,
-              datasources,
-              cloudWatchTargets
-            ),
-          }
-        : cloudWatchFacet,
-    [cloudWatchFacet, visibleRules, datasources, cloudWatchTargets]
-  );
   // ---- Handlers ----
 
   const handleAcknowledgeAlert = async (alertId: string) => {
@@ -1971,7 +1944,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             onRefresh={handleRefreshTime}
             datasourceErrorMap={datasourceErrorMapByName}
             unreachableDatasources={unreachableSelection}
-            cloudWatch={alertsCloudWatchFacet}
+            cloudWatch={cloudWatchFacet}
             initialSearchQuery={linkedSearchFor('alerts')}
             initialSearchQueryKey={deepLink.seq}
             onInitialSearchQueryEdited={handleLinkedSearchEdited}
@@ -2013,7 +1986,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           onDatasourceCapReached={handleDatasourceCapReached}
           datasourceErrorMap={datasourceErrorMapByName}
           unreachableDatasources={unreachableSelection}
-          cloudWatch={rulesCloudWatchFacet}
+          cloudWatch={cloudWatchFacet}
           initialSearchQuery={linkedSearchFor('rules')}
           initialSearchQueryKey={deepLink.seq}
           onInitialSearchQueryEdited={handleLinkedSearchEdited}

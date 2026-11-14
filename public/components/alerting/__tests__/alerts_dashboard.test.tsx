@@ -177,9 +177,7 @@ describe('AlertsDashboard', () => {
     const group = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
     expect(group.getByTestId('cloudWatchRegionControl')).toBeInTheDocument();
     expect(group.getByText('Prod account')).toBeInTheDocument();
-    expect(group.getByTestId('cloudWatchRegion-us-east-1')).toBeChecked();
-    expect(group.getByTestId('cloudWatchRegion-eu-west-1')).not.toBeChecked();
-    expect(group.getByText('us-east-1')).toBeInTheDocument();
+    expect(group.getByText('US East (N. Virginia)')).toBeInTheDocument();
   });
 
   it('shows the account and region under the name of a CloudWatch alert', () => {

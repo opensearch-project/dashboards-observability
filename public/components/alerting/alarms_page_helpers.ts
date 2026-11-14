@@ -24,7 +24,7 @@
  *
  * Constants are exported so the page can import them by name.
  */
-import type { CloudWatchTargets, Datasource, UnifiedRule } from '../../../common/types/alerting';
+import type { Datasource, UnifiedRule } from '../../../common/types/alerting';
 import type { MonitorFormState } from './create_monitor';
 
 // =========================================================================
@@ -146,29 +146,6 @@ export function persistTimeRange(
  * directQueryName (stable SQL-plugin connection name for Prom), and
  * mdsId (stable saved-object id for MDS OpenSearch datasources).
  */
-/**
- * Items per CloudWatch region: an item counts toward the region of its CloudWatch datasource
- * (the source's default region when the datasource has none). Other items are left out.
- */
-export function countCloudWatchItemsByRegion(
-  items: Array<{ datasourceId: string }>,
-  datasources: Datasource[],
-  targets?: CloudWatchTargets
-): Record<string, number> {
-  const regionById = new Map<string, string>();
-  for (const ds of datasources) {
-    if (ds.type !== 'cloudwatch') continue;
-    const region = ds.region ?? targets?.defaultRegion;
-    if (region) regionById.set(ds.id, region);
-  }
-  const counts: Record<string, number> = {};
-  for (const item of items) {
-    const region = regionById.get(item.datasourceId);
-    if (region) counts[region] = (counts[region] ?? 0) + 1;
-  }
-  return counts;
-}
-
 export function resolveDatasourceTokens(tokens: string[], datasources: Datasource[]): string[] {
   const lookup = new Map<string, string>();
   const add = (key: string | undefined, id: string) => {

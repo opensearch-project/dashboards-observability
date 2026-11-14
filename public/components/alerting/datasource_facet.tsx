@@ -7,10 +7,8 @@
  * The Datasource facet of the Alerts and Rules tabs, grouped by type (OpenSearch, Prometheus,
  * CloudWatch), each group headed by its type icon. An entry is one source: an OpenSearch
  * cluster, a Prometheus workspace, or a CloudWatch account scope. A CloudWatch account stands
- * for its (account, region) datasources in the selected regions; the group's "Regions" checkboxes
- * (shown once an account is checked) pick those regions for every checked account. When the
- * group has cross-account entries, the accounts sit under "This account" and "Cross-account"
- * sub-headings.
+ * for its (account, region) datasources in the selected regions; the group's "Regions" control
+ * (shown once an account is checked) picks those regions for every checked account.
  *
  * Within each group, checked entries come first and the first
  * `DATASOURCE_FACET_INITIAL_VISIBLE` entries show, with a "+N more" toggle; a search shows every
@@ -184,10 +182,6 @@ function entryError(
 export interface DatasourceFacetCloudWatch {
   /** The regions the source offers. */
   regions: Array<{ id: string; name: string }>;
-  /** The home region: listed first in the Regions section and marked "This region". */
-  defaultRegion?: string;
-  /** Items of the current tab per region id, shown on each region row when given. */
-  regionCounts?: Record<string, number>;
   selectedRegions: string[];
   onRegionsChange: (regions: string[]) => void;
   /** Fires when a change would select too many CloudWatch (account, region) datasources. */
@@ -286,46 +280,6 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
     );
   };
 
-  const renderSubHeading = (text: string, testSubj: string) => (
-    <EuiText
-      size="xs"
-      color="subdued"
-      style={{ marginTop: 2, marginBottom: 2 }}
-      data-test-subj={testSubj}
-    >
-      <span>{text}</span>
-    </EuiText>
-  );
-  // The CloudWatch accounts, under "This account" (the caller's own scope) and "Cross-account"
-  // (connection scopes) once any cross-account entry shows; a section without entries is left out.
-  const renderCloudWatchAccounts = (shown: DatasourceFacetEntry[]) => {
-    const isOwn = (e: DatasourceFacetEntry) => e.datasources[0]?.cloudWatchScope === undefined;
-    const own = shown.filter(isOwn);
-    const cross = shown.filter((e) => !isOwn(e));
-    if (cross.length === 0) return <div style={{ paddingLeft: 4 }}>{own.map(renderEntry)}</div>;
-    return (
-      <div style={{ paddingLeft: 4 }}>
-        {own.length > 0 && (
-          <>
-            {renderSubHeading(
-              i18n.translate('observability.alerting.cloudwatch.accountsSection.own', {
-                defaultMessage: 'This account',
-              }),
-              'datasourceFacet-cloudwatch-ownHeading'
-            )}
-            <div style={{ paddingLeft: 8 }}>{own.map(renderEntry)}</div>
-          </>
-        )}
-        {renderSubHeading(
-          i18n.translate('observability.alerting.cloudwatch.accountsSection.crossAccount', {
-            defaultMessage: 'Cross-account',
-          }),
-          'datasourceFacet-cloudwatch-crossHeading'
-        )}
-        <div style={{ paddingLeft: 8 }}>{cross.map(renderEntry)}</div>
-      </div>
-    );
-  };
   return (
     <div style={{ marginBottom: 12 }} data-test-subj={`facetGroup-${FACET_ID}`}>
       <EuiFlexGroup
@@ -449,11 +403,7 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                {type === 'cloudwatch' ? (
-                  renderCloudWatchAccounts(ofType)
-                ) : (
-                  <div style={{ paddingLeft: 4 }}>{ofType.map(renderEntry)}</div>
-                )}
+                <div style={{ paddingLeft: 4 }}>{ofType.map(renderEntry)}</div>
                 {showLoading && (
                   <EuiFlexGroup
                     gutterSize="xs"
@@ -548,9 +498,6 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
                       regions={cloudWatch.regions}
                       selected={cloudWatch.selectedRegions}
                       onChange={cloudWatch.onRegionsChange}
-                      defaultRegion={cloudWatch.defaultRegion}
-                      counts={cloudWatch.regionCounts}
-                      initialVisible={DATASOURCE_FACET_INITIAL_VISIBLE}
                     />
                   </div>
                 )}
