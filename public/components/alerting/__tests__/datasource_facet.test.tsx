@@ -72,6 +72,7 @@ const renderFacet = (props: Partial<DatasourceFacetProps> = {}) => {
       onCapReached={onCapReached}
       cloudWatch={{
         regions: targets.regions,
+        defaultRegion: targets.defaultRegion,
         selectedRegions: regionsSelected,
         onRegionsChange,
         onPairCapReached,
@@ -203,6 +204,7 @@ describe('DatasourceFacet', () => {
         onCapReached={jest.fn()}
         cloudWatch={{
           regions: targets.regions,
+          defaultRegion: targets.defaultRegion,
           selectedRegions: regionsSelected,
           onRegionsChange: jest.fn(),
           onPairCapReached: jest.fn(),
@@ -215,18 +217,31 @@ describe('DatasourceFacet', () => {
     expect(controls).toHaveLength(1);
     const cw = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
     expect(cw.getByText('Regions')).toBeInTheDocument();
-    expect(cw.getByText('US West (Oregon)')).toBeInTheDocument();
-    expect(cw.getByText('US East (N. Virginia)')).toBeInTheDocument();
+    expect(within(controls[0]).queryByRole('combobox')).toBeNull();
+    // One checkbox per offered region, by code; the home region first and marked.
+    expect(
+      within(controls[0])
+        .getAllByRole('checkbox')
+        .map((c) => c.id)
+    ).toEqual([
+      'datasource-cwRegion-us-west-2',
+      'datasource-cwRegion-us-east-1',
+      'datasource-cwRegion-eu-west-1',
+    ]);
+    expect(cw.getByLabelText('us-west-2 · This region')).toBeChecked();
+    expect(cw.getByLabelText('us-east-1')).toBeChecked();
+    expect(cw.getByLabelText('eu-west-1')).not.toBeChecked();
   });
 
-  it('reports a removed region chip, but never an empty region list', () => {
+  it('reports a checked or unchecked region, but never an empty region list', () => {
     const { onRegionsChange } = renderFacet({
       selectedDsIds: ['cloudwatch_us-west-2_prod', 'cloudwatch_us-east-1_prod'],
     });
-    const control = screen.getByTestId('cloudWatchRegionControl');
-    fireEvent.click(
-      within(control).getByLabelText('Remove US East (N. Virginia) from selection in this group')
-    );
+    fireEvent.click(screen.getByLabelText('eu-west-1'));
+    expect(onRegionsChange).toHaveBeenLastCalledWith(['us-west-2', 'us-east-1', 'eu-west-1']);
+    // The parent refused the change (cap or pair limit): the checkbox stays unchecked.
+    expect(screen.getByLabelText('eu-west-1')).not.toBeChecked();
+    fireEvent.click(screen.getByLabelText('us-east-1'));
     expect(onRegionsChange).toHaveBeenLastCalledWith(['us-west-2']);
     onRegionsChange.mockClear();
     const { container } = renderFacet({
@@ -238,11 +253,66 @@ describe('DatasourceFacet', () => {
         onPairCapReached: jest.fn(),
       },
     });
-    const single = within(container).getByTestId('cloudWatchRegionControl');
-    fireEvent.click(
-      within(single).getByLabelText('Remove US West (Oregon) from selection in this group')
-    );
+    fireEvent.click(within(container).getByTestId('cloudWatchRegion-us-west-2'));
     expect(onRegionsChange).not.toHaveBeenCalled();
+  });
+
+  it('marks the home region, shows region counts, and folds a long region list', () => {
+    const regions = [
+      'us-west-2',
+      'us-east-1',
+      'eu-west-1',
+      'ap-south-1',
+      'sa-east-1',
+      'ca-central-1',
+      'eu-north-1',
+    ].map((id) => ({ id, name: id }));
+    renderFacet({
+      selectedDsIds: ['cloudwatch_us-west-2_prod'],
+      cloudWatch: {
+        regions,
+        defaultRegion: 'eu-west-1',
+        regionCounts: { 'eu-west-1': 3, 'us-west-2': 1 },
+        selectedRegions: ['us-west-2', 'eu-north-1'],
+        onRegionsChange: jest.fn(),
+        onPairCapReached: jest.fn(),
+      },
+    });
+    const control = screen.getByTestId('cloudWatchRegionControl');
+    const ids = () =>
+      within(control)
+        .getAllByRole('checkbox')
+        .map((c) => c.id.replace('datasource-cwRegion-', ''));
+    // Home first, then the checked regions, then the rest; five rows until expanded.
+    expect(ids()).toEqual(['eu-west-1', 'us-west-2', 'eu-north-1', 'us-east-1', 'ap-south-1']);
+    expect(within(control).getByLabelText('eu-west-1 · This region')).not.toBeChecked();
+    expect(
+      within(
+        screen
+          .getByTestId('cloudWatchRegion-eu-west-1')
+          .closest('.altFacetCheckboxRow') as HTMLElement
+      ).getByText('(3)')
+    ).toBeInTheDocument();
+    fireEvent.click(within(control).getByText('+2 more'));
+    expect(ids()).toHaveLength(7);
+    fireEvent.click(within(control).getByText('Show less'));
+    expect(ids()).toHaveLength(5);
+  });
+
+  it('splits the CloudWatch accounts under This account and Cross-account', () => {
+    renderFacet();
+    const cw = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
+    expect(cw.getByTestId('datasourceFacet-cloudwatch-ownHeading')).toHaveTextContent(
+      'This account'
+    );
+    expect(cw.getByTestId('datasourceFacet-cloudwatch-crossHeading')).toHaveTextContent(
+      'Cross-account'
+    );
+    expect(cw.getByLabelText('Your AWS permissions')).toBeInTheDocument();
+    expect(cw.getByLabelText('Prod account')).toBeInTheDocument();
+    expect(cw.getByLabelText('Partner (read-only)')).toBeInTheDocument();
+    // No Regions section while no CloudWatch account is checked.
+    expect(screen.queryByTestId('cloudWatchRegionControl')).toBeNull();
   });
 
   it('shows no Regions control with one region, and a single CloudWatch entry without targets', () => {

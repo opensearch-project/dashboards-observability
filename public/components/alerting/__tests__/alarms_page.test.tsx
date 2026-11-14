@@ -1535,7 +1535,12 @@ describe('AlarmsPage CloudWatch regions', () => {
     await renderPage();
     const cw = lastProps(mockDashboard).cloudWatch;
     expect(cw).toEqual(
-      expect.objectContaining({ regions: targets.regions, selectedRegions: ['us-east-1'] })
+      expect.objectContaining({
+        regions: targets.regions,
+        defaultRegion: 'us-east-1',
+        selectedRegions: ['us-east-1'],
+        regionCounts: expect.any(Object),
+      })
     );
     await act(async () => {
       fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
