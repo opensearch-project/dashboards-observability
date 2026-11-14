@@ -28,6 +28,7 @@ const base: UseAlertingPageToastsParams = {
   alertingPluginMissing: false,
   alertingProbeLoading: false,
   alertsTruncated: false,
+  fallbackHints: [],
 };
 
 // Fresh object each render so effect deps churn exactly like the real page,
@@ -35,7 +36,7 @@ const base: UseAlertingPageToastsParams = {
 // duplicate toasts.
 const props = (over: Partial<UseAlertingPageToastsParams>): UseAlertingPageToastsParams => ({
   ...base,
-  rulesTruncatedDatasources: [],
+  fallbackHints: [],
   ...over,
 });
 
@@ -62,6 +63,21 @@ describe('useAlertingPageToasts — transition dedup', () => {
     rerender(props({ alertsErrorMessage: 'boom' })); // recur
 
     expect(mockSetToast.mock.calls.filter((c) => c[0] === 'Error loading alerts')).toHaveLength(2);
+  });
+
+  it('holds the plugin-missing toast while loading and does not re-fire it after a refresh', () => {
+    const { rerender } = renderHook((p: UseAlertingPageToastsParams) => useAlertingPageToasts(p), {
+      initialProps: props({ alertingPluginMissing: true, alertingProbeLoading: true }),
+    });
+    const pluginCalls = () =>
+      mockSetToast.mock.calls.filter((c) => c[0] === 'Alerting plugin not detected');
+    expect(pluginCalls()).toHaveLength(0);
+    rerender(props({ alertingPluginMissing: true }));
+    expect(pluginCalls()).toHaveLength(1);
+    // A refresh: loading again, then settled with the same state.
+    rerender(props({ alertingPluginMissing: true, alertingProbeLoading: true }));
+    rerender(props({ alertingPluginMissing: true }));
+    expect(pluginCalls()).toHaveLength(1);
   });
 });
 

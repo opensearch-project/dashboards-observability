@@ -74,7 +74,10 @@ import {
   ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS,
   ALERT_MANAGER_MAX_DATASOURCES_SETTING,
 } from '../../../common/constants/alerting_settings';
-import { clampToDatasourceCap } from '../../../common/services/alerting/cloudwatch_datasource_id';
+import {
+  clampToDatasourceCap,
+  cloudWatchScopeKeyOf,
+} from '../../../common/services/alerting/cloudwatch_datasource_id';
 import type { DatasourceFacetCloudWatch } from './datasource_facet';
 import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
 import { PPL_MONITOR_NAME_MAX } from '../../../common/services/alerting/validators';
@@ -534,8 +537,18 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       errorDetail: s.errorDetail,
     }));
   }, [alertsData, datasourceDisplayName]);
-  // Backend truncation hint, surfaced as a toast by `useAlertingPageToasts`.
+  // Backend hints surfaced through the dashboard banner props.
   const alertsTruncated = (alertsData?.datasourceStatus || []).some((s) => s.truncated);
+  const alertsFallbackHints = useMemo(
+    () =>
+      (alertsData?.datasourceStatus || [])
+        .filter((s) => s.fallback)
+        .map((s) => ({
+          datasourceName: datasourceDisplayName(s),
+          fallback: s.fallback!,
+        })),
+    [alertsData, datasourceDisplayName]
+  );
   const alertsErrorMessage =
     alertsError instanceof Error ? alertsError.message : alertsError ? String(alertsError) : null;
 
@@ -1930,6 +1943,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             onTimeChange={handleTimeChange}
             onRefresh={handleRefreshTime}
             datasourceErrorMap={datasourceErrorMapByName}
+            unreachableDatasources={unreachableSelection}
             cloudWatch={cloudWatchFacet}
             initialSearchQuery={linkedSearchFor('alerts')}
             initialSearchQueryKey={deepLink.seq}
@@ -1971,6 +1985,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           maxDatasources={maxDatasources}
           onDatasourceCapReached={handleDatasourceCapReached}
           datasourceErrorMap={datasourceErrorMapByName}
+          unreachableDatasources={unreachableSelection}
           cloudWatch={cloudWatchFacet}
           initialSearchQuery={linkedSearchFor('rules')}
           initialSearchQueryKey={deepLink.seq}
@@ -1994,7 +2009,8 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // Deduped by datasource id so a slow DS reporting the same error on both
   // paths doesn't produce a doubled indicator. The FIRST error wins; later
   // duplicates are dropped. The result feeds `datasourceErrorMapByName`, the
-  // facet indicator (keyed by datasource name; CloudWatch rows show none).
+  // facet indicator (keyed by datasource name), and `unreachableSelection`,
+  // the empty state shown when every selected datasource failed.
   const datasourceIssues = useMemo(() => {
     const byId = new Map<
       string,
@@ -2063,9 +2079,10 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return Array.from(byId.values());
   }, [alertsWarnings, rulesWarnings, alertingAvailability, datasources]);
 
-  const datasourceErrorMapByName = useMemo(() => {
-    const m: Record<string, string> = {};
-    for (const issue of datasourceIssues) {
+  // The text shown for one datasource issue, in the facet indicator and the
+  // unreachable empty state.
+  const datasourceIssueText = useCallback(
+    (issue: { error: string; errorDetail?: ClassifiedError }) => {
       // Prefer the structured classification when the server attached one —
       // it names the failure class (e.g. "AWS session expired") and carries
       // remediation + safe diagnostics, which reads far better than the raw
@@ -2073,46 +2090,88 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       // framing for unclassified failures.
       if (issue.errorDetail) {
         const localized = localizeClassified(issue.errorDetail);
-        m[issue.datasourceName] = `${localized.title} — ${classifiedToastText(localized)}`;
-        continue;
+        return `${localized.title} — ${classifiedToastText(localized)}`;
       }
       // Frame the raw error with "Could not connect" language so the
       // indicator popover reads as a complete thought
       // (the raw error alone — e.g. "getaddrinfo ENOTFOUND opensearch" — is
       // opaque without it). The datasource name is already shown as the
       // popover heading, so it is not repeated here.
-      m[issue.datasourceName] = i18n.translate(
-        'observability.alerting.alarmsPage.datasourceErrors.indicatorMessage',
-        {
-          defaultMessage: 'Could not connect. {error}',
-          values: { error: issue.error },
-        }
-      );
+      return i18n.translate('observability.alerting.alarmsPage.datasourceErrors.indicatorMessage', {
+        defaultMessage: 'Could not connect. {error}',
+        values: { error: issue.error },
+      });
+    },
+    []
+  );
+
+  const datasourceErrorMapByName = useMemo(() => {
+    // A CloudWatch account shows the indicator only when every selected region of it failed and
+    // none of the failures is a permission error. Missing read permissions for a scope or region
+    // are expected and stay quiet (the scope just contributes no rows), as does an account where
+    // only some regions fail.
+    const issueIds = new Set(datasourceIssues.map((i) => i.datasourceId));
+    const cloudWatchScopeShown = new Map<string, boolean>();
+    const showCloudWatchScope = (scope: string) => {
+      let shown = cloudWatchScopeShown.get(scope);
+      if (shown === undefined) {
+        const scopeIssues = datasourceIssues.filter(
+          (i) => cloudWatchScopeKeyOf(i.datasourceId) === scope
+        );
+        shown =
+          selectedDsIds
+            .filter((id) => cloudWatchScopeKeyOf(id) === scope)
+            .every((id) => issueIds.has(id)) &&
+          scopeIssues.every((i) => i.errorDetail?.category !== 'PERMISSION_DENIED');
+        cloudWatchScopeShown.set(scope, shown);
+      }
+      return shown;
+    };
+    const m: Record<string, string> = {};
+    for (const issue of datasourceIssues) {
+      const scope = cloudWatchScopeKeyOf(issue.datasourceId);
+      if (scope !== undefined && !showCloudWatchScope(scope)) continue;
+      m[issue.datasourceName] = datasourceIssueText(issue);
     }
     return m;
-  }, [datasourceIssues]);
+  }, [datasourceIssues, datasourceIssueText, selectedDsIds]);
+
+  // Every selected datasource failed: the Alerts and Rules tabs show
+  // "Couldn't reach the selected datasources" with each error, in place of
+  // the onboarding empty state, and the "Alerting plugin not detected" toast
+  // is held back (the unreachable clusters explain the failed probe).
+  const unreachableSelection = useMemo(() => {
+    if (selectedDsIds.length === 0) return [];
+    const byId = new Map(datasourceIssues.map((i) => [i.datasourceId, i]));
+    const issues = selectedDsIds.map((id) => byId.get(id));
+    if (issues.some((i) => !i)) return [];
+    return issues.map((i) => ({ name: i!.datasourceName, error: datasourceIssueText(i!) }));
+  }, [selectedDsIds, datasourceIssues, datasourceIssueText]);
 
   // Fire toasts on transitions for the fetch errors, the missing alerting
-  // plugin and result truncation. Per-datasource connection failures and the
-  // Prometheus legacy fallback raise no toast. See the hook for the
+  // plugin, result truncation and the Prometheus legacy fallback.
+  // Per-datasource connection failures raise no toast. See the hook for the
   // per-condition dedupe strategy.
   useAlertingPageToasts({
     activeTab,
     alertsErrorMessage,
     rulesErrorMessage: error,
-    alertingPluginMissing: alertingAvailability.unavailable,
-    alertingProbeLoading: alertingAvailability.isLoading,
+    alertingPluginMissing: alertingAvailability.unavailable && unreachableSelection.length === 0,
+    // Wait for the data too, so an all-unreachable selection is known before the toast decides.
+    alertingProbeLoading: alertingAvailability.isLoading || alertsLoading || dataLoading,
     alertsTruncated,
     rulesTruncatedDatasources,
+    fallbackHints: alertsFallbackHints,
   });
 
   return (
     <div data-test-subj="alertManagerPage" className="altPageRoot">
       {/* Page-top banner callouts (errors, alerting-plugin missing, alerts     */}
-      {/* truncation) have been migrated to toasts — see                        */}
-      {/* `useAlertingPageToasts`. Per-DS connection errors are shown only next */}
-      {/* to the affected OpenSearch / Prometheus row in the datasource facet  */}
-      {/* via `datasourceErrorMapByName`.                                       */}
+      {/* truncation, Prom legacy fallback) have been migrated to toasts — see  */}
+      {/* `useAlertingPageToasts`. Per-DS connection errors are shown next to   */}
+      {/* the affected row in the datasource facet via                          */}
+      {/* `datasourceErrorMapByName`, and in the empty state when every         */}
+      {/* selected datasource failed (`unreachableSelection`).                  */}
       {/* The active tab's page-level controls (portaled in through
           `TabRowActions`) sit on the page title row, on the right, like "APM
           Settings" on the APM pages. Without the header controls (new

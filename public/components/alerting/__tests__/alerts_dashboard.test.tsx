@@ -417,6 +417,20 @@ describe('AlertsDashboard', () => {
     expect(getByText('Go to Rules')).toBeInTheDocument();
   });
 
+  it('names each failed datasource in place of the onboarding state when all selected failed', () => {
+    const { getByText, getByTestId, queryByTestId } = render(
+      <AlertsDashboard
+        {...baseProps}
+        rulesTotal={0}
+        unreachableDatasources={[{ name: 'Local', error: 'Could not connect. ENOTFOUND' }]}
+      />
+    );
+    expect(getByText("Couldn't reach the selected datasources")).toBeInTheDocument();
+    expect(getByTestId('alertingUnreachableDatasources').textContent).toContain(
+      'Local: Could not connect. ENOTFOUND'
+    );
+    expect(queryByTestId('alertsUnifiedSignalsEmptyState')).toBeNull();
+  });
   it('shows the severity legend in the timeline header only while the chart is shown', () => {
     const { container, rerender } = render(
       <AlertsDashboard {...baseProps} alerts={[sampleAlert]} />

@@ -604,7 +604,84 @@ describe('AlarmsPage', () => {
     expect(toastText).not.toContain('could not be reached');
     expect(toastText).not.toContain('Could not connect');
   });
-  it('raises no "Showing current alerts only" toast when a datasource reports a legacy-fallback', async () => {
+
+  describe('every selected datasource unreachable', () => {
+    const lastProps = (mock: jest.Mock) => mock.mock.calls[mock.mock.calls.length - 1][0];
+    const osDatasources = ['ds-1', 'ds-2'].map((id) => ({
+      id,
+      name: `cluster-${id}`,
+      type: 'opensearch',
+      url: '',
+      enabled: true,
+    })) as Datasource[];
+    const failedStatus = (dsIds: string[]) => ({
+      ...emptyHookResult,
+      data: {
+        results: [],
+        datasourceStatus: dsIds.map((dsId) => ({
+          datasourceId: dsId,
+          datasourceName: `cluster-${dsId}`,
+          datasourceType: 'opensearch',
+          status: 'error',
+          data: [],
+          durationMs: 0,
+          error: 'ENOTFOUND',
+        })),
+        totalDatasources: dsIds.length,
+        completedDatasources: 0,
+        fetchedAt: '2026-01-01T00:00:00Z',
+      },
+    });
+    const refs = coreRefs as unknown as { http?: { get: jest.Mock } };
+    let savedHttp: unknown;
+    beforeEach(() => {
+      savedHttp = refs.http;
+      // Every alerting probe fails, as it does when the clusters can't be reached.
+      refs.http = { ...(refs.http || {}), get: jest.fn().mockRejectedValue(new Error('down')) };
+    });
+    afterEach(() => {
+      refs.http = savedHttp as { get: jest.Mock };
+    });
+
+    it('passes each failed datasource to both tabs and holds back the plugin-missing toast', async () => {
+      mockUseAlerts.mockReturnValue(failedStatus(['ds-1', 'ds-2']));
+      await act(async () => {
+        render(
+          <AlarmsPage
+            {...defaultProps}
+            datasources={osDatasources}
+            defaultDatasources={['ds-1', 'ds-2']}
+          />
+        );
+      });
+      const unreachable = lastProps(mockDashboard).unreachableDatasources;
+      expect(unreachable.map((u: { name: string }) => u.name)).toEqual([
+        'cluster-ds-1',
+        'cluster-ds-2',
+      ]);
+      expect(unreachable[0].error).toContain('ENOTFOUND');
+      expect(JSON.stringify(mockSetToast.mock.calls)).not.toContain('Alerting plugin not detected');
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+      });
+      expect(lastProps(mockMonitorsTable).unreachableDatasources).toHaveLength(2);
+    });
+
+    it('passes none when one selected datasource answered', async () => {
+      mockUseAlerts.mockReturnValue(failedStatus(['ds-1']));
+      await act(async () => {
+        render(
+          <AlarmsPage
+            {...defaultProps}
+            datasources={osDatasources}
+            defaultDatasources={['ds-1', 'ds-2']}
+          />
+        );
+      });
+      expect(lastProps(mockDashboard).unreachableDatasources).toEqual([]);
+    });
+  });
+  it('fires a "Showing current alerts only" toast when a datasource reports a legacy-fallback', async () => {
     mockUseAlerts.mockReturnValue({
       ...emptyHookResult,
       data: {
@@ -637,7 +714,12 @@ describe('AlarmsPage', () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} />);
     });
-    expect(JSON.stringify(mockSetToast.mock.calls)).not.toContain('Showing current alerts only');
+    const fallbackToast = mockSetToast.mock.calls.find(
+      (c) => typeof c[0] === 'string' && c[0].includes('Showing current alerts only')
+    );
+    expect(fallbackToast).toBeDefined();
+    expect(fallbackToast![1]).toBe('warning');
+    expect(String(fallbackToast![2])).toContain('prom-prod');
   });
 
   it('passes selectedDsIds, startTime, endTime, refreshToken together to useAlerts', async () => {
@@ -1582,6 +1664,70 @@ describe('AlarmsPage CloudWatch regions', () => {
     });
     expect(lastProps(mockDashboard).cloudWatch).toBeUndefined();
     expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1']);
+  });
+
+  describe('CloudWatch account error indicator', () => {
+    const cwStatus = (
+      failures: Array<{ id: string; category?: 'PERMISSION_DENIED' | 'RATE_LIMITED' }>
+    ) => ({
+      ...emptyHookResult,
+      data: {
+        results: [],
+        datasourceStatus: failures.map(({ id, category }) => ({
+          datasourceId: id,
+          datasourceName: id,
+          datasourceType: 'cloudwatch',
+          status: 'error',
+          data: [],
+          durationMs: 0,
+          error: category ?? 'failed',
+          errorDetail: category
+            ? {
+                category,
+                code: category === 'PERMISSION_DENIED' ? 'ACCESS_DENIED' : 'THROTTLED',
+                title: category === 'PERMISSION_DENIED' ? 'Access denied' : 'Throttled',
+                message: 'm',
+                retryable: category !== 'PERMISSION_DENIED',
+              }
+            : undefined,
+        })),
+        totalDatasources: failures.length,
+        completedDatasources: 0,
+        fetchedAt: '2026-01-01T00:00:00Z',
+      },
+    });
+    const ownUsEast = datasources.find(
+      (d) => d.type === 'cloudwatch' && d.id === 'cloudwatch'
+    ) as Datasource;
+    const ownEuWest = datasources.find(
+      (d) => d.type === 'cloudwatch' && d.region === 'eu-west-1' && !d.cloudWatchScope
+    ) as Datasource;
+
+    it('shows it when every selected region failed with a non-permission error', async () => {
+      mockUseAlerts.mockReturnValue(cwStatus([{ id: ownUsEast.id, category: 'RATE_LIMITED' }]));
+      await renderPage();
+      expect(Object.keys(lastProps(mockDashboard).datasourceErrorMap)).toEqual([ownUsEast.name]);
+    });
+
+    it('stays quiet for a permission error', async () => {
+      mockUseAlerts.mockReturnValue(
+        cwStatus([{ id: ownUsEast.id, category: 'PERMISSION_DENIED' }])
+      );
+      await renderPage();
+      expect(lastProps(mockDashboard).datasourceErrorMap).toEqual({});
+    });
+
+    it('stays quiet when only some selected regions failed', async () => {
+      mockUseAlerts.mockReturnValue(cwStatus([{ id: ownUsEast.id, category: 'RATE_LIMITED' }]));
+      await renderPage({
+        defaultDatasources: ['os-1', ownUsEast.id, ownEuWest.id],
+        cloudWatchRegions: ['us-east-1', 'eu-west-1'],
+      });
+      expect(lastProps(mockDashboard).selectedDsIds).toEqual(
+        expect.arrayContaining([ownUsEast.id, ownEuWest.id])
+      );
+      expect(lastProps(mockDashboard).datasourceErrorMap).toEqual({});
+    });
   });
 });
 describe('AlarmsPage cap toasts', () => {

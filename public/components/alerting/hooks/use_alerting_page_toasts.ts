@@ -13,13 +13,12 @@
  *   - "Alerting plugin not detected"
  *   - "Search incomplete — too many alerts"  (OS post-filter cap)
  *   - "Not all rules are listed"             (per-datasource rules cap)
+ *   - "Showing current alerts only"          (Prom empty-matrix fallback)
  *
- * Per-datasource connection failures and the Prometheus empty-matrix
- * fallback raise no toast: they fire on their own (on load, refresh and
- * background polls), so they popped up without any user action. Connection
- * failures of OpenSearch / Prometheus datasources stay visible next to the
- * datasource in the filter facet; a failing CloudWatch scope or region just
- * contributes no rows.
+ * Per-datasource connection failures raise no toast: they fire on their own
+ * (on load, refresh and background polls), so they popped up without any
+ * user action. They stay visible next to the datasource in the filter facet,
+ * and when every selected datasource fails, in the tab's empty state.
  *
  * Because toasts are event-driven (fire once per new occurrence) rather than
  * declarative (visible while the condition holds), this hook diff-tracks the
@@ -28,7 +27,7 @@
  * "plugin not detected" toast on every keystroke elsewhere on the page.
  *
  * Tab gating: the alerts-derived conditions (alerts fetch error, result
- * truncation) only fire while the Alerts tab is active, matching the
+ * truncation, Prometheus legacy-fallback) only fire while the Alerts tab is active, matching the
  * pre-toast behavior where those callouts lived inside `AlertsDashboard` /
  * were gated on `activeTab === 'alerts'`. If the condition is still active
  * when the user switches TO the Alerts tab, the toast fires then (the ref is
@@ -38,7 +37,13 @@
  */
 import { useEffect, useRef } from 'react';
 import { i18n } from '@osd/i18n';
+import type { DatasourceFetchFallback } from '../../../../common/types/alerting';
 import { useToast } from '../../common/toast';
+
+export interface FallbackHint {
+  datasourceName: string;
+  fallback: DatasourceFetchFallback;
+}
 
 export interface UseAlertingPageToastsParams {
   /** Active tab — alerts-derived toasts only fire on the 'alerts' tab. */
@@ -49,12 +54,24 @@ export interface UseAlertingPageToastsParams {
   rulesErrorMessage: string | null;
   /** True when every selected OS datasource failed the alerting-plugin probe. */
   alertingPluginMissing: boolean;
-  /** Loading flag from the probe — suppresses the plugin-missing toast during the probe. */
+  /**
+   * True while the probe (or the page's first data load) is still running: the plugin-missing
+   * toast waits, and its last state is kept, so a refresh doesn't fire it again.
+   */
   alertingProbeLoading: boolean;
   /** True when a backend reported a hard cap on returned alerts. */
   alertsTruncated: boolean;
   /** Datasources whose rule listing was capped (e.g. a large CloudWatch account). */
   rulesTruncatedDatasources?: string[];
+  /** Per-datasource legacy-fallback hints (Prom empty-matrix → active-only /alerts). */
+  fallbackHints: FallbackHint[];
+}
+
+function fallbackHintsKey(hints: FallbackHint[]): string {
+  return hints
+    .map((h) => `${h.datasourceName}|${h.fallback}`)
+    .sort()
+    .join('||');
 }
 
 export function useAlertingPageToasts({
@@ -65,6 +82,7 @@ export function useAlertingPageToasts({
   alertingProbeLoading,
   alertsTruncated,
   rulesTruncatedDatasources = [],
+  fallbackHints,
 }: UseAlertingPageToastsParams): void {
   const { setToast } = useToast();
 
@@ -78,6 +96,7 @@ export function useAlertingPageToasts({
   const lastPluginMissingRef = useRef<boolean>(false);
   const lastTruncatedRef = useRef<boolean>(false);
   const lastRulesTruncatedKeyRef = useRef<string>('');
+  const lastFallbackKeyRef = useRef<string>('');
 
   const onAlertsTab = activeTab === 'alerts';
 
@@ -113,10 +132,11 @@ export function useAlertingPageToasts({
     lastRulesErrorRef.current = rulesErrorMessage;
   }, [rulesErrorMessage, setToast]);
 
-  // Alerting plugin not detected (suppress while the probe is still running).
-  // Cross-cutting: the old callout rendered above the tab bar.
+  // Alerting plugin not detected (wait while the probe or first load is still running, keeping
+  // the last state). Cross-cutting: the old callout rendered above the tab bar.
   useEffect(() => {
-    const active = alertingPluginMissing && !alertingProbeLoading;
+    if (alertingProbeLoading) return;
+    const active = alertingPluginMissing;
     if (active && !lastPluginMissingRef.current) {
       setToast(
         i18n.translate('observability.alerting.alarmsPage.toast.alertingPluginMissing.title', {
@@ -174,4 +194,28 @@ export function useAlertingPageToasts({
       lastRulesTruncatedKeyRef.current = rulesTruncatedKey;
     }
   }, [rulesTruncatedKey, activeTab, setToast]);
+
+  // Legacy-fallback hints (Prometheus empty-matrix → active-only) — alerts-tab only.
+  useEffect(() => {
+    const key = fallbackHintsKey(fallbackHints);
+    if (!key) {
+      lastFallbackKeyRef.current = '';
+      return;
+    }
+    if (onAlertsTab && key !== lastFallbackKeyRef.current) {
+      const names = fallbackHints.map((h) => h.datasourceName).join(', ');
+      setToast(
+        i18n.translate('observability.alerting.alarmsPage.toast.fallback.title', {
+          defaultMessage: 'Showing current alerts only',
+        }),
+        'warning',
+        i18n.translate('observability.alerting.alarmsPage.toast.fallback.body', {
+          defaultMessage:
+            '{names}: historical alert data unavailable; showing currently active alerts instead.',
+          values: { names },
+        })
+      );
+      lastFallbackKeyRef.current = key;
+    }
+  }, [fallbackHints, onAlertsTab, setToast]);
 }

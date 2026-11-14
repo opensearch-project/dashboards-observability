@@ -274,15 +274,17 @@ describe('DatasourceFacet', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it("shows no error indicator for a CloudWatch account's failing regions", () => {
+  it("joins a CloudWatch account's region errors", () => {
     renderFacet({
       errorMap: {
-        'CloudWatch · Prod account · us-east-1': 'AccessDenied',
+        'CloudWatch · Prod account · us-east-1': 'Throttled',
         'CloudWatch · Prod account · us-west-2': 'Timed out',
       },
     });
-    expect(screen.getByLabelText('Prod account')).toBeInTheDocument();
-    expect(screen.queryByTestId('facetGroup-datasource-error-Prod account')).toBeNull();
+    fireEvent.click(screen.getByTestId('facetGroup-datasource-error-Prod account'));
+    const popover = screen.getByTestId('facetGroup-datasource-error-Prod account-popover');
+    expect(popover.textContent).toContain('us-west-2: Timed out');
+    expect(popover.textContent).toContain('us-east-1: Throttled');
   });
   it('keeps the error indicator for an OpenSearch datasource', () => {
     renderFacet({ errorMap: { 'Local Cluster': 'Could not connect. ENOTFOUND' } });

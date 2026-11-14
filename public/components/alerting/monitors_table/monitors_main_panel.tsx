@@ -45,6 +45,10 @@ import type { MonitorsEuiTableProps } from './monitors_eui_table';
 import { AlarmTimeWindow, describeTimeRange } from '../alarm_time_window';
 import type { UseTimeRangeResult } from '../hooks/use_time_range';
 import { TabRowActions } from '../tab_row_actions';
+import {
+  UnreachableDatasource,
+  UnreachableDatasourcesPrompt,
+} from '../unreachable_datasources_prompt';
 
 export interface MonitorsMainPanelProps {
   // Data
@@ -108,6 +112,8 @@ export interface MonitorsMainPanelProps {
    * hits zero datasources to query against.
    */
   noDatasourceSelected?: boolean;
+  /** Every selected datasource failed: an empty list names each with its error. */
+  unreachableDatasources?: UnreachableDatasource[];
   showCreatePopover: boolean;
   setShowCreatePopover: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -167,6 +173,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   detectorCreateDisabled = false,
   forecasterCreateDisabled = false,
   noDatasourceSelected = false,
+  unreachableDatasources = [],
   onRefresh,
   refreshing = false,
   showCreatePopover,
@@ -706,7 +713,13 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
           className="monitors-table-wrapper"
           ref={tableWrapperRef}
         >
-          {!loading && filtered.length === 0 ? (
+          {!loading &&
+          filtered.length === 0 &&
+          rules.length === 0 &&
+          !noDatasourceSelected &&
+          unreachableDatasources.length > 0 ? (
+            <UnreachableDatasourcesPrompt datasources={unreachableDatasources} />
+          ) : !loading && filtered.length === 0 ? (
             <EuiEmptyPrompt
               data-test-subj={
                 linkedMonitorId ? 'monitorsTableLinkedRuleMissing' : 'monitorsTableEmptyPrompt'

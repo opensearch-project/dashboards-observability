@@ -86,6 +86,20 @@ describe('MonitorsTable', () => {
     expect(names[0]).toContain('always-in-alarm');
     expect(names[1]).toContain('Observability Stack');
   });
+  it('names each failed datasource when every selected datasource failed', () => {
+    render(
+      <MonitorsTable
+        {...defaultProps}
+        rules={[]}
+        unreachableDatasources={[{ name: 'prom1', error: 'Could not connect. timeout' }]}
+      />
+    );
+    expect(screen.getByText("Couldn't reach the selected datasources")).toBeInTheDocument();
+    expect(screen.getByTestId('alertingUnreachableDatasources').textContent).toContain(
+      'prom1: Could not connect. timeout'
+    );
+    expect(screen.queryByText('No rules configured yet.')).toBeNull();
+  });
   it('selects a row checkbox', () => {
     render(<MonitorsTable {...defaultProps} />);
     const checkbox = screen.getByLabelText('Select HighCPU');

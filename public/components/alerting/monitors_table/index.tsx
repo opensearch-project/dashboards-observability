@@ -43,6 +43,7 @@ import { useCloudWatchStatesAt } from '../hooks/use_cloudwatch_states_at';
 import type { DatasourceFacetCloudWatch } from '../datasource_facet';
 import { facetLabels } from '../../../../common/services/alerting/facet_labels';
 import { useCloudWatchIconType } from '../cloudwatch_icon';
+import type { UnreachableDatasource } from '../unreachable_datasources_prompt';
 import '../alerting.scss';
 
 interface MonitorsTableProps {
@@ -83,6 +84,11 @@ interface MonitorsTableProps {
    * affected row in the filter panel; click opens a popover with details.
    */
   datasourceErrorMap?: Record<string, string>;
+  /**
+   * Set when every selected datasource failed: an empty list shows
+   * "Couldn't reach the selected datasources" with these errors.
+   */
+  unreachableDatasources?: UnreachableDatasource[];
   /** CloudWatch accounts and regions for the Datasource facet; omitted without CloudWatch targets. */
   cloudWatch?: DatasourceFacetCloudWatch;
   /**
@@ -122,6 +128,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   maxDatasources,
   onDatasourceCapReached,
   datasourceErrorMap,
+  unreachableDatasources,
   cloudWatch,
   initialSearchQuery,
   initialSearchQueryKey,
@@ -548,6 +555,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 detectorCreateDisabled={adCreateDisabled}
                 forecasterCreateDisabled={adCreateDisabled}
                 noDatasourceSelected={selectedDsIds.length === 0}
+                unreachableDatasources={unreachableDatasources}
                 showCreatePopover={showCreatePopover}
                 setShowCreatePopover={setShowCreatePopover}
                 showDeleteConfirm={showDeleteConfirm}

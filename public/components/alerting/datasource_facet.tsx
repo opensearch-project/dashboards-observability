@@ -160,18 +160,20 @@ export function toggleDatasourceEntry(
 }
 
 /**
- * The entry's error text. CloudWatch accounts never show one: a scope or region that fails to
- * read just contributes no rows.
+ * The entry's error text: per region for a CloudWatch account (`<region>: <error>` lines). The
+ * page leaves a CloudWatch account out of the map unless every selected region of it failed with
+ * an error other than a permission error.
  */
 function entryError(
   entry: DatasourceFacetEntry,
   errorMap?: Record<string, string>
 ): string | undefined {
-  if (!errorMap || entry.type === 'cloudwatch') return undefined;
+  if (!errorMap) return undefined;
   const lines: string[] = [];
   for (const ds of entry.datasources) {
     const error = errorMap[ds.name];
-    if (error) lines.push(error);
+    if (!error) continue;
+    lines.push(entry.type === 'cloudwatch' && ds.region ? `${ds.region}: ${error}` : error);
   }
   return lines.length > 0 ? lines.join('\n') : undefined;
 }
