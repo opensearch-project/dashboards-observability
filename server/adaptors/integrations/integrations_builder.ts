@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import escapeRegExp from 'lodash/escapeRegExp';
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObjectsBulkCreateObject } from '../../../../../src/core/public';
 import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import { IntegrationReader } from './repository/integration_reader';
 import { deepCheck } from './repository/utils';
+
+const LINK_REFERENCE_PREFIX = 'link_';
 
 interface BuilderOptions {
   name: string;
@@ -23,7 +26,7 @@ interface SavedObject {
   id: string;
   type: string;
   attributes: { title: string };
-  references: Array<{ id: string }>;
+  references: Array<{ id: string; name?: string; type?: string }>;
 }
 
 export class IntegrationInstanceBuilder {
@@ -184,14 +187,30 @@ export class IntegrationInstanceBuilder {
 
   remapIDs(assets: SavedObject[]): SavedObject[] {
     const toRemap = assets.filter((asset) => asset.id);
+    const bundleIds = new Set(toRemap.map((asset) => asset.id));
+    const isLinkReference = (ref: SavedObject['references'][number]) =>
+      ref.name?.startsWith(LINK_REFERENCE_PREFIX) ?? false;
+    const linkedIds = toRemap.map(
+      (asset) =>
+        new Set(
+          asset.references
+            .filter((ref) => isLinkReference(ref) && bundleIds.has(ref.id))
+            .map((ref) => ref.id)
+        )
+    );
     const idMap = new Map<string, string>();
-    return toRemap.map((item) => {
+    const remapped = toRemap.map((item) => {
       if (!idMap.has(item.id)) {
         idMap.set(item.id, uuidv4());
       }
       item.id = idMap.get(item.id)!;
       for (let ref = 0; ref < item.references.length; ref++) {
         const refId = item.references[ref].id;
+        // A link to an object outside the bundle keeps its ID, so the link and its reference
+        // still point at the existing object.
+        if (isLinkReference(item.references[ref]) && !bundleIds.has(refId)) {
+          continue;
+        }
         if (!idMap.has(refId)) {
           idMap.set(refId, uuidv4());
         }
@@ -199,6 +218,46 @@ export class IntegrationInstanceBuilder {
       }
       return item;
     });
+    return remapped.map((asset, index) => this.remapLinkedIDs(asset, linkedIds[index], idMap));
+  }
+
+  // Assets can link to each other through URLs in string attributes, such as a data link to
+  // `/app/dashboards#/view/<id>` inside an explore visualization. An asset opts in by declaring
+  // each link target as a `link_<n>` reference; only those IDs of objects in the bundle are
+  // rewritten in its URLs, to the same new IDs as the references.
+  remapLinkedIDs(
+    asset: SavedObject,
+    linkedIds: Set<string>,
+    idMap: Map<string, string>
+  ): SavedObject {
+    if (linkedIds.size === 0 || !asset.attributes) {
+      return asset;
+    }
+    // Match the declared IDs exactly, so punctuation after a link (`#/view/<id>.`) is not read
+    // as part of the ID and a longer ID such as `<id>-2` is not matched.
+    const linkPattern = new RegExp(
+      `(/(?:view|edit)/)(${Array.from(linkedIds).map(escapeRegExp).join('|')})(?![\\w-])`,
+      'g'
+    );
+    const remapLinks = (value: unknown): unknown => {
+      if (typeof value === 'string') {
+        return value.replace(
+          linkPattern,
+          (_match: string, prefix: string, id: string) => prefix + idMap.get(id)
+        );
+      }
+      if (Array.isArray(value)) {
+        return value.map(remapLinks);
+      }
+      if (value && typeof value === 'object') {
+        return Object.fromEntries(
+          Object.entries(value).map(([key, nested]) => [key, remapLinks(nested)])
+        );
+      }
+      return value;
+    };
+    asset.attributes = remapLinks(asset.attributes) as SavedObject['attributes'];
+    return asset;
   }
 
   addMDSReference(
