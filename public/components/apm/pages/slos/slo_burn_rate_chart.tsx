@@ -23,6 +23,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import * as echarts from 'echarts';
+import moment from 'moment-timezone';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { EchartsRender } from '../../../alerting/echarts_render';
@@ -31,6 +32,36 @@ import { TimeRange } from '../../common/types/service_types';
 import { CHART_COLORS } from '../../common/constants';
 import type { BurnRateConfig, Objective, SloDocument } from '../../../../../common/slo/slo_types';
 import { buildCoverageProbeQuery, buildErrorRatioExprForWindow } from './slo_query_builders';
+import { uiSettingsService } from '../../../../../common/utils';
+
+/**
+ * Escape values interpolated into the ECharts tooltip HTML. The tooltip
+ * `formatter` returns a raw HTML string, so any dynamic value (series names,
+ * colours, formatted numbers) must be escaped to prevent HTML/attribute
+ * injection should an upstream value ever contain angle brackets or quotes.
+ */
+const escapeHtml = (s: string): string =>
+  String(s).replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] as string
+  );
+
+/**
+ * Resolve the timezone the user configured via `dateFormat:tz`, falling back to
+ * the browser zone. Kept local (rather than shared) so this file owns its copy.
+ */
+function resolveDisplayTz(): string {
+  const tz = uiSettingsService.get('dateFormat:tz');
+  if (!tz || tz === 'Browser') {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  }
+  return tz;
+}
+
+/** Format an epoch-ms tooltip timestamp with an explicit timezone abbreviation. */
+function formatTooltipTs(ms: number, tz: string): string {
+  return moment.tz(ms, tz).format('YYYY-MM-DD HH:mm z');
+}
 
 export interface SloBurnRateChartProps {
   slo: SloDocument;
@@ -69,6 +100,8 @@ export interface BurnRateOptionInputs {
     color: string;
     data: Array<[number, number]>;
   }>;
+  /** Timezone for tooltip timestamps. Defaults to the user's `dateFormat:tz`. */
+  tz?: string;
 }
 
 /**
@@ -77,6 +110,10 @@ export interface BurnRateOptionInputs {
  */
 export function buildBurnRateOption(inputs: BurnRateOptionInputs): echarts.EChartsOption {
   const { tiers } = inputs;
+  const tz = inputs.tz ?? resolveDisplayTz();
+  // Series name → threshold multiplier, so the tooltip can show how far each
+  // tier's current burn sits above/below the threshold that would fire it.
+  const thresholdByName = new Map(tiers.map((t) => [t.label, t.multiplier]));
 
   // Y-axis is log10: default MWMBR tiers span 14.4x / 6x / 3x / 1x, and a linear
   // axis dominated by the top tier crushes the 1x / 3x lines (and any <10x burn
@@ -122,15 +159,34 @@ export function buildBurnRateOption(inputs: BurnRateOptionInputs): echarts.EChar
           color: string;
         }>;
         if (!list || list.length === 0) return '';
-        const ts = new Date(list[0].axisValue).toLocaleString();
+        const ts = formatTooltipTs(list[0].axisValue, tz);
         const rows = list
           .map((p) => {
-            const raw = Array.isArray(p.value) ? p.value[2] ?? p.value[1] : (p.value as number);
-            const swatch = `<span style="display:inline-block;width:10px;height:10px;background:${p.color};margin-right:6px;border-radius:2px;"></span>`;
-            return `<div>${swatch}${p.seriesName}: <strong>${formatMultiplier(raw)}</strong></div>`;
+            const raw = Array.isArray(p.value) ? (p.value[2] ?? p.value[1]) : (p.value as number);
+            const swatch = `<span style="display:inline-block;width:10px;height:10px;background:${escapeHtml(
+              p.color
+            )};margin-right:6px;border-radius:2px;"></span>`;
+            // Delta versus this tier's threshold: how much over/under the burn
+            // rate that would fire the alert.
+            const threshold = thresholdByName.get(p.seriesName);
+            let deltaStr = '';
+            if (threshold !== undefined && Number.isFinite(raw)) {
+              const delta = raw - threshold;
+              deltaStr =
+                delta >= 0
+                  ? ` <span style="color:${escapeHtml(
+                      euiThemeVars.euiColorDanger
+                    )};">(${escapeHtml(formatMultiplier(delta))} over)</span>`
+                  : ` <span style="color:${escapeHtml(
+                      euiThemeVars.euiColorDarkShade
+                    )};">(${escapeHtml(formatMultiplier(Math.abs(delta)))} under)</span>`;
+            }
+            return `<div>${swatch}${escapeHtml(p.seriesName)}: <strong>${escapeHtml(
+              formatMultiplier(raw)
+            )}</strong>${deltaStr}</div>`;
           })
           .join('');
-        return `<div>${ts}</div>${rows}`;
+        return `<div>${escapeHtml(ts)}</div>${rows}`;
       },
     },
     xAxis: {
@@ -242,11 +298,10 @@ const TierFetcher: React.FC<TierFetcherProps> = ({
   errorBudget,
   onChange,
 }) => {
-  const query = useMemo(() => buildErrorRatioExprForWindow(slo, objective, tier.longWindow), [
-    slo,
-    objective,
-    tier.longWindow,
-  ]);
+  const query = useMemo(
+    () => buildErrorRatioExprForWindow(slo, objective, tier.longWindow),
+    [slo, objective, tier.longWindow]
+  );
   const { series, isLoading, error } = usePromQLChartData({
     promqlQuery: query ?? '',
     timeRange,
@@ -406,46 +461,56 @@ export const SloBurnRateChart: React.FC<SloBurnRateChartProps> = ({
           <EuiText size="s">{firstError.message}</EuiText>
         </EuiCallOut>
       )}
-      {tiers.length > 0 && !firstError && !isLoading && !hasData && !probeLoading && !metricExists && (
-        <EuiCallOut
-          size="s"
-          color="warning"
-          iconType="alert"
-          title={i18n.translate('observability.apm.slo.burnRateChart.missingMetric.title', {
-            defaultMessage: 'SLI source metric not found in this datasource',
-          })}
-          data-test-subj="slosBurnRateMissingMetric"
-        >
-          <EuiText size="s">
-            {i18n.translate('observability.apm.slo.burnRateChart.missingMetric.bodyPrefix', {
-              defaultMessage: 'No samples exist for the metric this SLI queries on',
+      {tiers.length > 0 &&
+        !firstError &&
+        !isLoading &&
+        !hasData &&
+        !probeLoading &&
+        !metricExists && (
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="alert"
+            title={i18n.translate('observability.apm.slo.burnRateChart.missingMetric.title', {
+              defaultMessage: 'SLI source metric not found in this datasource',
             })}
-            <strong> {prometheusConnectionId}</strong>
-            {i18n.translate('observability.apm.slo.burnRateChart.missingMetric.bodySuffix', {
-              defaultMessage:
-                ". Burn rate is derived from the same error ratio as the budget chart — if that metric is absent, burn rate can't populate. Waiting won't help; re-check the SLI's metric / selectors.",
+            data-test-subj="slosBurnRateMissingMetric"
+          >
+            <EuiText size="s">
+              {i18n.translate('observability.apm.slo.burnRateChart.missingMetric.bodyPrefix', {
+                defaultMessage: 'No samples exist for the metric this SLI queries on',
+              })}
+              <strong> {prometheusConnectionId}</strong>
+              {i18n.translate('observability.apm.slo.burnRateChart.missingMetric.bodySuffix', {
+                defaultMessage:
+                  ". Burn rate is derived from the same error ratio as the budget chart — if that metric is absent, burn rate can't populate. Waiting won't help; re-check the SLI's metric / selectors.",
+              })}
+            </EuiText>
+          </EuiCallOut>
+        )}
+      {tiers.length > 0 &&
+        !firstError &&
+        !isLoading &&
+        !hasData &&
+        !probeLoading &&
+        metricExists && (
+          <EuiCallOut
+            size="s"
+            color="primary"
+            iconType="iInCircle"
+            title={i18n.translate('observability.apm.slo.burnRateChart.emptyRange.title', {
+              defaultMessage: 'No samples in the selected time range',
             })}
-          </EuiText>
-        </EuiCallOut>
-      )}
-      {tiers.length > 0 && !firstError && !isLoading && !hasData && !probeLoading && metricExists && (
-        <EuiCallOut
-          size="s"
-          color="primary"
-          iconType="iInCircle"
-          title={i18n.translate('observability.apm.slo.burnRateChart.emptyRange.title', {
-            defaultMessage: 'No samples in the selected time range',
-          })}
-          data-test-subj="slosBurnRateEmpty"
-        >
-          <EuiText size="s">
-            {i18n.translate('observability.apm.slo.burnRateChart.emptyRange.body', {
-              defaultMessage:
-                'The metric exists in this datasource but the current range returned no burn-rate samples. Widen the time range, or wait for the next Prometheus scrape + rule evaluation.',
-            })}
-          </EuiText>
-        </EuiCallOut>
-      )}
+            data-test-subj="slosBurnRateEmpty"
+          >
+            <EuiText size="s">
+              {i18n.translate('observability.apm.slo.burnRateChart.emptyRange.body', {
+                defaultMessage:
+                  'The metric exists in this datasource but the current range returned no burn-rate samples. Widen the time range, or wait for the next Prometheus scrape + rule evaluation.',
+              })}
+            </EuiText>
+          </EuiCallOut>
+        )}
       {tiers.length > 0 && hasData && <EchartsRender spec={spec} height={260} />}
       {overflow > 0 && (
         <>
