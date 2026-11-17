@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { CUSTOM_PANELS_SAVED_OBJECT_TYPE } from "common/constants/custom_panels"
 import { coreRefs } from "public/framework/core_refs"
 

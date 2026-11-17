@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export { AggregateFunction } from './AggregateFunction';
 export { AggregateTerm } from './AggregateTerm';
 export { GroupBy } from './group_by';
