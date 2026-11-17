@@ -1,6 +1,6 @@
 name: Test and Build Observability Dashboards Plugin
 
-on: [pull_request, push]
+on: [pull_request]
 
 env:
   PLUGIN_NAME: dashboards-observability
