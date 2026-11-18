@@ -225,3 +225,31 @@ describe('cloudWatchAlarmToUnifiedAlertSummary', () => {
     expect(alert.state).toBe('insufficient_data');
   });
 });
+
+describe('CloudWatch mappers and Explore targets', () => {
+  const targets = [
+    {
+      signal: 'metrics' as const,
+      dataset: { id: 'some-dataset', type: 'SOME_TYPE' },
+      language: 'SOME_LANGUAGE',
+      query: 'q',
+    },
+  ];
+  it("copies the source's targets to the rule and alert rows", () => {
+    const withTargets = metricAlarm({ exploreTargets: targets });
+    expect(cloudWatchAlarmToUnifiedRuleSummary(withTargets, 'cloudwatch').exploreTargets).toEqual(
+      targets
+    );
+    expect(cloudWatchAlarmToUnifiedAlertSummary(withTargets, 'cloudwatch').exploreTargets).toEqual(
+      targets
+    );
+  });
+  it('sets no exploreTargets field when the source gives none', () => {
+    expect(cloudWatchAlarmToUnifiedRuleSummary(metricAlarm(), 'cloudwatch')).not.toHaveProperty(
+      'exploreTargets'
+    );
+    expect(cloudWatchAlarmToUnifiedAlertSummary(metricAlarm(), 'cloudwatch')).not.toHaveProperty(
+      'exploreTargets'
+    );
+  });
+});

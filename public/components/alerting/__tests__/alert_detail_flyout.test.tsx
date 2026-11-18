@@ -716,3 +716,69 @@ describe('AlertDetailFlyout', () => {
     });
   });
 });
+
+/** Turn Explore links on (capability + a registered dataset type) for one test. */
+function enableExploreLinks(refs: any) {
+  const saved = { application: refs.application, data: refs.data };
+  refs.application = {
+    ...(refs.application || {}),
+    capabilities: { observability: { exploreLinksEnabled: true } },
+    getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+    navigateToApp: refs.application?.navigateToApp || jest.fn(),
+  };
+  refs.data = {
+    query: { queryString: { getDatasetService: () => ({ getType: () => ({}) }) } },
+  };
+  return () => {
+    refs.application = saved.application;
+    refs.data = saved.data;
+  };
+}
+
+const exploreTarget = {
+  signal: 'metrics' as const,
+  dataset: { id: 'my-prom', type: 'PROMETHEUS' },
+  language: 'PROMQL',
+  query: 'rate(errors_total[5m])',
+};
+
+describe('AlertDetailFlyout Explore links', () => {
+  it('shows "Open in Metrics" for the alert targets and closes the flyout on click', () => {
+    const restore = enableExploreLinks(coreRefs);
+    try {
+      const onClose = jest.fn();
+      const { getByTestId } = render(
+        <AlertDetailFlyout
+          alert={baseAlert}
+          datasources={datasources}
+          exploreTargets={[exploreTarget]}
+          onClose={onClose}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const button = getByTestId('alertDetailExploreLinks-0');
+      expect(button).toHaveTextContent('Open in Metrics');
+      fireEvent.click(button);
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(coreRefs.application!.navigateToApp).toHaveBeenCalledWith(
+        'explore/metrics',
+        expect.objectContaining({ path: expect.stringContaining('rate(errors_total%5B5m%5D)') })
+      );
+    } finally {
+      restore();
+    }
+  });
+
+  it('shows no link with Explore links off', () => {
+    const { queryByTestId } = render(
+      <AlertDetailFlyout
+        alert={baseAlert}
+        datasources={datasources}
+        exploreTargets={[exploreTarget]}
+        onClose={jest.fn()}
+        onAcknowledge={jest.fn()}
+      />
+    );
+    expect(queryByTestId('alertDetailExploreLinks')).toBeNull();
+  });
+});

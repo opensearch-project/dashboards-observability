@@ -60,6 +60,8 @@ import { TabRowActionsProvider } from './tab_row_actions';
 import { HeaderControlledComponentsWrapper } from '../../plugin_helpers/plugin_headerControl';
 import type { MonitorBackendType } from './monitor_form_components';
 import { useAlerts } from './hooks/use_alerts';
+import { alertExploreTargets, withRuleExploreTargets } from './explore_targets';
+import { isExploreLinksEnabled } from '../common/explore_links';
 import { useAlertingPluginAvailability } from './hooks/use_alerting_plugin_availability';
 import { useAlertingPageToasts } from './hooks/use_alerting_page_toasts';
 import { useDatasourceSelection } from './hooks/use_datasource_selection';
@@ -753,9 +755,19 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     window.location.assign(href);
   }, []);
 
-  const visibleRules = useMemo(
-    () => mergedRules.filter((r) => !deletedRuleIds.has(r.id)),
-    [mergedRules, deletedRuleIds]
+  // With Explore links on, rows gain the queries their flyouts link to (derived for Prometheus
+  // rules and PPL monitors; other sources set their own). Off: rows are unchanged.
+  const exploreLinksOn = isExploreLinksEnabled();
+  const visibleRules = useMemo(() => {
+    const kept = mergedRules.filter((r) => !deletedRuleIds.has(r.id));
+    return exploreLinksOn ? withRuleExploreTargets(kept, datasources) : kept;
+  }, [mergedRules, deletedRuleIds, exploreLinksOn, datasources]);
+  const selectedAlertExploreTargets = useMemo(
+    () =>
+      exploreLinksOn && selectedAlert
+        ? alertExploreTargets(selectedAlert, visibleRules, datasources)
+        : undefined,
+    [exploreLinksOn, selectedAlert, visibleRules, datasources]
   );
 
   // Whether the open alert's monitor is still in the rules list, so the flyout
@@ -2302,6 +2314,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           datasources={datasources}
           allAlerts={alerts}
           sourceRuleStatus={selectedAlertRuleStatus}
+          exploreTargets={selectedAlertExploreTargets}
           onClose={() => setSelectedAlert(null)}
           onAcknowledge={(id) => {
             handleAcknowledgeAlert(id);

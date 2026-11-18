@@ -139,8 +139,20 @@ export class CloudWatchBackend {
 
   constructor(
     private readonly logger: Logger,
-    private readonly source: CloudWatchAlarmSource
+    private readonly source: CloudWatchAlarmSource,
+    /**
+     * Whether alarms keep the source's `exploreTargets` (Explore links on for this request).
+     * Off: they are dropped here, so nothing about them reaches the browser.
+     */
+    private readonly options: { exploreTargets?: boolean } = {}
   ) {}
+
+  /** The alarm without its Explore targets unless Explore links are on. */
+  private withExploreTargets<T extends { exploreTargets?: unknown }>(alarm: T): T {
+    if (this.options.exploreTargets || alarm.exploreTargets === undefined) return alarm;
+    const { exploreTargets: _dropped, ...rest } = alarm;
+    return rest as T;
+  }
 
   /**
    * The source a datasource reads through: the default source, or the one bound to the
@@ -212,7 +224,7 @@ export class CloudWatchBackend {
     ]);
     return {
       alarms: list.alarms.map((a) => ({
-        ...a,
+        ...this.withExploreTargets(a),
         accountId: a.accountId || identity?.accountId,
         // The datasource's region first: the identity is shared by the scope's regions.
         region: a.region || ds.region || identity?.region,
@@ -373,7 +385,7 @@ export class CloudWatchBackend {
 
     const causedBy = findCausingAlarm(alarm, relationships);
     return {
-      alarm,
+      alarm: this.withExploreTargets(alarm),
       // With a known cause, the summary leaves out CloudWatch's reason text (which names the
       // child by ARN); the flyout shows "Caused by: <child>" instead.
       summary: buildSummary(alarm, history, !causedBy),

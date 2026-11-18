@@ -16,47 +16,10 @@ import {
 import { coreRefs } from '../../../../framework/core_refs';
 import { buildSuggestSearch } from '../../pages/slos/slo_suggest_scope';
 import { isDependencyType, normalizeNodeType } from './platform_utils';
-
-/**
- * Serialize a single datemath time value (from/to) for a hand-built rison `_g`
- * on a URL hash. Two hazards, both verified against rison-node + the OSD read
- * path (URL-decode → rison-decode → datemath):
- *  1) rison parse: a value starting with `-`/a digit, or containing a rison
- *     structural char (the `:` in an absolute ISO timestamp), must be rison
- *     single-quoted or rison treats `:` as a delimiter and drops `_g` entirely.
- *     Relative values like `now` / `now-1h` stay bare.
- *  2) URL decode runs BEFORE rison on read and turns a literal `+` into a space
- *     (`now+1h` → "now 1h", which datemath rejects → blank time). encodeURIComponent
- *     makes it `%2B`, which the read path decodes back to `+`.
- * So: rison-string-encode, THEN encodeURIComponent — mirrors OSD's canonical
- * rison→URL write path (encodeURIComponent is a stricter superset: it also
- * percent-encodes `:`/`/`, which the read path decodes back before rison, so
- * every value round-trips).
- */
-const RISON_NOT_IDCHAR = " '!:(),*@$";
-function encodeTimeRangeValueForG(value: string): string {
-  let bare = value !== '' && '-0123456789'.indexOf(value[0]) === -1;
-  if (bare) {
-    for (const ch of value) {
-      if (RISON_NOT_IDCHAR.indexOf(ch) !== -1) {
-        bare = false;
-        break;
-      }
-    }
-  }
-  const risonValue = bare ? value : `'${escapeRisonString(value)}'`;
-  return encodeURIComponent(risonValue);
-}
-
-/**
- * Escape a value for embedding inside a rison single-quoted string. Rison treats
- * `!` as its escape char and `'` as the string terminator, so both must be
- * escaped (`!`→`!!` FIRST, then `'`→`!'`) or the surrounding rison is corrupted
- * and the OSD read path silently drops the enclosing object.
- */
-function escapeRisonString(value: string): string {
-  return value.replace(/!/g, '!!').replace(/'/g, "!'");
-}
+import {
+  encodeTimeRangeValueForG,
+  escapeRisonString,
+} from '../../../common/explore_links/explore_url';
 
 /**
  * Options for navigating to service details

@@ -749,3 +749,32 @@ describe('CloudWatchBackend scopes', () => {
     expect(await new CloudWatchBackend(noopLogger, new FakeSource()).listTargets()).toBeUndefined();
   });
 });
+
+describe('CloudWatchBackend Explore targets', () => {
+  const targets = [
+    {
+      signal: 'metrics' as const,
+      dataset: { id: 'some-dataset', type: 'SOME_TYPE' },
+      language: 'SOME_LANGUAGE',
+      query: 'q',
+    },
+  ];
+
+  it('drops the source exploreTargets unless Explore links are on', async () => {
+    const source = new FakeSource();
+    source.alarms = [alarm({ exploreTargets: targets })];
+    const off = await new CloudWatchBackend(noopLogger, source).describeAlarms(ds);
+    expect(off.alarms[0]).not.toHaveProperty('exploreTargets');
+    const offDetail = await new CloudWatchBackend(noopLogger, source).getAlarmDetail(
+      ds,
+      source.alarms[0].alarmName
+    );
+    expect(offDetail!.alarm).not.toHaveProperty('exploreTargets');
+
+    const on = new CloudWatchBackend(noopLogger, source, { exploreTargets: true });
+    expect((await on.describeAlarms(ds)).alarms[0].exploreTargets).toEqual(targets);
+    expect((await on.getAlarmDetail(ds, source.alarms[0].alarmName))!.alarm.exploreTargets).toEqual(
+      targets
+    );
+  });
+});

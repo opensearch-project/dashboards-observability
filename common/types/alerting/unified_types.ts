@@ -16,6 +16,7 @@ import type { OSAlert, OSMonitor } from './opensearch_types';
 import type { PromAlert, PromAlertingRule } from './prometheus_types';
 import type { CloudWatchAlarmState, CloudWatchAlarmType } from './cloudwatch_types';
 import type { ClassifiedError } from '../../error';
+import type { ExploreQueryTarget } from '../explore_links';
 
 /**
  * Known fallback reasons a backend may surface through
@@ -306,6 +307,11 @@ export interface UnifiedAlertSummary {
   monitorId?: string;
   /** CloudWatch-specific row metadata; present only for CloudWatch alarms. */
   cloudWatch?: UnifiedCloudWatchMeta;
+  /**
+   * Queries that open this alert's data in Explore. Set only when Explore links are enabled
+   * (`observability.exploreLinks.enabled`); absent otherwise.
+   */
+  exploreTargets?: ExploreQueryTarget[];
 }
 
 /** Full alert with backend-specific raw data. Use for detail views only. */
@@ -410,6 +416,11 @@ export interface UnifiedRuleSummary {
   threshold?: { operator: string; value: number; unit?: string };
   /** CloudWatch-specific row metadata; present only for CloudWatch alarms. */
   cloudWatch?: UnifiedCloudWatchMeta;
+  /**
+   * Queries that open this rule's signal in Explore. Set only when Explore links are enabled
+   * (`observability.exploreLinks.enabled`); absent otherwise.
+   */
+  exploreTargets?: ExploreQueryTarget[];
 }
 
 /** Full rule with detail-view fields. Use for single-item detail views only. */

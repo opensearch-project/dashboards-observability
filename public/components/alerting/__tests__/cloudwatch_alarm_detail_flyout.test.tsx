@@ -20,6 +20,7 @@ import {
   CloudWatchAlarmFlyoutRow,
 } from '../cloudwatch_alarm_detail_flyout';
 import { useCloudWatchAlarmDetail } from '../hooks/use_cloudwatch_alarm_detail';
+import { coreRefs } from '../../../framework/core_refs';
 import type { AlarmTimeWindow } from '../alarm_time_window';
 
 jest.mock('../hooks/use_cloudwatch_alarm_detail', () => ({
@@ -428,5 +429,61 @@ describe('buildTimelineSegments', () => {
       segments: [{ start, end, state: 'ALARM' }],
       changes: 0,
     });
+  });
+});
+
+/** Turn Explore links on (capability + a registered dataset type) for one test. */
+function enableExploreLinks(refs: any) {
+  const saved = { application: refs.application, data: refs.data };
+  refs.application = {
+    ...(refs.application || {}),
+    capabilities: { observability: { exploreLinksEnabled: true } },
+    getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+    navigateToApp: refs.application?.navigateToApp || jest.fn(),
+  };
+  refs.data = {
+    query: { queryString: { getDatasetService: () => ({ getType: () => ({}) }) } },
+  };
+  return () => {
+    refs.application = saved.application;
+    refs.data = saved.data;
+  };
+}
+
+const exploreTarget = {
+  signal: 'metrics' as const,
+  dataset: { id: 'my-prom', type: 'PROMETHEUS' },
+  language: 'PROMQL',
+  query: 'rate(errors_total[5m])',
+};
+
+describe('CloudWatchAlarmDetailFlyout Explore links', () => {
+  it("shows the alarm's Explore link from its detail, over the flyout window", () => {
+    const restore = enableExploreLinks(coreRefs);
+    try {
+      mockHook({
+        detail: {
+          ...detailFixture(),
+          alarm: { ...detailFixture().alarm, exploreTargets: [exploreTarget] },
+        },
+      });
+      renderFlyout();
+      const button = screen.getByTestId('cwAlarmExploreLinks-0');
+      expect(button).toHaveTextContent('Open in Metrics');
+      expect(button.getAttribute('href')).toMatch(/time:\(from:'\d{4}-/);
+    } finally {
+      restore();
+    }
+  });
+
+  it('shows no link when the alarm has no targets', () => {
+    const restore = enableExploreLinks(coreRefs);
+    try {
+      mockHook({ detail: detailFixture() });
+      renderFlyout();
+      expect(screen.queryByTestId('cwAlarmExploreLinks')).toBeNull();
+    } finally {
+      restore();
+    }
   });
 });

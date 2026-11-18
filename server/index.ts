@@ -44,6 +44,13 @@ const observabilityConfig = {
       enabled: schema.boolean({ defaultValue: false }),
       defaultRegion: schema.maybe(schema.string()),
     }),
+    exploreLinks: schema.object({
+      // Links from alerts, rules and SLOs to the matching query in Discover Logs / Explore
+      // Metrics. Ships dark: operators opt in via `observability.exploreLinks.enabled: true`
+      // (mirrors the `alertManager.enabled` / `slo.enabled` pattern). Off: no link is shown and
+      // rows carry no Explore targets.
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
     errors: schema.object({
       // When true, verbatim upstream error detail (classified as `sensitive`)
       // is included in API error responses. Defaults off so open-source /

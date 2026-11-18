@@ -45,6 +45,9 @@ import {
 } from './shared_constants';
 import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
 import { formatTimestamp } from './time_format';
+import { ExploreLinkButtons, openableExploreTargets } from '../common/explore_links';
+import { alertExploreTimeRange, useResolvedExploreTargets } from './explore_targets';
+import type { ExploreQueryTarget } from '../../../common/types/explore_links';
 
 /** Internal label keys filtered from the Labels accordion display. */
 const INTERNAL_LABEL_KEYS = new Set([
@@ -70,19 +73,26 @@ export interface AlertDetailFlyoutProps {
   datasources: Datasource[];
   allAlerts?: UnifiedAlertSummary[];
   sourceRuleStatus?: SourceRuleStatus;
+  /** Queries that open this alert's data in Explore (Explore links on); none: no buttons. */
+  exploreTargets?: ExploreQueryTarget[];
   onClose: () => void;
   onAcknowledge: (alertId: string) => void;
 }
+
+const NO_TARGETS: ExploreQueryTarget[] = [];
 
 export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   alert,
   datasources,
   allAlerts = [],
   sourceRuleStatus = 'unknown',
+  exploreTargets = NO_TARGETS,
   onClose,
   onAcknowledge,
 }) => {
   const osService = useMemo(() => new AlertingOpenSearchService(), []);
+  const resolvedExploreTargets = useResolvedExploreTargets(exploreTargets, alert.datasourceId);
+  const exploreTimeRange = useMemo(() => alertExploreTimeRange(alert), [alert]);
   const [detailData, setDetailData] = useState<UnifiedAlert | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailFetched, setDetailFetched] = useState(false);
@@ -385,6 +395,16 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                   >
                     {sourceLinkLabel}
                   </EuiButton>
+                </EuiFlexItem>
+              )}
+              {openableExploreTargets(resolvedExploreTargets).length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <ExploreLinkButtons
+                    targets={resolvedExploreTargets}
+                    timeRange={exploreTimeRange}
+                    onNavigate={onClose}
+                    data-test-subj="alertDetailExploreLinks"
+                  />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
