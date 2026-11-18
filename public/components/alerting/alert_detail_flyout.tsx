@@ -346,12 +346,23 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
       aria-labelledby="alertDetailTitle"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem>
+        {/* Alert names can be long with no spaces (e.g. generated SLO rule names), so the title may
+            shrink and wrap anywhere, and the row wraps, rather than pushing the state, severity
+            and source link past the flyout's right edge. */}
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+          wrap
+          data-test-subj="alertDetailHeaderRow"
+        >
+          <EuiFlexItem style={{ minWidth: 0 }}>
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
                 <EuiTitle size="m">
-                  <h2 id="alertDetailTitle">{alert.name}</h2>
+                  <h2 id="alertDetailTitle" style={{ overflowWrap: 'anywhere' }}>
+                    {alert.name}
+                  </h2>
                 </EuiTitle>
               </EuiFlexItem>
               {/* S-m8: Datasource type badge for visual distinction */}
