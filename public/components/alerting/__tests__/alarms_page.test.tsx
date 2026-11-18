@@ -1658,6 +1658,58 @@ describe('AlarmsPage CloudWatch regions', () => {
     window.history.replaceState(null, '', '#/');
   });
 
+  it('applies a datasource link that names the datasource instead of its id', async () => {
+    // Prometheus ids (`ds-N`) change between discovery passes, so links from other pages (SLO
+    // detail) carry the connection name; it resolves like a stored selection does.
+    const promDs: Datasource = {
+      id: 'ds-7',
+      name: 'team_prometheus',
+      type: 'prometheus',
+      url: '',
+      enabled: true,
+      directQueryName: 'team_prometheus',
+    };
+    window.history.replaceState(null, '', '#/alerts?ds=team_prometheus');
+    await act(async () => {
+      render(
+        <AlarmsPage {...defaultProps} datasources={[osDs, promDs]} defaultDatasources={['os-1']} />
+      );
+    });
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1', 'ds-7']);
+    window.history.replaceState(null, '', '#/');
+  });
+
+  it('prefers an exact id over another datasource whose name equals it', async () => {
+    const namedLikeId: Datasource = {
+      id: 'ds-9',
+      name: 'os-1',
+      type: 'prometheus',
+      url: '',
+      enabled: true,
+    };
+    window.history.replaceState(null, '', '#/alerts?ds=os-1');
+    await act(async () => {
+      render(
+        <AlarmsPage
+          {...defaultProps}
+          datasources={[namedLikeId, osDs]}
+          defaultDatasources={['ds-9']}
+        />
+      );
+    });
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual(['ds-9', 'os-1']);
+    window.history.replaceState(null, '', '#/');
+  });
+
+  it('ignores a datasource link that names no datasource', async () => {
+    window.history.replaceState(null, '', '#/alerts?ds=not-a-datasource');
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} datasources={[osDs]} defaultDatasources={['os-1']} />);
+    });
+    expect(lastProps(mockDashboard).selectedDsIds).toEqual(['os-1']);
+    window.history.replaceState(null, '', '#/');
+  });
+
   it('is unchanged without the CloudWatch props', async () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} datasources={[osDs]} />);
