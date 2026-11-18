@@ -161,6 +161,19 @@ export function buildHttpStatusPplWhere(bucket: string): string {
 }
 
 /**
+ * PPL `where` fragment for the flyout's span status filter: OTel `status.code` for
+ * error / ok / unset, and the HTTP-status buckets via buildHttpStatusPplWhere. Returns ''
+ * for 'all' or an unknown value. Shared by the flyout's own query and its Explore links so
+ * both apply the same filter.
+ */
+export function buildSpanStatusPplWhere(statusFilter: string): string {
+  if (statusFilter === 'error') return ' | where `status.code` = 2';
+  if (statusFilter === 'ok') return ' | where `status.code` = 0';
+  if (statusFilter === 'unset') return ' | where `status.code` != 0 AND `status.code` != 2';
+  return buildHttpStatusPplWhere(statusFilter);
+}
+
+/**
  * Sanitizes a string value for safe use in PPL queries.
  * Escapes backslashes and single quotes to prevent query injection.
  */

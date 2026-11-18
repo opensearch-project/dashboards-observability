@@ -60,6 +60,7 @@ jest.mock('../../utils/navigation_utils', () => ({
 
 import { useApmConfig } from '../../../config/apm_config_context';
 import { useCorrelatedLogs } from '../../hooks/use_apm_config';
+import { navigateToExploreTraces } from '../../utils/navigation_utils';
 import { ServiceCorrelationsFlyout } from '../service_correlations_flyout';
 import { CORRELATION_CONSTANTS } from '../../../common/constants';
 
@@ -246,5 +247,36 @@ describe('ServiceCorrelationsFlyout time range', () => {
       .pop() as string;
     expect(logQuery).toContain("`time` >= '2026-10-02 00:00:00.000'");
     expect(logQuery).toContain("`time` <= '2026-10-02 06:00:00.000'");
+  });
+
+  it('carries the active status filter to the Explore Traces link', async () => {
+    mockExecuteQuery.mockResolvedValue({ jsonData: [{ ...span('e1'), status: { code: 2 } }] });
+    render(<ServiceCorrelationsFlyout {...props} operationFilter="op" timeRange={fixedRange} />);
+    await waitFor(() => expect(screen.getByText('e1')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('All'));
+    const errorOption = (await screen.findAllByRole('option')).find(
+      (o) => o.textContent === 'ERROR'
+    ) as HTMLElement;
+    fireEvent.click(errorOption);
+    await waitFor(() => expect(queries().some((q) => q.includes('`status.code` = 2'))).toBe(true));
+    fireEvent.click(await screen.findByTestId('apmCorrelationsExploreTraces'));
+    expect(navigateToExploreTraces).toHaveBeenLastCalledWith(
+      'traces-id',
+      'otel-v1-apm-span*',
+      'travel-planner',
+      fixedRange,
+      'ds-1',
+      undefined,
+      'op',
+      ' | where `status.code` = 2'
+    );
+  });
+
+  it('passes no extra filter to the link when the status filter is All', async () => {
+    mockExecuteQuery.mockResolvedValue({ jsonData: [span('a1')] });
+    render(<ServiceCorrelationsFlyout {...props} timeRange={fixedRange} />);
+    await waitFor(() => expect(screen.getByText('a1')).toBeInTheDocument());
+    fireEvent.click(await screen.findByTestId('apmCorrelationsExploreTraces'));
+    expect((navigateToExploreTraces as jest.Mock).mock.calls.pop()[7]).toBe('');
   });
 });

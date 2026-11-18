@@ -849,3 +849,76 @@ describe('Agent Traces navigation', () => {
     });
   });
 });
+
+describe('Explore/Agent Traces/Logs links carry the flyout filters', () => {
+  let openSpy: jest.SpyInstance;
+  const range = { from: 'now-1h', to: 'now' };
+
+  beforeEach(() => {
+    openSpy = jest.spyOn(window, 'open').mockImplementation();
+  });
+  afterEach(() => openSpy.mockRestore());
+
+  // The PPL lives in the RISON `query:'<urlencoded>'` of the opened URL.
+  const openedQuery = (): string => {
+    const url = openSpy.mock.calls[0][0] as string;
+    const match = url.match(/query:'([^']*)'\)/);
+    return decodeURIComponent(match ? match[1] : '');
+  };
+
+  it('adds the status filter to the Explore traces query', () => {
+    navigateToExploreTraces(
+      'id',
+      'title',
+      'flagd',
+      range,
+      undefined,
+      undefined,
+      'op',
+      [' | where `status.code` = 2'].join('')
+    );
+    expect(openedQuery()).toBe(
+      '| where serviceName = "flagd" | where name = "op" | where `status.code` = 2'
+    );
+  });
+
+  it('rewrites single-quoted literals so they cannot break the RISON query', () => {
+    navigateToExploreLogs(
+      'id',
+      'title',
+      'flagd',
+      'serviceName',
+      range,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      " | where LOWER(`severityText`) LIKE '%error%'"
+    );
+    const url = openSpy.mock.calls[0][0] as string;
+    expect(openedQuery()).toBe(
+      '| where `serviceName` = "flagd" | where LOWER(`severityText`) LIKE "%error%"'
+    );
+    // No raw single quote inside the query value.
+    expect(url.match(/query:'([^']*)'\)/)).not.toBeNull();
+  });
+
+  it('adds the status filter to the Agent Traces query', () => {
+    navigateToAgentTraces(
+      'id',
+      'title',
+      'flagd',
+      range,
+      undefined,
+      undefined,
+      undefined,
+      ' | where `status.code` = 2'
+    );
+    expect(openedQuery()).toBe('| where serviceName = "flagd" | where `status.code` = 2');
+  });
+
+  it('leaves the query unchanged when no filter is given', () => {
+    navigateToExploreTraces('id', 'title', 'flagd', range);
+    expect(openedQuery()).toBe('| where serviceName = "flagd"');
+  });
+});

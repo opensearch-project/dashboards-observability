@@ -70,7 +70,7 @@ import {
   getHttpStatusColor,
   normalizeLogLevel,
   buildLogLevelPplWhere,
-  buildHttpStatusPplWhere,
+  buildSpanStatusPplWhere,
   isCoalesceUnsupportedError,
   isGenAiSpan,
 } from '../utils/format_utils';
@@ -297,12 +297,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
   // error/ok/unset; the HTTP-status buckets are pushed via buildHttpStatusPplWhere, which
   // coalesces the two OTel-convention field names so a name absent from the index mapping
   // doesn't error. Everything is server-side now, so the fetch stays at head 50.
-  const spanStatusWhere = useMemo(() => {
-    if (statusFilter === 'error') return ' | where `status.code` = 2';
-    if (statusFilter === 'ok') return ' | where `status.code` = 0';
-    if (statusFilter === 'unset') return ' | where `status.code` != 0 AND `status.code` != 2';
-    return buildHttpStatusPplWhere(statusFilter);
-  }, [statusFilter]);
+  const spanStatusWhere = useMemo(() => buildSpanStatusPplWhere(statusFilter), [statusFilter]);
 
   // Fetch spans with optional filters
   useEffect(() => {
@@ -812,7 +807,10 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                     timeRange,
                     config?.tracesDataset?.datasourceId,
                     undefined, // dataSourceTitle - not available in config
-                    operationFilter // Pass the operation filter
+                    operationFilter, // Pass the operation filter
+                    // Carry the status/HTTP filter. The HTTP buckets use coalesce, which the
+                    // pre-3.1 fallback path can't run, so leave those off the link there.
+                    spanFilterFallback ? '' : spanStatusWhere
                   )
                 }
                 data-test-subj="apmCorrelationsExploreTraces"
@@ -979,7 +977,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                         result.dataSourceId,
                         result.dataSourceTitle,
                         hasFilters ? extractedTraceIds : undefined, // Pass traceIds only when filtered
-                        hasFilters ? result.traceIdField : undefined // Pass traceIdField
+                        hasFilters ? result.traceIdField : undefined, // Pass traceIdField
+                        result.filterFallback ? '' : logLevelWhere // Carry the log-level filter
                       )
                     }
                   >

@@ -332,13 +332,15 @@ export function navigateToExploreTraces(
   timeRange: TimeRange,
   dataSourceId?: string,
   dataSourceTitle?: string,
-  operationFilter?: string
+  operationFilter?: string,
+  filterPpl?: string
 ): void {
   // PPL query - URL encoded via encodeURIComponent
   let pplQuery = `| where serviceName = "${serviceName}"`;
   if (operationFilter) {
     pplQuery += ` | where name = "${operationFilter}"`;
   }
+  pplQuery += pplFilterForUrl(filterPpl);
 
   // Build path using RISON format matching expected explore traces URL format
   // Note: Empty strings in RISON must be quoted as ''
@@ -397,6 +399,15 @@ export function navigateToSpanDetails(
   window.open(fullUrl, '_blank');
 }
 
+/**
+ * Make an extra PPL filter fragment safe to embed in an Explore/Agent Traces URL. The query
+ * sits inside a single-quoted RISON string, which encodeURIComponent does not escape, so
+ * single-quoted PPL literals are rewritten as double-quoted ones (equivalent in PPL).
+ */
+function pplFilterForUrl(filterPpl?: string): string {
+  return filterPpl ? filterPpl.replace(/'/g, '"') : '';
+}
+
 /** Escape a value for a PPL double-quoted string literal. */
 function escapePplString(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
@@ -451,12 +462,14 @@ export function navigateToAgentTraces(
   timeRange: TimeRange,
   dataSourceId?: string,
   dataSourceTitle?: string,
-  operationFilter?: string
+  operationFilter?: string,
+  filterPpl?: string
 ): void {
   let pplQuery = `| where serviceName = "${escapePplString(serviceName)}"`;
   if (operationFilter) {
     pplQuery += ` | where name = "${escapePplString(operationFilter)}"`;
   }
+  pplQuery += pplFilterForUrl(filterPpl);
   openAgentTraces(
     'spans',
     pplQuery,
@@ -547,7 +560,8 @@ export function navigateToExploreLogs(
   dataSourceId?: string,
   dataSourceTitle?: string,
   traceIds?: string[],
-  traceIdField?: string
+  traceIdField?: string,
+  filterPpl?: string
 ): void {
   // PPL query - URL encoded via encodeURIComponent below
   // Note: Use double quotes for string literals to avoid RISON single-quote conflicts
@@ -556,6 +570,7 @@ export function navigateToExploreLogs(
     const traceIdList = traceIds.map((id) => `"${id}"`).join(', ');
     pplQuery += ` | where \`${traceIdField}\` IN (${traceIdList})`;
   }
+  pplQuery += pplFilterForUrl(filterPpl);
 
   // Build path using RISON format matching expected explore logs URL format
   // Note: datasetId is already in correct format from APM config, use as-is

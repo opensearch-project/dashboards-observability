@@ -12,6 +12,7 @@ import {
   normalizeLogLevel,
   buildLogLevelPplWhere,
   buildHttpStatusPplWhere,
+  buildSpanStatusPplWhere,
   isCoalesceUnsupportedError,
   isGenAiSpan,
 } from '../format_utils';
@@ -378,5 +379,22 @@ describe('isGenAiSpan', () => {
     expect(isGenAiSpan({ attributes: { 'http.method': 'GET' } })).toBe(false);
     expect(isGenAiSpan({ attributes: { 'gen_ai.operation.name': '' } })).toBe(false);
     expect(isGenAiSpan({ attributes: { 'gen_ai.operation.name': '   ' } })).toBe(false);
+  });
+});
+
+describe('buildSpanStatusPplWhere', () => {
+  it('maps OTel status values to status.code predicates', () => {
+    expect(buildSpanStatusPplWhere('error')).toBe(' | where `status.code` = 2');
+    expect(buildSpanStatusPplWhere('ok')).toBe(' | where `status.code` = 0');
+    expect(buildSpanStatusPplWhere('unset')).toBe(
+      ' | where `status.code` != 0 AND `status.code` != 2'
+    );
+  });
+
+  it('delegates HTTP buckets and returns empty for all/unknown', () => {
+    expect(buildSpanStatusPplWhere('http-5xx')).toBe(buildHttpStatusPplWhere('http-5xx'));
+    expect(buildSpanStatusPplWhere('http-5xx')).toContain('>= 500');
+    expect(buildSpanStatusPplWhere('all')).toBe('');
+    expect(buildSpanStatusPplWhere('bogus')).toBe('');
   });
 });
