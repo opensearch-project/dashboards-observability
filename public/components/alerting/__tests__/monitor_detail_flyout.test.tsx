@@ -86,6 +86,23 @@ describe('MonitorDetailFlyout', () => {
     (console.error as jest.Mock).mockRestore?.();
   });
 
+  it('lets a long rule name with no spaces wrap instead of running under the badges', () => {
+    const longName =
+      'SLO_BurnRate_PageQuick_api_availability_availability_1a2b3c4d_0123456789abcdef';
+    const { getByRole, getByTestId } = render(
+      <MonitorDetailFlyout
+        monitor={{ ...mockMonitor, name: longName }}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+      />
+    );
+    const title = getByRole('heading', { name: longName });
+    expect(title).toHaveStyle({ overflowWrap: 'anywhere' });
+    expect(title.closest('.euiFlexItem')).toHaveStyle({ minWidth: '0' });
+    expect(getByTestId('monitorDetailHeaderRow')).toHaveClass('euiFlexGroup--wrap');
+  });
+
   it('renders flyout with monitor name', () => {
     const { getByText } = render(
       <MonitorDetailFlyout

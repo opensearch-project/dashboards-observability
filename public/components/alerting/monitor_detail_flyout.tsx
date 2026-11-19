@@ -338,10 +338,20 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
     <>
       <EuiFlyout onClose={onClose} size="m" ownFocus aria-labelledby="monitorDetailTitle">
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem>
+          {/* Rule names can be long with no spaces (e.g. generated SLO rule names): let the title
+              shrink and wrap anywhere so it never runs under the status badges. */}
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            responsive={false}
+            wrap
+            data-test-subj="monitorDetailHeaderRow"
+          >
+            <EuiFlexItem style={{ minWidth: 0 }}>
               <EuiTitle size="m">
-                <h2 id="monitorDetailTitle">{monitor.name}</h2>
+                <h2 id="monitorDetailTitle" style={{ overflowWrap: 'anywhere' }}>
+                  {monitor.name}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

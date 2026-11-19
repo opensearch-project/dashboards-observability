@@ -562,6 +562,32 @@ describe('AlertDetailFlyout', () => {
       });
     });
 
+    it('keeps the header actions reachable when the alert name is long with no spaces', () => {
+      // Generated SLO rule names have no spaces; the title must be able to shrink and wrap
+      // anywhere, and the header row must wrap, so "Open SLO" stays inside the flyout (#57).
+      const longName =
+        'SLO_BurnRate_PageQuick_api_availability_availability_1a2b3c4d_0123456789abcdef';
+      const sloAlert: UnifiedAlertSummary = {
+        ...baseAlert,
+        name: longName,
+        datasourceType: 'prometheus',
+        labels: { slo_id: 'slo-1', slo_name: 'Checkout availability', alertname: longName },
+      };
+      const { getByTestId, getByRole } = render(
+        <AlertDetailFlyout
+          alert={sloAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const title = getByRole('heading', { name: longName });
+      expect(title).toHaveStyle({ overflowWrap: 'anywhere' });
+      expect(title.closest('.euiFlexItem')).toHaveStyle({ minWidth: '0' });
+      expect(getByTestId('alertDetailHeaderRow')).toHaveClass('euiFlexGroup--wrap');
+      expect(getByTestId('alertDetailOpenSource')).toHaveTextContent('Open SLO');
+    });
+
     it('prefers the SLO name over a copied monitor_name for an SLO alert', () => {
       // An SLO alert that also carries a monitor_name must still name the SLO in
       // the "Source SLO" row — not the monitor — to stay consistent with the
