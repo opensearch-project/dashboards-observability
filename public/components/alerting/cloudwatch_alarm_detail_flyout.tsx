@@ -70,6 +70,8 @@ import {
 } from './shared_constants';
 import { getStateHex } from './alert_colors';
 import { formatTimestamp, localizeTimestampsInText } from './time_format';
+import { ExploreLinkButtons } from '../common/explore_links';
+import type { ExploreQueryTarget } from '../../../common/types/explore_links';
 import {
   getCloudWatchStateLabel,
   getMonitorStateLabel,
@@ -100,6 +102,8 @@ export interface CloudWatchAlarmFlyoutRow {
   severity?: UnifiedAlertSeverity;
   monitorType?: MonitorType;
   cloudWatch?: UnifiedCloudWatchMeta;
+  /** Queries that open the alarm's data in Explore, when its source provides them. */
+  exploreTargets?: ExploreQueryTarget[];
 }
 
 export interface CloudWatchAlarmDetailFlyoutProps {
@@ -671,6 +675,13 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
     (current.monitorType === 'composite' ? 'composite' : 'metric');
   const state = detail?.alarm.stateValue || current.cloudWatch?.state;
   const cw = { accountId: detail?.alarm.accountId, region: detail?.alarm.region };
+  const exploreTimeRange = useMemo(
+    () => ({
+      from: new Date(timeWindow.startMs).toISOString(),
+      to: new Date(timeWindow.endMs).toISOString(),
+    }),
+    [timeWindow.startMs, timeWindow.endMs]
+  );
 
   const headerState = (
     <EuiText size="s">
@@ -780,6 +791,13 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         {headerState}
+        {/* The alarm's own query in Explore, over the window this flyout charts. */}
+        <ExploreLinkButtons
+          targets={detail?.alarm.exploreTargets ?? current.exploreTargets}
+          timeRange={exploreTimeRange}
+          onNavigate={onClose}
+          data-test-subj="cwAlarmExploreLinks"
+        />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>

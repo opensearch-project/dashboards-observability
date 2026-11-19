@@ -1796,3 +1796,56 @@ describe('AlarmsPage cap toasts', () => {
     expect(typeof toast.text).toBe('string');
   });
 });
+
+describe('AlarmsPage Explore links', () => {
+  const promRule = {
+    id: 'r1',
+    name: 'HighErrors',
+    datasourceId: 'prom-1',
+    datasourceType: 'prometheus',
+    definitionType: 'prometheus_rule',
+    query: 'rate(errors_total[5m]) > 0.1',
+    labels: {},
+  };
+  const promDs = {
+    id: 'prom-1',
+    name: 'prom',
+    type: 'prometheus',
+    url: '',
+    enabled: true,
+    directQueryName: 'my_prom',
+  } as Datasource;
+
+  const rulesSentToTable = async () => {
+    mockUseRulesData.mockReturnValue({
+      ...emptyRulesHookResult,
+      rules: [promRule] as unknown as never,
+    });
+    await act(async () => {
+      render(<AlarmsPage {...defaultProps} datasources={[promDs]} />);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    });
+    return mockMonitorsTable.mock.calls[mockMonitorsTable.mock.calls.length - 1][0].rules;
+  };
+
+  afterEach(() => {
+    delete (coreRefs as any).application;
+  });
+
+  it('gives Prometheus rules their Explore target with Explore links on', async () => {
+    (coreRefs as any).application = {
+      capabilities: { observability: { exploreLinksEnabled: true } },
+    };
+    const [row] = await rulesSentToTable();
+    expect(row.exploreTargets).toEqual([
+      expect.objectContaining({ signal: 'metrics', query: 'rate(errors_total[5m])' }),
+    ]);
+  });
+
+  it('passes the rule rows unchanged with Explore links off', async () => {
+    const [row] = await rulesSentToTable();
+    expect(row).toBe(promRule);
+  });
+});

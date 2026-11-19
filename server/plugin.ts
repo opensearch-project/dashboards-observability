@@ -354,6 +354,7 @@ export class ObservabilityPlugin implements Plugin<
       .create<{
         alertManager?: { enabled?: boolean };
         apmInfrastructure?: { enabled?: boolean };
+        exploreLinks?: { enabled?: boolean };
         cloudwatch?: { enabled?: boolean; defaultRegion?: string };
         errors?: { exposeSensitiveErrorDetail?: boolean };
         slo?: {
@@ -383,6 +384,7 @@ export class ObservabilityPlugin implements Plugin<
     const ymlAlertManagerEnabled = observabilityConfig.alertManager?.enabled ?? false;
     const ymlSloEnabled = observabilityConfig.slo?.enabled ?? false;
     const ymlApmInfrastructureEnabled = observabilityConfig.apmInfrastructure?.enabled ?? false;
+    const ymlExploreLinksEnabled = observabilityConfig.exploreLinks?.enabled ?? false;
     // CloudWatch alarms (experimental) need, per request, the flag on and a source that reaches
     // CloudWatch with the caller's credentials. This plugin ships no source (and no AWS SDK), so
     // here they stay off; a deployment that can reach CloudWatch provides the factory at this
@@ -404,6 +406,20 @@ export class ObservabilityPlugin implements Plugin<
         return config.cloudwatch?.enabled ?? ymlCloudWatchEnabled;
       } catch {
         return ymlCloudWatchEnabled;
+      }
+    };
+    // Explore links for one request: the dynamic-config value when there is one, else yml.
+    const isExploreLinksOn = async (request: OpenSearchDashboardsRequest): Promise<boolean> => {
+      try {
+        const dynamicConfig = await core.dynamicConfigService.getStartService();
+        const store = dynamicConfig.createStoreFromRequest(request);
+        if (!store) return ymlExploreLinksEnabled;
+        const config = await dynamicConfig
+          .getClient()
+          .getConfig({ name: 'observability' }, { asyncLocalStorageContext: store });
+        return config.exploreLinks?.enabled ?? ymlExploreLinksEnabled;
+      } catch {
+        return ymlExploreLinksEnabled;
       }
     };
     // Whether CloudWatch is on for this request: the flag, and the deployment's source agreeing.
@@ -452,6 +468,7 @@ export class ObservabilityPlugin implements Plugin<
         region: observabilityConfig.cloudwatch?.defaultRegion,
       },
       cloudWatchAlarmSourceFactory,
+      exploreLinks: { isEnabled: isExploreLinksOn },
     });
 
     // SLO service + routes. Starts on `InMemorySloStore` so it's available
@@ -551,6 +568,7 @@ export class ObservabilityPlugin implements Plugin<
         alertManagerEnabled: ymlAlertManagerEnabled,
         sloEnabled: ymlSloEnabled,
         apmInfrastructureEnabled: ymlApmInfrastructureEnabled,
+        exploreLinksEnabled: ymlExploreLinksEnabled,
         // Whether the browser shows the virtual CloudWatch datasource; resolved per request by
         // the switcher below (flag and source), off until then.
         cloudWatchAlarmsEnabled: false,
@@ -583,6 +601,7 @@ export class ObservabilityPlugin implements Plugin<
             sloEnabled: config.slo?.enabled ?? ymlSloEnabled,
             apmInfrastructureEnabled:
               config.apmInfrastructure?.enabled ?? ymlApmInfrastructureEnabled,
+            exploreLinksEnabled: config.exploreLinks?.enabled ?? ymlExploreLinksEnabled,
             cloudWatchAlarmsEnabled: await isCloudWatchAvailable(request).catch(() => false),
           },
         };

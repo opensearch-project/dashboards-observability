@@ -16,6 +16,8 @@
  * backend) so the two integrations read the same way.
  */
 
+import type { ExploreQueryTarget } from '../explore_links';
+
 /** Unified CloudWatch alarm state (`StateValue` in the CloudWatch API). */
 export type CloudWatchAlarmState = 'ALARM' | 'OK' | 'INSUFFICIENT_DATA';
 
@@ -76,6 +78,12 @@ export interface CloudWatchAlarm {
    * failing the whole flyout.
    */
   partialAccess?: boolean;
+  /**
+   * Optional: queries that open this alarm's data in Explore, built by the source (it knows the
+   * dataset types and query languages the deployment registers). Shown only when Explore links
+   * are enabled; the plugin drops them otherwise.
+   */
+  exploreTargets?: ExploreQueryTarget[];
 }
 
 /** One entry in `DescribeAlarmHistory`. */

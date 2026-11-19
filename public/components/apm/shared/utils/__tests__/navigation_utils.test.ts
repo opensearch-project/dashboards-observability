@@ -590,6 +590,14 @@ describe('navigateToExploreMetrics (open in Discover metrics)', () => {
     expect(url).toContain('time:(from:now-15m,to:now)');
   });
 
+  it('builds exactly the same URL as before the shared Explore link builder', () => {
+    navigateToExploreMetrics('up{job!="a b"}', "conn'1", { from: 'now-15m', to: 'now' });
+    expect(windowOpenSpy).toHaveBeenCalledWith(
+      "/base/app/explore/metrics/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(dataset:(id:'conn!'1',title:'conn!'1',type:PROMETHEUS,language:PROMQL,timeFieldName:Time,signalType:metrics,dataSource:(meta:())),language:PROMQL,query:'up%7Bjob!!%3D%22a%20b%22%7D')&_a=(ui:(metricsPageMode:query))",
+      '_blank'
+    );
+  });
+
   it('sends only the UI mode in _a, so Explore uses its defaults for the tab and legacy state', () => {
     navigateToExploreMetrics('up', 'conn-1', { from: 'now-15m', to: 'now' });
 

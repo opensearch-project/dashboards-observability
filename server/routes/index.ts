@@ -51,6 +51,7 @@ export function setupRoutes({
   logger,
   cloudWatch,
   cloudWatchAlarmSourceFactory,
+  exploreLinks,
 }: {
   router: IRouter;
   client: ILegacyClusterClient;
@@ -66,6 +67,11 @@ export function setupRoutes({
    * CloudWatch with the caller's credentials passes one (as it can pass a Prometheus backend).
    */
   cloudWatchAlarmSourceFactory?: CloudWatchAlarmSourceFactory;
+  /**
+   * `isEnabled` is the per-request Explore links flag (`observability.exploreLinks.enabled`).
+   * Off (or absent): rows carry no Explore targets.
+   */
+  exploreLinks?: { isEnabled: (request: OpenSearchDashboardsRequest) => Promise<boolean> };
 }) {
   PanelsRouter(router);
   VisualizationsRouter(router);
@@ -125,7 +131,11 @@ export function setupRoutes({
       ? async (request: OpenSearchDashboardsRequest) => {
           if (!(await cloudWatch.isEnabled(request))) return undefined;
           const source = await cloudWatchAlarmSourceFactory(request);
-          return source ? new CloudWatchBackend(logger, source) : undefined;
+          return source
+            ? new CloudWatchBackend(logger, source, {
+                exploreTargets: (await exploreLinks?.isEnabled(request)) === true,
+              })
+            : undefined;
         }
       : undefined;
 

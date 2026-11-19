@@ -61,6 +61,11 @@ import {
 } from './shared_constants';
 import { getMonitorStateLabel, getSeverityLabel, getStateLabel } from './enum_labels';
 import { stateHistoryUnavailableMessage } from './alarm_time_window';
+import { ExploreLinkButtons, openableExploreTargets } from '../common/explore_links';
+import { DEFAULT_RULE_EXPLORE_TIME_RANGE, useResolvedExploreTargets } from './explore_targets';
+import type { ExploreQueryTarget } from '../../../common/types/explore_links';
+
+const NO_TARGETS: ExploreQueryTarget[] = [];
 
 // Cap for the alert-history table in the flyout. `EuiBasicTable` doesn't
 // paginate by default; without this cap a monitor that has accumulated
@@ -134,6 +139,10 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   onEdit,
   onToggleEnabled,
 }) => {
+  const resolvedExploreTargets = useResolvedExploreTargets(
+    monitor.exploreTargets ?? NO_TARGETS,
+    monitor.datasourceId
+  );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditRedirectConfirm, setShowEditRedirectConfirm] = useState(false);
   const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
@@ -464,6 +473,16 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 </EuiButtonEmpty>
               )}
             </EuiFlexItem>
+            {openableExploreTargets(resolvedExploreTargets).length > 0 && (
+              <EuiFlexItem grow={false}>
+                <ExploreLinkButtons
+                  targets={resolvedExploreTargets}
+                  timeRange={DEFAULT_RULE_EXPLORE_TIME_RANGE}
+                  onNavigate={onClose}
+                  data-test-subj="monitorDetailExploreLinks"
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutHeader>
 

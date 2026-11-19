@@ -52,32 +52,8 @@ import {
 // Preview helper functions (exported for testing)
 // ============================================================================
 
-/**
- * Strip a single trailing comparison (`> 0.5`, `>= 1e3`, `!= -2`, …) off a
- * PromQL alert expression so a preview can chart the underlying metric series
- * rather than the boolean 0/1 the full alert condition would produce.
- *
- * Best-effort by design: it only removes the LAST trailing comparison, so a
- * compound condition like `a > 1 and b > 2` is intentionally left unchanged
- * (the metric expression can't be safely recovered) rather than mangled into
- * `a > 1 and b`. Handles integers, decimals, scientific notation and negative
- * thresholds. Shared by the Prometheus preview route and the rule-detail
- * condition preview so both strip identically.
- */
-export function stripTrailingComparison(query: string): string {
-  const trimmed = (query || '').trim();
-  const stripped = trimmed
-    .replace(/\s*(>=|<=|!=|==|>|<)\s*-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\s*$/, '')
-    .trim();
-  // No trailing comparison matched, or stripping emptied the query → leave as-is.
-  if (!stripped || stripped === trimmed) return trimmed;
-  // If the remainder still contains a comparison operator, the original was a
-  // compound condition (e.g. `a > 1 and b > 2`) — stripping only the tail would
-  // produce a nonsensical `a > 1 and b`, so preserve the original instead of
-  // charting a mangled expression.
-  if (/(>=|<=|!=|==|>|<)/.test(stripped)) return trimmed;
-  return stripped;
-}
+// `stripTrailingComparison` lives in common/ so the browser can chart a rule's signal too.
+export { stripTrailingComparison } from '../../../common/services/alerting/promql_signal';
 
 /**
  * Extract the timestamp field name from a query's range filter.
@@ -1255,6 +1231,7 @@ export function cloudWatchAlarmToUnifiedRuleSummary(
         ? { operator: alarm.comparisonOperator || 'GreaterThanThreshold', value: alarm.threshold }
         : undefined,
     cloudWatch: meta,
+    ...(alarm.exploreTargets?.length ? { exploreTargets: alarm.exploreTargets } : {}),
   };
 }
 
@@ -1283,5 +1260,6 @@ export function cloudWatchAlarmToUnifiedAlertSummary(
     annotations: alarm.description ? { description: alarm.description } : {},
     monitorId: alarm.alarmName,
     cloudWatch: cloudWatchMeta(alarm),
+    ...(alarm.exploreTargets?.length ? { exploreTargets: alarm.exploreTargets } : {}),
   };
 }

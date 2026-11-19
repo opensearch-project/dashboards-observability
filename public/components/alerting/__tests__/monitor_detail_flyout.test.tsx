@@ -437,3 +437,50 @@ describe('MonitorDetailFlyout', () => {
     });
   });
 });
+
+/** Turn Explore links on (capability + a registered dataset type) for one test. */
+function enableExploreLinks(refs: any) {
+  const saved = { application: refs.application, data: refs.data };
+  refs.application = {
+    ...(refs.application || {}),
+    capabilities: { observability: { exploreLinksEnabled: true } },
+    getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+    navigateToApp: refs.application?.navigateToApp || jest.fn(),
+  };
+  refs.data = {
+    query: { queryString: { getDatasetService: () => ({ getType: () => ({}) }) } },
+  };
+  return () => {
+    refs.application = saved.application;
+    refs.data = saved.data;
+  };
+}
+
+const exploreTarget = {
+  signal: 'metrics' as const,
+  dataset: { id: 'my-prom', type: 'PROMETHEUS' },
+  language: 'PROMQL',
+  query: 'rate(errors_total[5m])',
+};
+
+describe('MonitorDetailFlyout Explore links', () => {
+  it("shows the rule's Explore link with Explore links on, and none with them off", () => {
+    const monitor = { ...mockMonitor, exploreTargets: [exploreTarget] };
+    const props = { onClose: jest.fn(), onDelete: jest.fn(), onClone: jest.fn() };
+    const off = render(<MonitorDetailFlyout monitor={monitor} {...props} />);
+    expect(off.queryByTestId('monitorDetailExploreLinks')).toBeNull();
+    // No empty slot either: the flag-off header has the same items as before.
+    const offItems = off.container.querySelectorAll('.euiFlyoutHeader .euiFlexItem').length;
+    off.unmount();
+    const plain = render(<MonitorDetailFlyout monitor={mockMonitor} {...props} />);
+    expect(plain.container.querySelectorAll('.euiFlyoutHeader .euiFlexItem').length).toBe(offItems);
+    plain.unmount();
+    const restore = enableExploreLinks(coreRefs);
+    try {
+      const { getByTestId } = render(<MonitorDetailFlyout monitor={monitor} {...props} />);
+      expect(getByTestId('monitorDetailExploreLinks-0')).toHaveTextContent('Open in Metrics');
+    } finally {
+      restore();
+    }
+  });
+});
