@@ -36,7 +36,7 @@ import {
   classifiedToastText,
   extractClassifiedError,
 } from '../common/error';
-import { localizeClassified } from '../../../common/error';
+import { CloudWatchErrorCode, localizeClassified } from '../../../common/error';
 import type { ClassifiedError } from '../../../common/error';
 import {
   CloudWatchTargets,
@@ -77,6 +77,7 @@ import {
 import {
   clampToDatasourceCap,
   cloudWatchScopeKeyOf,
+  decodeCloudWatchDatasourceId,
 } from '../../../common/services/alerting/cloudwatch_datasource_id';
 import type { DatasourceFacetCloudWatch } from './datasource_facet';
 import { transformPplFormToPayload } from '../../../common/services/alerting/form_transforms';
@@ -269,6 +270,14 @@ function buildUniqueCloneName(
   // Practically unreachable — a thousand same-named clones on one datasource.
   // Guarantee a unique name rather than loop forever.
   return withSuffix(`${makeSuffix(1)}-${Date.now()}`);
+}
+
+/**
+ * The scope id of a CloudWatch datasource that reads through a source-defined account scope
+ * (e.g. a data connection). Undefined for the default scope and for any other datasource.
+ */
+function cloudWatchScopeIdOf(datasourceId: string): string | undefined {
+  return decodeCloudWatchDatasourceId(datasourceId)?.scopeId;
 }
 
 export const AlarmsPage: React.FC<AlarmsPageProps> = ({
@@ -2079,10 +2088,23 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     return Array.from(byId.values());
   }, [alertsWarnings, rulesWarnings, alertingAvailability, datasources]);
 
+  // The label of the account scope a CloudWatch datasource with a scope id reads through.
+  // The scope's own label, not the datasource's display label: a display label can carry an
+  // account id to tell repeated labels apart. Undefined for the default scope, any other
+  // datasource, or a scope the targets don't list.
+  const cloudWatchScopeLabelOf = useCallback(
+    (datasourceId: string): string | undefined => {
+      const scopeId = cloudWatchScopeIdOf(datasourceId);
+      if (scopeId === undefined) return undefined;
+      return cloudWatchTargets?.scopes.find((s) => s.id === scopeId)?.label;
+    },
+    [cloudWatchTargets]
+  );
+
   // The text shown for one datasource issue, in the facet indicator and the
   // unreachable empty state.
   const datasourceIssueText = useCallback(
-    (issue: { error: string; errorDetail?: ClassifiedError }) => {
+    (issue: { datasourceId: string; error: string; errorDetail?: ClassifiedError }) => {
       // Prefer the structured classification when the server attached one —
       // it names the failure class (e.g. "AWS session expired") and carries
       // remediation + safe diagnostics, which reads far better than the raw
@@ -2090,7 +2112,27 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
       // framing for unclassified failures.
       if (issue.errorDetail) {
         const localized = localizeClassified(issue.errorDetail);
-        return `${localized.title} — ${classifiedToastText(localized)}`;
+        // A scope with an id reads with the credentials configured for it, not the caller's
+        // own: an access denial names the scope instead of asking to grant "your identity".
+        const scopeLabel =
+          localized.code === CloudWatchErrorCode.ACCESS_DENIED
+            ? cloudWatchScopeLabelOf(issue.datasourceId)
+            : undefined;
+        const shown =
+          scopeLabel === undefined
+            ? localized
+            : {
+                ...localized,
+                remediation: i18n.translate(
+                  'observability.alerting.alarmsPage.datasourceErrors.cloudWatchScopeAccessDenied',
+                  {
+                    defaultMessage:
+                      'The credentials of "{scopeLabel}" aren\'t allowed to read alarms. Ask an administrator to grant them cloudwatch:DescribeAlarms, cloudwatch:DescribeAlarmHistory and cloudwatch:GetMetricData, then retry.',
+                    values: { scopeLabel },
+                  }
+                ),
+              };
+        return `${shown.title} — ${classifiedToastText(shown)}`;
       }
       // Frame the raw error with "Could not connect" language so the
       // indicator popover reads as a complete thought
@@ -2102,14 +2144,15 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         values: { error: issue.error },
       });
     },
-    []
+    [cloudWatchScopeLabelOf]
   );
 
   const datasourceErrorMapByName = useMemo(() => {
-    // A CloudWatch account shows the indicator only when every selected region of it failed and
-    // none of the failures is a permission error. Missing read permissions for a scope or region
-    // are expected and stay quiet (the scope just contributes no rows), as does an account where
-    // only some regions fail.
+    // A CloudWatch account shows the indicator only when every selected region of it failed; an
+    // account where only some regions fail stays quiet. The default scope reads with the
+    // caller's own credentials, so missing read permissions there are expected and stay quiet
+    // too (the scope just contributes no rows). A scope with an id (e.g. a data connection)
+    // reads with credentials configured for it, so a permission error there is shown.
     const issueIds = new Set(datasourceIssues.map((i) => i.datasourceId));
     const cloudWatchScopeShown = new Map<string, boolean>();
     const showCloudWatchScope = (scope: string) => {
@@ -2118,11 +2161,14 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         const scopeIssues = datasourceIssues.filter(
           (i) => cloudWatchScopeKeyOf(i.datasourceId) === scope
         );
+        const hasScopeId = scopeIssues.some(
+          (i) => cloudWatchScopeIdOf(i.datasourceId) !== undefined
+        );
         shown =
           selectedDsIds
             .filter((id) => cloudWatchScopeKeyOf(id) === scope)
             .every((id) => issueIds.has(id)) &&
-          scopeIssues.every((i) => i.errorDetail?.category !== 'PERMISSION_DENIED');
+          (hasScopeId || scopeIssues.every((i) => i.errorDetail?.category !== 'PERMISSION_DENIED'));
         cloudWatchScopeShown.set(scope, shown);
       }
       return shown;
