@@ -121,6 +121,8 @@ jest.mock('../hooks/use_monitor_mutations', () => ({
 import { AlarmsPage, parseAlarmsHashRoute } from '../alarms_page';
 import type { CloudWatchTargets, Datasource } from '../../../../common/types/alerting';
 import { cloudWatchDatasourcesFor } from '../../../../common/services/alerting/cloudwatch_datasource_id';
+import { CloudWatchErrorCode } from '../../../../common/error';
+import type { ClassifiedError } from '../../../../common/error';
 import { coreRefs } from '../../../framework/core_refs';
 import { ALERT_MANAGER_SELECTED_DS_STORAGE_KEY } from '../../../../common/constants/alerting_settings';
 
@@ -1668,12 +1670,16 @@ describe('AlarmsPage CloudWatch regions', () => {
 
   describe('CloudWatch account error indicator', () => {
     const cwStatus = (
-      failures: Array<{ id: string; category?: 'PERMISSION_DENIED' | 'RATE_LIMITED' }>
+      failures: Array<{
+        id: string;
+        category?: 'PERMISSION_DENIED' | 'RATE_LIMITED';
+        errorDetail?: ClassifiedError;
+      }>
     ) => ({
       ...emptyHookResult,
       data: {
         results: [],
-        datasourceStatus: failures.map(({ id, category }) => ({
+        datasourceStatus: failures.map(({ id, category, errorDetail }) => ({
           datasourceId: id,
           datasourceName: id,
           datasourceType: 'cloudwatch',
@@ -1681,15 +1687,17 @@ describe('AlarmsPage CloudWatch regions', () => {
           data: [],
           durationMs: 0,
           error: category ?? 'failed',
-          errorDetail: category
-            ? {
-                category,
-                code: category === 'PERMISSION_DENIED' ? 'ACCESS_DENIED' : 'THROTTLED',
-                title: category === 'PERMISSION_DENIED' ? 'Access denied' : 'Throttled',
-                message: 'm',
-                retryable: category !== 'PERMISSION_DENIED',
-              }
-            : undefined,
+          errorDetail:
+            errorDetail ??
+            (category
+              ? {
+                  category,
+                  code: category === 'PERMISSION_DENIED' ? 'ACCESS_DENIED' : 'THROTTLED',
+                  title: category === 'PERMISSION_DENIED' ? 'Access denied' : 'Throttled',
+                  message: 'm',
+                  retryable: category !== 'PERMISSION_DENIED',
+                }
+              : undefined),
         })),
         totalDatasources: failures.length,
         completedDatasources: 0,
@@ -1727,6 +1735,136 @@ describe('AlarmsPage CloudWatch regions', () => {
         expect.arrayContaining([ownUsEast.id, ownEuWest.id])
       );
       expect(lastProps(mockDashboard).datasourceErrorMap).toEqual({});
+    });
+
+    describe('for a scope with an id', () => {
+      // A denial as the CloudWatch classifier reports it.
+      const accessDenied: ClassifiedError = {
+        category: 'PERMISSION_DENIED',
+        code: CloudWatchErrorCode.ACCESS_DENIED,
+        title: 'CloudWatch access denied',
+        message:
+          'The AWS credentials are valid but not authorized for the CloudWatch API that was called.',
+        remediation:
+          'Ask an administrator to grant your identity cloudwatch:DescribeAlarms, cloudwatch:DescribeAlarmHistory and cloudwatch:GetMetricData, then retry.',
+        retryable: false,
+      };
+      const scopedRemediation =
+        'The credentials of "Shared" aren\'t allowed to read alarms. Ask an administrator to grant them cloudwatch:DescribeAlarms, cloudwatch:DescribeAlarmHistory and cloudwatch:GetMetricData, then retry.';
+      const sharedUsEast = datasources.find(
+        (d) => d.cloudWatchScope === 'scope-b' && d.region === 'us-east-1'
+      ) as Datasource;
+      const sharedEuWest = datasources.find(
+        (d) => d.cloudWatchScope === 'scope-b' && d.region === 'eu-west-1'
+      ) as Datasource;
+
+      it('shows a permission error with a remediation that names the scope', async () => {
+        mockUseAlerts.mockReturnValue(
+          cwStatus([{ id: sharedUsEast.id, errorDetail: accessDenied }])
+        );
+        await renderPage({ defaultDatasources: ['os-1', sharedUsEast.id] });
+        const errorMap = lastProps(mockDashboard).datasourceErrorMap;
+        expect(Object.keys(errorMap)).toEqual([sharedUsEast.name]);
+        expect(errorMap[sharedUsEast.name]).toBe(
+          `CloudWatch access denied — ${accessDenied.message}\n${scopedRemediation}`
+        );
+        expect(errorMap[sharedUsEast.name]).not.toContain('your identity');
+      });
+
+      it('keeps the default scope quiet for the same permission error', async () => {
+        mockUseAlerts.mockReturnValue(cwStatus([{ id: ownUsEast.id, errorDetail: accessDenied }]));
+        await renderPage();
+        expect(lastProps(mockDashboard).datasourceErrorMap).toEqual({});
+      });
+
+      it('stays quiet when only some selected regions of the scope failed', async () => {
+        mockUseAlerts.mockReturnValue(
+          cwStatus([{ id: sharedUsEast.id, errorDetail: accessDenied }])
+        );
+        await renderPage({
+          defaultDatasources: ['os-1', sharedUsEast.id, sharedEuWest.id],
+          cloudWatchRegions: ['us-east-1', 'eu-west-1'],
+        });
+        expect(lastProps(mockDashboard).selectedDsIds).toEqual(
+          expect.arrayContaining([sharedUsEast.id, sharedEuWest.id])
+        );
+        expect(lastProps(mockDashboard).datasourceErrorMap).toEqual({});
+      });
+
+      it('keeps the text of a non-permission error', async () => {
+        mockUseAlerts.mockReturnValue(
+          cwStatus([{ id: sharedUsEast.id, category: 'RATE_LIMITED' }])
+        );
+        await renderPage({ defaultDatasources: ['os-1', sharedUsEast.id] });
+        expect(lastProps(mockDashboard).datasourceErrorMap).toEqual({
+          [sharedUsEast.name]: 'Throttled — m',
+        });
+      });
+
+      it('shows another permission error with its own remediation', async () => {
+        const expired: ClassifiedError = {
+          category: 'PERMISSION_DENIED',
+          code: CloudWatchErrorCode.AUTH_EXPIRED,
+          title: 'AWS session expired',
+          message: 'The AWS credentials have expired, so CloudWatch rejected the request.',
+          remediation: 'Sign in again to get a new session, then retry.',
+          retryable: false,
+        };
+        mockUseAlerts.mockReturnValue(cwStatus([{ id: sharedUsEast.id, errorDetail: expired }]));
+        await renderPage({ defaultDatasources: ['os-1', sharedUsEast.id] });
+        expect(lastProps(mockDashboard).datasourceErrorMap).toEqual({
+          [sharedUsEast.name]: `AWS session expired — ${expired.message}\n${expired.remediation}`,
+        });
+      });
+
+      it('uses the same text in the unreachable list, and the default scope keeps its own', async () => {
+        mockUseAlerts.mockReturnValue(
+          cwStatus([
+            { id: sharedUsEast.id, errorDetail: accessDenied },
+            { id: ownUsEast.id, errorDetail: accessDenied },
+          ])
+        );
+        await renderPage({ defaultDatasources: [ownUsEast.id, sharedUsEast.id] });
+        const errorMap = lastProps(mockDashboard).datasourceErrorMap;
+        const unreachable = lastProps(mockDashboard).unreachableDatasources;
+        expect(unreachable).toEqual([
+          {
+            name: ownUsEast.name,
+            error: `CloudWatch access denied — ${accessDenied.message}\n${accessDenied.remediation}`,
+          },
+          { name: sharedUsEast.name, error: errorMap[sharedUsEast.name] },
+        ]);
+        expect(errorMap[sharedUsEast.name]).toContain(scopedRemediation);
+        await act(async () => {
+          fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+        });
+        expect(lastProps(mockMonitorsTable).unreachableDatasources).toEqual(unreachable);
+      });
+
+      it('names the scope by its own label, without an account id or ARN', async () => {
+        // Two scopes share a label, so their display labels carry the account ids.
+        const repeated: CloudWatchTargets = {
+          ...targets,
+          scopes: [
+            { label: 'CloudWatch', relation: 'own', accountId: '111111111111' },
+            { id: 'scope-b', label: 'Shared', relation: 'other', accountId: '222222222222' },
+            { id: 'scope-c', label: 'Shared', relation: 'other', accountId: '333333333333' },
+          ],
+        };
+        const repeatedDatasources = [osDs, ...cloudWatchDatasourcesFor(repeated, ['us-east-1'])];
+        const shared = repeatedDatasources.find((d) => d.cloudWatchScope === 'scope-b')!;
+        expect(shared.cloudWatchScopeLabel).toBe('Shared (222222222222)');
+        mockUseAlerts.mockReturnValue(cwStatus([{ id: shared.id, errorDetail: accessDenied }]));
+        await renderPage({
+          datasources: repeatedDatasources,
+          cloudWatchTargets: repeated,
+          defaultDatasources: ['os-1', shared.id],
+        });
+        const text = lastProps(mockDashboard).datasourceErrorMap[shared.name];
+        expect(text).toContain(scopedRemediation);
+        expect(text).not.toMatch(/\d{12}/);
+        expect(text).not.toMatch(/arn:/i);
+      });
     });
   });
 });

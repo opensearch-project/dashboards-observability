@@ -173,7 +173,11 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   // a stale snapshot until the user closes and reopens it.
   useEffect(() => {
     if (!selectedMonitor) return;
-    const fresh = rules.find((r) => r.id === selectedMonitor.id);
+    // Match the datasource too: a CloudWatch alarm read through two account scopes is two rows
+    // with the same id (its ARN), and the open flyout must stay on the row that was clicked.
+    const fresh = rules.find(
+      (r) => r.id === selectedMonitor.id && r.datasourceId === selectedMonitor.datasourceId
+    );
     if (!fresh) return;
     if (fresh !== selectedMonitor) setSelectedMonitor(fresh);
   }, [rules, selectedMonitor]);
