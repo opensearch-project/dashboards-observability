@@ -26,6 +26,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -33,7 +34,7 @@ import {
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { PromQLLineChart } from '../../shared/components/promql_line_chart';
-import { useApmConfig } from '../../config/apm_config_context';
+import { useSloPrometheusConnection } from './slo_prometheus_connection';
 import { TimeRange } from '../../common/types/service_types';
 import type { Objective, SloDocument, SloLiveStatus } from '../../../../../common/slo/slo_types';
 import { SloBurnRatePanel } from './slo_burn_rate_panel';
@@ -78,8 +79,19 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
   refreshTrigger,
   onViewRulesRequest,
 }) => {
-  const { config } = useApmConfig();
-  const prometheusConnectionId = config?.prometheusDataSource?.name ?? '';
+  // The SLO's own datasource, not the APM settings' source (which may differ or be unset).
+  const {
+    connectionId: prometheusConnectionId,
+    loading: connectionLoading,
+    source: connectionSource,
+  } = useSloPrometheusConnection(slo.spec.datasourceId);
+  // The SLO names a data source that isn't listed, so the charts use the APM settings' one.
+  // Trimmed like the resolver, so a padded or blank id doesn't show a padded or blank name.
+  const sloDatasourceRef = slo.spec.datasourceId?.trim() ?? '';
+  const chartsUseApmFallback =
+    connectionSource === 'apm' &&
+    sloDatasourceRef !== '' &&
+    sloDatasourceRef !== prometheusConnectionId;
 
   // Multi-objective support — the server generates one rule set per objective,
   // so each needs its own visualization. Default to the first (tightest target
@@ -115,6 +127,22 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
   // page should know *why* there are no charts without reading three paragraphs.
   // ========================================================================
 
+  if (connectionLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner
+            size="l"
+            aria-label={i18n.translate('observability.apm.slo.visualizations.connectionLoading', {
+              defaultMessage: 'Loading the SLO data source',
+            })}
+            data-test-subj="slosVisualizationsConnectionLoading"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   if (!prometheusConnectionId) {
     return (
       <EuiCallOut
@@ -122,14 +150,14 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
         color="warning"
         iconType="iInCircle"
         data-test-subj="slosVisualizationsNoDatasource"
-        title={i18n.translate('observability.apm.slo.visualizations.noDatasource.title', {
-          defaultMessage: 'Prometheus datasource not configured in APM',
+        title={i18n.translate('observability.apm.slo.visualizations.noSloDatasource.title', {
+          defaultMessage: 'No Prometheus data source for this SLO',
         })}
       >
         <EuiText size="s">
-          {i18n.translate('observability.apm.slo.visualizations.noDatasource.body', {
+          {i18n.translate('observability.apm.slo.visualizations.noSloDatasource.body', {
             defaultMessage:
-              'Configure a Prometheus datasource in APM Settings to render live SLO visualizations.',
+              "This SLO's data source isn't available in this workspace, and APM Settings has no Prometheus data source. Add the SLO's data source to this workspace, or set one in APM Settings, to see live charts.",
           })}
         </EuiText>
       </EuiCallOut>
@@ -177,6 +205,24 @@ export const SloVisualizations: React.FC<SloVisualizationsProps> = ({
 
   return (
     <>
+      {chartsUseApmFallback && (
+        <>
+          <EuiCallOut
+            size="s"
+            iconType="iInCircle"
+            data-test-subj="slosVisualizationsApmFallback"
+            title={i18n.translate('observability.apm.slo.visualizations.apmFallback.title', {
+              defaultMessage:
+                "Charts use the APM settings' Prometheus data source ({connection}); this SLO's data source ({datasource}) wasn't found.",
+              values: {
+                connection: prometheusConnectionId,
+                datasource: sloDatasourceRef,
+              },
+            })}
+          />
+          <EuiSpacer size="s" />
+        </>
+      )}
       {/* Objective selector — only renders when there's more than one. */}
       {objectives.length > 1 && (
         <>
