@@ -39,6 +39,19 @@ describe('signalExpressions', () => {
   it('returns nothing for an empty expression', () => {
     expect(signalExpressions('  ')).toEqual([]);
   });
+  it('ignores operators inside label matchers and strings', () => {
+    expect(signalExpressions('rate(errors{code!="200"}[5m]) > 0.1')).toEqual([
+      'rate(errors{code!="200"}[5m])',
+    ]);
+    expect(signalExpressions('a{x!="1"} > 1 and b{y=~"z>2"} > 2')).toEqual([
+      'a{x!="1"}',
+      'b{y=~"z>2"}',
+    ]);
+    expect(stripTrailingComparison('up{job!="api"} == 0')).toBe('up{job!="api"}');
+    // A real compound condition still stays whole.
+    expect(stripTrailingComparison('a{x!="1"} > 1 and b > 2')).toBe('a{x!="1"} > 1 and b > 2');
+  });
+
   it('keeps stripTrailingComparison behaviour', () => {
     expect(stripTrailingComparison('a > 1 and b > 2')).toBe('a > 1 and b > 2');
     expect(stripTrailingComparison('up == 0')).toBe('up');

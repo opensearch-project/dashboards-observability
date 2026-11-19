@@ -6,6 +6,7 @@
 import {
   alertExploreTargets,
   alertExploreTimeRange,
+  dateFields,
   pickTimeField,
   pplMonitorTargets,
   prometheusRuleTargets,
@@ -269,6 +270,24 @@ describe('alertExploreTimeRange', () => {
       from: 'now-1h',
       to: 'now',
     });
+  });
+});
+
+describe('dateFields', () => {
+  it('counts date_nanos fields as dates (OpenTelemetry log indices map @timestamp that way)', () => {
+    expect(dateFields({ date_nanos: ['@timestamp', 'time'], keyword: ['traceId'] })).toEqual([
+      '@timestamp',
+      'time',
+    ]);
+    expect(dateFields({ date: ['created'], date_nanos: ['observed'] })).toEqual([
+      'created',
+      'observed',
+    ]);
+    expect(dateFields({})).toEqual([]);
+    // Same field typed differently across the indices of a wildcard: listed once.
+    expect(dateFields({ date: ['@timestamp'], date_nanos: ['@timestamp'] })).toEqual([
+      '@timestamp',
+    ]);
   });
 });
 

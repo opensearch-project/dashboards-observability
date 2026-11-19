@@ -165,10 +165,16 @@ export function alertExploreTimeRange(
   return { from, to: new Date(last + ALERT_EXPLORE_PAD_MS).toISOString() };
 }
 
+/** Date-typed fields of a mapping (`date` and `date_nanos`, e.g. OpenTelemetry log indices). */
+export function dateFields(fieldsByType: Record<string, string[]>): string[] {
+  // A wildcard pattern can map one field as `date` in one index and `date_nanos` in another.
+  return Array.from(new Set([...(fieldsByType.date || []), ...(fieldsByType.date_nanos || [])]));
+}
+
 /** Pick an index's time field: `@timestamp` when it's a date, else its only date field. */
-export function pickTimeField(dateFields: string[]): string | undefined {
-  if (dateFields.includes('@timestamp')) return '@timestamp';
-  return dateFields.length === 1 ? dateFields[0] : undefined;
+export function pickTimeField(fields: string[]): string | undefined {
+  if (fields.includes('@timestamp')) return '@timestamp';
+  return fields.length === 1 ? fields[0] : undefined;
 }
 
 /**
@@ -191,7 +197,7 @@ export function useResolvedExploreTargets(
   });
   return useMemo(() => {
     if (!needs) return targets;
-    const timeField = isLoading || isStale ? undefined : pickTimeField(fieldsByType.date || []);
+    const timeField = isLoading || isStale ? undefined : pickTimeField(dateFields(fieldsByType));
     return targets.flatMap((t) => {
       if (t.dataset.type !== 'INDEXES' || t.dataset.timeFieldName) return [t];
       return timeField ? [{ ...t, dataset: { ...t.dataset, timeFieldName: timeField } }] : [];

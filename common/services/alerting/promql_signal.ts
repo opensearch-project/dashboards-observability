@@ -10,6 +10,16 @@
  */
 
 /**
+ * The expression with label-matcher braces and quoted strings emptied, so operator checks don't
+ * see the `!=` / `=~` inside `{code!="200"}` or text inside a string.
+ */
+function outsideMatchersAndStrings(expr: string): string {
+  return expr
+    .replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`[^`]*`/g, '""')
+    .replace(/\{[^}]*\}/g, '{}');
+}
+
+/**
  * Strip a single trailing comparison (`> 0.5`, `>= 1e3`, `!= -2`, …) off a
  * PromQL alert expression so a preview can chart the underlying metric series
  * rather than the boolean 0/1 the full alert condition would produce.
@@ -32,7 +42,7 @@ export function stripTrailingComparison(query: string): string {
   // compound condition (e.g. `a > 1 and b > 2`) — stripping only the tail would
   // produce a nonsensical `a > 1 and b`, so preserve the original instead of
   // charting a mangled expression.
-  if (/(>=|<=|!=|==|>|<)/.test(stripped)) return trimmed;
+  if (/(>=|<=|!=|==|>|<)/.test(outsideMatchersAndStrings(stripped))) return trimmed;
   return stripped;
 }
 
@@ -88,9 +98,9 @@ export function signalExpressions(query: string): string[] {
   const sides = splitTopLevelAnd(trimmed);
   if (sides.length < 2) return [stripTrailingComparison(trimmed)];
   const stripped = sides.map((side) => stripTrailingComparison(side));
-  const clean = stripped.every(
-    (side, i) =>
-      side !== sides[i] && !/\s(or|unless)\s/i.test(side) && !/(>=|<=|!=|==|>|<)/.test(side)
-  );
+  const clean = stripped.every((side, i) => {
+    const bare = outsideMatchersAndStrings(side);
+    return side !== sides[i] && !/\s(or|unless)\s/i.test(bare) && !/(>=|<=|!=|==|>|<)/.test(bare);
+  });
   return clean ? stripped : [trimmed];
 }
