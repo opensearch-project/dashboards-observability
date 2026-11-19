@@ -415,10 +415,16 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     // selection, which the restore may have just changed.
     if (cloudWatchLoading) return;
     if (lastAppliedDsSeqRef.current === deepLink.seq) return;
-    if (!datasources.some((d) => d.id === dsId)) return;
+    // An exact id wins, as before. Otherwise the link may name the datasource by name,
+    // direct-query name or MDS id, like the stored selection: Prometheus ids (`ds-N`) change
+    // between discovery passes, so a link from another page (e.g. SLO detail) carries the name.
+    const linkedId = datasources.some((d) => d.id === dsId)
+      ? dsId
+      : resolveDatasourceTokens([dsId], datasources)[0];
+    if (!linkedId) return;
     lastAppliedDsSeqRef.current = deepLink.seq;
     setSelectedDsIds((prev) =>
-      prev.includes(dsId) ? prev : clampToDatasourceCap([...prev, dsId], maxDatasources)
+      prev.includes(linkedId) ? prev : clampToDatasourceCap([...prev, linkedId], maxDatasources)
     );
   }, [
     deepLink.ds,

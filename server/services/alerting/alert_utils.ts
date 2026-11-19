@@ -277,7 +277,9 @@ export function osStateToUnified(state: string): UnifiedAlertState {
 }
 
 export function promSeverityFromLabels(labels: Record<string, string>): UnifiedAlertSeverity {
-  const sev = labels.severity || '';
+  // `severity` is the Prometheus convention. Rules generated for SLOs carry `slo_severity`
+  // instead (critical / warning), so fall back to it rather than reading every SLO alert as info.
+  const sev = labels.severity || labels.slo_severity || '';
   if (sev === 'critical' || sev === 'high' || sev === 'medium' || sev === 'low') return sev;
   if (sev === 'warning') return 'medium';
   if (sev === 'page') return 'critical';
@@ -547,7 +549,10 @@ export function promEpisodeToUnified(ep: PromAlertEpisode, dsId: string): Unifie
   // `promSeverityFromLabels` so `warning` / `page` aliases stay consistent
   // with live alerts — an unrecognized non-empty severity still falls
   // through to `'info'` there, matching live-alert behavior.
-  const finalSeverity = ep.labels.severity ? promSeverityFromLabels(ep.labels) : 'medium';
+  // `slo_severity` counts as a severity too (SLO-generated rules), so SLO episodes read like
+  // their live alerts instead of falling back to medium.
+  const finalSeverity =
+    ep.labels.severity || ep.labels.slo_severity ? promSeverityFromLabels(ep.labels) : 'medium';
   const state: UnifiedAlertState = ep.stillActiveAtRangeEnd ? 'active' : 'resolved';
 
   const annotations: Record<string, string> = {};

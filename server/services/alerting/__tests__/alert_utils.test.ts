@@ -22,10 +22,52 @@ import {
   osMonitorToUnifiedRuleSummary,
   promAlertToUnified,
   promEpisodeToUnified,
+  promRuleToUnified,
+  promSeverityFromLabels,
   runtimeStateToMonitorStatus,
   stripTrailingComparison,
 } from '../alert_utils';
-import type { MonitorStatus, OSMonitor } from '../../../../common/types/alerting';
+import type { MonitorStatus, OSMonitor, PromAlertingRule } from '../../../../common/types/alerting';
+
+describe('promSeverityFromLabels', () => {
+  it('reads the severity label', () => {
+    expect(promSeverityFromLabels({ severity: 'critical' })).toBe('critical');
+    expect(promSeverityFromLabels({ severity: 'warning' })).toBe('medium');
+    expect(promSeverityFromLabels({})).toBe('info');
+  });
+  it('falls back to slo_severity (SLO-generated rules carry no severity label)', () => {
+    expect(promSeverityFromLabels({ slo_severity: 'critical' })).toBe('critical');
+    expect(promSeverityFromLabels({ slo_severity: 'warning' })).toBe('medium');
+  });
+  it('prefers severity over slo_severity', () => {
+    expect(promSeverityFromLabels({ severity: 'low', slo_severity: 'critical' })).toBe('low');
+  });
+  it('treats an empty severity as absent', () => {
+    expect(promSeverityFromLabels({ severity: '', slo_severity: 'critical' })).toBe('critical');
+  });
+});
+
+describe('promRuleToUnified severity', () => {
+  const rule = (labels: Record<string, string>): PromAlertingRule => ({
+    type: 'alerting',
+    name: 'SLOBurnRateHigh',
+    query: 'slo:sli_error:ratio_rate_5m{slo_id="s-1"} > 14.4',
+    duration: 120,
+    labels,
+    annotations: {},
+    alerts: [],
+    health: 'ok',
+    state: 'firing',
+  });
+  it('reads slo_severity on an SLO burn-rate rule', () => {
+    expect(
+      promRuleToUnified(rule({ slo_id: 's-1', slo_severity: 'critical' }), 'g', 'ds-prom').severity
+    ).toBe('critical');
+  });
+  it('is unchanged for a rule without either label', () => {
+    expect(promRuleToUnified(rule({}), 'g', 'ds-prom').severity).toBe('info');
+  });
+});
 
 describe('stripTrailingComparison', () => {
   it('strips a simple trailing comparison', () => {
@@ -139,6 +181,18 @@ describe('promEpisodeToUnified', () => {
       'ds-prom'
     );
     expect(u.severity).toBe('medium');
+  });
+
+  it('reads slo_severity when the severity label is missing (SLO-generated rules)', () => {
+    const u = promEpisodeToUnified(
+      {
+        labels: { alertname: 'SLOBurnRateHigh', slo_id: 's-1', slo_severity: 'critical' },
+        startMs: START,
+        endMs: END,
+      },
+      'ds-prom'
+    );
+    expect(u.severity).toBe('critical');
   });
 
   it('empty-string severity ⇒ fallback "medium" (treated same as missing)', () => {
