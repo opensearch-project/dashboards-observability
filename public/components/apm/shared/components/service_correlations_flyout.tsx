@@ -41,7 +41,11 @@ import { useCorrelatedLogs } from '../hooks/use_apm_config';
 import { useServiceAttributes } from '../hooks/use_service_attributes';
 import { PPLSearchService } from '../../query_services/ppl_search_service';
 import { TimeRange } from '../../common/types/service_types';
-import { parseTimeRange, formatPPLTimestamp, formatDisplayTimestamp } from '../utils/time_utils';
+import {
+  parseTimeRange,
+  buildPplTimeRangeWhere,
+  formatDisplayTimestamp,
+} from '../utils/time_utils';
 import { correlationsFlyoutI18nTexts as i18nTexts } from './service_correlations_flyout_i18n';
 import { openCorrelatedDashboard, openApmSettings } from '../utils/navigation_utils';
 import { ResolvedCorrelatedDashboard } from '../../../../../common/types/observability_saved_object_attributes';
@@ -66,7 +70,7 @@ import {
   getHttpStatusColor,
   normalizeLogLevel,
   buildLogLevelPplWhere,
-  buildHttpStatusPplWhere,
+  buildSpanStatusPplWhere,
   isCoalesceUnsupportedError,
   isGenAiSpan,
 } from '../utils/format_utils';
@@ -293,12 +297,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
   // error/ok/unset; the HTTP-status buckets are pushed via buildHttpStatusPplWhere, which
   // coalesces the two OTel-convention field names so a name absent from the index mapping
   // doesn't error. Everything is server-side now, so the fetch stays at head 50.
-  const spanStatusWhere = useMemo(() => {
-    if (statusFilter === 'error') return ' | where `status.code` = 2';
-    if (statusFilter === 'ok') return ' | where `status.code` = 0';
-    if (statusFilter === 'unset') return ' | where `status.code` != 0 AND `status.code` != 2';
-    return buildHttpStatusPplWhere(statusFilter);
-  }, [statusFilter]);
+  const spanStatusWhere = useMemo(() => buildSpanStatusPplWhere(statusFilter), [statusFilter]);
 
   // Fetch spans with optional filters
   useEffect(() => {
@@ -308,6 +307,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       setSpansLoading(true);
       setSpansError(null);
       setSpanFilterFallback(false);
+      // A previous range's span window must not leak into the log query for this one.
+      setSpanTimeRange(undefined);
 
       try {
         const pplService = new PPLSearchService();
@@ -324,6 +325,12 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
         if (operationFilter) {
           baseQuery += ` | where name = '${operationFilter}'`;
         }
+        // Bound to the selected time range so the newest 50 are the newest *in range*.
+        baseQuery += buildPplTimeRangeWhere(
+          'startTime',
+          parsedTimeRange.startTime,
+          parsedTimeRange.endTime
+        );
 
         // Primary: push the status/HTTP filter server-side and fetch the top 50.
         const primaryQuery = `${baseQuery}${spanStatusWhere} | sort - startTime | head ${APM_CONSTANTS.QUERY_LIMITS.SPANS}`;
@@ -480,15 +487,18 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           // 1. Always filter by serviceName
           pplQuery += ` | where \`${serviceNameField}\` = '${serviceName}'`;
 
-          // 2. Add timestamp filter with buffer if we have span time range (5 minutes before span start only)
+          // 2. Always bound to the selected time range. When spans were fetched, narrow to their
+          // window (with a lag buffer before the first span), clamped to the selected range.
+          let logsFrom = parsedTimeRange.startTime;
+          let logsTo = parsedTimeRange.endTime;
           if (spanTimeRange) {
             const bufferMs = CORRELATION_CONSTANTS.TELEMETRY_LAG_BUFFER_MS;
-            const minTimeStr = formatPPLTimestamp(
-              new Date(spanTimeRange.minTime.getTime() - bufferMs)
+            logsFrom = new Date(
+              Math.max(logsFrom.getTime(), spanTimeRange.minTime.getTime() - bufferMs)
             );
-            const maxTimeStr = formatPPLTimestamp(new Date(spanTimeRange.maxTime.getTime()));
-            pplQuery += ` | where \`${timestampField}\` >= '${minTimeStr}' AND \`${timestampField}\` <= '${maxTimeStr}'`;
+            logsTo = new Date(Math.min(logsTo.getTime(), spanTimeRange.maxTime.getTime()));
           }
+          pplQuery += buildPplTimeRangeWhere(timestampField, logsFrom, logsTo);
 
           // 3. Add traceId correlation only when viewing filtered data (operations/dependencies)
           // When no filters are set (service-level view), show all logs for the service
@@ -576,6 +586,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     serviceName,
     extractedTraceIds,
     spanTimeRange,
+    parsedTimeRange,
     spansLoading,
     hasFilters,
     logLevelWhere,
@@ -796,7 +807,10 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                     timeRange,
                     config?.tracesDataset?.datasourceId,
                     undefined, // dataSourceTitle - not available in config
-                    operationFilter // Pass the operation filter
+                    operationFilter, // Pass the operation filter
+                    // Carry the status/HTTP filter. The HTTP buckets use coalesce, which the
+                    // pre-3.1 fallback path can't run, so leave those off the link there.
+                    spanFilterFallback ? '' : spanStatusWhere
                   )
                 }
                 data-test-subj="apmCorrelationsExploreTraces"
@@ -843,7 +857,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           body={<p>{spansError.message}</p>}
         />
       ) : sortedSpans.length === 0 ? (
-        <EuiEmptyPrompt iconType="search" title={<h3>{i18nTexts.noSpans}</h3>} />
+        <EuiEmptyPrompt
+          iconType="search"
+          title={<h3>{i18nTexts.noSpans}</h3>}
+          body={<p>{i18nTexts.noSpansBody}</p>}
+        />
       ) : (
         <EuiBasicTable
           items={sortedSpans}
@@ -959,7 +977,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                         result.dataSourceId,
                         result.dataSourceTitle,
                         hasFilters ? extractedTraceIds : undefined, // Pass traceIds only when filtered
-                        hasFilters ? result.traceIdField : undefined // Pass traceIdField
+                        hasFilters ? result.traceIdField : undefined, // Pass traceIdField
+                        result.filterFallback ? '' : logLevelWhere // Carry the log-level filter
                       )
                     }
                   >

@@ -25,13 +25,17 @@ export const correlationsFlyoutI18nTexts = {
 
   // Empty states
   noSpans: i18n.translate('observability.apm.correlationsFlyout.noSpans', {
-    defaultMessage: 'No spans found for this service',
+    defaultMessage: 'No spans found in the selected time range',
+  }),
+  noSpansBody: i18n.translate('observability.apm.correlationsFlyout.noSpansBody', {
+    defaultMessage:
+      'No spans match this service and the current filters. Widen the time range or clear the operation, dependency or status filters.',
   }),
   noAttributes: i18n.translate('observability.apm.correlationsFlyout.noAttributes', {
     defaultMessage: 'No attributes found for this service',
   }),
   noLogs: i18n.translate('observability.apm.correlationsFlyout.noLogs', {
-    defaultMessage: 'No logs found for this service',
+    defaultMessage: 'No logs found in the selected time range for this service',
   }),
   noCorrelatedLogs: i18n.translate('observability.apm.correlationsFlyout.noCorrelatedLogs', {
     defaultMessage: 'No correlated log datasets configured',

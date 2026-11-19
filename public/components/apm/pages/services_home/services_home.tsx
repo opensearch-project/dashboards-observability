@@ -95,6 +95,12 @@ const toMetricsNode = (s: ServiceTableItem) => ({
 // Sort value for a metric that may be unavailable (its query failed): below every real value.
 const UNAVAILABLE_SORT_VALUE = -1;
 
+/**
+ * Min width of the value text ("747 ms", "0.073 req/s", "0.0%") beside each metric sparkline.
+ * Shared so the latency, throughput and failure-rate sparklines get the same width.
+ */
+const METRIC_VALUE_MIN_WIDTH = 70;
+
 /** Initial node-type filter: services only (see selectedTypes). */
 const DEFAULT_TYPE_FILTER: Record<string, boolean> = { service: true };
 
@@ -1168,9 +1174,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         // sidebar claims its share) the failure-ratio header truncated
         // mid-word and the throughput sparkline visibly bled into the
         // failure-rate cell. Metric columns (latency / throughput /
-        // failure rate) need ~130px to fit `<value>` + the 60px sparkline;
-        // budget the remaining width proportionally.
-        width: '15%',
+        // failure rate) need ~130px to fit `<value>` + the 60px sparkline and
+        // share one width so the three trend charts line up; the remaining
+        // columns are budgeted from what is left.
+        width: '14%',
         render: (serviceName: string, item: ServiceTableItem) => {
           const language = item.groupByAttributes?.telemetry?.sdk?.language;
 
@@ -1284,7 +1291,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '23%',
+        width: '20%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
@@ -1306,7 +1313,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: '50px' }}>
+              <EuiFlexItem grow={false} style={{ minWidth: METRIC_VALUE_MIN_WIDTH }}>
                 <EuiText size="s">{latencyText}</EuiText>
               </EuiFlexItem>
               {/* Sparkline grows to fill the cell so wide screens get a
@@ -1337,7 +1344,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '23%',
+        width: '20%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
@@ -1360,7 +1367,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: '70px' }}>
+              <EuiFlexItem grow={false} style={{ minWidth: METRIC_VALUE_MIN_WIDTH }}>
                 <EuiText size="s">{throughputFormatted}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
@@ -1387,7 +1394,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        width: '13%',
+        width: '20%',
         align: 'center',
         sortable: (item: ServiceTableItem) => {
           if (!item?.serviceName) return 0;
@@ -1411,7 +1418,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: '40px' }}>
+              <EuiFlexItem grow={false} style={{ minWidth: METRIC_VALUE_MIN_WIDTH }}>
                 <EuiText size="s">{failureFormatted}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
@@ -1436,8 +1443,8 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         sortable: true,
         align: 'center',
         width: '8%',
-        // Widths: 15 + 8 + 19 + 19 + 13 + 8 + 18 = 100% (SLO health column
-        // adds 18% only when sloFeatureEnabled; without it the others
+        // Widths: 14 + 8 + 20 + 20 + 20 + 8 + 10 = 100% (SLO health column
+        // adds 10% only when sloFeatureEnabled; without it the others
         // distribute the remainder via EuiBasicTable's flex rules).
         render: (environment: string) => {
           return <EuiText size="s">{getEnvironmentLabel(environment)}</EuiText>;
