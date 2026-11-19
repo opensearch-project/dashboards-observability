@@ -144,6 +144,16 @@ export interface SloStatusAggregationContext {
    */
   onOutdatedRules?: (doc: SloDocument, outdatedGroups: string[]) => void;
   /**
+   * Request-scoped reader for a datasource's active alerts: the Prometheus
+   * `/api/v1/alerts` response or its alerts array. When set, the firing-alert
+   * count reads through it instead of the resource-proxy transport, which can't
+   * reach a datasource that needs the caller's credentials. Unset keeps the
+   * transport read.
+   */
+  alertsReader?: (
+    ds: Datasource
+  ) => Promise<PromAlertsApiResponse | PromRawAlert[] | Record<string, unknown>>;
+  /**
    * When true, the aggregator queries fingerprint-named recording rules
    * (e.g. `slo:sli_error:ratio_rate_3d:sli_<fp>`) and maps samples back to
    * objectives via each SO's `recordingFingerprints`. When undefined/false,
@@ -311,8 +321,9 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       // Firing-alerts: one fetch per datasource, keyed by slo_id.
       //
       // This fetch is NON-CRITICAL: it only supplies the firing-alert count
-      // badge. It uses the raw OSD resource-proxy transport
-      // (`ctx.client.transport`), a different path from the PromQL status read
+      // badge. It reads through `ctx.alertsReader` when the deployment wires a
+      // request-scoped one; otherwise it uses the raw OSD resource-proxy
+      // transport (`ctx.client.transport`), a different path from the PromQL status read
       // (which goes through the data plugin's search strategy). The alerts
       // endpoint can be unreachable while `/query` is fine, so this fetch's
       // failure must NOT drive the datasource circuit breaker — doing so trips
@@ -320,18 +331,23 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       // PromQL status reads to `no_data` for every SLO. Failure here only zeroes
       // the firing count; the breaker is recorded by the status read below,
       // which reflects the path that actually determines health.
-      let alertCountBySloId = new Map<string, number>();
-      try {
-        alertCountBySloId = await this.fetchFiringAlertsBySlo(ctx.client, ds);
-      } catch (err) {
+      // Started here and awaited after the long-window prefetch below, so the
+      // two reads overlap instead of adding up.
+      const datasource = ds;
+      const alertCountsPromise = this.fetchFiringAlertsBySlo(
+        ctx.client,
+        datasource,
+        ctx.alertsReader
+      ).catch((err) => {
         // Graceful: treat as zero firing alerts and keep computing attainment.
         this.logger.warn(
-          `StatusAggregator: alerts fetch failed for datasource ${ds.id} (${
-            ds.directQueryName
+          `StatusAggregator: alerts fetch failed for datasource ${datasource.id} (${
+            datasource.directQueryName
           }): ${errMsg(err)}. firingCount will be 0 for affected SLOs (non-critical; ` +
             `circuit breaker not affected).`
         );
-      }
+        return new Map<string, number>();
+      });
 
       // Pre-fetch the long-window recording samples for every non-dedup SLO
       // on this datasource in a single PromQL call per (datasource ×
@@ -343,6 +359,7 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
       // fingerprints — collapsing them would force a second membership
       // lookup per sample, with no win).
       const prefetchedByLongWindow = await this.prefetchLongWindowSamples(group, ds, ctx);
+      const alertCountBySloId = await alertCountsPromise;
 
       // Per-SLO: one *fallback* instant query per SLO if the prefetch missed
       // (dedup-flag enabled, or empty group, or transport failure). Cap the
@@ -993,20 +1010,27 @@ export class DirectQueryStatusAggregator implements SloStatusAggregator {
   // --------------------------------------------------------------------------
 
   /**
-   * Fetch firing alerts and group by `slo_id` label. Uses the same
-   * resource-proxy path as `DirectQueryPrometheusBackend.getAlerts` (verified
-   * 2026-04-23 — GET passes through the SQL plugin's resource router). Only
-   * state=firing is counted; pending/inactive aren't "active pages".
+   * Fetch firing alerts and group by `slo_id` label. Reads through
+   * `alertsReader` when given; otherwise uses the same resource-proxy path as
+   * `DirectQueryPrometheusBackend.getAlerts` (verified 2026-04-23 — GET passes
+   * through the SQL plugin's resource router). Only state=firing is counted;
+   * pending/inactive aren't "active pages".
    */
   private async fetchFiringAlertsBySlo(
     client: AlertingOSClient,
-    ds: Datasource
+    ds: Datasource,
+    alertsReader?: SloStatusAggregationContext['alertsReader']
   ): Promise<Map<string, number>> {
-    const path = `/_plugins/_directquery/_resources/${encodeURIComponent(
-      ds.directQueryName as string
-    )}/api/v1/alerts`;
-    const resp = await client.transport.request({ method: 'GET', path });
-    const body = resp.body as PromAlertsApiResponse | Record<string, unknown> | PromRawAlert[];
+    let body: PromAlertsApiResponse | Record<string, unknown> | PromRawAlert[];
+    if (alertsReader) {
+      body = await alertsReader(ds);
+    } else {
+      const path = `/_plugins/_directquery/_resources/${encodeURIComponent(
+        ds.directQueryName as string
+      )}/api/v1/alerts`;
+      const resp = await client.transport.request({ method: 'GET', path });
+      body = resp.body as PromAlertsApiResponse | Record<string, unknown> | PromRawAlert[];
+    }
     const alerts = extractAlerts(body);
     const counts = new Map<string, number>();
     for (const a of alerts) {

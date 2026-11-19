@@ -33,7 +33,12 @@ import {
 import type { SloRuleHealthChecker, SloStatusAggregationContext } from '../status_aggregator';
 import { resetPromQLSearcherForTests, setPromQLSearcher } from '../../alerting/promql_search';
 import type { PromQLSearcher } from '../../alerting/promql_search';
-import type { AlertingOSClient, Datasource, Logger } from '../../../../common/types/alerting';
+import type {
+  AlertingOSClient,
+  Datasource,
+  Logger,
+  PromRawAlert,
+} from '../../../../common/types/alerting';
 import type { ObjectiveStatus, SloDocument, SloSpec } from '../../../../common/slo/slo_types';
 
 // ============================================================================
@@ -839,6 +844,99 @@ describe('DirectQueryStatusAggregator.aggregate — partial failure', () => {
     expect(byName['avail-99']).toBe('no_data');
     // Worst-of: breached > no_data > ok → breached.
     expect(status.state).toBe('breached');
+  });
+
+  it('reads firing alerts through ctx.alertsReader when set, not the transport', async () => {
+    const doc = makeDoc();
+    const { client, requestMock } = mockClient({
+      query: () =>
+        instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.002 }]),
+      alerts: () => {
+        throw new Error('transport must not be used when alertsReader is set');
+      },
+    });
+    const ds = promDatasource();
+    const alertsReader = jest.fn(
+      async () =>
+        alertsResponse([
+          { sloId: 'slo-1', state: 'firing' },
+          { sloId: 'slo-1', state: 'pending' },
+          { sloId: 'other-slo', state: 'firing' },
+        ]).data.alerts as unknown as PromRawAlert[]
+    );
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([doc], { ...ctxFor(ds, client), alertsReader });
+
+    expect(alertsReader).toHaveBeenCalledTimes(1);
+    expect(alertsReader).toHaveBeenCalledWith(ds);
+    expect(status.firingCount).toBe(1);
+    expect(
+      requestMock.mock.calls.some(([p]) =>
+        String((p as { path?: string }).path).endsWith('/api/v1/alerts')
+      )
+    ).toBe(false);
+  });
+
+  it('starts the long-window read while the alerts read is still pending', async () => {
+    const doc = makeDoc();
+    const { client, searcherMock } = mockClient({
+      query: () =>
+        instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.002 }]),
+    });
+    let release: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const alertsReader = jest.fn(async (_ds: Datasource) => {
+      await gate;
+      return alertsResponse([{ sloId: 'slo-1', state: 'firing' }]);
+    });
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const pending = agg.aggregate([doc], { ...ctxFor(promDatasource(), client), alertsReader });
+    for (let i = 0; i < 20 && searcherMock.mock.calls.length === 0; i++) {
+      await new Promise((resolve) => setImmediate(resolve));
+    }
+    expect(alertsReader).toHaveBeenCalledTimes(1);
+    expect(searcherMock).toHaveBeenCalled();
+    release();
+    const [status] = await pending;
+    expect(status.firingCount).toBe(1);
+  });
+
+  it('accepts the /api/v1/alerts envelope from ctx.alertsReader too', async () => {
+    const doc = makeDoc();
+    const { client } = mockClient({
+      query: () =>
+        instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.002 }]),
+    });
+    const alertsReader = jest.fn(async () => alertsResponse([{ sloId: 'slo-1', state: 'firing' }]));
+    const agg = new DirectQueryStatusAggregator(noopLogger());
+    const [status] = await agg.aggregate([doc], {
+      ...ctxFor(promDatasource(), client),
+      alertsReader,
+    });
+    expect(status.firingCount).toBe(1);
+  });
+
+  it('ctx.alertsReader failure → firingCount=0, status still computed', async () => {
+    const doc = makeDoc();
+    const { client } = mockClient({
+      query: () =>
+        instantResponse([{ objective: 'availability-99-9', sloId: 'slo-1', ratio: 0.0002 }]),
+    });
+    const alertsReader = jest.fn(async () => {
+      throw new Error('alerting backend unavailable');
+    });
+    const logger = noopLogger();
+    const agg = new DirectQueryStatusAggregator(logger);
+    const [status] = await agg.aggregate([doc], {
+      ...ctxFor(promDatasource(), client),
+      alertsReader,
+    });
+    expect(status.state).toBe('ok');
+    expect(status.firingCount).toBe(0);
+    expect(status.objectives[0].attainment).toBeCloseTo(0.9998, 5);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('alerts fetch failed'));
   });
 
   it('alerts endpoint fails but query succeeds → firingCount=0, attainment still computed', async () => {
