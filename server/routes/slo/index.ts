@@ -25,7 +25,11 @@ import type {
 import { SloService, SloValidationError, WORKSPACE_ID_RE } from '../../../common/slo/slo_service';
 import { MAX_BUCKET_BOUNDS } from '../../../common/slo/slo_types';
 import type { SloDocument } from '../../../common/slo/slo_types';
-import type { AlertingOSClient, Datasource } from '../../../common/types/alerting';
+import type {
+  AlertingOSClient,
+  Datasource,
+  PrometheusBackend,
+} from '../../../common/types/alerting';
 import type { InMemoryDatasourceService } from '../../services/alerting/datasource_service';
 import type { DatasourceDiscoveryService } from '../../services/alerting/datasource_discovery';
 import type { DirectQueryPrometheusBackend } from '../../services/alerting/directquery_prometheus_backend';
@@ -491,6 +495,23 @@ async function tryBuildDeployContext(
  * TODO: pull real workspaceId from OSD request scope once plumbed. Today
  * we use the alerting default workspace ('default').
  */
+/**
+ * A firing-alerts reader over a request-scoped alerting backend. The backend is
+ * built on the first read (and only once), so a status read that never gets to
+ * the alerts fetch doesn't build it, and a factory failure surfaces as that
+ * read's rejection, which the aggregator treats as non-critical.
+ */
+export function lazyAlertsReader(
+  client: AlertingOSClient,
+  backendFor: () => Pick<PrometheusBackend, 'getAlerts'>
+): (ds: Datasource) => ReturnType<PrometheusBackend['getAlerts']> {
+  let backend: Pick<PrometheusBackend, 'getAlerts'> | undefined;
+  return async (ds: Datasource) => {
+    backend = backend ?? backendFor();
+    return backend.getAlerts(client, ds);
+  };
+}
+
 function buildStatusContext(
   ctx: SloHandlerContext,
   datasourceService: InMemoryDatasourceService | undefined,
@@ -498,7 +519,8 @@ function buildStatusContext(
   ruleHealthChecker: RuleHealthChecker | undefined,
   ruleDedupEnabled?: boolean,
   request?: OpenSearchDashboardsRequest,
-  onOutdatedRules?: (doc: SloDocument, outdatedGroups: string[]) => void
+  onOutdatedRules?: (doc: SloDocument, outdatedGroups: string[]) => void,
+  alertsBackendFor?: () => Pick<PrometheusBackend, 'getAlerts'>
 ): SloStatusAggregationContext | undefined {
   if (!datasourceService) return undefined;
   const client = ctx.core.opensearch.client.asCurrentUser;
@@ -545,6 +567,11 @@ function buildStatusContext(
     // Re-provision recording groups that record an older version of the SLI
     // math, in the background (see OutdatedRuleRepairer).
     onOutdatedRules,
+    // Read the firing alerts through a request-scoped alerting backend when the
+    // deployment provides one (the resource-proxy transport can't reach a
+    // datasource that needs the caller's credentials). Built on first use, so a
+    // factory failure lands in the aggregator's non-critical alerts catch.
+    ...(alertsBackendFor ? { alertsReader: lazyAlertsReader(client, alertsBackendFor) } : {}),
     // Propagate the dedup flag so the aggregator can pick fingerprint-keyed
     // selectors when true.
     ruleDedupEnabled,
@@ -569,6 +596,14 @@ export interface RegisterSloRoutesOptions {
   sloService: SloService;
   logger: Logger;
   rulerClient?: RulerClient;
+  /**
+   * Per-request alerting backend for the status read's firing-alert count.
+   * When present, the count reads active alerts through it; when absent, the
+   * aggregator keeps the resource-proxy transport read.
+   */
+  alertsBackendFactory?: (
+    request: OpenSearchDashboardsRequest
+  ) => Pick<PrometheusBackend, 'getAlerts'>;
   datasourceService?: InMemoryDatasourceService;
   discoveryService?: DatasourceDiscoveryService;
   prometheusBackend?: DirectQueryPrometheusBackend;
@@ -583,6 +618,7 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
     sloService,
     logger,
     rulerClient,
+    alertsBackendFactory,
     datasourceService,
     discoveryService,
     prometheusBackend,
@@ -648,7 +684,8 @@ export function registerSloRoutes(options: RegisterSloRoutesOptions) {
               }
             });
           }
-        : undefined
+        : undefined,
+      req && alertsBackendFactory ? () => alertsBackendFactory(req) : undefined
     );
 
   // F1 — per-service aggregate rollup. Registered ahead of the list route so

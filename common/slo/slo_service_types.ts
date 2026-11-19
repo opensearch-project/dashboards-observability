@@ -16,7 +16,12 @@
  * import risk between the three sub-services and the facade.
  */
 
-import type { AlertingOSClient, Datasource } from '../types/alerting';
+import type {
+  AlertingOSClient,
+  Datasource,
+  PromAlertsApiResponse,
+  PromRawAlert,
+} from '../types/alerting';
 import type { SloDocument, SloLiveStatus, GeneratedRuleGroup } from './slo_types';
 import type { SloRulerErrorCode } from './slo_errors';
 import { SLO_RULER_NAMESPACE } from './slo_promql_generator';
@@ -246,6 +251,13 @@ export interface SloStatusAggregationContext {
    * SLI math; the route layer wires it to a throttled background repair.
    */
   onOutdatedRules?: (doc: SloDocument, outdatedGroups: string[]) => void;
+  /**
+   * Request-scoped reader for a datasource's active alerts, used for the
+   * firing-alert count instead of the resource-proxy transport when set.
+   */
+  alertsReader?: (
+    ds: Datasource
+  ) => Promise<PromAlertsApiResponse | PromRawAlert[] | Record<string, unknown>>;
 }
 
 // ============================================================================
