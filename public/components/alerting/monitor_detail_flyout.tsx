@@ -352,7 +352,16 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
       name: i18n.translate('observability.alerting.monitorDetailFlyout.history.message', {
         defaultMessage: 'Message',
       }),
-      truncateText: true,
+      // Error messages are long and can run without spaces (e.g. "Failed fetching inputs:
+      // OpenSearchStatusException[…]"): wrap anywhere so all of it is readable.
+      render: (message: string) => (
+        <span
+          data-test-subj="monitorDetailAlertHistoryMessage"
+          style={{ overflowWrap: 'anywhere' }}
+        >
+          {message}
+        </span>
+      ),
     },
   ];
 

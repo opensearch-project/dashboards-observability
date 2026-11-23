@@ -497,6 +497,24 @@ describe('MonitorDetailFlyout header and rows', () => {
     expect(queryByText('State')).toBeNull();
   });
 
+  it('shows the full message of a recent alert, wrapped instead of truncated', async () => {
+    const message =
+      'Failed fetching inputs: OpenSearchStatusException[OpenSearch exception [type=index_not_found_exception, reason=no such index [app-logs-2026.11.01]]]';
+    mockGetRuleDetail.mockResolvedValue({
+      ...mockMonitor,
+      alertHistory: [{ timestamp: new Date().toISOString(), state: 'error', value: '1', message }],
+      conditionPreviewData: [],
+    } as unknown as UnifiedRule);
+    const { findByTestId, getByText } = renderFlyout(mockMonitor);
+    const cell = await findByTestId('monitorDetailAlertHistoryMessage');
+    expect(cell).toHaveTextContent(message);
+    expect(cell).toHaveStyle({ overflowWrap: 'anywhere' });
+    expect(cell.closest('.euiTableCellContent--truncateText')).toBeNull();
+    // The other columns stay.
+    for (const column of ['Time', 'Status', 'Value', 'Message']) {
+      expect(getByText(column, { selector: '.euiTableCellContent__text' })).toBeInTheDocument();
+    }
+  });
   it('links a burn-rate rule to its SLO', async () => {
     const { findByTestId } = renderFlyout({
       ...mockMonitor,
