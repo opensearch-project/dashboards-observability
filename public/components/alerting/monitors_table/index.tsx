@@ -32,6 +32,7 @@ import {
   FilterState,
   matchesFilters,
   matchesSearch,
+  ruleStatusKey,
 } from './monitors_table_filters';
 import { SavedSearch } from './monitors_table_helpers';
 import { DEFAULT_WIDTHS, useResizableColumns } from './resizable_columns';
@@ -392,7 +393,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   useResizableColumns(tableWrapperRef, columnWidths, setColumnWidths, visibleColumns);
 
   // Unique values for filter dropdowns
-  const uniqueStatuses = useMemo(() => collectUniqueValues(rules, (r) => r.status), [rules]);
+  const uniqueStatuses = useMemo(() => collectUniqueValues(rules, ruleStatusKey), [rules]);
   const uniqueSeverities = useMemo(
     () => sortBySeverity(collectUniqueValues(rules, (r) => r.severity)),
     [rules]
@@ -446,7 +447,8 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
       createdBy: {},
     };
     for (const r of searchMatched) {
-      counts.status[r.status] = (counts.status[r.status] || 0) + 1;
+      const statusKey = ruleStatusKey(r);
+      counts.status[statusKey] = (counts.status[statusKey] || 0) + 1;
       counts.severity[r.severity] = (counts.severity[r.severity] || 0) + 1;
       counts.monitorType[r.monitorType] = (counts.monitorType[r.monitorType] || 0) + 1;
       counts.healthStatus[r.healthStatus] = (counts.healthStatus[r.healthStatus] || 0) + 1;

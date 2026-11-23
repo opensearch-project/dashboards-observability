@@ -719,19 +719,94 @@ describe('AlertsDashboard', () => {
     expect(onViewDetail).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'ad-older' }));
   });
 
-  it('shows anomalies as anomaly in the State facet instead of active', () => {
+  it('shows anomalies as anomaly in the Status facet, after the source groups', () => {
     render(<AlertsDashboard {...baseProps} alerts={[sampleAlert, buildAnomaly()]} />);
 
     const stateFacet = within(screen.getByTestId('facetGroup-state'));
     expect(stateFacet.getByText('Active')).toBeInTheDocument();
     expect(stateFacet.getByText('Anomaly')).toBeInTheDocument();
     expect(stateFacet.getAllByText('(1)')).toHaveLength(2);
+    // Anomaly is no source's status word: it has no heading and a gray dot.
+    const groups = stateFacet.getAllByTestId('facetGroup-state-optionGroup');
+    expect(groups.some((g) => g.textContent?.includes('Anomaly'))).toBe(false);
 
     fireEvent.click(stateFacet.getByLabelText(/anomaly/i));
 
     expect(screen.queryByText('HighCPU')).not.toBeInTheDocument();
     expect(screen.getByText('test - DestCityName=London')).toBeInTheDocument();
     expect(screen.getByText('1 filter')).toBeInTheDocument();
+  });
+
+  it("groups the Status facet by data source, in each source's own word", () => {
+    const cwDs: Datasource = {
+      id: 'cloudwatch',
+      name: 'CloudWatch',
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+    };
+    const alerts: UnifiedAlertSummary[] = [
+      { ...sampleAlert, id: 'os-a', name: 'os-active' },
+      { ...sampleAlert, id: 'os-e', name: 'os-error', state: 'error' },
+      {
+        ...sampleAlert,
+        id: 'p-a',
+        name: 'prom-firing',
+        datasourceId: 'prometheus-1',
+        datasourceType: 'prometheus',
+      },
+      {
+        ...sampleAlert,
+        id: 'p-p',
+        name: 'prom-pending',
+        datasourceId: 'prometheus-1',
+        datasourceType: 'prometheus',
+        state: 'pending',
+      },
+      {
+        ...sampleAlert,
+        id: 'cw-a',
+        name: 'cw-in-alarm',
+        datasourceId: 'cloudwatch',
+        datasourceType: 'cloudwatch',
+      },
+      {
+        ...sampleAlert,
+        id: 'cw-n',
+        name: 'cw-no-data',
+        datasourceId: 'cloudwatch',
+        datasourceType: 'cloudwatch',
+        state: 'insufficient_data',
+      },
+    ];
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={[sampleDs, samplePrometheusDs, cwDs]}
+        selectedDsIds={['ds-1', 'prometheus-1', 'cloudwatch']}
+        alerts={alerts}
+      />
+    );
+    const facet = screen.getByTestId('facetGroup-state');
+    expect(
+      within(facet)
+        .getAllByTestId('facetOptionGroupHeading')
+        .map((h) => h.textContent)
+    ).toEqual(['OpenSearch', 'Prometheus', 'CloudWatch']);
+    const groups = within(facet).getAllByTestId('facetGroup-state-optionGroup');
+    const words = (g: HTMLElement) =>
+      Array.from(g.querySelectorAll('.euiCheckbox label')).map((l) =>
+        l.textContent?.replace(/\(\d+\)$/, '')
+      );
+    expect(words(groups[0])).toEqual(['Active', 'Error']);
+    expect(words(groups[1])).toEqual(['Firing', 'Pending']);
+    expect(words(groups[2])).toEqual(['In alarm', 'Insufficient data']);
+
+    fireEvent.click(within(facet).getByLabelText(/In alarm/));
+    const names = Array.from(document.querySelectorAll('.altAlertNameText')).map(
+      (el) => el.textContent
+    );
+    expect(names).toEqual(['cw-in-alarm']);
   });
 
   it('filters by alert type and hides noisy anomaly label keys', () => {

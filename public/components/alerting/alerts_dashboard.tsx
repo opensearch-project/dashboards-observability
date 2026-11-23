@@ -43,7 +43,12 @@ import { alertMatchesSearch, filterAlerts } from '../../../common/services/alert
 import { facetLabels } from '../../../common/services/alerting/facet_labels';
 import { AlertTimeline, AlertTimelineLegend, countAlertsStartedInWindow } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
-import { DatasourceFacet, DatasourceFacetCloudWatch } from './datasource_facet';
+import {
+  DATASOURCE_TYPE_ORDER,
+  DatasourceFacet,
+  DatasourceFacetCloudWatch,
+  datasourceTypeLabel,
+} from './datasource_facet';
 import {
   canAcknowledgeAlert,
   SEVERITY_SORT_ORDER,
@@ -55,13 +60,12 @@ import {
   EMPTY_VALUE,
   getNativeAlertStateLabel,
   getSeverityLabel,
-  getStateLabel,
   isBreachStatus,
 } from './enum_labels';
 import { NativeStatus } from './native_status';
 import { SeverityTag } from './severity_tag';
 import { formatTimestamp } from './time_format';
-import { ALERT_KIND_HEX, getStateHex } from './alert_colors';
+import { ALERT_KIND_HEX } from './alert_colors';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
 import { DatasourceTag } from './datasource_tag';
 import { TabRowActions } from './tab_row_actions';
@@ -430,6 +434,20 @@ function getAlertKind(alert: UnifiedAlertSummary): string {
 
 function getAlertDisplayState(alert: UnifiedAlertSummary): string {
   return getAlertKind(alert) === 'anomaly' ? 'anomaly' : alert.state;
+}
+
+/**
+ * The Status filter's option for an alert: `<datasourceType>:<state>`, so the same internal
+ * state reads in each source's own word. The anomaly row kind stays `anomaly`.
+ */
+export function alertStatusKey(alert: UnifiedAlertSummary): string {
+  const state = getAlertDisplayState(alert);
+  return state === 'anomaly' ? state : `${alert.datasourceType}:${state}`;
+}
+
+/** The internal state of a Status filter option (`anomaly` for the anomaly row kind). */
+function statusKeyState(key: string): string {
+  return key.slice(key.indexOf(':') + 1);
 }
 
 /**
@@ -844,22 +862,36 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     () => sortBySeverity(collectAlertUniqueValues(alerts, (a) => a.severity)),
     [alerts]
   );
+  // Status options are `<datasourceType>:<state>` (the anomaly row kind stays `anomaly`), so
+  // each source's own word is one option: "In alarm" selects only CloudWatch rows.
   const uniqueStates = useMemo(
-    () => collectAlertUniqueValues(alerts, getAlertDisplayState),
+    () =>
+      collectAlertUniqueValues(alerts, alertStatusKey).sort(
+        (a, b) =>
+          alertStatusSortRank(statusKeyState(a)) - alertStatusSortRank(statusKeyState(b)) ||
+          a.localeCompare(b)
+      ),
     [alerts]
   );
   const uniqueAlertKinds = useMemo(() => collectAlertUniqueValues(alerts, getAlertKind), [alerts]);
   const labelKeys = useMemo(() => collectAlertLabelKeys(alerts), [alerts]);
 
-  // The State facet includes the synthetic `anomaly` row kind, which has no
-  // semantic OUI color name in `STATE_COLORS`. Resolve every option through the
-  // theme-hex getter (which also covers `anomaly`) so `EuiHealth` renders a
-  // correct, dark-mode-safe swatch for each.
+  // The same dot colors as the Status cell: by internal state, gray for the anomaly row kind
+  // and unmapped states.
   const stateFacetColorMap = useMemo(() => {
     const map: Record<string, string> = {};
-    for (const state of uniqueStates) map[state] = getStateHex(state);
+    for (const key of uniqueStates) map[key] = STATE_COLORS[statusKeyState(key)] || 'subdued';
     return map;
   }, [uniqueStates]);
+  // One sub-heading per data source type; the anomaly option has none (it renders after them).
+  const stateOptionGroups = useMemo(
+    () =>
+      DATASOURCE_TYPE_ORDER.map((type) => ({
+        label: datasourceTypeLabel(type),
+        options: uniqueStates.filter((k) => k.startsWith(`${type}:`)),
+      })),
+    [uniqueStates]
+  );
 
   // Facet counts (against search-matched but not filter-matched alerts)
   const facetCounts = useMemo(() => {
@@ -871,7 +903,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     };
     for (const a of searchMatched) {
       const alertKind = getAlertKind(a);
-      const state = getAlertDisplayState(a);
+      const state = alertStatusKey(a);
       counts.alertKind[alertKind] = (counts.alertKind[alertKind] || 0) + 1;
       counts.severity[a.severity] = (counts.severity[a.severity] || 0) + 1;
       counts.state[state] = (counts.state[state] || 0) + 1;
@@ -902,9 +934,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       search: searchQuery || undefined,
     });
     if (filters.state.length === 0) return baseFilteredAlerts;
-    return baseFilteredAlerts.filter((alert) =>
-      filters.state.includes(getAlertDisplayState(alert))
-    );
+    return baseFilteredAlerts.filter((alert) => filters.state.includes(alertStatusKey(alert)));
   }, [alerts, searchQuery, filters]);
 
   const groupedTableRows = useMemo(() => groupAnomalyAlerts(filteredAlerts), [filteredAlerts]);
@@ -956,10 +986,11 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const stateDisplayMap = useMemo(
     () =>
       Object.fromEntries(
-        uniqueStates.map((v) => [
-          v,
-          v === 'anomaly' ? kindDisplayMap.anomaly || 'Anomaly' : getStateLabel(v),
-        ])
+        uniqueStates.map((key) => {
+          if (key === 'anomaly') return [key, kindDisplayMap.anomaly || 'Anomaly'];
+          const sep = key.indexOf(':');
+          return [key, getNativeAlertStateLabel(key.slice(0, sep), key.slice(sep + 1))];
+        })
       ),
     [uniqueStates, kindDisplayMap]
   );
@@ -974,7 +1005,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     colorMap?: Record<string, string>,
     defaultCollapsed = false,
     showOptionCount = false,
-    displayMap?: Record<string, string>
+    displayMap?: Record<string, string>,
+    optionGroups?: Array<{ label: string; options: string[] }>
   ) => (
     <FacetFilterGroup
       key={id}
@@ -987,6 +1019,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       counts={counts}
       colorMap={colorMap}
       colorStyle="health"
+      optionGroups={optionGroups}
       showOptionCount={showOptionCount}
       isCollapsed={isFacetCollapsed(id, defaultCollapsed)}
       onToggleCollapse={(facetId) => toggleFacetCollapse(facetId, defaultCollapsed)}
@@ -1428,7 +1461,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   stateFacetColorMap,
                   false,
                   false,
-                  stateDisplayMap
+                  stateDisplayMap,
+                  stateOptionGroups
                 )}
                 {(() => {
                   const visibleLabelKeys = labelKeys.filter(
