@@ -185,7 +185,7 @@ describe('native status words', () => {
       'Active'
     );
   });
-  it('marks only breached statuses for the red tag', () => {
+  it('marks only breached statuses for the red dot', () => {
     for (const ds of ['opensearch', 'prometheus', 'cloudwatch']) {
       expect(isBreachStatus('alert', ds, 'active')).toBe(true);
       for (const s of ['pending', 'insufficient_data', 'acknowledged', 'resolved', 'error']) {

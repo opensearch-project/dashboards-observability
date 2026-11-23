@@ -6,17 +6,17 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
-import { BREACH_TAG_COLOR, NativeStatus } from '../native_status';
+import { BREACH_DOT_COLOR, NativeStatus } from '../native_status';
 
 describe('NativeStatus', () => {
-  it("renders a breach as a filled tag in the theme's danger red, with no dot", () => {
-    render(<NativeStatus label="In alarm" color="danger" breached data-test-subj="st" />);
-    const tag = screen.getByTestId('st');
-    expect(tag).toHaveTextContent('In alarm');
-    expect(tag).toHaveAttribute('data-breached', 'true');
-    expect(tag.className).toMatch(/euiBadge/);
-    expect(BREACH_TAG_COLOR).toBe(euiThemeVars.euiColorDanger);
-    expect(tag.querySelector('.euiHealth')).toBeNull();
+  it("renders a breach as the theme's danger-red dot with the word", () => {
+    render(<NativeStatus label="In alarm" color="subdued" breached data-test-subj="st" />);
+    const st = screen.getByTestId('st');
+    expect(st).toHaveTextContent('In alarm');
+    expect(st).toHaveAttribute('data-breached', 'true');
+    expect(st.className).toMatch(/euiHealth/);
+    expect(st.className).not.toMatch(/euiBadge/);
+    expect(BREACH_DOT_COLOR).toBe(euiThemeVars.euiColorDanger);
   });
 
   it('renders any other status as a dot with the word', () => {

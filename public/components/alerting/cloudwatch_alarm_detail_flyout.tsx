@@ -727,7 +727,7 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
           </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {/* One status in CloudWatch's own word (In alarm is the red tag), then severity
+        {/* One status in CloudWatch's own word (In alarm is the red dot), then severity
             and the data source, in the table's order and style. */}
         <EuiFlexGroup
           gutterSize="s"

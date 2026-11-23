@@ -218,7 +218,7 @@ describe('CloudWatchAlarmDetailFlyout', () => {
 describe('CloudWatchAlarmDetailFlyout header', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('shows "In alarm" as the red tag, the severity tag and the data source tag', () => {
+  it('shows "In alarm" with the red dot, the severity tag and the data source tag', () => {
     mockHook({
       detail: {
         ...detailFixture(),

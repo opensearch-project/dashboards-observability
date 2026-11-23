@@ -382,7 +382,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false} wrap>
-                {/* Status in the data source's own word (a breach is the red tag), severity
+                {/* Status in the data source's own word (a breach is the red dot), severity
                     and the data source, in the table's order and style.
                     Health stays (spec R3). */}
                 <EuiFlexItem grow={false}>

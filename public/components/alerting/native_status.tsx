@@ -4,15 +4,14 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiHealth } from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 
 /**
- * Breach tag color: the theme's danger red (#BD271E in the light theme). Not
- * `EuiBadge color="danger"`, which is the chart palette's salmon and reads as
- * orange next to the dots.
+ * Breach dot color: the theme's danger red (#BD271E in the light theme), so red means
+ * breached for every data source. Not the chart palette's salmon, which reads as orange.
  */
-export const BREACH_TAG_COLOR = euiThemeVars.euiColorDanger;
+export const BREACH_DOT_COLOR = euiThemeVars.euiColorDanger;
 
 export interface NativeStatusProps {
   /** The status in the data source's own word (In alarm, Firing, Active, ...). */
@@ -23,14 +22,14 @@ export interface NativeStatusProps {
   labelStyle?: React.CSSProperties;
   /** `EuiHealth` color for a status that is not a breach. */
   color: string;
-  /** A breached status renders as a filled red tag with no dot. */
+  /** A breached status gets the red dot; every status is a dot and a word. */
   breached: boolean;
   'data-test-subj'?: string;
 }
 
 /**
- * One status per row: a breach is a filled red tag with white text; every other status
- * is a dot in its color with the word at normal weight.
+ * One status per row: a dot and the data source's own word. The dot is red for a
+ * breach and the status color otherwise.
  */
 export const NativeStatus: React.FC<NativeStatusProps> = ({
   label,
@@ -48,12 +47,14 @@ export const NativeStatus: React.FC<NativeStatusProps> = ({
     ) : (
       label
     );
-  return breached ? (
-    <EuiBadge color={BREACH_TAG_COLOR} data-test-subj={dataTestSubj} data-breached="true">
-      {word}
-    </EuiBadge>
-  ) : (
-    <EuiHealth color={color} data-test-subj={dataTestSubj}>
+  // Every status is a dot and a word, so it still reads in grayscale. A breach
+  // (In alarm, Firing, Active) gets the danger red; `data-breached` marks it for tests.
+  return (
+    <EuiHealth
+      color={breached ? BREACH_DOT_COLOR : color}
+      data-test-subj={dataTestSubj}
+      data-breached={breached ? 'true' : undefined}
+    >
       {word}
     </EuiHealth>
   );

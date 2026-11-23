@@ -1050,7 +1050,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         // Firing, Pending, No data, then the ended states.
         sortable: (alert: AlertTableRow) => alertStatusSortRank(getAlertDisplayState(alert)),
         // One status per row in the data source's own word: In alarm,
-        // Firing, Active, ... A breach is the red tag. The
+        // Firing, Active, ... A breach is the red dot. The
         // `anomaly` row kind and any unmapped state (error, deleted) keep
         // their word with a neutral gray dot and are never a breach.
         render: (_state: string, alert: AlertTableRow) => {

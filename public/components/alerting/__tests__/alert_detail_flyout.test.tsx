@@ -666,7 +666,7 @@ describe('AlertDetailFlyout', () => {
   });
 
   describe('header and body', () => {
-    it('shows one tag row: native status (breach as the red tag), severity, data source', () => {
+    it('shows one tag row: native status (breach as the red dot), severity, data source', () => {
       const { getByTestId } = render(
         <AlertDetailFlyout
           alert={{ ...baseAlert, datasourceType: 'prometheus' }}

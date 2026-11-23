@@ -933,7 +933,7 @@ describe('AlertsDashboard', () => {
     const critical = within(screen.getByText('HighCPU').closest('tr') as HTMLElement).getByTestId(
       'alertSeverityBadge'
     );
-    expect(critical.className).not.toMatch(/euiBadge--hollow/);
+    expect(critical.className).toMatch(/euiBadge--hollow/);
     const facet = screen.getByTestId('facetGroup-severity');
     expect(facet.querySelector('[data-test-subj^="facetGroup-severity-swatch-"]')).toBeNull();
     expect(facet.querySelector('.euiHealth')).toBeNull();
@@ -973,7 +973,7 @@ describe('AlertsDashboard', () => {
     expect(within(screen.getByTestId('facetGroup-state')).getByText('Status')).toBeInTheDocument();
     expect(screen.queryByText('State')).toBeNull();
   });
-  it('shows one native status word per row, with the red tag only for a breach', () => {
+  it('shows one native status word per row, with the red dot only for a breach', () => {
     const alerts: UnifiedAlertSummary[] = [
       { ...sampleAlert, id: 'os-active', name: 'OsActive' },
       { ...sampleAlert, id: 'os-done', name: 'OsDone', state: 'resolved' },

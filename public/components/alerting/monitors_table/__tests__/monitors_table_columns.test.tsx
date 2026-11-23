@@ -58,13 +58,13 @@ describe('monitors_table_columns cell labels', () => {
     expect(queryByText('no_data')).toBeNull();
   });
 
-  it('renders severity as an outlined neutral tag, Critical dark filled', () => {
+  it('renders every severity as an outlined neutral tag, Critical included', () => {
     const medium = renderCell('severity', 'medium');
     expect(medium.getByTestId('rulesTableSeverity').className).toMatch(/euiBadge--hollow/);
     medium.unmount();
     const critical = renderCell('severity', 'critical');
     expect(critical.getByTestId('rulesTableSeverity')).toHaveTextContent('Critical');
-    expect(critical.getByTestId('rulesTableSeverity').className).not.toMatch(/euiBadge--hollow/);
+    expect(critical.getByTestId('rulesTableSeverity').className).toMatch(/euiBadge--hollow/);
   });
   it('passes AD/forecaster lifecycle statuses through unchanged', () => {
     // These arrive already display-ready; re-casing them would corrupt the
@@ -92,7 +92,7 @@ describe('monitors_table_columns native status words', () => {
     expect(queryByText('Active')).toBeNull();
     expect(getByTestId('rulesTableStatus')).not.toHaveAttribute('data-breached');
   });
-  it('reads Firing as the red tag and Pending / Inactive as dots for Prometheus', () => {
+  it('reads Firing as the red dot and Pending / Inactive as their dots for Prometheus', () => {
     const firing = statusCell({ datasourceType: 'prometheus', status: 'active' });
     expect(firing.getByText('Firing')).toBeInTheDocument();
     expect(firing.getByTestId('rulesTableStatus')).toHaveAttribute('data-breached', 'true');
@@ -152,7 +152,7 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
     expect(getByText('In alarm')).toBeInTheDocument();
     expect(queryByText(/CW:/)).toBeNull();
     expect(queryByText('Active')).toBeNull();
-    // In alarm is a breach: the filled red tag, not a dot.
+    // In alarm is a breach: the red dot.
     expect(getByTestId('rulesTableStatus')).toHaveAttribute('data-breached', 'true');
   });
 

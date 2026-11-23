@@ -299,7 +299,7 @@ export function buildTableColumns({
           const atState = at?.state;
           const status = atState ? cloudWatchStateToStatus(atState) : s;
           // One status in the data source's own word, no "CW:" chip;
-          // a breach (firing rule, alarm in ALARM) is the red tag.
+          // a breach (firing rule, alarm in ALARM) is the red dot.
           const nativeLabel = getNativeRuleStatusLabel(item, atState);
           // Long values ("Insufficient data") must not overflow the
           // (user-resizable) status column: the label truncates with an
