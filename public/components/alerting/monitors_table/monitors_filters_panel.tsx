@@ -38,7 +38,7 @@ import {
 } from '../../../../common/types/alerting';
 import { FacetFilterGroup } from '../facet_filter_panel';
 import { DatasourceFacet, DatasourceFacetCloudWatch } from '../datasource_facet';
-import { HEALTH_COLORS, SEVERITY_COLORS, STATUS_COLORS, TYPE_LABELS } from '../shared_constants';
+import { HEALTH_COLORS, STATUS_COLORS, TYPE_LABELS } from '../shared_constants';
 import { getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
 import { collectLabelValues, FilterState } from './monitors_table_filters';
 import { INTERNAL_LABEL_KEYS, SavedSearch } from './monitors_table_helpers';
@@ -176,7 +176,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
       counts={counts}
       displayMap={displayMap}
       colorMap={colorMap}
-      colorStyle={id === 'severity' ? 'swatch' : 'health'}
+      colorStyle="health"
       showOptionCount={showOptionCount}
       isCollapsed={isFacetCollapsed(id, defaultCollapsed)}
       onToggleCollapse={(facetId) => toggleFacetCollapse(facetId, defaultCollapsed)}
@@ -258,8 +258,8 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           filters.severity,
           (v) => updateFilter('severity', v as UnifiedAlertSeverity[]),
           facetCounts.counts.severity,
-          severityDisplayMap,
-          SEVERITY_COLORS
+          severityDisplayMap
+          // No swatches: severity is a neutral tag.
         )}
         {renderFacetGroup(
           'monitorType',

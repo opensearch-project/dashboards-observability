@@ -76,6 +76,13 @@ describe('MonitorsFiltersPanel — facet labels match the table', () => {
     expect(queryByText('medium')).toBeNull();
   });
 
+  it('renders the Severity filter without swatches or dots', () => {
+    render(<MonitorsFiltersPanel {...makeProps()} />);
+    const facet = screen.getByTestId('facetGroup-severity');
+    expect(facet.querySelector('[data-test-subj^="facetGroup-severity-swatch-"]')).toBeNull();
+    expect(facet.querySelector('.euiHealth')).toBeNull();
+    expect(within(facet).getByText('Critical')).toBeInTheDocument();
+  });
   it('still filters on the RAW value when a humanized facet is clicked (display-only map)', () => {
     // The crucial invariant: relabelling must not change which rows match.
     // Clicking the "Active" label must call updateFilter('status', ['active']).

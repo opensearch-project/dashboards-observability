@@ -59,6 +59,14 @@ describe('monitors_table_columns cell labels', () => {
     expect(queryByText('no_data')).toBeNull();
   });
 
+  it('renders severity as an outlined neutral tag, Critical dark filled', () => {
+    const medium = renderCell('severity', 'medium');
+    expect(medium.getByTestId('rulesTableSeverity').className).toMatch(/euiBadge--hollow/);
+    medium.unmount();
+    const critical = renderCell('severity', 'critical');
+    expect(critical.getByTestId('rulesTableSeverity')).toHaveTextContent('Critical');
+    expect(critical.getByTestId('rulesTableSeverity').className).not.toMatch(/euiBadge--hollow/);
+  });
   it('passes AD/forecaster lifecycle statuses through unchanged', () => {
     // These arrive already display-ready; re-casing them would corrupt the
     // wording, so the label getter must leave them alone.

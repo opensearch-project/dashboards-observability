@@ -778,6 +778,27 @@ describe('AlertsDashboard', () => {
   // B1 / A11Y1 + CLAR2: severity must be conveyed by a labeled indicator
   // (translated text), not a bare color dot. Reverting to the dot removes the
   // human-readable "Critical" text and this fails.
+  it('renders severity as an outlined neutral tag and its filter without swatches', () => {
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[sampleAlert, { ...sampleAlert, id: 'a-2', name: 'LowDisk', severity: 'medium' }]}
+      />
+    );
+    const medium = within(screen.getByText('LowDisk').closest('tr') as HTMLElement).getByTestId(
+      'alertSeverityBadge'
+    );
+    expect(medium).toHaveTextContent('Medium');
+    expect(medium.className).toMatch(/euiBadge--hollow/);
+    const critical = within(screen.getByText('HighCPU').closest('tr') as HTMLElement).getByTestId(
+      'alertSeverityBadge'
+    );
+    expect(critical.className).not.toMatch(/euiBadge--hollow/);
+    const facet = screen.getByTestId('facetGroup-severity');
+    expect(facet.querySelector('[data-test-subj^="facetGroup-severity-swatch-"]')).toBeNull();
+    expect(facet.querySelector('.euiHealth')).toBeNull();
+    expect(within(facet).getByText('Critical')).toBeInTheDocument();
+  });
   it('renders severity as a labeled badge, not a bare color dot', () => {
     render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
     const badge = screen.getByTestId('alertSeverityBadge');

@@ -45,18 +45,13 @@ import {
   HEALTH_COLORS,
   isDetectorRule,
   isForecasterRule,
-  SEVERITY_COLORS,
   getRuleStatusColor,
   TYPE_LABELS,
 } from '../shared_constants';
 import { TruncatedLabel } from '../../common/truncated_label';
-import {
-  getMonitorStateLabel,
-  getNativeRuleStatusLabel,
-  getSeverityLabel,
-  isBreachStatus,
-} from '../enum_labels';
+import { getMonitorStateLabel, getNativeRuleStatusLabel, isBreachStatus } from '../enum_labels';
 import { NativeStatus } from '../native_status';
+import { SeverityTag } from '../severity_tag';
 import { DEFAULT_WIDTHS } from './resizable_columns';
 import { isPending } from './pending_rules';
 import type { CloudWatchWindowState } from '../hooks/use_cloudwatch_states_at';
@@ -387,8 +382,9 @@ export function buildTableColumns({
         }),
         sortable: true,
         width: w('severity'),
+        // An outlined neutral tag with the word.
         render: (s: UnifiedAlertSeverity) => (
-          <EuiBadge color={SEVERITY_COLORS[s] || 'default'}>{getSeverityLabel(s)}</EuiBadge>
+          <SeverityTag severity={s} data-test-subj="rulesTableSeverity" />
         ),
       });
     } else if (colId === 'monitorType') {

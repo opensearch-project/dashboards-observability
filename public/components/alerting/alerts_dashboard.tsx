@@ -9,7 +9,6 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiBadge,
   EuiBasicTableColumn,
   EuiButton,
   EuiCard,
@@ -54,7 +53,6 @@ import {
   SEVERITY_SORT_ORDER,
   sortBySeverity,
   isStandardOpenSearchDatasource,
-  SEVERITY_COLORS,
   STATE_COLORS,
 } from './shared_constants';
 import {
@@ -65,6 +63,7 @@ import {
   isBreachStatus,
 } from './enum_labels';
 import { NativeStatus } from './native_status';
+import { SeverityTag } from './severity_tag';
 import { formatTimestamp } from './time_format';
 import { ALERT_KIND_HEX, getStateHex } from './alert_colors';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
@@ -991,7 +990,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       onChange={onChange}
       counts={counts}
       colorMap={colorMap}
-      colorStyle={id === 'severity' ? 'swatch' : 'health'}
+      colorStyle="health"
       showOptionCount={showOptionCount}
       isCollapsed={isFacetCollapsed(id, defaultCollapsed)}
       onToggleCollapse={(facetId) => toggleFacetCollapse(facetId, defaultCollapsed)}
@@ -1011,15 +1010,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         }),
         width: '10%',
         sortable: (a: AlertTableRow) => SEVERITY_SORT_ORDER[a.severity] ?? 5,
-        // A labeled badge (not a bare color dot) so severity is conveyed by text
-        // and shape, not color alone — reachable by screen readers and legible
-        // to colorblind users. Mirrors the severity column in
+        // An outlined neutral tag with the word, so severity never
+        // competes with the status. Mirrors the severity column in
         // monitors_table/monitors_table_columns.tsx.
-        render: (s: string) => (
-          <EuiBadge color={SEVERITY_COLORS[s] || 'default'} data-test-subj="alertSeverityBadge">
-            {getSeverityLabel(s)}
-          </EuiBadge>
-        ),
+        render: (s: string) => <SeverityTag severity={s} data-test-subj="alertSeverityBadge" />,
       },
       {
         field: 'name',
@@ -1142,7 +1136,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         className: 'altAlertStateColumn',
         sortable: (alert: AlertTableRow) => getAlertDisplayState(alert),
         // One status per row in the data source's own word: In alarm,
-        // Firing, Active, ... A breach is the red tag (option D). The
+        // Firing, Active, ... A breach is the red tag. The
         // `anomaly` row kind and any unmapped state (error, deleted) keep
         // their word with a neutral gray dot and are never a breach.
         render: (_state: string, alert: AlertTableRow) => {
@@ -1465,7 +1459,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   filters.severity,
                   (v) => updateFilter('severity', v),
                   facetCounts.counts.severity,
-                  SEVERITY_COLORS,
+                  // No swatches: severity is a neutral tag.
+                  undefined,
                   false,
                   false,
                   severityDisplayMap
