@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiHealth,
   EuiInMemoryTable,
   EuiLink,
   EuiText,
@@ -58,7 +57,14 @@ import {
   SEVERITY_COLORS,
   STATE_COLORS,
 } from './shared_constants';
-import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
+import {
+  EMPTY_VALUE,
+  getNativeAlertStateLabel,
+  getSeverityLabel,
+  getStateLabel,
+  isBreachStatus,
+} from './enum_labels';
+import { NativeStatus } from './native_status';
 import { formatTimestamp } from './time_format';
 import { ALERT_KIND_HEX, getStateHex } from './alert_colors';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
@@ -1135,16 +1141,19 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         // No wrapping inside the label (see `.altAlertStateColumn`).
         className: 'altAlertStateColumn',
         sortable: (alert: AlertTableRow) => getAlertDisplayState(alert),
-        // Route the raw lowercase wire enum through `getStateLabel` so the UI
-        // shows "Active" / "Acknowledged" rather than `active`. `anomaly` is a
-        // row kind (not an alert state) so it isn't in the semantic name map —
-        // fall back to its theme hex, which `EuiHealth` also accepts.
+        // One status per row in the data source's own word: In alarm,
+        // Firing, Active, ... A breach is the red tag (option D). The
+        // `anomaly` row kind and any unmapped state (error, deleted) keep
+        // their word with a neutral gray dot and are never a breach.
         render: (_state: string, alert: AlertTableRow) => {
           const state = getAlertDisplayState(alert);
           return (
-            <EuiHealth color={STATE_COLORS[state] || getStateHex(state)}>
-              {getStateLabel(state)}
-            </EuiHealth>
+            <NativeStatus
+              label={getNativeAlertStateLabel(alert.datasourceType, state)}
+              color={STATE_COLORS[state] || 'subdued'}
+              breached={isBreachStatus('alert', alert.datasourceType, state)}
+              data-test-subj="alertsTableStatus"
+            />
           );
         },
       },

@@ -812,6 +812,57 @@ describe('AlertsDashboard', () => {
     expect(within(screen.getByTestId('facetGroup-state')).getByText('Status')).toBeInTheDocument();
     expect(screen.queryByText('State')).toBeNull();
   });
+  it('shows one native status word per row, with the red tag only for a breach', () => {
+    const alerts: UnifiedAlertSummary[] = [
+      { ...sampleAlert, id: 'os-active', name: 'OsActive' },
+      { ...sampleAlert, id: 'os-done', name: 'OsDone', state: 'resolved' },
+      { ...sampleAlert, id: 'os-err', name: 'OsErr', state: 'error' },
+      { ...sampleAlert, id: 'p-fire', name: 'PromFire', datasourceType: 'prometheus' },
+      {
+        ...sampleAlert,
+        id: 'p-pend',
+        name: 'PromPend',
+        datasourceType: 'prometheus',
+        state: 'pending',
+      },
+      {
+        ...sampleAlert,
+        id: 'cw-alarm',
+        name: 'CwAlarm',
+        datasourceType: 'cloudwatch',
+        cloudWatch: { state: 'ALARM', alarmType: 'metric' },
+      },
+      {
+        ...sampleAlert,
+        id: 'cw-nodata',
+        name: 'CwNoData',
+        datasourceType: 'cloudwatch',
+        state: 'insufficient_data',
+        cloudWatch: { state: 'INSUFFICIENT_DATA', alarmType: 'metric' },
+      },
+      buildAnomaly(),
+    ];
+    render(<AlertsDashboard {...baseProps} alerts={alerts} />);
+    const statusOf = (name: string) =>
+      within(screen.getByText(name).closest('tr') as HTMLElement).getByTestId('alertsTableStatus');
+    const expected: Array<[string, string, boolean]> = [
+      ['OsActive', 'Active', true],
+      ['OsDone', 'Completed', false],
+      ['OsErr', 'Error', false],
+      ['PromFire', 'Firing', true],
+      ['PromPend', 'Pending', false],
+      ['CwAlarm', 'In alarm', true],
+      ['CwNoData', 'Insufficient data', false],
+      ['test - DestCityName=London', 'Anomaly', false],
+    ];
+    for (const [name, word, breached] of expected) {
+      const cell = statusOf(name);
+      expect(cell).toHaveTextContent(word);
+      if (breached) expect(cell).toHaveAttribute('data-breached', 'true');
+      else expect(cell).not.toHaveAttribute('data-breached');
+    }
+    expect(within(screen.getByRole('table')).queryByText(/CW:/)).toBeNull();
+  });
   it('renders the alert state as a human label in the table', () => {
     render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
     // The facet still lists the raw `active` option; the table cell shows "Active".

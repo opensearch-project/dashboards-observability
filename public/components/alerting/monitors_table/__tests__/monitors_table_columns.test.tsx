@@ -67,6 +67,47 @@ describe('monitors_table_columns cell labels', () => {
   });
 });
 
+describe('monitors_table_columns native status words', () => {
+  const statusCell = (rule: Partial<UnifiedRuleSummary>) => {
+    const cols = buildTableColumns({ ...baseParams, visibleColumns: new Set(['status']) });
+    const col = cols.find((c) => c.field === 'status') as {
+      render: (v: unknown, item: UnifiedRuleSummary) => React.ReactNode;
+    };
+    const item = { id: 'rule-1', ...rule } as UnifiedRuleSummary;
+    return render(<div>{col.render(item.status, item)}</div>);
+  };
+  it('reads "Enabled" for an active OpenSearch rule, as a blue dot, not a breach', () => {
+    const { getByText, queryByText, getByTestId } = statusCell({
+      datasourceType: 'opensearch',
+      status: 'active',
+    });
+    expect(getByText('Enabled')).toBeInTheDocument();
+    expect(queryByText('Active')).toBeNull();
+    expect(getByTestId('rulesTableStatus')).not.toHaveAttribute('data-breached');
+  });
+  it('reads Firing as the red tag and Pending / Inactive as dots for Prometheus', () => {
+    const firing = statusCell({ datasourceType: 'prometheus', status: 'active' });
+    expect(firing.getByText('Firing')).toBeInTheDocument();
+    expect(firing.getByTestId('rulesTableStatus')).toHaveAttribute('data-breached', 'true');
+    firing.unmount();
+    const pending = statusCell({ datasourceType: 'prometheus', status: 'pending' });
+    expect(pending.getByText('Pending')).toBeInTheDocument();
+    expect(pending.getByTestId('rulesTableStatus')).not.toHaveAttribute('data-breached');
+    pending.unmount();
+    const inactive = statusCell({ datasourceType: 'prometheus', status: 'muted' });
+    expect(inactive.getByText('Inactive')).toBeInTheDocument();
+    expect(inactive.queryByText('Muted')).toBeNull();
+  });
+  it('reads OK for a CloudWatch alarm in OK, with no CW: chip', () => {
+    const { getByText, queryByText } = statusCell({
+      datasourceType: 'cloudwatch',
+      status: 'ok',
+      cloudWatch: { state: 'OK', alarmType: 'metric' },
+    });
+    expect(getByText('OK')).toBeInTheDocument();
+    expect(queryByText(/CW:/)).toBeNull();
+  });
+});
 describe('monitors_table_columns headers', () => {
   it('heads the data source column "Data source"', () => {
     const cols = buildTableColumns({ ...baseParams, visibleColumns: new Set(['datasource']) });
@@ -99,10 +140,13 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
     return render(<div>{col.render((cwRule as never)[field], cwRule)}</div>);
   };
 
-  it('shows the current state when the window ends now', () => {
-    const { getByText } = cell('status');
-    expect(getByText('Active')).toBeInTheDocument();
-    expect(getByText('CW: In alarm')).toBeInTheDocument();
+  it('shows the current state when the window ends now, once, in CloudWatch words', () => {
+    const { getByText, queryByText, getByTestId } = cell('status');
+    expect(getByText('In alarm')).toBeInTheDocument();
+    expect(queryByText(/CW:/)).toBeNull();
+    expect(queryByText('Active')).toBeNull();
+    // In alarm is a breach: the filled red tag, not a dot.
+    expect(getByTestId('rulesTableStatus')).toHaveAttribute('data-breached', 'true');
   });
 
   it('shows the state at the window end in Status and Health', () => {
@@ -112,9 +156,9 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
       complete: true,
     };
     const status = cell('status', () => at);
-    expect(status.getByText('Insufficient data')).toBeInTheDocument();
-    expect(status.getByText('CW: Insufficient data')).toBeInTheDocument();
-    expect(status.getByTestId('cloudWatchStatusAtWindowEnd')).toBeInTheDocument();
+    expect(status.getAllByText('Insufficient data')).toHaveLength(1);
+    expect(status.queryByText(/CW:/)).toBeNull();
+    expect(status.getByTestId('cloudWatchStatusAtWindowEnd')).not.toHaveAttribute('data-breached');
     status.unmount();
     expect(cell('healthStatus', () => at).getByText('No data')).toBeInTheDocument();
   });
@@ -125,7 +169,7 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
     expect(status.getByTestId('cloudWatchStatusUnknownAtWindowEnd')).toHaveTextContent(
       'No history'
     );
-    expect(status.queryByText('CW: In alarm')).toBeNull();
+    expect(status.queryByText('In alarm')).toBeNull();
     status.unmount();
     expect(cell('healthStatus', () => at).getByText('—')).toBeInTheDocument();
   });

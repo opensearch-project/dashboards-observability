@@ -182,3 +182,114 @@ export function getCloudWatchStateLabel(state?: string | null): string {
   if (!state) return EMPTY_VALUE;
   return CLOUDWATCH_STATE_LABELS[state as CloudWatchAlarmState] ?? humanizeUnknown(state);
 }
+// ============================================================================
+// Native status words
+// ============================================================================
+/**
+ * One status per row, in the data source's own word, with no source prefix:
+ * CloudWatch "In alarm / OK / Insufficient data", Prometheus "Firing / Pending /
+ * Inactive", OpenSearch "Active / Acknowledged / Completed". Only the listed
+ * states are mapped; anything else (anomaly rows, OpenSearch `error` /
+ * `deleted`, a state a backend adds later) keeps its unified word.
+ */
+const PROMETHEUS_INACTIVE = i18n.translate(
+  'observability.alerting.nativeStatus.prometheus.inactive',
+  {
+    defaultMessage: 'Inactive',
+  }
+);
+const PROMETHEUS_FIRING = i18n.translate('observability.alerting.nativeStatus.prometheus.firing', {
+  defaultMessage: 'Firing',
+});
+const NATIVE_ALERT_STATE_LABELS: Record<string, Partial<Record<string, string>>> = {
+  opensearch: {
+    active: STATE_LABELS.active,
+    acknowledged: STATE_LABELS.acknowledged,
+    resolved: i18n.translate('observability.alerting.nativeStatus.opensearch.completed', {
+      defaultMessage: 'Completed',
+    }),
+  },
+  prometheus: {
+    active: PROMETHEUS_FIRING,
+    pending: STATE_LABELS.pending,
+    resolved: PROMETHEUS_INACTIVE,
+  },
+  cloudwatch: {
+    active: CLOUDWATCH_STATE_LABELS.ALARM,
+    resolved: CLOUDWATCH_STATE_LABELS.OK,
+    insufficient_data: CLOUDWATCH_STATE_LABELS.INSUFFICIENT_DATA,
+  },
+};
+/**
+ * Display word for an alert's state in its data source's own vocabulary.
+ * Falls back to {@link getStateLabel} for unmapped states and sources.
+ */
+export function getNativeAlertStateLabel(
+  datasourceType: string | undefined,
+  state?: string | null
+): string {
+  if (!state) return EMPTY_VALUE;
+  return (
+    (datasourceType && NATIVE_ALERT_STATE_LABELS[datasourceType]?.[state]) || getStateLabel(state)
+  );
+}
+const CLOUDWATCH_STATE_FOR_RULE_STATUS: Record<string, CloudWatchAlarmState> = {
+  active: 'ALARM',
+  ok: 'OK',
+  insufficient_data: 'INSUFFICIENT_DATA',
+};
+const PROMETHEUS_RULE_STATUS_LABELS: Record<string, string> = {
+  active: PROMETHEUS_FIRING,
+  pending: STATE_LABELS.pending,
+  // `promRuleToUnified` maps every non-firing, non-pending rule to `muted`.
+  muted: PROMETHEUS_INACTIVE,
+};
+/**
+ * Display word for a rule's status in its data source's own vocabulary.
+ * An OpenSearch rule's `active` means "enabled", while an OpenSearch alert's
+ * "Active" means breached, so the rule reads "Enabled" (one word, one meaning).
+ * `cloudWatchState` overrides the alarm's current state (e.g. the state at the
+ * end of the selected window).
+ */
+export function getNativeRuleStatusLabel(
+  rule: {
+    datasourceType?: string;
+    status?: string | null;
+    cloudWatch?: { state?: CloudWatchAlarmState | string } | null;
+  },
+  cloudWatchState?: CloudWatchAlarmState | string | null
+): string {
+  const { datasourceType, status } = rule;
+  if (datasourceType === 'cloudwatch') {
+    const cwState =
+      cloudWatchState ||
+      rule.cloudWatch?.state ||
+      (status ? CLOUDWATCH_STATE_FOR_RULE_STATUS[status] : undefined);
+    if (cwState) return getCloudWatchStateLabel(cwState);
+  }
+  if (!status) return EMPTY_VALUE;
+  if (datasourceType === 'prometheus' && PROMETHEUS_RULE_STATUS_LABELS[status]) {
+    return PROMETHEUS_RULE_STATUS_LABELS[status];
+  }
+  if (datasourceType === 'opensearch' && status === 'active') {
+    return i18n.translate('observability.alerting.nativeRuleStatus.opensearch.enabled', {
+      defaultMessage: 'Enabled',
+    });
+  }
+  return getMonitorStateLabel(status);
+}
+/**
+ * Whether a status means "breached" (red means breached, for every data
+ * source). An alert breaches when it is `active` (In alarm, Firing, Active). A
+ * rule breaches when it is `active` on Prometheus or CloudWatch; an OpenSearch
+ * rule's `active` only means enabled. Anomaly rows, errors and every other
+ * state are never a breach.
+ */
+export function isBreachStatus(
+  kind: 'alert' | 'rule',
+  datasourceType: string | undefined,
+  status?: string | null
+): boolean {
+  if (status !== 'active') return false;
+  return kind === 'alert' || (!!datasourceType && datasourceType !== 'opensearch');
+}

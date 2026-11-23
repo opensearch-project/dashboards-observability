@@ -11,6 +11,9 @@ import {
   getMonitorStateLabel,
   getSeverityLabel,
   getStateLabel,
+  getNativeAlertStateLabel,
+  getNativeRuleStatusLabel,
+  isBreachStatus,
 } from '../enum_labels';
 import type {
   MonitorHealthStatus,
@@ -132,5 +135,70 @@ describe('enum_labels', () => {
 
   it('labels a deleted-rule alert so it does not read as a deleted alert', () => {
     expect(getStateLabel('deleted')).toBe('Rule deleted');
+  });
+});
+describe('native status words', () => {
+  it.each([
+    ['opensearch', 'active', 'Active'],
+    ['opensearch', 'acknowledged', 'Acknowledged'],
+    ['opensearch', 'resolved', 'Completed'],
+    ['prometheus', 'active', 'Firing'],
+    ['prometheus', 'pending', 'Pending'],
+    ['prometheus', 'resolved', 'Inactive'],
+    ['cloudwatch', 'active', 'In alarm'],
+    ['cloudwatch', 'resolved', 'OK'],
+    ['cloudwatch', 'insufficient_data', 'Insufficient data'],
+  ])('labels a %s alert in state %s "%s"', (ds, state, label) => {
+    expect(getNativeAlertStateLabel(ds, state)).toBe(label);
+  });
+  it('keeps the unified word for unmapped states: anomaly, error, deleted', () => {
+    expect(getNativeAlertStateLabel('opensearch', 'anomaly')).toBe('Anomaly');
+    expect(getNativeAlertStateLabel('opensearch', 'error')).toBe(getStateLabel('error'));
+    expect(getNativeAlertStateLabel('opensearch', 'deleted')).toBe(getStateLabel('deleted'));
+    expect(getNativeAlertStateLabel(undefined, 'active')).toBe('Active');
+    expect(getNativeAlertStateLabel('cloudwatch', undefined)).toBe(EMPTY_VALUE);
+  });
+  it.each([
+    ['opensearch', 'active', undefined, 'Enabled'],
+    ['opensearch', 'disabled', undefined, 'Disabled'],
+    ['prometheus', 'active', undefined, 'Firing'],
+    ['prometheus', 'pending', undefined, 'Pending'],
+    ['prometheus', 'muted', undefined, 'Inactive'],
+    ['cloudwatch', 'active', 'ALARM', 'In alarm'],
+    ['cloudwatch', 'ok', 'OK', 'OK'],
+    ['cloudwatch', 'insufficient_data', 'INSUFFICIENT_DATA', 'Insufficient data'],
+  ])('labels a %s rule with status %s "%s"', (ds, status, cwState, label) => {
+    const rule = {
+      datasourceType: ds,
+      status,
+      cloudWatch: cwState ? { state: cwState } : undefined,
+    };
+    expect(getNativeRuleStatusLabel(rule)).toBe(label);
+  });
+  it('reads a CloudWatch rule by the window-end state when one is given', () => {
+    const rule = { datasourceType: 'cloudwatch', status: 'active', cloudWatch: { state: 'ALARM' } };
+    expect(getNativeRuleStatusLabel(rule, 'OK')).toBe('OK');
+    expect(getNativeRuleStatusLabel({ datasourceType: 'cloudwatch', status: 'ok' })).toBe('OK');
+  });
+  it('never reads "Active" for an OpenSearch rule (one word, one meaning)', () => {
+    expect(getNativeRuleStatusLabel({ datasourceType: 'opensearch', status: 'active' })).not.toBe(
+      'Active'
+    );
+  });
+  it('marks only breached statuses for the red tag', () => {
+    for (const ds of ['opensearch', 'prometheus', 'cloudwatch']) {
+      expect(isBreachStatus('alert', ds, 'active')).toBe(true);
+      for (const s of ['pending', 'insufficient_data', 'acknowledged', 'resolved', 'error']) {
+        expect(isBreachStatus('alert', ds, s)).toBe(false);
+      }
+    }
+    expect(isBreachStatus('alert', 'opensearch', 'anomaly')).toBe(false);
+    expect(isBreachStatus('alert', 'opensearch', 'deleted')).toBe(false);
+    expect(isBreachStatus('rule', 'prometheus', 'active')).toBe(true);
+    expect(isBreachStatus('rule', 'cloudwatch', 'active')).toBe(true);
+    expect(isBreachStatus('rule', 'opensearch', 'active')).toBe(false);
+    expect(isBreachStatus('rule', undefined, 'active')).toBe(false);
+    expect(isBreachStatus('rule', 'cloudwatch', 'ok')).toBe(false);
+    expect(isBreachStatus('rule', 'prometheus', 'pending')).toBe(false);
   });
 });

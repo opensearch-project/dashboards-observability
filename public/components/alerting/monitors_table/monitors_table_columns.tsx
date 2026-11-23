@@ -46,18 +46,21 @@ import {
   isDetectorRule,
   isForecasterRule,
   SEVERITY_COLORS,
-  getCloudWatchStateBadgeColor,
   getRuleStatusColor,
   TYPE_LABELS,
 } from '../shared_constants';
 import { TruncatedLabel } from '../../common/truncated_label';
-import { getCloudWatchStateLabel, getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
+import {
+  getMonitorStateLabel,
+  getNativeRuleStatusLabel,
+  getSeverityLabel,
+  isBreachStatus,
+} from '../enum_labels';
+import { NativeStatus } from '../native_status';
 import { DEFAULT_WIDTHS } from './resizable_columns';
 import { isPending } from './pending_rules';
 import type { CloudWatchWindowState } from '../hooks/use_cloudwatch_states_at';
 import { CLOUDWATCH_ICON_FALLBACK } from '../cloudwatch_icon';
-
-/** Tint for the `CW: <state>` badge shown alongside the unified status. */
 
 // ============================================================================
 // Column Definitions
@@ -329,14 +332,13 @@ export function buildTableColumns({
             );
           }
           const atState = at?.state;
-          const cw =
-            item.cloudWatch && atState ? { ...item.cloudWatch, state: atState } : item.cloudWatch;
           const status = atState ? cloudWatchStateToStatus(atState) : s;
-          const unifiedLabel = getMonitorStateLabel(status);
-          // Long values ("insufficient data", "CW: INSUFFICIENT_DATA") must
-          // not overflow the (user-resizable) status column: both the health
-          // label and the CW badge truncate with an ellipsis, and the full
-          // text stays reachable via tooltip.
+          // One status in the data source's own word, no "CW:" chip;
+          // a breach (firing rule, alarm in ALARM) is the red tag.
+          const nativeLabel = getNativeRuleStatusLabel(item, atState);
+          // Long values ("Insufficient data") must not overflow the
+          // (user-resizable) status column: the label truncates with an
+          // ellipsis, and the full text stays reachable via its title.
           const truncate: React.CSSProperties = {
             display: 'block',
             maxWidth: '100%',
@@ -353,36 +355,15 @@ export function buildTableColumns({
               style={{ minWidth: 0 }}
             >
               <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
-                <EuiHealth
+                <NativeStatus
                   color={getRuleStatusColor(status, item.datasourceType)}
-                  data-test-subj={at ? 'cloudWatchStatusAtWindowEnd' : undefined}
-                >
-                  <span style={truncate} title={at ? stateAtTooltip(at) : unifiedLabel}>
-                    {unifiedLabel}
-                  </span>
-                </EuiHealth>
+                  breached={isBreachStatus('rule', item.datasourceType, status)}
+                  data-test-subj={at ? 'cloudWatchStatusAtWindowEnd' : 'rulesTableStatus'}
+                  label={nativeLabel}
+                  title={at ? stateAtTooltip(at) : nativeLabel}
+                  labelStyle={truncate}
+                />
               </EuiFlexItem>
-              {cw && (
-                <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
-                  <EuiToolTip
-                    content={
-                      at
-                        ? stateAtTooltip(at)
-                        : i18n.translate(
-                            'observability.alerting.monitorsTable.columns.cloudWatchStateTooltip',
-                            {
-                              defaultMessage: 'CloudWatch state: {state}',
-                              values: { state: getCloudWatchStateLabel(cw.state) },
-                            }
-                          )
-                    }
-                  >
-                    <EuiBadge color={getCloudWatchStateBadgeColor(cw.state)}>
-                      <span style={truncate}>CW: {getCloudWatchStateLabel(cw.state)}</span>
-                    </EuiBadge>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
               {at && (
                 // Visible cue that the row shows the window end, not now.
                 <EuiFlexItem grow={false} style={{ flexBasis: '100%' }}>
