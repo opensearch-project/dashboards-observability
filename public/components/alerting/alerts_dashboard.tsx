@@ -1127,7 +1127,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       {
         field: 'state',
         name: i18n.translate('observability.alerting.alertsDashboard.column.state', {
-          defaultMessage: 'State',
+          defaultMessage: 'Status',
         }),
         // A floor wide enough for "Acknowledged" plus its dot: the table uses
         // `table-layout: fixed`, where a CSS min-width on the cell is ignored.
@@ -1426,7 +1426,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   searchAriaLabel={i18n.translate(
                     'observability.alerting.alertsDashboard.searchDatasourcesAriaLabel',
                     {
-                      defaultMessage: 'Search datasources',
+                      defaultMessage: 'Search data sources',
                     }
                   )}
                   isCollapsed={isFacetCollapsed('datasource')}
@@ -1464,7 +1464,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 {renderFacetGroup(
                   'state',
                   i18n.translate('observability.alerting.alertsDashboard.facet.state', {
-                    defaultMessage: 'State',
+                    defaultMessage: 'Status',
                   }),
                   uniqueStates,
                   filters.state,

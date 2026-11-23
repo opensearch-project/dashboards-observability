@@ -114,6 +114,18 @@ describe('AnomalyDetailFlyout', () => {
     expect(screen.getAllByTestId('mockElasticChart')).toHaveLength(2);
   });
 
+  it('labels the data source row "Data source"', () => {
+    render(
+      <AnomalyDetailFlyout
+        anomaly={buildAnomaly()}
+        datasources={[datasource]}
+        allAlerts={[]}
+        onClose={jest.fn()}
+      />
+    );
+    expect(screen.getByText('Data source')).toBeInTheDocument();
+    expect(screen.queryByText('Datasource')).toBeNull();
+  });
   it('renders single-stream anomalies without the heatmap context', () => {
     render(
       <AnomalyDetailFlyout

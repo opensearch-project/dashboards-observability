@@ -805,6 +805,13 @@ describe('AlertsDashboard', () => {
     const cwRow = table.getByText('checkout-errors-high').closest('tr')!;
     expect(within(cwRow).queryByText('Ack')).toBeNull();
   });
+  it('heads the status column and its filter "Status", never "State"', () => {
+    render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    const table = within(screen.getByRole('table'));
+    expect(table.getAllByText('Status').length).toBeGreaterThanOrEqual(1);
+    expect(within(screen.getByTestId('facetGroup-state')).getByText('Status')).toBeInTheDocument();
+    expect(screen.queryByText('State')).toBeNull();
+  });
   it('renders the alert state as a human label in the table', () => {
     render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
     // The facet still lists the raw `active` option; the table cell shows "Active".

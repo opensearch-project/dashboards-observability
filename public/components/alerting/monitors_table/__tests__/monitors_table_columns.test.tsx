@@ -67,6 +67,13 @@ describe('monitors_table_columns cell labels', () => {
   });
 });
 
+describe('monitors_table_columns headers', () => {
+  it('heads the data source column "Data source"', () => {
+    const cols = buildTableColumns({ ...baseParams, visibleColumns: new Set(['datasource']) });
+    const col = cols.find((c) => c.field === 'datasourceId');
+    expect(col?.name).toBe('Data source');
+  });
+});
 describe('monitors_table_columns CloudWatch state at the window end', () => {
   const cwRule = {
     id: 'checkout-errors-high',

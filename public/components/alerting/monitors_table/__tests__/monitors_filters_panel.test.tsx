@@ -136,6 +136,17 @@ describe('MonitorsFiltersPanel — Datasource facet', () => {
     expect(screen.getByText('Regions')).toBeInTheDocument();
   });
 
+  it('titles the facet "Data source" and its search "Search data sources"', () => {
+    render(
+      <MonitorsFiltersPanel {...makeProps({ datasources, selectedDsIds: ['os-1'], cloudWatch })} />
+    );
+    expect(screen.getByText('Data source')).toBeInTheDocument();
+    expect(screen.queryByText('Datasource')).toBeNull();
+    expect(screen.getByTestId('facetGroup-datasource-search')).toHaveAttribute(
+      'aria-label',
+      'Search data sources'
+    );
+  });
   it('leaves CloudWatch account and region out of the Labels facet', () => {
     const rule = (over: Record<string, unknown>) => ({
       id: 'r',

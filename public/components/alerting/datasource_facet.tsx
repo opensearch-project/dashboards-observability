@@ -229,7 +229,7 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
   const [expandedTypes, setExpandedTypes] = useState<Set<DatasourceType>>(() => new Set());
   const cloudWatchIconType = useCloudWatchIconType();
   const title = i18n.translate('observability.alerting.datasourceFacet.title', {
-    defaultMessage: 'Datasource',
+    defaultMessage: 'Data source',
   });
 
   const entries = useMemo(() => buildDatasourceFacetEntries(datasources), [datasources]);
@@ -387,7 +387,7 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
             placeholder={i18n.translate(
               'observability.alerting.datasourceFacet.searchPlaceholder',
               {
-                defaultMessage: 'Search datasource',
+                defaultMessage: 'Search data sources',
               }
             )}
             value={searchTerm}
@@ -395,7 +395,7 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
             aria-label={
               searchAriaLabel ||
               i18n.translate('observability.alerting.datasourceFacet.searchAriaLabel', {
-                defaultMessage: 'Search datasources',
+                defaultMessage: 'Search data sources',
               })
             }
             data-test-subj={`facetGroup-${FACET_ID}-search`}

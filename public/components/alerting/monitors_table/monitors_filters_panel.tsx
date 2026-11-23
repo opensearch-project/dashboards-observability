@@ -230,7 +230,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           searchAriaLabel={i18n.translate(
             'observability.alerting.monitorsTable.filtersPanel.searchDatasourcesAriaLabel',
             {
-              defaultMessage: 'Search datasources',
+              defaultMessage: 'Search data sources',
             }
           )}
           isCollapsed={isFacetCollapsed('datasource')}

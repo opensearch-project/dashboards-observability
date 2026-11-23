@@ -450,7 +450,7 @@ export function buildTableColumns({
       cols.push({
         field: 'datasourceId',
         name: i18n.translate('observability.alerting.monitorsTable.columns.datasource', {
-          defaultMessage: 'Datasource',
+          defaultMessage: 'Data source',
         }),
         sortable: (r: UnifiedRuleSummary) =>
           datasourceCellLines(r, dsNameMap, dsById)[0].toLowerCase(),

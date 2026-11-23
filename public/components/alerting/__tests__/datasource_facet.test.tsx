@@ -173,6 +173,14 @@ describe('DatasourceFacet', () => {
     expect(cw.getByText('Partner (read-only)')).toBeInTheDocument();
     expect(cw.queryByText(/us-west-2/)).toBeNull();
   });
+  it('reads "Data source" in the title and "Search data sources" in the search', () => {
+    renderFacet();
+    expect(screen.getByText('Data source')).toBeInTheDocument();
+    expect(screen.queryByText('Datasource')).toBeNull();
+    const search = screen.getByTestId('facetGroup-datasource-search');
+    expect(search).toHaveAttribute('placeholder', 'Search data sources');
+    expect(search).toHaveAttribute('aria-label', 'Search data sources');
+  });
   it("heads the CloudWatch group with core's CloudWatch logo, and the AWS logo as fallback", () => {
     mockCloudWatchIconType = '/plugins/workspace/assets/cloudwatch_logo.svg';
     const { unmount } = renderFacet();
