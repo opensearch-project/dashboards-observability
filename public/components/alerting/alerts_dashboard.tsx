@@ -790,6 +790,11 @@ export interface AlertsDashboardProps {
   /** CloudWatch regions for the Datasource facet's CloudWatch group; omitted without targets. */
   cloudWatch?: DatasourceFacetCloudWatch;
   /**
+   * The Data source filter's limit message, shown at the bottom of the filter after a refused
+   * selection. Set and cleared by the page.
+   */
+  datasourceLimitMessage?: React.ReactNode;
+  /**
    * Seeds the alerts search box on first render — used by deep links such as
    * `#/alerts?q=slo_id:<id>` that expect the list to arrive pre-filtered. Applied
    * as the initial value ONLY; it does not override the user's subsequent typing.
@@ -827,6 +832,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   datasourceErrorMap,
   unreachableDatasources = [],
   cloudWatch,
+  datasourceLimitMessage,
   initialSearchQuery,
   initialSearchQueryKey,
   onInitialSearchQueryEdited,
@@ -1410,6 +1416,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   onCapReached={onDatasourceCapReached}
                   errorMap={datasourceErrorMap}
                   cloudWatch={cloudWatch}
+                  limitMessage={datasourceLimitMessage}
                   searchAriaLabel={i18n.translate(
                     'observability.alerting.alertsDashboard.searchDatasourcesAriaLabel',
                     {

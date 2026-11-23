@@ -244,6 +244,15 @@ describe('AlertsDashboard', () => {
     expect(nameCell.querySelector('.euiButtonEmpty__icon')).toBeNull();
   });
 
+  it('passes the data source limit message to the Data source filter', () => {
+    const { rerender } = render(<AlertsDashboard {...baseProps} />);
+    expect(screen.queryByTestId('datasourceFacetLimitMessage')).toBeNull();
+    rerender(<AlertsDashboard {...baseProps} datasourceLimitMessage="Limit reached" />);
+    expect(
+      within(screen.getByTestId('facetGroup-datasource')).getByTestId('datasourceFacetLimitMessage')
+    ).toHaveTextContent('Limit reached');
+  });
+
   it('orders the columns Status, Started, Severity, Alert, Data source, Actions', () => {
     render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
     const headers = Array.from(document.querySelectorAll('thead th')).map((th) =>

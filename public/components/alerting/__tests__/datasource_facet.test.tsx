@@ -162,6 +162,32 @@ describe('toggleDatasourceEntry', () => {
 });
 
 describe('DatasourceFacet', () => {
+  it('shows the limit message at the bottom of the facet, and nothing without one', () => {
+    const { rerender, onChange, onCapReached } = renderFacet({
+      limitMessage: 'You can select up to 5 data sources.',
+    });
+    const message = screen.getByTestId('datasourceFacetLimitMessage');
+    expect(message).toHaveTextContent('You can select up to 5 data sources.');
+    expect(message).toHaveAttribute('role', 'status');
+    // After the last group.
+    const facet = screen.getByTestId('facetGroup-datasource');
+    const all = Array.from(facet.querySelectorAll('*'));
+    expect(all.indexOf(message)).toBeGreaterThan(
+      all.indexOf(screen.getByTestId('datasourceFacet-group-cloudwatch'))
+    );
+    rerender(
+      <DatasourceFacet
+        datasources={datasources}
+        selectedDsIds={['os-1']}
+        onChange={onChange}
+        maxDatasources={5}
+        onCapReached={onCapReached}
+        isCollapsed={false}
+        onToggleCollapse={jest.fn()}
+      />
+    );
+    expect(screen.queryByTestId('datasourceFacetLimitMessage')).toBeNull();
+  });
   it('renders a header with the type icon per group and account labels without regions', () => {
     renderFacet();
     for (const type of ['opensearch', 'prometheus', 'cloudwatch']) {

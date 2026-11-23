@@ -72,6 +72,11 @@ export interface MonitorsFiltersPanelProps {
   datasourceErrorMap?: Record<string, string>;
   /** CloudWatch regions for the Datasource facet's CloudWatch group; omitted without targets. */
   cloudWatch?: DatasourceFacetCloudWatch;
+  /**
+   * The Data source filter's limit message, shown at the bottom of the filter after a refused
+   * selection. Set and cleared by the page.
+   */
+  datasourceLimitMessage?: React.ReactNode;
 
   filters: FilterState;
   activeFilterCount: number;
@@ -116,6 +121,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
   onDatasourceCapReached,
   datasourceErrorMap,
   cloudWatch,
+  datasourceLimitMessage,
   filters,
   activeFilterCount,
   clearAllFilters,
@@ -275,6 +281,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           onCapReached={onDatasourceCapReached}
           errorMap={datasourceErrorMap}
           cloudWatch={cloudWatch}
+          limitMessage={datasourceLimitMessage}
           searchAriaLabel={i18n.translate(
             'observability.alerting.monitorsTable.filtersPanel.searchDatasourcesAriaLabel',
             {

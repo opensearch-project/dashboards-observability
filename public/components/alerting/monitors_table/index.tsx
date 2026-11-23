@@ -93,6 +93,11 @@ interface MonitorsTableProps {
   /** CloudWatch accounts and regions for the Datasource facet; omitted without CloudWatch targets. */
   cloudWatch?: DatasourceFacetCloudWatch;
   /**
+   * The Data source filter's limit message, shown at the bottom of the filter after a refused
+   * selection. Set and cleared by the page.
+   */
+  datasourceLimitMessage?: React.ReactNode;
+  /**
    * Optional pre-fill for the search box. Used by deep links from the SLO
    * detail page so users can jump straight to a specific recording rule
    * without typing it. Empty / undefined leaves the box blank.
@@ -131,6 +136,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
   datasourceErrorMap,
   unreachableDatasources,
   cloudWatch,
+  datasourceLimitMessage,
   initialSearchQuery,
   initialSearchQueryKey,
   onInitialSearchQueryEdited,
@@ -492,6 +498,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 onDatasourceCapReached={onDatasourceCapReached}
                 datasourceErrorMap={datasourceErrorMap}
                 cloudWatch={cloudWatch}
+                datasourceLimitMessage={datasourceLimitMessage}
                 filters={filters}
                 activeFilterCount={activeFilterCount}
                 clearAllFilters={clearAllFilters}

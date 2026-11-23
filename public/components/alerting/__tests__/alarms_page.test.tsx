@@ -1735,7 +1735,7 @@ describe('AlarmsPage CloudWatch regions', () => {
     });
   });
 });
-describe('AlarmsPage cap toasts', () => {
+describe('AlarmsPage data source limit messages', () => {
   const lastProps = (mock: jest.Mock) => mock.mock.calls[mock.mock.calls.length - 1][0];
   const refs = coreRefs as unknown as {
     cloudwatchEnabled?: boolean;
@@ -1750,8 +1750,6 @@ describe('AlarmsPage cap toasts', () => {
     defaultRegion: 'us-east-1',
     scopes: [{ label: 'CloudWatch', relation: 'own' }],
   };
-  const lastToast = () =>
-    refs.toasts.addWarning.mock.calls[refs.toasts.addWarning.mock.calls.length - 1][0];
   beforeEach(() => {
     refs.toasts.addWarning.mockClear();
   });
@@ -1764,13 +1762,14 @@ describe('AlarmsPage cap toasts', () => {
     await act(async () => {
       render(<AlarmsPage {...defaultProps} maxDatasources={7} />);
     });
+    expect(lastProps(mockDashboard).datasourceLimitMessage).toBeUndefined();
     act(() => lastProps(mockDashboard).onDatasourceCapReached());
-    const toast = lastToast();
-    expect(toast.title).toBe('Maximum 7 datasources can be selected');
-    render(<I18nProvider>{toast.text}</I18nProvider>);
+    expect(refs.toasts.addWarning).not.toHaveBeenCalled();
+    const message = lastProps(mockDashboard).datasourceLimitMessage;
+    render(<I18nProvider>{message}</I18nProvider>);
     const body = screen.getByTestId('alertManagerMaxDatasourcesSettingsLink').parentElement!;
     expect(body).toHaveTextContent(
-      'The limit is 7 datasources. Clear one to add another, or change it in settings.'
+      'You can select up to 7 data sources. A CloudWatch account counts once, whatever the regions. Clear one to add another, or change the limit in settings.'
     );
     const link = screen.getByTestId('alertManagerMaxDatasourcesSettingsLink');
     expect(link).toHaveTextContent(/^settings$/);
@@ -1794,10 +1793,41 @@ describe('AlarmsPage cap toasts', () => {
       );
     });
     act(() => lastProps(mockDashboard).cloudWatch.onPairCapReached());
-    const toast = lastToast();
-    expect(toast.text).toBe(
-      'CloudWatch is limited to 20 account and region combinations. Clear an account or a region to add another.'
+    expect(refs.toasts.addWarning).not.toHaveBeenCalled();
+    expect(lastProps(mockDashboard).datasourceLimitMessage).toBe(
+      'You can select up to 20 account and region pairs for CloudWatch. Clear one to add another.'
     );
-    expect(typeof toast.text).toBe('string');
+  });
+  it('passes the message to the Rules tab and clears it on the next accepted change', async () => {
+    refs.cloudwatchEnabled = true;
+    const onRegions = jest.fn();
+    await act(async () => {
+      render(
+        <AlarmsPage
+          {...defaultProps}
+          datasources={cloudWatchDatasourcesFor(targets, ['us-east-1', 'eu-west-1'])}
+          defaultDatasources={['cloudwatch']}
+          cloudWatchTargets={targets}
+          cloudWatchRegions={['us-east-1']}
+          onCloudWatchRegionsChange={onRegions}
+        />
+      );
+    });
+    act(() => lastProps(mockDashboard).onDatasourceCapReached());
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('alertManagerTabs-rules'));
+    });
+    expect(lastProps(mockMonitorsTable).datasourceLimitMessage).toBeTruthy();
+    // An accepted region change clears it.
+    await act(async () => {
+      lastProps(mockMonitorsTable).cloudWatch.onRegionsChange(['us-east-1', 'eu-west-1']);
+    });
+    expect(onRegions).toHaveBeenCalledWith(['us-east-1', 'eu-west-1']);
+    expect(lastProps(mockMonitorsTable).datasourceLimitMessage).toBeUndefined();
+    // So does an accepted data source change.
+    act(() => lastProps(mockMonitorsTable).cloudWatch.onPairCapReached());
+    expect(lastProps(mockMonitorsTable).datasourceLimitMessage).toBeTruthy();
+    act(() => lastProps(mockMonitorsTable).onDatasourceChange([]));
+    expect(lastProps(mockMonitorsTable).datasourceLimitMessage).toBeUndefined();
   });
 });

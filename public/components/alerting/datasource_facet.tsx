@@ -208,6 +208,8 @@ export interface DatasourceFacetProps {
   /** Per-datasource error text keyed by datasource name. */
   errorMap?: Record<string, string>;
   cloudWatch?: DatasourceFacetCloudWatch;
+  /** Why the last selection was refused (a limit); shown at the bottom of the facet. */
+  limitMessage?: React.ReactNode;
   searchAriaLabel?: string;
   isCollapsed: boolean;
   onToggleCollapse: (id: string) => void;
@@ -221,6 +223,7 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
   onCapReached,
   errorMap,
   cloudWatch,
+  limitMessage,
   searchAriaLabel,
   isCollapsed,
   onToggleCollapse,
@@ -557,6 +560,19 @@ export const DatasourceFacet: React.FC<DatasourceFacetProps> = ({
               </div>
             );
           })}
+          {limitMessage && (
+            <div
+              role="status"
+              data-test-subj="datasourceFacetLimitMessage"
+              style={{ margin: '8px 4px 0', fontSize: 12, lineHeight: '16px' }}
+            >
+              {/* A plain span: a ReactNode passed straight into EuiText trips the plugin's and
+                  the host's differing @types/react. */}
+              <EuiText size="xs" color="subdued">
+                <span>{limitMessage}</span>
+              </EuiText>
+            </div>
+          )}
         </div>
       )}
     </div>

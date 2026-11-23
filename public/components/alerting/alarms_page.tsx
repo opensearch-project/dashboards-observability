@@ -850,11 +850,12 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     ? (selectedMonitorLookup ?? 'unknown')
     : listedRuleStatus;
 
-  // Fires when a user tries to select past `maxDatasources`. Pops a warning
-  // toast whose "settings" link opens Advanced Settings showing only the
-  // max-datasources setting. Uses the core toasts API directly (not the shared
-  // `useToast` wrapper) because the wrapper only accepts plain strings, and we
-  // need a React body to render the link.
+  // The Data source filter's limit message: shown inline at the bottom of the filter
+  // when a selection is refused, and cleared by the next accepted selection or region change.
+  const [datasourceLimitMessage, setDatasourceLimitMessage] = useState<React.ReactNode>();
+
+  // Fires when a user tries to select past `maxDatasources`. The message's "settings" link
+  // opens Advanced Settings showing only the max-datasources setting.
   //
   // The link is a plain same-tab href (a full page load, like the
   // `window.location.assign` workaround in trace_analytics
@@ -863,9 +864,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // includes the workspace prefix (`/w/<id>`), so the link stays in the
   // current workspace.
   const handleDatasourceCapReached = useCallback(() => {
-    const toasts = coreRefs.toasts;
     const http = coreRefs.http;
-    if (!toasts) return;
     // Advanced Settings' `/:query` route pre-fills its search bar, so the page
     // lists only the matching setting. A `#<key>-group` hash doesn't work: the
     // page looks for the row once while it still shows its loading spinner and
@@ -875,28 +874,22 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
     const settingsHref = `${
       http?.basePath.get() ?? ''
     }/app/settings/${ALERT_MANAGER_MAX_DATASOURCES_SETTING.toLowerCase()}`;
-    toasts.addWarning({
-      title: i18n.translate('observability.alerting.alarmsPage.maxDatasourcesToast.title', {
-        defaultMessage: 'Maximum {maxDatasources} datasources can be selected',
-        values: { maxDatasources },
-      }),
-      text: toMountPoint(
-        <FormattedMessage
-          id="observability.alerting.alarmsPage.maxDatasourcesToast.text"
-          defaultMessage="The limit is {max} datasources. Clear one to add another, or change it in {settingsLink}."
-          values={{
-            max: maxDatasources,
-            settingsLink: (
-              <EuiLink href={settingsHref} data-test-subj="alertManagerMaxDatasourcesSettingsLink">
-                {i18n.translate('observability.alerting.alarmsPage.maxDatasourcesToast.settings', {
-                  defaultMessage: 'settings',
-                })}
-              </EuiLink>
-            ),
-          }}
-        />
-      ),
-    });
+    setDatasourceLimitMessage(
+      <FormattedMessage
+        id="observability.alerting.alarmsPage.datasourceLimitMessage"
+        defaultMessage="You can select up to {max} data sources. A CloudWatch account counts once, whatever the regions. Clear one to add another, or change the limit in {settingsLink}."
+        values={{
+          max: maxDatasources,
+          settingsLink: (
+            <EuiLink href={settingsHref} data-test-subj="alertManagerMaxDatasourcesSettingsLink">
+              {i18n.translate('observability.alerting.alarmsPage.maxDatasourcesToast.settings', {
+                defaultMessage: 'settings',
+              })}
+            </EuiLink>
+          ),
+        }}
+      />
+    );
   }, [maxDatasources]);
 
   // ---- Breadcrumbs ----
@@ -934,6 +927,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   const handleDatasourceChange = useCallback(
     (ids: string[]) => {
       setSelectedDsIds(ids);
+      setDatasourceLimitMessage(undefined);
       setDeletedRuleIds(new Set());
       // Drop pending rows whose datasource is no longer selected (but keep the
       // rest — this is a scope change, not a blanket clear).
@@ -945,16 +939,13 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
   // Fires when a change would select more CloudWatch (account, region) datasources than one
   // request reads (the cap counts accounts, so this bounds the AWS calls instead).
   const handleCloudWatchPairCapReached = useCallback(() => {
-    coreRefs.toasts?.addWarning({
-      title: i18n.translate('observability.alerting.cloudwatch.pairCapToast.title', {
-        defaultMessage: 'Too many CloudWatch account and region combinations',
-      }),
-      text: i18n.translate('observability.alerting.cloudwatch.pairCapToast.text', {
+    setDatasourceLimitMessage(
+      i18n.translate('observability.alerting.cloudwatch.pairLimitMessage', {
         defaultMessage:
-          'CloudWatch is limited to {max} account and region combinations. Clear an account or a region to add another.',
+          'You can select up to {max} account and region pairs for CloudWatch. Clear one to add another.',
         values: { max: ALERT_MANAGER_MAX_CLOUDWATCH_PAIRS },
-      }),
-    });
+      })
+    );
   }, []);
 
   // A region change adds or drops the matching CloudWatch datasources in the selection: an added
@@ -980,6 +971,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         return;
       }
       onCloudWatchRegionsChange(nextRegions);
+      setDatasourceLimitMessage(undefined);
       const changed =
         change.selectedDsIds.length !== selectedDsIds.length ||
         change.selectedDsIds.some((id, i) => id !== selectedDsIds[i]);
@@ -1972,6 +1964,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
             datasourceErrorMap={datasourceErrorMapByName}
             unreachableDatasources={unreachableSelection}
             cloudWatch={alertsCloudWatchFacet}
+            datasourceLimitMessage={datasourceLimitMessage}
             initialSearchQuery={linkedSearchFor('alerts')}
             initialSearchQueryKey={deepLink.seq}
             onInitialSearchQueryEdited={handleLinkedSearchEdited}
@@ -2014,6 +2007,7 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
           datasourceErrorMap={datasourceErrorMapByName}
           unreachableDatasources={unreachableSelection}
           cloudWatch={rulesCloudWatchFacet}
+          datasourceLimitMessage={datasourceLimitMessage}
           initialSearchQuery={linkedSearchFor('rules')}
           initialSearchQueryKey={deepLink.seq}
           onInitialSearchQueryEdited={handleLinkedSearchEdited}

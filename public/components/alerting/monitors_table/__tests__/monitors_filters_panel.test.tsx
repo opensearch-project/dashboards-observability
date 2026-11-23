@@ -151,6 +151,17 @@ describe('MonitorsFiltersPanel — Status grouped by data source', () => {
   });
 });
 
+describe('MonitorsFiltersPanel — data source limit message', () => {
+  it('renders the message in the Data source filter', () => {
+    render(<MonitorsFiltersPanel {...makeProps({ datasourceLimitMessage: 'Limit reached' })} />);
+    expect(screen.getByTestId('datasourceFacetLimitMessage')).toHaveTextContent('Limit reached');
+  });
+  it('renders no message without one', () => {
+    render(<MonitorsFiltersPanel {...makeProps()} />);
+    expect(screen.queryByTestId('datasourceFacetLimitMessage')).toBeNull();
+  });
+});
+
 describe('MonitorsFiltersPanel — Datasource facet', () => {
   const regions = [
     { id: 'us-east-1', name: 'US East (N. Virginia)' },
