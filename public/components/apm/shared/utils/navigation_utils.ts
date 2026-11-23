@@ -332,24 +332,26 @@ export function navigateToExploreTraces(
   timeRange: TimeRange,
   dataSourceId?: string,
   dataSourceTitle?: string,
-  operationFilter?: string
+  operationFilter?: string,
+  filterPpl?: string
 ): void {
   // PPL query - URL encoded via encodeURIComponent
   let pplQuery = `| where serviceName = "${serviceName}"`;
   if (operationFilter) {
     pplQuery += ` | where name = "${operationFilter}"`;
   }
+  if (filterPpl) pplQuery += filterPpl;
 
   // Build path using RISON format matching expected explore traces URL format
   // Note: Empty strings in RISON must be quoted as ''
   // Note: datasetId is already in correct format from APM config, use as-is
-  const dsTitle = dataSourceTitle ? dataSourceTitle : "''";
+  const dsTitle = dataSourceTitle ? `'${escapeRisonString(dataSourceTitle)}'` : "''";
   const path = `traces/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
     timeRange.from
   )},to:${encodeTimeRangeValueForG(timeRange.to)}))&_q=(dataset:(dataSource:(id:'${
     dataSourceId || ''
   }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',schemaMappings:(),signalType:traces,timeFieldName:startTime,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
-    pplQuery
+    escapeRisonString(pplQuery)
   )}')&_a=(legacy:(columns:!(spanId,status.code,attributes.http.status_code,resource.attributes.service.name,kind,name,durationNano,durationInNanos),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
   // Use basePath.prepend to properly handle workspace context
@@ -451,12 +453,14 @@ export function navigateToAgentTraces(
   timeRange: TimeRange,
   dataSourceId?: string,
   dataSourceTitle?: string,
-  operationFilter?: string
+  operationFilter?: string,
+  filterPpl?: string
 ): void {
   let pplQuery = `| where serviceName = "${escapePplString(serviceName)}"`;
   if (operationFilter) {
     pplQuery += ` | where name = "${escapePplString(operationFilter)}"`;
   }
+  if (filterPpl) pplQuery += filterPpl;
   openAgentTraces(
     'spans',
     pplQuery,
@@ -547,7 +551,8 @@ export function navigateToExploreLogs(
   dataSourceId?: string,
   dataSourceTitle?: string,
   traceIds?: string[],
-  traceIdField?: string
+  traceIdField?: string,
+  filterPpl?: string
 ): void {
   // PPL query - URL encoded via encodeURIComponent below
   // Note: Use double quotes for string literals to avoid RISON single-quote conflicts
@@ -556,17 +561,18 @@ export function navigateToExploreLogs(
     const traceIdList = traceIds.map((id) => `"${id}"`).join(', ');
     pplQuery += ` | where \`${traceIdField}\` IN (${traceIdList})`;
   }
+  if (filterPpl) pplQuery += filterPpl;
 
   // Build path using RISON format matching expected explore logs URL format
   // Note: datasetId is already in correct format from APM config, use as-is
-  const dsTitle = dataSourceTitle ? dataSourceTitle : "''";
+  const dsTitle = dataSourceTitle ? `'${escapeRisonString(dataSourceTitle)}'` : "''";
 
   const path = `logs/#?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${encodeTimeRangeValueForG(
     timeRange.from
   )},to:${encodeTimeRangeValueForG(timeRange.to)}))&_q=(dataset:(dataSource:(id:'${
     dataSourceId || ''
   }',title:${dsTitle},type:OpenSearch),id:'${datasetId}',timeFieldName:time,title:'${datasetTitle}',type:INDEX_PATTERN),language:PPL,query:'${encodeURIComponent(
-    pplQuery
+    escapeRisonString(pplQuery)
   )}')&_a=(legacy:(interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
   // Use basePath.prepend to properly handle workspace context

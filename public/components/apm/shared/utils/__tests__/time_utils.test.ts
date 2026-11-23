@@ -8,6 +8,7 @@ import {
   parseTimeRange,
   formatDate,
   formatPPLTimestamp,
+  buildPplTimeRangeWhere,
   formatDisplayTimestamp,
   calculateTimeRangeDuration,
   getTimeAxisConfig,
@@ -540,5 +541,19 @@ describe('time_utils', () => {
         expect(result.labelFormat).toBe('{HH}:{mm}');
       });
     });
+  });
+});
+
+describe('buildPplTimeRangeWhere', () => {
+  it('bounds the field inclusively with UTC PPL timestamps', () => {
+    expect(
+      buildPplTimeRangeWhere(
+        'startTime',
+        new Date('2026-10-01T00:00:00.000Z'),
+        new Date('2026-10-01T06:30:15.250Z')
+      )
+    ).toBe(
+      " | where `startTime` >= '2026-10-01 00:00:00.000' AND `startTime` <= '2026-10-01 06:30:15.250'"
+    );
   });
 });

@@ -166,3 +166,13 @@ export const getTimeAxisConfig = (startTime: Date, endTime: Date): TimeAxisConfi
     };
   }
 };
+
+/**
+ * Build a PPL `where` clause bounding a time field to [start, end] (inclusive), e.g.
+ * ` | where \`startTime\` >= '2026-10-01 00:00:00.000' AND \`startTime\` <= '...'`.
+ * Timestamps are UTC (see formatPPLTimestamp). Returns a leading-pipe fragment.
+ */
+export const buildPplTimeRangeWhere = (field: string, start: Date, end: Date): string =>
+  ` | where \`${field}\` >= '${formatPPLTimestamp(start)}' AND \`${field}\` <= '${formatPPLTimestamp(
+    end
+  )}'`;

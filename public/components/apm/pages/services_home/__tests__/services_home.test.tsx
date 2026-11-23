@@ -317,6 +317,20 @@ describe('ServicesHome — Node type column and filter', () => {
   const rowNames = () =>
     screen.queryAllByTestId(/^serviceLink-/).map((el) => el.textContent?.trim());
 
+  it('gives the latency, throughput and failure-rate columns the same width', () => {
+    renderTyped([{ serviceName: 'cart', type: 'service' }]);
+    const widthOf = (label: string) =>
+      (
+        screen
+          .getAllByRole('columnheader')
+          .find((th) => th.textContent?.includes(label)) as HTMLElement
+      ).style.width;
+    const latency = widthOf('Latency');
+    expect(latency).not.toBe('');
+    expect(widthOf(servicesI18nTexts.table.throughput)).toBe(latency);
+    expect(widthOf(servicesI18nTexts.table.failureRatio)).toBe(latency);
+  });
+
   it('service-only data (no dependency nodes) renders no Type column or filter', () => {
     renderTyped([
       { serviceName: 'cart', type: 'service' },
