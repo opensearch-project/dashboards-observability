@@ -39,14 +39,12 @@ export const NativeStatus: React.FC<NativeStatusProps> = ({
   labelStyle,
   'data-test-subj': dataTestSubj,
 }) => {
-  const word =
-    title || labelStyle ? (
-      <span style={labelStyle} title={title}>
-        {label}
-      </span>
-    ) : (
-      label
-    );
+  // Every status word is semibold, breached or not.
+  const word = (
+    <span style={{ fontWeight: 600, ...labelStyle }} title={title}>
+      {label}
+    </span>
+  );
   // Every status is a dot and a word, so it still reads in grayscale. A breach
   // (In alarm, Firing, Active) gets the danger red; `data-breached` marks it for tests.
   return (
