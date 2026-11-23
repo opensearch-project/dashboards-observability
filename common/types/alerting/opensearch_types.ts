@@ -20,7 +20,8 @@ import type { AlertingOSClient } from './unified_types';
 // ============================================================================
 
 export interface OSSchedule {
-  period: { interval: number; unit: 'MINUTES' | 'HOURS' | 'DAYS' };
+  period?: { interval: number; unit: 'MINUTES' | 'HOURS' | 'DAYS' };
+  cron?: { expression: string; timezone: string };
 }
 
 export interface OSAction {

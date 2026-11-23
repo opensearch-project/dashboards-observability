@@ -323,6 +323,39 @@ describe('osMonitorToUnifiedRuleSummary — monitorType derivation', () => {
     } as unknown as OSMonitor;
   }
 
+  it('preserves the period schedule display', () => {
+    const rule = osMonitorToUnifiedRuleSummary(buildMonitor([]), 'ds');
+    expect(rule.evaluationInterval).toBe('1 minutes');
+    expect(rule.pendingPeriod).toBe('1 minutes');
+  });
+
+  it('summarizes cron schedules without dropping period-scheduled monitors', () => {
+    const cronMonitor: OSMonitor = {
+      ...buildMonitor([]),
+      id: 'cron-1',
+      schedule: { cron: { expression: '0 3 * * *', timezone: 'America/Chicago' } },
+    };
+    const rules = [buildMonitor([]), cronMonitor].map((monitor) =>
+      osMonitorToUnifiedRuleSummary(monitor, 'ds')
+    );
+    expect(rules).toHaveLength(2);
+    expect(rules[0].evaluationInterval).toBe('1 minutes');
+    expect(rules[1].evaluationInterval).toBe('cron: 0 3 * * *');
+    expect(rules[1].pendingPeriod).toBe('cron: 0 3 * * *');
+  });
+
+  it('uses a fallback for an empty schedule', () => {
+    const rule = osMonitorToUnifiedRuleSummary({ ...buildMonitor([]), schedule: {} }, 'ds');
+    expect(rule.evaluationInterval).toBe('-');
+    expect(rule.pendingPeriod).toBe('-');
+  });
+
+  it('tolerates a missing schedule in a monitor response', () => {
+    const monitor = buildMonitor([]);
+    delete (monitor as Partial<OSMonitor>).schedule;
+    expect(osMonitorToUnifiedRuleSummary(monitor, 'ds').evaluationInterval).toBe('-');
+  });
+
   it.each([['logs-2024.01.15'], ['logs-prod-app'], ['ss4o_logs-myapp'], ['ss4o_logs']])(
     'classifies %s as a log monitor',
     (idx) => {
