@@ -897,9 +897,13 @@ export function osMonitorToUnifiedRuleSummary(m: OSMonitor, dsId: string): Unifi
   }
 
   const destNames = triggerActions.map((a) => a.name);
-  const intervalUnit = m.schedule.period.unit;
-  const intervalVal = m.schedule.period.interval;
-  const evalInterval = `${intervalVal} ${intervalUnit.toLowerCase()}`;
+  const period = m.schedule?.period;
+  const cron = m.schedule?.cron;
+  const evalInterval = period
+    ? `${period.interval} ${period.unit.toLowerCase()}`
+    : cron
+      ? `cron: ${cron.expression}`
+      : '-';
 
   let threshold: UnifiedRuleSummary['threshold'];
   if (pplBody && pplBody.type === 'number_of_results') {
