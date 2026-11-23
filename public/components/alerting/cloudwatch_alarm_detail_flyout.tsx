@@ -54,6 +54,7 @@ import type {
   CloudWatchMetricPreview,
   CloudWatchRelationshipGraph,
   CloudWatchRelationshipNode,
+  Datasource,
   MonitorType,
   UnifiedCloudWatchMeta,
   UnifiedAlertSeverity,
@@ -62,20 +63,13 @@ import { EchartsRender } from './echarts_render';
 import { ClassifiedErrorCallout } from '../common/error';
 import { useCloudWatchAlarmDetail } from './hooks/use_cloudwatch_alarm_detail';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
-import {
-  CLOUDWATCH_STATE_TO_UNIFIED,
-  SEVERITY_COLORS,
-  getCloudWatchStateBadgeColor,
-  getCloudWatchStateHealthColor,
-} from './shared_constants';
+import { CLOUDWATCH_STATE_TO_UNIFIED, getCloudWatchStateHealthColor } from './shared_constants';
 import { getStateHex } from './alert_colors';
 import { formatTimestamp, localizeTimestampsInText } from './time_format';
-import {
-  getCloudWatchStateLabel,
-  getMonitorStateLabel,
-  getSeverityLabel,
-  getStateLabel,
-} from './enum_labels';
+import { getCloudWatchStateLabel } from './enum_labels';
+import { NativeStatus } from './native_status';
+import { SeverityTag } from './severity_tag';
+import { DatasourceTag } from './datasource_tag';
 import {
   AlarmTimeWindow,
   defaultAlarmTimeWindow,
@@ -104,6 +98,8 @@ export interface CloudWatchAlarmFlyoutRow {
 
 export interface CloudWatchAlarmDetailFlyoutProps {
   rule: CloudWatchAlarmFlyoutRow;
+  /** The alarm's data source, when it is listed: the header's Data source tag names it. */
+  datasource?: Datasource;
   onClose: () => void;
   /**
    * The window that scopes the state timeline, metric preview and state history (the Rules
@@ -614,6 +610,7 @@ const SectionTitle: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
 export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutProps> = ({
   rule,
+  datasource,
   onClose,
   timeRange,
 }) => {
@@ -675,20 +672,6 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
   const headerState = (
     <EuiText size="s">
       <EuiFlexGroup gutterSize="l" responsive={false} wrap alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="subdued">
-            {i18n.translate('observability.alerting.cloudwatch.stateLabel', {
-              defaultMessage: 'CloudWatch state',
-            })}
-          </EuiTextColor>{' '}
-          {state ? (
-            <EuiBadge color={getCloudWatchStateBadgeColor(state)}>
-              {getCloudWatchStateLabel(state)}
-            </EuiBadge>
-          ) : (
-            '—'
-          )}
-        </EuiFlexItem>
         {cw?.accountId && (
           <EuiFlexItem grow={false}>
             <EuiTextColor color="subdued">
@@ -709,14 +692,6 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
             {cw.region}
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiTextColor color="subdued">
-            {i18n.translate('observability.alerting.cloudwatch.sourceLabel', {
-              defaultMessage: 'Source',
-            })}
-          </EuiTextColor>{' '}
-          CloudWatch
-        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiText>
   );
@@ -744,38 +719,46 @@ export const CloudWatchAlarmDetailFlyout: React.FC<CloudWatchAlarmDetailFlyoutPr
             <EuiSpacer size="xs" />
           </>
         )}
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" gutterSize="s">
-          <EuiFlexItem>
-            <EuiTitle size="m">
-              {/* Alarm names can be 255 chars with no spaces — force wrapping
-                  so the title never overflows the flyout header. */}
-              <h2 id="cwAlarmFlyoutTitle" style={{ overflowWrap: 'anywhere' }}>
-                {displayName}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
+        <EuiTitle size="m">
+          {/* Alarm names can be 255 chars with no spaces — force wrapping
+              so the title never overflows the flyout header. */}
+          <h2 id="cwAlarmFlyoutTitle" style={{ overflowWrap: 'anywhere' }}>
+            {displayName}
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        {/* One status in CloudWatch's own word (In alarm is the red tag), then severity
+            and the data source, in the table's order and style. */}
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="flexStart"
+          responsive={false}
+          wrap
+          data-test-subj="cwAlarmHeaderTags"
+        >
+          {state && (
+            <EuiFlexItem grow={false}>
+              <NativeStatus
+                label={getCloudWatchStateLabel(state)}
+                color={getCloudWatchStateHealthColor(state)}
+                breached={state === 'ALARM'}
+                data-test-subj="cwAlarmStatus"
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-              {state && (
-                <EuiFlexItem grow={false}>
-                  <EuiHealth color={getCloudWatchStateHealthColor(state)}>
-                    {state === 'ALARM'
-                      ? getStateLabel('active')
-                      : state === 'INSUFFICIENT_DATA'
-                        ? getStateLabel('insufficient_data')
-                        : getMonitorStateLabel('ok')}
-                  </EuiHealth>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={SEVERITY_COLORS[severity] || 'default'}>
-                  {getSeverityLabel(severity)}
-                </EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <AlarmTypeBadge alarmType={alarmType} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <SeverityTag severity={severity} data-test-subj="cwAlarmSeverity" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <DatasourceTag
+              ds={datasource}
+              cloudWatch={{
+                accountId: cw.accountId ?? current.cloudWatch?.accountId,
+                region: cw.region ?? current.cloudWatch?.region,
+              }}
+              datasourceType="cloudwatch"
+              data-test-subj="cwAlarmDatasource"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />

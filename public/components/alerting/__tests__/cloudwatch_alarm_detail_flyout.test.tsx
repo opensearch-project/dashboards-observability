@@ -215,6 +215,59 @@ describe('CloudWatchAlarmDetailFlyout', () => {
   });
 });
 
+describe('CloudWatchAlarmDetailFlyout header', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('shows "In alarm" as the red tag, the severity tag and the data source tag', () => {
+    mockHook({
+      detail: {
+        ...detailFixture(),
+        alarm: { ...detailFixture().alarm, accountId: '123456789012' },
+      },
+    });
+    render(
+      <I18nProvider>
+        <CloudWatchAlarmDetailFlyout
+          rule={row}
+          datasource={{
+            id: 'cloudwatch',
+            name: 'prod-account',
+            type: 'cloudwatch',
+            url: '',
+            enabled: true,
+          }}
+          onClose={jest.fn()}
+        />
+      </I18nProvider>
+    );
+    const status = screen.getByTestId('cwAlarmStatus');
+    expect(status).toHaveTextContent('In alarm');
+    expect(status).toHaveAttribute('data-breached', 'true');
+    expect(screen.getByTestId('cwAlarmSeverity')).toHaveAttribute('data-severity');
+    // The Data source filter's words for the connection's own account.
+    expect(screen.getByTestId('cwAlarmDatasource')).toHaveTextContent('This account');
+    expect(screen.getByTestId('cwAlarmDatasource-detail')).toHaveTextContent('us-east-1');
+    // No salmon "CloudWatch state" badge, no "Source: CloudWatch" and no alarm-type chip.
+    expect(screen.queryByText('CloudWatch state')).toBeNull();
+    expect(screen.queryByText('Source')).toBeNull();
+    expect(screen.getByTestId('cwAlarmHeaderTags')).not.toHaveTextContent('Metric');
+    // Account and Region stay.
+    expect(screen.getByText('Account')).toBeInTheDocument();
+    expect(screen.getByText('123456789012')).toBeInTheDocument();
+    expect(screen.getByText('Region')).toBeInTheDocument();
+  });
+
+  it('shows OK as a dot, not a breach', () => {
+    mockHook({
+      detail: { ...detailFixture(), alarm: { ...detailFixture().alarm, stateValue: 'OK' } },
+    });
+    renderFlyout();
+    const status = screen.getByTestId('cwAlarmStatus');
+    expect(status).toHaveTextContent('OK');
+    expect(status).not.toHaveAttribute('data-breached');
+  });
+});
+
 describe('CloudWatchAlarmDetailFlyout time window', () => {
   // Midday timestamps so the M/D in the copy doesn't depend on the test machine's timezone.
   const timeWindow: AlarmTimeWindow = {

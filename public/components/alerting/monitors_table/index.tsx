@@ -583,6 +583,7 @@ export const MonitorsTable: React.FC<MonitorsTableProps> = ({
                 lifecycleActionPending={lifecycleActionPending}
                 onToggleEnabled={onToggleEnabled}
                 rulesTime={rulesTime}
+                dsById={dsById}
               />
             </EuiResizablePanel>
           </>

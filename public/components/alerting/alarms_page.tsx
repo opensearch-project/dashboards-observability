@@ -2315,7 +2315,11 @@ export const AlarmsPage: React.FC<AlarmsPageProps> = ({
         />
       )}
       {selectedAlert && selectedAlert.alertKind !== 'anomaly' && selectedAlert.cloudWatch && (
-        <CloudWatchAlarmDetailFlyout rule={selectedAlert} onClose={() => setSelectedAlert(null)} />
+        <CloudWatchAlarmDetailFlyout
+          rule={selectedAlert}
+          datasource={datasources.find((d) => d.id === selectedAlert.datasourceId)}
+          onClose={() => setSelectedAlert(null)}
+        />
       )}
       {selectedAlert && selectedAlert.alertKind !== 'anomaly' && !selectedAlert.cloudWatch && (
         <AlertDetailFlyout
