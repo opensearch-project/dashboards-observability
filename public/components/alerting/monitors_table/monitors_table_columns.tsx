@@ -37,8 +37,7 @@ import {
   UnifiedAlertSeverity,
   UnifiedRuleSummary,
 } from '../../../../common/types/alerting';
-import { CLOUDWATCH_DEFAULT_SCOPE_LABEL } from '../../../../common/services/alerting/cloudwatch_datasource_id';
-import { datasourceTypeLabel } from '../datasource_facet';
+import { DatasourceTag, DatasourceTagProps, datasourceTagParts } from '../datasource_tag';
 import {
   cloudWatchStateToHealth,
   cloudWatchStateToStatus,
@@ -48,7 +47,6 @@ import {
   getRuleStatusColor,
   TYPE_LABELS,
 } from '../shared_constants';
-import { TruncatedLabel } from '../../common/truncated_label';
 import { getMonitorStateLabel, getNativeRuleStatusLabel, isBreachStatus } from '../enum_labels';
 import { NativeStatus } from '../native_status';
 import { SeverityTag } from '../severity_tag';
@@ -106,42 +104,6 @@ export interface BuildTableColumnsParams {
 
 const formatAt = (ms: number) => moment(ms).format('M/D HH:mm');
 
-const CELL_SEPARATOR = ' • ';
-
-/**
- * The Datasource cell: `<Type> • <source>` (e.g. "CloudWatch • Prod account"), then, when known,
- * the account id and region of a CloudWatch row ("444455556666 • us-east-1"; the account id only
- * when the source reports it and the first line doesn't already show it) or the region of a
- * Prometheus datasource.
- */
-export function datasourceCellLines(
-  item: UnifiedRuleSummary,
-  dsNameMap: Map<string, string>,
-  dsById?: Map<string, Datasource>
-): [string, string | undefined] {
-  const ds = dsById?.get(item.datasourceId);
-  const type = ds?.type ?? item.datasourceType;
-  const typeLabel = datasourceTypeLabel(type);
-  let source: string | undefined;
-  if (type === 'cloudwatch') {
-    const scopeLabel = ds?.cloudWatchScopeLabel;
-    source = scopeLabel && scopeLabel !== CLOUDWATCH_DEFAULT_SCOPE_LABEL ? scopeLabel : undefined;
-  } else {
-    source = ds?.name ?? dsNameMap.get(item.datasourceId) ?? item.datasourceId;
-  }
-  const first = source ? `${typeLabel}${CELL_SEPARATOR}${source}` : typeLabel;
-  let detail: string | undefined;
-  if (type === 'cloudwatch') {
-    const cw = item.cloudWatch;
-    const accountId = cw?.accountId && !source?.includes(cw.accountId) ? cw.accountId : undefined;
-    const parts = [accountId, cw?.region ?? ds?.region].filter(Boolean);
-    detail = parts.length > 0 ? parts.join(CELL_SEPARATOR) : undefined;
-  } else if (type === 'prometheus') {
-    detail = ds?.region || undefined;
-  }
-  return [first, detail];
-}
-
 /** "CloudWatch state at 9/24 14:00" (plus a caveat when the history read stopped short). */
 function stateAtTooltip(at: CloudWatchWindowState): string {
   if (!at.state) {
@@ -176,6 +138,14 @@ export function buildTableColumns({
   cloudWatchIconType = CLOUDWATCH_ICON_FALLBACK,
 }: BuildTableColumnsParams): Array<Record<string, unknown>> {
   const w = (id: string) => `${columnWidths[id] || DEFAULT_WIDTHS[id] || 120}px`;
+  const datasourceTagProps = (item: UnifiedRuleSummary): DatasourceTagProps => ({
+    ds: dsById?.get(item.datasourceId),
+    cloudWatch: item.cloudWatch,
+    datasourceType: item.datasourceType,
+    fallbackLabel: dsNameMap.get(item.datasourceId),
+  });
+  const datasourceTagFor = (item: UnifiedRuleSummary) =>
+    datasourceTagParts(datasourceTagProps(item));
   // Pending optimistic rows aren't selectable (their synthetic id would 404),
   // so exclude them when deciding the header's "all selected" state.
   const selectable = filtered.filter((item) => !isPending(item));
@@ -429,26 +399,12 @@ export function buildTableColumns({
         name: i18n.translate('observability.alerting.monitorsTable.columns.datasource', {
           defaultMessage: 'Data source',
         }),
-        sortable: (r: UnifiedRuleSummary) =>
-          datasourceCellLines(r, dsNameMap, dsById)[0].toLowerCase(),
+        // The data source once, as the Data source filter names it.
+        sortable: (r: UnifiedRuleSummary) => datasourceTagFor(r).label.toLowerCase(),
         width: w('datasource'),
-        // A bare string cell wraps mid-word for long datasource names (e.g.
-        // "ObservabilityStack_Prometheus"). EUI's `truncateText` doesn't
-        // single-line a plain-text render in this table, so use the shared
-        // `TruncatedLabel` (single-line ellipsis + instant full-text tooltip),
-        // matching the datasource facet in the filter panel.
-        render: (_id: string, item: UnifiedRuleSummary) => {
-          const [label, detail] = datasourceCellLines(item, dsNameMap, dsById);
-          if (!detail) return <TruncatedLabel text={label} />;
-          return (
-            <div>
-              <TruncatedLabel text={label} />
-              <EuiTextColor color="subdued" style={{ fontSize: 11 }}>
-                {detail}
-              </EuiTextColor>
-            </div>
-          );
-        },
+        render: (_id: string, item: UnifiedRuleSummary) => (
+          <DatasourceTag {...datasourceTagProps(item)} data-test-subj="rulesTableDatasource" />
+        ),
       });
     }
   }

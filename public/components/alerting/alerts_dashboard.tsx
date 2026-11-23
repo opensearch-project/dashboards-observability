@@ -43,11 +43,7 @@ import { alertMatchesSearch, filterAlerts } from '../../../common/services/alert
 import { facetLabels } from '../../../common/services/alerting/facet_labels';
 import { AlertTimeline, AlertTimelineLegend, countAlertsStartedInWindow } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
-import {
-  DatasourceFacet,
-  DatasourceFacetCloudWatch,
-  datasourceEntryLabel,
-} from './datasource_facet';
+import { DatasourceFacet, DatasourceFacetCloudWatch } from './datasource_facet';
 import {
   canAcknowledgeAlert,
   SEVERITY_SORT_ORDER,
@@ -67,7 +63,7 @@ import { SeverityTag } from './severity_tag';
 import { formatTimestamp } from './time_format';
 import { ALERT_KIND_HEX, getStateHex } from './alert_colors';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
-import { useCloudWatchIconType } from './cloudwatch_icon';
+import { DatasourceTag } from './datasource_tag';
 import { TabRowActions } from './tab_row_actions';
 import {
   UnreachableDatasource,
@@ -436,6 +432,21 @@ function getAlertDisplayState(alert: UnifiedAlertSummary): string {
   return getAlertKind(alert) === 'anomaly' ? 'anomaly' : alert.state;
 }
 
+/**
+ * The Status column's sort order: Firing, Pending, No data, then the ended states. Anomaly,
+ * error, deleted and any other state sort last.
+ */
+const ALERT_STATUS_SORT_RANK: Record<string, number> = {
+  active: 0,
+  pending: 1,
+  insufficient_data: 2,
+  acknowledged: 3,
+  resolved: 4,
+};
+export function alertStatusSortRank(state: string): number {
+  return ALERT_STATUS_SORT_RANK[state] ?? 5;
+}
+
 function isGroupedAnomalyRow(row: AlertTableRow): boolean {
   return getAlertKind(row) === 'anomaly' && (row.occurrenceCount || 0) > 1;
 }
@@ -579,22 +590,6 @@ function collectAlertLabelValues(alerts: UnifiedAlertSummary[], key: string): st
 // datasource, but two datasources can report the same id (an OpenSearch alert id read through
 // two connections to one cluster), so the datasource id is part of it. A repeated row id gives
 // React duplicate keys, and it then keeps stale rows when filtering shrinks the list.
-/**
- * The account and region a CloudWatch alert row reads (`<account> • <region>`), so same-named
- * alarms in two accounts or regions can be told apart. The account reads as in the Datasource
- * facet. Undefined for other rows.
- */
-export function cloudWatchAlertSourceLine(
-  alert: Pick<UnifiedAlertSummary, 'datasourceId' | 'datasourceType' | 'cloudWatch'>,
-  dsById: Map<string, Datasource>
-): string | undefined {
-  if (alert.datasourceType !== 'cloudwatch') return undefined;
-  const ds = dsById.get(alert.datasourceId);
-  const account = ds ? datasourceEntryLabel(ds) : alert.cloudWatch?.accountId;
-  const parts = [account, alert.cloudWatch?.region ?? ds?.region].filter(Boolean);
-  return parts.length > 0 ? parts.join(' • ') : undefined;
-}
-
 const alertRowId = (row: Pick<UnifiedAlertSummary, 'datasourceId' | 'id'>): string =>
   `${row.datasourceId}::${row.id}`;
 interface AlertsTableProps {
@@ -662,7 +657,22 @@ function renderGroupedAnomalyOccurrences(
                   hasBorder
                   color={index === 0 ? 'subdued' : 'plain'}
                 >
+                  {/* The table's columns: Status, Started, Severity, Alert, Data source, Actions. */}
                   <div className="altGroupedOccurrenceGrid">
+                    <div className="altGroupedOccurrenceCell" />
+                    <div className="altGroupedOccurrenceCell">
+                      <EuiToolTip content={timestamp}>
+                        <span style={{ fontSize: 12 }} tabIndex={0} aria-label={timestamp}>
+                          <FormattedMessage
+                            id="observability.alerting.alertsDashboard.groupedAnomalyStartedAgo"
+                            defaultMessage="{duration} ago"
+                            values={{
+                              duration: formatAgo(occurrence.startTime),
+                            }}
+                          />
+                        </span>
+                      </EuiToolTip>
+                    </div>
                     <div className="altGroupedOccurrenceCell" />
                     <div className="altGroupedOccurrenceCell altGroupedOccurrenceAlertCell">
                       <EuiButtonEmpty
@@ -677,28 +687,14 @@ function renderGroupedAnomalyOccurrences(
                           values={{ occurrenceNumber, total }}
                         />
                       </EuiButtonEmpty>
-                    </div>
-                    <div className="altGroupedOccurrenceCell" />
-                    <div className="altGroupedOccurrenceCell altGroupedOccurrenceMessageCell">
+                      {/* No Message column: the occurrence's message follows its name. */}
                       {occurrence.message && (
                         <EuiText size="xs" color="subdued" className="altGroupedOccurrenceMessage">
                           {occurrence.message}
                         </EuiText>
                       )}
                     </div>
-                    <div className="altGroupedOccurrenceCell">
-                      <EuiToolTip content={timestamp}>
-                        <span style={{ fontSize: 12 }} tabIndex={0} aria-label={timestamp}>
-                          <FormattedMessage
-                            id="observability.alerting.alertsDashboard.groupedAnomalyStartedAgo"
-                            defaultMessage="{duration} ago"
-                            values={{
-                              duration: formatAgo(occurrence.startTime),
-                            }}
-                          />
-                        </span>
-                      </EuiToolTip>
-                    </div>
+                    <div className="altGroupedOccurrenceCell" />
                     <div className="altGroupedOccurrenceCell" />
                   </div>
                 </EuiPanel>
@@ -999,10 +995,64 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
   // Table columns — memoized so `AlertsTable`'s React.memo shallow-compare
   // doesn't invalidate on every parent re-render.
-  const cloudWatchIconType = useCloudWatchIconType();
   const dsById = useMemo(() => new Map(datasources.map((d) => [d.id, d])), [datasources]);
   const columns = useMemo<Array<EuiBasicTableColumn<AlertTableRow>>>(
     () => [
+      {
+        field: 'state',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.state', {
+          defaultMessage: 'Status',
+        }),
+        // A floor wide enough for "Acknowledged" plus its dot: the table uses
+        // `table-layout: fixed`, where a CSS min-width on the cell is ignored.
+        width: 'max(12%, 136px)',
+        // No wrapping inside the label (see `.altAlertStateColumn`).
+        className: 'altAlertStateColumn',
+        // Firing, Pending, No data, then the ended states.
+        sortable: (alert: AlertTableRow) => alertStatusSortRank(getAlertDisplayState(alert)),
+        // One status per row in the data source's own word: In alarm,
+        // Firing, Active, ... A breach is the red tag. The
+        // `anomaly` row kind and any unmapped state (error, deleted) keep
+        // their word with a neutral gray dot and are never a breach.
+        render: (_state: string, alert: AlertTableRow) => {
+          const state = getAlertDisplayState(alert);
+          return (
+            <NativeStatus
+              label={getNativeAlertStateLabel(alert.datasourceType, state)}
+              color={STATE_COLORS[state] || 'subdued'}
+              breached={isBreachStatus('alert', alert.datasourceType, state)}
+              data-test-subj="alertsTableStatus"
+            />
+          );
+        },
+      },
+      {
+        field: 'startTime',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.started', {
+          defaultMessage: 'Started',
+        }),
+        width: '10%',
+        sortable: true,
+        // The absolute, timezone-labeled timestamp used to live only in a hover
+        // tooltip on a non-focusable span (A11Y6). It is now also exposed via
+        // `aria-label` and the span is keyboard-focusable, so screen-reader and
+        // keyboard users get the exact time, not just the relative "x ago".
+        render: (ts: string) => {
+          if (!ts) return <EuiText size="xs">{EMPTY_VALUE}</EuiText>;
+          const abs = formatTimestamp(ts);
+          return (
+            <EuiToolTip content={abs}>
+              <span style={{ fontSize: 12 }} tabIndex={0} aria-label={abs}>
+                <FormattedMessage
+                  id="observability.alerting.alertsDashboard.startedAgo"
+                  defaultMessage="{duration} ago"
+                  values={{ duration: formatAgo(ts) }}
+                />
+              </span>
+            </EuiToolTip>
+          );
+        },
+      },
       {
         field: 'severity',
         name: i18n.translate('observability.alerting.alertsDashboard.column.severity', {
@@ -1028,24 +1078,14 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           const isGrouped = isGroupedAnomalyRow(alert);
           const rowId = alertRowId(alert);
           const isExpanded = Boolean(expandedGroupIds[rowId]);
-          const iconType =
-            alert.datasourceType === 'cloudwatch'
-              ? cloudWatchIconType
-              : alert.datasourceType === 'prometheus'
-                ? 'logoPrometheus'
-                : 'logoOpenSearch';
-          const sourceLine = cloudWatchAlertSourceLine(alert, dsById);
           const toggleExpandedGroup = () => {
             setExpandedGroupIds((prev) => ({
               ...prev,
               [rowId]: !prev[rowId],
             }));
           };
-          // `iconType` on EuiButtonEmpty puts the icon in the button's
-          // dedicated icon slot (vertically centered with the label). Inlining
-          // <EuiIcon> as a child instead lands inside the .euiButtonEmpty__text
-          // flex slot which has no `align-items: center`, so it sits at the
-          // top-left of the row.
+          // No source icon or account line here: the Data source column shows the
+          // source once.
           return (
             <EuiFlexGroup
               className="altAlertCell"
@@ -1055,24 +1095,11 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
               wrap={false}
             >
               <EuiFlexItem className="altAlertNameItem" grow={true}>
-                <EuiToolTip
-                  content={
-                    sourceLine ? (
-                      <>
-                        {name}
-                        <br />
-                        {sourceLine}
-                      </>
-                    ) : (
-                      name
-                    )
-                  }
-                >
+                <EuiToolTip content={name}>
                   <EuiButtonEmpty
                     className="altAlertNameButton"
                     size="xs"
                     flush="left"
-                    iconType={iconType}
                     onClick={() =>
                       isGrouped ? toggleExpandedGroup() : onViewDetail(representative)
                     }
@@ -1081,16 +1108,6 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     <span className="altAlertNameText">{name}</span>
                   </EuiButtonEmpty>
                 </EuiToolTip>
-                {sourceLine && (
-                  <EuiText
-                    size="xs"
-                    color="subdued"
-                    className="altAlertSourceText"
-                    data-test-subj="alertsTable-cloudWatchSource"
-                  >
-                    {sourceLine}
-                  </EuiText>
-                )}
               </EuiFlexItem>
               {isGrouped && (
                 <EuiFlexItem className="altAlertOccurrencesItem" grow={false}>
@@ -1125,86 +1142,20 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         },
       },
       {
-        field: 'state',
-        name: i18n.translate('observability.alerting.alertsDashboard.column.state', {
-          defaultMessage: 'Status',
+        field: 'datasourceId',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.datasource', {
+          defaultMessage: 'Data source',
         }),
-        // A floor wide enough for "Acknowledged" plus its dot: the table uses
-        // `table-layout: fixed`, where a CSS min-width on the cell is ignored.
-        width: 'max(12%, 136px)',
-        // No wrapping inside the label (see `.altAlertStateColumn`).
-        className: 'altAlertStateColumn',
-        sortable: (alert: AlertTableRow) => getAlertDisplayState(alert),
-        // One status per row in the data source's own word: In alarm,
-        // Firing, Active, ... A breach is the red tag. The
-        // `anomaly` row kind and any unmapped state (error, deleted) keep
-        // their word with a neutral gray dot and are never a breach.
-        render: (_state: string, alert: AlertTableRow) => {
-          const state = getAlertDisplayState(alert);
-          return (
-            <NativeStatus
-              label={getNativeAlertStateLabel(alert.datasourceType, state)}
-              color={STATE_COLORS[state] || 'subdued'}
-              breached={isBreachStatus('alert', alert.datasourceType, state)}
-              data-test-subj="alertsTableStatus"
-            />
-          );
-        },
-      },
-      {
-        field: 'message',
-        name: i18n.translate('observability.alerting.alertsDashboard.column.message', {
-          defaultMessage: 'Message',
-        }),
-        truncateText: true,
-        className: 'altAlertMessageColumn',
-        // The cell truncates, so wrap it in a tooltip that exposes the full
-        // message on hover / focus. The span is focusable (tabIndex) so
-        // keyboard users can reach the tooltip too. The row's "View details"
-        // action still opens the flyout for the complete record.
-        render: (msg: string) => {
-          if (!msg) {
-            return (
-              <EuiText size="xs" color="subdued">
-                {EMPTY_VALUE}
-              </EuiText>
-            );
-          }
-          return (
-            <EuiToolTip content={msg}>
-              <EuiText size="xs" color="subdued" tabIndex={0} className="altAlertMessageText">
-                {msg}
-              </EuiText>
-            </EuiToolTip>
-          );
-        },
-      },
-      {
-        field: 'startTime',
-        name: i18n.translate('observability.alerting.alertsDashboard.column.started', {
-          defaultMessage: 'Started',
-        }),
-        width: '10%',
-        sortable: true,
-        // The absolute, timezone-labeled timestamp used to live only in a hover
-        // tooltip on a non-focusable span (A11Y6). It is now also exposed via
-        // `aria-label` and the span is keyboard-focusable, so screen-reader and
-        // keyboard users get the exact time, not just the relative "x ago".
-        render: (ts: string) => {
-          if (!ts) return <EuiText size="xs">{EMPTY_VALUE}</EuiText>;
-          const abs = formatTimestamp(ts);
-          return (
-            <EuiToolTip content={abs}>
-              <span style={{ fontSize: 12 }} tabIndex={0} aria-label={abs}>
-                <FormattedMessage
-                  id="observability.alerting.alertsDashboard.startedAgo"
-                  defaultMessage="{duration} ago"
-                  values={{ duration: formatAgo(ts) }}
-                />
-              </span>
-            </EuiToolTip>
-          );
-        },
+        width: '18%',
+        // The data source once, as the Data source filter names it.
+        render: (_id: string, alert: AlertTableRow) => (
+          <DatasourceTag
+            ds={dsById.get(alert.datasourceId)}
+            cloudWatch={alert.cloudWatch}
+            datasourceType={alert.datasourceType}
+            data-test-subj="alertsTableDatasource"
+          />
+        ),
       },
       // No Duration column: for a firing alert it repeats "Started … ago", so the
       // list shows one relative time (full timestamp on hover) and the flyout
@@ -1281,7 +1232,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         },
       },
     ],
-    [expandedGroupIds, onAcknowledge, onViewDetail, cloudWatchIconType, dsById]
+    [expandedGroupIds, onAcknowledge, onViewDetail, dsById]
   );
 
   // Chart-area empty state mode. Cascade:

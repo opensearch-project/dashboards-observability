@@ -240,25 +240,6 @@
 
   @include obsStandardTableRows;
 
-  /* One line per message; the cell's tooltip shows the full text. The cell and
-   * the tooltip anchor are bounded to the column so the line truncates instead
-   * of widening the table. */
-  .altAlertMessageColumn .euiTableCellContent {
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .altAlertMessageColumn .euiToolTipAnchor {
-    display: block;
-    max-width: 100%;
-  }
-
-  .altAlertMessageText {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
   /* State labels never wrap mid-word ("Acknowledged" broke at 143px). The
    * column width floor is set on the column itself (`max(12%, 136px)`). */
   .altAlertStateColumn {
@@ -334,8 +315,8 @@
   white-space: nowrap;
 }
 
-// The account and region under a CloudWatch alert's name, truncated like the name.
-.altAlertSourceText {
+// The region line under a Data source tag (datasource_tag.tsx), truncated like the name.
+.altDatasourceTagDetail {
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
@@ -355,16 +336,16 @@
   overflow-x: hidden;
 }
 
-/* The six columns of the alerts table: Severity, Alert, State, Message,
- * Started, Actions (no Duration column). */
+/* The six columns of the alerts table: Status, Started, Severity, Alert,
+ * Data source, Actions (no Message or Duration column). */
 .altGroupedOccurrenceGrid {
   display: grid;
   grid-template-columns:
-    60px
-    minmax(260px, 1fr)
     140px
-    minmax(260px, 1fr)
     120px
+    100px
+    minmax(260px, 1fr)
+    200px
     150px;
   align-items: center;
   min-width: 1080px;
@@ -377,8 +358,7 @@
   padding: 0 8px;
 }
 
-.altGroupedOccurrenceAlertCell,
-.altGroupedOccurrenceMessageCell {
+.altGroupedOccurrenceAlertCell {
   display: flex;
   align-items: center;
   gap: 8px;

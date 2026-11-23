@@ -182,7 +182,7 @@ describe('AlertsDashboard', () => {
     expect(group.getByText('us-east-1')).toBeInTheDocument();
   });
 
-  it('shows the account and region under the name of a CloudWatch alert', () => {
+  it('shows the data source once, in its own column, with the region below', () => {
     const cwDs = (scope: string, label: string): Datasource => ({
       id: `cloudwatch_us-east-1_${scope}`,
       name: `CloudWatch · ${label} · us-east-1`,
@@ -224,17 +224,70 @@ describe('AlertsDashboard', () => {
         ]}
       />
     );
+    const cells = screen.getAllByTestId('alertsTableDatasource');
+    expect(cells.map((el) => el.querySelector('.euiBadge')?.textContent)).toEqual(
+      expect.arrayContaining(['Prod', 'Staging', 'This account (111111111111)', 'Local'])
+    );
     expect(
-      screen.getAllByTestId('alertsTable-cloudWatchSource').map((el) => el.textContent)
+      screen.getAllByTestId('alertsTableDatasource-detail').map((el) => el.textContent)
     ).toEqual(
       expect.arrayContaining([
-        'Prod • us-east-1',
-        'Staging • us-east-1',
-        'This account (111111111111) • us-west-2',
+        'Cross-account · us-east-1',
+        'Cross-account · us-east-1',
+        'us-west-2',
       ])
     );
     // OpenSearch rows get no second line.
-    expect(screen.getAllByTestId('alertsTable-cloudWatchSource')).toHaveLength(3);
+    expect(screen.getAllByTestId('alertsTableDatasource-detail')).toHaveLength(3);
+    // The Alert cell no longer repeats the source (no icon, no account line).
+    const nameCell = screen.getAllByText('checkout-api-cpu-high-0')[0].closest('td')!;
+    expect(nameCell.querySelector('.euiButtonEmpty__icon')).toBeNull();
+  });
+
+  it('orders the columns Status, Started, Severity, Alert, Data source, Actions', () => {
+    render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    const headers = Array.from(document.querySelectorAll('thead th')).map((th) =>
+      th.textContent?.trim()
+    );
+    expect(headers).toEqual(['Status', 'Started', 'Severity', 'Alert', 'Data source', 'Actions']);
+    expect(headers).not.toContain('Message');
+  });
+
+  it('sorts Status as Firing, Pending, No data, then the ended states', () => {
+    const at = (id: string, state: UnifiedAlertSummary['state']): UnifiedAlertSummary => ({
+      ...sampleAlert,
+      id,
+      name: `alert-${state}`,
+      state,
+    });
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[
+          at('a1', 'resolved'),
+          at('a2', 'error'),
+          at('a3', 'active'),
+          at('a4', 'acknowledged'),
+          { ...at('a5', 'pending'), datasourceType: 'prometheus' },
+          { ...at('a6', 'insufficient_data'), datasourceType: 'cloudwatch' },
+        ]}
+      />
+    );
+    fireEvent.click(
+      within(document.querySelector('thead')!).getByRole('button', { name: /^Status/ })
+    );
+    const names = () =>
+      Array.from(document.querySelectorAll('.altAlertNameText')).map((el) => el.textContent);
+    const order = [
+      'alert-active',
+      'alert-pending',
+      'alert-insufficient_data',
+      'alert-acknowledged',
+      'alert-resolved',
+      'alert-error',
+    ];
+    const first = names();
+    expect([order, [...order].reverse()]).toContainEqual(first);
   });
   it('leaves CloudWatch account and region out of the Labels facet', () => {
     const cwAlert: UnifiedAlertSummary = {
@@ -266,7 +319,7 @@ describe('AlertsDashboard', () => {
     expect(region.queryByText('us-east-1')).toBeNull();
   });
 
-  it("shows core's CloudWatch logo on a CloudWatch row only", () => {
+  it('shows no source logo in the Alert cell; the Data source column names the source', () => {
     const cwAlert: UnifiedAlertSummary = {
       ...sampleAlert,
       id: 'cw-1',
@@ -280,9 +333,9 @@ describe('AlertsDashboard', () => {
     const rowIcons = Array.from(container.querySelectorAll('.altAlertNameButton')).map((b) =>
       b.querySelector('img')?.getAttribute('src')
     );
-    expect(rowIcons).toHaveLength(2);
-    expect(rowIcons.filter((src) => src === CW_LOGO)).toHaveLength(1);
-    expect(rowIcons.filter((src) => src === undefined)).toHaveLength(1);
+    expect(rowIcons).toEqual([undefined, undefined]);
+    expect(container.querySelectorAll('.altAlertNameButton .euiButtonEmpty__icon')).toHaveLength(0);
+    expect(container.querySelector(`table img[src="${CW_LOGO}"]`)).toBeNull();
   });
   it('renders "no datasource" empty state when selection is empty', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} selectedDsIds={[]} />);
@@ -651,11 +704,14 @@ describe('AlertsDashboard', () => {
     expect(screen.getByText('Occurrence 2 of 2')).toBeInTheDocument();
     expect(screen.getByText('Occurrence 1 of 2')).toBeInTheDocument();
     expect(screen.queryByText('Latest')).not.toBeInTheDocument();
-    // Occurrence rows line up with the six table columns: no Duration cell,
+    // Occurrence rows line up with the six table columns: no Message or Duration cell,
     // and Started reads like the parent row ("… ago", one unit).
     const grids = document.querySelectorAll('.altGroupedOccurrenceGrid');
     expect(grids.length).toBe(2);
     grids.forEach((grid) => expect(grid.children).toHaveLength(6));
+    // Started sits under Started (2nd), the occurrence under Alert (4th).
+    expect(grids[0].children[1]).toHaveTextContent(/ago$/);
+    expect(grids[0].children[3]).toHaveTextContent(/^Occurrence 2 of 2/);
     expect(screen.queryByText('10m')).not.toBeInTheDocument();
     expect(onViewDetail).not.toHaveBeenCalled();
 
