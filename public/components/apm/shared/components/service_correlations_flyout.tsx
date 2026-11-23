@@ -139,6 +139,10 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     [spans]
   );
   const [spansLoading, setSpansLoading] = useState(false);
+  // The time range the loaded spans (and the span window derived from them) belong to.
+  const [spansRange, setSpansRange] = useState<ReturnType<typeof parseTimeRange> | undefined>(
+    undefined
+  );
   const [spansError, setSpansError] = useState<Error | null>(null);
   const [expandedSpanRows, setExpandedSpanRows] = useState<Record<string, React.ReactNode>>({});
 
@@ -303,6 +307,11 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
   useEffect(() => {
     if (!config?.tracesDataset) return;
 
+    // Set on re-run/unmount so a slower response for a previous range can't overwrite the
+    // current one.
+    let cancelled = false;
+    const fetchRange = parsedTimeRange;
+
     const fetchSpans = async () => {
       setSpansLoading(true);
       setSpansError(null);
@@ -350,6 +359,8 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           }
         }
 
+        if (cancelled) return;
+
         const spansData: SpanData[] = (response.jsonData || []).map((item: any, idx: number) => ({
           _id: item.spanId || `span-${idx}`,
           startTime: item.startTime || '',
@@ -394,13 +405,20 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
           }
         }
       } catch (err) {
+        if (cancelled) return;
         setSpansError(err instanceof Error ? err : new Error(String(err)));
       } finally {
-        setSpansLoading(false);
+        if (!cancelled) {
+          setSpansRange(fetchRange);
+          setSpansLoading(false);
+        }
       }
     };
 
     fetchSpans();
+    return () => {
+      cancelled = true;
+    };
   }, [
     config?.tracesDataset,
     serviceName,
@@ -423,10 +441,14 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
       return;
     }
 
-    // Wait for spans to load first so we have traceIds
-    if (spansLoading) {
+    // Wait for spans to load first so we have traceIds, and for them to belong to the current
+    // range: right after a range change this effect runs in the same commit as the span fetch,
+    // still holding the previous range's span window and trace ids.
+    if (spansLoading || spansRange !== parsedTimeRange) {
       return;
     }
+
+    let cancelled = false;
 
     const fetchLogsForDatasets = async () => {
       // Initialize results with loading state
@@ -573,6 +595,7 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
 
       // Wait for all fetches to complete and update state once
       const fetchedResults = await Promise.all(fetchPromises);
+      if (cancelled) return;
       const finalResults = [...initialResults];
       fetchedResults.forEach(({ index, result }) => {
         finalResults[index] = result;
@@ -581,12 +604,16 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
     };
 
     fetchLogsForDatasets();
+    return () => {
+      cancelled = true;
+    };
   }, [
     correlatedLogDatasets,
     serviceName,
     extractedTraceIds,
     spanTimeRange,
     parsedTimeRange,
+    spansRange,
     spansLoading,
     hasFilters,
     logLevelWhere,
@@ -806,11 +833,12 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                     serviceName,
                     timeRange,
                     config?.tracesDataset?.datasourceId,
-                    undefined, // dataSourceTitle - not available in config
+                    config?.tracesDataset?.datasourceTitle,
                     operationFilter, // Pass the operation filter
-                    // Carry the status/HTTP filter. The HTTP buckets use coalesce, which the
-                    // pre-3.1 fallback path can't run, so leave those off the link there.
-                    spanFilterFallback ? '' : spanStatusWhere
+                    // Carry the status/HTTP filter only once the fetch finished cleanly. The HTTP
+                    // buckets use coalesce, which pre-3.1 clusters can't run (fallback path, or
+                    // while loading / after a failed fetch we can't tell), so leave them off then.
+                    !spansLoading && !spansError && !spanFilterFallback ? spanStatusWhere : ''
                   )
                 }
                 data-test-subj="apmCorrelationsExploreTraces"
@@ -978,7 +1006,9 @@ export const ServiceCorrelationsFlyout: React.FC<ServiceCorrelationsFlyoutProps>
                         result.dataSourceTitle,
                         hasFilters ? extractedTraceIds : undefined, // Pass traceIds only when filtered
                         hasFilters ? result.traceIdField : undefined, // Pass traceIdField
-                        result.filterFallback ? '' : logLevelWhere // Carry the log-level filter
+                        !result.loading && !result.error && !result.filterFallback
+                          ? logLevelWhere
+                          : '' // Carry the log-level filter once this dataset loaded cleanly
                       )
                     }
                   >

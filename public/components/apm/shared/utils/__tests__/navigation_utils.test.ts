@@ -19,6 +19,8 @@ import {
   subscribeAgentTracesAvailable,
 } from '../navigation_utils';
 import { BehaviorSubject } from 'rxjs';
+import rison from 'rison-node';
+import { buildHttpStatusPplWhere } from '../format_utils';
 import { coreRefs } from '../../../../../framework/core_refs';
 
 // Mock coreRefs
@@ -859,11 +861,14 @@ describe('Explore/Agent Traces/Logs links carry the flyout filters', () => {
   });
   afterEach(() => openSpy.mockRestore());
 
-  // The PPL lives in the RISON `query:'<urlencoded>'` of the opened URL.
-  const openedQuery = (): string => {
+  // Decode the opened URL's `_q` with real rison, as Explore does. A value that corrupts the
+  // rison (e.g. an unescaped `!` or `'`) throws here instead of passing a regex check.
+  const openedQuery = (): { query: string; dataset: any } => {
     const url = openSpy.mock.calls[0][0] as string;
-    const match = url.match(/query:'([^']*)'\)/);
-    return decodeURIComponent(match ? match[1] : '');
+    const raw = (url.match(/_q=(\(.*?\))&_a=/) || [])[1];
+    expect(raw).toBeDefined();
+    const q = rison.decode(raw) as { query: string; dataset: any };
+    return { query: decodeURIComponent(q.query), dataset: q.dataset };
   };
 
   it('adds the status filter to the Explore traces query', () => {
@@ -875,14 +880,30 @@ describe('Explore/Agent Traces/Logs links carry the flyout filters', () => {
       undefined,
       undefined,
       'op',
-      [' | where `status.code` = 2'].join('')
+      ' | where `status.code` = 2'
     );
-    expect(openedQuery()).toBe(
+    expect(openedQuery().query).toBe(
       '| where serviceName = "flagd" | where name = "op" | where `status.code` = 2'
     );
   });
 
-  it('rewrites single-quoted literals so they cannot break the RISON query', () => {
+  it('keeps the "unset" filter (contains !=) decodable as rison', () => {
+    navigateToExploreTraces(
+      'id',
+      'title',
+      'flagd',
+      range,
+      undefined,
+      undefined,
+      undefined,
+      ' | where `status.code` != 0 AND `status.code` != 2'
+    );
+    expect(openedQuery().query).toBe(
+      '| where serviceName = "flagd" | where `status.code` != 0 AND `status.code` != 2'
+    );
+  });
+
+  it('keeps single-quoted literals in the Explore logs filter decodable as rison', () => {
     navigateToExploreLogs(
       'id',
       'title',
@@ -895,12 +916,15 @@ describe('Explore/Agent Traces/Logs links carry the flyout filters', () => {
       undefined,
       " | where LOWER(`severityText`) LIKE '%error%'"
     );
-    const url = openSpy.mock.calls[0][0] as string;
-    expect(openedQuery()).toBe(
-      '| where `serviceName` = "flagd" | where LOWER(`severityText`) LIKE "%error%"'
+    expect(openedQuery().query).toBe(
+      '| where `serviceName` = "flagd" | where LOWER(`severityText`) LIKE \'%error%\''
     );
-    // No raw single quote inside the query value.
-    expect(url.match(/query:'([^']*)'\)/)).not.toBeNull();
+  });
+
+  it('keeps the filter decodable on the HTTP-status (coalesce) bucket', () => {
+    const where = buildHttpStatusPplWhere('http-5xx');
+    navigateToExploreTraces('id', 'title', 'flagd', range, undefined, undefined, undefined, where);
+    expect(openedQuery().query).toBe(`| where serviceName = "flagd"${where}`);
   });
 
   it('adds the status filter to the Agent Traces query', () => {
@@ -912,13 +936,23 @@ describe('Explore/Agent Traces/Logs links carry the flyout filters', () => {
       undefined,
       undefined,
       undefined,
-      ' | where `status.code` = 2'
+      ' | where `status.code` != 0 AND `status.code` != 2'
     );
-    expect(openedQuery()).toBe('| where serviceName = "flagd" | where `status.code` = 2');
+    expect(openedQuery().query).toBe(
+      '| where serviceName = "flagd" | where `status.code` != 0 AND `status.code` != 2'
+    );
   });
 
   it('leaves the query unchanged when no filter is given', () => {
     navigateToExploreTraces('id', 'title', 'flagd', range);
-    expect(openedQuery()).toBe('| where serviceName = "flagd"');
+    expect(openedQuery().query).toBe('| where serviceName = "flagd"');
+  });
+
+  it('quotes a data source title containing spaces so the rison still decodes', () => {
+    navigateToExploreTraces('id', 'title', 'flagd', range, 'ds-1', 'Local Cluster');
+    expect(openedQuery().dataset.dataSource.title).toBe('Local Cluster');
+    openSpy.mockClear();
+    navigateToExploreLogs('id', 'title', 'flagd', 'serviceName', range, 'ds-1', 'Local Cluster');
+    expect(openedQuery().dataset.dataSource.title).toBe('Local Cluster');
   });
 });

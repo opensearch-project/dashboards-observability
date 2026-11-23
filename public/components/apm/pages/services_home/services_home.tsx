@@ -95,12 +95,6 @@ const toMetricsNode = (s: ServiceTableItem) => ({
 // Sort value for a metric that may be unavailable (its query failed): below every real value.
 const UNAVAILABLE_SORT_VALUE = -1;
 
-/**
- * Min width of the value text ("747 ms", "0.073 req/s", "0.0%") beside each metric sparkline.
- * Shared so the latency, throughput and failure-rate sparklines get the same width.
- */
-const METRIC_VALUE_MIN_WIDTH = 70;
-
 /** Initial node-type filter: services only (see selectedTypes). */
 const DEFAULT_TYPE_FILTER: Record<string, boolean> = { service: true };
 
@@ -1313,7 +1307,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: METRIC_VALUE_MIN_WIDTH }}>
+              <EuiFlexItem grow={false} style={{ minWidth: APM_CONSTANTS.METRIC_VALUE_MIN_WIDTH }}>
                 <EuiText size="s">{latencyText}</EuiText>
               </EuiFlexItem>
               {/* Sparkline grows to fill the cell so wide screens get a
@@ -1367,7 +1361,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: METRIC_VALUE_MIN_WIDTH }}>
+              <EuiFlexItem grow={false} style={{ minWidth: APM_CONSTANTS.METRIC_VALUE_MIN_WIDTH }}>
                 <EuiText size="s">{throughputFormatted}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
@@ -1418,7 +1412,7 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
               justifyContent="center"
               responsive={false}
             >
-              <EuiFlexItem grow={false} style={{ minWidth: METRIC_VALUE_MIN_WIDTH }}>
+              <EuiFlexItem grow={false} style={{ minWidth: APM_CONSTANTS.METRIC_VALUE_MIN_WIDTH }}>
                 <EuiText size="s">{failureFormatted}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={1} style={{ minWidth: 60, maxWidth: 200 }}>
@@ -1443,9 +1437,10 @@ export const ServicesHome: React.FC<ServicesHomeProps> = ({
         sortable: true,
         align: 'center',
         width: '8%',
-        // Widths: 14 + 8 + 20 + 20 + 20 + 8 + 10 = 100% (SLO health column
-        // adds 10% only when sloFeatureEnabled; without it the others
-        // distribute the remainder via EuiBasicTable's flex rules).
+        // Widths: 14 + 8 + 20 + 20 + 20 + 8 = 90%, plus 10% for the SLO health column
+        // (sloFeatureEnabled) = 100%. The Type column (10%, only with dependency rows) is
+        // not budgeted: with both shown the table is over 100% and EuiBasicTable's flex
+        // rules shrink the columns proportionally.
         render: (environment: string) => {
           return <EuiText size="s">{getEnvironmentLabel(environment)}</EuiText>;
         },

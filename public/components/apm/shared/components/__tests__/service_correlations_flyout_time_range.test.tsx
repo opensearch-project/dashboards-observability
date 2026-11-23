@@ -242,6 +242,10 @@ describe('ServiceCorrelationsFlyout time range', () => {
       />
     );
     await waitFor(() => expect(queries().some((q) => q.includes('otel-logs*'))).toBe(true));
+    // No intermediate log query may carry the previous range's window or trace ids.
+    queries()
+      .filter((q) => q.includes('otel-logs*'))
+      .forEach((q) => expect(q).not.toContain('2026-10-01'));
     const logQuery = queries()
       .filter((q) => q.includes('otel-logs*'))
       .pop() as string;
@@ -278,5 +282,66 @@ describe('ServiceCorrelationsFlyout time range', () => {
     await waitFor(() => expect(screen.getByText('a1')).toBeInTheDocument());
     fireEvent.click(await screen.findByTestId('apmCorrelationsExploreTraces'));
     expect((navigateToExploreTraces as jest.Mock).mock.calls.pop()[7]).toBe('');
+  });
+
+  it('ignores a slow span response for a previous range once the range has changed', async () => {
+    let resolveStale: (v: unknown) => void = () => {};
+    mockExecuteQuery.mockImplementation((q: string) => {
+      if (!q.includes('otel-v1-apm-span*')) return Promise.resolve({ jsonData: [] });
+      if (q.includes("'2026-10-01 00:00:00.000'")) {
+        return new Promise((resolve) => {
+          resolveStale = resolve;
+        });
+      }
+      return Promise.resolve({ jsonData: [span('fresh')] });
+    });
+    const { rerender } = render(<ServiceCorrelationsFlyout {...props} timeRange={fixedRange} />);
+    await waitFor(() => expect(queries().some((q) => q.includes('otel-v1-apm-span*'))).toBe(true));
+    rerender(
+      <ServiceCorrelationsFlyout
+        {...props}
+        timeRange={{ from: '2026-10-02T00:00:00.000Z', to: '2026-10-02T06:00:00.000Z' }}
+      />
+    );
+    await waitFor(() => expect(screen.getByText('fresh')).toBeInTheDocument());
+    // The older request resolves last; it must not replace the current spans.
+    resolveStale({ jsonData: [span('stale')] });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(screen.getByText('fresh')).toBeInTheDocument();
+    expect(screen.queryByText('stale')).not.toBeInTheDocument();
+  });
+
+  it('does not carry the status filter to the link while the filtered fetch is loading', async () => {
+    mockExecuteQuery.mockImplementation((q: string) =>
+      q.includes('otel-v1-apm-span*') && q.includes('coalesce')
+        ? new Promise(() => {}) // the HTTP-bucket fetch never settles
+        : Promise.resolve({ jsonData: [span('a1')] })
+    );
+    render(<ServiceCorrelationsFlyout {...props} timeRange={fixedRange} />);
+    await waitFor(() => expect(screen.getByText('a1')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('All'));
+    const option = (await screen.findAllByRole('option')).find(
+      (o) => o.textContent === '5xx'
+    ) as HTMLElement;
+    fireEvent.click(option);
+    await waitFor(() => expect(queries().some((q) => q.includes('coalesce'))).toBe(true));
+    fireEvent.click(await screen.findByTestId('apmCorrelationsExploreTraces'));
+    // coalesce is unsupported before OpenSearch 3.1 and the fetch hasn't confirmed support yet.
+    expect((navigateToExploreTraces as jest.Mock).mock.calls.pop()[7]).toBe('');
+  });
+
+  it('passes the traces data source title to the Explore Traces link', async () => {
+    (useApmConfig as jest.Mock).mockReturnValue({
+      ...config,
+      config: {
+        ...config.config,
+        tracesDataset: { ...config.config.tracesDataset, datasourceTitle: 'Local Cluster' },
+      },
+    });
+    mockExecuteQuery.mockResolvedValue({ jsonData: [span('a1')] });
+    render(<ServiceCorrelationsFlyout {...props} timeRange={fixedRange} />);
+    await waitFor(() => expect(screen.getByText('a1')).toBeInTheDocument());
+    fireEvent.click(await screen.findByTestId('apmCorrelationsExploreTraces'));
+    expect((navigateToExploreTraces as jest.Mock).mock.calls.pop()[5]).toBe('Local Cluster');
   });
 });
