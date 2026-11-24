@@ -44,7 +44,11 @@ jest.mock('../../../framework/core_refs', () => ({
 
 import { MonitorDetailFlyout } from '../monitor_detail_flyout';
 import { coreRefs } from '../../../framework/core_refs';
-import type { UnifiedRule, UnifiedRuleSummary } from '../../../../common/types/alerting';
+import type {
+  Datasource,
+  UnifiedRule,
+  UnifiedRuleSummary,
+} from '../../../../common/types/alerting';
 
 const navigateToApp = coreRefs.application!.navigateToApp as jest.Mock;
 
@@ -435,5 +439,148 @@ describe('MonitorDetailFlyout', () => {
         path: '#/monitors/mon-1?action=edit-monitor&monitorType=doc_level_monitor&dataSourceId=',
       });
     });
+  });
+});
+
+describe('MonitorDetailFlyout header and rows', () => {
+  beforeEach(() => {
+    mockGetRuleDetail.mockReset();
+    mockGetRuleDetail.mockResolvedValue(null);
+    navigateToApp.mockClear();
+  });
+
+  const renderFlyout = (monitor: UnifiedRuleSummary, datasource?: Datasource) =>
+    render(
+      <MonitorDetailFlyout
+        monitor={monitor}
+        datasource={datasource}
+        onClose={jest.fn()}
+        onDelete={jest.fn()}
+        onClone={jest.fn()}
+      />
+    );
+
+  it('reads "Enabled" for an OpenSearch rule, never as a breach, with the tags in table order', () => {
+    const { getByTestId } = renderFlyout(mockMonitor, {
+      id: 'ds-1',
+      name: 'logs-cluster',
+      type: 'opensearch',
+      url: '',
+      enabled: true,
+    });
+    const status = getByTestId('monitorDetailStatus');
+    expect(status).toHaveTextContent('Enabled');
+    expect(status).not.toHaveAttribute('data-breached');
+    expect(getByTestId('monitorDetailSeverity')).toHaveAttribute('data-severity', 'medium');
+    expect(getByTestId('monitorDetailDatasource')).toHaveTextContent('logs-cluster');
+    const order = Array.from(
+      getByTestId('monitorDetailHeaderRow').querySelectorAll('[data-test-subj]')
+    ).map((el) => el.getAttribute('data-test-subj'));
+    expect(order.indexOf('monitorDetailStatus')).toBeLessThan(
+      order.indexOf('monitorDetailSeverity')
+    );
+    expect(order.indexOf('monitorDetailSeverity')).toBeLessThan(
+      order.indexOf('monitorDetailDatasource')
+    );
+  });
+
+  it('shows a firing Prometheus rule as the red "Firing" tag', () => {
+    const { getByTestId } = renderFlyout({ ...mockMonitor, datasourceType: 'prometheus' });
+    expect(getByTestId('monitorDetailStatus')).toHaveTextContent('Firing');
+    expect(getByTestId('monitorDetailStatus')).toHaveAttribute('data-breached', 'true');
+  });
+
+  it('names the history column "Status" and the id row "Data source ID"', async () => {
+    const { findByText, queryByText } = renderFlyout(mockMonitor);
+    expect(await findByText('Data source ID')).toBeInTheDocument();
+    expect(queryByText('Datasource ID')).toBeNull();
+    expect(queryByText('State')).toBeNull();
+  });
+
+  it('shows the full message of a recent alert, wrapped instead of truncated', async () => {
+    const message =
+      'Failed fetching inputs: OpenSearchStatusException[OpenSearch exception [type=index_not_found_exception, reason=no such index [app-logs-2026.11.01]]]';
+    mockGetRuleDetail.mockResolvedValue({
+      ...mockMonitor,
+      alertHistory: [{ timestamp: new Date().toISOString(), state: 'error', value: '1', message }],
+      conditionPreviewData: [],
+    } as unknown as UnifiedRule);
+    const { findByTestId, getByText } = renderFlyout(mockMonitor);
+    const cell = await findByTestId('monitorDetailAlertHistoryMessage');
+    expect(cell).toHaveTextContent(message);
+    expect(cell).toHaveStyle({ overflowWrap: 'anywhere' });
+    expect(cell.closest('.euiTableCellContent--truncateText')).toBeNull();
+    // The other columns stay.
+    for (const column of ['Time', 'Status', 'Value', 'Message']) {
+      expect(getByText(column, { selector: '.euiTableCellContent__text' })).toBeInTheDocument();
+    }
+  });
+  it('links a burn-rate rule to its SLO', async () => {
+    const { findByTestId } = renderFlyout({
+      ...mockMonitor,
+      datasourceType: 'prometheus',
+      labels: { slo_id: 'slo/1', slo_name: 'Checkout availability' },
+    });
+    const link = await findByTestId('monitorDetailSloLink');
+    expect(link).toHaveTextContent('Checkout availability');
+    fireEvent.click(link);
+    expect(navigateToApp).toHaveBeenCalledWith('observability-apm-slo', {
+      path: `#/slos/${encodeURIComponent('slo/1')}`,
+    });
+  });
+
+  it('shows no SLO row without an slo_id', async () => {
+    const { findByText, queryByTestId } = renderFlyout(mockMonitor);
+    await findByText('Data source ID');
+    expect(queryByTestId('monitorDetailSloLink')).toBeNull();
+  });
+  const template =
+    'Monitor {{ctx.monitor.name}} just entered alert status. Please investigate the issue. - Trigger: {{ctx.trigger.name}} - Severity: {{ctx.trigger.severity}} - Period start: {{ctx.periodStart}} UTC - Period end: {{ctx.periodEnd}} UTC';
+  it('shows an OpenSearch action message template once, in its own section after Conditions & Evaluation', async () => {
+    const monitor = { ...mockMonitor, annotations: { summary: template } };
+    mockGetRuleDetail.mockResolvedValue({
+      ...monitor,
+      description: template,
+      alertHistory: [],
+      conditionPreviewData: [],
+    } as unknown as UnifiedRule);
+    const { findByTestId, getByTestId, getAllByText, getByText } = renderFlyout(monitor);
+    const section = await findByTestId('monitorDetailNotificationMessage');
+    expect(section).toHaveTextContent('Notification message');
+    expect(getByTestId('monitorDetailNotificationMessageText')).toHaveTextContent(template);
+    expect(getAllByText(template)).toHaveLength(1);
+    const conditions = getByText('Conditions & Evaluation');
+    const sections = Array.from(document.querySelectorAll('.euiAccordion'));
+    const conditionsIndex = sections.findIndex((el) => el.contains(conditions));
+    expect(conditionsIndex).toBeGreaterThanOrEqual(0);
+    expect(sections.indexOf(section)).toBeGreaterThan(conditionsIndex);
+  });
+  it('keeps the generated description of an OpenSearch rule with no action', async () => {
+    const description = 'Bucket aggregation monitor targeting logs-*';
+    mockGetRuleDetail.mockResolvedValue({
+      ...mockMonitor,
+      description,
+      alertHistory: [],
+      conditionPreviewData: [],
+    } as unknown as UnifiedRule);
+    const { findByText, queryByTestId } = renderFlyout(mockMonitor);
+    expect(await findByText(description)).toBeInTheDocument();
+    expect(queryByTestId('monitorDetailNotificationMessage')).toBeNull();
+  });
+  it('shows no notification message section for a Prometheus rule', async () => {
+    const monitor = {
+      ...mockMonitor,
+      datasourceType: 'prometheus' as const,
+      annotations: { summary: 'High error rate' },
+    };
+    mockGetRuleDetail.mockResolvedValue({
+      ...monitor,
+      description: 'High error rate',
+      alertHistory: [],
+      conditionPreviewData: [],
+    } as unknown as UnifiedRule);
+    const { findByText, queryByTestId } = renderFlyout(monitor);
+    expect(await findByText('High error rate')).toBeInTheDocument();
+    expect(queryByTestId('monitorDetailNotificationMessage')).toBeNull();
   });
 });

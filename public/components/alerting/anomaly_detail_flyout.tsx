@@ -442,7 +442,7 @@ export const AnomalyDetailContent: React.FC<AnomalyDetailContentProps> = ({
             },
             {
               title: i18n.translate('observability.alerting.anomalyDetailFlyout.datasource', {
-                defaultMessage: 'Datasource',
+                defaultMessage: 'Data source',
               }),
               description: dsName,
             },

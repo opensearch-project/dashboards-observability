@@ -3,11 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { matchesSearch } from '../monitors_table_filters';
+import {
+  emptyFilters,
+  matchesFilters,
+  matchesSearch,
+  ruleStatusKey,
+  splitRuleStatusKey,
+} from '../monitors_table_filters';
 import type { UnifiedRuleSummary } from '../../../../../common/types/alerting';
 
 function rule(over: Partial<UnifiedRuleSummary> = {}): UnifiedRuleSummary {
-  return ({
+  return {
     id: 'rule-id-1',
     datasourceId: 'ds-1',
     datasourceType: 'opensearch',
@@ -25,7 +31,7 @@ function rule(over: Partial<UnifiedRuleSummary> = {}): UnifiedRuleSummary {
     createdAt: '',
     lastModified: '',
     ...over,
-  } as unknown) as UnifiedRuleSummary;
+  } as unknown as UnifiedRuleSummary;
 }
 
 describe('matchesSearch', () => {
@@ -52,6 +58,32 @@ describe('matchesSearch', () => {
     // Without a label match, `monitor_id:foo` must NOT fall back to
     // matching `foo` against name/labels via the legacy free-text path.
     expect(matchesSearch(rule({ id: 'rule-id-1', name: 'foo monitor' }), 'monitor_id:foo')).toBe(
+      false
+    );
+  });
+});
+
+describe('Status filter keys', () => {
+  it('keys a rule by data source type and status', () => {
+    expect(ruleStatusKey(rule({ datasourceType: 'cloudwatch', status: 'active' }))).toBe(
+      'cloudwatch:active'
+    );
+    expect(splitRuleStatusKey('prometheus:muted')).toEqual({
+      datasourceType: 'prometheus',
+      status: 'muted',
+    });
+    expect(splitRuleStatusKey('active')).toEqual({ datasourceType: '', status: 'active' });
+  });
+
+  it('matches only the selected source, not the same status of another source', () => {
+    const filters = { ...emptyFilters(), status: ['cloudwatch:active'] };
+    expect(matchesFilters(rule({ datasourceType: 'cloudwatch', status: 'active' }), filters)).toBe(
+      true
+    );
+    expect(matchesFilters(rule({ datasourceType: 'opensearch', status: 'active' }), filters)).toBe(
+      false
+    );
+    expect(matchesFilters(rule({ datasourceType: 'prometheus', status: 'active' }), filters)).toBe(
       false
     );
   });

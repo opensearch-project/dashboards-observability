@@ -99,6 +99,12 @@ export interface FacetGroupConfig {
    * is expected to surface the feedback another way (e.g., a toast with a link to settings).
    */
   onCapReached?: () => void;
+  /**
+   * Splits the options under subdued sub-headings (e.g. Status by data source: OpenSearch,
+   * Prometheus, CloudWatch). A group with no shown option has no heading. Options no group
+   * lists render after the groups, with no heading.
+   */
+  optionGroups?: Array<{ label: string; options: string[] }>;
 }
 
 export interface FacetFilterGroupProps extends FacetGroupConfig {
@@ -195,6 +201,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
   maxSelected,
   checkedFirst,
   onCapReached,
+  optionGroups,
   isCollapsed,
   onToggleCollapse,
 }) => {
@@ -239,6 +246,147 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
 
   // Selection cap: once reached, unchecked options are disabled. Checked stay interactive.
   const capReached = typeof maxSelected === 'number' && selected.length >= maxSelected;
+
+  const renderOption = (opt: string) => {
+    const isActive = selected.includes(opt);
+    const count = counts[opt] || 0;
+    const displayLabel = displayMap?.[opt] || opt;
+    const checkboxId = `${id}-${opt}`;
+    // Checked items always remain interactive so the user can uncheck to free a slot.
+    // When a consumer provided `onCapReached`, the option stays enabled (clickable)
+    // and the click fires the callback instead of mutating selection — this lets
+    // the consumer surface the cap feedback as a toast rather than greyed-out rows.
+    const isDisabled = capReached && !isActive && !onCapReached;
+
+    const labelContent = (
+      <span
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          width: '100%',
+          justifyContent: 'space-between',
+          opacity: isDisabled ? 0.5 : 1,
+          minWidth: 0,
+        }}
+      >
+        <span
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            flex: 1,
+            minWidth: 0,
+          }}
+        >
+          {colorMap && colorStyle === 'swatch' && (
+            <span
+              aria-hidden="true"
+              data-test-subj={`facetGroup-${id}-swatch-${opt}`}
+              style={{
+                display: 'inline-block',
+                width: 12,
+                height: 12,
+                borderRadius: 2,
+                flexShrink: 0,
+                backgroundColor: colorMap[opt] || UNKNOWN_HEX,
+              }}
+            />
+          )}
+          {colorMap && colorStyle === 'health' && (
+            <EuiHealth color={colorMap[opt] || 'subdued'} style={{ marginRight: 0 }} />
+          )}
+          {iconMap?.[opt] && (
+            <EuiIcon
+              type={iconMap[opt]}
+              size="s"
+              style={{ flexShrink: 0 }}
+              data-test-subj={`facetGroup-${id}-icon-${opt}`}
+            />
+          )}
+          {/* Explicit 12/18 preserves Alert Manager's existing look. */}
+          <TruncatedLabel text={displayLabel} fontSize={12} lineHeight={18} />
+        </span>
+        {showCounts && (
+          <EuiText size="xs" color="subdued" className="altFacetCount">
+            ({count})
+          </EuiText>
+        )}
+      </span>
+    );
+
+    return (
+      // The error indicator is a SIBLING of the checkbox (not part of
+      // the checkbox `label`), so no interactive button is nested inside
+      // a `<label>` (WCAG 4.1.2 nested-interactive).
+      <div key={opt} className="altFacetCheckboxRow">
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
+            <EuiCheckbox
+              id={checkboxId}
+              label={labelContent}
+              checked={isActive}
+              disabled={isDisabled}
+              aria-label={
+                isDisabled
+                  ? i18n.translate('observability.alerting.facetFilterPanel.disabledAriaLabel', {
+                      defaultMessage: '{displayLabel} (maximum datasources reached)',
+                      values: { displayLabel },
+                    })
+                  : undefined
+              }
+              onChange={() => {
+                if (isActive) {
+                  onChange(selected.filter((s) => s !== opt));
+                  return;
+                }
+                if (capReached && onCapReached) {
+                  onCapReached();
+                  return;
+                }
+                onChange([...selected, opt]);
+              }}
+              compressed
+            />
+          </EuiFlexItem>
+          {errorMap?.[opt] && (
+            <EuiFlexItem grow={false}>
+              <FacetErrorIndicator
+                facetId={id}
+                option={opt}
+                displayLabel={displayLabel}
+                error={errorMap[opt]}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
+    );
+  };
+
+  // Rows under their group's sub-heading, then the options no group lists.
+  const renderOptions = () => {
+    if (!optionGroups) return cappedOptions.map(renderOption);
+    const grouped = new Set(optionGroups.flatMap((g) => g.options));
+    return (
+      <>
+        {optionGroups.map((group) => {
+          const members = new Set(group.options);
+          const shown = cappedOptions.filter((o) => members.has(o));
+          if (shown.length === 0) return null;
+          return (
+            <div key={`group-${group.label}`} data-test-subj={`facetGroup-${id}-optionGroup`}>
+              <EuiText size="xs" color="subdued" style={{ marginTop: 2, marginBottom: 2 }}>
+                <span data-test-subj="facetOptionGroupHeading">{group.label}</span>
+              </EuiText>
+              {shown.map(renderOption)}
+            </div>
+          );
+        })}
+        {cappedOptions.filter((o) => !grouped.has(o)).map(renderOption)}
+      </>
+    );
+  };
 
   return (
     <div key={id} style={{ marginBottom: 12 }} data-test-subj={`facetGroup-${id}`}>
@@ -417,125 +565,7 @@ export const FacetFilterGroup: React.FC<FacetFilterGroupProps> = ({
               <EuiSpacer size="xs" />
             </>
           )}
-          {cappedOptions.map((opt) => {
-            const isActive = selected.includes(opt);
-            const count = counts[opt] || 0;
-            const displayLabel = displayMap?.[opt] || opt;
-            const checkboxId = `${id}-${opt}`;
-            // Checked items always remain interactive so the user can uncheck to free a slot.
-            // When a consumer provided `onCapReached`, the option stays enabled (clickable)
-            // and the click fires the callback instead of mutating selection — this lets
-            // the consumer surface the cap feedback as a toast rather than greyed-out rows.
-            const isDisabled = capReached && !isActive && !onCapReached;
-
-            const labelContent = (
-              <span
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  width: '100%',
-                  justifyContent: 'space-between',
-                  opacity: isDisabled ? 0.5 : 1,
-                  minWidth: 0,
-                }}
-              >
-                <span
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    flex: 1,
-                    minWidth: 0,
-                  }}
-                >
-                  {colorMap && colorStyle === 'swatch' && (
-                    <span
-                      aria-hidden="true"
-                      data-test-subj={`facetGroup-${id}-swatch-${opt}`}
-                      style={{
-                        display: 'inline-block',
-                        width: 12,
-                        height: 12,
-                        borderRadius: 2,
-                        flexShrink: 0,
-                        backgroundColor: colorMap[opt] || UNKNOWN_HEX,
-                      }}
-                    />
-                  )}
-                  {colorMap && colorStyle === 'health' && (
-                    <EuiHealth color={colorMap[opt] || 'subdued'} style={{ marginRight: 0 }} />
-                  )}
-                  {iconMap?.[opt] && (
-                    <EuiIcon
-                      type={iconMap[opt]}
-                      size="s"
-                      style={{ flexShrink: 0 }}
-                      data-test-subj={`facetGroup-${id}-icon-${opt}`}
-                    />
-                  )}
-                  {/* Explicit 12/18 preserves Alert Manager's existing look. */}
-                  <TruncatedLabel text={displayLabel} fontSize={12} lineHeight={18} />
-                </span>
-                {showCounts && (
-                  <EuiText size="xs" color="subdued" className="altFacetCount">
-                    ({count})
-                  </EuiText>
-                )}
-              </span>
-            );
-
-            return (
-              // The error indicator is a SIBLING of the checkbox (not part of
-              // the checkbox `label`), so no interactive button is nested inside
-              // a `<label>` (WCAG 4.1.2 nested-interactive).
-              <div key={opt} className="altFacetCheckboxRow">
-                <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-                    <EuiCheckbox
-                      id={checkboxId}
-                      label={labelContent}
-                      checked={isActive}
-                      disabled={isDisabled}
-                      aria-label={
-                        isDisabled
-                          ? i18n.translate(
-                              'observability.alerting.facetFilterPanel.disabledAriaLabel',
-                              {
-                                defaultMessage: '{displayLabel} (maximum datasources reached)',
-                                values: { displayLabel },
-                              }
-                            )
-                          : undefined
-                      }
-                      onChange={() => {
-                        if (isActive) {
-                          onChange(selected.filter((s) => s !== opt));
-                          return;
-                        }
-                        if (capReached && onCapReached) {
-                          onCapReached();
-                          return;
-                        }
-                        onChange([...selected, opt]);
-                      }}
-                      compressed
-                    />
-                  </EuiFlexItem>
-                  {errorMap?.[opt] && (
-                    <EuiFlexItem grow={false}>
-                      <FacetErrorIndicator
-                        facetId={id}
-                        option={opt}
-                        displayLabel={displayLabel}
-                        error={errorMap[opt]}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              </div>
-            );
-          })}
+          {renderOptions()}
           {hasOverflow && (
             <EuiLink
               onClick={() => setShowAll((v) => !v)}

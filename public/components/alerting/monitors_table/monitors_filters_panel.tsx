@@ -31,18 +31,32 @@ import { FormattedMessage } from '@osd/i18n/react';
 import {
   Datasource,
   MonitorHealthStatus,
-  MonitorStatus,
   MonitorType,
   UnifiedAlertSeverity,
   UnifiedRuleSummary,
 } from '../../../../common/types/alerting';
 import { FacetFilterGroup } from '../facet_filter_panel';
-import { DatasourceFacet, DatasourceFacetCloudWatch } from '../datasource_facet';
-import { HEALTH_COLORS, SEVERITY_COLORS, STATUS_COLORS, TYPE_LABELS } from '../shared_constants';
-import { getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
-import { collectLabelValues, FilterState } from './monitors_table_filters';
+import {
+  DATASOURCE_TYPE_ORDER,
+  DatasourceFacet,
+  DatasourceFacetCloudWatch,
+  datasourceTypeLabel,
+} from '../datasource_facet';
+import { getRuleStatusColor, HEALTH_COLORS, TYPE_LABELS } from '../shared_constants';
+import { getMonitorStateLabel, getNativeRuleStatusLabel, getSeverityLabel } from '../enum_labels';
+import { collectLabelValues, FilterState, splitRuleStatusKey } from './monitors_table_filters';
 import { INTERNAL_LABEL_KEYS, SavedSearch } from './monitors_table_helpers';
 
+// Status options within a data source: breach first, then the waiting and quiet states
+// (the Alerts tab's order); anything else follows by name.
+const RULE_STATUS_ORDER: Record<string, number> = {
+  active: 0,
+  pending: 1,
+  insufficient_data: 2,
+  ok: 3,
+  muted: 4,
+  disabled: 5,
+};
 // Cap on label-key facets rendered before the user expands the section.
 // Mirrors the Alerts panel.
 const LABEL_KEY_INITIAL_VISIBLE = 10;
@@ -58,6 +72,11 @@ export interface MonitorsFiltersPanelProps {
   datasourceErrorMap?: Record<string, string>;
   /** CloudWatch regions for the Datasource facet's CloudWatch group; omitted without targets. */
   cloudWatch?: DatasourceFacetCloudWatch;
+  /**
+   * The Data source filter's limit message, shown at the bottom of the filter after a refused
+   * selection. Set and cleared by the page.
+   */
+  datasourceLimitMessage?: React.ReactNode;
 
   filters: FilterState;
   activeFilterCount: number;
@@ -102,6 +121,7 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
   onDatasourceCapReached,
   datasourceErrorMap,
   cloudWatch,
+  datasourceLimitMessage,
   filters,
   activeFilterCount,
   clearAllFilters,
@@ -140,9 +160,41 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
   // raw value (FacetFilterGroup's onChange keeps the original option), so this
   // is display-only and cannot change which rows match. Mirrors how the Type
   // facet already uses TYPE_LABELS.
-  const statusDisplayMap = useMemo(
-    () => Object.fromEntries(uniqueStatuses.map((s) => [s, getMonitorStateLabel(s)])),
+  // Status options are `<datasourceType>:<status>`, shown in the source's own word under a
+  // heading per source, with the table cell's dot color.
+  const statusOptions = useMemo(
+    () =>
+      [...uniqueStatuses].sort((a, b) => {
+        const sa = splitRuleStatusKey(a).status;
+        const sb = splitRuleStatusKey(b).status;
+        return (RULE_STATUS_ORDER[sa] ?? 9) - (RULE_STATUS_ORDER[sb] ?? 9) || sa.localeCompare(sb);
+      }),
     [uniqueStatuses]
+  );
+  const statusDisplayMap = useMemo(
+    () =>
+      Object.fromEntries(
+        statusOptions.map((key) => [key, getNativeRuleStatusLabel(splitRuleStatusKey(key))])
+      ),
+    [statusOptions]
+  );
+  const statusColorMap = useMemo(
+    () =>
+      Object.fromEntries(
+        statusOptions.map((key) => {
+          const { datasourceType, status } = splitRuleStatusKey(key);
+          return [key, getRuleStatusColor(status, datasourceType)];
+        })
+      ),
+    [statusOptions]
+  );
+  const statusOptionGroups = useMemo(
+    () =>
+      DATASOURCE_TYPE_ORDER.map((type) => ({
+        label: datasourceTypeLabel(type),
+        options: statusOptions.filter((k) => splitRuleStatusKey(k).datasourceType === type),
+      })),
+    [statusOptions]
   );
   const severityDisplayMap = useMemo(
     () => Object.fromEntries(uniqueSeverities.map((s) => [s, getSeverityLabel(s)])),
@@ -164,7 +216,8 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
     displayMap?: Record<string, string>,
     colorMap?: Record<string, string>,
     defaultCollapsed = false,
-    showOptionCount = false
+    showOptionCount = false,
+    optionGroups?: Array<{ label: string; options: string[] }>
   ) => (
     <FacetFilterGroup
       key={id}
@@ -176,7 +229,8 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
       counts={counts}
       displayMap={displayMap}
       colorMap={colorMap}
-      colorStyle={id === 'severity' ? 'swatch' : 'health'}
+      colorStyle="health"
+      optionGroups={optionGroups}
       showOptionCount={showOptionCount}
       isCollapsed={isFacetCollapsed(id, defaultCollapsed)}
       onToggleCollapse={(facetId) => toggleFacetCollapse(facetId, defaultCollapsed)}
@@ -227,10 +281,11 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           onCapReached={onDatasourceCapReached}
           errorMap={datasourceErrorMap}
           cloudWatch={cloudWatch}
+          limitMessage={datasourceLimitMessage}
           searchAriaLabel={i18n.translate(
             'observability.alerting.monitorsTable.filtersPanel.searchDatasourcesAriaLabel',
             {
-              defaultMessage: 'Search datasources',
+              defaultMessage: 'Search data sources',
             }
           )}
           isCollapsed={isFacetCollapsed('datasource')}
@@ -242,12 +297,15 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           i18n.translate('observability.alerting.monitorsTable.filtersPanel.status', {
             defaultMessage: 'Status',
           }),
-          uniqueStatuses,
+          statusOptions,
           filters.status,
-          (v) => updateFilter('status', v as MonitorStatus[]),
+          (v) => updateFilter('status', v),
           facetCounts.counts.status,
           statusDisplayMap,
-          STATUS_COLORS
+          statusColorMap,
+          false,
+          false,
+          statusOptionGroups
         )}
         {renderFacetGroup(
           'severity',
@@ -258,8 +316,8 @@ export const MonitorsFiltersPanel: React.FC<MonitorsFiltersPanelProps> = ({
           filters.severity,
           (v) => updateFilter('severity', v as UnifiedAlertSeverity[]),
           facetCounts.counts.severity,
-          severityDisplayMap,
-          SEVERITY_COLORS
+          severityDisplayMap
+          // No swatches: severity is a neutral tag.
         )}
         {renderFacetGroup(
           'monitorType',

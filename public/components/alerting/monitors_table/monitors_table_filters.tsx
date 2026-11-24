@@ -19,7 +19,6 @@
  */
 import {
   MonitorHealthStatus,
-  MonitorStatus,
   MonitorType,
   UnifiedAlertSeverity,
   UnifiedRuleSummary,
@@ -31,7 +30,8 @@ import { facetLabels } from '../../../../common/services/alerting/facet_labels';
 // ============================================================================
 
 export interface FilterState {
-  status: MonitorStatus[];
+  /** Status options, `<datasourceType>:<status>` (see `ruleStatusKey`). */
+  status: string[];
   severity: UnifiedAlertSeverity[];
   monitorType: MonitorType[];
   healthStatus: MonitorHealthStatus[];
@@ -49,6 +49,22 @@ export const emptyFilters = (): FilterState => ({
   createdBy: [],
   destinations: [],
 });
+
+/**
+ * The Status filter's option for a rule: `<datasourceType>:<status>`, so each source's own
+ * word is its own option: CloudWatch "In alarm" selects only CloudWatch rules, and an
+ * OpenSearch rule's `active` ("Enabled") is not a Prometheus rule's `active` ("Firing").
+ */
+export function ruleStatusKey(rule: Pick<UnifiedRuleSummary, 'datasourceType' | 'status'>): string {
+  return `${rule.datasourceType}:${rule.status}`;
+}
+
+/** The data source type and status of a `ruleStatusKey` option. */
+export function splitRuleStatusKey(key: string): { datasourceType: string; status: string } {
+  const sep = key.indexOf(':');
+  if (sep < 0) return { datasourceType: '', status: key };
+  return { datasourceType: key.slice(0, sep), status: key.slice(sep + 1) };
+}
 
 // ============================================================================
 // Suggestion Engine
@@ -100,7 +116,7 @@ export function matchesSearch(rule: UnifiedRuleSummary, query: string): boolean 
 }
 
 export function matchesFilters(rule: UnifiedRuleSummary, filters: FilterState): boolean {
-  if (filters.status.length > 0 && !filters.status.includes(rule.status)) return false;
+  if (filters.status.length > 0 && !filters.status.includes(ruleStatusKey(rule))) return false;
   if (filters.severity.length > 0 && !filters.severity.includes(rule.severity)) return false;
   if (filters.monitorType.length > 0 && !filters.monitorType.includes(rule.monitorType))
     return false;

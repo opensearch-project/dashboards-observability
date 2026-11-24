@@ -66,7 +66,8 @@ export const STATE_COLORS: Record<string, string> = {
   acknowledged: 'primary',
   silenced: 'default',
   resolved: 'success',
-  error: 'danger',
+  // A monitor error is not a breach: neutral, so red keeps one meaning.
+  error: 'subdued',
   deleted: 'subdued',
 };
 

@@ -80,6 +80,15 @@ describe('NotificationRoutingPanel', () => {
     });
   });
 
+  it('shows where routing is configured, with no Read-only label', async () => {
+    mockGetConfig.mockResolvedValue(mockConfig);
+    render(<NotificationRoutingPanel datasources={[promDs]} />);
+    await waitFor(() => expect(screen.getByText('Route Tree')).toBeInTheDocument());
+    expect(screen.queryByText(/Read-only/i)).toBeNull();
+    expect(screen.getByTestId('notificationRoutingConfigNote')).toHaveTextContent(
+      /Alertmanager configuration file or API/
+    );
+  });
   it('shows error callout when fetch fails', async () => {
     mockGetConfig.mockRejectedValue(new Error('timeout'));
     render(<NotificationRoutingPanel datasources={[promDs]} />);

@@ -325,3 +325,57 @@ describe('FacetFilterGroup — color styles', () => {
     expect(container.querySelector('.euiHealth')).not.toBeNull();
   });
 });
+
+describe('FacetFilterGroup optionGroups', () => {
+  const props: FacetFilterGroupProps = {
+    ...defaultProps,
+    options: ['opensearch:active', 'cloudwatch:active', 'cloudwatch:resolved', 'anomaly'],
+    displayMap: {
+      'opensearch:active': 'Active',
+      'cloudwatch:active': 'In alarm',
+      'cloudwatch:resolved': 'OK',
+      anomaly: 'Anomaly',
+    },
+    counts: {
+      'opensearch:active': 1,
+      'cloudwatch:active': 2,
+      'cloudwatch:resolved': 3,
+      anomaly: 4,
+    },
+    optionGroups: [
+      { label: 'OpenSearch', options: ['opensearch:active'] },
+      { label: 'Prometheus', options: [] },
+      { label: 'CloudWatch', options: ['cloudwatch:active', 'cloudwatch:resolved'] },
+    ],
+  };
+
+  it('heads each non-empty group and lists ungrouped options last, with no heading', () => {
+    const { getAllByTestId, container } = render(<FacetFilterGroup {...props} />);
+    expect(getAllByTestId('facetOptionGroupHeading').map((h) => h.textContent)).toEqual([
+      'OpenSearch',
+      'CloudWatch',
+    ]);
+    const order = Array.from(container.querySelectorAll('.euiCheckbox input')).map((i) => i.id);
+    expect(order).toEqual([
+      'status-opensearch:active',
+      'status-cloudwatch:active',
+      'status-cloudwatch:resolved',
+      'status-anomaly',
+    ]);
+    const groups = getAllByTestId('facetGroup-status-optionGroup');
+    expect(groups[1].textContent).toContain('In alarm');
+    expect(groups.some((g) => g.textContent?.includes('Anomaly'))).toBe(false);
+  });
+
+  it('keeps selection, counts and Clear working', () => {
+    const onChange = jest.fn();
+    const { getByLabelText, getByText, getByTestId } = render(
+      <FacetFilterGroup {...props} selected={['anomaly']} onChange={onChange} />
+    );
+    expect(getByText('(2)')).toBeInTheDocument();
+    fireEvent.click(getByLabelText(/In alarm/));
+    expect(onChange).toHaveBeenLastCalledWith(['anomaly', 'cloudwatch:active']);
+    fireEvent.click(getByTestId('facetGroup-status-clear'));
+    expect(onChange).toHaveBeenLastCalledWith([]);
+  });
+});

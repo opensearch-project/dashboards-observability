@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 
 // Stub flyout to avoid pulling in its dependency tree
 jest.mock('../monitor_detail_flyout', () => ({
@@ -62,6 +62,12 @@ const defaultProps = {
 };
 
 describe('MonitorsTable', () => {
+  it('passes the data source limit message to the Data source filter', () => {
+    render(<MonitorsTable {...defaultProps} datasourceLimitMessage="Limit reached" />);
+    expect(
+      within(screen.getByTestId('facetGroup-datasource')).getByTestId('datasourceFacetLimitMessage')
+    ).toHaveTextContent('Limit reached');
+  });
   it('renders the table with a rule row', () => {
     render(<MonitorsTable {...defaultProps} />);
     expect(screen.getByText('HighCPU')).toBeInTheDocument();

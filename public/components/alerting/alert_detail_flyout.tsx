@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiBadge,
-  EuiHealth,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
@@ -37,13 +36,11 @@ import { coreRefs } from '../../framework/core_refs';
 import { AnomalyDetailContent } from './anomaly_detail_flyout';
 import { AlertingOpenSearchService } from './query_services/alerting_opensearch_service';
 import { LinkifyAnnotation } from './linkify_annotation';
-import {
-  canAcknowledgeAlert,
-  formatDatasourceType,
-  SEVERITY_COLORS,
-  STATE_COLORS,
-} from './shared_constants';
-import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
+import { canAcknowledgeAlert, formatDatasourceType, STATE_COLORS } from './shared_constants';
+import { EMPTY_VALUE, getNativeAlertStateLabel, isBreachStatus } from './enum_labels';
+import { NativeStatus } from './native_status';
+import { SeverityTag } from './severity_tag';
+import { DatasourceTag } from './datasource_tag';
 import { formatTimestamp } from './time_format';
 
 /** Internal label keys filtered from the Labels accordion display. */
@@ -72,6 +69,15 @@ export interface AlertDetailFlyoutProps {
   sourceRuleStatus?: SourceRuleStatus;
   onClose: () => void;
   onAcknowledge: (alertId: string) => void;
+}
+
+/**
+ * Where a Rule or SLO row goes: a hash path, plus the OSD app id when the
+ * target is in another app (the SLO detail page) rather than the alerting app.
+ */
+interface SourceLink {
+  path: string;
+  appId?: string;
 }
 
 export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
@@ -160,26 +166,16 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     ? { ...alert, ...detailData, relatedAnomaly: detailData.relatedAnomaly ?? alert.relatedAnomaly }
     : alert;
 
-  const dsName =
-    datasources.find((d) => d.id === alert.datasourceId)?.name || alert.datasourceId || '\u2014';
+  const ds = datasources.find((d) => d.id === alert.datasourceId);
   // Memoize so `allLabels` keeps a stable reference between renders when
   // `alertData.labels` is unchanged \u2014 the `useMemo` for `sourceLink`
   // below depends on it, and a fresh `{}` from the `||` fallback would
   // otherwise re-run the dep-list check every render.
   const allLabels = useMemo(() => alertData.labels || {}, [alertData.labels]);
 
-  // Source deep-link computation (BUG-14 / OBS1). The unified alert shape
-  // doesn't carry a typed pointer to its origin; we derive a navigation
-  // target from the labels available per-backend. The target is an object so
-  // each surface knows whether it must cross an OSD app boundary (`appId`)
-  // or can stay within the alerting app (hash-only):
-  //   - SLO burn-rate alerts (either backend) carry `slo_id`. These open the
-  //     SLO *detail* page, which lives in the separate SLO app
-  //     (`observabilityApmSloID`) \u2014 so carry that app id and point at
-  //     `#/slos/<id>` (matches the SLO listing/detail deep-link convention).
-  //     Checked first, and backend-agnostically, so it stays in lock-step
-  //     with `sourceLinkLabel` below (which shows "Open SLO" whenever
-  //     `slo_id` is present).
+  // Rule deep-link (BUG-14 / OBS1). The unified alert shape doesn't
+  // carry a typed pointer to its rule; we derive one from the labels
+  // available per-backend:
   //   - OpenSearch alerts: `labels.monitor_id` is reliably populated. Match
   //     on `monitor_id:<id>` so the Rules tab's `matchesSearch` narrows to
   //     the originating monitor (rules carry the same id).
@@ -187,17 +183,14 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
   //     handle is `labels.alertname` (Prom convention) which equals the
   //     rule's `name`. Match by name.
   // Falls back to undefined when no usable handle exists, in which case the
-  // source-link surfaces are simply not rendered. Rules deep-links include
-  // the backing datasource id (`ds=\u2026`) so the Rules tab DS filter
-  // auto-selects the right cluster on landing (BUG-12).
-  const sourceLink = useMemo<{ path: string; appId?: string } | undefined>(() => {
+  // Rule row is not rendered. Rules deep-links include the backing datasource
+  // id (`ds=…`) so the Rules tab DS filter auto-selects the right cluster on
+  // landing (BUG-12). The SLO of a burn-rate alert is its own row (`sloLink`
+  // below), so an SLO alert links to both.
+  const ruleLink = useMemo<SourceLink | undefined>(() => {
     const dsId = alert.datasourceId;
     if (!dsId) return undefined;
     const labels = (allLabels as Record<string, string>) ?? {};
-    const sloId = labels.slo_id;
-    if (sloId) {
-      return { path: `#/slos/${encodeURIComponent(sloId)}`, appId: observabilityApmSloID };
-    }
     if (alert.datasourceType === 'opensearch') {
       const monitorId = labels.monitor_id;
       if (!monitorId) return undefined;
@@ -213,43 +206,31 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     return undefined;
   }, [alert.datasourceId, alert.datasourceType, allLabels]);
 
-  const sloId = (allLabels as Record<string, string>)?.slo_id;
-  const sourceLinkLabel = sloId
-    ? i18n.translate('observability.alerting.alertDetailFlyout.openSlo', {
-        defaultMessage: 'Open SLO',
-      })
-    : i18n.translate('observability.alerting.alertDetailFlyout.openMonitor', {
-        defaultMessage: 'Open rule',
-      });
-
-  // The description-list row names the *source*, so it must never fall back to
-  // the action label (`sourceLinkLabel`) — that both duplicates the header
-  // button verbatim and mislabels an SLO as if "Open SLO" were its name.
-  // Preference order per backend: SLO burn-rate alerts (any `slo_id`, matching
-  // the "Source SLO" title and "Open SLO" action) resolve to the SLO name then
-  // its id first — never the copied `monitor_name`, which would otherwise render
-  // a monitor's name in a row titled "Source SLO". Non-SLO alerts prefer the
-  // monitor's own name (OpenSearch), then the Prometheus `alertname`, then the
-  // raw `monitor_id`. `sourceLink` only exists when one of `slo_id` /
-  // `monitor_id` / `alertname` is present, so this chain always resolves to a
-  // string.
   const labelRecord = allLabels as Record<string, string>;
-  const sourceDisplayName = sloId
-    ? (labelRecord?.slo_name ?? sloId)
-    : (labelRecord?.monitor_name ?? labelRecord?.alertname ?? labelRecord?.monitor_id);
-  const sourceRowTitle = sloId
-    ? i18n.translate('observability.alerting.alertDetailFlyout.sourceSlo', {
-        defaultMessage: 'Source SLO',
-      })
-    : i18n.translate('observability.alerting.alertDetailFlyout.sourceRule', {
-        defaultMessage: 'Source rule',
-      });
+  // SLO burn-rate alerts (either backend) carry `slo_id`. The SLO row opens the
+  // SLO *detail* page, which lives in the separate SLO app
+  // (`observabilityApmSloID`), at `#/slos/<id>` (the SLO listing/detail
+  // deep-link convention).
+  const sloId = labelRecord?.slo_id;
+  const sloLink = useMemo<SourceLink | undefined>(
+    () =>
+      sloId
+        ? { path: `#/slos/${encodeURIComponent(sloId)}`, appId: observabilityApmSloID }
+        : undefined,
+    [sloId]
+  );
+  const sloDisplayName = sloId ? (labelRecord?.slo_name ?? sloId) : undefined;
+  // The Rule row names the rule: the monitor's own name (OpenSearch), then the
+  // Prometheus `alertname`, then the raw `monitor_id`. `ruleLink` only exists
+  // when `monitor_id` or `alertname` is present, so this resolves to a string.
+  const ruleDisplayName =
+    labelRecord?.monitor_name ?? labelRecord?.alertname ?? labelRecord?.monitor_id;
 
   // An alert can outlive its rule: OpenSearch keeps an alert whose monitor or
   // trigger was deleted (state `deleted`), and an old alert can point at a
   // monitor that's gone. Opening the rule would land on an empty Rules tab, so
   // say what happened instead and drop the link when the monitor is gone.
-  const monitorMissing = !sloId && sourceRuleStatus === 'missing';
+  const monitorMissing = sourceRuleStatus === 'missing';
   const deletedNotice = (() => {
     const monitorName = labelRecord?.monitor_name ?? labelRecord?.monitor_id;
     if (monitorMissing) {
@@ -290,9 +271,9 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
       }),
     };
   })();
-  const openableSourceLink = monitorMissing ? undefined : sourceLink;
+  const openableRuleLink = monitorMissing ? undefined : ruleLink;
 
-  const navigateToSource = () => {
+  const navigateToSource = (openableSourceLink: SourceLink | undefined) => {
     if (!openableSourceLink) return;
     onClose();
     if (openableSourceLink.appId) {
@@ -324,6 +305,10 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     Object.entries(allLabels).filter(([k]) => !INTERNAL_LABEL_KEYS.has(k))
   );
   const annotations = alertData.annotations || {};
+  // An OpenSearch alert in Error state carries the monitor's error (often a long exception) as
+  // its message. It is shown once, in a danger callout in the body, not as the header line.
+  const osErrorMessage =
+    alert.datasourceType === 'opensearch' && alert.state === 'error' ? alert.message : undefined;
   const relatedAnomaly = alertData.relatedAnomaly;
   const anomalyContext = useMemo(() => {
     if (!relatedAnomaly) return [];
@@ -346,52 +331,17 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
       aria-labelledby="alertDetailTitle"
     >
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="m">
-                  <h2 id="alertDetailTitle">{alert.name}</h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              {/* S-m8: Datasource type badge for visual distinction */}
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={alert.datasourceType === 'opensearch' ? 'primary' : 'accent'}>
-                  {formatDatasourceType(alert.datasourceType)}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiHealth color={STATE_COLORS[alert.state]}>
-                  {getStateLabel(alert.state)}
-                </EuiHealth>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={SEVERITY_COLORS[alert.severity]}>
-                  {getSeverityLabel(alert.severity)}
-                </EuiBadge>
-              </EuiFlexItem>
-              {openableSourceLink && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    iconType="popout"
-                    iconSide="right"
-                    onClick={navigateToSource}
-                    data-test-subj="alertDetailOpenSource"
-                  >
-                    {sourceLinkLabel}
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        {alert.message || annotations.summary || annotations.description ? (
+        {/* the name only in the title, the message once below it, then one row with
+            Status, Severity and Data source in the table's order and style. Alert names can be
+            long with no spaces (e.g. generated SLO rule names), so the title wraps anywhere.
+            An OpenSearch alert's error shows as a callout in the body instead of the message. */}
+        <EuiTitle size="m">
+          <h2 id="alertDetailTitle" style={{ overflowWrap: 'anywhere' }}>
+            {alert.name}
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
+        {osErrorMessage ? null : alert.message || annotations.summary || annotations.description ? (
           <EuiText size="s" color="subdued">
             {alert.message || annotations.summary || annotations.description}
           </EuiText>
@@ -403,9 +353,58 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
             />
           </EuiText>
         )}
+        <EuiSpacer size="s" />
+        <EuiFlexGroup
+          gutterSize="m"
+          alignItems="flexStart"
+          responsive={false}
+          wrap
+          data-test-subj="alertDetailHeaderRow"
+        >
+          <EuiFlexItem grow={false}>
+            <NativeStatus
+              label={getNativeAlertStateLabel(alert.datasourceType, alert.state)}
+              color={STATE_COLORS[alert.state] || 'subdued'}
+              breached={isBreachStatus('alert', alert.datasourceType, alert.state)}
+              data-test-subj="alertDetailStatus"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SeverityTag severity={alert.severity} data-test-subj="alertDetailSeverity" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+            <DatasourceTag
+              ds={ds}
+              cloudWatch={alert.cloudWatch}
+              datasourceType={alert.datasourceType}
+              data-test-subj="alertDetailDatasource"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {osErrorMessage && (
+          <>
+            <EuiCallOut
+              title={i18n.translate('observability.alerting.alertDetailFlyout.errorCalloutTitle', {
+                defaultMessage: 'Error',
+              })}
+              color="danger"
+              iconType="alert"
+              size="s"
+              data-test-subj="alertDetailErrorCallout"
+            >
+              <p
+                style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}
+                data-test-subj="alertDetailErrorMessage"
+              >
+                {osErrorMessage}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
         {deletedNotice && (
           <>
             <EuiCallOut
@@ -420,18 +419,93 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
             <EuiSpacer size="m" />
           </>
         )}
-        {/* Alert Details */}
+        {/* Started, the Rule and SLO links, and the CloudWatch account. Status,
+            Severity and Data source are in the header row, so they are not repeated here. */}
+        <EuiDescriptionList
+          type="column"
+          compressed
+          data-test-subj="alertDetailSummary"
+          listItems={[
+            {
+              title: i18n.translate('observability.alerting.alertDetailFlyout.started', {
+                defaultMessage: 'Started',
+              }),
+              // Zone-labelled so this reads identically to the Started column in
+              // the alerts table; a bare `toLocaleString()` hides which zone it
+              // rendered in, so two readers see different "start" times.
+              description: formatTimestamp(alert.startTime),
+            },
+            ...(ruleLink
+              ? [
+                  {
+                    title: i18n.translate('observability.alerting.alertDetailFlyout.rule', {
+                      defaultMessage: 'Rule',
+                    }),
+                    description: openableRuleLink ? (
+                      <EuiLink
+                        onClick={() => navigateToSource(openableRuleLink)}
+                        data-test-subj="alertDetailSourceRuleLink"
+                      >
+                        {ruleDisplayName}
+                      </EuiLink>
+                    ) : (
+                      <span data-test-subj="alertDetailSourceRuleDeleted">
+                        {i18n.translate(
+                          'observability.alerting.alertDetailFlyout.sourceRuleDeleted',
+                          {
+                            defaultMessage: '{name} (deleted)',
+                            values: { name: ruleDisplayName },
+                          }
+                        )}
+                      </span>
+                    ),
+                  },
+                ]
+              : []),
+            ...(sloLink
+              ? [
+                  {
+                    title: i18n.translate('observability.alerting.alertDetailFlyout.slo', {
+                      defaultMessage: 'SLO',
+                    }),
+                    description: (
+                      <EuiLink
+                        onClick={() => navigateToSource(sloLink)}
+                        data-test-subj="alertDetailSloLink"
+                      >
+                        {sloDisplayName}
+                      </EuiLink>
+                    ),
+                  },
+                ]
+              : []),
+            ...(alert.cloudWatch?.accountId
+              ? [
+                  {
+                    title: i18n.translate('observability.alerting.alertDetailFlyout.account', {
+                      defaultMessage: 'Account',
+                    }),
+                    description: alert.cloudWatch.accountId,
+                  },
+                ]
+              : []),
+          ]}
+        />
+
+        <EuiSpacer size="m" />
+
         <EuiAccordion
-          id={`alertDetails-${alert.id}`}
+          id={`alertMoreDetails-${alert.id}`}
+          data-test-subj="alertDetailMoreDetails"
           buttonContent={
             <strong>
               <FormattedMessage
-                id="observability.alerting.alertDetailFlyout.alertDetails"
-                defaultMessage="Alert Details"
+                id="observability.alerting.alertDetailFlyout.moreDetails"
+                defaultMessage="More details"
               />
             </strong>
           }
-          initialIsOpen={true}
+          initialIsOpen={false}
           paddingSize="m"
         >
           <EuiDescriptionList
@@ -445,39 +519,12 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 description: alert.id || EMPTY_VALUE,
               },
               {
-                title: i18n.translate('observability.alerting.alertDetailFlyout.state', {
-                  defaultMessage: 'State',
-                }),
-                description: getStateLabel(alert.state),
-              },
-              {
-                title: i18n.translate('observability.alerting.alertDetailFlyout.severity', {
-                  defaultMessage: 'Severity',
-                }),
-                description: getSeverityLabel(alert.severity),
-              },
-              {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.backend', {
                   defaultMessage: 'Backend',
                 }),
                 description: alert.datasourceType
                   ? formatDatasourceType(alert.datasourceType)
                   : EMPTY_VALUE,
-              },
-              {
-                title: i18n.translate('observability.alerting.alertDetailFlyout.datasource', {
-                  defaultMessage: 'Datasource',
-                }),
-                description: dsName,
-              },
-              {
-                title: i18n.translate('observability.alerting.alertDetailFlyout.started', {
-                  defaultMessage: 'Started',
-                }),
-                // Zone-labelled so this reads identically to the Started column in
-                // the alerts table; a bare `toLocaleString()` hides which zone it
-                // rendered in, so two readers see different "start" times.
-                description: formatTimestamp(alert.startTime),
               },
               {
                 title: i18n.translate('observability.alerting.alertDetailFlyout.lastUpdated', {
@@ -491,31 +538,12 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
                 }),
                 description: getAlertDuration(alert),
               },
-              ...(sourceLink
-                ? [
-                    {
-                      title: sourceRowTitle,
-                      description: openableSourceLink ? (
-                        <EuiLink
-                          onClick={navigateToSource}
-                          data-test-subj="alertDetailSourceRuleLink"
-                        >
-                          {sourceDisplayName}
-                        </EuiLink>
-                      ) : (
-                        <span data-test-subj="alertDetailSourceRuleDeleted">
-                          {i18n.translate(
-                            'observability.alerting.alertDetailFlyout.sourceRuleDeleted',
-                            {
-                              defaultMessage: '{name} (deleted)',
-                              values: { name: sourceDisplayName },
-                            }
-                          )}
-                        </span>
-                      ),
-                    },
-                  ]
-                : []),
+              {
+                title: i18n.translate('observability.alerting.alertDetailFlyout.datasourceId', {
+                  defaultMessage: 'Data source ID',
+                }),
+                description: alert.datasourceId || EMPTY_VALUE,
+              },
             ]}
           />
         </EuiAccordion>

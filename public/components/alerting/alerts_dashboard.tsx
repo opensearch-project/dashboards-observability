@@ -9,7 +9,6 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiBadge,
   EuiBasicTableColumn,
   EuiButton,
   EuiCard,
@@ -17,7 +16,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiHealth,
   EuiInMemoryTable,
   EuiLink,
   EuiText,
@@ -46,23 +44,30 @@ import { facetLabels } from '../../../common/services/alerting/facet_labels';
 import { AlertTimeline, AlertTimelineLegend, countAlertsStartedInWindow } from './alerts_charts';
 import { FacetFilterGroup, useFacetCollapse } from './facet_filter_panel';
 import {
+  DATASOURCE_TYPE_ORDER,
   DatasourceFacet,
   DatasourceFacetCloudWatch,
-  datasourceEntryLabel,
+  datasourceTypeLabel,
 } from './datasource_facet';
 import {
   canAcknowledgeAlert,
   SEVERITY_SORT_ORDER,
   sortBySeverity,
   isStandardOpenSearchDatasource,
-  SEVERITY_COLORS,
   STATE_COLORS,
 } from './shared_constants';
-import { EMPTY_VALUE, getSeverityLabel, getStateLabel } from './enum_labels';
+import {
+  EMPTY_VALUE,
+  getNativeAlertStateLabel,
+  getSeverityLabel,
+  isBreachStatus,
+} from './enum_labels';
+import { NativeStatus } from './native_status';
+import { SeverityTag } from './severity_tag';
 import { formatTimestamp } from './time_format';
-import { ALERT_KIND_HEX, getStateHex } from './alert_colors';
+import { ALERT_KIND_HEX } from './alert_colors';
 import { INTERNAL_LABEL_KEYS } from './monitors_table/monitors_table_helpers';
-import { useCloudWatchIconType } from './cloudwatch_icon';
+import { DatasourceTag } from './datasource_tag';
 import { TabRowActions } from './tab_row_actions';
 import {
   UnreachableDatasource,
@@ -431,6 +436,35 @@ function getAlertDisplayState(alert: UnifiedAlertSummary): string {
   return getAlertKind(alert) === 'anomaly' ? 'anomaly' : alert.state;
 }
 
+/**
+ * The Status filter's option for an alert: `<datasourceType>:<state>`, so the same internal
+ * state reads in each source's own word. The anomaly row kind stays `anomaly`.
+ */
+export function alertStatusKey(alert: UnifiedAlertSummary): string {
+  const state = getAlertDisplayState(alert);
+  return state === 'anomaly' ? state : `${alert.datasourceType}:${state}`;
+}
+
+/** The internal state of a Status filter option (`anomaly` for the anomaly row kind). */
+function statusKeyState(key: string): string {
+  return key.slice(key.indexOf(':') + 1);
+}
+
+/**
+ * The Status column's sort order: Firing, Pending, No data, then the ended states. Anomaly,
+ * error, deleted and any other state sort last.
+ */
+const ALERT_STATUS_SORT_RANK: Record<string, number> = {
+  active: 0,
+  pending: 1,
+  insufficient_data: 2,
+  acknowledged: 3,
+  resolved: 4,
+};
+export function alertStatusSortRank(state: string): number {
+  return ALERT_STATUS_SORT_RANK[state] ?? 5;
+}
+
 function isGroupedAnomalyRow(row: AlertTableRow): boolean {
   return getAlertKind(row) === 'anomaly' && (row.occurrenceCount || 0) > 1;
 }
@@ -574,22 +608,6 @@ function collectAlertLabelValues(alerts: UnifiedAlertSummary[], key: string): st
 // datasource, but two datasources can report the same id (an OpenSearch alert id read through
 // two connections to one cluster), so the datasource id is part of it. A repeated row id gives
 // React duplicate keys, and it then keeps stale rows when filtering shrinks the list.
-/**
- * The account and region a CloudWatch alert row reads (`<account> • <region>`), so same-named
- * alarms in two accounts or regions can be told apart. The account reads as in the Datasource
- * facet. Undefined for other rows.
- */
-export function cloudWatchAlertSourceLine(
-  alert: Pick<UnifiedAlertSummary, 'datasourceId' | 'datasourceType' | 'cloudWatch'>,
-  dsById: Map<string, Datasource>
-): string | undefined {
-  if (alert.datasourceType !== 'cloudwatch') return undefined;
-  const ds = dsById.get(alert.datasourceId);
-  const account = ds ? datasourceEntryLabel(ds) : alert.cloudWatch?.accountId;
-  const parts = [account, alert.cloudWatch?.region ?? ds?.region].filter(Boolean);
-  return parts.length > 0 ? parts.join(' • ') : undefined;
-}
-
 const alertRowId = (row: Pick<UnifiedAlertSummary, 'datasourceId' | 'id'>): string =>
   `${row.datasourceId}::${row.id}`;
 interface AlertsTableProps {
@@ -657,7 +675,22 @@ function renderGroupedAnomalyOccurrences(
                   hasBorder
                   color={index === 0 ? 'subdued' : 'plain'}
                 >
+                  {/* The table's columns: Status, Started, Severity, Alert, Data source, Actions. */}
                   <div className="altGroupedOccurrenceGrid">
+                    <div className="altGroupedOccurrenceCell" />
+                    <div className="altGroupedOccurrenceCell">
+                      <EuiToolTip content={timestamp}>
+                        <span style={{ fontSize: 12 }} tabIndex={0} aria-label={timestamp}>
+                          <FormattedMessage
+                            id="observability.alerting.alertsDashboard.groupedAnomalyStartedAgo"
+                            defaultMessage="{duration} ago"
+                            values={{
+                              duration: formatAgo(occurrence.startTime),
+                            }}
+                          />
+                        </span>
+                      </EuiToolTip>
+                    </div>
                     <div className="altGroupedOccurrenceCell" />
                     <div className="altGroupedOccurrenceCell altGroupedOccurrenceAlertCell">
                       <EuiButtonEmpty
@@ -672,28 +705,14 @@ function renderGroupedAnomalyOccurrences(
                           values={{ occurrenceNumber, total }}
                         />
                       </EuiButtonEmpty>
-                    </div>
-                    <div className="altGroupedOccurrenceCell" />
-                    <div className="altGroupedOccurrenceCell altGroupedOccurrenceMessageCell">
+                      {/* No Message column: the occurrence's message follows its name. */}
                       {occurrence.message && (
                         <EuiText size="xs" color="subdued" className="altGroupedOccurrenceMessage">
                           {occurrence.message}
                         </EuiText>
                       )}
                     </div>
-                    <div className="altGroupedOccurrenceCell">
-                      <EuiToolTip content={timestamp}>
-                        <span style={{ fontSize: 12 }} tabIndex={0} aria-label={timestamp}>
-                          <FormattedMessage
-                            id="observability.alerting.alertsDashboard.groupedAnomalyStartedAgo"
-                            defaultMessage="{duration} ago"
-                            values={{
-                              duration: formatAgo(occurrence.startTime),
-                            }}
-                          />
-                        </span>
-                      </EuiToolTip>
-                    </div>
+                    <div className="altGroupedOccurrenceCell" />
                     <div className="altGroupedOccurrenceCell" />
                   </div>
                 </EuiPanel>
@@ -771,6 +790,11 @@ export interface AlertsDashboardProps {
   /** CloudWatch regions for the Datasource facet's CloudWatch group; omitted without targets. */
   cloudWatch?: DatasourceFacetCloudWatch;
   /**
+   * The Data source filter's limit message, shown at the bottom of the filter after a refused
+   * selection. Set and cleared by the page.
+   */
+  datasourceLimitMessage?: React.ReactNode;
+  /**
    * Seeds the alerts search box on first render — used by deep links such as
    * `#/alerts?q=slo_id:<id>` that expect the list to arrive pre-filtered. Applied
    * as the initial value ONLY; it does not override the user's subsequent typing.
@@ -808,6 +832,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   datasourceErrorMap,
   unreachableDatasources = [],
   cloudWatch,
+  datasourceLimitMessage,
   initialSearchQuery,
   initialSearchQueryKey,
   onInitialSearchQueryEdited,
@@ -843,22 +868,36 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     () => sortBySeverity(collectAlertUniqueValues(alerts, (a) => a.severity)),
     [alerts]
   );
+  // Status options are `<datasourceType>:<state>` (the anomaly row kind stays `anomaly`), so
+  // each source's own word is one option: "In alarm" selects only CloudWatch rows.
   const uniqueStates = useMemo(
-    () => collectAlertUniqueValues(alerts, getAlertDisplayState),
+    () =>
+      collectAlertUniqueValues(alerts, alertStatusKey).sort(
+        (a, b) =>
+          alertStatusSortRank(statusKeyState(a)) - alertStatusSortRank(statusKeyState(b)) ||
+          a.localeCompare(b)
+      ),
     [alerts]
   );
   const uniqueAlertKinds = useMemo(() => collectAlertUniqueValues(alerts, getAlertKind), [alerts]);
   const labelKeys = useMemo(() => collectAlertLabelKeys(alerts), [alerts]);
 
-  // The State facet includes the synthetic `anomaly` row kind, which has no
-  // semantic OUI color name in `STATE_COLORS`. Resolve every option through the
-  // theme-hex getter (which also covers `anomaly`) so `EuiHealth` renders a
-  // correct, dark-mode-safe swatch for each.
+  // The same dot colors as the Status cell: by internal state, gray for the anomaly row kind
+  // and unmapped states.
   const stateFacetColorMap = useMemo(() => {
     const map: Record<string, string> = {};
-    for (const state of uniqueStates) map[state] = getStateHex(state);
+    for (const key of uniqueStates) map[key] = STATE_COLORS[statusKeyState(key)] || 'subdued';
     return map;
   }, [uniqueStates]);
+  // One sub-heading per data source type; the anomaly option has none (it renders after them).
+  const stateOptionGroups = useMemo(
+    () =>
+      DATASOURCE_TYPE_ORDER.map((type) => ({
+        label: datasourceTypeLabel(type),
+        options: uniqueStates.filter((k) => k.startsWith(`${type}:`)),
+      })),
+    [uniqueStates]
+  );
 
   // Facet counts (against search-matched but not filter-matched alerts)
   const facetCounts = useMemo(() => {
@@ -870,7 +909,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     };
     for (const a of searchMatched) {
       const alertKind = getAlertKind(a);
-      const state = getAlertDisplayState(a);
+      const state = alertStatusKey(a);
       counts.alertKind[alertKind] = (counts.alertKind[alertKind] || 0) + 1;
       counts.severity[a.severity] = (counts.severity[a.severity] || 0) + 1;
       counts.state[state] = (counts.state[state] || 0) + 1;
@@ -901,9 +940,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       search: searchQuery || undefined,
     });
     if (filters.state.length === 0) return baseFilteredAlerts;
-    return baseFilteredAlerts.filter((alert) =>
-      filters.state.includes(getAlertDisplayState(alert))
-    );
+    return baseFilteredAlerts.filter((alert) => filters.state.includes(alertStatusKey(alert)));
   }, [alerts, searchQuery, filters]);
 
   const groupedTableRows = useMemo(() => groupAnomalyAlerts(filteredAlerts), [filteredAlerts]);
@@ -955,10 +992,11 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
   const stateDisplayMap = useMemo(
     () =>
       Object.fromEntries(
-        uniqueStates.map((v) => [
-          v,
-          v === 'anomaly' ? kindDisplayMap.anomaly || 'Anomaly' : getStateLabel(v),
-        ])
+        uniqueStates.map((key) => {
+          if (key === 'anomaly') return [key, kindDisplayMap.anomaly || 'Anomaly'];
+          const sep = key.indexOf(':');
+          return [key, getNativeAlertStateLabel(key.slice(0, sep), key.slice(sep + 1))];
+        })
       ),
     [uniqueStates, kindDisplayMap]
   );
@@ -973,7 +1011,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
     colorMap?: Record<string, string>,
     defaultCollapsed = false,
     showOptionCount = false,
-    displayMap?: Record<string, string>
+    displayMap?: Record<string, string>,
+    optionGroups?: Array<{ label: string; options: string[] }>
   ) => (
     <FacetFilterGroup
       key={id}
@@ -985,7 +1024,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
       onChange={onChange}
       counts={counts}
       colorMap={colorMap}
-      colorStyle={id === 'severity' ? 'swatch' : 'health'}
+      colorStyle="health"
+      optionGroups={optionGroups}
       showOptionCount={showOptionCount}
       isCollapsed={isFacetCollapsed(id, defaultCollapsed)}
       onToggleCollapse={(facetId) => toggleFacetCollapse(facetId, defaultCollapsed)}
@@ -994,10 +1034,64 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
 
   // Table columns — memoized so `AlertsTable`'s React.memo shallow-compare
   // doesn't invalidate on every parent re-render.
-  const cloudWatchIconType = useCloudWatchIconType();
   const dsById = useMemo(() => new Map(datasources.map((d) => [d.id, d])), [datasources]);
   const columns = useMemo<Array<EuiBasicTableColumn<AlertTableRow>>>(
     () => [
+      {
+        field: 'state',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.state', {
+          defaultMessage: 'Status',
+        }),
+        // A floor wide enough for "Acknowledged" plus its dot: the table uses
+        // `table-layout: fixed`, where a CSS min-width on the cell is ignored.
+        width: 'max(12%, 136px)',
+        // No wrapping inside the label (see `.altAlertStateColumn`).
+        className: 'altAlertStateColumn',
+        // Firing, Pending, No data, then the ended states.
+        sortable: (alert: AlertTableRow) => alertStatusSortRank(getAlertDisplayState(alert)),
+        // One status per row in the data source's own word: In alarm,
+        // Firing, Active, ... A breach is the red dot. The
+        // `anomaly` row kind and any unmapped state (error, deleted) keep
+        // their word with a neutral gray dot and are never a breach.
+        render: (_state: string, alert: AlertTableRow) => {
+          const state = getAlertDisplayState(alert);
+          return (
+            <NativeStatus
+              label={getNativeAlertStateLabel(alert.datasourceType, state)}
+              color={STATE_COLORS[state] || 'subdued'}
+              breached={isBreachStatus('alert', alert.datasourceType, state)}
+              data-test-subj="alertsTableStatus"
+            />
+          );
+        },
+      },
+      {
+        field: 'startTime',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.started', {
+          defaultMessage: 'Started',
+        }),
+        width: '10%',
+        sortable: true,
+        // The absolute, timezone-labeled timestamp used to live only in a hover
+        // tooltip on a non-focusable span (A11Y6). It is now also exposed via
+        // `aria-label` and the span is keyboard-focusable, so screen-reader and
+        // keyboard users get the exact time, not just the relative "x ago".
+        render: (ts: string) => {
+          if (!ts) return <EuiText size="xs">{EMPTY_VALUE}</EuiText>;
+          const abs = formatTimestamp(ts);
+          return (
+            <EuiToolTip content={abs}>
+              <span style={{ fontSize: 12 }} tabIndex={0} aria-label={abs}>
+                <FormattedMessage
+                  id="observability.alerting.alertsDashboard.startedAgo"
+                  defaultMessage="{duration} ago"
+                  values={{ duration: formatAgo(ts) }}
+                />
+              </span>
+            </EuiToolTip>
+          );
+        },
+      },
       {
         field: 'severity',
         name: i18n.translate('observability.alerting.alertsDashboard.column.severity', {
@@ -1005,15 +1099,10 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         }),
         width: '10%',
         sortable: (a: AlertTableRow) => SEVERITY_SORT_ORDER[a.severity] ?? 5,
-        // A labeled badge (not a bare color dot) so severity is conveyed by text
-        // and shape, not color alone — reachable by screen readers and legible
-        // to colorblind users. Mirrors the severity column in
+        // An outlined neutral tag with the word, so severity never
+        // competes with the status. Mirrors the severity column in
         // monitors_table/monitors_table_columns.tsx.
-        render: (s: string) => (
-          <EuiBadge color={SEVERITY_COLORS[s] || 'default'} data-test-subj="alertSeverityBadge">
-            {getSeverityLabel(s)}
-          </EuiBadge>
-        ),
+        render: (s: string) => <SeverityTag severity={s} data-test-subj="alertSeverityBadge" />,
       },
       {
         field: 'name',
@@ -1028,24 +1117,14 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
           const isGrouped = isGroupedAnomalyRow(alert);
           const rowId = alertRowId(alert);
           const isExpanded = Boolean(expandedGroupIds[rowId]);
-          const iconType =
-            alert.datasourceType === 'cloudwatch'
-              ? cloudWatchIconType
-              : alert.datasourceType === 'prometheus'
-                ? 'logoPrometheus'
-                : 'logoOpenSearch';
-          const sourceLine = cloudWatchAlertSourceLine(alert, dsById);
           const toggleExpandedGroup = () => {
             setExpandedGroupIds((prev) => ({
               ...prev,
               [rowId]: !prev[rowId],
             }));
           };
-          // `iconType` on EuiButtonEmpty puts the icon in the button's
-          // dedicated icon slot (vertically centered with the label). Inlining
-          // <EuiIcon> as a child instead lands inside the .euiButtonEmpty__text
-          // flex slot which has no `align-items: center`, so it sits at the
-          // top-left of the row.
+          // No source icon or account line here: the Data source column shows the
+          // source once.
           return (
             <EuiFlexGroup
               className="altAlertCell"
@@ -1055,24 +1134,11 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
               wrap={false}
             >
               <EuiFlexItem className="altAlertNameItem" grow={true}>
-                <EuiToolTip
-                  content={
-                    sourceLine ? (
-                      <>
-                        {name}
-                        <br />
-                        {sourceLine}
-                      </>
-                    ) : (
-                      name
-                    )
-                  }
-                >
+                <EuiToolTip content={name}>
                   <EuiButtonEmpty
                     className="altAlertNameButton"
                     size="xs"
                     flush="left"
-                    iconType={iconType}
                     onClick={() =>
                       isGrouped ? toggleExpandedGroup() : onViewDetail(representative)
                     }
@@ -1081,16 +1147,6 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                     <span className="altAlertNameText">{name}</span>
                   </EuiButtonEmpty>
                 </EuiToolTip>
-                {sourceLine && (
-                  <EuiText
-                    size="xs"
-                    color="subdued"
-                    className="altAlertSourceText"
-                    data-test-subj="alertsTable-cloudWatchSource"
-                  >
-                    {sourceLine}
-                  </EuiText>
-                )}
               </EuiFlexItem>
               {isGrouped && (
                 <EuiFlexItem className="altAlertOccurrencesItem" grow={false}>
@@ -1125,83 +1181,20 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         },
       },
       {
-        field: 'state',
-        name: i18n.translate('observability.alerting.alertsDashboard.column.state', {
-          defaultMessage: 'State',
+        field: 'datasourceId',
+        name: i18n.translate('observability.alerting.alertsDashboard.column.datasource', {
+          defaultMessage: 'Data source',
         }),
-        // A floor wide enough for "Acknowledged" plus its dot: the table uses
-        // `table-layout: fixed`, where a CSS min-width on the cell is ignored.
-        width: 'max(12%, 136px)',
-        // No wrapping inside the label (see `.altAlertStateColumn`).
-        className: 'altAlertStateColumn',
-        sortable: (alert: AlertTableRow) => getAlertDisplayState(alert),
-        // Route the raw lowercase wire enum through `getStateLabel` so the UI
-        // shows "Active" / "Acknowledged" rather than `active`. `anomaly` is a
-        // row kind (not an alert state) so it isn't in the semantic name map —
-        // fall back to its theme hex, which `EuiHealth` also accepts.
-        render: (_state: string, alert: AlertTableRow) => {
-          const state = getAlertDisplayState(alert);
-          return (
-            <EuiHealth color={STATE_COLORS[state] || getStateHex(state)}>
-              {getStateLabel(state)}
-            </EuiHealth>
-          );
-        },
-      },
-      {
-        field: 'message',
-        name: i18n.translate('observability.alerting.alertsDashboard.column.message', {
-          defaultMessage: 'Message',
-        }),
-        truncateText: true,
-        className: 'altAlertMessageColumn',
-        // The cell truncates, so wrap it in a tooltip that exposes the full
-        // message on hover / focus. The span is focusable (tabIndex) so
-        // keyboard users can reach the tooltip too. The row's "View details"
-        // action still opens the flyout for the complete record.
-        render: (msg: string) => {
-          if (!msg) {
-            return (
-              <EuiText size="xs" color="subdued">
-                {EMPTY_VALUE}
-              </EuiText>
-            );
-          }
-          return (
-            <EuiToolTip content={msg}>
-              <EuiText size="xs" color="subdued" tabIndex={0} className="altAlertMessageText">
-                {msg}
-              </EuiText>
-            </EuiToolTip>
-          );
-        },
-      },
-      {
-        field: 'startTime',
-        name: i18n.translate('observability.alerting.alertsDashboard.column.started', {
-          defaultMessage: 'Started',
-        }),
-        width: '10%',
-        sortable: true,
-        // The absolute, timezone-labeled timestamp used to live only in a hover
-        // tooltip on a non-focusable span (A11Y6). It is now also exposed via
-        // `aria-label` and the span is keyboard-focusable, so screen-reader and
-        // keyboard users get the exact time, not just the relative "x ago".
-        render: (ts: string) => {
-          if (!ts) return <EuiText size="xs">{EMPTY_VALUE}</EuiText>;
-          const abs = formatTimestamp(ts);
-          return (
-            <EuiToolTip content={abs}>
-              <span style={{ fontSize: 12 }} tabIndex={0} aria-label={abs}>
-                <FormattedMessage
-                  id="observability.alerting.alertsDashboard.startedAgo"
-                  defaultMessage="{duration} ago"
-                  values={{ duration: formatAgo(ts) }}
-                />
-              </span>
-            </EuiToolTip>
-          );
-        },
+        width: '18%',
+        // The data source once, as the Data source filter names it.
+        render: (_id: string, alert: AlertTableRow) => (
+          <DatasourceTag
+            ds={dsById.get(alert.datasourceId)}
+            cloudWatch={alert.cloudWatch}
+            datasourceType={alert.datasourceType}
+            data-test-subj="alertsTableDatasource"
+          />
+        ),
       },
       // No Duration column: for a firing alert it repeats "Started … ago", so the
       // list shows one relative time (full timestamp on hover) and the flyout
@@ -1278,7 +1271,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
         },
       },
     ],
-    [expandedGroupIds, onAcknowledge, onViewDetail, cloudWatchIconType, dsById]
+    [expandedGroupIds, onAcknowledge, onViewDetail, dsById]
   );
 
   // Chart-area empty state mode. Cascade:
@@ -1423,10 +1416,11 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   onCapReached={onDatasourceCapReached}
                   errorMap={datasourceErrorMap}
                   cloudWatch={cloudWatch}
+                  limitMessage={datasourceLimitMessage}
                   searchAriaLabel={i18n.translate(
                     'observability.alerting.alertsDashboard.searchDatasourcesAriaLabel',
                     {
-                      defaultMessage: 'Search datasources',
+                      defaultMessage: 'Search data sources',
                     }
                   )}
                   isCollapsed={isFacetCollapsed('datasource')}
@@ -1456,7 +1450,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   filters.severity,
                   (v) => updateFilter('severity', v),
                   facetCounts.counts.severity,
-                  SEVERITY_COLORS,
+                  // No swatches: severity is a neutral tag.
+                  undefined,
                   false,
                   false,
                   severityDisplayMap
@@ -1464,7 +1459,7 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                 {renderFacetGroup(
                   'state',
                   i18n.translate('observability.alerting.alertsDashboard.facet.state', {
-                    defaultMessage: 'State',
+                    defaultMessage: 'Status',
                   }),
                   uniqueStates,
                   filters.state,
@@ -1473,7 +1468,8 @@ export const AlertsDashboard: React.FC<AlertsDashboardProps> = ({
                   stateFacetColorMap,
                   false,
                   false,
-                  stateDisplayMap
+                  stateDisplayMap,
+                  stateOptionGroups
                 )}
                 {(() => {
                   const visibleLabelKeys = labelKeys.filter(
