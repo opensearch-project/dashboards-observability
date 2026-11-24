@@ -534,4 +534,53 @@ describe('MonitorDetailFlyout header and rows', () => {
     await findByText('Data source ID');
     expect(queryByTestId('monitorDetailSloLink')).toBeNull();
   });
+  const template =
+    'Monitor {{ctx.monitor.name}} just entered alert status. Please investigate the issue. - Trigger: {{ctx.trigger.name}} - Severity: {{ctx.trigger.severity}} - Period start: {{ctx.periodStart}} UTC - Period end: {{ctx.periodEnd}} UTC';
+  it('shows an OpenSearch action message template once, in its own section after Conditions & Evaluation', async () => {
+    const monitor = { ...mockMonitor, annotations: { summary: template } };
+    mockGetRuleDetail.mockResolvedValue({
+      ...monitor,
+      description: template,
+      alertHistory: [],
+      conditionPreviewData: [],
+    } as unknown as UnifiedRule);
+    const { findByTestId, getByTestId, getAllByText, getByText } = renderFlyout(monitor);
+    const section = await findByTestId('monitorDetailNotificationMessage');
+    expect(section).toHaveTextContent('Notification message');
+    expect(getByTestId('monitorDetailNotificationMessageText')).toHaveTextContent(template);
+    expect(getAllByText(template)).toHaveLength(1);
+    const conditions = getByText('Conditions & Evaluation');
+    const sections = Array.from(document.querySelectorAll('.euiAccordion'));
+    const conditionsIndex = sections.findIndex((el) => el.contains(conditions));
+    expect(conditionsIndex).toBeGreaterThanOrEqual(0);
+    expect(sections.indexOf(section)).toBeGreaterThan(conditionsIndex);
+  });
+  it('keeps the generated description of an OpenSearch rule with no action', async () => {
+    const description = 'Bucket aggregation monitor targeting logs-*';
+    mockGetRuleDetail.mockResolvedValue({
+      ...mockMonitor,
+      description,
+      alertHistory: [],
+      conditionPreviewData: [],
+    } as unknown as UnifiedRule);
+    const { findByText, queryByTestId } = renderFlyout(mockMonitor);
+    expect(await findByText(description)).toBeInTheDocument();
+    expect(queryByTestId('monitorDetailNotificationMessage')).toBeNull();
+  });
+  it('shows no notification message section for a Prometheus rule', async () => {
+    const monitor = {
+      ...mockMonitor,
+      datasourceType: 'prometheus' as const,
+      annotations: { summary: 'High error rate' },
+    };
+    mockGetRuleDetail.mockResolvedValue({
+      ...monitor,
+      description: 'High error rate',
+      alertHistory: [],
+      conditionPreviewData: [],
+    } as unknown as UnifiedRule);
+    const { findByText, queryByTestId } = renderFlyout(monitor);
+    expect(await findByText('High error rate')).toBeInTheDocument();
+    expect(queryByTestId('monitorDetailNotificationMessage')).toBeNull();
+  });
 });

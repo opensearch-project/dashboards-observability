@@ -305,6 +305,10 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
     Object.entries(allLabels).filter(([k]) => !INTERNAL_LABEL_KEYS.has(k))
   );
   const annotations = alertData.annotations || {};
+  // An OpenSearch alert in Error state carries the monitor's error (often a long exception) as
+  // its message. It is shown once, in a danger callout in the body, not as the header line.
+  const osErrorMessage =
+    alert.datasourceType === 'opensearch' && alert.state === 'error' ? alert.message : undefined;
   const relatedAnomaly = alertData.relatedAnomaly;
   const anomalyContext = useMemo(() => {
     if (!relatedAnomaly) return [];
@@ -329,14 +333,15 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
       <EuiFlyoutHeader hasBorder>
         {/* the name only in the title, the message once below it, then one row with
             Status, Severity and Data source in the table's order and style. Alert names can be
-            long with no spaces (e.g. generated SLO rule names), so the title wraps anywhere. */}
+            long with no spaces (e.g. generated SLO rule names), so the title wraps anywhere.
+            An OpenSearch alert's error shows as a callout in the body instead of the message. */}
         <EuiTitle size="m">
           <h2 id="alertDetailTitle" style={{ overflowWrap: 'anywhere' }}>
             {alert.name}
           </h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        {alert.message || annotations.summary || annotations.description ? (
+        {osErrorMessage ? null : alert.message || annotations.summary || annotations.description ? (
           <EuiText size="s" color="subdued">
             {alert.message || annotations.summary || annotations.description}
           </EuiText>
@@ -379,6 +384,27 @@ export const AlertDetailFlyout: React.FC<AlertDetailFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {osErrorMessage && (
+          <>
+            <EuiCallOut
+              title={i18n.translate('observability.alerting.alertDetailFlyout.errorCalloutTitle', {
+                defaultMessage: 'Error',
+              })}
+              color="danger"
+              iconType="alert"
+              size="s"
+              data-test-subj="alertDetailErrorCallout"
+            >
+              <p
+                style={{ overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }}
+                data-test-subj="alertDetailErrorMessage"
+              >
+                {osErrorMessage}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
         {deletedNotice && (
           <>
             <EuiCallOut

@@ -666,6 +666,58 @@ describe('AlertDetailFlyout', () => {
   });
 
   describe('header and body', () => {
+    const osErrorMessage =
+      'Failed fetching inputs: OpenSearchStatusException[{"error":{"root_cause":[{"type":"index_not_found_exception","reason":"no such index [logs-s007-index]","index":"logs-s007-index"}]}}]';
+    it('shows an OpenSearch alert error once, in a danger callout in the body', () => {
+      const { container, getByTestId, getAllByText } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, state: 'error', message: osErrorMessage }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const callout = getByTestId('alertDetailErrorCallout');
+      expect(callout).toHaveClass('euiCallOut--danger');
+      expect(callout).toHaveTextContent('Error');
+      const text = getByTestId('alertDetailErrorMessage');
+      expect(text).toHaveTextContent(osErrorMessage);
+      expect(text).toHaveStyle({ overflowWrap: 'anywhere' });
+      expect(callout.closest('.euiFlyoutBody')).not.toBeNull();
+      const header = container.ownerDocument.querySelector('.euiFlyoutHeader');
+      expect(header).not.toBeNull();
+      expect(header).not.toHaveTextContent(osErrorMessage);
+      expect(header).not.toHaveTextContent('Not available');
+      expect(getAllByText(osErrorMessage)).toHaveLength(1);
+    });
+    it('keeps the message of an active OpenSearch alert in the header, with no error callout', () => {
+      const { container, queryByTestId } = render(
+        <AlertDetailFlyout
+          alert={baseAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      expect(queryByTestId('alertDetailErrorCallout')).toBeNull();
+      expect(container.ownerDocument.querySelector('.euiFlyoutHeader')).toHaveTextContent(
+        'Error rate above threshold'
+      );
+    });
+    it('keeps a Prometheus alert message in the header, with no error callout', () => {
+      const { container, queryByTestId } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, datasourceType: 'prometheus', message: osErrorMessage }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      expect(queryByTestId('alertDetailErrorCallout')).toBeNull();
+      expect(container.ownerDocument.querySelector('.euiFlyoutHeader')).toHaveTextContent(
+        osErrorMessage
+      );
+    });
     it('shows one tag row: native status (breach as the red dot), severity, data source', () => {
       const { getByTestId } = render(
         <AlertDetailFlyout

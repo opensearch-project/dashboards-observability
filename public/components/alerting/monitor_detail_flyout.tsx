@@ -194,6 +194,14 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   const alertHistory = detail?.alertHistory ?? [];
   const conditionPreviewData = detail?.conditionPreviewData ?? [];
   const description = detail?.description ?? '';
+  // An OpenSearch rule's first action message template is also its `annotations.summary`. It is
+  // shown in its own "Notification message" section, so the description paragraph is skipped
+  // when it is that same template.
+  const notificationMessage =
+    monitor.datasourceType === 'opensearch'
+      ? (detail?.annotations?.summary ?? monitor.annotations?.summary ?? '')
+      : '';
+  const showDescription = !!description && description !== notificationMessage;
   const evaluationInterval = detail?.evaluationInterval ?? monitor.evaluationInterval ?? '—';
   const pendingPeriod = detail?.pendingPeriod ?? monitor.pendingPeriod ?? '—';
 
@@ -548,10 +556,14 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 </>
               )}
               {/* Description */}
-              <EuiText size="s">
-                <p>{description}</p>
-              </EuiText>
-              <EuiSpacer size="m" />
+              {showDescription && (
+                <>
+                  <EuiText size="s">
+                    <p>{description}</p>
+                  </EuiText>
+                  <EuiSpacer size="m" />
+                </>
+              )}
               {/* The SLO this burn-rate rule belongs to, linked to the SLO detail page. */}
               {sloId && (
                 <>
@@ -895,6 +907,39 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
               </EuiAccordion>
 
               <EuiSpacer size="m" />
+
+              {/* Notification message: an OpenSearch rule's action message template */}
+              {notificationMessage && (
+                <>
+                  <EuiAccordion
+                    id={`notificationMessage-${monitor.id}`}
+                    data-test-subj="monitorDetailNotificationMessage"
+                    buttonContent={
+                      <strong>
+                        <FormattedMessage
+                          id="observability.alerting.monitorDetailFlyout.notificationMessageHeader"
+                          defaultMessage="Notification message"
+                        />
+                      </strong>
+                    }
+                    initialIsOpen={true}
+                    paddingSize="m"
+                  >
+                    <div style={{ overflowWrap: 'anywhere' }}>
+                      <EuiCodeBlock
+                        fontSize="s"
+                        paddingSize="s"
+                        whiteSpace="pre-wrap"
+                        isCopyable
+                        data-test-subj="monitorDetailNotificationMessageText"
+                      >
+                        {notificationMessage}
+                      </EuiCodeBlock>
+                    </div>
+                  </EuiAccordion>
+                  <EuiSpacer size="m" />
+                </>
+              )}
 
               {/* Labels */}
               <EuiAccordion
