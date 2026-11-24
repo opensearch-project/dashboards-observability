@@ -104,7 +104,7 @@ const datasources: Datasource[] = [
 
 describe('AlertDetailFlyout', () => {
   it('smoke renders with the alert name, severity, and datasource label', () => {
-    const { getByText, getAllByText } = render(
+    const { getByText, getAllByText, getByTestId } = render(
       <AlertDetailFlyout
         alert={baseAlert}
         datasources={datasources}
@@ -113,8 +113,10 @@ describe('AlertDetailFlyout', () => {
       />
     );
     expect(getByText('HighErrorRate')).toBeInTheDocument();
-    // Header badge and the Backend row both read "OpenSearch", not `opensearch`.
-    expect(getAllByText('OpenSearch')).toHaveLength(2);
+    // The header row names the data source once, as the Data source filter does;
+    // the Backend row in "More details" reads "OpenSearch", not `opensearch`.
+    expect(getByTestId('alertDetailDatasource')).toHaveTextContent('my-prom');
+    expect(getAllByText('OpenSearch')).toHaveLength(1);
     // Message appears both in the header and as the `summary` annotation below.
     expect(getAllByText('Error rate above threshold').length).toBeGreaterThan(0);
   });
@@ -489,7 +491,6 @@ describe('AlertDetailFlyout', () => {
         'The monitor for this alert no longer exists'
       );
       expect(getByTestId('alertDetailRuleDeletedCallout')).toHaveTextContent('Checkout errors');
-      expect(queryByTestId('alertDetailOpenSource')).toBeNull();
       expect(queryByTestId('alertDetailSourceRuleLink')).toBeNull();
       expect(getByTestId('alertDetailSourceRuleDeleted')).toHaveTextContent(
         'Checkout errors (deleted)'
@@ -501,18 +502,18 @@ describe('AlertDetailFlyout', () => {
     it('flags an active alert whose monitor is missing from the rules list', () => {
       const { getByTestId, queryByTestId, queryByText } = renderFlyout(osAlert, 'missing');
       expect(getByTestId('alertDetailRuleDeletedCallout')).toBeInTheDocument();
-      expect(queryByTestId('alertDetailOpenSource')).toBeNull();
+      expect(queryByTestId('alertDetailSourceRuleLink')).toBeNull();
       // The callout says it can't be acknowledged, so no Acknowledge button.
       expect(queryByText('Acknowledge')).toBeNull();
     });
 
-    it('keeps Open rule when only the trigger was deleted', () => {
+    it('keeps the Rule link when only the trigger was deleted', () => {
       const { getByTestId } = renderFlyout({ ...osAlert, state: 'deleted' }, 'exists');
       expect(getByTestId('alertDetailRuleDeletedCallout')).toHaveTextContent(
         'The trigger for this alert was deleted'
       );
       expect(getByTestId('alertDetailRuleDeletedCallout')).toHaveTextContent('Too many');
-      expect(getByTestId('alertDetailOpenSource')).toBeInTheDocument();
+      expect(getByTestId('alertDetailSourceRuleLink')).toBeInTheDocument();
     });
 
     it('explains a deleted state even when the rules list is unavailable', () => {
@@ -520,7 +521,7 @@ describe('AlertDetailFlyout', () => {
       expect(getByTestId('alertDetailRuleDeletedCallout')).toHaveTextContent(
         'The rule for this alert was deleted'
       );
-      expect(getByTestId('alertDetailOpenSource')).toBeInTheDocument();
+      expect(getByTestId('alertDetailSourceRuleLink')).toBeInTheDocument();
     });
 
     it('shows no notice for a live alert whose rule exists', () => {
@@ -534,14 +535,14 @@ describe('AlertDetailFlyout', () => {
       navigateToApp.mockClear();
     });
 
-    it('pivots an SLO burn-rate alert to the SLO detail page in the SLO app', () => {
+    it('links an SLO burn-rate alert to its rule and to the SLO detail page in the SLO app', () => {
       const onClose = jest.fn();
       const sloAlert: UnifiedAlertSummary = {
         ...baseAlert,
         datasourceType: 'prometheus',
         labels: { slo_id: 'slo/api ok', slo_name: 'API availability', alertname: 'BurnRate' },
       };
-      const { getByText, getByTestId } = render(
+      const { getByText, getByTestId, queryByText } = render(
         <AlertDetailFlyout
           alert={sloAlert}
           datasources={datasources}
@@ -549,12 +550,15 @@ describe('AlertDetailFlyout', () => {
           onAcknowledge={jest.fn()}
         />
       );
-      // The action is labelled "Open SLO" whenever `slo_id` is present, and the
-      // source row names the SLO instead of repeating the action label.
-      expect(getByText('Source SLO')).toBeInTheDocument();
-      expect(getByTestId('alertDetailOpenSource')).toHaveTextContent('Open SLO');
-      expect(getByTestId('alertDetailSourceRuleLink')).toHaveTextContent('API availability');
-      fireEvent.click(getByTestId('alertDetailOpenSource'));
+      // a "Rule" row and an "SLO" row, each with the name as the link. No
+      // "Open SLO" / "Open rule" button.
+      expect(getByText('Rule')).toBeInTheDocument();
+      expect(getByText('SLO')).toBeInTheDocument();
+      expect(getByTestId('alertDetailSourceRuleLink')).toHaveTextContent('BurnRate');
+      expect(getByTestId('alertDetailSloLink')).toHaveTextContent('API availability');
+      expect(queryByText('Open SLO')).toBeNull();
+      expect(queryByText('Open rule')).toBeNull();
+      fireEvent.click(getByTestId('alertDetailSloLink'));
       expect(onClose).toHaveBeenCalledTimes(1);
       // Cross-app navigation to the SLO detail route, with the id encoded.
       expect(navigateToApp).toHaveBeenCalledWith(observabilityApmSloID, {
@@ -562,14 +566,48 @@ describe('AlertDetailFlyout', () => {
       });
     });
 
-    it('prefers the SLO name over a copied monitor_name for an SLO alert', () => {
-      // An SLO alert that also carries a monitor_name must still name the SLO in
-      // the "Source SLO" row — not the monitor — to stay consistent with the
-      // "Open SLO" action.
+    it('keeps the header tags reachable when the alert name is long with no spaces', () => {
+      // Generated SLO rule names have no spaces; the title must wrap anywhere, and the tag row
+      // must wrap, so the status, severity and data source stay inside the flyout (#57).
+      const longName =
+        'SLO_BurnRate_PageQuick_checkout_availability_availability_124e5ec2_0123456789abcdef';
+      const sloAlert: UnifiedAlertSummary = {
+        ...baseAlert,
+        name: longName,
+        datasourceType: 'prometheus',
+        labels: { slo_id: 'slo-1', slo_name: 'Checkout availability', alertname: longName },
+      };
+      const { getByTestId, getByRole } = render(
+        <AlertDetailFlyout
+          alert={sloAlert}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const title = getByRole('heading', { name: longName });
+      expect(title).toHaveStyle({ overflowWrap: 'anywhere' });
+      const row = getByTestId('alertDetailHeaderRow');
+      expect(row).toHaveClass('euiFlexGroup--wrap');
+      // The tags have their own row under the title, so its length can't push them out of view.
+      expect(row).not.toContainElement(title);
+      expect(row).toContainElement(getByTestId('alertDetailStatus'));
+      expect(row).toContainElement(getByTestId('alertDetailSeverity'));
+      expect(row).toContainElement(getByTestId('alertDetailDatasource'));
+    });
+
+    it('names the SLO in the SLO row and the monitor in the Rule row', () => {
+      // An SLO alert that also carries a monitor_name names the SLO in the "SLO" row and the
+      // monitor in the "Rule" row; neither borrows the other's name.
       const sloAlert: UnifiedAlertSummary = {
         ...baseAlert,
         datasourceType: 'prometheus',
-        labels: { slo_id: 'slo-1', slo_name: 'API availability', monitor_name: 'High latency' },
+        labels: {
+          slo_id: 'slo-1',
+          slo_name: 'API availability',
+          monitor_name: 'High latency',
+          alertname: 'BurnRate',
+        },
       };
       const { getByText, getByTestId } = render(
         <AlertDetailFlyout
@@ -579,10 +617,10 @@ describe('AlertDetailFlyout', () => {
           onAcknowledge={jest.fn()}
         />
       );
-      expect(getByText('Source SLO')).toBeInTheDocument();
-      const sourceRow = getByTestId('alertDetailSourceRuleLink');
-      expect(sourceRow).toHaveTextContent('API availability');
-      expect(sourceRow).not.toHaveTextContent('High latency');
+      expect(getByText('SLO')).toBeInTheDocument();
+      expect(getByTestId('alertDetailSloLink')).toHaveTextContent('API availability');
+      expect(getByTestId('alertDetailSloLink')).not.toHaveTextContent('High latency');
+      expect(getByTestId('alertDetailSourceRuleLink')).toHaveTextContent('High latency');
     });
 
     it('does not cross apps for a monitor rule deep-link', () => {
@@ -599,10 +637,9 @@ describe('AlertDetailFlyout', () => {
           onAcknowledge={jest.fn()}
         />
       );
-      expect(getByText('Source rule')).toBeInTheDocument();
-      expect(getByTestId('alertDetailOpenSource')).toHaveTextContent('Open rule');
+      expect(getByText('Rule')).toBeInTheDocument();
       expect(getByTestId('alertDetailSourceRuleLink')).toHaveTextContent('High latency');
-      fireEvent.click(getByTestId('alertDetailOpenSource'));
+      fireEvent.click(getByTestId('alertDetailSourceRuleLink'));
       // Rule deep-links stay inside the alerting app (hash-only), so
       // navigateToApp must not fire.
       expect(navigateToApp).not.toHaveBeenCalled();
@@ -628,8 +665,125 @@ describe('AlertDetailFlyout', () => {
     });
   });
 
+  describe('header and body', () => {
+    it('shows one tag row: native status (breach as the red dot), severity, data source', () => {
+      const { getByTestId } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, datasourceType: 'prometheus' }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const row = getByTestId('alertDetailHeaderRow');
+      const status = getByTestId('alertDetailStatus');
+      expect(status).toHaveTextContent('Firing');
+      expect(status).toHaveAttribute('data-breached', 'true');
+      expect(getByTestId('alertDetailSeverity')).toHaveAttribute('data-severity', 'critical');
+      expect(getByTestId('alertDetailDatasource')).toHaveTextContent('my-prom');
+      // Table order: Status, Severity, Data source.
+      const order = Array.from(row.querySelectorAll('[data-test-subj]')).map((el) =>
+        el.getAttribute('data-test-subj')
+      );
+      expect(order.indexOf('alertDetailStatus')).toBeLessThan(order.indexOf('alertDetailSeverity'));
+      expect(order.indexOf('alertDetailSeverity')).toBeLessThan(
+        order.indexOf('alertDetailDatasource')
+      );
+    });
+
+    it('shows a resolved Prometheus alert as a gray "Inactive", not a breach', () => {
+      const { getByTestId } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, datasourceType: 'prometheus', state: 'resolved' }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      expect(getByTestId('alertDetailStatus')).toHaveTextContent('Inactive');
+      expect(getByTestId('alertDetailStatus')).not.toHaveAttribute('data-breached');
+    });
+
+    it('drops the source-type chip and the "Open rule" button', () => {
+      const { queryByTestId, queryByText } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, labels: { monitor_id: 'mon-1', monitor_name: 'Errors' } }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      expect(queryByTestId('alertDetailOpenSource')).toBeNull();
+      expect(queryByText('Open rule')).toBeNull();
+      // "OpenSearch" is only the Backend value in "More details", not a header chip.
+      expect(queryByTestId('alertDetailHeaderRow')).not.toHaveTextContent('OpenSearch');
+    });
+
+    it('lists Started, Rule, SLO and Account in the body; the rest in a collapsed More details', () => {
+      const { getByTestId } = render(
+        <AlertDetailFlyout
+          alert={{
+            ...baseAlert,
+            labels: {
+              monitor_id: 'mon-1',
+              monitor_name: 'Errors',
+              slo_id: 'slo-1',
+              slo_name: 'Checkout availability',
+            },
+            cloudWatch: {
+              state: 'ALARM',
+              alarmType: 'metric',
+              accountId: '123456789012',
+              region: 'us-east-1',
+            },
+          }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const summary = getByTestId('alertDetailSummary');
+      const titles = Array.from(summary.querySelectorAll('.euiDescriptionList__title')).map(
+        (el) => el.textContent
+      );
+      expect(titles).toEqual(['Started', 'Rule', 'SLO', 'Account']);
+      expect(summary).toHaveTextContent('123456789012');
+      const more = getByTestId('alertDetailMoreDetails');
+      expect(more).toHaveTextContent('More details');
+      expect(more.querySelector('.euiAccordion-isOpen')).toBeNull();
+      expect(more).not.toHaveClass('euiAccordion-isOpen');
+      const moreTitles = Array.from(more.querySelectorAll('.euiDescriptionList__title')).map(
+        (el) => el.textContent
+      );
+      expect(moreTitles).toEqual([
+        'Alert ID',
+        'Backend',
+        'Last Updated',
+        'Duration',
+        'Data source ID',
+      ]);
+      expect(more).toHaveTextContent('ds-prom');
+    });
+
+    it('shows no SLO or Account row for a plain alert', () => {
+      const { getByTestId, queryByTestId } = render(
+        <AlertDetailFlyout
+          alert={{ ...baseAlert, labels: { monitor_id: 'mon-1', monitor_name: 'Errors' } }}
+          datasources={datasources}
+          onClose={jest.fn()}
+          onAcknowledge={jest.fn()}
+        />
+      );
+      const titles = Array.from(
+        getByTestId('alertDetailSummary').querySelectorAll('.euiDescriptionList__title')
+      ).map((el) => el.textContent);
+      expect(titles).toEqual(['Started', 'Rule']);
+      expect(queryByTestId('alertDetailSloLink')).toBeNull();
+    });
+  });
+
   describe('detail-list formatting parity with the alerts table', () => {
-    it('title-cases the State and Severity values instead of showing raw enums', () => {
+    it('shows Status and Severity once, in the header, in words instead of raw enums', () => {
       const { getAllByText, queryByText } = render(
         <AlertDetailFlyout
           alert={baseAlert}
@@ -638,14 +792,16 @@ describe('AlertDetailFlyout', () => {
           onAcknowledge={jest.fn()}
         />
       );
-      // The alerts table renders "Active"/"Critical"; the flyout used to show
-      // the raw backend enums, so the same alert read two different ways on
-      // the same screen. Each value appears twice — once as a header chip, once
-      // in the detail list — and no lowercase rendering may survive anywhere.
-      expect(getAllByText('Active')).toHaveLength(2);
-      expect(getAllByText('Critical')).toHaveLength(2);
+      // The alerts table renders "Active"/"Critical"; the flyout shows the same words. The
+      // header row carries Status, Severity and Data source, so the body has no State,
+      // Severity or Datasource rows repeating them, and no raw enum survives anywhere.
+      expect(getAllByText('Active')).toHaveLength(1);
+      expect(getAllByText('Critical')).toHaveLength(1);
       expect(queryByText('active')).toBeNull();
       expect(queryByText('critical')).toBeNull();
+      expect(queryByText('State')).toBeNull();
+      expect(queryByText('Severity')).toBeNull();
+      expect(queryByText('Datasource')).toBeNull();
     });
 
     it('names the timezone on the Started and Last Updated timestamps', () => {

@@ -177,10 +177,12 @@ describe('AlertsDashboard', () => {
     const group = within(screen.getByTestId('datasourceFacet-group-cloudwatch'));
     expect(group.getByTestId('cloudWatchRegionControl')).toBeInTheDocument();
     expect(group.getByText('Prod account')).toBeInTheDocument();
-    expect(group.getByText('US East (N. Virginia)')).toBeInTheDocument();
+    expect(group.getByTestId('cloudWatchRegion-us-east-1')).toBeChecked();
+    expect(group.getByTestId('cloudWatchRegion-eu-west-1')).not.toBeChecked();
+    expect(group.getByText('us-east-1')).toBeInTheDocument();
   });
 
-  it('shows the account and region under the name of a CloudWatch alert', () => {
+  it('shows the data source once, in its own column, with the region below', () => {
     const cwDs = (scope: string, label: string): Datasource => ({
       id: `cloudwatch_us-east-1_${scope}`,
       name: `CloudWatch · ${label} · us-east-1`,
@@ -222,17 +224,79 @@ describe('AlertsDashboard', () => {
         ]}
       />
     );
+    const cells = screen.getAllByTestId('alertsTableDatasource');
+    expect(cells.map((el) => el.querySelector('.euiBadge')?.textContent)).toEqual(
+      expect.arrayContaining(['Prod', 'Staging', 'This account (111111111111)', 'Local'])
+    );
     expect(
-      screen.getAllByTestId('alertsTable-cloudWatchSource').map((el) => el.textContent)
+      screen.getAllByTestId('alertsTableDatasource-detail').map((el) => el.textContent)
     ).toEqual(
       expect.arrayContaining([
-        'Prod • us-east-1',
-        'Staging • us-east-1',
-        'This account (111111111111) • us-west-2',
+        'Cross-account · us-east-1',
+        'Cross-account · us-east-1',
+        'us-west-2',
       ])
     );
     // OpenSearch rows get no second line.
-    expect(screen.getAllByTestId('alertsTable-cloudWatchSource')).toHaveLength(3);
+    expect(screen.getAllByTestId('alertsTableDatasource-detail')).toHaveLength(3);
+    // The Alert cell no longer repeats the source (no icon, no account line).
+    const nameCell = screen.getAllByText('checkout-api-cpu-high-0')[0].closest('td')!;
+    expect(nameCell.querySelector('.euiButtonEmpty__icon')).toBeNull();
+  });
+
+  it('passes the data source limit message to the Data source filter', () => {
+    const { rerender } = render(<AlertsDashboard {...baseProps} />);
+    expect(screen.queryByTestId('datasourceFacetLimitMessage')).toBeNull();
+    rerender(<AlertsDashboard {...baseProps} datasourceLimitMessage="Limit reached" />);
+    expect(
+      within(screen.getByTestId('facetGroup-datasource')).getByTestId('datasourceFacetLimitMessage')
+    ).toHaveTextContent('Limit reached');
+  });
+
+  it('orders the columns Status, Started, Severity, Alert, Data source, Actions', () => {
+    render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    const headers = Array.from(document.querySelectorAll('thead th')).map((th) =>
+      th.textContent?.trim()
+    );
+    expect(headers).toEqual(['Status', 'Started', 'Severity', 'Alert', 'Data source', 'Actions']);
+    expect(headers).not.toContain('Message');
+  });
+
+  it('sorts Status as Firing, Pending, No data, then the ended states', () => {
+    const at = (id: string, state: UnifiedAlertSummary['state']): UnifiedAlertSummary => ({
+      ...sampleAlert,
+      id,
+      name: `alert-${state}`,
+      state,
+    });
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[
+          at('a1', 'resolved'),
+          at('a2', 'error'),
+          at('a3', 'active'),
+          at('a4', 'acknowledged'),
+          { ...at('a5', 'pending'), datasourceType: 'prometheus' },
+          { ...at('a6', 'insufficient_data'), datasourceType: 'cloudwatch' },
+        ]}
+      />
+    );
+    fireEvent.click(
+      within(document.querySelector('thead')!).getByRole('button', { name: /^Status/ })
+    );
+    const names = () =>
+      Array.from(document.querySelectorAll('.altAlertNameText')).map((el) => el.textContent);
+    const order = [
+      'alert-active',
+      'alert-pending',
+      'alert-insufficient_data',
+      'alert-acknowledged',
+      'alert-resolved',
+      'alert-error',
+    ];
+    const first = names();
+    expect([order, [...order].reverse()]).toContainEqual(first);
   });
   it('leaves CloudWatch account and region out of the Labels facet', () => {
     const cwAlert: UnifiedAlertSummary = {
@@ -264,7 +328,7 @@ describe('AlertsDashboard', () => {
     expect(region.queryByText('us-east-1')).toBeNull();
   });
 
-  it("shows core's CloudWatch logo on a CloudWatch row only", () => {
+  it('shows no source logo in the Alert cell; the Data source column names the source', () => {
     const cwAlert: UnifiedAlertSummary = {
       ...sampleAlert,
       id: 'cw-1',
@@ -278,9 +342,9 @@ describe('AlertsDashboard', () => {
     const rowIcons = Array.from(container.querySelectorAll('.altAlertNameButton')).map((b) =>
       b.querySelector('img')?.getAttribute('src')
     );
-    expect(rowIcons).toHaveLength(2);
-    expect(rowIcons.filter((src) => src === CW_LOGO)).toHaveLength(1);
-    expect(rowIcons.filter((src) => src === undefined)).toHaveLength(1);
+    expect(rowIcons).toEqual([undefined, undefined]);
+    expect(container.querySelectorAll('.altAlertNameButton .euiButtonEmpty__icon')).toHaveLength(0);
+    expect(container.querySelector(`table img[src="${CW_LOGO}"]`)).toBeNull();
   });
   it('renders "no datasource" empty state when selection is empty', () => {
     const { getByText } = render(<AlertsDashboard {...baseProps} selectedDsIds={[]} />);
@@ -649,11 +713,14 @@ describe('AlertsDashboard', () => {
     expect(screen.getByText('Occurrence 2 of 2')).toBeInTheDocument();
     expect(screen.getByText('Occurrence 1 of 2')).toBeInTheDocument();
     expect(screen.queryByText('Latest')).not.toBeInTheDocument();
-    // Occurrence rows line up with the six table columns: no Duration cell,
+    // Occurrence rows line up with the six table columns: no Message or Duration cell,
     // and Started reads like the parent row ("… ago", one unit).
     const grids = document.querySelectorAll('.altGroupedOccurrenceGrid');
     expect(grids.length).toBe(2);
     grids.forEach((grid) => expect(grid.children).toHaveLength(6));
+    // Started sits under Started (2nd), the occurrence under Alert (4th).
+    expect(grids[0].children[1]).toHaveTextContent(/ago$/);
+    expect(grids[0].children[3]).toHaveTextContent(/^Occurrence 2 of 2/);
     expect(screen.queryByText('10m')).not.toBeInTheDocument();
     expect(onViewDetail).not.toHaveBeenCalled();
 
@@ -661,19 +728,94 @@ describe('AlertsDashboard', () => {
     expect(onViewDetail).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'ad-older' }));
   });
 
-  it('shows anomalies as anomaly in the State facet instead of active', () => {
+  it('shows anomalies as anomaly in the Status facet, after the source groups', () => {
     render(<AlertsDashboard {...baseProps} alerts={[sampleAlert, buildAnomaly()]} />);
 
     const stateFacet = within(screen.getByTestId('facetGroup-state'));
     expect(stateFacet.getByText('Active')).toBeInTheDocument();
     expect(stateFacet.getByText('Anomaly')).toBeInTheDocument();
     expect(stateFacet.getAllByText('(1)')).toHaveLength(2);
+    // Anomaly is no source's status word: it has no heading and a gray dot.
+    const groups = stateFacet.getAllByTestId('facetGroup-state-optionGroup');
+    expect(groups.some((g) => g.textContent?.includes('Anomaly'))).toBe(false);
 
     fireEvent.click(stateFacet.getByLabelText(/anomaly/i));
 
     expect(screen.queryByText('HighCPU')).not.toBeInTheDocument();
     expect(screen.getByText('test - DestCityName=London')).toBeInTheDocument();
     expect(screen.getByText('1 filter')).toBeInTheDocument();
+  });
+
+  it("groups the Status facet by data source, in each source's own word", () => {
+    const cwDs: Datasource = {
+      id: 'cloudwatch',
+      name: 'CloudWatch',
+      type: 'cloudwatch',
+      url: 'cloudwatch',
+      enabled: true,
+    };
+    const alerts: UnifiedAlertSummary[] = [
+      { ...sampleAlert, id: 'os-a', name: 'os-active' },
+      { ...sampleAlert, id: 'os-e', name: 'os-error', state: 'error' },
+      {
+        ...sampleAlert,
+        id: 'p-a',
+        name: 'prom-firing',
+        datasourceId: 'prometheus-1',
+        datasourceType: 'prometheus',
+      },
+      {
+        ...sampleAlert,
+        id: 'p-p',
+        name: 'prom-pending',
+        datasourceId: 'prometheus-1',
+        datasourceType: 'prometheus',
+        state: 'pending',
+      },
+      {
+        ...sampleAlert,
+        id: 'cw-a',
+        name: 'cw-in-alarm',
+        datasourceId: 'cloudwatch',
+        datasourceType: 'cloudwatch',
+      },
+      {
+        ...sampleAlert,
+        id: 'cw-n',
+        name: 'cw-no-data',
+        datasourceId: 'cloudwatch',
+        datasourceType: 'cloudwatch',
+        state: 'insufficient_data',
+      },
+    ];
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        datasources={[sampleDs, samplePrometheusDs, cwDs]}
+        selectedDsIds={['ds-1', 'prometheus-1', 'cloudwatch']}
+        alerts={alerts}
+      />
+    );
+    const facet = screen.getByTestId('facetGroup-state');
+    expect(
+      within(facet)
+        .getAllByTestId('facetOptionGroupHeading')
+        .map((h) => h.textContent)
+    ).toEqual(['OpenSearch', 'Prometheus', 'CloudWatch']);
+    const groups = within(facet).getAllByTestId('facetGroup-state-optionGroup');
+    const words = (g: HTMLElement) =>
+      Array.from(g.querySelectorAll('.euiCheckbox label')).map((l) =>
+        l.textContent?.replace(/\(\d+\)$/, '')
+      );
+    expect(words(groups[0])).toEqual(['Active', 'Error']);
+    expect(words(groups[1])).toEqual(['Firing', 'Pending']);
+    expect(words(groups[2])).toEqual(['In alarm', 'Insufficient data']);
+
+    fireEvent.click(within(facet).getByLabelText(/In alarm/));
+    const names = Array.from(document.querySelectorAll('.altAlertNameText')).map(
+      (el) => el.textContent
+    );
+    expect(names).toEqual(['cw-in-alarm']);
   });
 
   it('filters by alert type and hides noisy anomaly label keys', () => {
@@ -776,6 +918,27 @@ describe('AlertsDashboard', () => {
   // B1 / A11Y1 + CLAR2: severity must be conveyed by a labeled indicator
   // (translated text), not a bare color dot. Reverting to the dot removes the
   // human-readable "Critical" text and this fails.
+  it('renders severity as an outlined neutral tag and its filter without swatches', () => {
+    render(
+      <AlertsDashboard
+        {...baseProps}
+        alerts={[sampleAlert, { ...sampleAlert, id: 'a-2', name: 'LowDisk', severity: 'medium' }]}
+      />
+    );
+    const medium = within(screen.getByText('LowDisk').closest('tr') as HTMLElement).getByTestId(
+      'alertSeverityBadge'
+    );
+    expect(medium).toHaveTextContent('Medium');
+    expect(medium.className).toMatch(/euiBadge--hollow/);
+    const critical = within(screen.getByText('HighCPU').closest('tr') as HTMLElement).getByTestId(
+      'alertSeverityBadge'
+    );
+    expect(critical.className).toMatch(/euiBadge--hollow/);
+    const facet = screen.getByTestId('facetGroup-severity');
+    expect(facet.querySelector('[data-test-subj^="facetGroup-severity-swatch-"]')).toBeNull();
+    expect(facet.querySelector('.euiHealth')).toBeNull();
+    expect(within(facet).getByText('Critical')).toBeInTheDocument();
+  });
   it('renders severity as a labeled badge, not a bare color dot', () => {
     render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
     const badge = screen.getByTestId('alertSeverityBadge');
@@ -802,6 +965,64 @@ describe('AlertsDashboard', () => {
     expect(table.getAllByText('Ack')).toHaveLength(1);
     const cwRow = table.getByText('checkout-errors-high').closest('tr')!;
     expect(within(cwRow).queryByText('Ack')).toBeNull();
+  });
+  it('heads the status column and its filter "Status", never "State"', () => {
+    render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);
+    const table = within(screen.getByRole('table'));
+    expect(table.getAllByText('Status').length).toBeGreaterThanOrEqual(1);
+    expect(within(screen.getByTestId('facetGroup-state')).getByText('Status')).toBeInTheDocument();
+    expect(screen.queryByText('State')).toBeNull();
+  });
+  it('shows one native status word per row, with the red dot only for a breach', () => {
+    const alerts: UnifiedAlertSummary[] = [
+      { ...sampleAlert, id: 'os-active', name: 'OsActive' },
+      { ...sampleAlert, id: 'os-done', name: 'OsDone', state: 'resolved' },
+      { ...sampleAlert, id: 'os-err', name: 'OsErr', state: 'error' },
+      { ...sampleAlert, id: 'p-fire', name: 'PromFire', datasourceType: 'prometheus' },
+      {
+        ...sampleAlert,
+        id: 'p-pend',
+        name: 'PromPend',
+        datasourceType: 'prometheus',
+        state: 'pending',
+      },
+      {
+        ...sampleAlert,
+        id: 'cw-alarm',
+        name: 'CwAlarm',
+        datasourceType: 'cloudwatch',
+        cloudWatch: { state: 'ALARM', alarmType: 'metric' },
+      },
+      {
+        ...sampleAlert,
+        id: 'cw-nodata',
+        name: 'CwNoData',
+        datasourceType: 'cloudwatch',
+        state: 'insufficient_data',
+        cloudWatch: { state: 'INSUFFICIENT_DATA', alarmType: 'metric' },
+      },
+      buildAnomaly(),
+    ];
+    render(<AlertsDashboard {...baseProps} alerts={alerts} />);
+    const statusOf = (name: string) =>
+      within(screen.getByText(name).closest('tr') as HTMLElement).getByTestId('alertsTableStatus');
+    const expected: Array<[string, string, boolean]> = [
+      ['OsActive', 'Active', true],
+      ['OsDone', 'Completed', false],
+      ['OsErr', 'Error', false],
+      ['PromFire', 'Firing', true],
+      ['PromPend', 'Pending', false],
+      ['CwAlarm', 'In alarm', true],
+      ['CwNoData', 'Insufficient data', false],
+      ['test - DestCityName=London', 'Anomaly', false],
+    ];
+    for (const [name, word, breached] of expected) {
+      const cell = statusOf(name);
+      expect(cell).toHaveTextContent(word);
+      if (breached) expect(cell).toHaveAttribute('data-breached', 'true');
+      else expect(cell).not.toHaveAttribute('data-breached');
+    }
+    expect(within(screen.getByRole('table')).queryByText(/CW:/)).toBeNull();
   });
   it('renders the alert state as a human label in the table', () => {
     render(<AlertsDashboard {...baseProps} alerts={[sampleAlert]} />);

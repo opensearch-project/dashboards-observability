@@ -37,27 +37,23 @@ import {
   UnifiedAlertSeverity,
   UnifiedRuleSummary,
 } from '../../../../common/types/alerting';
-import { CLOUDWATCH_DEFAULT_SCOPE_LABEL } from '../../../../common/services/alerting/cloudwatch_datasource_id';
-import { datasourceTypeLabel } from '../datasource_facet';
+import { DatasourceTag, DatasourceTagProps, datasourceTagParts } from '../datasource_tag';
 import {
   cloudWatchStateToHealth,
   cloudWatchStateToStatus,
   HEALTH_COLORS,
   isDetectorRule,
   isForecasterRule,
-  SEVERITY_COLORS,
-  getCloudWatchStateBadgeColor,
   getRuleStatusColor,
   TYPE_LABELS,
 } from '../shared_constants';
-import { TruncatedLabel } from '../../common/truncated_label';
-import { getCloudWatchStateLabel, getMonitorStateLabel, getSeverityLabel } from '../enum_labels';
+import { getMonitorStateLabel, getNativeRuleStatusLabel, isBreachStatus } from '../enum_labels';
+import { NativeStatus } from '../native_status';
+import { SeverityTag } from '../severity_tag';
 import { DEFAULT_WIDTHS } from './resizable_columns';
 import { isPending } from './pending_rules';
 import type { CloudWatchWindowState } from '../hooks/use_cloudwatch_states_at';
 import { CLOUDWATCH_ICON_FALLBACK } from '../cloudwatch_icon';
-
-/** Tint for the `CW: <state>` badge shown alongside the unified status. */
 
 // ============================================================================
 // Column Definitions
@@ -108,42 +104,6 @@ export interface BuildTableColumnsParams {
 
 const formatAt = (ms: number) => moment(ms).format('M/D HH:mm');
 
-const CELL_SEPARATOR = ' • ';
-
-/**
- * The Datasource cell: `<Type> • <source>` (e.g. "CloudWatch • Prod account"), then, when known,
- * the account id and region of a CloudWatch row ("444455556666 • us-east-1"; the account id only
- * when the source reports it and the first line doesn't already show it) or the region of a
- * Prometheus datasource.
- */
-export function datasourceCellLines(
-  item: UnifiedRuleSummary,
-  dsNameMap: Map<string, string>,
-  dsById?: Map<string, Datasource>
-): [string, string | undefined] {
-  const ds = dsById?.get(item.datasourceId);
-  const type = ds?.type ?? item.datasourceType;
-  const typeLabel = datasourceTypeLabel(type);
-  let source: string | undefined;
-  if (type === 'cloudwatch') {
-    const scopeLabel = ds?.cloudWatchScopeLabel;
-    source = scopeLabel && scopeLabel !== CLOUDWATCH_DEFAULT_SCOPE_LABEL ? scopeLabel : undefined;
-  } else {
-    source = ds?.name ?? dsNameMap.get(item.datasourceId) ?? item.datasourceId;
-  }
-  const first = source ? `${typeLabel}${CELL_SEPARATOR}${source}` : typeLabel;
-  let detail: string | undefined;
-  if (type === 'cloudwatch') {
-    const cw = item.cloudWatch;
-    const accountId = cw?.accountId && !source?.includes(cw.accountId) ? cw.accountId : undefined;
-    const parts = [accountId, cw?.region ?? ds?.region].filter(Boolean);
-    detail = parts.length > 0 ? parts.join(CELL_SEPARATOR) : undefined;
-  } else if (type === 'prometheus') {
-    detail = ds?.region || undefined;
-  }
-  return [first, detail];
-}
-
 /** "CloudWatch state at 9/24 14:00" (plus a caveat when the history read stopped short). */
 function stateAtTooltip(at: CloudWatchWindowState): string {
   if (!at.state) {
@@ -178,6 +138,14 @@ export function buildTableColumns({
   cloudWatchIconType = CLOUDWATCH_ICON_FALLBACK,
 }: BuildTableColumnsParams): Array<Record<string, unknown>> {
   const w = (id: string) => `${columnWidths[id] || DEFAULT_WIDTHS[id] || 120}px`;
+  const datasourceTagProps = (item: UnifiedRuleSummary): DatasourceTagProps => ({
+    ds: dsById?.get(item.datasourceId),
+    cloudWatch: item.cloudWatch,
+    datasourceType: item.datasourceType,
+    fallbackLabel: dsNameMap.get(item.datasourceId),
+  });
+  const datasourceTagFor = (item: UnifiedRuleSummary) =>
+    datasourceTagParts(datasourceTagProps(item));
   // Pending optimistic rows aren't selectable (their synthetic id would 404),
   // so exclude them when deciding the header's "all selected" state.
   const selectable = filtered.filter((item) => !isPending(item));
@@ -329,14 +297,13 @@ export function buildTableColumns({
             );
           }
           const atState = at?.state;
-          const cw =
-            item.cloudWatch && atState ? { ...item.cloudWatch, state: atState } : item.cloudWatch;
           const status = atState ? cloudWatchStateToStatus(atState) : s;
-          const unifiedLabel = getMonitorStateLabel(status);
-          // Long values ("insufficient data", "CW: INSUFFICIENT_DATA") must
-          // not overflow the (user-resizable) status column: both the health
-          // label and the CW badge truncate with an ellipsis, and the full
-          // text stays reachable via tooltip.
+          // One status in the data source's own word, no "CW:" chip;
+          // a breach (firing rule, alarm in ALARM) is the red dot.
+          const nativeLabel = getNativeRuleStatusLabel(item, atState);
+          // Long values ("Insufficient data") must not overflow the
+          // (user-resizable) status column: the label truncates with an
+          // ellipsis, and the full text stays reachable via its title.
           const truncate: React.CSSProperties = {
             display: 'block',
             maxWidth: '100%',
@@ -353,36 +320,15 @@ export function buildTableColumns({
               style={{ minWidth: 0 }}
             >
               <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
-                <EuiHealth
+                <NativeStatus
                   color={getRuleStatusColor(status, item.datasourceType)}
-                  data-test-subj={at ? 'cloudWatchStatusAtWindowEnd' : undefined}
-                >
-                  <span style={truncate} title={at ? stateAtTooltip(at) : unifiedLabel}>
-                    {unifiedLabel}
-                  </span>
-                </EuiHealth>
+                  breached={isBreachStatus('rule', item.datasourceType, status)}
+                  data-test-subj={at ? 'cloudWatchStatusAtWindowEnd' : 'rulesTableStatus'}
+                  label={nativeLabel}
+                  title={at ? stateAtTooltip(at) : nativeLabel}
+                  labelStyle={truncate}
+                />
               </EuiFlexItem>
-              {cw && (
-                <EuiFlexItem grow={false} style={{ maxWidth: '100%', minWidth: 0 }}>
-                  <EuiToolTip
-                    content={
-                      at
-                        ? stateAtTooltip(at)
-                        : i18n.translate(
-                            'observability.alerting.monitorsTable.columns.cloudWatchStateTooltip',
-                            {
-                              defaultMessage: 'CloudWatch state: {state}',
-                              values: { state: getCloudWatchStateLabel(cw.state) },
-                            }
-                          )
-                    }
-                  >
-                    <EuiBadge color={getCloudWatchStateBadgeColor(cw.state)}>
-                      <span style={truncate}>CW: {getCloudWatchStateLabel(cw.state)}</span>
-                    </EuiBadge>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              )}
               {at && (
                 // Visible cue that the row shows the window end, not now.
                 <EuiFlexItem grow={false} style={{ flexBasis: '100%' }}>
@@ -406,8 +352,9 @@ export function buildTableColumns({
         }),
         sortable: true,
         width: w('severity'),
+        // An outlined neutral tag with the word.
         render: (s: UnifiedAlertSeverity) => (
-          <EuiBadge color={SEVERITY_COLORS[s] || 'default'}>{getSeverityLabel(s)}</EuiBadge>
+          <SeverityTag severity={s} data-test-subj="rulesTableSeverity" />
         ),
       });
     } else if (colId === 'monitorType') {
@@ -450,28 +397,14 @@ export function buildTableColumns({
       cols.push({
         field: 'datasourceId',
         name: i18n.translate('observability.alerting.monitorsTable.columns.datasource', {
-          defaultMessage: 'Datasource',
+          defaultMessage: 'Data source',
         }),
-        sortable: (r: UnifiedRuleSummary) =>
-          datasourceCellLines(r, dsNameMap, dsById)[0].toLowerCase(),
+        // The data source once, as the Data source filter names it.
+        sortable: (r: UnifiedRuleSummary) => datasourceTagFor(r).label.toLowerCase(),
         width: w('datasource'),
-        // A bare string cell wraps mid-word for long datasource names (e.g.
-        // "ObservabilityStack_Prometheus"). EUI's `truncateText` doesn't
-        // single-line a plain-text render in this table, so use the shared
-        // `TruncatedLabel` (single-line ellipsis + instant full-text tooltip),
-        // matching the datasource facet in the filter panel.
-        render: (_id: string, item: UnifiedRuleSummary) => {
-          const [label, detail] = datasourceCellLines(item, dsNameMap, dsById);
-          if (!detail) return <TruncatedLabel text={label} />;
-          return (
-            <div>
-              <TruncatedLabel text={label} />
-              <EuiTextColor color="subdued" style={{ fontSize: 11 }}>
-                {detail}
-              </EuiTextColor>
-            </div>
-          );
-        },
+        render: (_id: string, item: UnifiedRuleSummary) => (
+          <DatasourceTag {...datasourceTagProps(item)} data-test-subj="rulesTableDatasource" />
+        ),
       });
     }
   }

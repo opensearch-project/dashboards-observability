@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { UnifiedRuleSummary } from '../../../../common/types/alerting';
+import { Datasource, UnifiedRuleSummary } from '../../../../common/types/alerting';
 import { DeleteModal } from '../../common/helpers/delete_modal';
 import { CloudWatchAlarmDetailFlyout } from '../cloudwatch_alarm_detail_flyout';
 import { DetectorDetailFlyout } from '../detector_detail_flyout';
@@ -146,6 +146,8 @@ export interface MonitorsMainPanelProps {
    * row filter.
    */
   rulesTime: UseTimeRangeResult;
+  /** Listed data sources by id: the rule flyouts' Data source tag names the rule's source. */
+  dsById?: Map<string, Datasource>;
 }
 
 export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
@@ -194,6 +196,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
   lifecycleActionPending = false,
   onToggleEnabled,
   rulesTime,
+  dsById,
 }) => {
   // A `monitor_id:<id>` search is what an alert's "Open rule" link and old
   // bookmarks put in the box. When it matches nothing (and no other filter is
@@ -824,6 +827,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       {selectedMonitor && isCloudWatchRule(selectedMonitor) ? (
         <CloudWatchAlarmDetailFlyout
           rule={selectedMonitor}
+          datasource={dsById?.get(selectedMonitor.datasourceId)}
           timeRange={rulesWindow}
           onClose={() => setSelectedMonitor(null)}
         />
@@ -847,6 +851,7 @@ export const MonitorsMainPanel: React.FC<MonitorsMainPanelProps> = ({
       ) : selectedMonitor ? (
         <MonitorDetailFlyout
           monitor={selectedMonitor}
+          datasource={dsById?.get(selectedMonitor.datasourceId)}
           onClose={() => setSelectedMonitor(null)}
           onDelete={(id) => {
             onDelete([id]);

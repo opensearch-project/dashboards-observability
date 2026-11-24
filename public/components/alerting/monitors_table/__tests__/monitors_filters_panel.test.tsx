@@ -25,14 +25,14 @@ const makeProps = (overrides = {}) => ({
   updateLabelFilter: jest.fn(),
   labelKeys: [],
   datasourceEntries: [],
-  uniqueStatuses: ['active', 'muted'],
+  uniqueStatuses: ['opensearch:active', 'opensearch:muted'],
   uniqueSeverities: ['critical', 'medium'],
   uniqueTypes: [],
   uniqueHealth: ['healthy', 'no_data'],
   uniqueCreators: [],
   facetCounts: {
     counts: {
-      status: { active: 3, muted: 2 },
+      status: { 'opensearch:active': 3, 'opensearch:muted': 2 },
       severity: { critical: 1, medium: 4 },
       monitorType: {},
       healthStatus: { healthy: 4, no_data: 1 },
@@ -63,7 +63,8 @@ describe('MonitorsFiltersPanel — facet labels match the table', () => {
   // halves of the same screen would disagree — the defect this fixes.
   it('renders humanized Status / Severity / Health facet labels, not raw tokens', () => {
     const { getByText, queryByText } = render(<MonitorsFiltersPanel {...makeProps()} />);
-    expect(getByText('Active')).toBeInTheDocument();
+    // An OpenSearch rule's `active` reads "Enabled".
+    expect(getByText('Enabled')).toBeInTheDocument();
     expect(getByText('Muted')).toBeInTheDocument();
     expect(getByText('Critical')).toBeInTheDocument();
     expect(getByText('Medium')).toBeInTheDocument();
@@ -76,16 +77,88 @@ describe('MonitorsFiltersPanel — facet labels match the table', () => {
     expect(queryByText('medium')).toBeNull();
   });
 
+  it('renders the Severity filter without swatches or dots', () => {
+    render(<MonitorsFiltersPanel {...makeProps()} />);
+    const facet = screen.getByTestId('facetGroup-severity');
+    expect(facet.querySelector('[data-test-subj^="facetGroup-severity-swatch-"]')).toBeNull();
+    expect(facet.querySelector('.euiHealth')).toBeNull();
+    expect(within(facet).getByText('Critical')).toBeInTheDocument();
+  });
   it('still filters on the RAW value when a humanized facet is clicked (display-only map)', () => {
     // The crucial invariant: relabelling must not change which rows match.
-    // Clicking the "Active" label must call updateFilter('status', ['active']).
+    // Clicking the "Enabled" label must call updateFilter('status', ['opensearch:active']).
     const updateFilter = jest.fn();
     const { getByText } = render(<MonitorsFiltersPanel {...makeProps({ updateFilter })} />);
-    fireEvent.click(getByText('Active'));
-    expect(updateFilter).toHaveBeenCalledWith('status', ['active']);
+    fireEvent.click(getByText('Enabled'));
+    expect(updateFilter).toHaveBeenCalledWith('status', ['opensearch:active']);
 
     fireEvent.click(getByText('No data'));
     expect(updateFilter).toHaveBeenCalledWith('healthStatus', ['no_data']);
+  });
+});
+
+describe('MonitorsFiltersPanel — Status grouped by data source', () => {
+  const props = () =>
+    makeProps({
+      uniqueStatuses: [
+        'cloudwatch:ok',
+        'cloudwatch:active',
+        'prometheus:muted',
+        'prometheus:active',
+        'opensearch:active',
+      ],
+      facetCounts: {
+        counts: {
+          status: {
+            'cloudwatch:ok': 1,
+            'cloudwatch:active': 2,
+            'prometheus:muted': 3,
+            'prometheus:active': 4,
+            'opensearch:active': 5,
+          },
+          severity: {},
+          monitorType: {},
+          healthStatus: {},
+          createdBy: {},
+        },
+        labelCounts: {},
+      },
+    });
+
+  it('lists each source under its own heading, in its own words, breach first', () => {
+    render(<MonitorsFiltersPanel {...props()} />);
+    const facet = screen.getByTestId('facetGroup-status');
+    expect(
+      within(facet)
+        .getAllByTestId('facetOptionGroupHeading')
+        .map((h) => h.textContent)
+    ).toEqual(['OpenSearch', 'Prometheus', 'CloudWatch']);
+    const groups = within(facet).getAllByTestId('facetGroup-status-optionGroup');
+    const words = (g: HTMLElement) =>
+      Array.from(g.querySelectorAll('.euiCheckbox label')).map((l) =>
+        l.textContent?.replace(/\(\d+\)$/, '')
+      );
+    expect(words(groups[0])).toEqual(['Enabled']);
+    expect(words(groups[1])).toEqual(['Firing', 'Inactive']);
+    expect(words(groups[2])).toEqual(['In alarm', 'OK']);
+  });
+
+  it('selects the composite key, so "In alarm" is CloudWatch only', () => {
+    const updateFilter = jest.fn();
+    render(<MonitorsFiltersPanel {...props()} updateFilter={updateFilter} />);
+    fireEvent.click(screen.getByText('In alarm'));
+    expect(updateFilter).toHaveBeenCalledWith('status', ['cloudwatch:active']);
+  });
+});
+
+describe('MonitorsFiltersPanel — data source limit message', () => {
+  it('renders the message in the Data source filter', () => {
+    render(<MonitorsFiltersPanel {...makeProps({ datasourceLimitMessage: 'Limit reached' })} />);
+    expect(screen.getByTestId('datasourceFacetLimitMessage')).toHaveTextContent('Limit reached');
+  });
+  it('renders no message without one', () => {
+    render(<MonitorsFiltersPanel {...makeProps()} />);
+    expect(screen.queryByTestId('datasourceFacetLimitMessage')).toBeNull();
   });
 });
 
@@ -136,6 +209,17 @@ describe('MonitorsFiltersPanel — Datasource facet', () => {
     expect(screen.getByText('Regions')).toBeInTheDocument();
   });
 
+  it('titles the facet "Data source" and its search "Search data sources"', () => {
+    render(
+      <MonitorsFiltersPanel {...makeProps({ datasources, selectedDsIds: ['os-1'], cloudWatch })} />
+    );
+    expect(screen.getByText('Data source')).toBeInTheDocument();
+    expect(screen.queryByText('Datasource')).toBeNull();
+    expect(screen.getByTestId('facetGroup-datasource-search')).toHaveAttribute(
+      'aria-label',
+      'Search data sources'
+    );
+  });
   it('leaves CloudWatch account and region out of the Labels facet', () => {
     const rule = (over: Record<string, unknown>) => ({
       id: 'r',

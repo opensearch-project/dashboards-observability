@@ -4,10 +4,9 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { buildTableColumns, datasourceCellLines } from '../monitors_table_columns';
+import { render, within } from '@testing-library/react';
+import { buildTableColumns } from '../monitors_table_columns';
 import type { Datasource, UnifiedRuleSummary } from '../../../../../common/types/alerting';
-import { cloudWatchDatasourcesFor } from '../../../../../common/services/alerting/cloudwatch_datasource_id';
 
 const baseParams = {
   filtered: [] as UnifiedRuleSummary[],
@@ -59,6 +58,14 @@ describe('monitors_table_columns cell labels', () => {
     expect(queryByText('no_data')).toBeNull();
   });
 
+  it('renders every severity as an outlined neutral tag, Critical included', () => {
+    const medium = renderCell('severity', 'medium');
+    expect(medium.getByTestId('rulesTableSeverity').className).toMatch(/euiBadge--hollow/);
+    medium.unmount();
+    const critical = renderCell('severity', 'critical');
+    expect(critical.getByTestId('rulesTableSeverity')).toHaveTextContent('Critical');
+    expect(critical.getByTestId('rulesTableSeverity').className).toMatch(/euiBadge--hollow/);
+  });
   it('passes AD/forecaster lifecycle statuses through unchanged', () => {
     // These arrive already display-ready; re-casing them would corrupt the
     // wording, so the label getter must leave them alone.
@@ -67,6 +74,54 @@ describe('monitors_table_columns cell labels', () => {
   });
 });
 
+describe('monitors_table_columns native status words', () => {
+  const statusCell = (rule: Partial<UnifiedRuleSummary>) => {
+    const cols = buildTableColumns({ ...baseParams, visibleColumns: new Set(['status']) });
+    const col = cols.find((c) => c.field === 'status') as {
+      render: (v: unknown, item: UnifiedRuleSummary) => React.ReactNode;
+    };
+    const item = { id: 'rule-1', ...rule } as UnifiedRuleSummary;
+    return render(<div>{col.render(item.status, item)}</div>);
+  };
+  it('reads "Enabled" for an active OpenSearch rule, as a blue dot, not a breach', () => {
+    const { getByText, queryByText, getByTestId } = statusCell({
+      datasourceType: 'opensearch',
+      status: 'active',
+    });
+    expect(getByText('Enabled')).toBeInTheDocument();
+    expect(queryByText('Active')).toBeNull();
+    expect(getByTestId('rulesTableStatus')).not.toHaveAttribute('data-breached');
+  });
+  it('reads Firing as the red dot and Pending / Inactive as their dots for Prometheus', () => {
+    const firing = statusCell({ datasourceType: 'prometheus', status: 'active' });
+    expect(firing.getByText('Firing')).toBeInTheDocument();
+    expect(firing.getByTestId('rulesTableStatus')).toHaveAttribute('data-breached', 'true');
+    firing.unmount();
+    const pending = statusCell({ datasourceType: 'prometheus', status: 'pending' });
+    expect(pending.getByText('Pending')).toBeInTheDocument();
+    expect(pending.getByTestId('rulesTableStatus')).not.toHaveAttribute('data-breached');
+    pending.unmount();
+    const inactive = statusCell({ datasourceType: 'prometheus', status: 'muted' });
+    expect(inactive.getByText('Inactive')).toBeInTheDocument();
+    expect(inactive.queryByText('Muted')).toBeNull();
+  });
+  it('reads OK for a CloudWatch alarm in OK, with no CW: chip', () => {
+    const { getByText, queryByText } = statusCell({
+      datasourceType: 'cloudwatch',
+      status: 'ok',
+      cloudWatch: { state: 'OK', alarmType: 'metric' },
+    });
+    expect(getByText('OK')).toBeInTheDocument();
+    expect(queryByText(/CW:/)).toBeNull();
+  });
+});
+describe('monitors_table_columns headers', () => {
+  it('heads the data source column "Data source"', () => {
+    const cols = buildTableColumns({ ...baseParams, visibleColumns: new Set(['datasource']) });
+    const col = cols.find((c) => c.field === 'datasourceId');
+    expect(col?.name).toBe('Data source');
+  });
+});
 describe('monitors_table_columns CloudWatch state at the window end', () => {
   const cwRule = {
     id: 'checkout-errors-high',
@@ -92,10 +147,13 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
     return render(<div>{col.render((cwRule as never)[field], cwRule)}</div>);
   };
 
-  it('shows the current state when the window ends now', () => {
-    const { getByText } = cell('status');
-    expect(getByText('Active')).toBeInTheDocument();
-    expect(getByText('CW: In alarm')).toBeInTheDocument();
+  it('shows the current state when the window ends now, once, in CloudWatch words', () => {
+    const { getByText, queryByText, getByTestId } = cell('status');
+    expect(getByText('In alarm')).toBeInTheDocument();
+    expect(queryByText(/CW:/)).toBeNull();
+    expect(queryByText('Active')).toBeNull();
+    // In alarm is a breach: the red dot.
+    expect(getByTestId('rulesTableStatus')).toHaveAttribute('data-breached', 'true');
   });
 
   it('shows the state at the window end in Status and Health', () => {
@@ -105,9 +163,9 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
       complete: true,
     };
     const status = cell('status', () => at);
-    expect(status.getByText('Insufficient data')).toBeInTheDocument();
-    expect(status.getByText('CW: Insufficient data')).toBeInTheDocument();
-    expect(status.getByTestId('cloudWatchStatusAtWindowEnd')).toBeInTheDocument();
+    expect(status.getAllByText('Insufficient data')).toHaveLength(1);
+    expect(status.queryByText(/CW:/)).toBeNull();
+    expect(status.getByTestId('cloudWatchStatusAtWindowEnd')).not.toHaveAttribute('data-breached');
     status.unmount();
     expect(cell('healthStatus', () => at).getByText('No data')).toBeInTheDocument();
   });
@@ -118,13 +176,13 @@ describe('monitors_table_columns CloudWatch state at the window end', () => {
     expect(status.getByTestId('cloudWatchStatusUnknownAtWindowEnd')).toHaveTextContent(
       'No history'
     );
-    expect(status.queryByText('CW: In alarm')).toBeNull();
+    expect(status.queryByText('In alarm')).toBeNull();
     status.unmount();
     expect(cell('healthStatus', () => at).getByText('—')).toBeInTheDocument();
   });
 });
 
-describe('monitors_table_columns Datasource cell', () => {
+describe('monitors_table_columns Data source cell', () => {
   const ds = (d: Partial<Datasource> & Pick<Datasource, 'id' | 'name' | 'type'>): Datasource => ({
     url: '',
     enabled: true,
@@ -150,11 +208,33 @@ describe('monitors_table_columns Datasource cell', () => {
       }),
     ].map((d) => [d.id, d])
   );
-  const row = (over: Partial<UnifiedRuleSummary>) => over as unknown as UnifiedRuleSummary;
+  const row = (over: Partial<UnifiedRuleSummary>) =>
+    ({ id: 'rule-1', name: 'r', ...over }) as unknown as UnifiedRuleSummary;
+  const datasourceColumn = (byId = dsById) =>
+    buildTableColumns({
+      ...baseParams,
+      dsById: byId,
+      visibleColumns: new Set(['datasource']),
+    }).find((c) => c.field === 'datasourceId') as {
+      render: (v: unknown, item: UnifiedRuleSummary) => React.ReactNode;
+      sortable: (item: UnifiedRuleSummary) => string;
+    };
+  const renderDs = (item: UnifiedRuleSummary, byId = dsById) => {
+    const { container } = render(
+      <div>{datasourceColumn(byId).render(item.datasourceId, item)}</div>
+    );
+    const { getByTestId, queryByTestId } = within(container);
+    const tag = getByTestId('rulesTableDatasource');
+    return {
+      label: tag.querySelector('.euiBadge')?.textContent,
+      detail: queryByTestId('rulesTableDatasource-detail')?.textContent,
+      title: tag.getAttribute('data-title'),
+    };
+  };
 
-  it('reads "<Type> • <source>" with the account id and region below for CloudWatch', () => {
+  it('shows a cross-account CloudWatch scope once, as the filter names it', () => {
     expect(
-      datasourceCellLines(
+      renderDs(
         row({
           datasourceId: 'cloudwatch_us-east-1_prod',
           datasourceType: 'cloudwatch',
@@ -164,111 +244,48 @@ describe('monitors_table_columns Datasource cell', () => {
             accountId: '444455556666',
             region: 'us-east-1',
           },
-        }),
-        new Map(),
-        dsById
+        })
       )
-    ).toEqual(['CloudWatch • Prod account', '444455556666 • us-east-1']);
+    ).toEqual({
+      label: 'Prod account',
+      detail: 'Cross-account · us-east-1',
+      title: 'CloudWatch · account 444455556666',
+    });
   });
 
-  it('omits an account id the source does not report', () => {
+  it('reads the own CloudWatch account as "This account" with the region below', () => {
     expect(
-      datasourceCellLines(
+      renderDs(
         row({
-          datasourceId: 'cloudwatch_us-east-1_prod',
+          datasourceId: 'cloudwatch',
           datasourceType: 'cloudwatch',
-          cloudWatch: { state: 'OK', alarmType: 'metric', region: 'us-east-1' },
-        }),
-        new Map(),
-        dsById
+          cloudWatch: { state: 'OK', alarmType: 'metric', region: 'us-west-2' },
+        })
       )
-    ).toEqual(['CloudWatch • Prod account', 'us-east-1']);
-  });
-  it('shows the account id once when the first line already has it', () => {
-    const repeated = new Map(dsById);
-    repeated.set(
-      'cloudwatch_us-east-1_s2',
-      ds({
-        id: 'cloudwatch_us-east-1_s2',
-        name: 'CloudWatch · Prod (222222222222) · us-east-1',
-        type: 'cloudwatch',
-        region: 'us-east-1',
-        cloudWatchScope: 's2',
-        cloudWatchScopeLabel: 'Prod (222222222222)',
-      })
-    );
-    expect(
-      datasourceCellLines(
-        row({
-          datasourceId: 'cloudwatch_us-east-1_s2',
-          datasourceType: 'cloudwatch',
-          cloudWatch: {
-            state: 'ALARM',
-            alarmType: 'metric',
-            accountId: '222222222222',
-            region: 'us-east-1',
-          },
-        }),
-        new Map(),
-        repeated
-      )
-    ).toEqual(['CloudWatch • Prod (222222222222)', 'us-east-1']);
-  });
-
-  it('shows the type once when two scopes are labelled CloudWatch', () => {
-    const rows = cloudWatchDatasourcesFor(
-      {
-        regions: [{ id: 'us-east-1', name: 'US East (N. Virginia)' }],
-        defaultRegion: 'us-east-1',
-        scopes: [
-          { label: 'CloudWatch', relation: 'own', accountId: '111111111111' },
-          { id: 's2', label: 'CloudWatch', relation: 'other', accountId: '222222222222' },
-        ],
-      },
-      ['us-east-1']
-    );
-    const byId = new Map(rows.map((d) => [d.id, d]));
-    const cw = (datasourceId: string, accountId: string) =>
-      datasourceCellLines(
-        row({
-          datasourceId,
-          datasourceType: 'cloudwatch',
-          cloudWatch: { state: 'OK', alarmType: 'metric', accountId, region: 'us-east-1' },
-        }),
-        new Map(),
-        byId
-      );
-    expect(cw('cloudwatch', '111111111111')).toEqual(['CloudWatch', '111111111111 • us-east-1']);
-    expect(cw('cloudwatch_us-east-1_s2', '222222222222')).toEqual([
-      'CloudWatch • 222222222222',
-      'us-east-1',
-    ]);
-  });
-  it('labels the legacy single CloudWatch datasource just "CloudWatch"', () => {
-    expect(
-      datasourceCellLines(
-        row({ datasourceId: 'cloudwatch', datasourceType: 'cloudwatch' }),
-        new Map(),
-        dsById
-      )
-    ).toEqual(['CloudWatch', undefined]);
+    ).toEqual({ label: 'This account', detail: 'us-west-2', title: 'CloudWatch' });
   });
 
   it('reads OpenSearch and Prometheus sources by name, with a Prometheus region', () => {
+    expect(renderDs(row({ datasourceId: 'os-1', datasourceType: 'opensearch' }))).toEqual({
+      label: 'Local Cluster',
+      detail: undefined,
+      title: 'OpenSearch',
+    });
+    expect(renderDs(row({ datasourceId: 'prom-1', datasourceType: 'prometheus' }))).toEqual({
+      label: 'prod-amp-workspace',
+      detail: 'us-west-2',
+      title: 'Prometheus',
+    });
+  });
+
+  it('sorts by the tag text', () => {
+    const col = datasourceColumn();
+    expect(col.sortable(row({ datasourceId: 'os-1', datasourceType: 'opensearch' }))).toBe(
+      'local cluster'
+    );
     expect(
-      datasourceCellLines(
-        row({ datasourceId: 'os-1', datasourceType: 'opensearch' }),
-        new Map(),
-        dsById
-      )
-    ).toEqual(['OpenSearch • Local Cluster', undefined]);
-    expect(
-      datasourceCellLines(
-        row({ datasourceId: 'prom-1', datasourceType: 'prometheus' }),
-        new Map(),
-        dsById
-      )
-    ).toEqual(['Prometheus • prod-amp-workspace', 'us-west-2']);
+      col.sortable(row({ datasourceId: 'cloudwatch_us-east-1_prod', datasourceType: 'cloudwatch' }))
+    ).toBe('prod account');
   });
 });
 describe('monitors_table_columns Name cell icon', () => {

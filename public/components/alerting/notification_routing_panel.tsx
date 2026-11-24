@@ -536,23 +536,16 @@ export const NotificationRoutingPanel: React.FC<NotificationRoutingPanelProps> =
 
   return (
     <div style={{ padding: '0 16px' }}>
-      {/* Read-only explanation banner (UX audit M6 + S-m8) */}
-      <EuiCallOut
-        title={i18n.translate(
-          'observability.alerting.notificationRoutingPanel.readOnlyCallout.title',
-          { defaultMessage: 'Read-only view' }
-        )}
-        color="primary"
-        iconType="iInCircle"
-        size="s"
-      >
+      {/* Where routing is configured (UX audit M6 + S-m8). No "Read-only"
+          label: no tab shows an Experimental or Read-only label. */}
+      <EuiText size="s" color="subdued" data-test-subj="notificationRoutingConfigNote">
         <p>
           <FormattedMessage
             id="observability.alerting.notificationRoutingPanel.readOnlyCallout.body"
             defaultMessage="Routing configuration is managed via the Alertmanager configuration file or API. This view shows the current routing tree for all Prometheus datasources."
           />
         </p>
-      </EuiCallOut>
+      </EuiText>
       <EuiSpacer size="s" />
 
       {/* Datasource selector + refresh. In the Alert Manager they sit in the

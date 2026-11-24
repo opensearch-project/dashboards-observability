@@ -40,6 +40,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
   AlertHistoryEntry,
+  Datasource,
   OSMonitor,
   OSMonitorInput,
   UnifiedRuleSummary,
@@ -50,16 +51,20 @@ import { ConditionPreviewGraph } from './monitor_detail/condition_preview_graph'
 import { humanizeCondition } from './monitor_detail/humanize_condition';
 import { normalizeDuration } from './utils/duration';
 import { observabilityAlertingID } from '../../../common/constants/shared';
+import { observabilityApmSloID } from '../../../common/constants/apm';
 import { coreRefs } from '../../framework/core_refs';
 import { isPending } from './monitors_table/pending_rules';
 
+import { STATE_COLORS, HEALTH_COLORS, getRuleStatusColor } from './shared_constants';
 import {
-  SEVERITY_COLORS,
-  STATE_COLORS,
-  HEALTH_COLORS,
-  getStatusBadgeColor,
-} from './shared_constants';
-import { getMonitorStateLabel, getSeverityLabel, getStateLabel } from './enum_labels';
+  getMonitorStateLabel,
+  getNativeAlertStateLabel,
+  getNativeRuleStatusLabel,
+  isBreachStatus,
+} from './enum_labels';
+import { NativeStatus } from './native_status';
+import { SeverityTag } from './severity_tag';
+import { DatasourceTag } from './datasource_tag';
 import { stateHistoryUnavailableMessage } from './alarm_time_window';
 
 // Cap for the alert-history table in the flyout. `EuiBasicTable` doesn't
@@ -98,6 +103,8 @@ export interface MonitorDetailFlyoutProps {
    * explanatory tooltip until their edit path is implemented.
    */
   onToggleEnabled?: (monitor: UnifiedRuleSummary) => Promise<void> | void;
+  /** The rule's data source, when it is listed: the header's Data source tag names it. */
+  datasource?: Datasource;
 }
 
 /**
@@ -133,7 +140,20 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
   onClone,
   onEdit,
   onToggleEnabled,
+  datasource,
 }) => {
+  const sloId = monitor.labels?.slo_id;
+  // The SLO detail page lives in the SLO app: switch apps (workspace-aware), then fire a
+  // hashchange once it has mounted, as the alert flyout's SLO link does.
+  const openSlo = () => {
+    if (!sloId) return;
+    onClose();
+    Promise.resolve(
+      coreRefs?.application?.navigateToApp(observabilityApmSloID, {
+        path: `#/slos/${encodeURIComponent(sloId)}`,
+      })
+    ).then(() => window.dispatchEvent(new HashChangeEvent('hashchange')));
+  };
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showEditRedirectConfirm, setShowEditRedirectConfirm] = useState(false);
   const [isTogglingEnabled, setIsTogglingEnabled] = useState(false);
@@ -311,11 +331,13 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
     },
     {
       field: 'state',
-      name: i18n.translate('observability.alerting.monitorDetailFlyout.history.state', {
-        defaultMessage: 'State',
+      name: i18n.translate('observability.alerting.monitorDetailFlyout.history.status', {
+        defaultMessage: 'Status',
       }),
       render: (s: string) => (
-        <EuiHealth color={STATE_COLORS[s] || 'subdued'}>{getStateLabel(s)}</EuiHealth>
+        <EuiHealth color={STATE_COLORS[s] || 'subdued'}>
+          {getNativeAlertStateLabel(monitor.datasourceType, s)}
+        </EuiHealth>
       ),
     },
     {
@@ -330,7 +352,16 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
       name: i18n.translate('observability.alerting.monitorDetailFlyout.history.message', {
         defaultMessage: 'Message',
       }),
-      truncateText: true,
+      // Error messages are long and can run without spaces (e.g. "Failed fetching inputs:
+      // OpenSearchStatusException[…]"): wrap anywhere so all of it is readable.
+      render: (message: string) => (
+        <span
+          data-test-subj="monitorDetailAlertHistoryMessage"
+          style={{ overflowWrap: 'anywhere' }}
+        >
+          {message}
+        </span>
+      ),
     },
   ];
 
@@ -338,23 +369,40 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
     <>
       <EuiFlyout onClose={onClose} size="m" ownFocus aria-labelledby="monitorDetailTitle">
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            responsive={false}
+            data-test-subj="monitorDetailHeaderRow"
+          >
             <EuiFlexItem>
               <EuiTitle size="m">
                 <h2 id="monitorDetailTitle">{monitor.name}</h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" responsive={false}>
+              <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false} wrap>
+                {/* Status in the data source's own word (a breach is the red dot), severity
+                    and the data source, in the table's order and style.
+                    Health stays (spec R3). */}
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={getStatusBadgeColor(monitor.status, monitor.datasourceType)}>
-                    {getMonitorStateLabel(monitor.status)}
-                  </EuiBadge>
+                  <NativeStatus
+                    label={getNativeRuleStatusLabel(monitor)}
+                    color={getRuleStatusColor(monitor.status, monitor.datasourceType)}
+                    breached={isBreachStatus('rule', monitor.datasourceType, monitor.status)}
+                    data-test-subj="monitorDetailStatus"
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={SEVERITY_COLORS[monitor.severity]}>
-                    {getSeverityLabel(monitor.severity)}
-                  </EuiBadge>
+                  <SeverityTag severity={monitor.severity} data-test-subj="monitorDetailSeverity" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
+                  <DatasourceTag
+                    ds={datasource}
+                    cloudWatch={monitor.cloudWatch}
+                    datasourceType={monitor.datasourceType}
+                    data-test-subj="monitorDetailDatasource"
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiHealth color={HEALTH_COLORS[monitor.healthStatus]}>
@@ -504,6 +552,28 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                 <p>{description}</p>
               </EuiText>
               <EuiSpacer size="m" />
+              {/* The SLO this burn-rate rule belongs to, linked to the SLO detail page. */}
+              {sloId && (
+                <>
+                  <EuiDescriptionList
+                    type="column"
+                    compressed
+                    listItems={[
+                      {
+                        title: i18n.translate('observability.alerting.monitorDetailFlyout.slo', {
+                          defaultMessage: 'SLO',
+                        }),
+                        description: (
+                          <EuiLink onClick={openSlo} data-test-subj="monitorDetailSloLink">
+                            {monitor.labels?.slo_name ?? sloId}
+                          </EuiLink>
+                        ),
+                      },
+                    ]}
+                  />
+                  <EuiSpacer size="m" />
+                </>
+              )}
 
               {/* Query Definition — type-aware rendering */}
               <EuiAccordion
@@ -1089,7 +1159,7 @@ export const MonitorDetailFlyout: React.FC<MonitorDetailFlyoutProps> = ({
                     {
                       title: i18n.translate(
                         'observability.alerting.monitorDetailFlyout.history.datasourceId',
-                        { defaultMessage: 'Datasource ID' }
+                        { defaultMessage: 'Data source ID' }
                       ),
                       description: monitor.datasourceId,
                     },
